@@ -1,0 +1,43 @@
+{
+    "name": "sr3e",
+    "title": "Shadowrun Third Edition Homebrew",
+    "description": "An unofficial fan system for Shadowrun Third Edition",
+    "background": "systems/sr3e/textures/ai-generated/cyberpunkcity.webp",
+    "authors": [
+        {
+            "name": "Otterbeast"
+        }
+    ],
+    "version": "0.01",
+    "compatibility": {
+        "minimum": "12.331",
+        "verified": "12.331"
+    },
+    "esmodules": [
+        "module/svelte/bundle.js"
+    ],
+    "scripts": [
+        "https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
+    ],
+    "styles": [
+        "styles/css/bundle.css"
+    ],
+    "actorTypes": [
+        "character"
+    ],
+    "documentTypes": {
+        "Actor": {
+            "character": {}
+        }
+    },
+    "packs": [],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        }
+    ],
+    "primaryTokenAttribute": "wounds",
+    "initiative": "1d6 + @reaction"
+}
