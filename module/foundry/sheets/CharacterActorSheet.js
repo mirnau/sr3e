@@ -14,10 +14,10 @@ export default class CharacterActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-        const container = html.find('#character-sheet-app')[0];
+        const selector = ".window-content";
 
-        console.log("Container:", container);
-        console.log("Actor:", this.actor);
+        const container = document.querySelector(selector);
+        container.innerHTML = '';
 
         if (container) {
             console.log("Mounting Svelte app...");
@@ -26,9 +26,8 @@ export default class CharacterActorSheet extends ActorSheet {
                 props: { actor: { name: "Test Actor", type: "Test Type" } },
             });
 
-
         } else {
-            console.warn("Container not found. Ensure #character-sheet-app exists in the template.");
+            console.warn(`Container not found. Ensure ${selector} exists in the template.`);
         }
 
         console.log("End of Activate Listeners");

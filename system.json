@@ -20,7 +20,7 @@
         "https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
     ],
     "styles": [
-        "styles/css/bundle.css"
+        "styles/css/chummer-dark.css"
     ],
     "actorTypes": [
         "character"
