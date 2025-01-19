@@ -14,7 +14,7 @@ export function mountSvelteApp(App, target, props = {}) {
   
   /**
    * Unmounts a Svelte app.
-   * @param {Object} app - The Svelte app instance to destroy.
+   * @param {Object} app - The Svelte app instance to destroy.s
    */
   export function unmountSvelteApp(app) {
     if (app && app.$destroy) {

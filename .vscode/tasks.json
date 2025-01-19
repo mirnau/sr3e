@@ -2,34 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Watch Chummer Dark",
+      "label": "Watch Gulp",
       "type": "shell",
-      // Run in watch mode so it recompiles automatically whenever chummer-dark.less or its imports change
-      "command": "lessc --watch styles/less/chummer-dark.less styles/css/sr3d-chummer-dark.css",
+      "command": "npx gulp watchAll",
       "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "Watch Chummer Light",
-      "type": "shell",
-      // Run in watch mode so it recompiles automatically whenever chummer-light.less or its imports change
-      "command": "lessc --watch styles/less/chummer-light.less styles/css/sr3d-chummer-light.css",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "Watch All Themes",
-      // Tells VS Code this is a build-like group so you can run it easily
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      // Launch both watchers in parallel
-      "dependsOn": [
-        "Watch Chummer Dark",
-        "Watch Chummer Light"
-      ],
-      "dependsOrder": "parallel"
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ]
 }

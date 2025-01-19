@@ -1,14 +1,9 @@
 {
-    // ... existing settings ...
     "emeraldwalk.runonsave": {
       "commands": [
         {
-          // This regex matches all files. Adjust as needed.
           "match": ".*",
-          // Command to compile all themes
-          "cmd": "lessc styles/less/chummer-dark.less styles/css/sr3d-chummer-dark.css && lessc styles/less/chummer-light.less styles/css/sr3d-chummer-light.css",
-          // Optional: Specify files to exclude
-          "silent": false
+          "command": "workbench.action.tasks.runTask Build Svelte"
         }
       ]
     }
