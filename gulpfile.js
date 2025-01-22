@@ -11,10 +11,14 @@ import { exec } from "child_process";
 
 function compileLess() {
   return gulp
-    .src("styles/less/*.less") // only top-level .less files
+    .src("styles/less/*.less")
     .pipe(less())
+    .on("error", (err) => {
+      console.error("LESS error:", err.message);
+    })
     .pipe(gulp.dest("styles/css"));
 }
+
 
 function watchLess() {
   gulp.watch("styles/less/**/*.less", compileLess);

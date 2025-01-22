@@ -1,0 +1,23 @@
+:root {
+    --column-width: 300px;
+    --gutter-width: 0.5rem;
+}
+
+.sr3e.sheet.character {
+    min-width: @masonry-column-width;
+    min-height: 800px;
+    max-width: 1400px;
+
+    .character-sheet-masonry {
+        display: grid;
+        margin: 0 auto;
+
+        .layout-gutter-sizer {
+            width: var(--gutter-width);
+        }
+
+        .layout-grid-sizer {
+            min-width: var(--column-width);
+        }
+    }
+}

@@ -1,29 +1,36 @@
 import CharacterModel from "./module/models/actor/CharacterModel.js";
-import SvelteActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
+import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
+import { sr3e } from "./module/foundry/config.js";
+import { 
+  closeMainMasonryGrid, 
+  initMainMasonryGrid } from "./module/foundry/hooks/renderCharacterActorSheet/onRenderCharacterActorSheet.js";
 
-async function registerTemplatesFromPathsAsync() {
-  const rootFolder = "systems/sr3e/templates";
-  const paths = [];
-
-  async function gatherFiles(folder) {
-      const { files, dirs } = await FilePicker.browse("data", folder);
-      paths.push(...files.filter(file => file.endsWith(".hbs")));
-      await Promise.all(dirs.map(gatherFiles));
-  }
-
-  await gatherFiles(rootFolder);
-  return loadTemplates(paths);
+const hooks = {
+  renderCharacterActorSheet: "renderCharacterActorSheet",
+  closeCharacterActorSheet: "closeCharacterActorSheet",
+  init: "init",
+  ready: "ready"
 }
 
-Hooks.once("init", function () {
+function registerHooks() {
 
-  Actors.unregisterSheet("core", ActorSheet);
+  Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
+  Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
 
-  CONFIG.Actor.dataModels = {
+
+  Hooks.once(hooks.init, () => {
+
+    CONFIG.sr3e = sr3e;
+
+    Actors.unregisterSheet("core", ActorSheet);
+
+    CONFIG.Actor.dataModels = {
       "character": CharacterModel,
-  };
+    };
 
-  Actors.registerSheet("sr3e", SvelteActorSheet, { types: ["character"], makeDefault: true });
+    Actors.registerSheet("sr3e", CharacterActorSheet, { types: ["character"], makeDefault: true });
 
-  registerTemplatesFromPathsAsync();
-});
+  });
+}
+
+registerHooks();

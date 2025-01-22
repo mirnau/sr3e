@@ -1,6 +1,334 @@
-h1 {
-  color: red;
+@font-face {
+  font-family: 'VT323';
+  src: url('../../fonts/VT323/VT323-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
-h2 {
-  color: purple;
+@font-face {
+  font-family: 'Neonderthaw';
+  src: url('../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+.sr3e.sheet.item,
+.sr3e.sheet.character {
+  font-family: 'VT323', monospace;
+  margin: 0.33rem 0;
+  line-height: 1.1rem;
+  color: #1df0ff;
+}
+.sr3e.sheet.item h1,
+.sr3e.sheet.character h1 {
+  text-transform: uppercase;
+  color: #1df0ff;
+  text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+  border: none;
+}
+.sr3e.sheet.item h1.no-margin,
+.sr3e.sheet.character h1.no-margin {
+  margin: 0;
+}
+.sr3e.sheet.item h1 input,
+.sr3e.sheet.character h1 input {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  text-transform: inherit;
+  line-height: inherit;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+.sr3e.sheet.item summary,
+.sr3e.sheet.character summary,
+.sr3e.sheet.item h2,
+.sr3e.sheet.character h2 {
+  text-transform: uppercase;
+  color: #ff0095;
+  border: none;
+}
+.sr3e.sheet.item h3,
+.sr3e.sheet.character h3 {
+  text-transform: uppercase;
+  color: #3ed199;
+  border: none;
+  text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+}
+.sr3e.sheet.item h3.no-margin,
+.sr3e.sheet.character h3.no-margin {
+  margin: 0;
+}
+.sr3e.sheet.item h4,
+.sr3e.sheet.character h4 {
+  text-transform: uppercase;
+  color: #1df0ff;
+}
+.sr3e.sheet.item h4.no-margin,
+.sr3e.sheet.character h4.no-margin {
+  margin: 0;
+}
+.sr3e.sheet.item h5,
+.sr3e.sheet.character h5 {
+  text-transform: uppercase;
+  color: #3ed199;
+}
+.sr3e.sheet.item h6,
+.sr3e.sheet.character h6 {
+  text-transform: uppercase;
+  color: #3ed199;
+}
+.sr3e.sheet.item select,
+.sr3e.sheet.character select,
+.sr3e.sheet.item input,
+.sr3e.sheet.character input {
+  font-family: 'VT323', monospace;
+  margin: 0.33rem 0;
+  line-height: 1.1rem;
+  color: #1df0ff;
+}
+.sr3e.sheet.item select::placeholder,
+.sr3e.sheet.character select::placeholder,
+.sr3e.sheet.item input::placeholder,
+.sr3e.sheet.character input::placeholder {
+  color: #c8d3f5;
+}
+.sr3e.sheet.item .details-foldout,
+.sr3e.sheet.character .details-foldout {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+.sr3e.sheet.item .inner-background-container,
+.sr3e.sheet.character .inner-background-container {
+  position: relative;
+  padding: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+.sr3e.sheet.item .inner-background-container .inner-background .header-icon,
+.sr3e.sheet.character .inner-background-container .inner-background .header-icon {
+  justify-content: center;
+}
+.sr3e.sheet.item .inner-background,
+.sr3e.sheet.character .inner-background {
+  padding: 0.5rem;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 10;
+}
+.sr3e.window-app.sr3e {
+  background: none;
+}
+.sheet-masonry-grid {
+  backdrop-filter: blur(2px);
+}
+.sr3e.sheet.item,
+.sr3e.sheet.character {
+  box-shadow: none;
+}
+.sr3e.sheet.item .details-foldout,
+.sr3e.sheet.character .details-foldout {
+  text-shadow: 0 0 10px #ff0095;
+}
+.sr3e.sheet.item a,
+.sr3e.sheet.character a {
+  text-decoration: none;
+}
+.sr3e.sheet.item .editor,
+.sr3e.sheet.character .editor {
+  height: 100%;
+}
+.sr3e.sheet.item .window-resizable-handle,
+.sr3e.sheet.character .window-resizable-handle {
+  background-color: #ff0095;
+}
+.sr3e.sheet.item .window-header,
+.sr3e.sheet.character .window-header {
+  background-color: transparent;
+  box-shadow: inset 0 0 10px #ff0095;
+  margin-left: 0.5rem;
+  margin-right: 0.4rem;
+  border: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
+}
+.sr3e.sheet.item .window-content,
+.sr3e.sheet.character .window-content {
+  background: transparent;
+  background-image: none;
+}
+.sr3e.sheet.item input[type="number"],
+.sr3e.sheet.character input[type="number"],
+.sr3e.sheet.item input[type="text"],
+.sr3e.sheet.character input[type="text"] {
+  background-color: #1c364b;
+  box-shadow: inset 0 0 10px #3ed199;
+  border: none;
+}
+.sr3e.sheet.item img,
+.sr3e.sheet.character img {
+  border: none;
+}
+.sr3e.sheet.item img.small,
+.sr3e.sheet.character img.small {
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.sr3e.sheet.item img.large,
+.sr3e.sheet.character img.large {
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.sr3e.sheet.item .fake-shadow,
+.sr3e.sheet.character .fake-shadow {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background-color: #ff0095;
+  width: calc(100% - 1.5rem);
+  height: calc(100% - 1.5rem);
+  z-index: -2;
+  filter: blur(20px);
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.sr3e.sheet.item .inner-background,
+.sr3e.sheet.character .inner-background {
+  background: #e792cb;
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.sr3e.sheet.item .inner-background::before,
+.sr3e.sheet.character .inner-background::before {
+  box-shadow: inset 0 0 30px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.sr3e.sheet.item .image-mask,
+.sr3e.sheet.character .image-mask {
+  z-index: 1;
+  min-width: 10rem;
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  position: relative;
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.sr3e.sheet.item .image-mask img,
+.sr3e.sheet.character .image-mask img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+}
+.sr3e.sheet.item select,
+.sr3e.sheet.character select {
+  background-color: #1b1f24;
+  border: none;
+  border-radius: 0rem;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.sr3e.sheet.item option,
+.sr3e.sheet.character option {
+  text-indent: 0.5rem;
+  background-color: transparent;
+  border-radius: 0rem;
+  border: none;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.sr3e.sheet.item .stat-card,
+.sr3e.sheet.character .stat-card {
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  transition: transform 1.3s ease, width 1.3s ease, height 1.3s ease, background-color 1.3s ease;
+}
+.sr3e.sheet.item .stat-card .stat-value,
+.sr3e.sheet.character .stat-card .stat-value {
+  margin: 0;
+  text-align: center;
+}
+.sr3e.sheet.item .stat-card select,
+.sr3e.sheet.character .stat-card select,
+.sr3e.sheet.item .stat-card .stat-label,
+.sr3e.sheet.character .stat-card .stat-label {
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 8px #1df0ff;
+  transition: box-shadow 0.3s ease-in;
+}
+.sr3e.sheet.item .stat-card select:hover,
+.sr3e.sheet.character .stat-card select:hover,
+.sr3e.sheet.item .stat-card .stat-label:hover,
+.sr3e.sheet.character .stat-card .stat-label:hover {
+  box-shadow: inset 0 0 25px #1df0ff;
+}
+.sr3e.sheet.item .stat-card:hover,
+.sr3e.sheet.character .stat-card:hover {
+  background-color: #ff0095;
+}
+.sr3e.sheet.item .core-skill .skill-name,
+.sr3e.sheet.character .core-skill .skill-name {
+  text-indent: 0rem;
+  text-overflow: ellipsis;
+}
+.sr3e.sheet.item .core-skill .skill-value,
+.sr3e.sheet.character .core-skill .skill-value {
+  text-indent: 0rem;
+  text-align: center;
+  background-color: #1c364b;
+  box-shadow: inset 0 0 8px #1df0ff;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.sr3e.sheet.item .specialisation-container,
+.sr3e.sheet.character .specialisation-container {
+  background-color: #1b1f24;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.sr3e.sheet.item .specialisation-container .specializations,
+.sr3e.sheet.character .specialisation-container .specializations {
+  text-indent: 0rem;
+}
+.sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
+.sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card {
+  background-color: #1c364b;
+}
+.sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
+.sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-value,
+.sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-value {
+  text-indent: 0rem;
+  text-align: center;
+  background-color: #1b1f24;
+  box-shadow: inset 0 0 8px #1df0ff;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+:root {
+  --column-width: 300px;
+  --gutter-width: 0.5rem;
+}
+.sr3e.sheet.character {
+  min-width: 20rem;
+  min-height: 800px;
+  max-width: 1400px;
+}
+.sr3e.sheet.character .character-sheet-masonry {
+  display: grid;
+  margin: 0 auto;
+}
+.sr3e.sheet.character .character-sheet-masonry .layout-gutter-sizer {
+  width: var(--gutter-width);
+}
+.sr3e.sheet.character .character-sheet-masonry .layout-grid-sizer {
+  min-width: var(--column-width);
 }

@@ -1,0 +1,103 @@
+@font-face {
+    font-family: 'VT323';
+    src: url('../../fonts/VT323/VT323-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Neonderthaw';
+    src: url('../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+.VTT323-header() {
+    text-transform: uppercase;
+}
+
+.VTT323() {
+    font-family: 'VT323', monospace;
+    margin: 0.33rem 0;
+    line-height: 1.1rem;
+    color: @h1-color;
+}
+
+.sr3e.sheet.item,
+.sr3e.sheet.character {
+
+    .VTT323();
+
+    h1 {
+        .VTT323-header();
+        color: @h1-color;
+        text-shadow: @h1-color-bloom-primary;
+        border: none;
+        
+        &.no-margin {
+            margin: 0;
+        }
+        
+        // Explicitly style input inside h1
+        input {
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            text-shadow: inherit;
+            text-transform: inherit;
+            line-height: inherit;
+            
+            display: inline-block;
+            width: 100%; // Adjust based on your layout
+            text-align: center; // Centers text inside the input
+        }
+    }
+    
+    summary,
+    h2 {
+        .VTT323-header();
+        color: @h2-color;
+        border: none;
+    }
+
+    h3 {
+        .VTT323-header();
+        color: @h3-color;
+        border: none;
+        text-shadow: @h3-color-bloom-primary;
+
+        &.no-margin {
+            margin: 0;
+        }
+    }
+
+    h4 {
+        .VTT323-header();
+        color: @h4-color;
+        
+        &.no-margin {
+            margin: 0;
+        }
+    }
+
+    h5 {
+        .VTT323-header();
+        color: @h5-color;
+    }
+
+    h6 {
+        .VTT323-header();
+        color: @h6-color;
+    }
+
+    select,
+    input {
+        .VTT323();
+
+        &::placeholder {
+            color: @text-color;
+        }
+    }
+}
