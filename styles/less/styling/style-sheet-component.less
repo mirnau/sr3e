@@ -1,11 +1,29 @@
 .sr3e.window-app.sr3e {
     background: @appwindow-background;
-
-        
 }
 
-//Main sheet background blur
-.sheet-masonry-grid {
+
+.sheet-component {
+    box-sizing: border-box;
+    min-width: @component-unit;
+    margin-bottom: 10px;
+
+    h1 {
+        text-indent: 1rem;
+    }
+
+    .portrait {
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        object-position: center;
+        border: 0;
+        z-index: 1;
+        .clipped-corners(1rem, 1rem, 2rem, 1rem);
+    }
+}
+
+
+.character-sheet-masonry {
     backdrop-filter: blur(2px);
 }
 

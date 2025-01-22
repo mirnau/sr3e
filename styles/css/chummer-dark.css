@@ -123,7 +123,23 @@
 .sr3e.window-app.sr3e {
   background: none;
 }
-.sheet-masonry-grid {
+.sheet-component {
+  box-sizing: border-box;
+  min-width: 20rem;
+  margin-bottom: 10px;
+}
+.sheet-component h1 {
+  text-indent: 1rem;
+}
+.sheet-component .portrait {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center;
+  border: 0;
+  z-index: 1;
+  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+}
+.character-sheet-masonry {
   backdrop-filter: blur(2px);
 }
 .sr3e.sheet.item,
