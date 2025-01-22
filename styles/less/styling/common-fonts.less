@@ -20,46 +20,36 @@
 
 .VTT323() {
     font-family: 'VT323', monospace;
+    font-size: 14px;
     margin: 0.33rem 0;
-    line-height: 1.1rem;
+    line-height: @line-height;
     color: @h1-color;
 }
 
 .sr3e.sheet.item,
 .sr3e.sheet.character {
-
+    
     .VTT323();
+    
+    div {
+        color: @h1-color;
+    }
 
     h1 {
         .VTT323-header();
         color: @h1-color;
         text-shadow: @h1-color-bloom-primary;
         border: none;
-        
-        &.no-margin {
-            margin: 0;
-        }
-        
-        // Explicitly style input inside h1
-        input {
-            font-family: inherit;
-            font-size: inherit;
-            color: inherit;
-            text-shadow: inherit;
-            text-transform: inherit;
-            line-height: inherit;
-            
-            display: inline-block;
-            width: 100%; // Adjust based on your layout
-            text-align: center; // Centers text inside the input
-        }
+        margin-bottom: 0.7rem;
+        font-size: 1.4rem;
     }
-    
+
     summary,
     h2 {
         .VTT323-header();
         color: @h2-color;
         border: none;
+        font-size: 1.2rem;
     }
 
     h3 {
@@ -67,6 +57,7 @@
         color: @h3-color;
         border: none;
         text-shadow: @h3-color-bloom-primary;
+        font-size: 1.1rem;
 
         &.no-margin {
             margin: 0;
@@ -76,7 +67,7 @@
     h4 {
         .VTT323-header();
         color: @h4-color;
-        
+
         &.no-margin {
             margin: 0;
         }

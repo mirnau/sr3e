@@ -1,9 +1,9 @@
 import Log from "../../../../Log";
-import CharacterActorSheet from "../../sheets/CharacterActorSheet";
-import CharacterActorSheet from "../../sheets/CharacterActorSheet";
-import CharacterSheetApp from "./module/svelte/apps/CharacterSheetApp.svelte";
+import CharacterActorSheet from "../../sheets/CharacterActorSheet.js";
+import CharacterSheetApp from "../../../svelte/apps/CharacterSheetApp.svelte";
 
 export function initMainMasonryGrid(app, html, data) {
+  if (!(app instanceof CharacterActorSheet)) return;
 
   const container = document.querySelector(".window-content");
 

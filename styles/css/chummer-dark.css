@@ -15,8 +15,13 @@
 .sr3e.sheet.item,
 .sr3e.sheet.character {
   font-family: 'VT323', monospace;
+  font-size: 14px;
   margin: 0.33rem 0;
-  line-height: 1.1rem;
+  line-height: 1rem;
+  color: #1df0ff;
+}
+.sr3e.sheet.item div,
+.sr3e.sheet.character div {
   color: #1df0ff;
 }
 .sr3e.sheet.item h1,
@@ -25,22 +30,8 @@
   color: #1df0ff;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   border: none;
-}
-.sr3e.sheet.item h1.no-margin,
-.sr3e.sheet.character h1.no-margin {
-  margin: 0;
-}
-.sr3e.sheet.item h1 input,
-.sr3e.sheet.character h1 input {
-  font-family: inherit;
-  font-size: inherit;
-  color: inherit;
-  text-shadow: inherit;
-  text-transform: inherit;
-  line-height: inherit;
-  display: inline-block;
-  width: 100%;
-  text-align: center;
+  margin-bottom: 0.7rem;
+  font-size: 1.4rem;
 }
 .sr3e.sheet.item summary,
 .sr3e.sheet.character summary,
@@ -49,6 +40,7 @@
   text-transform: uppercase;
   color: #ff0095;
   border: none;
+  font-size: 1.2rem;
 }
 .sr3e.sheet.item h3,
 .sr3e.sheet.character h3 {
@@ -56,6 +48,7 @@
   color: #3ed199;
   border: none;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+  font-size: 1.1rem;
 }
 .sr3e.sheet.item h3.no-margin,
 .sr3e.sheet.character h3.no-margin {
@@ -85,8 +78,9 @@
 .sr3e.sheet.item input,
 .sr3e.sheet.character input {
   font-family: 'VT323', monospace;
+  font-size: 14px;
   margin: 0.33rem 0;
-  line-height: 1.1rem;
+  line-height: 1rem;
   color: #1df0ff;
 }
 .sr3e.sheet.item select::placeholder,
@@ -128,16 +122,13 @@
   min-width: 20rem;
   margin-bottom: 10px;
 }
-.sheet-component h1 {
-  text-indent: 1rem;
-}
 .sheet-component .portrait {
   aspect-ratio: 1 / 1;
   object-fit: cover;
   object-position: center;
   border: 0;
   z-index: 1;
-  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .character-sheet-masonry {
   backdrop-filter: blur(2px);
@@ -206,12 +197,13 @@
   height: calc(100% - 1.5rem);
   z-index: -2;
   filter: blur(20px);
-  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.sheet.item .inner-background,
 .sr3e.sheet.character .inner-background {
   background: #e792cb;
-  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+  padding: calc(0.5*1.4142rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.sheet.item .inner-background::before,
 .sr3e.sheet.character .inner-background::before {
@@ -225,7 +217,7 @@
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
-  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.sheet.item .image-mask,
 .sr3e.sheet.character .image-mask {
@@ -329,22 +321,16 @@
   box-shadow: inset 0 0 8px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-:root {
-  --column-width: 300px;
-  --gutter-width: 0.5rem;
-}
 .sr3e.sheet.character {
-  min-width: 20rem;
-  min-height: 800px;
-  max-width: 1400px;
+  min-width: calc(20rem + 0.25rem * 3);
 }
 .sr3e.sheet.character .character-sheet-masonry {
   display: grid;
   margin: 0 auto;
 }
 .sr3e.sheet.character .character-sheet-masonry .layout-gutter-sizer {
-  width: var(--gutter-width);
+  width: 0.25rem;
 }
 .sr3e.sheet.character .character-sheet-masonry .layout-grid-sizer {
-  min-width: var(--column-width);
+  min-width: 20rem;
 }

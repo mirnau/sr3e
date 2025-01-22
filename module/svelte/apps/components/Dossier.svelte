@@ -6,7 +6,7 @@
   
   <div class="partial-app-container">
     <h2>Nested Partial App</h2>
-    <p>Actor Name: {actorName}</p> <!-- Display the actor's name -->
-    <p>Message: {message}</p> <!-- Display the passed message -->
+    <div>Actor Name: {actorName}</div> <!-- Display the actor's name -->
+    <div>Message: {message}</div> <!-- Display the passed message -->
   </div>
   
