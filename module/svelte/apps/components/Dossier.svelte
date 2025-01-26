@@ -1,7 +1,13 @@
 <script>
-    // Declare the props you want to receive
-    export let actorName = "Default Name"; // Fallback value if no prop is passed
-    export let message = "No message provided";
+    
+  /**
+   * @typedef {Object} Props
+   * @property {string} [actorName] - Declare the props you want to receive - Fallback value if no prop is passed
+   * @property {string} [message]
+   */
+
+  /** @type {Props} */
+  let { actorName = "Default Name", message = "No message provided" } = $props();
   </script>
   
   <div class="partial-app-container">

@@ -22,7 +22,7 @@ export default class Profile extends foundry.abstract.TypeDataModel {
       // Image
       img: new foundry.data.fields.StringField({
         required: false,
-        initial: "systems/sr3d/textures/ai-generated/humans.webp",
+        initial: "systems/sr3e/textures/ai-generated/humans.webp",
       }),
 
       // Pronouns

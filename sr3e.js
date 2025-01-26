@@ -1,6 +1,6 @@
+import { sr3e } from "./module/foundry/config.js";
 import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
-import { sr3e } from "./module/foundry/config.js";
 import { 
   closeMainMasonryGrid, 
   initMainMasonryGrid } from "./module/foundry/hooks/renderCharacterActorSheet/onRenderCharacterActorSheet.js";

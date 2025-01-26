@@ -1,5 +1,5 @@
 <script>
-  import Dossier from "./components/Dossier.svelte";
+  
   import { onMount } from "svelte";
   import Log from "../../../Log.js";
   import { initializeMasonryLayout } from "../../foundry/masonry/masonryInitMain.js";
@@ -29,116 +29,67 @@
     Log.success("Masonry layout initialized", "CharacterSheetApp.svelte");
   });
 </script>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component two-span-selectable">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
+  <div class="sheet-component">
+    <div class="inner-background-container">
+      <div class="fake-shadow"></div>
+      <div class="inner-background">
+        <h1>{test}</h1>
+        Testing Databind
+      </div>
+    </div>
+  </div>
 
-<div class="character-sheet-masonry">
-  <div class="layout-gutter-sizer"></div>
-  <div class="layout-grid-sizer"></div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        <Dossier actorName={name} message="Hello from Parent Component!" />
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        <Dossier actorName={name} message="Hello from Parent Component!" />
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component two-span-selectable">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        <Dossier actorName={name} message="Hello from Parent Component!" />
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        <Dossier actorName={name} message="Hello from Parent Component!" />
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        <Dossier actorName={name} message="Hello from Parent Component!" />
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component two-span-selectable">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-  <div class="sheet-component">
-    <div class="inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="inner-background">
-        <h1>{test}</h1>
-        Testing Databind
-      </div>
-    </div>
-  </div>
-</div>

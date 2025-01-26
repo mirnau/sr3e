@@ -7,9 +7,9 @@ repopsitory.
 * All pre compilation has been automated to start on vs code start-up, this prevents unnecessary debugging time when the developer forgets to initiate tasks
 * DataModels are used instead of a template.json
 
-# SR3D
+# sr3e
 
-SR3D is a Shadowrun Third Edition Homebrew game system. In Foundry Virtual Tabletop (VTT), a game system is essentially a modular software package that defines the rules, mechanics, and data structures for a specific tabletop role-playing game (TTRPG). 
+sr3e is a Shadowrun Third Edition Homebrew game system. In Foundry Virtual Tabletop (VTT), a game system is essentially a modular software package that defines the rules, mechanics, and data structures for a specific tabletop role-playing game (TTRPG). 
 
 ## YouTube-video showing this project (First Iteration), click the image!
 
