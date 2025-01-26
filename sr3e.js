@@ -1,3 +1,4 @@
+import Log from "./Log.js";
 import { sr3e } from "./module/foundry/config.js";
 import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
@@ -29,6 +30,9 @@ function registerHooks() {
     };
 
     Actors.registerSheet("sr3e", CharacterActorSheet, { types: ["character"], makeDefault: true });
+
+    Log.success("Hooks Registered", "sr3e.js");
+    Log.success("Initialization Completed", "sr3e.js");
 
   });
 }
