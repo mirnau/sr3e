@@ -4,20 +4,21 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 export default defineConfig({
   plugins: [svelte()],
   build: {
-    sourcemap: true, // Generate source maps for debugging
-    outDir: 'build', // Output directory for build files
+    sourcemap: true, // Enable source maps (correct usage)
+    minify: false, 
+    outDir: 'build', // Output directory
     emptyOutDir: true, // Clean the output directory before each build
     rollupOptions: {
-      input: 'sr3e.js', // Set your entry module
+      input: 'sr3e.js', // Entry point for your system
       output: {
-        entryFileNames: 'bundle.js',   // Static filename for the main JS file
-        chunkFileNames: '[name].js', // Optional: Static filenames for chunks
-        assetFileNames: '[name].[ext]', // Static filenames for assets (e.g., CSS, images)
+        format: 'es', // ES module format for Foundry
+        dir: 'build', // Output directory
+        entryFileNames: 'bundle.js', // Consolidate everything into bundle.js
       },
     },
   },
   server: {
-    port: 3000, // Dev server port
-    open: false, // Don’t auto-open the browser
+    port: 3000, // Development server port
+    open: false, // Prevent auto-opening the browser
   },
 });

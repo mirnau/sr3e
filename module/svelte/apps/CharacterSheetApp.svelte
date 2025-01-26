@@ -4,9 +4,7 @@
   import Log from "../../../Log.js";
   import { initializeMasonryLayout } from "../../foundry/masonry/masonryInitMain.js";
 
-  export let app;
-  export let config;
-  export let jQueryObject;
+  let { app, config, jQueryObject } = $props();
   
   let actor = app.actor;
   let name = actor?.name || "Unknown Actor";

@@ -1,22 +1,26 @@
 import Log from "../../../../Log";
 import CharacterActorSheet from "../../sheets/CharacterActorSheet.js";
 import CharacterSheetApp from "../../../svelte/apps/CharacterSheetApp.svelte";
+import { mount } from "svelte";
 
 export function initMainMasonryGrid(app, html, data) {
   if (!(app instanceof CharacterActorSheet)) return;
+
+  Log.info("Initialize", CharacterActorSheet.name);
+
 
   const container = document.querySelector(".window-content");
 
   container.innerHTML = '';
 
-  app.svelteApp = new CharacterSheetApp({
-    target: container,
-    props: {
-      app: app,
-      config: CONFIG.sr3e,
-      jQueryObject: html
-    },
-  });
+  app.svelteApp = mount(CharacterSheetApp, {
+      target: container,
+      props: {
+        app: app,
+        config: CONFIG.sr3e,
+        jQueryObject: html
+      },
+    });
 
   Log.success("Svelte App Initialized", CharacterActorSheet.name);
 }
