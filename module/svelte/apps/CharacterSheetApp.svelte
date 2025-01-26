@@ -7,7 +7,6 @@
   let { app, config, jQueryObject } = $props();
 
   let actor = app.actor;
-  let test = game.i18n.localize(config.test);
 
   onMount(() => {
     const args = {
@@ -33,7 +32,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         <Dossier {actor} {config} />
       </div>
     </div>
@@ -42,7 +41,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -51,7 +50,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -60,7 +59,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -69,7 +68,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -78,7 +77,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -87,7 +86,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -96,7 +95,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -105,7 +104,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>
@@ -114,7 +113,7 @@
     <div class="inner-background-container">
       <div class="fake-shadow"></div>
       <div class="inner-background">
-        <h1>{test}</h1>
+       
         Testing Databind
       </div>
     </div>

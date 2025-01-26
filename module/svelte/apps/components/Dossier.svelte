@@ -1,16 +1,24 @@
 <script>
-  export let actor = {};
+   export let actor = {};
    export let config = {};
+
+   let isDetailsOpen = false;
 
   function multiply(value, factor) {
     return (value * factor).toFixed(2);
   }
+
+  function onToggleDetails() {
+    isDetailsOpen = !isDetailsOpen;
+    actor.mainLayoutResizeObserver.masonryInstance.layout();
+  }
+
 </script>
 
 <div class="dossier">
-  {#if false}
+  {#if isDetailsOpen}
     <div class="version-one image-mask">
-      <img src={actor.system.profile.img} alt="Character Portrait" />
+      <img src={actor.system.profile.img} alt="Metahuman Portrait" />
     </div>
   {:else}
     <div class="version-two image-mask">
@@ -18,7 +26,7 @@
     </div>
   {/if}
 
-  <details class="component-details">
+  <details class="component-details" on:toggle={onToggleDetails}>
     <summary class="details-foldout">
       <span><i class="fa-solid fa-magnifying-glass"></i></span>
       {config.sheet.details}
@@ -61,7 +69,3 @@
     </a>
   </details>
 </div>
-
-<style>
-  /* Add your LESS or CSS styles here */
-</style>

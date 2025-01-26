@@ -414,6 +414,20 @@ function mutable_source(initial_value, immutable = false) {
   }
   return s;
 }
+function mutable_state(v, immutable = false) {
+  return /* @__PURE__ */ push_derived_source(/* @__PURE__ */ mutable_source(v, immutable));
+}
+// @__NO_SIDE_EFFECTS__
+function push_derived_source(source2) {
+  if (active_reaction !== null && !untracking && (active_reaction.f & DERIVED) !== 0) {
+    if (derived_sources === null) {
+      set_derived_sources([source2]);
+    } else {
+      derived_sources.push(source2);
+    }
+  }
+  return source2;
+}
 function set(source2, value) {
   if (active_reaction !== null && !untracking && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && // If the source was created locally within the current derived, then
   // we allow the mutation.
@@ -861,6 +875,12 @@ function create_effect(type, fn, sync, push2 = true) {
   }
   return effect2;
 }
+function teardown(fn) {
+  const effect2 = create_effect(RENDER_EFFECT, null, false);
+  set_signal_status(effect2, CLEAN);
+  effect2.teardown = fn;
+  return effect2;
+}
 function user_effect(fn) {
   validate_effect();
   var defer = active_effect !== null && (active_effect.f & BRANCH_EFFECT) !== 0 && component_context !== null && !component_context.m;
@@ -917,14 +937,14 @@ function branch(fn, push2 = true) {
   return create_effect(RENDER_EFFECT | BRANCH_EFFECT, fn, true, push2);
 }
 function execute_effect_teardown(effect2) {
-  var teardown = effect2.teardown;
-  if (teardown !== null) {
+  var teardown2 = effect2.teardown;
+  if (teardown2 !== null) {
     const previously_destroying_effect = is_destroying_effect;
     const previous_reaction = active_reaction;
     set_is_destroying_effect(true);
     set_active_reaction(null);
     try {
-      teardown.call(null);
+      teardown2.call(null);
     } finally {
       set_is_destroying_effect(previously_destroying_effect);
       set_active_reaction(previous_reaction);
@@ -1067,6 +1087,21 @@ function resume_children(effect2, local) {
     }
   }
 }
+let is_micro_task_queued$1 = false;
+let current_queued_micro_tasks = [];
+function process_micro_tasks() {
+  is_micro_task_queued$1 = false;
+  const tasks = current_queued_micro_tasks.slice();
+  current_queued_micro_tasks = [];
+  run_all(tasks);
+}
+function queue_micro_task(fn) {
+  if (!is_micro_task_queued$1) {
+    is_micro_task_queued$1 = true;
+    queueMicrotask(process_micro_tasks);
+  }
+  current_queued_micro_tasks.push(fn);
+}
 function lifecycle_outside_component(name) {
   {
     throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
@@ -1096,6 +1131,9 @@ function set_active_effect(effect2) {
   active_effect = effect2;
 }
 let derived_sources = null;
+function set_derived_sources(sources) {
+  derived_sources = sources;
+}
 let new_deps = null;
 let skipped_deps = 0;
 let untracked_writes = null;
@@ -1347,8 +1385,8 @@ function update_effect(effect2) {
     }
     destroy_effect_deriveds(effect2);
     execute_effect_teardown(effect2);
-    var teardown = update_reaction(effect2);
-    effect2.teardown = typeof teardown === "function" ? teardown : null;
+    var teardown2 = update_reaction(effect2);
+    effect2.teardown = typeof teardown2 === "function" ? teardown2 : null;
     effect2.wv = write_version;
     var deps = effect2.deps;
     var dep;
@@ -1713,8 +1751,8 @@ function without_reactive_context(fn) {
     set_active_effect(previous_effect);
   }
 }
-function listen_to_event_and_reset_event(element, event, handler, on_reset = handler) {
-  element.addEventListener(event, () => without_reactive_context(handler));
+function listen_to_event_and_reset_event(element, event2, handler, on_reset = handler) {
+  element.addEventListener(event2, () => without_reactive_context(handler));
   const prev = element.__on_r;
   if (prev) {
     element.__on_r = () => {
@@ -1728,26 +1766,55 @@ function listen_to_event_and_reset_event(element, event, handler, on_reset = han
 }
 const all_registered_events = /* @__PURE__ */ new Set();
 const root_event_handles = /* @__PURE__ */ new Set();
-function handle_event_propagation(event) {
+function create_event(event_name, dom, handler, options = {}) {
+  function target_handler(event2) {
+    if (!options.capture) {
+      handle_event_propagation.call(dom, event2);
+    }
+    if (!event2.cancelBubble) {
+      return without_reactive_context(() => {
+        return handler == null ? void 0 : handler.call(this, event2);
+      });
+    }
+  }
+  if (event_name.startsWith("pointer") || event_name.startsWith("touch") || event_name === "wheel") {
+    queue_micro_task(() => {
+      dom.addEventListener(event_name, target_handler, options);
+    });
+  } else {
+    dom.addEventListener(event_name, target_handler, options);
+  }
+  return target_handler;
+}
+function event(event_name, dom, handler, capture, passive) {
+  var options = { capture, passive };
+  var target_handler = create_event(event_name, dom, handler, options);
+  if (dom === document.body || dom === window || dom === document) {
+    teardown(() => {
+      dom.removeEventListener(event_name, target_handler, options);
+    });
+  }
+}
+function handle_event_propagation(event2) {
   var _a;
   var handler_element = this;
   var owner_document = (
     /** @type {Node} */
     handler_element.ownerDocument
   );
-  var event_name = event.type;
-  var path = ((_a = event.composedPath) == null ? void 0 : _a.call(event)) || [];
+  var event_name = event2.type;
+  var path = ((_a = event2.composedPath) == null ? void 0 : _a.call(event2)) || [];
   var current_target = (
     /** @type {null | Element} */
-    path[0] || event.target
+    path[0] || event2.target
   );
   var path_idx = 0;
-  var handled_at = event.__root;
+  var handled_at = event2.__root;
   if (handled_at) {
     var at_idx = path.indexOf(handled_at);
     if (at_idx !== -1 && (handler_element === document || handler_element === /** @type {any} */
     window)) {
-      event.__root = handler_element;
+      event2.__root = handler_element;
       return;
     }
     var handler_idx = path.indexOf(handler_element);
@@ -1759,9 +1826,9 @@ function handle_event_propagation(event) {
     }
   }
   current_target = /** @type {Element} */
-  path[path_idx] || event.target;
+  path[path_idx] || event2.target;
   if (current_target === handler_element) return;
-  define_property(event, "currentTarget", {
+  define_property(event2, "currentTarget", {
     configurable: true,
     get() {
       return current_target || owner_document;
@@ -1783,9 +1850,9 @@ function handle_event_propagation(event) {
         current_target.disabled) {
           if (is_array(delegated)) {
             var [fn, ...data] = delegated;
-            fn.apply(current_target, [event, ...data]);
+            fn.apply(current_target, [event2, ...data]);
           } else {
-            delegated.call(current_target, event);
+            delegated.call(current_target, event2);
           }
         }
       } catch (error) {
@@ -1795,7 +1862,7 @@ function handle_event_propagation(event) {
           throw_error = error;
         }
       }
-      if (event.cancelBubble || parent_element === handler_element || parent_element === null) {
+      if (event2.cancelBubble || parent_element === handler_element || parent_element === null) {
         break;
       }
       current_target = parent_element;
@@ -1809,8 +1876,8 @@ function handle_event_propagation(event) {
       throw throw_error;
     }
   } finally {
-    event.__root = handler_element;
-    delete event.currentTarget;
+    event2.__root = handler_element;
+    delete event2.currentTarget;
     set_active_reaction(previous_reaction);
     set_active_effect(previous_effect);
   }
@@ -2298,6 +2365,7 @@ function getResizeObserver(masonryInstance, gridElement, func = null) {
     }
     masonryInstance.layout();
   });
+  resizeObserver.masonryInstance = masonryInstance;
   resizeObserver.observe(gridElement);
   return resizeObserver;
 }
@@ -2423,19 +2491,31 @@ function initializeMasonryLayout(masonryResizeConfig) {
   actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
 }
 enable_legacy_mode_flag();
+var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img data-edit="img"></div>`);
 var root$1 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="component-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
   let actor = prop($$props, "actor", 28, () => ({}));
   let config = prop($$props, "config", 24, () => ({}));
+  let isDetailsOpen = mutable_state(false);
   function multiply(value, factor) {
     return (value * factor).toFixed(2);
+  }
+  function onToggleDetails() {
+    set(isDetailsOpen, !get(isDetailsOpen));
+    actor().mainLayoutResizeObserver.masonryInstance.layout();
   }
   init();
   var div = root$1();
   var node = child(div);
   {
+    var consequent = ($$anchor2) => {
+      var div_1 = root_1();
+      var img = child(div_1);
+      template_effect(() => set_attribute(img, "src", actor().system.profile.img));
+      append($$anchor2, div_1);
+    };
     var alternate = ($$anchor2) => {
       var div_2 = root_2();
       var img_1 = child(div_2);
@@ -2447,7 +2527,8 @@ function Dossier($$anchor, $$props) {
       append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
-      $$render(alternate, false);
+      if (get(isDetailsOpen)) $$render(consequent);
+      else $$render(alternate, false);
     });
   }
   var details = sibling(node, 2);
@@ -2491,14 +2572,14 @@ function Dossier($$anchor, $$props) {
     derived_safe_equal
   );
   bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
+  event("toggle", details, onToggleDetails);
   append($$anchor, div);
   pop();
 }
-var root = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> <!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1></h1> Testing Databind</div></div></div></div>`);
+var root = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   let actor = $$props.app.actor;
-  let test = game.i18n.localize($$props.config.test);
   onMount(() => {
     const args = {
       jQueryObject: $$props.jQueryObject,
@@ -2516,60 +2597,13 @@ function CharacterSheetApp($$anchor, $$props) {
   var div_1 = sibling(child(div), 4);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
-  var h1 = child(div_3);
-  h1.textContent = test;
-  var node = sibling(h1, 2);
+  var node = child(div_3);
   Dossier(node, {
     actor,
     get config() {
       return $$props.config;
     }
   });
-  var div_4 = sibling(div_1, 2);
-  var div_5 = child(div_4);
-  var div_6 = sibling(child(div_5), 2);
-  var h1_1 = child(div_6);
-  h1_1.textContent = test;
-  var div_7 = sibling(div_4, 2);
-  var div_8 = child(div_7);
-  var div_9 = sibling(child(div_8), 2);
-  var h1_2 = child(div_9);
-  h1_2.textContent = test;
-  var div_10 = sibling(div_7, 2);
-  var div_11 = child(div_10);
-  var div_12 = sibling(child(div_11), 2);
-  var h1_3 = child(div_12);
-  h1_3.textContent = test;
-  var div_13 = sibling(div_10, 2);
-  var div_14 = child(div_13);
-  var div_15 = sibling(child(div_14), 2);
-  var h1_4 = child(div_15);
-  h1_4.textContent = test;
-  var div_16 = sibling(div_13, 2);
-  var div_17 = child(div_16);
-  var div_18 = sibling(child(div_17), 2);
-  var h1_5 = child(div_18);
-  h1_5.textContent = test;
-  var div_19 = sibling(div_16, 2);
-  var div_20 = child(div_19);
-  var div_21 = sibling(child(div_20), 2);
-  var h1_6 = child(div_21);
-  h1_6.textContent = test;
-  var div_22 = sibling(div_19, 2);
-  var div_23 = child(div_22);
-  var div_24 = sibling(child(div_23), 2);
-  var h1_7 = child(div_24);
-  h1_7.textContent = test;
-  var div_25 = sibling(div_22, 2);
-  var div_26 = child(div_25);
-  var div_27 = sibling(child(div_26), 2);
-  var h1_8 = child(div_27);
-  h1_8.textContent = test;
-  var div_28 = sibling(div_25, 2);
-  var div_29 = child(div_28);
-  var div_30 = sibling(child(div_29), 2);
-  var h1_9 = child(div_30);
-  h1_9.textContent = test;
   append($$anchor, div);
   pop();
 }

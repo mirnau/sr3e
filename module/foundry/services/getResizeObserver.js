@@ -10,7 +10,7 @@ export function getResizeObserver(masonryInstance, gridElement, func = null) {
         
         masonryInstance.layout();
     });
-    
+    resizeObserver.masonryInstance = masonryInstance;
     resizeObserver.observe(gridElement);
 
     return resizeObserver;
