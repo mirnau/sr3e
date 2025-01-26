@@ -2503,8 +2503,13 @@ function Dossier($$anchor, $$props) {
     return (value * factor).toFixed(2);
   }
   function onToggleDetails() {
+    var _a, _b;
     set(isDetailsOpen, !get(isDetailsOpen));
-    actor().mainLayoutResizeObserver.masonryInstance.layout();
+    (_b = (_a = actor().mainLayoutResizeObserver) == null ? void 0 : _a.masonryInstance) == null ? void 0 : _b.layout();
+  }
+  function saveActorName(event2) {
+    const newName = event2.target.value;
+    actor().update({ name: newName });
   }
   init();
   var div = root$1();
@@ -2560,9 +2565,9 @@ function Dossier($$anchor, $$props) {
       set_text(text_2, actor().system.profile.metaHumanity);
       set_text(text_3, `${config().actor.character.age ?? ""}: ${actor().system.profile.age ?? ""}`);
       set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm 
-        (${$0 ?? ""} feet)`);
+       (${$0 ?? ""} feet)`);
       set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg 
-        (${$1 ?? ""} stones)`);
+       (${$1 ?? ""} stones)`);
       set_text(text_6, config().sheet.viewbackground);
     },
     [
@@ -2572,6 +2577,8 @@ function Dossier($$anchor, $$props) {
     derived_safe_equal
   );
   bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
+  event("blur", input, saveActorName);
+  event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
   event("toggle", details, onToggleDetails);
   append($$anchor, div);
   pop();

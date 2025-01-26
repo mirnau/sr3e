@@ -22,6 +22,7 @@ export function initMainMasonryGrid(app, html, data) {
   Log.success("Svelte App Initialized", CharacterActorSheet.name);
 }
 
+
 export function closeMainMasonryGrid(app) {
   if (!(app instanceof CharacterActorSheet)) return;
 
