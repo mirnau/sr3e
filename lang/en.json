@@ -1,5 +1,17 @@
 {
     "sr3e": {
-        "test": "A Friendly Test"
+      "sheet": {
+        "details": "Details",
+        "viewbackground": "View Background"
+      },
+      "actor": {
+        "character": {
+          "age": "Age",
+          "height": "Height",
+          "weight": "Weight",
+          "metahuman": "Metahuman"
+        }
+      }
     }
-}
+  }
+  

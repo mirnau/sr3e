@@ -2,23 +2,33 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [
+    svelte({
+      onwarn: (warning, handler) => {
+        // Suppress specific accessibility warnings
+        if (["a11y_missing_attribute"].includes(warning.code)) {
+          return;
+        }
+        handler(warning);
+      }
+    })
+  ],
   build: {
-    sourcemap: true, // Enable source maps (correct usage)
-    minify: false, 
-    outDir: 'build', // Output directory
-    emptyOutDir: true, // Clean the output directory before each build
+    sourcemap: true,
+    minify: false,
+    outDir: 'build',
+    emptyOutDir: true,
     rollupOptions: {
-      input: 'sr3e.js', // Entry point for your system
+      input: 'sr3e.js',
       output: {
-        format: 'es', // ES module format for Foundry
-        dir: 'build', // Output directory
-        entryFileNames: 'bundle.js', // Consolidate everything into bundle.js
+        format: 'es',
+        dir: 'build',
+        entryFileNames: 'bundle.js',
       },
     },
   },
   server: {
-    port: 3000, // Development server port
-    open: false, // Prevent auto-opening the browser
+    port: 3000,
+    open: false,
   },
 });

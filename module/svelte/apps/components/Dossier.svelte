@@ -1,18 +1,67 @@
 <script>
-    
-  /**
-   * @typedef {Object} Props
-   * @property {string} [actorName] - Declare the props you want to receive - Fallback value if no prop is passed
-   * @property {string} [message]
-   */
+  export let actor = {};
+   export let config = {};
 
-  /** @type {Props} */
-  let { actorName = "Default Name", message = "No message provided" } = $props();
-  </script>
-  
-  <div class="partial-app-container">
-    <h2>Nested Partial App</h2>
-    <div>Actor Name: {actorName}</div> <!-- Display the actor's name -->
-    <div>Message: {message}</div> <!-- Display the passed message -->
-  </div>
-  
+  function multiply(value, factor) {
+    return (value * factor).toFixed(2);
+  }
+</script>
+
+<div class="dossier">
+  {#if false}
+    <div class="version-one image-mask">
+      <img src={actor.system.profile.img} alt="Character Portrait" />
+    </div>
+  {:else}
+    <div class="version-two image-mask">
+      <img src={actor.img} alt={actor.name} title={actor.name} data-edit="img" />
+    </div>
+  {/if}
+
+  <details class="component-details">
+    <summary class="details-foldout">
+      <span><i class="fa-solid fa-magnifying-glass"></i></span>
+      {config.sheet.details}
+    </summary>
+
+    <div>
+      <input type="text" id="actor-name" name="name" bind:value={actor.name} />
+    </div>
+
+    <div>
+      <h3>
+        {config.actor.character.metahuman}: 
+        <span>{actor.system.profile.metaHumanity}</span>
+      </h3>
+    </div>
+
+    <div>
+      <h3>
+        {config.actor.character.age}: {actor.system.profile.age}
+      </h3>
+    </div>
+
+    <div>
+      <h3>
+        {config.actor.character.height}: {actor.system.profile.height} cm 
+        ({multiply(actor.system.profile.height, 0.0328084)} feet)
+      </h3>
+    </div>
+
+    <div>
+      <h3>
+        {config.actor.character.weight}: {actor.system.profile.weight} kg 
+        ({multiply(actor.system.profile.weight, 0.157473)} stones)
+      </h3>
+    </div>
+
+    <!-- svelte-ignore a11y_missing_attribute -->
+    <a class="journal-entry-link">
+      <h3>{ config.sheet.viewbackground }</h3>
+    </a>
+  </details>
+</div>
+
+<style>
+  /* Add your LESS or CSS styles here */
+</style>

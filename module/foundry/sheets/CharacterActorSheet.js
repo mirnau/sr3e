@@ -5,6 +5,4 @@ export default class CharacterActorSheet extends ActorSheet {
       template: "systems/sr3e/templates/sheet/actor/character-sheet.html"
     });
   }
-
-  
 }

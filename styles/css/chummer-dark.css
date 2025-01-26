@@ -324,13 +324,13 @@
 .sr3e.sheet.character {
   min-width: calc(20rem + 0.25rem * 3);
 }
-.sr3e.sheet.character .character-sheet-masonry {
+.sr3e.sheet.character .sheet-character-masonry-main {
   display: grid;
   margin: 0 auto;
 }
-.sr3e.sheet.character .character-sheet-masonry .layout-gutter-sizer {
+.sr3e.sheet.character .sheet-character-masonry-main .layout-gutter-sizer {
   width: 0.25rem;
 }
-.sr3e.sheet.character .character-sheet-masonry .layout-grid-sizer {
+.sr3e.sheet.character .sheet-character-masonry-main .layout-grid-sizer {
   min-width: 20rem;
 }

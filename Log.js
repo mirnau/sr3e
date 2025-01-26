@@ -1,6 +1,6 @@
 export default class Log {
     static error(message, sender, obj) {
-        this._print('❌', 'red', message, sender, obj);
+        this._print('❌', 'coral', message, sender, obj);
     }
 
     static warn(message, sender, obj) {
@@ -8,7 +8,7 @@ export default class Log {
     }
 
     static info(message, sender, obj) {
-        this._print('ℹ️', 'blue', message, sender, obj);
+        this._print('ℹ️', 'lightblue', message, sender, obj);
     }
 
     static success(message, sender, obj) {
@@ -16,7 +16,7 @@ export default class Log {
     }
 
     static inspect(message, sender, obj) {
-        this._print('🔎', 'purple', message, sender, obj);
+        this._print('🔎', 'mediumpurple', message, sender, obj);
     }
 
     static _print(icon, color, message, sender, obj) {

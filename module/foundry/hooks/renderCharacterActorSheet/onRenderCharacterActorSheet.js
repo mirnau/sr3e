@@ -6,9 +6,6 @@ import { mount } from "svelte";
 export function initMainMasonryGrid(app, html, data) {
   if (!(app instanceof CharacterActorSheet)) return;
 
-  Log.info("Initialize", CharacterActorSheet.name);
-
-
   const container = document.querySelector(".window-content");
 
   container.innerHTML = '';
