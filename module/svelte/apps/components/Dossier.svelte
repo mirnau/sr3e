@@ -1,22 +1,28 @@
 <script>
-  import { flags } from "../../../foundry/services/commonConsts.js";
+  import { onMount } from "svelte";
+  import Log from "../../../../Log";
   export let actor = {};
   export let config = {};
 
   // Reactive store for isDetailsOpen, synchronized with the actor's flag
-  $: isDetailsOpen = actor.system.profileisDossierDetailsOpen;
+  $: isDetailsOpen = actor.system.profile.isDetailsOpen;
+
+  onMount(() => {
+    isDetailsOpen = actor.system.profile.isDetailsOpen;
+    Log.inspect("Dossier actor", "SVELTE", actor);
+  });
 
   function toggleDetails() {
     actor.update(
-      { "system.profile.isDetailsOpen": !isDetailsOpen },
-      { render: false }
+      { "system.profile.isDetailsOpen": isDetailsOpen },
+      { render: false },
     );
     actor.mainLayoutResizeObserver.masonryInstance.layout();
   }
 
   function saveActorName(event) {
     const newName = event.target.value;
-    actor.update({ name: newName });
+    actor.update({ name: newName }, { render: true });
   }
 
   function multiply(value, factor) {
@@ -28,7 +34,7 @@
   <!-- Reactive rendering based on isDetailsOpen -->
   {#if isDetailsOpen}
     <div class="version-one image-mask">
-      <img src={actor.system.profile.img} alt="Metahuman Portrait" />
+      <img alt="Metahuman Portrait" />
     </div>
   {:else}
     <div class="version-two image-mask">
@@ -41,7 +47,7 @@
     </div>
   {/if}
 
-  <details class="component-details" on:toggle={toggleDetails}>
+  <details bind:open={isDetailsOpen} on:toggle={toggleDetails}>
     <summary class="details-foldout">
       <span><i class="fa-solid fa-magnifying-glass"></i></span>
       {config.sheet.details}
@@ -56,7 +62,7 @@
         bind:value={actor.name}
         on:blur={saveActorName}
         on:keypress={(e) => e.key === "Enter" && saveActorName(e)}
-      />
+        />
     </div>
 
     <div>

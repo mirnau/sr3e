@@ -33,7 +33,7 @@
       <div class="fake-shadow"></div>
       <div class="inner-background">
        
-        <Dossier {actor} {config} />
+        <Dossier actor={actor} config={config} />
         
       </div>
     </div>

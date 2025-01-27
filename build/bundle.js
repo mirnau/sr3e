@@ -2187,6 +2187,22 @@ function is_numberlike_input(input) {
 function to_number(value) {
   return value === "" ? null : +value;
 }
+function bind_property(property, event_name, element, set2, get2) {
+  var handler = () => {
+    set2(element[property]);
+  };
+  element.addEventListener(event_name, handler);
+  {
+    render_effect(() => {
+      element[property] = get2();
+    });
+  }
+  if (element === document.body || element === window || element === document) {
+    teardown(() => {
+      element.removeEventListener(event_name, handler);
+    });
+  }
+}
 function init(immutable = false) {
   const context = (
     /** @type {ComponentContextLegacy} */
@@ -2552,16 +2568,20 @@ function initializeMasonryLayout(masonryResizeConfig) {
 enable_legacy_mode_flag();
 var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img data-edit="img"></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="component-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></details></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="dossier"><!> <details><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
   const isDetailsOpen = mutable_state();
   let actor = prop($$props, "actor", 28, () => ({}));
   let config = prop($$props, "config", 24, () => ({}));
+  onMount(() => {
+    set(isDetailsOpen, actor().system.profile.isDetailsOpen);
+    Log.inspect("Dossier actor", "SVELTE", actor());
+  });
   function toggleDetails() {
     actor().update(
       {
-        "system.profile.isDetailsOpen": !get(isDetailsOpen)
+        "system.profile.isDetailsOpen": get(isDetailsOpen)
       },
       { render: false }
     );
@@ -2569,13 +2589,13 @@ function Dossier($$anchor, $$props) {
   }
   function saveActorName(event2) {
     const newName = event2.target.value;
-    actor().update({ name: newName });
+    actor().update({ name: newName }, { render: true });
   }
   function multiply(value, factor) {
     return (value * factor).toFixed(2);
   }
   legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(isDetailsOpen, actor().system.profileisDossierDetailsOpen);
+    set(isDetailsOpen, actor().system.profile.isDetailsOpen);
   });
   legacy_pre_effect_reset();
   init();
@@ -2584,17 +2604,15 @@ function Dossier($$anchor, $$props) {
   {
     var consequent = ($$anchor2) => {
       var div_1 = root_1();
-      var img = child(div_1);
-      template_effect(() => set_attribute(img, "src", actor().system.profile.img));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
       var div_2 = root_2();
-      var img_1 = child(div_2);
+      var img = child(div_2);
       template_effect(() => {
-        set_attribute(img_1, "src", actor().img);
-        set_attribute(img_1, "alt", actor().name);
-        set_attribute(img_1, "title", actor().name);
+        set_attribute(img, "src", actor().img);
+        set_attribute(img, "alt", actor().name);
+        set_attribute(img, "title", actor().name);
       });
       append($$anchor2, div_2);
     };
@@ -2644,6 +2662,7 @@ function Dossier($$anchor, $$props) {
   bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
   event("blur", input, saveActorName);
   event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+  bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get(isDetailsOpen));
   event("toggle", details, toggleDetails);
   append($$anchor, div);
   pop();
