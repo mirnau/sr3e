@@ -2,19 +2,17 @@ import Log from "./Log.js";
 import { sr3e } from "./module/foundry/config.js";
 import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
+import { initActorFlags } from "./module/foundry/hooks/preCreateActor/onPreCreateActor.js";
 import {
   closeMainMasonryGrid,
   initMainMasonryGrid
 } from "./module/foundry/hooks/renderCharacterActorSheet/onRenderCharacterActorSheet.js";
+import { hooks } from "./module/foundry/services/commonConsts.js";
 
-const hooks = {
-  renderCharacterActorSheet: "renderCharacterActorSheet",
-  closeCharacterActorSheet: "closeCharacterActorSheet",
-  init: "init",
-  ready: "ready"
-}
 
 function registerHooks() {
+
+  //Hooks.on(hooks.ceateActor, initActorFlags);
 
   Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);

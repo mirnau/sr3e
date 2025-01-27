@@ -34,6 +34,7 @@
       <div class="inner-background">
        
         <Dossier {actor} {config} />
+        
       </div>
     </div>
   </div>

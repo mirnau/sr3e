@@ -103,6 +103,12 @@ class Profile extends foundry.abstract.TypeDataModel {
       quote: new foundry.data.fields.StringField({
         required: false,
         initial: "Alea iacta es"
+      }),
+      // Persistent boolean for the panel state
+      isDetailsOpen: new foundry.data.fields.BooleanField({
+        required: false,
+        initial: false
+        // Default value for the panel state
       })
     };
   }
@@ -277,6 +283,14 @@ class CharacterActorSheet extends ActorSheet {
     });
   }
 }
+const hooks = {
+  renderCharacterActorSheet: "renderCharacterActorSheet",
+  closeCharacterActorSheet: "closeCharacterActorSheet",
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  ready: "ready"
+};
 const PUBLIC_VERSION = "5";
 if (typeof window !== "undefined")
   (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
@@ -921,6 +935,41 @@ function component_root(fn) {
 }
 function effect(fn) {
   return create_effect(EFFECT, fn, false);
+}
+function legacy_pre_effect(deps, fn) {
+  var context = (
+    /** @type {ComponentContextLegacy} */
+    component_context
+  );
+  var token = { effect: null, ran: false };
+  context.l.r1.push(token);
+  token.effect = render_effect(() => {
+    deps();
+    if (token.ran) return;
+    token.ran = true;
+    set(context.l.r2, true);
+    untrack(fn);
+  });
+}
+function legacy_pre_effect_reset() {
+  var context = (
+    /** @type {ComponentContextLegacy} */
+    component_context
+  );
+  render_effect(() => {
+    if (!get(context.l.r2)) return;
+    for (var token of context.l.r1) {
+      var effect2 = token.effect;
+      if ((effect2.f & CLEAN) !== 0) {
+        set_signal_status(effect2, MAYBE_DIRTY);
+      }
+      if (check_dirtiness(effect2)) {
+        update_effect(effect2);
+      }
+      token.ran = false;
+    }
+    context.l.r2.v = false;
+  });
 }
 function render_effect(fn) {
   return create_effect(RENDER_EFFECT, fn, true);
@@ -2367,16 +2416,17 @@ function prop(props, key, flags, fallback) {
 }
 function getResizeObserver(masonryInstance, gridElement, func = null) {
   gridElement.masonryInstance = masonryInstance;
-  masonryInstance.options.transitionDuration = "0";
   const resizeObserver = new ResizeObserver(() => {
     if (func) {
       func();
     }
     masonryInstance.layout();
+    masonryInstance.options.transitionDuration = "0.4s";
   });
-  resizeObserver.masonryInstance = masonryInstance;
   resizeObserver.observe(gridElement);
+  resizeObserver.masonryInstance = masonryInstance;
   resizeObserver.masonryInstance.layout();
+  resizeObserver.masonryInstance.options.transitionDuration = "0";
   return resizeObserver;
 }
 function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
@@ -2505,21 +2555,29 @@ var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img 
 var root$1 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="component-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
+  const isDetailsOpen = mutable_state();
   let actor = prop($$props, "actor", 28, () => ({}));
   let config = prop($$props, "config", 24, () => ({}));
-  let isDetailsOpen = mutable_state(false);
-  function multiply(value, factor) {
-    return (value * factor).toFixed(2);
-  }
-  function onToggleDetails() {
-    var _a, _b;
-    set(isDetailsOpen, !get(isDetailsOpen));
-    (_b = (_a = actor().mainLayoutResizeObserver) == null ? void 0 : _a.masonryInstance) == null ? void 0 : _b.layout();
+  function toggleDetails() {
+    actor().update(
+      {
+        "system.profile.isDetailsOpen": !get(isDetailsOpen)
+      },
+      { render: false }
+    );
+    actor().mainLayoutResizeObserver.masonryInstance.layout();
   }
   function saveActorName(event2) {
     const newName = event2.target.value;
     actor().update({ name: newName });
   }
+  function multiply(value, factor) {
+    return (value * factor).toFixed(2);
+  }
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    set(isDetailsOpen, actor().system.profileisDossierDetailsOpen);
+  });
+  legacy_pre_effect_reset();
   init();
   var div = root$1();
   var node = child(div);
@@ -2573,10 +2631,8 @@ function Dossier($$anchor, $$props) {
       set_text(text_1, `${config().actor.character.metahuman ?? ""}: `);
       set_text(text_2, actor().system.profile.metaHumanity);
       set_text(text_3, `${config().actor.character.age ?? ""}: ${actor().system.profile.age ?? ""}`);
-      set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm 
-       (${$0 ?? ""} feet)`);
-      set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg 
-       (${$1 ?? ""} stones)`);
+      set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm (${$0 ?? ""} feet)`);
+      set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$1 ?? ""} stones)`);
       set_text(text_6, config().sheet.viewbackground);
     },
     [
@@ -2588,7 +2644,7 @@ function Dossier($$anchor, $$props) {
   bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
   event("blur", input, saveActorName);
   event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-  event("toggle", details, onToggleDetails);
+  event("toggle", details, toggleDetails);
   append($$anchor, div);
   pop();
 }
@@ -2649,12 +2705,6 @@ function closeMainMasonryGrid(app) {
     console.info("Svelte App Destroyed.", CharacterActorSheet.name);
   }
 }
-const hooks = {
-  renderCharacterActorSheet: "renderCharacterActorSheet",
-  closeCharacterActorSheet: "closeCharacterActorSheet",
-  init: "init",
-  ready: "ready"
-};
 function registerHooks() {
   Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);

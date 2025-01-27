@@ -18,5 +18,4 @@ export function initializeMasonryLayout(masonryResizeConfig) {
       }
 
     actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
-    //actor.mainLayoutResizeObserver.masonryInstance.options.transitionDuration = '2.3s';
 }

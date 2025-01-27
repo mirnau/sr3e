@@ -1,8 +1,7 @@
 export function getResizeObserver(masonryInstance, gridElement, func = null) {
 
     gridElement.masonryInstance = masonryInstance;
-    masonryInstance.options.transitionDuration = '0'
-
+    
     const resizeObserver = new ResizeObserver(() => {
         
         if(func) { 
@@ -10,10 +9,13 @@ export function getResizeObserver(masonryInstance, gridElement, func = null) {
         }
         
         masonryInstance.layout();
+        masonryInstance.options.transitionDuration = '0.4s';
     });
-    resizeObserver.masonryInstance = masonryInstance;
+
     resizeObserver.observe(gridElement);
+    resizeObserver.masonryInstance = masonryInstance;
     resizeObserver.masonryInstance.layout();
+    resizeObserver.masonryInstance.options.transitionDuration = '0'
 
     return resizeObserver;
 }

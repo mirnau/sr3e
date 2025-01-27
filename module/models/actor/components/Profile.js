@@ -57,6 +57,12 @@ export default class Profile extends foundry.abstract.TypeDataModel {
         required: false,
         initial: "Alea iacta es",
       }),
+      
+      // Persistent boolean for the panel state
+      isDetailsOpen: new foundry.data.fields.BooleanField({
+        required: false,
+        initial: false, // Default value for the panel state
+      }),
     };
   }
 }
