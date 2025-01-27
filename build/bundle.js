@@ -1960,7 +1960,7 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
   event_handle(array_from(all_registered_events));
   root_event_handles.add(event_handle);
   var component = void 0;
-  var unmount = component_root(() => {
+  var unmount2 = component_root(() => {
     var anchor_node = anchor ?? target.appendChild(create_text());
     branch(() => {
       if (context) {
@@ -2000,10 +2000,18 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
       }
     };
   });
-  mounted_components.set(component, unmount);
+  mounted_components.set(component, unmount2);
   return component;
 }
 let mounted_components = /* @__PURE__ */ new WeakMap();
+function unmount(component, options) {
+  const fn = mounted_components.get(component);
+  if (fn) {
+    mounted_components.delete(component);
+    return fn(options);
+  }
+  return Promise.resolve();
+}
 function if_block(node, fn, elseif = false) {
   var anchor = node;
   var consequent_effect = null;
@@ -2359,6 +2367,7 @@ function prop(props, key, flags, fallback) {
 }
 function getResizeObserver(masonryInstance, gridElement, func = null) {
   gridElement.masonryInstance = masonryInstance;
+  masonryInstance.options.transitionDuration = "0";
   const resizeObserver = new ResizeObserver(() => {
     if (func) {
       func();
@@ -2367,6 +2376,7 @@ function getResizeObserver(masonryInstance, gridElement, func = null) {
   });
   resizeObserver.masonryInstance = masonryInstance;
   resizeObserver.observe(gridElement);
+  resizeObserver.masonryInstance.layout();
   return resizeObserver;
 }
 function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
@@ -2379,9 +2389,8 @@ function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
     gutterSizerSelector,
     app
   } = masonryResizeConfig;
-  Log.inspect("Html element 1", observeMasonryResize.name, jQueryObject);
   const $grid = jQueryObject.find(parentSelector);
-  Log.inspect("Html element 2 (jQuery grid)", observeMasonryResize.name, $grid);
+  Log.info("Grid", observeMasonryResize.name, $grid);
   masonryResizeConfig.grid = $grid;
   const rawGrid = $grid[0];
   if (!rawGrid) {
@@ -2411,10 +2420,7 @@ function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
     }
     masonryResizeConfig.observer = getResizeObserver(masonryInstance, rawGrid, resizeHandler);
   }
-  if (rawGrid.masonryInstance) {
-    rawGrid.masonryInstance.layout();
-  }
-  masonryResizeConfig.observer.observe(rawGrid.parentNode);
+  rawGrid.masonryInstance.layout();
   Log.success("Masonry Resize Observer Initialized", observeMasonryResize.name, masonryResizeConfig.observer);
   return masonryResizeConfig.observer;
 }
@@ -2481,13 +2487,16 @@ function layoutStateMachine(app, $html) {
   }
 }
 function initializeMasonryLayout(masonryResizeConfig) {
-  var _a;
   const actor = masonryResizeConfig.app.actor;
   if (actor.mainLayoutResizeObserver) {
+    const rawGrid = actor.mainLayoutResizeObserver.masonryInstance.element;
+    if (rawGrid.masonryInstance) {
+      rawGrid.masonryInstance = null;
+    }
+    actor.mainLayoutResizeObserver.masonryInstance.destroy();
     actor.mainLayoutResizeObserver.disconnect();
     actor.mainLayoutResizeObserver = null;
   }
-  (_a = actor.mainLayoutResizeObserver) == null ? void 0 : _a.disconnect();
   actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
 }
 enable_legacy_mode_flag();
@@ -2615,29 +2624,28 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
 }
 function initMainMasonryGrid(app, html, data) {
-  if (!(app instanceof CharacterActorSheet)) return;
-  const container = document.querySelector(".window-content");
+  if (app.svelteApp) {
+    unmount(app.svelteApp);
+  }
+  const container = app.element[0].querySelector(".window-content");
   container.innerHTML = "";
   app.svelteApp = mount(CharacterSheetApp, {
     target: container,
     props: {
       app,
       config: CONFIG.sr3e,
-      jQueryObject: html
+      jQueryObject: app.element
     }
   });
   Log.success("Svelte App Initialized", CharacterActorSheet.name);
 }
 function closeMainMasonryGrid(app) {
-  var _a;
-  if (!(app instanceof CharacterActorSheet)) return;
   if (app.svelteApp) {
-    console.info("Actor", CharacterActorSheet.name, app.actor.mainLayoutResizeObserver);
-    (_a = app.actor.mainLayoutResizeObserver) == null ? void 0 : _a.disconnect();
+    app.actor.mainLayoutResizeObserver.disconnect();
     app.actor.mainLayoutResizeObserver = null;
-    console.info("Masonry observer disconnected.", CharacterActorSheet.name);
-    app.svelteApp.$destroy();
-    app.svelteApp = null;
+    Log.success("Masonry observer disconnected.", CharacterActorSheet.name);
+    unmount(app.svelteApp);
+    app.svelteApp.destroy();
     console.info("Svelte App Destroyed.", CharacterActorSheet.name);
   }
 }

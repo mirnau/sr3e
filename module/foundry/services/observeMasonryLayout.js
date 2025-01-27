@@ -17,14 +17,9 @@ export function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
     app
   } = masonryResizeConfig;
 
-  // For debugging
-  Log.inspect("Html element 1", observeMasonryResize.name, jQueryObject);
-
-  // Use jQuery find (not .querySelector)
-  // This gives us another jQuery object, potentially with 1 item
   const $grid = jQueryObject.find(parentSelector);
 
-  Log.inspect("Html element 2 (jQuery grid)", observeMasonryResize.name, $grid);
+  Log.info("Grid", observeMasonryResize.name, $grid);
 
   // Store it back into the config so adjustMasonryOnResize can see it
   masonryResizeConfig.grid = $grid;
@@ -70,13 +65,7 @@ export function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
     masonryResizeConfig.observer = getResizeObserver(masonryInstance, rawGrid, resizeHandler);
   }
 
-  // If we already had a masonry instance, layout again
-  if (rawGrid.masonryInstance) {
-    rawGrid.masonryInstance.layout();
-  }
-
-  // Start observing changes
-  masonryResizeConfig.observer.observe(rawGrid.parentNode);
+  rawGrid.masonryInstance.layout();
 
   Log.success("Masonry Resize Observer Initialized", observeMasonryResize.name, masonryResizeConfig.observer);
 
@@ -95,28 +84,28 @@ export function adjustMasonryOnResize(masonryResizeConfig) {
 
   const $gridItems = grid.find(childSelector);
   const $gridSizer = grid.find(gridSizerSelector);
-  const $gutter    = grid.find(gutterSizerSelector);
+  const $gutter = grid.find(gutterSizerSelector);
 
   if (!$gridSizer.length || !$gridItems.length) return;
 
   // Access the raw DOM nodes
-  const rawGrid   = grid[0];
-  const rawSizer  = $gridSizer[0];
+  const rawGrid = grid[0];
+  const rawSizer = $gridSizer[0];
   const rawGutter = $gutter[0];
 
   // Calculate sizes
-  const parentPadding   = parseFloat(getComputedStyle(rawGrid.parentNode).paddingLeft) || 0;
-  const gridWidthPx     = rawGrid.parentNode.offsetWidth - 2 * parentPadding;
-  const gutterPx        = parseFloat(getComputedStyle(rawGutter).width);
-  const minItemWidthPx  = parseFloat(getComputedStyle($gridItems[0]).minWidth);
+  const parentPadding = parseFloat(getComputedStyle(rawGrid.parentNode).paddingLeft) || 0;
+  const gridWidthPx = rawGrid.parentNode.offsetWidth - 2 * parentPadding;
+  const gutterPx = parseFloat(getComputedStyle(rawGutter).width);
+  const minItemWidthPx = parseFloat(getComputedStyle($gridItems[0]).minWidth);
 
   // Calculate columns
   let columnCount = Math.floor((gridWidthPx + gutterPx) / (minItemWidthPx + gutterPx));
   columnCount = Math.max(columnCount, 1);
 
   // Calculate item width
-  const totalGutterWidthPx  = gutterPx * (columnCount - 1);
-  const itemWidthPx         = (gridWidthPx - totalGutterWidthPx) / columnCount;
+  const totalGutterWidthPx = gutterPx * (columnCount - 1);
+  const itemWidthPx = (gridWidthPx - totalGutterWidthPx) / columnCount;
   const adjustedItemWidthPx = Math.floor(itemWidthPx);
 
   // Apply the new width to each item
@@ -140,11 +129,11 @@ export function adjustMasonryOnResize(masonryResizeConfig) {
  * @param {JQuery} $html - jQuery object for the sheet's main container
  */
 function layoutStateMachine(app, $html) {
-  const sheetWidth = app.position?.width || 1400; 
-  const maxWidth   = 1400;
+  const sheetWidth = app.position?.width || 1400;
+  const maxWidth = 1400;
 
   // Layout thresholds
-  const lowerLimit  = 0.5 * maxWidth;
+  const lowerLimit = 0.5 * maxWidth;
   const middleLimit = 0.66 * maxWidth;
 
   // Determine layout state
@@ -157,18 +146,18 @@ function layoutStateMachine(app, $html) {
 
   // Column widths
   const columnWidthPercent = { small: 100, medium: 50, wide: 25 };
-  const columnWidth        = columnWidthPercent[layoutState];
+  const columnWidth = columnWidthPercent[layoutState];
 
   // Apply a custom CSS variable on the raw element
   const rawHtml = $html[0]; // raw DOM node
   rawHtml.style.setProperty("--column-width", `${columnWidth}%`);
 
   // Grab components with jQuery
-  const $twoSpan   = $html.find(".two-span-selectable");
+  const $twoSpan = $html.find(".two-span-selectable");
   const $threeSpan = $html.find(".three-span-selectable");
 
   // We can convert them to arrays if we want .forEach:
-  const twoSpanArray   = $twoSpan.toArray();
+  const twoSpanArray = $twoSpan.toArray();
   const threeSpanArray = $threeSpan.toArray();
 
   // Adjust widths
