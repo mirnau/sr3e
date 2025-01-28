@@ -2,11 +2,13 @@
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
   import Log from "../../../../Log";
+  import {characterStore} from "../../stores/characterStore";
   export let actor = {};
   export let config = {};
 
   // Reactive store for isDetailsOpen, synchronized with the actor's flag
   $: isDetailsOpen = actor.system.profile.isDetailsOpen;
+  $: name = characterStore;
 
   onMount(() => {
     isDetailsOpen = actor.system.profile.isDetailsOpen;
@@ -88,7 +90,7 @@
             type="text"
             id="actor-name"
             name="name"
-            bind:value={actor.name}
+            bind:value={$characterStore.name}
             on:blur={saveActorName}
             on:keypress={(e) => e.key === "Enter" && saveActorName(e)}
           />

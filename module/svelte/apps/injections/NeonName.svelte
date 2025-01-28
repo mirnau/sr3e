@@ -1,18 +1,23 @@
+<!-- ChildComponent.svelte -->
 <script>
+      import {characterStore} from "../../stores/characterStore";
     export let actor; // The Actor object passed in as props
     let malfunctioningIndexes = [];
+    let neonHTML;
 
-    // Create a reactive variable that tracks actor.name
-    $: actorName = actor.name;
+    // Enhanced reactive declaration (Svelte 5 syntax, if applicable)
+    // Using $: to declare dependencies
+    $: {
+        const name = $characterStore.name;
+        neonHTML = getNeonHtml(name);
+    }
 
     const randomInRange = (min, max) =>
         Math.floor(Math.random() * (max - min + 1)) + min;
 
-    // Recompute neonHTML whenever actorName changes
-    $: neonHTML = getNeonHtml(actorName);
-
     function getNeonHtml(name) {
         malfunctioningIndexes = []; // Reset malfunctioning indexes
+
         if (name.length < 4) {
             malfunctioningIndexes.push(randomInRange(0, name.length - 1));
         } else {

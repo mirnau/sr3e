@@ -570,7 +570,7 @@ function proxy(value, parent = null, prev) {
           sources.set(prop2, s);
         }
         if (s !== void 0) {
-          var v = get(s);
+          var v = get$1(s);
           return v === UNINITIALIZED ? void 0 : v;
         }
         return Reflect.get(target, prop2, receiver);
@@ -579,7 +579,7 @@ function proxy(value, parent = null, prev) {
         var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
         if (descriptor && "value" in descriptor) {
           var s = sources.get(prop2);
-          if (s) descriptor.value = get(s);
+          if (s) descriptor.value = get$1(s);
         } else if (descriptor === void 0) {
           var source2 = sources.get(prop2);
           var value2 = source2 == null ? void 0 : source2.v;
@@ -606,7 +606,7 @@ function proxy(value, parent = null, prev) {
             s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
             sources.set(prop2, s);
           }
-          var value2 = get(s);
+          var value2 = get$1(s);
           if (value2 === UNINITIALIZED) {
             return false;
           }
@@ -659,7 +659,7 @@ function proxy(value, parent = null, prev) {
         return true;
       },
       ownKeys(target) {
-        get(version);
+        get$1(version);
         var own_keys = Reflect.ownKeys(target).filter((key2) => {
           var source3 = sources.get(key2);
           return source3 === void 0 || source3.v !== UNINITIALIZED;
@@ -965,7 +965,7 @@ function legacy_pre_effect_reset() {
     component_context
   );
   render_effect(() => {
-    if (!get(context.l.r2)) return;
+    if (!get$1(context.l.r2)) return;
     for (var token of context.l.r1) {
       var effect2 = token.effect;
       if ((effect2.f & CLEAN) !== 0) {
@@ -984,7 +984,7 @@ function render_effect(fn) {
 }
 function template_effect(fn, thunks = [], d = derived) {
   const deriveds = thunks.map(d);
-  const effect2 = () => fn(...deriveds.map(get));
+  const effect2 = () => fn(...deriveds.map(get$1));
   return block(effect2);
 }
 function block(fn, flags = 0) {
@@ -1601,7 +1601,7 @@ function process_effects(effect2, collected_effects) {
     process_effects(child2, collected_effects);
   }
 }
-function get(signal) {
+function get$1(signal) {
   var _a;
   var flags = signal.f;
   var is_derived = (flags & DERIVED) !== 0;
@@ -2532,7 +2532,7 @@ function init(immutable = false) {
       if (changed) version++;
       return version;
     });
-    props = () => get(d);
+    props = () => get$1(d);
   }
   if (callbacks.b.length) {
     user_pre_effect(() => {
@@ -2559,7 +2559,7 @@ function init(immutable = false) {
 }
 function observe_all(context, props) {
   if (context.l.s) {
-    for (const signal of context.l.s) get(signal);
+    for (const signal of context.l.s) get$1(signal);
   }
   props();
 }
@@ -2586,7 +2586,124 @@ function init_update_callbacks(context) {
   );
   return l.u ?? (l.u = { a: [], b: [], m: [] });
 }
+function subscribe_to_store(store, run2, invalidate) {
+  if (store == null) {
+    run2(void 0);
+    return noop;
+  }
+  const unsub = untrack(
+    () => store.subscribe(
+      run2,
+      // @ts-expect-error
+      invalidate
+    )
+  );
+  return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+}
+const subscriber_queue = [];
+function writable(value, start = noop) {
+  let stop = null;
+  const subscribers = /* @__PURE__ */ new Set();
+  function set2(new_value) {
+    if (safe_not_equal(value, new_value)) {
+      value = new_value;
+      if (stop) {
+        const run_queue = !subscriber_queue.length;
+        for (const subscriber of subscribers) {
+          subscriber[1]();
+          subscriber_queue.push(subscriber, value);
+        }
+        if (run_queue) {
+          for (let i = 0; i < subscriber_queue.length; i += 2) {
+            subscriber_queue[i][0](subscriber_queue[i + 1]);
+          }
+          subscriber_queue.length = 0;
+        }
+      }
+    }
+  }
+  function update(fn) {
+    set2(fn(
+      /** @type {T} */
+      value
+    ));
+  }
+  function subscribe(run2, invalidate = noop) {
+    const subscriber = [run2, invalidate];
+    subscribers.add(subscriber);
+    if (subscribers.size === 1) {
+      stop = start(set2, update) || noop;
+    }
+    run2(
+      /** @type {T} */
+      value
+    );
+    return () => {
+      subscribers.delete(subscriber);
+      if (subscribers.size === 0 && stop) {
+        stop();
+        stop = null;
+      }
+    };
+  }
+  return { set: set2, update, subscribe };
+}
+function get(store) {
+  let value;
+  subscribe_to_store(store, (_) => value = _)();
+  return value;
+}
 let is_store_binding = false;
+let IS_UNMOUNTED = Symbol();
+function store_get(store, store_name, stores) {
+  const entry = stores[store_name] ?? (stores[store_name] = {
+    store: null,
+    source: /* @__PURE__ */ mutable_source(void 0),
+    unsubscribe: noop
+  });
+  if (entry.store !== store && !(IS_UNMOUNTED in stores)) {
+    entry.unsubscribe();
+    entry.store = store;
+    if (store == null) {
+      entry.source.v = void 0;
+      entry.unsubscribe = noop;
+    } else {
+      var is_synchronous_callback = true;
+      entry.unsubscribe = subscribe_to_store(store, (v) => {
+        if (is_synchronous_callback) {
+          entry.source.v = v;
+        } else {
+          set(entry.source, v);
+        }
+      });
+      is_synchronous_callback = false;
+    }
+  }
+  if (IS_UNMOUNTED in stores) {
+    return get(store);
+  }
+  return get$1(entry.source);
+}
+function setup_stores() {
+  const stores = {};
+  function cleanup() {
+    teardown(() => {
+      for (var store_name in stores) {
+        const ref = stores[store_name];
+        ref.unsubscribe();
+      }
+      define_property(stores, IS_UNMOUNTED, {
+        enumerable: false,
+        value: true
+      });
+    });
+  }
+  return [stores, cleanup];
+}
+function store_mutate(store, expression, new_value) {
+  store.set(new_value);
+  return expression;
+}
 function capture_store_binding(fn) {
   var previous_is_store_binding = is_store_binding;
   try {
@@ -2678,7 +2795,7 @@ function prop(props, key, flags, fallback) {
     );
     derived_getter.f |= LEGACY_DERIVED_PROP;
     getter = () => {
-      var value = get(derived_getter);
+      var value = get$1(derived_getter);
       if (value !== void 0) fallback_value = /** @type {V} */
       void 0;
       return value === void 0 ? fallback_value : value;
@@ -2706,7 +2823,7 @@ function prop(props, key, flags, fallback) {
   var current_value = with_parent_branch(
     () => /* @__PURE__ */ derived(() => {
       var parent_value = getter();
-      var child_value = get(inner_current_value);
+      var child_value = get$1(inner_current_value);
       if (from_child) {
         from_child = false;
         was_from_child = true;
@@ -2719,18 +2836,18 @@ function prop(props, key, flags, fallback) {
   if (!immutable) current_value.equals = safe_equals;
   return function(value, mutation) {
     if (arguments.length > 0) {
-      const new_value = mutation ? get(current_value) : runes && bindable ? proxy(value) : value;
+      const new_value = mutation ? get$1(current_value) : runes && bindable ? proxy(value) : value;
       if (!current_value.equals(new_value)) {
         from_child = true;
         set(inner_current_value, new_value);
         if (fallback_used && fallback_value !== void 0) {
           fallback_value = new_value;
         }
-        untrack(() => get(current_value));
+        untrack(() => get$1(current_value));
       }
       return value;
     }
-    return get(current_value);
+    return get$1(current_value);
   };
 }
 function getResizeObserver(masonryInstance, gridElement, func = null) {
@@ -2902,14 +3019,18 @@ function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y"
     css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
   };
 }
+const characterStore = writable({ name: "John Doe" });
 var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
 var root$2 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="dossier-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <!></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $characterStore = () => store_get(characterStore, "$characterStore", $$stores);
   const isDetailsOpen = mutable_state();
-  let actor = prop($$props, "actor", 28, () => ({}));
+  const name = mutable_state();
+  let actor = prop($$props, "actor", 24, () => ({}));
   let config = prop($$props, "config", 24, () => ({}));
   onMount(() => {
     set(isDetailsOpen, actor().system.profile.isDetailsOpen);
@@ -2918,7 +3039,7 @@ function Dossier($$anchor, $$props) {
   function toggleDetails() {
     actor().update(
       {
-        "system.profile.isDetailsOpen": get(isDetailsOpen)
+        "system.profile.isDetailsOpen": get$1(isDetailsOpen)
       },
       { render: false }
     );
@@ -2947,6 +3068,9 @@ function Dossier($$anchor, $$props) {
   legacy_pre_effect(() => deep_read_state(actor()), () => {
     set(isDetailsOpen, actor().system.profile.isDetailsOpen);
   });
+  legacy_pre_effect(() => characterStore, () => {
+    set(name, characterStore);
+  });
   legacy_pre_effect_reset();
   init();
   var div = root$2();
@@ -2968,7 +3092,7 @@ function Dossier($$anchor, $$props) {
       append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
-      if (get(isDetailsOpen)) $$render(consequent);
+      if (get$1(isDetailsOpen)) $$render(consequent);
       else $$render(alternate, false);
     });
   }
@@ -3013,7 +3137,7 @@ function Dossier($$anchor, $$props) {
         ],
         derived_safe_equal
       );
-      bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
+      bind_value(input, () => $characterStore().name, ($$value) => store_mutate(characterStore, untrack($characterStore).name = $$value, untrack($characterStore)));
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
       transition(1, div_3, () => slide, () => ({ duration: 400, easing: cubicInOut }));
@@ -3021,14 +3145,15 @@ function Dossier($$anchor, $$props) {
       append($$anchor2, div_3);
     };
     if_block(node_1, ($$render) => {
-      if (get(isDetailsOpen)) $$render(consequent_1);
+      if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
   template_effect(() => set_text(text, ` ${config().sheet.details ?? ""}`));
-  bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get(isDetailsOpen));
+  bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get$1(isDetailsOpen));
   event("toggle", details, toggleDetails);
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 var root$1 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
@@ -3064,10 +3189,11 @@ function CharacterSheetApp($$anchor, $$props) {
 var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
-  const actorName = mutable_state();
-  const neonHTML = mutable_state();
-  let actor = prop($$props, "actor", 8);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $characterStore = () => store_get(characterStore, "$characterStore", $$stores);
+  prop($$props, "actor", 8);
   let malfunctioningIndexes = [];
+  let neonHTML = mutable_state();
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   function getNeonHtml(name) {
     malfunctioningIndexes = [];
@@ -3085,19 +3211,18 @@ function NeonName($$anchor, $$props) {
     }
     return [...name].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
   }
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(actorName, actor().name);
-  });
-  legacy_pre_effect(() => get(actorName), () => {
-    set(neonHTML, getNeonHtml(get(actorName)));
+  legacy_pre_effect(() => $characterStore(), () => {
+    const name = $characterStore().name;
+    set(neonHTML, getNeonHtml(name));
   });
   legacy_pre_effect_reset();
   init();
   var div = root();
   var node = child(div);
-  html(node, () => get(neonHTML));
+  html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 function initMainMasonryGrid(app, html2, data) {
   if (app.svelteApp) {
