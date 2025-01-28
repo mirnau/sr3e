@@ -2663,7 +2663,7 @@ function store_get(store, store_name, stores) {
   });
   if (entry.store !== store && !(IS_UNMOUNTED in stores)) {
     entry.unsubscribe();
-    entry.store = store;
+    entry.store = store ?? null;
     if (store == null) {
       entry.source.v = void 0;
       entry.unsubscribe = noop;
@@ -2679,7 +2679,7 @@ function store_get(store, store_name, stores) {
       is_synchronous_callback = false;
     }
   }
-  if (IS_UNMOUNTED in stores) {
+  if (store && IS_UNMOUNTED in stores) {
     return get(store);
   }
   return get$1(entry.source);
@@ -2699,10 +2699,6 @@ function setup_stores() {
     });
   }
   return [stores, cleanup];
-}
-function store_mutate(store, expression, new_value) {
-  store.set(new_value);
-  return expression;
 }
 function capture_store_binding(fn) {
   var previous_is_store_binding = is_store_binding;
@@ -3019,7 +3015,14 @@ function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y"
     css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
   };
 }
-const characterStore = writable({ name: "John Doe" });
+const actorStores = /* @__PURE__ */ new Map();
+function getActorStore(actorId, actorName) {
+  let initialState = { name: actorName };
+  if (!actorStores.has(actorId)) {
+    actorStores.set(actorId, writable(initialState));
+  }
+  return actorStores.get(actorId);
+}
 var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
@@ -3027,11 +3030,12 @@ var root$2 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="
 function Dossier($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
-  const $characterStore = () => store_get(characterStore, "$characterStore", $$stores);
+  const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
   const isDetailsOpen = mutable_state();
-  const name = mutable_state();
+  const fieldName = mutable_state();
   let actor = prop($$props, "actor", 24, () => ({}));
   let config = prop($$props, "config", 24, () => ({}));
+  const actorStore = getActorStore(actor().id, actor().name);
   onMount(() => {
     set(isDetailsOpen, actor().system.profile.isDetailsOpen);
     Log.inspect("Dossier actor", "SVELTE", actor());
@@ -3065,11 +3069,17 @@ function Dossier($$anchor, $$props) {
       }
     }).render(true);
   }
+  function updateStoreName(newName) {
+    actorStore.update((store) => {
+      store.name = newName;
+      return store;
+    });
+  }
   legacy_pre_effect(() => deep_read_state(actor()), () => {
     set(isDetailsOpen, actor().system.profile.isDetailsOpen);
   });
-  legacy_pre_effect(() => characterStore, () => {
-    set(name, characterStore);
+  legacy_pre_effect(() => $actorStore(), () => {
+    set(fieldName, $actorStore().name);
   });
   legacy_pre_effect_reset();
   init();
@@ -3137,8 +3147,9 @@ function Dossier($$anchor, $$props) {
         ],
         derived_safe_equal
       );
-      bind_value(input, () => $characterStore().name, ($$value) => store_mutate(characterStore, untrack($characterStore).name = $$value, untrack($characterStore)));
+      bind_value(input, () => get$1(fieldName), ($$value) => set(fieldName, $$value));
       event("blur", input, saveActorName);
+      event("input", input, (e) => updateStoreName(e.target.value));
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
       transition(1, div_3, () => slide, () => ({ duration: 400, easing: cubicInOut }));
       transition(2, div_3, () => slide, () => ({ duration: 300, easing: cubicInOut }));
@@ -3190,30 +3201,34 @@ var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
-  const $characterStore = () => store_get(characterStore, "$characterStore", $$stores);
-  prop($$props, "actor", 8);
+  const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
+  const name = mutable_state();
+  let actor = prop($$props, "actor", 8);
   let malfunctioningIndexes = [];
   let neonHTML = mutable_state();
+  const actorStore = getActorStore(actor().id, actor().name);
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  function getNeonHtml(name) {
+  function getNeonHtml(name2) {
     malfunctioningIndexes = [];
-    if (name.length < 4) {
-      malfunctioningIndexes.push(randomInRange(0, name.length - 1));
+    if (name2.length < 4) {
+      malfunctioningIndexes.push(randomInRange(0, name2.length - 1));
     } else {
-      const malfunctionInNplaces = name.length % 4;
+      const malfunctionInNplaces = name2.length % 4;
       for (let i = 0; i < malfunctionInNplaces; i++) {
         let index;
         do {
-          index = randomInRange(0, name.length - 1);
+          index = randomInRange(0, name2.length - 1);
         } while (malfunctioningIndexes.includes(index));
         malfunctioningIndexes.push(index);
       }
     }
-    return [...name].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
+    return [...name2].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
   }
-  legacy_pre_effect(() => $characterStore(), () => {
-    const name = $characterStore().name;
-    set(neonHTML, getNeonHtml(name));
+  legacy_pre_effect(() => $actorStore(), () => {
+    set(name, $actorStore().name);
+  });
+  legacy_pre_effect(() => get$1(name), () => {
+    set(neonHTML, getNeonHtml(get$1(name)));
   });
   legacy_pre_effect_reset();
   init();

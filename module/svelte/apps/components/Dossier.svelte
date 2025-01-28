@@ -2,13 +2,15 @@
   import { onMount } from "svelte";
   import { slide } from "svelte/transition";
   import Log from "../../../../Log";
-  import {characterStore} from "../../stores/characterStore";
+  import {getActorStore} from "../../stores/actorStoreRegistry";
   export let actor = {};
   export let config = {};
 
-  // Reactive store for isDetailsOpen, synchronized with the actor's flag
+  const actorStore = getActorStore(actor.id, actor.name);
+  
+  // Access reactive properties of the actor's store
   $: isDetailsOpen = actor.system.profile.isDetailsOpen;
-  $: name = characterStore;
+  $: fieldName = $actorStore.name;
 
   onMount(() => {
     isDetailsOpen = actor.system.profile.isDetailsOpen;
@@ -47,6 +49,13 @@
         actor.update({ img: path }, { render: true });
       },
     }).render(true);
+  }
+
+  function updateStoreName(newName) {
+    actorStore.update((store) => {
+      store.name = newName; // Update the name property in the store
+      return store; // Return the updated store value
+    });
   }
 
 </script>
@@ -90,8 +99,9 @@
             type="text"
             id="actor-name"
             name="name"
-            bind:value={$characterStore.name}
+            bind:value={fieldName}
             on:blur={saveActorName}
+            on:input={(e) => updateStoreName(e.target.value)} 
             on:keypress={(e) => e.key === "Enter" && saveActorName(e)}
           />
         </div>
