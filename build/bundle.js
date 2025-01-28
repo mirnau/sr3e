@@ -299,6 +299,9 @@ const PROPS_IS_RUNES = 1 << 1;
 const PROPS_IS_UPDATED = 1 << 2;
 const PROPS_IS_BINDABLE = 1 << 3;
 const PROPS_IS_LAZY_INITIAL = 1 << 4;
+const TRANSITION_IN = 1;
+const TRANSITION_OUT = 1 << 1;
+const TRANSITION_GLOBAL = 1 << 2;
 const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
 const UNINITIALIZED = Symbol();
 const PASSIVE_EVENTS = ["touchstart", "touchmove"];
@@ -315,6 +318,11 @@ var get_descriptors = Object.getOwnPropertyDescriptors;
 var object_prototype = Object.prototype;
 var array_prototype = Array.prototype;
 var get_prototype_of = Object.getPrototypeOf;
+function is_function(thing) {
+  return typeof thing === "function";
+}
+const noop = () => {
+};
 function run(fn) {
   return fn();
 }
@@ -1049,8 +1057,8 @@ function destroy_effect(effect2, remove_dom = true) {
   set_signal_status(effect2, DESTROYED);
   var transitions = effect2.transitions;
   if (transitions !== null) {
-    for (const transition of transitions) {
-      transition.stop();
+    for (const transition2 of transitions) {
+      transition2.stop();
     }
   }
   execute_effect_teardown(effect2);
@@ -1083,8 +1091,8 @@ function run_out_transitions(transitions, fn) {
   var remaining = transitions.length;
   if (remaining > 0) {
     var check = () => --remaining || fn();
-    for (var transition of transitions) {
-      transition.out(check);
+    for (var transition2 of transitions) {
+      transition2.out(check);
     }
   } else {
     fn();
@@ -1094,9 +1102,9 @@ function pause_children(effect2, transitions, local) {
   if ((effect2.f & INERT) !== 0) return;
   effect2.f ^= INERT;
   if (effect2.transitions !== null) {
-    for (const transition of effect2.transitions) {
-      if (transition.is_global || local) {
-        transitions.push(transition);
+    for (const transition2 of effect2.transitions) {
+      if (transition2.is_global || local) {
+        transitions.push(transition2);
       }
     }
   }
@@ -1129,9 +1137,9 @@ function resume_children(effect2, local) {
     child2 = sibling2;
   }
   if (effect2.transitions !== null) {
-    for (const transition of effect2.transitions) {
-      if (transition.is_global || local) {
-        transition.in();
+    for (const transition2 of effect2.transitions) {
+      if (transition2.is_global || local) {
+        transition2.in();
       }
     }
   }
@@ -1931,9 +1939,9 @@ function handle_event_propagation(event2) {
     set_active_effect(previous_effect);
   }
 }
-function create_fragment_from_html(html) {
+function create_fragment_from_html(html2) {
   var elem = document.createElement("template");
-  elem.innerHTML = html;
+  elem.innerHTML = html2;
   return elem.content;
 }
 function assign_nodes(start, end) {
@@ -1976,6 +1984,7 @@ function append(anchor, dom) {
     dom
   );
 }
+let should_intro = true;
 function set_text(text, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
   if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
@@ -2023,7 +2032,9 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
       if (events) {
         props.$$events = events;
       }
+      should_intro = intro;
       component = Component(anchor_node, props) || {};
+      should_intro = true;
       if (context) {
         pop();
       }
@@ -2106,6 +2117,34 @@ function if_block(node, fn, elseif = false) {
     }
   }, flags);
 }
+function html(node, get_value, svg, mathml, skip_warning) {
+  var anchor = node;
+  var value = "";
+  var effect2;
+  block(() => {
+    if (value === (value = get_value() ?? "")) {
+      return;
+    }
+    if (effect2 !== void 0) {
+      destroy_effect(effect2);
+      effect2 = void 0;
+    }
+    if (value === "") return;
+    effect2 = branch(() => {
+      var html2 = value + "";
+      var node2 = create_fragment_from_html(html2);
+      assign_nodes(
+        /** @type {TemplateNode} */
+        /* @__PURE__ */ get_first_child(node2),
+        /** @type {TemplateNode} */
+        node2.lastChild
+      );
+      {
+        anchor.before(node2);
+      }
+    });
+  });
+}
 function set_attribute(element, attribute, value, skip_warning) {
   var attributes = element.__attributes ?? (element.__attributes = {});
   if (attributes[attribute] === (attributes[attribute] = value)) return;
@@ -2141,6 +2180,270 @@ function get_setters(element) {
     proto = get_prototype_of(proto);
   }
   return setters;
+}
+const now = () => performance.now();
+const raf = {
+  // don't access requestAnimationFrame eagerly outside method
+  // this allows basic testing of user code without JSDOM
+  // bunder will eval and remove ternary when the user's app is built
+  tick: (
+    /** @param {any} _ */
+    (_) => requestAnimationFrame(_)
+  ),
+  now: () => now(),
+  tasks: /* @__PURE__ */ new Set()
+};
+function run_tasks() {
+  const now2 = raf.now();
+  raf.tasks.forEach((task) => {
+    if (!task.c(now2)) {
+      raf.tasks.delete(task);
+      task.f();
+    }
+  });
+  if (raf.tasks.size !== 0) {
+    raf.tick(run_tasks);
+  }
+}
+function loop(callback) {
+  let task;
+  if (raf.tasks.size === 0) {
+    raf.tick(run_tasks);
+  }
+  return {
+    promise: new Promise((fulfill) => {
+      raf.tasks.add(task = { c: callback, f: fulfill });
+    }),
+    abort() {
+      raf.tasks.delete(task);
+    }
+  };
+}
+function dispatch_event(element, type) {
+  element.dispatchEvent(new CustomEvent(type));
+}
+function css_property_to_camelcase(style) {
+  if (style === "float") return "cssFloat";
+  if (style === "offset") return "cssOffset";
+  if (style.startsWith("--")) return style;
+  const parts = style.split("-");
+  if (parts.length === 1) return parts[0];
+  return parts[0] + parts.slice(1).map(
+    /** @param {any} word */
+    (word) => word[0].toUpperCase() + word.slice(1)
+  ).join("");
+}
+function css_to_keyframe(css) {
+  const keyframe = {};
+  const parts = css.split(";");
+  for (const part of parts) {
+    const [property, value] = part.split(":");
+    if (!property || value === void 0) break;
+    const formatted_property = css_property_to_camelcase(property.trim());
+    keyframe[formatted_property] = value.trim();
+  }
+  return keyframe;
+}
+const linear = (t) => t;
+function transition(flags, element, get_fn, get_params) {
+  var is_intro = (flags & TRANSITION_IN) !== 0;
+  var is_outro = (flags & TRANSITION_OUT) !== 0;
+  var is_both = is_intro && is_outro;
+  var is_global = (flags & TRANSITION_GLOBAL) !== 0;
+  var direction = is_both ? "both" : is_intro ? "in" : "out";
+  var current_options;
+  var inert = element.inert;
+  var overflow = element.style.overflow;
+  var intro;
+  var outro;
+  function get_options() {
+    var previous_reaction = active_reaction;
+    var previous_effect = active_effect;
+    set_active_reaction(null);
+    set_active_effect(null);
+    try {
+      return current_options ?? (current_options = get_fn()(element, (get_params == null ? void 0 : get_params()) ?? /** @type {P} */
+      {}, {
+        direction
+      }));
+    } finally {
+      set_active_reaction(previous_reaction);
+      set_active_effect(previous_effect);
+    }
+  }
+  var transition2 = {
+    is_global,
+    in() {
+      var _a;
+      element.inert = inert;
+      if (!is_intro) {
+        outro == null ? void 0 : outro.abort();
+        (_a = outro == null ? void 0 : outro.reset) == null ? void 0 : _a.call(outro);
+        return;
+      }
+      if (!is_outro) {
+        intro == null ? void 0 : intro.abort();
+      }
+      dispatch_event(element, "introstart");
+      intro = animate(element, get_options(), outro, 1, () => {
+        dispatch_event(element, "introend");
+        intro == null ? void 0 : intro.abort();
+        intro = current_options = void 0;
+        element.style.overflow = overflow;
+      });
+    },
+    out(fn) {
+      if (!is_outro) {
+        fn == null ? void 0 : fn();
+        current_options = void 0;
+        return;
+      }
+      element.inert = true;
+      dispatch_event(element, "outrostart");
+      outro = animate(element, get_options(), intro, 0, () => {
+        dispatch_event(element, "outroend");
+        fn == null ? void 0 : fn();
+      });
+    },
+    stop: () => {
+      intro == null ? void 0 : intro.abort();
+      outro == null ? void 0 : outro.abort();
+    }
+  };
+  var e = (
+    /** @type {Effect} */
+    active_effect
+  );
+  (e.transitions ?? (e.transitions = [])).push(transition2);
+  if (is_intro && should_intro) {
+    var run2 = is_global;
+    if (!run2) {
+      var block2 = (
+        /** @type {Effect | null} */
+        e.parent
+      );
+      while (block2 && (block2.f & EFFECT_TRANSPARENT) !== 0) {
+        while (block2 = block2.parent) {
+          if ((block2.f & BLOCK_EFFECT) !== 0) break;
+        }
+      }
+      run2 = !block2 || (block2.f & EFFECT_RAN) !== 0;
+    }
+    if (run2) {
+      effect(() => {
+        untrack(() => transition2.in());
+      });
+    }
+  }
+}
+function animate(element, options, counterpart, t2, on_finish) {
+  var is_intro = t2 === 1;
+  if (is_function(options)) {
+    var a;
+    var aborted = false;
+    queue_micro_task(() => {
+      if (aborted) return;
+      var o = options({ direction: is_intro ? "in" : "out" });
+      a = animate(element, o, counterpart, t2, on_finish);
+    });
+    return {
+      abort: () => {
+        aborted = true;
+        a == null ? void 0 : a.abort();
+      },
+      deactivate: () => a.deactivate(),
+      reset: () => a.reset(),
+      t: () => a.t()
+    };
+  }
+  counterpart == null ? void 0 : counterpart.deactivate();
+  if (!(options == null ? void 0 : options.duration)) {
+    on_finish();
+    return {
+      abort: noop,
+      deactivate: noop,
+      reset: noop,
+      t: () => t2
+    };
+  }
+  const { delay = 0, css, tick, easing = linear } = options;
+  var keyframes = [];
+  if (is_intro && counterpart === void 0) {
+    if (tick) {
+      tick(0, 1);
+    }
+    if (css) {
+      var styles = css_to_keyframe(css(0, 1));
+      keyframes.push(styles, styles);
+    }
+  }
+  var get_t = () => 1 - t2;
+  var animation = element.animate(keyframes, { duration: delay });
+  animation.onfinish = () => {
+    var t1 = (counterpart == null ? void 0 : counterpart.t()) ?? 1 - t2;
+    counterpart == null ? void 0 : counterpart.abort();
+    var delta = t2 - t1;
+    var duration = (
+      /** @type {number} */
+      options.duration * Math.abs(delta)
+    );
+    var keyframes2 = [];
+    if (duration > 0) {
+      var needs_overflow_hidden = false;
+      if (css) {
+        var n = Math.ceil(duration / (1e3 / 60));
+        for (var i = 0; i <= n; i += 1) {
+          var t = t1 + delta * easing(i / n);
+          var styles2 = css_to_keyframe(css(t, 1 - t));
+          keyframes2.push(styles2);
+          needs_overflow_hidden || (needs_overflow_hidden = styles2.overflow === "hidden");
+        }
+      }
+      if (needs_overflow_hidden) {
+        element.style.overflow = "hidden";
+      }
+      get_t = () => {
+        var time = (
+          /** @type {number} */
+          /** @type {globalThis.Animation} */
+          animation.currentTime
+        );
+        return t1 + delta * easing(time / duration);
+      };
+      if (tick) {
+        loop(() => {
+          if (animation.playState !== "running") return false;
+          var t3 = get_t();
+          tick(t3, 1 - t3);
+          return true;
+        });
+      }
+    }
+    animation = element.animate(keyframes2, { duration, fill: "forwards" });
+    animation.onfinish = () => {
+      get_t = () => t2;
+      tick == null ? void 0 : tick(t2, 1 - t2);
+      on_finish();
+    };
+  };
+  return {
+    abort: () => {
+      if (animation) {
+        animation.cancel();
+        animation.effect = null;
+        animation.onfinish = noop;
+      }
+    },
+    deactivate: () => {
+      on_finish = noop;
+    },
+    reset: () => {
+      if (t2 === 0) {
+        tick == null ? void 0 : tick(1, 0);
+      }
+    },
+    t: () => get_t()
+  };
 }
 function bind_value(input, get2, set2 = get2) {
   var runes = is_runes();
@@ -2566,9 +2869,43 @@ function initializeMasonryLayout(masonryResizeConfig) {
   actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
 }
 enable_legacy_mode_flag();
+function cubic_out(t) {
+  const f = t - 1;
+  return f * f * f + 1;
+}
+function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
+  const style = getComputedStyle(node);
+  const opacity = +style.opacity;
+  const primary_property = axis === "y" ? "height" : "width";
+  const primary_property_value = parseFloat(style[primary_property]);
+  const secondary_properties = axis === "y" ? ["top", "bottom"] : ["left", "right"];
+  const capitalized_secondary_properties = secondary_properties.map(
+    (e) => (
+      /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
+      `${e[0].toUpperCase()}${e.slice(1)}`
+    )
+  );
+  const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
+  const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
+  const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
+  const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
+  const border_width_start_value = parseFloat(
+    style[`border${capitalized_secondary_properties[0]}Width`]
+  );
+  const border_width_end_value = parseFloat(
+    style[`border${capitalized_secondary_properties[1]}Width`]
+  );
+  return {
+    delay,
+    duration,
+    easing,
+    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
+  };
+}
 var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img data-edit="img"></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="dossier"><!> <details><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></details></div>`);
+var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="dossier-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <!></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
   const isDetailsOpen = mutable_state();
@@ -2594,12 +2931,25 @@ function Dossier($$anchor, $$props) {
   function multiply(value, factor) {
     return (value * factor).toFixed(2);
   }
+  function cubicInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function openFilePicker() {
+    new FilePicker({
+      type: "image",
+      current: actor().img,
+      // current image path
+      callback: (path) => {
+        actor().update({ img: path }, { render: true });
+      }
+    }).render(true);
+  }
   legacy_pre_effect(() => deep_read_state(actor()), () => {
     set(isDetailsOpen, actor().system.profile.isDetailsOpen);
   });
   legacy_pre_effect_reset();
   init();
-  var div = root$1();
+  var div = root$2();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -2614,6 +2964,7 @@ function Dossier($$anchor, $$props) {
         set_attribute(img, "alt", actor().name);
         set_attribute(img, "title", actor().name);
       });
+      event("click", img, openFilePicker);
       append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
@@ -2624,50 +2975,62 @@ function Dossier($$anchor, $$props) {
   var details = sibling(node, 2);
   var summary = child(details);
   var text = sibling(child(summary));
-  var div_3 = sibling(summary, 2);
-  var input = child(div_3);
-  var div_4 = sibling(div_3, 2);
-  var h3 = child(div_4);
-  var text_1 = child(h3);
-  var span = sibling(text_1);
-  var text_2 = child(span);
-  var div_5 = sibling(div_4, 2);
-  var h3_1 = child(div_5);
-  var text_3 = child(h3_1);
-  var div_6 = sibling(div_5, 2);
-  var h3_2 = child(div_6);
-  var text_4 = child(h3_2);
-  var div_7 = sibling(div_6, 2);
-  var h3_3 = child(div_7);
-  var text_5 = child(h3_3);
-  var a = sibling(div_7, 2);
-  var h3_4 = child(a);
-  var text_6 = child(h3_4);
-  template_effect(
-    ($0, $1) => {
-      set_text(text, ` ${config().sheet.details ?? ""}`);
-      set_text(text_1, `${config().actor.character.metahuman ?? ""}: `);
-      set_text(text_2, actor().system.profile.metaHumanity);
-      set_text(text_3, `${config().actor.character.age ?? ""}: ${actor().system.profile.age ?? ""}`);
-      set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm (${$0 ?? ""} feet)`);
-      set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$1 ?? ""} stones)`);
-      set_text(text_6, config().sheet.viewbackground);
-    },
-    [
-      () => multiply(actor().system.profile.height, 0.0328084),
-      () => multiply(actor().system.profile.weight, 0.157473)
-    ],
-    derived_safe_equal
-  );
-  bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
-  event("blur", input, saveActorName);
-  event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+  var node_1 = sibling(summary, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div_3 = root_3();
+      var div_4 = child(div_3);
+      var input = child(div_4);
+      var div_5 = sibling(div_4, 2);
+      var h3 = child(div_5);
+      var text_1 = child(h3);
+      var span = sibling(text_1);
+      var text_2 = child(span);
+      var div_6 = sibling(div_5, 2);
+      var h3_1 = child(div_6);
+      var text_3 = child(h3_1);
+      var div_7 = sibling(div_6, 2);
+      var h3_2 = child(div_7);
+      var text_4 = child(h3_2);
+      var div_8 = sibling(div_7, 2);
+      var h3_3 = child(div_8);
+      var text_5 = child(h3_3);
+      var a = sibling(div_8, 2);
+      var h3_4 = child(a);
+      var text_6 = child(h3_4);
+      template_effect(
+        ($0, $1) => {
+          set_text(text_1, `${config().actor.character.metahuman ?? ""}: `);
+          set_text(text_2, actor().system.profile.metaHumanity);
+          set_text(text_3, `${config().actor.character.age ?? ""}: ${actor().system.profile.age ?? ""}`);
+          set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm (${$0 ?? ""} feet)`);
+          set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$1 ?? ""} stones)`);
+          set_text(text_6, config().sheet.viewbackground);
+        },
+        [
+          () => multiply(actor().system.profile.height, 0.0328084),
+          () => multiply(actor().system.profile.weight, 0.157473)
+        ],
+        derived_safe_equal
+      );
+      bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
+      event("blur", input, saveActorName);
+      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+      transition(1, div_3, () => slide, () => ({ duration: 400, easing: cubicInOut }));
+      transition(2, div_3, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      append($$anchor2, div_3);
+    };
+    if_block(node_1, ($$render) => {
+      if (get(isDetailsOpen)) $$render(consequent_1);
+    });
+  }
+  template_effect(() => set_text(text, ` ${config().sheet.details ?? ""}`));
   bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get(isDetailsOpen));
   event("toggle", details, toggleDetails);
   append($$anchor, div);
   pop();
 }
-var root = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   let actor = $$props.app.actor;
@@ -2684,7 +3047,7 @@ function CharacterSheetApp($$anchor, $$props) {
     initializeMasonryLayout(args);
     Log.success("Masonry layout initialized", "CharacterSheetApp.svelte");
   });
-  var div = root();
+  var div = root$1();
   var div_1 = sibling(child(div), 4);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -2698,10 +3061,55 @@ function CharacterSheetApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-function initMainMasonryGrid(app, html, data) {
+var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+function NeonName($$anchor, $$props) {
+  push($$props, false);
+  const actorName = mutable_state();
+  const neonHTML = mutable_state();
+  let actor = prop($$props, "actor", 8);
+  let malfunctioningIndexes = [];
+  const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  function getNeonHtml(name) {
+    malfunctioningIndexes = [];
+    if (name.length < 4) {
+      malfunctioningIndexes.push(randomInRange(0, name.length - 1));
+    } else {
+      const malfunctionInNplaces = name.length % 4;
+      for (let i = 0; i < malfunctionInNplaces; i++) {
+        let index;
+        do {
+          index = randomInRange(0, name.length - 1);
+        } while (malfunctioningIndexes.includes(index));
+        malfunctioningIndexes.push(index);
+      }
+    }
+    return [...name].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
+  }
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    set(actorName, actor().name);
+  });
+  legacy_pre_effect(() => get(actorName), () => {
+    set(neonHTML, getNeonHtml(get(actorName)));
+  });
+  legacy_pre_effect_reset();
+  init();
+  var div = root();
+  var node = child(div);
+  html(node, () => get(neonHTML));
+  append($$anchor, div);
+  pop();
+}
+function initMainMasonryGrid(app, html2, data) {
   if (app.svelteApp) {
     unmount(app.svelteApp);
   }
+  if (app.neonInjection) {
+    unmount(app.neonInjection);
+  }
+  _initSheet(app);
+  _injectNeonName(app);
+}
+function _initSheet(app) {
   const container = app.element[0].querySelector(".window-content");
   container.innerHTML = "";
   app.svelteApp = mount(CharacterSheetApp, {
@@ -2714,13 +3122,25 @@ function initMainMasonryGrid(app, html, data) {
   });
   Log.success("Svelte App Initialized", CharacterActorSheet.name);
 }
+function _injectNeonName(app) {
+  const header = app.element[0].querySelector("header.window-header");
+  const placeholder = document.createElement("div");
+  placeholder.classList.add("neon-name-position");
+  header.insertAdjacentElement("afterend", placeholder);
+  app.neonInjection = mount(NeonName, {
+    target: placeholder,
+    props: {
+      actor: app.actor
+    }
+  });
+  Log.success("Neon Name Initialized", CharacterActorSheet.name);
+}
 function closeMainMasonryGrid(app) {
   if (app.svelteApp) {
     app.actor.mainLayoutResizeObserver.disconnect();
     app.actor.mainLayoutResizeObserver = null;
     Log.success("Masonry observer disconnected.", CharacterActorSheet.name);
     unmount(app.svelteApp);
-    app.svelteApp.destroy();
     console.info("Svelte App Destroyed.", CharacterActorSheet.name);
   }
 }

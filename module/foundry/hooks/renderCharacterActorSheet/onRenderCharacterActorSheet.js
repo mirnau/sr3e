@@ -1,6 +1,7 @@
 import Log from "../../../../Log";
 import CharacterActorSheet from "../../sheets/CharacterActorSheet.js";
 import CharacterSheetApp from "../../../svelte/apps/CharacterSheetApp.svelte";
+import NeonName  from "../../../svelte/apps/injections/NeonName.svelte"
 import { mount, unmount } from "svelte";
 
 export function initMainMasonryGrid(app, html, data) {
@@ -8,7 +9,16 @@ export function initMainMasonryGrid(app, html, data) {
   if(app.svelteApp) {
     unmount(app.svelteApp);
   }
+
+  if(app.neonInjection) {
+    unmount(app.neonInjection);
+  }
   
+  _initSheet(app);
+  _injectNeonName(app);
+}
+
+function _initSheet(app) {
   const container = app.element[0].querySelector(".window-content");
 
   container.innerHTML = '';
@@ -21,8 +31,25 @@ export function initMainMasonryGrid(app, html, data) {
       jQueryObject: app.element
     },
   });
-  
+
   Log.success("Svelte App Initialized", CharacterActorSheet.name);
+}
+
+function _injectNeonName(app) {
+  const header = app.element[0].querySelector("header.window-header");
+  const placeholder = document.createElement("div");
+  placeholder.classList.add("neon-name-position");
+  header.insertAdjacentElement("afterend", placeholder);
+
+
+  app.neonInjection =  mount(NeonName, {
+    target: placeholder,
+    props: {
+      actor: app.actor,
+    },
+  })
+
+  Log.success("Neon Name Initialized", CharacterActorSheet.name);
 }
 
 export function closeMainMasonryGrid(app) {
@@ -35,7 +62,6 @@ export function closeMainMasonryGrid(app) {
     Log.success("Masonry observer disconnected.", CharacterActorSheet.name);
 
     unmount(app.svelteApp);
-    app.svelteApp.destroy();
 
     console.info("Svelte App Destroyed.", CharacterActorSheet.name);
   }

@@ -321,6 +321,181 @@
   box-shadow: inset 0 0 8px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.sr3e.sheet.character .neon-name-position {
+  position: absolute;
+  top: -3.3rem;
+  left: 1rem;
+  z-index: 100;
+}
+.sr3e.sheet.character .neon-name-position .neon-name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Add more as needed or loop dynamically with LESS/SASS */
+}
+.sr3e.sheet.character .neon-name-position .neon-name div {
+  font-family: 'Neonderthaw', serif;
+  font-size: 5rem;
+  color: #ff0095;
+  text-shadow: 0 0 10px blueviolet, 0 0 20px #ff0033, 0 0 40px blue;
+  animation: glow 1.5s infinite alternate;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc {
+  color: #ff0095;
+  text-shadow: 0 0 10px blueviolet, 0 0 20px #ff0033, 0 0 40px blue;
+  animation: flicker 3.5s infinite alternate;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(2) {
+  animation-delay: 0s;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(7) {
+  animation-delay: 0.7s;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(10) {
+  animation-delay: 1.2s;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(14) {
+  animation-delay: 1.8s;
+}
+.sr3e.sheet.character .neon-name-position .neon-name .malfunc:nth-child(21) {
+  animation-delay: 1.8s;
+}
+@keyframes glow {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes flicker {
+  0% {
+    opacity: 0.2;
+  }
+  2.5% {
+    opacity: 1;
+  }
+  5% {
+    opacity: 0.5;
+  }
+  7.5% {
+    opacity: 0.7;
+  }
+  10% {
+    opacity: 1;
+  }
+  12.5% {
+    opacity: 1;
+  }
+  15% {
+    opacity: 1;
+  }
+  17.5% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  22.5% {
+    opacity: 0.2;
+  }
+  25% {
+    opacity: 0.2;
+  }
+  27.5% {
+    opacity: 0.2;
+  }
+  30% {
+    opacity: 0.2;
+  }
+  32.5% {
+    opacity: 0.2;
+  }
+  35% {
+    opacity: 0.2;
+  }
+  37.5% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 0.2;
+  }
+  42.5% {
+    opacity: 0.2;
+  }
+  45% {
+    opacity: 0.5;
+  }
+  47.5% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  52.5% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  57.5% {
+    opacity: 0.8;
+  }
+  60% {
+    opacity: 0.5;
+  }
+  62.5% {
+    opacity: 0.7;
+  }
+  65% {
+    opacity: 1;
+  }
+  67.5% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  72.5% {
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  77.5% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 1;
+  }
+  82.5% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  87.5% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  92.5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  97.5% {
+    opacity: 0.25;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
 .sr3e.sheet.character {
   min-width: calc(20rem + 0.25rem * 3);
 }

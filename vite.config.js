@@ -3,15 +3,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
   plugins: [
-    svelte({
-      onwarn: (warning, handler) => {
-        // Suppress specific accessibility warnings
-        if (["a11y_missing_attribute"].includes(warning.code)) {
-          return;
-        }
-        handler(warning);
-      }
-    })
+    svelte()
   ],
   build: {
     sourcemap: true,
