@@ -1,17 +1,16 @@
 {
-    "sr3e": {
-      "sheet": {
-        "details": "Details",
-        "viewbackground": "View Background"
-      },
-      "actor": {
-        "character": {
-          "age": "Age",
-          "height": "Height",
-          "weight": "Weight",
-          "metahuman": "Metahuman"
-        }
+"sr3e": {
+    "sheet": {
+      "details": "Details",
+      "viewbackground": "View Background"
+    },
+    "actor": {
+      "character": {
+        "age": "Age",
+        "height": "Height",
+        "weight": "Weight",
+        "metahuman": "Metahuman"
       }
     }
   }
-  
+}

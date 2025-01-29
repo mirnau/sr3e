@@ -1,40 +1,81 @@
 import Log from "./Log.js";
-import { sr3e } from "./module/foundry/config.js";
 import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
-import { initActorFlags } from "./module/foundry/hooks/preCreateActor/onPreCreateActor.js";
+import MetahumanModel from "./module/models/item/MetahumanModel.js";
+import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
+import MetahumanApp from "./module/svelte/apps/MetahumanApp.svelte";
+import { mount, unmount } from "svelte";
+import { sr3e } from "./module/foundry/config.js";
+import { 
+  hooks, 
+  flags 
+} from "./module/foundry/services/commonConsts.js";
 import {
   closeMainMasonryGrid,
   initMainMasonryGrid
 } from "./module/foundry/hooks/renderCharacterActorSheet/onRenderCharacterActorSheet.js";
-import { hooks } from "./module/foundry/services/commonConsts.js";
-
 
 function registerHooks() {
-
-  //Hooks.on(hooks.ceateActor, initActorFlags);
 
   Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
 
+  Hooks.on(hooks.renderMetahumanItemSheet, (app, html, data) => {
+
+      if(app.svelteApp) {
+        unmount(app.svelteApp);
+      }
+
+      const container = app.element[0].querySelector(".window-content");
+
+      container.innerHTML = '';
+    
+      app.svelteApp = mount(MetahumanApp, {
+        target: container,
+        props: {
+        },
+      });
+  });
+
+
   Hooks.once(hooks.init, () => {
+    
+    configureProject();
+    
+    registerActorTypes([
+      { type: "character", model: CharacterModel, sheet: CharacterActorSheet },
+    ]);
 
-    console.log("✅ INIT Hook Fired: Registering Custom Sheets");
-
-    CONFIG.sr3e = sr3e;
-
-    Actors.unregisterSheet("core", ActorSheet);
-
-    CONFIG.Actor.dataModels = {
-      "character": CharacterModel,
-    };
-
-    Actors.registerSheet("sr3e", CharacterActorSheet, { types: ["character"], makeDefault: true });
-
-    Log.success("Hooks Registered", "sr3e.js");
+    registerItemTypes([
+      { type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
+    ]);
+    
     Log.success("Initialization Completed", "sr3e.js");
-
+    
   });
 }
 
 registerHooks();
+
+function configureProject() {
+  CONFIG.sr3e = sr3e;
+  CONFIG.Actor.dataModels = {};
+  CONFIG.Item.dataModels = {};
+
+  Actors.unregisterSheet("core", ActorSheet);
+  Items.unregisterSheet("core", ItemSheet);
+}
+
+function registerActorTypes(actorsTypes) {
+  actorsTypes.forEach(({ type, model, sheet }) => {
+    CONFIG.Actor.dataModels[type] = model;
+    Actors.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
+  });
+}
+
+function registerItemTypes(itemTypes) {
+  itemTypes.forEach(({ type, model, sheet }) => {
+    CONFIG.Item.dataModels[type] = model;
+    Items.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
+  });
+}

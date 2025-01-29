@@ -1,6 +1,8 @@
 export const hooks = {
   renderCharacterActorSheet: "renderCharacterActorSheet",
   closeCharacterActorSheet: "closeCharacterActorSheet",
+  renderMetahumanItemSheet: "renderMetahumanItemSheet",
+  closeMetahumanItemSheet: "closeMetahumanItemSheet",
   preCreateActor: "preCreateActor",
   createActor: "createActor",
   init: "init",

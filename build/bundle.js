@@ -39,19 +39,6 @@ class Log {
     }
   }
 }
-const sr3e = {};
-sr3e.sheet = {
-  details: "sr3e.sheet.details",
-  viewbackground: "sr3e.sheet.viewbackground"
-};
-sr3e.actor = {
-  character: {
-    age: "age",
-    height: "height",
-    weight: "weight",
-    metahuman: "metahuman"
-  }
-};
 class Profile extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
@@ -279,21 +266,192 @@ class CharacterActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["sr3e", "sheet", "character"],
-      template: "systems/sr3e/templates/sheet/actor/character-sheet.html"
+      template: "systems/sr3e/default.html"
     });
   }
 }
-const hooks = {
-  renderCharacterActorSheet: "renderCharacterActorSheet",
-  closeCharacterActorSheet: "closeCharacterActorSheet",
-  preCreateActor: "preCreateActor",
-  createActor: "createActor",
-  init: "init",
-  ready: "ready"
-};
+class MetahumanModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      // Lifespan
+      lifespan: new foundry.data.fields.SchemaField({
+        min: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        average: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        max: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Physical: height & weight
+      physical: new foundry.data.fields.SchemaField({
+        height: new foundry.data.fields.SchemaField({
+          min: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          average: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          max: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          })
+        }),
+        weight: new foundry.data.fields.SchemaField({
+          min: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          average: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          max: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          })
+        })
+      }),
+      // Modifiers
+      modifiers: new foundry.data.fields.SchemaField({
+        strength: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        quickness: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        body: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        charisma: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        intelligence: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        willpower: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Attribute limits
+      attributeLimits: new foundry.data.fields.SchemaField({
+        strength: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        quickness: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        body: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        charisma: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        intelligence: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        willpower: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Karma advancement fraction
+      karmaAdvancementFraction: new foundry.data.fields.SchemaField({
+        value: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Vision
+      vision: new foundry.data.fields.SchemaField({
+        visionType: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
+        }),
+        description: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
+        }),
+        rules: new foundry.data.fields.SchemaField({
+          darknessPenaltyNegation: new foundry.data.fields.StringField({
+            required: true,
+            initial: ""
+          })
+        })
+      }),
+      // Priority
+      priority: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
+      }),
+      // Description
+      description: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
+      })
+    };
+  }
+}
+class MetahumanItemSheet extends ItemSheet {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      template: "systems/sr3e/default.html",
+      width: "auto",
+      height: "auto",
+      classes: ["sr3d", "sheet", "item"],
+      resizable: false
+    });
+  }
+}
 const PUBLIC_VERSION = "5";
 if (typeof window !== "undefined")
   (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
+let legacy_mode_flag = false;
+let tracing_mode_flag = false;
+function enable_legacy_mode_flag() {
+  legacy_mode_flag = true;
+}
+enable_legacy_mode_flag();
 const PROPS_IS_IMMUTABLE = 1;
 const PROPS_IS_RUNES = 1 << 1;
 const PROPS_IS_UPDATED = 1 << 2;
@@ -407,11 +565,6 @@ function state_unsafe_mutation() {
     throw new Error(`https://svelte.dev/e/state_unsafe_mutation`);
   }
 }
-let legacy_mode_flag = false;
-let tracing_mode_flag = false;
-function enable_legacy_mode_flag() {
-  legacy_mode_flag = true;
-}
 function source(v, stack) {
   var signal = {
     f: 0,
@@ -481,12 +634,12 @@ function mark_reactions(signal, status) {
   var length = reactions.length;
   for (var i = 0; i < length; i++) {
     var reaction = reactions[i];
-    var flags = reaction.f;
-    if ((flags & DIRTY) !== 0) continue;
+    var flags2 = reaction.f;
+    if ((flags2 & DIRTY) !== 0) continue;
     if (!runes && reaction === active_effect) continue;
     set_signal_status(reaction, status);
-    if ((flags & (CLEAN | UNOWNED)) !== 0) {
-      if ((flags & DERIVED) !== 0) {
+    if ((flags2 & (CLEAN | UNOWNED)) !== 0) {
+      if ((flags2 & DERIVED) !== 0) {
         mark_reactions(
           /** @type {Derived} */
           reaction,
@@ -727,9 +880,9 @@ function sibling(node, count = 1, is_text = false) {
 }
 // @__NO_SIDE_EFFECTS__
 function derived(fn) {
-  var flags = DERIVED | DIRTY;
+  var flags2 = DERIVED | DIRTY;
   if (active_effect === null) {
-    flags |= UNOWNED;
+    flags2 |= UNOWNED;
   } else {
     active_effect.f |= EFFECT_HAS_DERIVED;
   }
@@ -742,7 +895,7 @@ function derived(fn) {
     ctx: component_context,
     deps: null,
     equals,
-    f: flags,
+    f: flags2,
     fn,
     reactions: null,
     rv: 0,
@@ -987,8 +1140,8 @@ function template_effect(fn, thunks = [], d = derived) {
   const effect2 = () => fn(...deriveds.map(get$1));
   return block(effect2);
 }
-function block(fn, flags = 0) {
-  return create_effect(RENDER_EFFECT | BLOCK_EFFECT | flags, fn, true);
+function block(fn, flags2 = 0) {
+  return create_effect(RENDER_EFFECT | BLOCK_EFFECT | flags2, fn, true);
 }
 function branch(fn, push2 = true) {
   return create_effect(RENDER_EFFECT | BRANCH_EFFECT, fn, true, push2);
@@ -1209,17 +1362,17 @@ function is_runes() {
 }
 function check_dirtiness(reaction) {
   var _a;
-  var flags = reaction.f;
-  if ((flags & DIRTY) !== 0) {
+  var flags2 = reaction.f;
+  if ((flags2 & DIRTY) !== 0) {
     return true;
   }
-  if ((flags & MAYBE_DIRTY) !== 0) {
+  if ((flags2 & MAYBE_DIRTY) !== 0) {
     var dependencies = reaction.deps;
-    var is_unowned = (flags & UNOWNED) !== 0;
+    var is_unowned = (flags2 & UNOWNED) !== 0;
     if (dependencies !== null) {
       var i;
       var dependency;
-      var is_disconnected = (flags & DISCONNECTED) !== 0;
+      var is_disconnected = (flags2 & DISCONNECTED) !== 0;
       var is_unowned_connected = is_unowned && active_effect !== null && !skip_reaction;
       var length = dependencies.length;
       if (is_disconnected || is_unowned_connected) {
@@ -1327,13 +1480,13 @@ function update_reaction(reaction) {
   var prev_derived_sources = derived_sources;
   var previous_component_context = component_context;
   var previous_untracking = untracking;
-  var flags = reaction.f;
+  var flags2 = reaction.f;
   new_deps = /** @type {null | Value[]} */
   null;
   skipped_deps = 0;
   untracked_writes = null;
-  active_reaction = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) === 0 ? reaction : null;
-  skip_reaction = !is_flushing_effect && (flags & UNOWNED) !== 0;
+  active_reaction = (flags2 & (BRANCH_EFFECT | ROOT_EFFECT)) === 0 ? reaction : null;
+  skip_reaction = !is_flushing_effect && (flags2 & UNOWNED) !== 0;
   derived_sources = null;
   component_context = reaction.ctx;
   untracking = false;
@@ -1426,8 +1579,8 @@ function remove_reactions(signal, start_index) {
   }
 }
 function update_effect(effect2) {
-  var flags = effect2.f;
-  if ((flags & DESTROYED) !== 0) {
+  var flags2 = effect2.f;
+  if ((flags2 & DESTROYED) !== 0) {
     return;
   }
   set_signal_status(effect2, CLEAN);
@@ -1435,7 +1588,7 @@ function update_effect(effect2) {
   var previous_component_context = component_context;
   active_effect = effect2;
   try {
-    if ((flags & BLOCK_EFFECT) !== 0) {
+    if ((flags2 & BLOCK_EFFECT) !== 0) {
       destroy_block_effect_children(effect2);
     } else {
       destroy_effect_children(effect2);
@@ -1541,9 +1694,9 @@ function schedule_effect(signal) {
   var effect2 = signal;
   while (effect2.parent !== null) {
     effect2 = effect2.parent;
-    var flags = effect2.f;
-    if ((flags & (ROOT_EFFECT | BRANCH_EFFECT)) !== 0) {
-      if ((flags & CLEAN) === 0) return;
+    var flags2 = effect2.f;
+    if ((flags2 & (ROOT_EFFECT | BRANCH_EFFECT)) !== 0) {
+      if ((flags2 & CLEAN) === 0) return;
       effect2.f ^= CLEAN;
     }
   }
@@ -1553,12 +1706,12 @@ function process_effects(effect2, collected_effects) {
   var current_effect = effect2.first;
   var effects = [];
   main_loop: while (current_effect !== null) {
-    var flags = current_effect.f;
-    var is_branch = (flags & BRANCH_EFFECT) !== 0;
-    var is_skippable_branch = is_branch && (flags & CLEAN) !== 0;
+    var flags2 = current_effect.f;
+    var is_branch = (flags2 & BRANCH_EFFECT) !== 0;
+    var is_skippable_branch = is_branch && (flags2 & CLEAN) !== 0;
     var sibling2 = current_effect.next;
-    if (!is_skippable_branch && (flags & INERT) === 0) {
-      if ((flags & RENDER_EFFECT) !== 0) {
+    if (!is_skippable_branch && (flags2 & INERT) === 0) {
+      if ((flags2 & RENDER_EFFECT) !== 0) {
         if (is_branch) {
           current_effect.f ^= CLEAN;
         } else {
@@ -1575,7 +1728,7 @@ function process_effects(effect2, collected_effects) {
           current_effect = child2;
           continue;
         }
-      } else if ((flags & EFFECT) !== 0) {
+      } else if ((flags2 & EFFECT) !== 0) {
         effects.push(current_effect);
       }
     }
@@ -1603,9 +1756,9 @@ function process_effects(effect2, collected_effects) {
 }
 function get$1(signal) {
   var _a;
-  var flags = signal.f;
-  var is_derived = (flags & DERIVED) !== 0;
-  if (is_derived && (flags & DESTROYED) !== 0) {
+  var flags2 = signal.f;
+  var is_derived = (flags2 & DERIVED) !== 0;
+  if (is_derived && (flags2 & DESTROYED) !== 0) {
     var value = execute_derived(
       /** @type {Derived} */
       signal
@@ -1955,8 +2108,8 @@ function assign_nodes(start, end) {
   }
 }
 // @__NO_SIDE_EFFECTS__
-function template(content, flags) {
-  var use_import_node = (flags & TEMPLATE_USE_IMPORT_NODE) !== 0;
+function template(content, flags2) {
+  var use_import_node = (flags2 & TEMPLATE_USE_IMPORT_NODE) !== 0;
   var node;
   var has_start = !content.startsWith("<!>");
   return () => {
@@ -2077,7 +2230,7 @@ function if_block(node, fn, elseif = false) {
   var consequent_effect = null;
   var alternate_effect = null;
   var condition = UNINITIALIZED;
-  var flags = elseif ? EFFECT_TRANSPARENT : 0;
+  var flags2 = elseif ? EFFECT_TRANSPARENT : 0;
   var has_branch = false;
   const set_branch = (fn2, flag = true) => {
     has_branch = true;
@@ -2115,7 +2268,7 @@ function if_block(node, fn, elseif = false) {
     if (!has_branch) {
       update_branch(null, null);
     }
-  }, flags);
+  }, flags2);
 }
 function html(node, get_value, svg, mathml, skip_warning) {
   var anchor = node;
@@ -2245,11 +2398,11 @@ function css_to_keyframe(css) {
   return keyframe;
 }
 const linear = (t) => t;
-function transition(flags, element, get_fn, get_params) {
-  var is_intro = (flags & TRANSITION_IN) !== 0;
-  var is_outro = (flags & TRANSITION_OUT) !== 0;
+function transition(flags2, element, get_fn, get_params) {
+  var is_intro = (flags2 & TRANSITION_IN) !== 0;
+  var is_outro = (flags2 & TRANSITION_OUT) !== 0;
   var is_both = is_intro && is_outro;
-  var is_global = (flags & TRANSITION_GLOBAL) !== 0;
+  var is_global = (flags2 & TRANSITION_GLOBAL) !== 0;
   var direction = is_both ? "both" : is_intro ? "in" : "out";
   var current_options;
   var inert = element.inert;
@@ -2722,12 +2875,12 @@ function with_parent_branch(fn) {
     set_active_effect(previous_effect);
   }
 }
-function prop(props, key, flags, fallback) {
+function prop(props, key, flags2, fallback) {
   var _a;
-  var immutable = (flags & PROPS_IS_IMMUTABLE) !== 0;
-  var runes = !legacy_mode_flag || (flags & PROPS_IS_RUNES) !== 0;
-  var bindable = (flags & PROPS_IS_BINDABLE) !== 0;
-  var lazy = (flags & PROPS_IS_LAZY_INITIAL) !== 0;
+  var immutable = (flags2 & PROPS_IS_IMMUTABLE) !== 0;
+  var runes = !legacy_mode_flag || (flags2 & PROPS_IS_RUNES) !== 0;
+  var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
+  var lazy = (flags2 & PROPS_IS_LAZY_INITIAL) !== 0;
   var is_store_sub = false;
   var prop_value;
   if (bindable) {
@@ -2797,7 +2950,7 @@ function prop(props, key, flags, fallback) {
       return value === void 0 ? fallback_value : value;
     };
   }
-  if ((flags & PROPS_IS_UPDATED) === 0) {
+  if ((flags2 & PROPS_IS_UPDATED) === 0) {
     return getter;
   }
   if (setter) {
@@ -2846,6 +2999,40 @@ function prop(props, key, flags, fallback) {
     return get$1(current_value);
   };
 }
+var root$3 = /* @__PURE__ */ template(`<div>"Hello MetahumanApp"</div>`);
+function MetahumanApp($$anchor) {
+  var div = root$3();
+  append($$anchor, div);
+}
+const sr3e = {};
+sr3e.sheet = {
+  details: "sr3e.sheet.details",
+  viewbackground: "sr3e.sheet.viewbackground"
+};
+sr3e.actor = {
+  character: {
+    age: "sr3e.actor.character.age",
+    height: "sr3e.actor.character.height",
+    weight: "sr3e.actor.character.weight",
+    metahuman: "sr3e.actor.character.metahuman"
+  }
+};
+const hooks = {
+  renderCharacterActorSheet: "renderCharacterActorSheet",
+  closeCharacterActorSheet: "closeCharacterActorSheet",
+  renderMetahumanItemSheet: "renderMetahumanItemSheet",
+  closeMetahumanItemSheet: "closeMetahumanItemSheet",
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  ready: "ready"
+};
+const flags = {
+  sr3e: "sr3e",
+  actor: {
+    isDossierDetailsOpen: "isDossierDetailsOpen"
+  }
+};
 function getResizeObserver(masonryInstance, gridElement, func = null) {
   gridElement.masonryInstance = masonryInstance;
   const resizeObserver = new ResizeObserver(() => {
@@ -2981,7 +3168,6 @@ function initializeMasonryLayout(masonryResizeConfig) {
   }
   actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
 }
-enable_legacy_mode_flag();
 function cubic_out(t) {
   const f = t - 1;
   return f * f * f + 1;
@@ -3049,6 +3235,7 @@ function Dossier($$anchor, $$props) {
     );
     actor().mainLayoutResizeObserver.masonryInstance.layout();
   }
+  const localize = (args) => game.i18n.localize(args);
   function saveActorName(event2) {
     const newName = event2.target.value;
     actor().update({ name: newName }, { render: true });
@@ -3133,17 +3320,22 @@ function Dossier($$anchor, $$props) {
       var h3_4 = child(a);
       var text_6 = child(h3_4);
       template_effect(
-        ($0, $1) => {
-          set_text(text_1, `${config().actor.character.metahuman ?? ""}: `);
+        ($0, $1, $2, $3, $4, $5, $6) => {
+          set_text(text_1, `${$0 ?? ""}: `);
           set_text(text_2, actor().system.profile.metaHumanity);
-          set_text(text_3, `${config().actor.character.age ?? ""}: ${actor().system.profile.age ?? ""}`);
-          set_text(text_4, `${config().actor.character.height ?? ""}: ${actor().system.profile.height ?? ""} cm (${$0 ?? ""} feet)`);
-          set_text(text_5, `${config().actor.character.weight ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$1 ?? ""} stones)`);
-          set_text(text_6, config().sheet.viewbackground);
+          set_text(text_3, `${$1 ?? ""}: ${actor().system.profile.age ?? ""}`);
+          set_text(text_4, `${$2 ?? ""}: ${actor().system.profile.height ?? ""} cm (${$3 ?? ""} feet)`);
+          set_text(text_5, `${$4 ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$5 ?? ""} stones)`);
+          set_text(text_6, $6);
         },
         [
+          () => localize(config().actor.character.metahuman),
+          () => localize(config().actor.character.age),
+          () => localize(config().actor.character.height),
           () => multiply(actor().system.profile.height, 0.0328084),
-          () => multiply(actor().system.profile.weight, 0.157473)
+          () => localize(config().actor.character.weight),
+          () => multiply(actor().system.profile.weight, 0.157473),
+          () => localize(config().sheet.viewbackground)
         ],
         derived_safe_equal
       );
@@ -3159,7 +3351,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(() => set_text(text, ` ${config().sheet.details ?? ""}`));
+  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)], derived_safe_equal);
   bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get$1(isDetailsOpen));
   event("toggle", details, toggleDetails);
   append($$anchor, div);
@@ -3287,17 +3479,46 @@ function closeMainMasonryGrid(app) {
 function registerHooks() {
   Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
+  Hooks.on(hooks.renderMetahumanItemSheet, (app, html2, data) => {
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
+    const container = app.element[0].querySelector(".window-content");
+    container.innerHTML = "";
+    app.svelteApp = mount(MetahumanApp, {
+      target: container,
+      props: {}
+    });
+  });
   Hooks.once(hooks.init, () => {
-    console.log("✅ INIT Hook Fired: Registering Custom Sheets");
-    CONFIG.sr3e = sr3e;
-    Actors.unregisterSheet("core", ActorSheet);
-    CONFIG.Actor.dataModels = {
-      "character": CharacterModel
-    };
-    Actors.registerSheet("sr3e", CharacterActorSheet, { types: ["character"], makeDefault: true });
-    Log.success("Hooks Registered", "sr3e.js");
+    configureProject();
+    registerActorTypes([
+      { type: "character", model: CharacterModel, sheet: CharacterActorSheet }
+    ]);
+    registerItemTypes([
+      { type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet }
+    ]);
     Log.success("Initialization Completed", "sr3e.js");
   });
 }
 registerHooks();
+function configureProject() {
+  CONFIG.sr3e = sr3e;
+  CONFIG.Actor.dataModels = {};
+  CONFIG.Item.dataModels = {};
+  Actors.unregisterSheet("core", ActorSheet);
+  Items.unregisterSheet("core", ItemSheet);
+}
+function registerActorTypes(actorsTypes) {
+  actorsTypes.forEach(({ type, model, sheet }) => {
+    CONFIG.Actor.dataModels[type] = model;
+    Actors.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
+  });
+}
+function registerItemTypes(itemTypes) {
+  itemTypes.forEach(({ type, model, sheet }) => {
+    CONFIG.Item.dataModels[type] = model;
+    Items.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
+  });
+}
 //# sourceMappingURL=bundle.js.map

@@ -7,9 +7,9 @@ sr3e.sheet = {
 
 sr3e.actor = {
     character: {
-        age: "age",
-        height: "height",
-        weight: "weight",
-        metahuman: "metahuman",
+        age: "sr3e.actor.character.age",
+        height: "sr3e.actor.character.height",
+        weight: "sr3e.actor.character.weight",
+        metahuman: "sr3e.actor.character.metahuman",
     }
 }

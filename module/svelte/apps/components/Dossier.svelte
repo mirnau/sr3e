@@ -25,6 +25,8 @@
     actor.mainLayoutResizeObserver.masonryInstance.layout();
   }
 
+  const localize = (args) => game.i18n.localize(args);
+
   function saveActorName(event) {
     const newName = event.target.value;
     actor.update({ name: newName }, { render: true });
@@ -85,7 +87,7 @@
   >
     <summary class="details-foldout">
       <span><i class="fa-solid fa-magnifying-glass"></i></span>
-      {config.sheet.details}
+      {localize(config.sheet.details)}
     </summary>
 
     {#if isDetailsOpen}
@@ -108,20 +110,20 @@
 
         <div>
           <h3>
-            {config.actor.character.metahuman}:
+            {localize(config.actor.character.metahuman)}:
             <span>{actor.system.profile.metaHumanity}</span>
           </h3>
         </div>
 
         <div>
           <h3>
-            {config.actor.character.age}: {actor.system.profile.age}
+            {localize(config.actor.character.age)}: {actor.system.profile.age}
           </h3>
         </div>
 
         <div>
           <h3>
-            {config.actor.character.height}: {actor.system.profile.height} cm ({multiply(
+            {localize(config.actor.character.height)}: {actor.system.profile.height} cm ({multiply(
               actor.system.profile.height,
               0.0328084,
             )} feet)
@@ -130,7 +132,7 @@
 
         <div>
           <h3>
-            {config.actor.character.weight}: {actor.system.profile.weight} kg ({multiply(
+            {localize(config.actor.character.weight)}: {actor.system.profile.weight} kg ({multiply(
               actor.system.profile.weight,
               0.157473,
             )} stones)
@@ -139,7 +141,7 @@
 
         <!-- svelte-ignore a11y_missing_attribute -->
         <a class="journal-entry-link">
-          <h3>{config.sheet.viewbackground}</h3>
+          <h3>{localize(config.sheet.viewbackground)}</h3>
         </a>
       </div>
     {/if}

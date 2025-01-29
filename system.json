@@ -25,9 +25,15 @@
     "actorTypes": [
         "character"
     ],
+    "itemTypes": [
+        "metahuman"
+    ],
     "documentTypes": {
         "Actor": {
             "character": {}
+        },
+        "Item": {
+            "metahuman": {}
         }
     },
     "packs": [],
