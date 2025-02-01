@@ -3615,7 +3615,7 @@ function MetahumanApp($$anchor, $$props) {
   let attributes = config().attributes;
   let common = config().common;
   let movement = mutable_state(config().movement);
-  config().karma;
+  let karma = mutable_state(config().karma);
   let traits = config().traits;
   legacy_pre_effect(() => get$1(system), () => {
     set(metahuman, get$1(system));
@@ -3631,6 +3631,17 @@ function MetahumanApp($$anchor, $$props) {
         {
           label: localize(get$1(movement).runSpeedModifier),
           value: get$1(metahuman).movement.modifier
+        }
+      ]);
+    }
+  );
+  legacy_pre_effect(
+    () => (get$1(karma), get$1(metahuman)),
+    () => {
+      set(karma, [
+        {
+          label: localize(get$1(karma).advancementRatio),
+          value: get$1(metahuman).karma.factor
         }
       ]);
     }
@@ -3894,7 +3905,7 @@ function MetahumanApp($$anchor, $$props) {
   var h3_6 = child(div_54);
   var text_13 = child(h3_6);
   var div_55 = sibling(h3_6, 2);
-  each(div_55, 5, () => get$1(movement), index, ($$anchor2, entry) => {
+  each(div_55, 5, () => get$1(karma), index, ($$anchor2, entry) => {
     var div_56 = root_8();
     var div_57 = child(div_56);
     var h4_6 = child(div_57);
@@ -3920,7 +3931,7 @@ function MetahumanApp($$anchor, $$props) {
     }
   });
   template_effect(
-    ($0, $1, $2, $3, $4, $5) => {
+    ($0, $1, $2, $3, $4, $5, $6) => {
       set_attribute(img, "src", item().img);
       set_attribute(img, "title", item().name);
       set_attribute(img, "alt", item().name);
@@ -3930,7 +3941,7 @@ function MetahumanApp($$anchor, $$props) {
       set_text(text_7, $3);
       set_text(text_9, $4);
       set_text(text_11, $5);
-      set_text(text_13, $5);
+      set_text(text_13, $6);
     },
     [
       () => localize(traits.agerange),
@@ -3938,7 +3949,8 @@ function MetahumanApp($$anchor, $$props) {
       () => localize(traits.weight),
       () => localize(attributes.modifiers),
       () => localize(attributes.limits),
-      () => localize(get$1(movement).movement)
+      () => localize(config().movement.movement),
+      () => localize(config().karma.karma)
     ],
     derived_safe_equal
   );

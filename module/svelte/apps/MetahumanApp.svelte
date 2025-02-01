@@ -27,6 +27,13 @@
         },
     ];
 
+    $: karma = [
+        {
+            label: localize(karma.advancementRatio),
+            value: metahuman.karma.factor,
+        }
+    ];
+
     $: agerange = [
         {
             label: localize(common.min),
@@ -299,7 +306,7 @@
             <div class="inner-background-container">
                 <div class="fake-shadow"></div>
                 <div class="inner-background">
-                    <h3 class="no-margin">{localize(movement.movement)}</h3>
+                    <h3 class="no-margin">{localize(config.movement.movement)}</h3>
                     <div class="stat-grid">
                         {#each movement as entry}
                             <div class="stat-card">
@@ -324,9 +331,9 @@
             <div class="inner-background-container">
                 <div class="fake-shadow"></div>
                 <div class="inner-background">
-                    <h3 class="no-margin">{localize(movement.movement)}</h3>
+                    <h3 class="no-margin">{localize(config.karma.karma)}</h3>
                     <div class="stat-grid">
-                        {#each movement as entry}
+                        {#each karma as entry}
                             <div class="stat-card">
                                 <div>
                                     <h4 class="no-margin">{entry.label}</h4>
