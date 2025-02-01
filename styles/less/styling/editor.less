@@ -1,0 +1,164 @@
+.sr3e.sheet.item,
+.sr3e.sheet.character {
+    .inner-background-container {
+        .editor-field {
+            position: relative;
+            background: @default-sheet-border-color;
+            padding: 0rem;
+            margin: 0rem;
+            .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+
+            &::before {
+                box-shadow: inset 0 0 30px #1d282c;
+                content: '';
+                position: absolute;
+                z-index: -1;
+                background: @default-inner-background-color;
+                top: 1px;
+                left: 1px;
+                width: calc(100% - 2px);
+                height: calc(100% - 2px);
+                pointer-events: none;
+                .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+            }
+
+            /* LESS snippet to restyle TinyMCE header and its toolbar */
+            .tox-editor-container {
+                .tox-editor-header {
+                    padding: 0rem !important;
+                    background: transparent !important; // Custom header background
+
+                    .tox-toolbar-overlord {
+                        background: transparent !important;
+
+                        .tox-toolbar__primary {
+                            background: transparent !important;
+
+                            .tox-toolbar__group {
+                                position: relative;
+                                background: @highlight-color-primary !important;
+                                margin: 0.5rem !important;
+                                padding:0.0rem !important;
+                                .clipped-corners(0.43rem, 0.43rem, 0.43rem, 0.43rem);
+
+                                &::before {
+                                    content: '';
+                                    position: absolute;
+                                    z-index: -1;
+                                    box-shadow: inset 0 0 1rem @highlight-color-primary;
+                                    background: @default-inner-background-color;
+                                    top: 1px;
+                                    left: 1px;
+                                    width: calc(100% - 2px);
+                                    height: calc(100% - 2px);
+                                    pointer-events: none;
+                                    .clipped-corners(0.43rem, 0.43rem, 0.43rem, 0.43rem);
+                                }
+
+
+
+
+                                button {
+                                    .VTT323();
+                                    background: transparent !important;
+                                    border: none !important;
+                                    cursor: pointer !important;
+                                    .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+
+                                    &:hover {
+                                        box-shadow: inset 0 0 1rem @highlight-color-primary;
+                                    }
+
+                                    // Optionally override disabled styles if needed
+                                    &.tox-tbtn--disabled,
+                                    &[aria-disabled="true"] {
+                                        opacity: 0.5 !important;
+                                        cursor: not-allowed !important;
+                                    }
+
+                                    // Target the icon inside the button
+                                    .tox-tbtn__icon-wrap {
+
+                                        svg,
+                                        svg path {
+                                            // Set your desired color here.
+                                            fill: @highlight-color-primary !important;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Style the TinyMCE select menu (dropdown) container */
+.tox-menu.tox-collection {
+    .VTT323();
+    background: @primary-color !important; // White background
+    box-shadow: inset 0 0 1rem @highlight-color-primary !important;
+    border-radius: 0px !important; // Rounded corners
+    padding: 5px 0 !important; // Vertical padding for the menu
+    min-width: 112px !important; // Ensure a minimum width
+    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem) !important;
+}
+
+/* Style the group container (if you have multiple groups, you can add spacing or borders) */
+.tox-collection__group {
+    margin: 0;
+    padding: 0;
+}
+
+/* Style each menu item */
+.tox-collection__item {
+    display: flex; // Use flex to align label and caret side-by-side
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px !important; // Adjust padding as desired
+    color: @h1-color !important; // Text color
+    cursor: pointer !important;
+    transition: background 0.2s ease-in-out;
+    .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem) !important;
+
+    &:hover {
+        box-shadow: inset 0 0 1rem @highlight-color-primary !important;
+        background-color: transparent !important;
+    }
+
+    // For active state (hovering over an item)
+    &.tox-collection__item--active {
+        background: transparent !important;
+    }
+
+    // Disabled state styling (if applicable)
+    &[aria-disabled="true"] {
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+    }
+
+    // Style the item label (the text)
+    .tox-collection__item-label {
+        font-size: 14px; // Adjust font-size if needed
+        line-height: 1.2;
+    }
+
+    // Style the caret container and its SVG icon
+    .tox-collection__item-caret {
+        margin-left: 8px; // Space between label and caret
+        display: flex;
+        align-items: center;
+
+        svg,
+        svg path {
+            fill: @h1-color !important; // Set the caret (glyph) color
+        }
+    }
+}
+
+.tox-collection__item[aria-checked="true"],
+.tox-collection__item[aria-selected="true"] {
+    background: transparent !important;
+}

@@ -1,0 +1,39 @@
+.sr3e.sheet.item {
+    .meta-human-grid {
+      /* Set a fixed or max width and center it */
+      width: 40rem;
+      margin: 0 auto;
+      column-count: 2;
+      column-gap: 0.5rem;
+  
+  
+      .item-sheet-component {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        break-inside: avoid;
+      }
+  
+      .inner-background-container {
+        
+        .inner-background {
+          display: grid;
+          text-align: center;
+  
+          .stat-card {
+            background-color: @metahuman-stat-card-color;
+  
+            //.stat-value {}
+  
+            .stat-label {
+              background-color: @metahuman-stat-card-label-color;
+            }
+  
+            &:hover {
+              z-index: 10;
+            }
+          }
+        }
+      }
+    }
+  }

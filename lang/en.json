@@ -1,16 +1,54 @@
 {
-"sr3e": {
+  "sr3e": {
+    "attributes": {
+      "body": "Body",
+      "quickness": "Quickness",
+      "strength": "Strength",
+      "charisma": "Charisma",
+      "intelligence": "Intelligence",
+      "willpower": "Willpower",
+      "reaction": "Reaction",
+      "initiative": "Initiative",
+      "modifiers": "Attribute Modifiers",
+      "limits": "Attribute Limits"
+    },
+    "common": {
+      "max": "Maximum",
+      "min": "Minimum",
+      "average": "Average",
+      "description": "Description",
+      "priority": "Priority"
+    },
+    "dicepools": {
+      "dicepools": "Dice Pools",
+      "combat": "Combat Pool",
+      "magic": "Magic Pool",
+      "hacking": "Hacking Pool",
+      "astral": "Astral Pool",
+      "control": "Control Pool"
+    },
+    "karma": {
+      "karma": "Karma",
+      "goodKarma": "Good Karma",
+      "karmaPool": "Karma Pool",
+      "advancementRatio": "Advancement Ratio"
+    },
+    "movement": {
+      "movement": "Movement",
+      "walking": "Walking Speed",
+      "running": "Running Speed",
+      "runSpeedModifier": "Running Mod."
+    },
     "sheet": {
       "details": "Details",
       "viewbackground": "View Background"
     },
-    "actor": {
-      "character": {
-        "age": "Age",
-        "height": "Height",
-        "weight": "Weight",
-        "metahuman": "Metahuman"
-      }
+    "traits": {
+      "age": "Age",
+      "height": "Height",
+      "weight": "Weight",
+      "metahuman": "Metahuman",
+      "agerange": "Playable Age Range"
     }
   }
 }

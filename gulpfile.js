@@ -12,10 +12,13 @@ import { exec } from "child_process";
 function compileLess() {
   return gulp
     .src("styles/less/*.less")
-    .pipe(less())
-    .on("error", (err) => {
-      console.error("LESS error:", err.message);
-    })
+    .pipe(
+      less().on("error", function (err) {
+        console.error("LESS error:", err.message);
+        // End the stream gracefully
+        this.emit("end");
+      })
+    )
     .pipe(gulp.dest("styles/css"));
 }
 

@@ -32,10 +32,6 @@
         text-decoration: none;
     }
 
-    .editor {
-        height: 100%;
-    }
-
     box-shadow: none;
 
     .window-resizable-handle {
@@ -59,8 +55,23 @@
     input[type="number"],
     input[type="text"] {
         background-color: @input-background;
-        box-shadow: inset 0 0 10px @highlight-color-tertiary;
+        box-shadow: inset 0 0 10px @accent-color;
+        /* Default box-shadow */
         border: none;
+        font-size: 1.5rem;
+        width: auto;
+        /* Allows the input to expand based on content */
+        min-width: 2rem;
+        max-width: 4rem;
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+        /* Rounded corners */
+
+        transition: box-shadow 0.3s ease;
+
+        &:focus {
+            box-shadow: inset 0 0 10px @highlight-color-primary;
+            outline: none;
+        }
     }
 
     img {
@@ -77,7 +88,7 @@
 
     .fake-shadow {
         .fake-shadow(@default-fake-shadow-color);
-        .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+        .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
     }
 
     .inner-background {
@@ -123,7 +134,7 @@
         background-color: @primary-color;
         border: none;
         border-radius: 0rem;
-       .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
     }
 
     option {

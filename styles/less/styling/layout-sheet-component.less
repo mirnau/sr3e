@@ -27,6 +27,12 @@
 .sr3e.sheet.item,
 .sr3e.sheet.character {
 
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
     .details-foldout {
         margin-top: 0.5rem;
         margin-bottom: 1rem;
@@ -34,6 +40,7 @@
     }
 
     .inner-background-container {
+
         .apply-container();
 
         .inner-background {
@@ -48,5 +55,14 @@
         position: relative;
         z-index: 10;
 
+    }
+
+    .editor-field {
+
+        z-index: 100;
+        min-height: 10rem;
+        height: 100%;
+        color: @text-color;
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
     }
 }

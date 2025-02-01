@@ -1,3 +1,29 @@
+.sr3e.sheet.item .meta-human-grid {
+  /* Set a fixed or max width and center it */
+  width: 40rem;
+  margin: 0 auto;
+  column-count: 2;
+  column-gap: 0.5rem;
+}
+.sr3e.sheet.item .meta-human-grid .item-sheet-component {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  break-inside: avoid;
+}
+.sr3e.sheet.item .meta-human-grid .inner-background-container .inner-background {
+  display: grid;
+  text-align: center;
+}
+.sr3e.sheet.item .meta-human-grid .inner-background-container .inner-background .stat-card {
+  background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
+}
+.sr3e.sheet.item .meta-human-grid .inner-background-container .inner-background .stat-card .stat-label {
+  background-color: #1c364b;
+}
+.sr3e.sheet.item .meta-human-grid .inner-background-container .inner-background .stat-card:hover {
+  z-index: 10;
+}
 @font-face {
   font-family: 'VT323';
   src: url('../../fonts/VT323/VT323-Regular.ttf') format('truetype');
@@ -12,6 +38,7 @@
   font-style: normal;
   font-display: swap;
 }
+body.mce-content-body,
 .sr3e.sheet.item,
 .sr3e.sheet.character {
   font-family: 'VT323', monospace;
@@ -20,10 +47,12 @@
   line-height: 1rem;
   color: #1df0ff;
 }
+body.mce-content-body div,
 .sr3e.sheet.item div,
 .sr3e.sheet.character div {
   color: #1df0ff;
 }
+body.mce-content-body h1,
 .sr3e.sheet.item h1,
 .sr3e.sheet.character h1 {
   text-transform: uppercase;
@@ -33,8 +62,10 @@
   margin-bottom: 0.7rem;
   font-size: 1.4rem;
 }
+body.mce-content-body summary,
 .sr3e.sheet.item summary,
 .sr3e.sheet.character summary,
+body.mce-content-body h2,
 .sr3e.sheet.item h2,
 .sr3e.sheet.character h2 {
   text-transform: uppercase;
@@ -42,6 +73,7 @@
   border: none;
   font-size: 1.2rem;
 }
+body.mce-content-body h3,
 .sr3e.sheet.item h3,
 .sr3e.sheet.character h3 {
   text-transform: uppercase;
@@ -50,31 +82,41 @@
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   font-size: 1.1rem;
 }
+body.mce-content-body h3.no-margin,
 .sr3e.sheet.item h3.no-margin,
 .sr3e.sheet.character h3.no-margin {
   margin: 0;
 }
+body.mce-content-body h4,
 .sr3e.sheet.item h4,
 .sr3e.sheet.character h4 {
   text-transform: uppercase;
   color: #1df0ff;
 }
+body.mce-content-body h4.no-margin,
 .sr3e.sheet.item h4.no-margin,
 .sr3e.sheet.character h4.no-margin {
   margin: 0;
 }
+body.mce-content-body h5,
 .sr3e.sheet.item h5,
 .sr3e.sheet.character h5 {
   text-transform: uppercase;
   color: #3ed199;
 }
+body.mce-content-body h6,
 .sr3e.sheet.item h6,
 .sr3e.sheet.character h6 {
   text-transform: uppercase;
   color: #3ed199;
 }
+body.mce-content-body p,
+.sr3e.sheet.item p,
+.sr3e.sheet.character p,
+body.mce-content-body select,
 .sr3e.sheet.item select,
 .sr3e.sheet.character select,
+body.mce-content-body input,
 .sr3e.sheet.item input,
 .sr3e.sheet.character input {
   font-family: 'VT323', monospace;
@@ -83,11 +125,22 @@
   line-height: 1rem;
   color: #1df0ff;
 }
+body.mce-content-body p::placeholder,
+.sr3e.sheet.item p::placeholder,
+.sr3e.sheet.character p::placeholder,
+body.mce-content-body select::placeholder,
 .sr3e.sheet.item select::placeholder,
 .sr3e.sheet.character select::placeholder,
+body.mce-content-body input::placeholder,
 .sr3e.sheet.item input::placeholder,
 .sr3e.sheet.character input::placeholder {
   color: #c8d3f5;
+}
+.sr3e.sheet.item .stat-grid,
+.sr3e.sheet.character .stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
 }
 .sr3e.sheet.item .details-foldout,
 .sr3e.sheet.character .details-foldout {
@@ -113,6 +166,14 @@
   height: 100%;
   position: relative;
   z-index: 10;
+}
+.sr3e.sheet.item .editor-field,
+.sr3e.sheet.character .editor-field {
+  z-index: 100;
+  min-height: 10rem;
+  height: 100%;
+  color: #c8d3f5;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.window-app.sr3e {
   background: none;
@@ -145,10 +206,6 @@
 .sr3e.sheet.character a {
   text-decoration: none;
 }
-.sr3e.sheet.item .editor,
-.sr3e.sheet.character .editor {
-  height: 100%;
-}
 .sr3e.sheet.item .window-resizable-handle,
 .sr3e.sheet.character .window-resizable-handle {
   background-color: #ff0095;
@@ -172,8 +229,24 @@
 .sr3e.sheet.item input[type="text"],
 .sr3e.sheet.character input[type="text"] {
   background-color: #1c364b;
-  box-shadow: inset 0 0 10px #3ed199;
+  box-shadow: inset 0 0 10px #ff0095;
+  /* Default box-shadow */
   border: none;
+  font-size: 1.5rem;
+  width: auto;
+  /* Allows the input to expand based on content */
+  min-width: 2rem;
+  max-width: 4rem;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  /* Rounded corners */
+  transition: box-shadow 0.3s ease;
+}
+.sr3e.sheet.item input[type="number"]:focus,
+.sr3e.sheet.character input[type="number"]:focus,
+.sr3e.sheet.item input[type="text"]:focus,
+.sr3e.sheet.character input[type="text"]:focus {
+  box-shadow: inset 0 0 10px #1df0ff;
+  outline: none;
 }
 .sr3e.sheet.item img,
 .sr3e.sheet.character img {
@@ -197,7 +270,7 @@
   height: calc(100% - 1.5rem);
   z-index: -2;
   filter: blur(20px);
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.sheet.item .inner-background,
 .sr3e.sheet.character .inner-background {
@@ -508,4 +581,149 @@
 }
 .sr3e.sheet.character .sheet-character-masonry-main .layout-grid-sizer {
   min-width: 20rem;
+}
+.sr3e.sheet.item .inner-background-container .editor-field,
+.sr3e.sheet.character .inner-background-container .editor-field {
+  position: relative;
+  background: #e792cb;
+  padding: 0rem;
+  margin: 0rem;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  /* LESS snippet to restyle TinyMCE header and its toolbar */
+}
+.sr3e.sheet.item .inner-background-container .editor-field::before,
+.sr3e.sheet.character .inner-background-container .editor-field::before {
+  box-shadow: inset 0 0 30px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header {
+  padding: 0rem !important;
+  background: transparent !important;
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord {
+  background: transparent !important;
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary {
+  background: transparent !important;
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group {
+  position: relative;
+  background: #1df0ff !important;
+  margin: 0.5rem !important;
+  padding: 0rem !important;
+  clip-path: polygon(0.43rem 0px, calc(100% - 0.43rem) 0px, 100% 0.43rem, 100% calc(100% - 0.43rem), calc(100% - 0.43rem) 100%, 0.43rem 100%, 0px calc(100% - 0.43rem), 0px 0.43rem);
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group::before,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  box-shadow: inset 0 0 1rem #1df0ff;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(0.43rem 0px, calc(100% - 0.43rem) 0px, 100% 0.43rem, 100% calc(100% - 0.43rem), calc(100% - 0.43rem) 100%, 0.43rem 100%, 0px calc(100% - 0.43rem), 0px 0.43rem);
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  margin: 0.33rem 0;
+  line-height: 1rem;
+  color: #1df0ff;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button:hover,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button:hover {
+  box-shadow: inset 0 0 1rem #1df0ff;
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button.tox-tbtn--disabled,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button.tox-tbtn--disabled,
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button[aria-disabled="true"],
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button[aria-disabled="true"] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg,
+.sr3e.sheet.item .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg path,
+.sr3e.sheet.character .inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg path {
+  fill: #1df0ff !important;
+}
+/* Style the TinyMCE select menu (dropdown) container */
+.tox-menu.tox-collection {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  margin: 0.33rem 0;
+  line-height: 1rem;
+  color: #1df0ff;
+  background: #1b1f24 !important;
+  box-shadow: inset 0 0 1rem #1df0ff !important;
+  border-radius: 0px !important;
+  padding: 5px 0 !important;
+  min-width: 112px !important;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
+}
+/* Style the group container (if you have multiple groups, you can add spacing or borders) */
+.tox-collection__group {
+  margin: 0;
+  padding: 0;
+}
+/* Style each menu item */
+.tox-collection__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px !important;
+  color: #1df0ff !important;
+  cursor: pointer !important;
+  transition: background 0.2s ease-in-out;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem) !important;
+}
+.tox-collection__item:hover {
+  box-shadow: inset 0 0 1rem #1df0ff !important;
+  background-color: transparent !important;
+}
+.tox-collection__item.tox-collection__item--active {
+  background: transparent !important;
+}
+.tox-collection__item[aria-disabled="true"] {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+.tox-collection__item .tox-collection__item-label {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.tox-collection__item .tox-collection__item-caret {
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+}
+.tox-collection__item .tox-collection__item-caret svg,
+.tox-collection__item .tox-collection__item-caret svg path {
+  fill: #1df0ff !important;
+}
+.tox-collection__item[aria-checked="true"],
+.tox-collection__item[aria-selected="true"] {
+  background: transparent !important;
 }

@@ -3,6 +3,7 @@
   import { slide } from "svelte/transition";
   import Log from "../../../../Log";
   import {getActorStore} from "../../stores/actorStoreRegistry";
+  import { openFilePicker } from "../../../foundry/SvelteHelpers.js";
   export let actor = {};
   export let config = {};
 
@@ -41,18 +42,6 @@
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  function openFilePicker() {
-    // Use Foundry's FilePicker API
-    new FilePicker({
-      type: "image",
-      current: actor.img, // current image path
-      callback: (path) => {
-        // Update the actor's image with the selected path
-        actor.update({ img: path }, { render: true });
-      },
-    }).render(true);
-  }
-
   function updateStoreName(newName) {
     actorStore.update((store) => {
       store.name = newName; // Update the name property in the store
@@ -75,7 +64,7 @@
         alt={actor.name}
         title={actor.name}
         data-edit="img"
-        on:click={openFilePicker}
+        on:click={openFilePicker(document)}
       />
     </div>
   {/if}

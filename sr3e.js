@@ -29,10 +29,14 @@ function registerHooks() {
       const container = app.element[0].querySelector(".window-content");
 
       container.innerHTML = '';
+  
+      console.log("app", app.item);
     
       app.svelteApp = mount(MetahumanApp, {
         target: container,
         props: {
+          item: app.item,
+          config: CONFIG.sr3e,
         },
       });
   });

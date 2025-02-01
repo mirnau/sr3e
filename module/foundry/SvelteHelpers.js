@@ -1,23 +1,37 @@
-/**
- * Mounts a Svelte app to the DOM.
- * @param {Object} App - The Svelte app to mount.
- * @param {HTMLElement} target - The DOM element to mount the app into.
- * @param {Object} props - Properties to pass to the Svelte app.
- * @returns {Object} - The mounted Svelte app instance.
- */
-export function mountSvelteApp(App, target, props = {}) {
-    return new App({
-      target,
-      props,
+export function localize(key) {
+  return game.i18n.localize(key);
+}
+
+export function openFilePicker(document) {
+  // Use Foundry's FilePicker API
+  new FilePicker({
+    type: "image",
+    current: document.img, // current image path
+    callback: (path) => {
+      // Update the actor's image with the selected path
+      document.update({ img: path }, { render: true });
+    },
+  }).render(true);
+}
+
+export function activateTextEditor({ target, content, owner, editable, callback }) {
+  if (editable) {
+    TextEditor.activateEditor({
+      target: target,
+      height: 300,
+      save_onsubmit: false,
+      content: content || "",
+      buttons: true,
+      owner: owner,
+      callback: (html) => {
+        callback(html);
+      },
     });
+  } else {
+    target.innerHTML = TextEditor.enrichHTML(content);
   }
-  
-  /**
-   * Unmounts a Svelte app.
-   * @param {Object} app - The Svelte app instance to destroy.s
-   */
-  export function unmountSvelteApp(app) {
-    if (app && app.$destroy) {
-      app.$destroy();
-    }
-  }
+}
+
+export function enrichText(content) {
+  return TextEditor.enrichHTML(content);
+}

@@ -5,7 +5,7 @@ export default class MetahumanItemSheet extends ItemSheet {
             template: "systems/sr3e/default.html",
             width: "auto",
             height: "auto",
-            classes: ["sr3d", "sheet", "item"],
+            classes: ["sr3e", "sheet", "item"],
             resizable: false
         });
     }
