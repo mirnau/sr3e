@@ -3600,7 +3600,7 @@ var root_5 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no
 var root_6 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <h1 class="no-margin"><input name="name" type="text"></h1> <div class="stat-card"><h4 class="card-header">Select Priority</h4> <select name="system.priority" class="priority-select"></select></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="stat-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="stat-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div></div> <div class="stat-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <h1 class="no-margin"><input name="name" type="text"></h1> <div class="stat-card"><h4 class="card-header">Select Priority</h4> <select name="system.priority" class="priority-select"></select></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, false);
   const metahuman = mutable_state();
@@ -3840,87 +3840,84 @@ function MetahumanApp($$anchor, $$props) {
   });
   var div_27 = sibling(div_20, 2);
   var div_28 = child(div_27);
-  var div_29 = child(div_28);
-  var div_30 = sibling(child(div_29), 2);
-  var h3_3 = child(div_30);
+  var div_29 = sibling(child(div_28), 2);
+  var h3_3 = child(div_29);
   var text_7 = child(h3_3);
-  var div_31 = sibling(h3_3, 2);
-  var div_32 = child(div_31);
-  each(div_32, 5, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
-    var div_33 = root_5();
-    var div_34 = child(div_33);
-    var h4_3 = child(div_34);
+  var div_30 = sibling(h3_3, 2);
+  var div_31 = child(div_30);
+  each(div_31, 5, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
+    var div_32 = root_5();
+    var div_33 = child(div_32);
+    var h4_3 = child(div_33);
     var text_8 = child(h4_3);
-    var div_35 = sibling(div_34, 2);
-    var input_4 = child(div_35);
+    var div_34 = sibling(div_33, 2);
+    var input_4 = child(div_34);
     template_effect(() => {
       set_text(text_8, get$1(entry).label);
       set_value(input_4, get$1(entry).value);
     });
-    append($$anchor2, div_33);
+    append($$anchor2, div_32);
   });
-  var div_36 = sibling(div_27, 2);
-  var div_37 = child(div_36);
-  var div_38 = sibling(child(div_37), 2);
-  var h3_4 = child(div_38);
+  var div_35 = sibling(div_27, 2);
+  var div_36 = child(div_35);
+  var div_37 = sibling(child(div_36), 2);
+  var h3_4 = child(div_37);
   var text_9 = child(h3_4);
-  var div_39 = sibling(h3_4, 2);
-  each(div_39, 5, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
-    var div_40 = root_6();
-    var div_41 = child(div_40);
-    var h4_4 = child(div_41);
+  var div_38 = sibling(h3_4, 2);
+  each(div_38, 5, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
+    var div_39 = root_6();
+    var div_40 = child(div_39);
+    var h4_4 = child(div_40);
     var text_10 = child(h4_4);
-    var div_42 = sibling(div_41, 2);
-    var input_5 = child(div_42);
+    var div_41 = sibling(div_40, 2);
+    var input_5 = child(div_41);
     template_effect(() => {
       set_text(text_10, get$1(entry).label);
       set_value(input_5, get$1(entry).value);
     });
-    append($$anchor2, div_40);
+    append($$anchor2, div_39);
   });
-  var div_43 = sibling(div_36, 2);
-  var div_44 = child(div_43);
-  var div_45 = child(div_44);
-  var div_46 = sibling(child(div_45), 2);
-  var h3_5 = child(div_46);
+  var div_42 = sibling(div_35, 2);
+  var div_43 = child(div_42);
+  var div_44 = sibling(child(div_43), 2);
+  var h3_5 = child(div_44);
   var text_11 = child(h3_5);
-  var div_47 = sibling(h3_5, 2);
-  each(div_47, 5, () => get$1(movement), index, ($$anchor2, entry) => {
-    var div_48 = root_7();
-    var div_49 = child(div_48);
-    var h4_5 = child(div_49);
+  var div_45 = sibling(h3_5, 2);
+  each(div_45, 5, () => get$1(movement), index, ($$anchor2, entry) => {
+    var div_46 = root_7();
+    var div_47 = child(div_46);
+    var h4_5 = child(div_47);
     var text_12 = child(h4_5);
-    var div_50 = sibling(div_49, 2);
-    var input_6 = child(div_50);
+    var div_48 = sibling(div_47, 2);
+    var input_6 = child(div_48);
     template_effect(() => {
       set_text(text_12, get$1(entry).label);
       set_value(input_6, get$1(entry).value);
     });
-    append($$anchor2, div_48);
+    append($$anchor2, div_46);
   });
-  var div_51 = sibling(div_43, 2);
-  var div_52 = child(div_51);
-  var div_53 = child(div_52);
-  var div_54 = sibling(child(div_53), 2);
-  var h3_6 = child(div_54);
+  var div_49 = sibling(div_42, 2);
+  var div_50 = child(div_49);
+  var div_51 = sibling(child(div_50), 2);
+  var h3_6 = child(div_51);
   var text_13 = child(h3_6);
-  var div_55 = sibling(h3_6, 2);
-  each(div_55, 5, () => get$1(karma), index, ($$anchor2, entry) => {
-    var div_56 = root_8();
-    var div_57 = child(div_56);
-    var h4_6 = child(div_57);
+  var div_52 = sibling(h3_6, 2);
+  each(div_52, 5, () => get$1(karma), index, ($$anchor2, entry) => {
+    var div_53 = root_8();
+    var div_54 = child(div_53);
+    var h4_6 = child(div_54);
     var text_14 = child(h4_6);
-    var div_58 = sibling(div_57, 2);
-    var input_7 = child(div_58);
+    var div_55 = sibling(div_54, 2);
+    var input_7 = child(div_55);
     template_effect(() => {
       set_text(text_14, get$1(entry).label);
       set_value(input_7, get$1(entry).value);
     });
-    append($$anchor2, div_56);
+    append($$anchor2, div_53);
   });
-  var div_59 = sibling(div_51, 2);
-  var div_60 = child(div_59);
-  var node = sibling(child(div_60), 2);
+  var div_56 = sibling(div_49, 2);
+  var div_57 = child(div_56);
+  var node = sibling(child(div_57), 2);
   Editor(node, {
     get document() {
       return item();

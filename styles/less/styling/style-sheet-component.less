@@ -55,18 +55,29 @@
     input[type="number"],
     input[type="text"] {
         background-color: @input-background;
-        box-shadow: inset 0 0 10px @accent-color;
-        /* Default box-shadow */
+        box-shadow: inset 0 0 10px @highlight-color-primary;
         border: none;
         font-size: 1.5rem;
-        width: auto;
-        /* Allows the input to expand based on content */
+        width: 100%;
         min-width: 2rem;
-        max-width: 4rem;
+        max-width: 100%;
         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-        /* Rounded corners */
 
         transition: box-shadow 0.3s ease;
+
+        &::before {
+            box-shadow: inset 0 0 30px #1d282c;
+            content: '';
+            position: absolute;
+            z-index: -1;
+            background: @default-inner-background-color;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            pointer-events: none;
+            .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+        }
 
         &:focus {
             box-shadow: inset 0 0 10px @highlight-color-primary;
@@ -156,8 +167,6 @@
             text-align: center;
         }
 
-        input,
-        select,
         .stat-label {
             align-items: center;
             justify-content: center;

@@ -31,7 +31,7 @@
         {
             label: localize(karma.advancementRatio),
             value: metahuman.karma.factor,
-        }
+        },
     ];
 
     $: agerange = [
@@ -244,7 +244,6 @@
         </div>
     </div>
 
-    <div class="stat-grid">
         <!-- Modifiers Div -->
         <div class="item-sheet-component">
             <div class="inner-background-container">
@@ -276,7 +275,6 @@
                 </div>
             </div>
         </div>
-    </div>
 
     <!-- Attribute Limits Div -->
     <div class="item-sheet-component">
@@ -301,50 +299,46 @@
     </div>
 
     <!-- Movement Div -->
-    <div class="stat-grid">
-        <div class="item-sheet-component">
-            <div class="inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="inner-background">
-                    <h3 class="no-margin">{localize(config.movement.movement)}</h3>
-                    <div class="stat-grid">
-                        {#each movement as entry}
-                            <div class="stat-card">
-                                <div>
-                                    <h4 class="no-margin">{entry.label}</h4>
-                                </div>
-                                <div class="stat-label">
-                                    <!-- Hidden input to store the value for form submission -->
-                                    <input type="number" value={entry.value} />
-                                </div>
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h3 class="no-margin">{localize(config.movement.movement)}</h3>
+                <div class="stat-grid">
+                    {#each movement as entry}
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="no-margin">{entry.label}</h4>
                             </div>
-                        {/each}
-                    </div>
+                            <div class="stat-label">
+                                <!-- Hidden input to store the value for form submission -->
+                                <input type="number" value={entry.value} />
+                            </div>
+                        </div>
+                    {/each}
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Karma Div -->
-    <div class="stat-grid">
-        <div class="item-sheet-component">
-            <div class="inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="inner-background">
-                    <h3 class="no-margin">{localize(config.karma.karma)}</h3>
-                    <div class="stat-grid">
-                        {#each karma as entry}
-                            <div class="stat-card">
-                                <div>
-                                    <h4 class="no-margin">{entry.label}</h4>
-                                </div>
-                                <div class="stat-label">
-                                    <!-- Hidden input to store the value for form submission -->
-                                    <input type="number" value={entry.value} />
-                                </div>
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h3 class="no-margin">{localize(config.karma.karma)}</h3>
+                <div class="stat-grid">
+                    {#each karma as entry}
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="no-margin">{entry.label}</h4>
                             </div>
-                        {/each}
-                    </div>
+                            <div class="stat-label">
+                                <!-- Hidden input to store the value for form submission -->
+                                <input type="number" value={entry.value} />
+                            </div>
+                        </div>
+                    {/each}
                 </div>
             </div>
         </div>
@@ -353,7 +347,7 @@
     <div class="item-sheet-component">
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
-                <Editor document={item} editable={true} owner={item.isOwner} />
+            <Editor document={item} editable={true} owner={item.isOwner} />
         </div>
     </div>
 </div>

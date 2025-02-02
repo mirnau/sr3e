@@ -229,17 +229,30 @@ body.mce-content-body input::placeholder,
 .sr3e.sheet.item input[type="text"],
 .sr3e.sheet.character input[type="text"] {
   background-color: #1c364b;
-  box-shadow: inset 0 0 10px #ff0095;
-  /* Default box-shadow */
+  box-shadow: inset 0 0 10px #1df0ff;
   border: none;
   font-size: 1.5rem;
-  width: auto;
-  /* Allows the input to expand based on content */
+  width: 100%;
   min-width: 2rem;
-  max-width: 4rem;
+  max-width: 100%;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-  /* Rounded corners */
   transition: box-shadow 0.3s ease;
+}
+.sr3e.sheet.item input[type="number"]::before,
+.sr3e.sheet.character input[type="number"]::before,
+.sr3e.sheet.item input[type="text"]::before,
+.sr3e.sheet.character input[type="text"]::before {
+  box-shadow: inset 0 0 30px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .sr3e.sheet.item input[type="number"]:focus,
 .sr3e.sheet.character input[type="number"]:focus,
@@ -338,10 +351,6 @@ body.mce-content-body input::placeholder,
   margin: 0;
   text-align: center;
 }
-.sr3e.sheet.item .stat-card input,
-.sr3e.sheet.character .stat-card input,
-.sr3e.sheet.item .stat-card select,
-.sr3e.sheet.character .stat-card select,
 .sr3e.sheet.item .stat-card .stat-label,
 .sr3e.sheet.character .stat-card .stat-label {
   align-items: center;
@@ -349,10 +358,6 @@ body.mce-content-body input::placeholder,
   box-shadow: inset 0 0 8px #1df0ff;
   transition: box-shadow 0.3s ease-in;
 }
-.sr3e.sheet.item .stat-card input:hover,
-.sr3e.sheet.character .stat-card input:hover,
-.sr3e.sheet.item .stat-card select:hover,
-.sr3e.sheet.character .stat-card select:hover,
 .sr3e.sheet.item .stat-card .stat-label:hover,
 .sr3e.sheet.character .stat-card .stat-label:hover {
   box-shadow: inset 0 0 25px #1df0ff;
