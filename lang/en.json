@@ -37,7 +37,7 @@
       "movement": "Movement",
       "walking": "Walking Speed",
       "running": "Running Speed",
-      "runSpeedModifier": "Running Mod."
+      "runSpeedModifier": "Running Modifier"
     },
     "sheet": {
       "details": "Details",

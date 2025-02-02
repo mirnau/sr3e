@@ -26,6 +26,12 @@
     color: @h1-color;
 }
 
+//The outer elements hypothenuse
+//The distance between the elements
+.hypothenuse-length(@outer, @distance) {
+    B: sqrt(@outer * @outer + @distance * @distance) * ((@outer + @distance) / @outer);
+}
+
 body.mce-content-body,
 .sr3e.sheet.item,
 .sr3e.sheet.character {

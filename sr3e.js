@@ -26,12 +26,10 @@ function registerHooks() {
         unmount(app.svelteApp);
       }
 
-      const container = app.element[0].querySelector(".window-content");
+      let container = app.element[0].querySelector(".window-content");
 
       container.innerHTML = '';
   
-      console.log("app", app.item);
-    
       app.svelteApp = mount(MetahumanApp, {
         target: container,
         props: {
@@ -40,7 +38,6 @@ function registerHooks() {
         },
       });
   });
-
 
   Hooks.once(hooks.init, () => {
     

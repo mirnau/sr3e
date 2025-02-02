@@ -151,25 +151,36 @@
                 </div>
 
                 <!-- svelte-ignore a11y_missing_content -->
-                <h1 class="no-margin">
-                    <input name="name" type="text" bind:value={item.name} />
-                </h1>
 
+                <input
+                    class="large"
+                    name="name"
+                    type="text"
+                    bind:value={item.name}
+                    on:change={(e) =>
+                        item.update({
+                            "system.priority": e.target.value,
+                        })}
+                />
                 <div class="stat-card">
-                    <h4 class="card-header">Select Priority</h4>
-                    <select
-                        name="system.priority"
-                        class="priority-select"
-                        bind:value={system.priority}
-                        on:change={(e) =>
-                            item.update({
-                                "system.priority": e.target.value,
-                            })}
-                    >
-                        {#each ["C", "D", "E"] as priority}
-                            <option value={priority}>{priority}</option>
-                        {/each}
-                    </select>
+                    <div>
+                        <h4>Select Priority</h4>
+                    </div>
+                    <div class="stat-label">
+                        <select
+                            name="system.priority"
+                            class="priority-select"
+                            bind:value={system.priority}
+                            on:change={(e) =>
+                                item.update({
+                                    "system.priority": e.target.value,
+                                })}
+                        >
+                            {#each ["C", "D", "E"] as priority}
+                                <option value={priority}>{priority}</option>
+                            {/each}
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,7 +191,7 @@
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(traits.agerange)}</h3>
+                <h3 class="item">{localize(traits.agerange)}</h3>
                 <div class="stat-grid">
                     {#each agerange as entry}
                         <div class="stat-card">
@@ -203,7 +214,7 @@
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(traits.height)}</h3>
+                <h3 class="item">{localize(traits.height)}</h3>
                 <div class="stat-grid">
                     {#each height as entry}
                         <div class="stat-card">
@@ -226,7 +237,7 @@
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(traits.weight)}</h3>
+                <h3 class="item">{localize(traits.weight)}</h3>
                 <div class="stat-grid">
                     {#each weight as entry}
                         <div class="stat-card">
@@ -244,44 +255,41 @@
         </div>
     </div>
 
-        <!-- Modifiers Div -->
-        <div class="item-sheet-component">
-            <div class="inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="inner-background">
-                    <h3 class="no-margin">
-                        {localize(attributes.modifiers)}
-                    </h3>
-                    <div class="grid-container">
-                        <div class="stat-grid">
-                            {#each attributeModifiers as entry}
-                                <div class="stat-card">
-                                    <div>
-                                        <h4 class="no-margin">
-                                            {entry.label}
-                                        </h4>
-                                    </div>
-                                    <div class="stat-label">
-                                        <!-- Hidden input -->
-                                        <input
-                                            type="number"
-                                            value={entry.value}
-                                        />
-                                    </div>
+    <!-- Modifiers Div -->
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h3 class="item">
+                    {localize(attributes.modifiers)}
+                </h3>
+                <div class="grid-container">
+                    <div class="stat-grid">
+                        {#each attributeModifiers as entry}
+                            <div class="stat-card">
+                                <div>
+                                    <h4 class="no-margin">
+                                        {entry.label}
+                                    </h4>
                                 </div>
-                            {/each}
-                        </div>
+                                <div class="stat-label">
+                                    <!-- Hidden input -->
+                                    <input type="number" value={entry.value} />
+                                </div>
+                            </div>
+                        {/each}
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
     <!-- Attribute Limits Div -->
     <div class="item-sheet-component">
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(attributes.limits)}</h3>
+                <h3 class="item">{localize(attributes.limits)}</h3>
                 <div class="stat-grid">
                     {#each attributeLimits as entry}
                         <div class="stat-card">
@@ -303,7 +311,7 @@
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(config.movement.movement)}</h3>
+                <h3 class="item">{localize(config.movement.movement)}</h3>
                 <div class="stat-grid">
                     {#each movement as entry}
                         <div class="stat-card">
@@ -326,7 +334,7 @@
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
             <div class="inner-background">
-                <h3 class="no-margin">{localize(config.karma.karma)}</h3>
+                <h3 class="item">{localize(config.karma.karma)}</h3>
                 <div class="stat-grid">
                     {#each karma as entry}
                         <div class="stat-card">

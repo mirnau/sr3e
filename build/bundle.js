@@ -266,7 +266,9 @@ class CharacterActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["sr3e", "sheet", "character"],
-      template: "systems/sr3e/default.html"
+      template: "systems/sr3e/default.html",
+      left: 200,
+      top: 200
     });
   }
 }
@@ -449,8 +451,10 @@ class MetahumanItemSheet extends ItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "systems/sr3e/default.html",
-      width: "auto",
-      height: "auto",
+      width: "100%",
+      height: "100%",
+      left: 200,
+      top: 200,
       classes: ["sr3e", "sheet", "item"],
       resizable: false
     });
@@ -3600,7 +3604,7 @@ var root_5 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no
 var root_6 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <h1 class="no-margin"><input name="name" type="text"></h1> <div class="stat-card"><h4 class="card-header">Select Priority</h4> <select name="system.priority" class="priority-select"></select></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="no-margin"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, false);
   const metahuman = mutable_state();
@@ -3759,10 +3763,10 @@ function MetahumanApp($$anchor, $$props) {
   var div_4 = child(div_3);
   var img = child(div_4);
   var event_handler = /* @__PURE__ */ derived(() => openFilePicker(document));
-  var h1 = sibling(div_4, 2);
-  var input = child(h1);
-  var div_5 = sibling(h1, 2);
-  var select = sibling(child(div_5), 2);
+  var input = sibling(div_4, 2);
+  var div_5 = sibling(input, 2);
+  var div_6 = sibling(child(div_5), 2);
+  var select = child(div_6);
   template_effect(() => {
     get$1(system);
     invalidate_inner_signals(() => {
@@ -3781,143 +3785,143 @@ function MetahumanApp($$anchor, $$props) {
     });
     append($$anchor2, option);
   });
-  var div_6 = sibling(div_1, 2);
-  var div_7 = child(div_6);
-  var div_8 = sibling(child(div_7), 2);
-  var h3 = child(div_8);
+  var div_7 = sibling(div_1, 2);
+  var div_8 = child(div_7);
+  var div_9 = sibling(child(div_8), 2);
+  var h3 = child(div_9);
   var text_1 = child(h3);
-  var div_9 = sibling(h3, 2);
-  each(div_9, 5, () => get$1(agerange), index, ($$anchor2, entry) => {
-    var div_10 = root_2$1();
-    var div_11 = child(div_10);
-    var h4 = child(div_11);
+  var div_10 = sibling(h3, 2);
+  each(div_10, 5, () => get$1(agerange), index, ($$anchor2, entry) => {
+    var div_11 = root_2$1();
+    var div_12 = child(div_11);
+    var h4 = child(div_12);
     var text_2 = child(h4);
-    var div_12 = sibling(div_11, 2);
-    var input_1 = child(div_12);
+    var div_13 = sibling(div_12, 2);
+    var input_1 = child(div_13);
     template_effect(() => {
       set_text(text_2, get$1(entry).label);
       set_value(input_1, get$1(entry).value);
     });
-    append($$anchor2, div_10);
+    append($$anchor2, div_11);
   });
-  var div_13 = sibling(div_6, 2);
-  var div_14 = child(div_13);
-  var div_15 = sibling(child(div_14), 2);
-  var h3_1 = child(div_15);
+  var div_14 = sibling(div_7, 2);
+  var div_15 = child(div_14);
+  var div_16 = sibling(child(div_15), 2);
+  var h3_1 = child(div_16);
   var text_3 = child(h3_1);
-  var div_16 = sibling(h3_1, 2);
-  each(div_16, 5, () => get$1(height), index, ($$anchor2, entry) => {
-    var div_17 = root_3$1();
-    var div_18 = child(div_17);
-    var h4_1 = child(div_18);
+  var div_17 = sibling(h3_1, 2);
+  each(div_17, 5, () => get$1(height), index, ($$anchor2, entry) => {
+    var div_18 = root_3$1();
+    var div_19 = child(div_18);
+    var h4_1 = child(div_19);
     var text_4 = child(h4_1);
-    var div_19 = sibling(div_18, 2);
-    var input_2 = child(div_19);
+    var div_20 = sibling(div_19, 2);
+    var input_2 = child(div_20);
     template_effect(() => {
       set_text(text_4, get$1(entry).label);
       set_value(input_2, get$1(entry).value);
     });
-    append($$anchor2, div_17);
+    append($$anchor2, div_18);
   });
-  var div_20 = sibling(div_13, 2);
-  var div_21 = child(div_20);
-  var div_22 = sibling(child(div_21), 2);
-  var h3_2 = child(div_22);
+  var div_21 = sibling(div_14, 2);
+  var div_22 = child(div_21);
+  var div_23 = sibling(child(div_22), 2);
+  var h3_2 = child(div_23);
   var text_5 = child(h3_2);
-  var div_23 = sibling(h3_2, 2);
-  each(div_23, 5, () => get$1(weight), index, ($$anchor2, entry) => {
-    var div_24 = root_4();
-    var div_25 = child(div_24);
-    var h4_2 = child(div_25);
+  var div_24 = sibling(h3_2, 2);
+  each(div_24, 5, () => get$1(weight), index, ($$anchor2, entry) => {
+    var div_25 = root_4();
+    var div_26 = child(div_25);
+    var h4_2 = child(div_26);
     var text_6 = child(h4_2);
-    var div_26 = sibling(div_25, 2);
-    var input_3 = child(div_26);
+    var div_27 = sibling(div_26, 2);
+    var input_3 = child(div_27);
     template_effect(() => {
       set_text(text_6, get$1(entry).label);
       set_value(input_3, get$1(entry).value);
     });
-    append($$anchor2, div_24);
+    append($$anchor2, div_25);
   });
-  var div_27 = sibling(div_20, 2);
-  var div_28 = child(div_27);
-  var div_29 = sibling(child(div_28), 2);
-  var h3_3 = child(div_29);
+  var div_28 = sibling(div_21, 2);
+  var div_29 = child(div_28);
+  var div_30 = sibling(child(div_29), 2);
+  var h3_3 = child(div_30);
   var text_7 = child(h3_3);
-  var div_30 = sibling(h3_3, 2);
-  var div_31 = child(div_30);
-  each(div_31, 5, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
-    var div_32 = root_5();
-    var div_33 = child(div_32);
-    var h4_3 = child(div_33);
+  var div_31 = sibling(h3_3, 2);
+  var div_32 = child(div_31);
+  each(div_32, 5, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
+    var div_33 = root_5();
+    var div_34 = child(div_33);
+    var h4_3 = child(div_34);
     var text_8 = child(h4_3);
-    var div_34 = sibling(div_33, 2);
-    var input_4 = child(div_34);
+    var div_35 = sibling(div_34, 2);
+    var input_4 = child(div_35);
     template_effect(() => {
       set_text(text_8, get$1(entry).label);
       set_value(input_4, get$1(entry).value);
     });
-    append($$anchor2, div_32);
+    append($$anchor2, div_33);
   });
-  var div_35 = sibling(div_27, 2);
-  var div_36 = child(div_35);
-  var div_37 = sibling(child(div_36), 2);
-  var h3_4 = child(div_37);
+  var div_36 = sibling(div_28, 2);
+  var div_37 = child(div_36);
+  var div_38 = sibling(child(div_37), 2);
+  var h3_4 = child(div_38);
   var text_9 = child(h3_4);
-  var div_38 = sibling(h3_4, 2);
-  each(div_38, 5, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
-    var div_39 = root_6();
-    var div_40 = child(div_39);
-    var h4_4 = child(div_40);
+  var div_39 = sibling(h3_4, 2);
+  each(div_39, 5, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
+    var div_40 = root_6();
+    var div_41 = child(div_40);
+    var h4_4 = child(div_41);
     var text_10 = child(h4_4);
-    var div_41 = sibling(div_40, 2);
-    var input_5 = child(div_41);
+    var div_42 = sibling(div_41, 2);
+    var input_5 = child(div_42);
     template_effect(() => {
       set_text(text_10, get$1(entry).label);
       set_value(input_5, get$1(entry).value);
     });
-    append($$anchor2, div_39);
+    append($$anchor2, div_40);
   });
-  var div_42 = sibling(div_35, 2);
-  var div_43 = child(div_42);
-  var div_44 = sibling(child(div_43), 2);
-  var h3_5 = child(div_44);
+  var div_43 = sibling(div_36, 2);
+  var div_44 = child(div_43);
+  var div_45 = sibling(child(div_44), 2);
+  var h3_5 = child(div_45);
   var text_11 = child(h3_5);
-  var div_45 = sibling(h3_5, 2);
-  each(div_45, 5, () => get$1(movement), index, ($$anchor2, entry) => {
-    var div_46 = root_7();
-    var div_47 = child(div_46);
-    var h4_5 = child(div_47);
+  var div_46 = sibling(h3_5, 2);
+  each(div_46, 5, () => get$1(movement), index, ($$anchor2, entry) => {
+    var div_47 = root_7();
+    var div_48 = child(div_47);
+    var h4_5 = child(div_48);
     var text_12 = child(h4_5);
-    var div_48 = sibling(div_47, 2);
-    var input_6 = child(div_48);
+    var div_49 = sibling(div_48, 2);
+    var input_6 = child(div_49);
     template_effect(() => {
       set_text(text_12, get$1(entry).label);
       set_value(input_6, get$1(entry).value);
     });
-    append($$anchor2, div_46);
+    append($$anchor2, div_47);
   });
-  var div_49 = sibling(div_42, 2);
-  var div_50 = child(div_49);
-  var div_51 = sibling(child(div_50), 2);
-  var h3_6 = child(div_51);
+  var div_50 = sibling(div_43, 2);
+  var div_51 = child(div_50);
+  var div_52 = sibling(child(div_51), 2);
+  var h3_6 = child(div_52);
   var text_13 = child(h3_6);
-  var div_52 = sibling(h3_6, 2);
-  each(div_52, 5, () => get$1(karma), index, ($$anchor2, entry) => {
-    var div_53 = root_8();
-    var div_54 = child(div_53);
-    var h4_6 = child(div_54);
+  var div_53 = sibling(h3_6, 2);
+  each(div_53, 5, () => get$1(karma), index, ($$anchor2, entry) => {
+    var div_54 = root_8();
+    var div_55 = child(div_54);
+    var h4_6 = child(div_55);
     var text_14 = child(h4_6);
-    var div_55 = sibling(div_54, 2);
-    var input_7 = child(div_55);
+    var div_56 = sibling(div_55, 2);
+    var input_7 = child(div_56);
     template_effect(() => {
       set_text(text_14, get$1(entry).label);
       set_value(input_7, get$1(entry).value);
     });
-    append($$anchor2, div_53);
+    append($$anchor2, div_54);
   });
-  var div_56 = sibling(div_49, 2);
-  var div_57 = child(div_56);
-  var node = sibling(child(div_57), 2);
+  var div_57 = sibling(div_50, 2);
+  var div_58 = child(div_57);
+  var node = sibling(child(div_58), 2);
   Editor(node, {
     get document() {
       return item();
@@ -3956,6 +3960,7 @@ function MetahumanApp($$anchor, $$props) {
     (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
   });
   bind_value(input, () => item().name, ($$value) => item(item().name = $$value, true));
+  event("change", input, (e) => item().update({ "system.priority": e.target.value }));
   bind_select_value(select, () => get$1(system).priority, ($$value) => mutate(system, get$1(system).priority = $$value));
   event("change", select, (e) => item().update({ "system.priority": e.target.value }));
   append($$anchor, div);
@@ -4472,9 +4477,8 @@ function registerHooks() {
     if (app.svelteApp) {
       unmount(app.svelteApp);
     }
-    const container = app.element[0].querySelector(".window-content");
+    let container = app.element[0].querySelector(".window-content");
     container.innerHTML = "";
-    console.log("app", app.item);
     app.svelteApp = mount(MetahumanApp, {
       target: container,
       props: {
