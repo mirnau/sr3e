@@ -236,7 +236,7 @@ body.mce-content-body input::placeholder,
 .sr3e.sheet.item input[type="text"],
 .sr3e.sheet.character input[type="text"] {
   background-color: #1c364b;
-  box-shadow: inset 0 0 10px #1df0ff;
+  box-shadow: inset 0 0 8px #1df0ff;
   border: none;
   font-size: 1.5rem;
   width: 100%;
@@ -280,15 +280,6 @@ body.mce-content-body input::placeholder,
 .sr3e.sheet.item img,
 .sr3e.sheet.character img {
   border: none;
-  background: red;
-}
-.sr3e.sheet.item img.small,
-.sr3e.sheet.character img.small {
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-.sr3e.sheet.item img.large,
-.sr3e.sheet.character img.large {
-  clip-path: polygon(1rem 0px, calc(100% - 1rem) 0px, 100% 1rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 1rem 100%, 0px calc(100% - 1rem), 0px 1rem);
 }
 .sr3e.sheet.item .fake-shadow,
 .sr3e.sheet.character .fake-shadow {
@@ -328,8 +319,8 @@ body.mce-content-body input::placeholder,
   width: 100%;
   aspect-ratio: 1/1;
   position: relative;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   background: #e792cb;
+  clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .sr3e.sheet.item .image-mask::before,
 .sr3e.sheet.character .image-mask::before {
@@ -338,7 +329,7 @@ body.mce-content-body input::placeholder,
   position: absolute;
   z-index: 1;
   pointer-events: none;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .sr3e.sheet.item .image-mask img,
 .sr3e.sheet.character .image-mask img {
@@ -350,7 +341,7 @@ body.mce-content-body input::placeholder,
   height: calc(100% - 2px);
   object-fit: cover;
   z-index: 100;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .sr3e.sheet.item select,
 .sr3e.sheet.character select {

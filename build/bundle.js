@@ -459,6 +459,10 @@ class MetahumanItemSheet extends ItemSheet {
       resizable: false
     });
   }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
 }
 const PUBLIC_VERSION = "5";
 if (typeof window !== "undefined")
@@ -3960,7 +3964,7 @@ function MetahumanApp($$anchor, $$props) {
     (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
   });
   bind_value(input, () => item().name, ($$value) => item(item().name = $$value, true));
-  event("change", input, (e) => item().update({ "system.priority": e.target.value }));
+  event("change", input, (e) => item().update({ "name": e.target.value }));
   bind_select_value(select, () => get$1(system).priority, ($$value) => mutate(system, get$1(system).priority = $$value));
   event("change", select, (e) => item().update({ "system.priority": e.target.value }));
   append($$anchor, div);
@@ -4477,7 +4481,7 @@ function registerHooks() {
     if (app.svelteApp) {
       unmount(app.svelteApp);
     }
-    let container = app.element[0].querySelector(".window-content");
+    const container = app.element[0].querySelector(".window-content");
     container.innerHTML = "";
     app.svelteApp = mount(MetahumanApp, {
       target: container,
@@ -4486,6 +4490,11 @@ function registerHooks() {
         config: CONFIG.sr3e
       }
     });
+  });
+  Hooks.on(hooks.closeMetahumanItemSheet, (app, html2, data) => {
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
   });
   Hooks.once(hooks.init, () => {
     configureProject();

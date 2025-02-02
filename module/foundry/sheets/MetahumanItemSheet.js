@@ -11,4 +11,7 @@ export default class MetahumanItemSheet extends ItemSheet {
             resizable: false
         });
     }
+
+    /** @override prevent submission, since Svelte is managing state */
+    _onSubmit(event) { return; }
 }

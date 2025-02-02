@@ -159,7 +159,7 @@
                     bind:value={item.name}
                     on:change={(e) =>
                         item.update({
-                            "system.priority": e.target.value,
+                            "name": e.target.value,
                         })}
                 />
                 <div class="stat-card">

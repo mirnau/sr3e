@@ -6,9 +6,9 @@ import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
 import MetahumanApp from "./module/svelte/apps/MetahumanApp.svelte";
 import { mount, unmount } from "svelte";
 import { sr3e } from "./module/foundry/config.js";
-import { 
-  hooks, 
-  flags 
+import {
+  hooks,
+  flags
 } from "./module/foundry/services/commonConsts.js";
 import {
   closeMainMasonryGrid,
@@ -22,27 +22,34 @@ function registerHooks() {
 
   Hooks.on(hooks.renderMetahumanItemSheet, (app, html, data) => {
 
-      if(app.svelteApp) {
-        unmount(app.svelteApp);
-      }
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
 
-      let container = app.element[0].querySelector(".window-content");
+    const container = app.element[0].querySelector(".window-content");
 
-      container.innerHTML = '';
-  
-      app.svelteApp = mount(MetahumanApp, {
-        target: container,
-        props: {
-          item: app.item,
-          config: CONFIG.sr3e,
-        },
-      });
+    container.innerHTML = '';
+
+    app.svelteApp = mount(MetahumanApp, {
+      target: container,
+      props: {
+        item: app.item,
+        config: CONFIG.sr3e,
+      },
+    });
+  });
+
+  Hooks.on(hooks.closeMetahumanItemSheet, (app, html, data) => {
+
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
   });
 
   Hooks.once(hooks.init, () => {
-    
+
     configureProject();
-    
+
     registerActorTypes([
       { type: "character", model: CharacterModel, sheet: CharacterActorSheet },
     ]);
@@ -50,9 +57,9 @@ function registerHooks() {
     registerItemTypes([
       { type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
     ]);
-    
+
     Log.success("Initialization Completed", "sr3e.js");
-    
+
   });
 }
 
