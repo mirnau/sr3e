@@ -28,10 +28,25 @@
 .sr3e.sheet.character {
 
     .stat-grid {
-        display: grid;
+        display: inline-grid;
+        
         grid-template-columns: repeat(3, 1fr);
+
+        &.one-column {
+            display: inline-grid;
+            width: fit-content;
+            max-width: min-content;
+            grid-template-columns: repeat(1, auto);
+        }
+        
+        &.two-column {
+            display: inline-grid;
+            width: fit-content;
+            max-width: min-content;
+            grid-template-columns: repeat(2, auto);
+        }
+
         gap: 0.25rem;
-        padding: 0.25rem;
     }
 
     .details-foldout {
@@ -45,25 +60,27 @@
         .apply-container();
 
         .inner-background {
+            .apply-container();
+            position: relative;
+            z-index: 10;
+
             .header-icon {
                 justify-content: center;
             }
+
+            &.slim {
+                width: auto;
+                display: inline-block;
+                flex: 0 1 auto;
+                white-space: nowrap;
+            }
         }
-    }
 
-    .inner-background {
-        .apply-container();
-        position: relative;
-        z-index: 10;
-
-    }
-
-    .editor-field {
-
-        z-index: 100;
-        min-height: 10rem;
-        height: 100%;
-        color: @text-color;
-        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+        &.slim {
+            width: auto;
+            display: inline-block;
+            flex: 0 1 auto;
+            white-space: nowrap;
+        }
     }
 }

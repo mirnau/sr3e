@@ -146,7 +146,7 @@
                         title={item.name}
                         role="presentation"
                         alt={item.name}
-                        on:click={openFilePicker(document)}
+                        on:click={openFilePicker(item)}
                     />
                 </div>
 
@@ -308,11 +308,11 @@
 
     <!-- Movement Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="inner-background-container slim">
             <div class="fake-shadow"></div>
             <div class="inner-background">
                 <h3 class="item">{localize(config.movement.movement)}</h3>
-                <div class="stat-grid">
+                <div class="stat-grid two-column">
                     {#each movement as entry}
                         <div class="stat-card">
                             <div>
@@ -331,11 +331,11 @@
 
     <!-- Karma Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="inner-background-container slim">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="inner-background slim">
                 <h3 class="item">{localize(config.karma.karma)}</h3>
-                <div class="stat-grid">
+                <div class="stat-grid one-column">
                     {#each karma as entry}
                         <div class="stat-card">
                             <div>
