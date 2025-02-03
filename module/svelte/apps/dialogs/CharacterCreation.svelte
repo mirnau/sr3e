@@ -46,8 +46,8 @@
     $: weightMin = 30;
     $: weightMax = 250;
 
-    $: metahumanSelection = metahumans[0]?.id;
-    $: magicSelection = magics[0]?.id;
+    let metahumanSelection = "";
+    let magicSelection = "";
     let attributePoints = 0;
     let skillPoints = 0;
     let nuyen = 0;
@@ -192,6 +192,9 @@
                             (item) => item.type === e.target.value,
                         ).img)}
                 >
+                <option selected value={""}>
+                    Localize Select
+                </option>
                     {#each metahumans as metahuman}
                         <option value={metahuman.id}
                             >{metahuman.name} {metahuman.system.priority}
@@ -200,6 +203,9 @@
                 </select>
 
                 <select id="magic" bind:value={magicSelection}>
+                    <option selected value={""}>
+                        Localize Select
+                    </option>
                     {#each magics as magic}
                         <option value={magic.id}
                             >{magic.name} {magic.system.priority}</option

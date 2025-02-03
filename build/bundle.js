@@ -4586,7 +4586,7 @@ var root_2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <div><h1>Placeholder</h1></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Sliders</h1> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Multi Selections</h1> <select id="metahuman"></select> <select id="magic"></select> <select id="attributePoints"><option selected>Localize Select</option><!></select> <select id="skillPoints"><option selected>Localize Select</option><!></select> <select id="nuyen"><option selected>Localize Select</option><!></select></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Randomize</h1></div></div></div></div>`);
+var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <div><h1>Placeholder</h1></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Sliders</h1> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Multi Selections</h1> <select id="metahuman"><option selected>Localize Select</option><!></select> <select id="magic"><option selected>Localize Select</option><!></select> <select id="attributePoints"><option selected>Localize Select</option><!></select> <select id="skillPoints"><option selected>Localize Select</option><!></select> <select id="nuyen"><option selected>Localize Select</option><!></select></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Randomize</h1></div></div></div></div>`);
 function CharacterCreation($$anchor, $$props) {
   push($$props, false);
   const age = mutable_state();
@@ -4598,8 +4598,6 @@ function CharacterCreation($$anchor, $$props) {
   const weight = mutable_state();
   const weightMin = mutable_state();
   const weightMax = mutable_state();
-  const metahumanSelection = mutable_state();
-  const magicSelection = mutable_state();
   prop($$props, "resolve", 24, () => ({}));
   let actor = prop($$props, "actor", 28, () => ({}));
   let metahumanImg = mutable_state("");
@@ -4627,6 +4625,8 @@ function CharacterCreation($$anchor, $$props) {
     { priority: "E", points: 5e3 }
   ];
   let img = mutable_state("");
+  let metahumanSelection = mutable_state("");
+  let magicSelection = mutable_state("");
   let attributePoints = mutable_state(0);
   let skillPoints = mutable_state(0);
   let nuyen = mutable_state(0);
@@ -4686,14 +4686,6 @@ function CharacterCreation($$anchor, $$props) {
   }, () => {
     set(weightMax, 250);
   });
-  legacy_pre_effect(() => get$1(metahumans), () => {
-    var _a;
-    set(metahumanSelection, (_a = get$1(metahumans)[0]) == null ? void 0 : _a.id);
-  });
-  legacy_pre_effect(() => get$1(magics), () => {
-    var _a;
-    set(magicSelection, (_a = get$1(magics)[0]) == null ? void 0 : _a.id);
-  });
   legacy_pre_effect_reset();
   init();
   var div = root();
@@ -4732,17 +4724,20 @@ function CharacterCreation($$anchor, $$props) {
       get$1(metahumans);
     });
   });
-  each(select, 5, () => get$1(metahumans), index, ($$anchor2, metahuman) => {
-    var option = root_1();
-    var option_value = {};
-    var text_3 = child(option);
+  var option = child(select);
+  option.value = null == (option.__value = "") ? "" : "";
+  var node = sibling(option);
+  each(node, 1, () => get$1(metahumans), index, ($$anchor2, metahuman) => {
+    var option_1 = root_1();
+    var option_1_value = {};
+    var text_3 = child(option_1);
     template_effect(() => {
-      if (option_value !== (option_value = get$1(metahuman).id)) {
-        option.value = null == (option.__value = get$1(metahuman).id) ? "" : get$1(metahuman).id;
+      if (option_1_value !== (option_1_value = get$1(metahuman).id)) {
+        option_1.value = null == (option_1.__value = get$1(metahuman).id) ? "" : get$1(metahuman).id;
       }
       set_text(text_3, `${get$1(metahuman).name ?? ""} ${get$1(metahuman).system.priority ?? ""}`);
     });
-    append($$anchor2, option);
+    append($$anchor2, option_1);
   });
   var select_1 = sibling(select, 2);
   template_effect(() => {
@@ -4751,17 +4746,20 @@ function CharacterCreation($$anchor, $$props) {
       get$1(magics);
     });
   });
-  each(select_1, 5, () => get$1(magics), index, ($$anchor2, magic) => {
-    var option_1 = root_2();
-    var option_1_value = {};
-    var text_4 = child(option_1);
+  var option_2 = child(select_1);
+  option_2.value = null == (option_2.__value = "") ? "" : "";
+  var node_1 = sibling(option_2);
+  each(node_1, 1, () => get$1(magics), index, ($$anchor2, magic) => {
+    var option_3 = root_2();
+    var option_3_value = {};
+    var text_4 = child(option_3);
     template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(magic).id)) {
-        option_1.value = null == (option_1.__value = get$1(magic).id) ? "" : get$1(magic).id;
+      if (option_3_value !== (option_3_value = get$1(magic).id)) {
+        option_3.value = null == (option_3.__value = get$1(magic).id) ? "" : get$1(magic).id;
       }
       set_text(text_4, `${get$1(magic).name ?? ""} ${get$1(magic).system.priority ?? ""}`);
     });
-    append($$anchor2, option_1);
+    append($$anchor2, option_3);
   });
   var select_2 = sibling(select_1, 2);
   template_effect(() => {
@@ -4769,20 +4767,20 @@ function CharacterCreation($$anchor, $$props) {
     invalidate_inner_signals(() => {
     });
   });
-  var option_2 = child(select_2);
-  option_2.value = null == (option_2.__value = 0) ? "" : 0;
-  var node = sibling(option_2);
-  each(node, 1, () => attributePointCollection, index, ($$anchor2, attribute) => {
-    var option_3 = root_3();
-    var option_3_value = {};
-    var text_5 = child(option_3);
+  var option_4 = child(select_2);
+  option_4.value = null == (option_4.__value = 0) ? "" : 0;
+  var node_2 = sibling(option_4);
+  each(node_2, 1, () => attributePointCollection, index, ($$anchor2, attribute) => {
+    var option_5 = root_3();
+    var option_5_value = {};
+    var text_5 = child(option_5);
     template_effect(() => {
-      if (option_3_value !== (option_3_value = get$1(attribute).points)) {
-        option_3.value = null == (option_3.__value = get$1(attribute).points) ? "" : get$1(attribute).points;
+      if (option_5_value !== (option_5_value = get$1(attribute).points)) {
+        option_5.value = null == (option_5.__value = get$1(attribute).points) ? "" : get$1(attribute).points;
       }
       set_text(text_5, `${get$1(attribute).points ?? ""} ${get$1(attribute).priority ?? ""}`);
     });
-    append($$anchor2, option_3);
+    append($$anchor2, option_5);
   });
   var select_3 = sibling(select_2, 2);
   template_effect(() => {
@@ -4790,20 +4788,20 @@ function CharacterCreation($$anchor, $$props) {
     invalidate_inner_signals(() => {
     });
   });
-  var option_4 = child(select_3);
-  option_4.value = null == (option_4.__value = 0) ? "" : 0;
-  var node_1 = sibling(option_4);
-  each(node_1, 1, () => skillPointCollection, index, ($$anchor2, skill) => {
-    var option_5 = root_4();
-    var option_5_value = {};
-    var text_6 = child(option_5);
+  var option_6 = child(select_3);
+  option_6.value = null == (option_6.__value = 0) ? "" : 0;
+  var node_3 = sibling(option_6);
+  each(node_3, 1, () => skillPointCollection, index, ($$anchor2, skill) => {
+    var option_7 = root_4();
+    var option_7_value = {};
+    var text_6 = child(option_7);
     template_effect(() => {
-      if (option_5_value !== (option_5_value = get$1(skill).points)) {
-        option_5.value = null == (option_5.__value = get$1(skill).points) ? "" : get$1(skill).points;
+      if (option_7_value !== (option_7_value = get$1(skill).points)) {
+        option_7.value = null == (option_7.__value = get$1(skill).points) ? "" : get$1(skill).points;
       }
       set_text(text_6, `${get$1(skill).points ?? ""} ${get$1(skill).priority ?? ""}`);
     });
-    append($$anchor2, option_5);
+    append($$anchor2, option_7);
   });
   var select_4 = sibling(select_3, 2);
   template_effect(() => {
@@ -4811,24 +4809,24 @@ function CharacterCreation($$anchor, $$props) {
     invalidate_inner_signals(() => {
     });
   });
-  var option_6 = child(select_4);
-  option_6.value = null == (option_6.__value = 0) ? "" : 0;
-  var node_2 = sibling(option_6);
-  each(node_2, 1, () => assets, index, ($$anchor2, asset) => {
-    var option_7 = root_5();
-    var option_7_value = {};
-    var text_7 = child(option_7);
+  var option_8 = child(select_4);
+  option_8.value = null == (option_8.__value = 0) ? "" : 0;
+  var node_4 = sibling(option_8);
+  each(node_4, 1, () => assets, index, ($$anchor2, asset) => {
+    var option_9 = root_5();
+    var option_9_value = {};
+    var text_7 = child(option_9);
     template_effect(
       ($0) => {
-        if (option_7_value !== (option_7_value = get$1(asset).points)) {
-          option_7.value = null == (option_7.__value = get$1(asset).points) ? "" : get$1(asset).points;
+        if (option_9_value !== (option_9_value = get$1(asset).points)) {
+          option_9.value = null == (option_9.__value = get$1(asset).points) ? "" : get$1(asset).points;
         }
         set_text(text_7, `${$0 ?? ""} ${get$1(asset).priority ?? ""}`);
       },
       [() => currency(get$1(asset).points)],
       derived_safe_equal
     );
-    append($$anchor2, option_7);
+    append($$anchor2, option_9);
   });
   template_effect(() => {
     set_attribute(img_1, "src", get$1(img));
