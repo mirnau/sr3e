@@ -55,3 +55,10 @@ sr3e.traits = {
     agerange: "sr3e.traits.agerange",
     metahuman: "sr3e.traits.metahuman",
 }
+
+sr3e.vision = {
+    vision: "sr3e.vision.vision",
+    type: "sr3e.vision.type",
+    description: "sr3e.vision.description",
+    rules: "sr3e.vision.rules",
+}

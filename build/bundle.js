@@ -271,6 +271,10 @@ class CharacterActorSheet extends ActorSheet {
       top: 200
     });
   }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
 }
 class MetahumanModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
@@ -419,7 +423,7 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
       }),
       // Vision
       vision: new foundry.data.fields.SchemaField({
-        visionType: new foundry.data.fields.StringField({
+        type: new foundry.data.fields.StringField({
           required: true,
           initial: ""
         }),
@@ -447,7 +451,7 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-class MetahumanItemSheet extends ItemSheet {
+class MagicItemSheet extends ItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       template: "systems/sr3e/default.html",
@@ -3531,18 +3535,20 @@ function localize(key) {
   return game.i18n.localize(key);
 }
 function openFilePicker(document2) {
-  new FilePicker({
-    type: "image",
-    current: document2.img,
-    // current image path
-    callback: (path) => {
-      document2.update({ img: path }, { render: true });
-    }
-  }).render(true);
+  return new Promise((resolve) => {
+    new FilePicker({
+      type: "image",
+      current: document2.img,
+      callback: (path) => {
+        document2.update({ img: path }, { render: true });
+        resolve(path);
+      }
+    }).render(true);
+  });
 }
-var root_1$2 = /* @__PURE__ */ template(`<div class="editor"></div>`);
-var root_2$2 = /* @__PURE__ */ template(`<div class="editor-readonly"></div>`);
-var root$4 = /* @__PURE__ */ template(`<div class="editor-field"><!></div>`);
+var root_1$3 = /* @__PURE__ */ template(`<div class="editor"></div>`);
+var root_2$3 = /* @__PURE__ */ template(`<div class="editor-readonly"></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="editor-field"><!></div>`);
 function Editor($$anchor, $$props) {
   push($$props, false);
   let document2 = prop($$props, "document", 24, () => ({}));
@@ -3579,16 +3585,16 @@ function Editor($$anchor, $$props) {
     Log.success("Editor initialized successfully", "Editor.svelte", get$1(editorContainer));
   });
   init();
-  var div = root$4();
+  var div = root$5();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$2();
+      var div_1 = root_1$3();
       bind_this(div_1, ($$value) => set(editorContainer, $$value), () => get$1(editorContainer));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$2();
+      var div_2 = root_2$3();
       bind_this(div_2, ($$value) => set(editorContainer, $$value), () => get$1(editorContainer));
       append($$anchor2, div_2);
     };
@@ -3600,15 +3606,16 @@ function Editor($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root_3$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root_4 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root_5 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2$2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_3$2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_4$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_5$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_6 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
+var root_9 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="text"></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="sr3e"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, false);
   const metahuman = mutable_state();
@@ -3624,6 +3631,7 @@ function MetahumanApp($$anchor, $$props) {
   let common = config().common;
   let movement = mutable_state(config().movement);
   let karma = mutable_state(config().karma);
+  let vision = mutable_state(config().vision);
   let traits = config().traits;
   legacy_pre_effect(() => get$1(system), () => {
     set(metahuman, get$1(system));
@@ -3758,9 +3766,28 @@ function MetahumanApp($$anchor, $$props) {
       }
     ]);
   });
+  legacy_pre_effect(
+    () => (get$1(vision), get$1(metahuman)),
+    () => {
+      set(vision, [
+        {
+          label: localize(get$1(vision).type),
+          value: get$1(metahuman).vision.type
+        },
+        {
+          label: localize(get$1(vision).description),
+          value: get$1(metahuman).vision.description
+        },
+        {
+          label: localize(get$1(vision).rules),
+          value: get$1(metahuman).vision.rules
+        }
+      ]);
+    }
+  );
   legacy_pre_effect_reset();
   init();
-  var div = root$3();
+  var div = root$4();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -3778,7 +3805,7 @@ function MetahumanApp($$anchor, $$props) {
     });
   });
   each(select, 4, () => ["C", "D", "E"], index, ($$anchor2, priority) => {
-    var option = root_1$1();
+    var option = root_1$2();
     var option_value = {};
     var text = child(option);
     template_effect(() => {
@@ -3796,7 +3823,7 @@ function MetahumanApp($$anchor, $$props) {
   var text_1 = child(h3);
   var div_10 = sibling(h3, 2);
   each(div_10, 5, () => get$1(agerange), index, ($$anchor2, entry) => {
-    var div_11 = root_2$1();
+    var div_11 = root_2$2();
     var div_12 = child(div_11);
     var h4 = child(div_12);
     var text_2 = child(h4);
@@ -3815,7 +3842,7 @@ function MetahumanApp($$anchor, $$props) {
   var text_3 = child(h3_1);
   var div_17 = sibling(h3_1, 2);
   each(div_17, 5, () => get$1(height), index, ($$anchor2, entry) => {
-    var div_18 = root_3$1();
+    var div_18 = root_3$2();
     var div_19 = child(div_18);
     var h4_1 = child(div_19);
     var text_4 = child(h4_1);
@@ -3834,7 +3861,7 @@ function MetahumanApp($$anchor, $$props) {
   var text_5 = child(h3_2);
   var div_24 = sibling(h3_2, 2);
   each(div_24, 5, () => get$1(weight), index, ($$anchor2, entry) => {
-    var div_25 = root_4();
+    var div_25 = root_4$1();
     var div_26 = child(div_25);
     var h4_2 = child(div_26);
     var text_6 = child(h4_2);
@@ -3854,7 +3881,7 @@ function MetahumanApp($$anchor, $$props) {
   var div_31 = sibling(h3_3, 2);
   var div_32 = child(div_31);
   each(div_32, 5, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
-    var div_33 = root_5();
+    var div_33 = root_5$1();
     var div_34 = child(div_33);
     var h4_3 = child(div_34);
     var text_8 = child(h4_3);
@@ -3925,7 +3952,26 @@ function MetahumanApp($$anchor, $$props) {
   });
   var div_57 = sibling(div_50, 2);
   var div_58 = child(div_57);
-  var node = sibling(child(div_58), 2);
+  var div_59 = sibling(child(div_58), 2);
+  var h3_7 = child(div_59);
+  var text_15 = child(h3_7);
+  var div_60 = sibling(h3_7, 2);
+  each(div_60, 5, () => get$1(vision), index, ($$anchor2, entry) => {
+    var div_61 = root_9();
+    var div_62 = child(div_61);
+    var h4_7 = child(div_62);
+    var text_16 = child(h4_7);
+    var div_63 = sibling(div_62, 2);
+    var input_8 = child(div_63);
+    template_effect(() => {
+      set_text(text_16, get$1(entry).label);
+      set_value(input_8, get$1(entry).value);
+    });
+    append($$anchor2, div_61);
+  });
+  var div_64 = sibling(div_57, 2);
+  var div_65 = child(div_64);
+  var node = sibling(child(div_65), 2);
   Editor(node, {
     get document() {
       return item();
@@ -3936,7 +3982,7 @@ function MetahumanApp($$anchor, $$props) {
     }
   });
   template_effect(
-    ($0, $1, $2, $3, $4, $5, $6) => {
+    ($0, $1, $2, $3, $4, $5, $6, $7) => {
       set_attribute(img, "src", item().img);
       set_attribute(img, "title", item().name);
       set_attribute(img, "alt", item().name);
@@ -3947,6 +3993,7 @@ function MetahumanApp($$anchor, $$props) {
       set_text(text_9, $4);
       set_text(text_11, $5);
       set_text(text_13, $6);
+      set_text(text_15, $7);
     },
     [
       () => localize(traits.agerange),
@@ -3955,7 +4002,8 @@ function MetahumanApp($$anchor, $$props) {
       () => localize(attributes.modifiers),
       () => localize(attributes.limits),
       () => localize(config().movement.movement),
-      () => localize(config().karma.karma)
+      () => localize(config().karma.karma),
+      () => localize(config().vision.vision)
     ],
     derived_safe_equal
   );
@@ -3964,7 +4012,7 @@ function MetahumanApp($$anchor, $$props) {
     (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
   });
   bind_value(input, () => item().name, ($$value) => item(item().name = $$value, true));
-  event("change", input, (e) => item().update({ "name": e.target.value }));
+  event("change", input, (e) => item().update({ name: e.target.value }));
   bind_select_value(select, () => get$1(system).priority, ($$value) => mutate(system, get$1(system).priority = $$value));
   event("change", select, (e) => item().update({ "system.priority": e.target.value }));
   append($$anchor, div);
@@ -4020,6 +4068,12 @@ sr3e.traits = {
   weight: "sr3e.traits.weight",
   agerange: "sr3e.traits.agerange",
   metahuman: "sr3e.traits.metahuman"
+};
+sr3e.vision = {
+  vision: "sr3e.vision.vision",
+  type: "sr3e.vision.type",
+  description: "sr3e.vision.description",
+  rules: "sr3e.vision.rules"
 };
 const hooks = {
   renderCharacterActorSheet: "renderCharacterActorSheet",
@@ -4213,10 +4267,10 @@ function getActorStore(actorId, actorName) {
   }
   return actorStores.get(actorId);
 }
-var root_1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$2 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="dossier-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <!></details></div>`);
+var root_1$1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_3$1 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="dossier-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <!></details></div>`);
 function Dossier($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4264,15 +4318,15 @@ function Dossier($$anchor, $$props) {
   });
   legacy_pre_effect_reset();
   init();
-  var div = root$2();
+  var div = root$3();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1();
+      var div_1 = root_1$1();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2();
+      var div_2 = root_2$1();
       var img = child(div_2);
       var event_handler = /* @__PURE__ */ derived(() => openFilePicker(document));
       template_effect(() => {
@@ -4297,7 +4351,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = sibling(summary, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_3 = root_3();
+      var div_3 = root_3$1();
       var div_4 = child(div_3);
       var input = child(div_4);
       var div_5 = sibling(div_4, 2);
@@ -4356,7 +4410,7 @@ function Dossier($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$1 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   let actor = $$props.app.actor;
@@ -4373,7 +4427,7 @@ function CharacterSheetApp($$anchor, $$props) {
     initializeMasonryLayout(args);
     Log.success("Masonry layout initialized", "CharacterSheetApp.svelte");
   });
-  var div = root$1();
+  var div = root$2();
   var div_1 = sibling(child(div), 4);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -4387,7 +4441,7 @@ function CharacterSheetApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4422,7 +4476,7 @@ function NeonName($$anchor, $$props) {
   });
   legacy_pre_effect_reset();
   init();
-  var div = root();
+  var div = root$1();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
@@ -4474,26 +4528,442 @@ function closeMainMasonryGrid(app) {
     console.info("Svelte App Destroyed.", CharacterActorSheet.name);
   }
 }
-function registerHooks() {
-  Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
-  Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
-  Hooks.on(hooks.renderMetahumanItemSheet, (app, html2, data) => {
-    if (app.svelteApp) {
-      unmount(app.svelteApp);
-    }
-    const container = app.element[0].querySelector(".window-content");
-    container.innerHTML = "";
-    app.svelteApp = mount(MetahumanApp, {
-      target: container,
-      props: {
-        item: app.item,
-        config: CONFIG.sr3e
+class ItemDataService {
+  static getDefaultHumanItem() {
+    return {
+      name: "Human",
+      type: "metahuman",
+      img: "systems/sr3e/textures/ai-generated/humans.webp",
+      system: {
+        lifespan: { min: 10, average: 30, max: 100 },
+        physical: {
+          height: { min: 150, average: 170, max: 200 },
+          weight: { min: 50, average: 70, max: 120 }
+        },
+        modifiers: {
+          strength: 0,
+          quickness: 0,
+          body: 0,
+          charisma: 0,
+          intelligence: 0,
+          willpower: 0
+        },
+        attributeLimits: {
+          strength: 6,
+          quickness: 6,
+          body: 6,
+          charisma: 6,
+          intelligence: 6,
+          willpower: 6
+        },
+        karmaAdvancementFraction: { value: 0.1 },
+        vision: {
+          type: "Normal",
+          description: "Standard human vision",
+          rules: { darknessPenaltyNegation: "" }
+        },
+        priority: "E",
+        description: "<p>Humans are the baseline metatype, versatile and adaptive.</p>"
       }
+    };
+  }
+  static getDefaultMagic() {
+    return {
+      name: "Full Shaman",
+      type: "magic",
+      system: {
+        type: "Full",
+        priority: "A",
+        focus: "None",
+        drainResistanceAttribute: "Charisma",
+        totem: "Bear"
+      }
+    };
+  }
+}
+var root_1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2 = /* @__PURE__ */ template(`<option> </option>`);
+var root_3 = /* @__PURE__ */ template(`<option> </option>`);
+var root_4 = /* @__PURE__ */ template(`<option> </option>`);
+var root_5 = /* @__PURE__ */ template(`<option> </option>`);
+var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <div><h1>Placeholder</h1></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Sliders</h1> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Multi Selections</h1> <select id="metahuman"></select> <select id="magic"></select> <select id="attributePoints"><option selected>Localize Select</option><!></select> <select id="skillPoints"><option selected>Localize Select</option><!></select> <select id="nuyen"><option selected>Localize Select</option><!></select></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Randomize</h1></div></div></div></div>`);
+function CharacterCreation($$anchor, $$props) {
+  push($$props, false);
+  const age = mutable_state();
+  const ageMin = mutable_state();
+  const ageMax = mutable_state();
+  const height = mutable_state();
+  const heightMin = mutable_state();
+  const heightMax = mutable_state();
+  const weight = mutable_state();
+  const weightMin = mutable_state();
+  const weightMax = mutable_state();
+  const metahumanSelection = mutable_state();
+  const magicSelection = mutable_state();
+  prop($$props, "resolve", 24, () => ({}));
+  let actor = prop($$props, "actor", 28, () => ({}));
+  let metahumanImg = mutable_state("");
+  let metahumans = mutable_state([]);
+  let magics = mutable_state([]);
+  let attributePointCollection = [
+    { priority: "A", points: 30 },
+    { priority: "B", points: 27 },
+    { priority: "C", points: 24 },
+    { priority: "D", points: 21 },
+    { priority: "E", points: 18 }
+  ];
+  let skillPointCollection = [
+    { priority: "A", points: 50 },
+    { priority: "B", points: 40 },
+    { priority: "C", points: 34 },
+    { priority: "D", points: 30 },
+    { priority: "E", points: 27 }
+  ];
+  let assets = [
+    { priority: "A", points: 1e6 },
+    { priority: "B", points: 4e5 },
+    { priority: "C", points: 9e4 },
+    { priority: "D", points: 2e4 },
+    { priority: "E", points: 5e3 }
+  ];
+  let img = mutable_state("");
+  let attributePoints = mutable_state(0);
+  let skillPoints = mutable_state(0);
+  let nuyen = mutable_state(0);
+  onMount(async () => {
+    var _a;
+    set(metahumans, game.items.filter((item) => item.type === "metahuman"));
+    if (get$1(metahumans).length === 0) {
+      const humanItem = ItemDataService.getDefaultHumanItem();
+      Item.create(humanItem);
+      set(metahumans, game.items.filter((item) => item.type === "metahuman"));
+    }
+    set(magics, game.items.filter((item) => item.type === "magic"));
+    if (get$1(magics).length === 0) {
+      const magicItem = ItemDataService.getDefaultMagic();
+      Item.create(magicItem);
+      set(magics, game.items.filter((item) => item.type === "magic"));
+    }
+    set(metahumanImg, (_a = get$1(metahumans).find((item) => item.name.toLowerCase() === "human")) == null ? void 0 : _a.img);
+    set(img, actor().img);
+  });
+  function currency(number) {
+    return `¥${number.toLocaleString()}`;
+  }
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    actor(actor());
+  });
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    set(age, actor().system.profile.age);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(ageMin, 0);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(ageMax, 100);
+  });
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    set(height, actor().system.profile.height);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(heightMin, 70);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(heightMax, 220);
+  });
+  legacy_pre_effect(() => deep_read_state(actor()), () => {
+    set(weight, actor().system.profile.weight);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(weightMin, 30);
+  });
+  legacy_pre_effect(() => {
+  }, () => {
+    set(weightMax, 250);
+  });
+  legacy_pre_effect(() => get$1(metahumans), () => {
+    var _a;
+    set(metahumanSelection, (_a = get$1(metahumans)[0]) == null ? void 0 : _a.id);
+  });
+  legacy_pre_effect(() => get$1(magics), () => {
+    var _a;
+    set(magicSelection, (_a = get$1(magics)[0]) == null ? void 0 : _a.id);
+  });
+  legacy_pre_effect_reset();
+  init();
+  var div = root();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = sibling(child(div_2), 2);
+  var div_4 = child(div_3);
+  var img_1 = child(div_4);
+  var input = sibling(div_4, 2);
+  var div_5 = sibling(div_1, 2);
+  var div_6 = child(div_5);
+  var div_7 = sibling(child(div_6), 2);
+  var div_8 = child(div_7);
+  var img_2 = child(div_8);
+  var div_9 = sibling(div_5, 2);
+  var div_10 = child(div_9);
+  var div_11 = sibling(child(div_10), 2);
+  var h3 = sibling(child(div_11), 2);
+  var text = child(h3);
+  var input_1 = sibling(h3, 2);
+  var h3_1 = sibling(input_1, 2);
+  var text_1 = child(h3_1);
+  var input_2 = sibling(h3_1, 2);
+  var h3_2 = sibling(input_2, 2);
+  var text_2 = child(h3_2);
+  var input_3 = sibling(h3_2, 2);
+  var div_12 = sibling(div_9, 2);
+  var div_13 = child(div_12);
+  var div_14 = sibling(child(div_13), 2);
+  var select = sibling(child(div_14), 2);
+  template_effect(() => {
+    get$1(metahumanSelection);
+    invalidate_inner_signals(() => {
+      get$1(metahumanImg);
+      game;
+      get$1(metahumans);
     });
   });
-  Hooks.on(hooks.closeMetahumanItemSheet, (app, html2, data) => {
-    if (app.svelteApp) {
-      unmount(app.svelteApp);
+  each(select, 5, () => get$1(metahumans), index, ($$anchor2, metahuman) => {
+    var option = root_1();
+    var option_value = {};
+    var text_3 = child(option);
+    template_effect(() => {
+      if (option_value !== (option_value = get$1(metahuman).id)) {
+        option.value = null == (option.__value = get$1(metahuman).id) ? "" : get$1(metahuman).id;
+      }
+      set_text(text_3, `${get$1(metahuman).name ?? ""} ${get$1(metahuman).system.priority ?? ""}`);
+    });
+    append($$anchor2, option);
+  });
+  var select_1 = sibling(select, 2);
+  template_effect(() => {
+    get$1(magicSelection);
+    invalidate_inner_signals(() => {
+      get$1(magics);
+    });
+  });
+  each(select_1, 5, () => get$1(magics), index, ($$anchor2, magic) => {
+    var option_1 = root_2();
+    var option_1_value = {};
+    var text_4 = child(option_1);
+    template_effect(() => {
+      if (option_1_value !== (option_1_value = get$1(magic).id)) {
+        option_1.value = null == (option_1.__value = get$1(magic).id) ? "" : get$1(magic).id;
+      }
+      set_text(text_4, `${get$1(magic).name ?? ""} ${get$1(magic).system.priority ?? ""}`);
+    });
+    append($$anchor2, option_1);
+  });
+  var select_2 = sibling(select_1, 2);
+  template_effect(() => {
+    get$1(attributePoints);
+    invalidate_inner_signals(() => {
+    });
+  });
+  var option_2 = child(select_2);
+  option_2.value = null == (option_2.__value = 0) ? "" : 0;
+  var node = sibling(option_2);
+  each(node, 1, () => attributePointCollection, index, ($$anchor2, attribute) => {
+    var option_3 = root_3();
+    var option_3_value = {};
+    var text_5 = child(option_3);
+    template_effect(() => {
+      if (option_3_value !== (option_3_value = get$1(attribute).points)) {
+        option_3.value = null == (option_3.__value = get$1(attribute).points) ? "" : get$1(attribute).points;
+      }
+      set_text(text_5, `${get$1(attribute).points ?? ""} ${get$1(attribute).priority ?? ""}`);
+    });
+    append($$anchor2, option_3);
+  });
+  var select_3 = sibling(select_2, 2);
+  template_effect(() => {
+    get$1(skillPoints);
+    invalidate_inner_signals(() => {
+    });
+  });
+  var option_4 = child(select_3);
+  option_4.value = null == (option_4.__value = 0) ? "" : 0;
+  var node_1 = sibling(option_4);
+  each(node_1, 1, () => skillPointCollection, index, ($$anchor2, skill) => {
+    var option_5 = root_4();
+    var option_5_value = {};
+    var text_6 = child(option_5);
+    template_effect(() => {
+      if (option_5_value !== (option_5_value = get$1(skill).points)) {
+        option_5.value = null == (option_5.__value = get$1(skill).points) ? "" : get$1(skill).points;
+      }
+      set_text(text_6, `${get$1(skill).points ?? ""} ${get$1(skill).priority ?? ""}`);
+    });
+    append($$anchor2, option_5);
+  });
+  var select_4 = sibling(select_3, 2);
+  template_effect(() => {
+    get$1(nuyen);
+    invalidate_inner_signals(() => {
+    });
+  });
+  var option_6 = child(select_4);
+  option_6.value = null == (option_6.__value = 0) ? "" : 0;
+  var node_2 = sibling(option_6);
+  each(node_2, 1, () => assets, index, ($$anchor2, asset) => {
+    var option_7 = root_5();
+    var option_7_value = {};
+    var text_7 = child(option_7);
+    template_effect(
+      ($0) => {
+        if (option_7_value !== (option_7_value = get$1(asset).points)) {
+          option_7.value = null == (option_7.__value = get$1(asset).points) ? "" : get$1(asset).points;
+        }
+        set_text(text_7, `${$0 ?? ""} ${get$1(asset).priority ?? ""}`);
+      },
+      [() => currency(get$1(asset).points)],
+      derived_safe_equal
+    );
+    append($$anchor2, option_7);
+  });
+  template_effect(() => {
+    set_attribute(img_1, "src", get$1(img));
+    set_attribute(img_1, "title", actor().name);
+    set_attribute(img_1, "alt", actor().name);
+    set_attribute(img_2, "src", get$1(metahumanImg));
+    set_attribute(img_2, "title", actor().name);
+    set_attribute(img_2, "alt", actor().name);
+    set_text(text, `Age: ${get$1(age) ?? ""}`);
+    set_attribute(input_1, "min", get$1(ageMin));
+    set_attribute(input_1, "max", get$1(ageMax));
+    set_text(text_1, `Height: ${get$1(height) ?? ""}`);
+    set_attribute(input_2, "min", get$1(heightMin));
+    set_attribute(input_2, "max", get$1(heightMax));
+    set_text(text_2, `Weight: ${get$1(weight) ?? ""}`);
+    set_attribute(input_3, "min", get$1(weightMin));
+    set_attribute(input_3, "max", get$1(weightMax));
+  });
+  event("click", img_1, async () => {
+    const path = await openFilePicker(actor());
+    set(img, path);
+  });
+  bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
+  event("change", input, (e) => actor().update({ name: e.target.value }));
+  event("keydown", input, (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      actor().update({ name: e.target.value });
+    }
+  });
+  bind_value(input_1, () => get$1(age), ($$value) => set(age, $$value));
+  bind_value(input_2, () => get$1(height), ($$value) => set(height, $$value));
+  bind_value(input_3, () => get$1(weight), ($$value) => set(weight, $$value));
+  bind_select_value(select, () => get$1(metahumanSelection), ($$value) => set(metahumanSelection, $$value));
+  event("change", select, (e) => set(metahumanImg, game.items.contents.find((item) => item.type === e.target.value).img));
+  bind_select_value(select_1, () => get$1(magicSelection), ($$value) => set(magicSelection, $$value));
+  bind_select_value(select_2, () => get$1(attributePoints), ($$value) => set(attributePoints, $$value));
+  bind_select_value(select_3, () => get$1(skillPoints), ($$value) => set(skillPoints, $$value));
+  bind_select_value(select_4, () => get$1(nuyen), ($$value) => set(nuyen, $$value));
+  append($$anchor, div);
+  pop();
+}
+class CharacterCreationDialog extends Dialog {
+  constructor(actor, resolve) {
+    super({
+      title: "Character Creation",
+      content: "<p>If this displays, there was an issue with the Svelte component in CharacterCreationDialog.js</p>",
+      default: "ok",
+      buttons: {
+        ok: {
+          label: "OK",
+          callback: async (html2) => console.log("OK clicked")
+        },
+        cancel: {
+          label: "Cancel",
+          callback: () => console.log("Cancel clicked")
+        }
+      },
+      render: (html2) => {
+        this.element.addClass("sr3e");
+        const container = this.element[0].querySelector(".window-content");
+        container.innerHTML = "";
+        this.svelteApp = mount(CharacterCreation, {
+          target: container,
+          props: {
+            actor,
+            resolve
+          }
+        });
+      }
+    });
+  }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      width: "100%",
+      height: "100%",
+      left: 200,
+      top: 200,
+      resizable: false
+    });
+  }
+  /** @override */
+  close(options = {}) {
+    if (this.svelteApp) {
+      unmount(this.svelteApp);
+    }
+    return super.close(options);
+  }
+}
+async function renderCharacterCreationDialog(actor, options, userId) {
+  if (actor.type !== "character") return;
+  Log.info("Character Dialog Initiated", "Create Actor Hook");
+  const dialogResult = await _showCharacterCreationDialog(actor);
+  if (!dialogResult) {
+    console.log(`Character creation canceled for actor: ${actor.name}. Deleting actor.`);
+    await actor.delete();
+    return false;
+  }
+  actor.sheet.render(true);
+  Log.success("Character Dialog Completed", "Create Actor Hook");
+}
+async function _showCharacterCreationDialog(actor) {
+  return new Promise((resolve) => {
+    new CharacterCreationDialog(actor, resolve).render(true);
+  });
+}
+function onRenderMetahumanItemSheet(app, html2, data) {
+  if (app.svelteApp) {
+    unmount(app.svelteApp);
+  }
+  const container = app.element[0].querySelector(".window-content");
+  container.innerHTML = "";
+  app.svelteApp = mount(MetahumanApp, {
+    target: container,
+    props: {
+      item: app.item,
+      config: CONFIG.sr3e
+    }
+  });
+}
+function onCloseMetahumanItemSheet(app, html2, data) {
+  if (app.svelteApp) {
+    unmount(app.svelteApp);
+  }
+}
+function registerHooks() {
+  Hooks.on(hooks.createActor, renderCharacterCreationDialog);
+  Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
+  Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
+  Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
+  Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
+  Hooks.on(hooks.preCreateActor, (doc, actor, options, userId) => {
+    if (actor.type === "character") {
+      options.renderSheet = false;
     }
   });
   Hooks.once(hooks.init, () => {
@@ -4502,7 +4972,8 @@ function registerHooks() {
       { type: "character", model: CharacterModel, sheet: CharacterActorSheet }
     ]);
     registerItemTypes([
-      { type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet }
+      { type: "metahuman", model: MetahumanModel, sheet: MagicItemSheet },
+      { type: "magic", model: MetahumanModel, sheet: MagicItemSheet }
     ]);
     Log.success("Initialization Completed", "sr3e.js");
   });

@@ -1,3 +1,4 @@
+.dialog.sr3e .meta-human-grid,
 .sr3e.sheet.item .meta-human-grid {
   /* Set a fixed or max width and center it */
   width: 40rem;
@@ -5,6 +6,7 @@
   column-count: 2;
   column-gap: 0.5rem;
 }
+.dialog.sr3e .meta-human-grid .item-sheet-component,
 .sr3e.sheet.item .meta-human-grid .item-sheet-component {
   display: inline-block;
   width: 100%;
@@ -26,6 +28,7 @@
   font-display: swap;
 }
 body.mce-content-body,
+.dialog.sr3e,
 .sr3e.sheet.item,
 .sr3e.sheet.character {
   font-family: 'VT323', monospace;
@@ -35,11 +38,13 @@ body.mce-content-body,
   color: #1df0ff;
 }
 body.mce-content-body div,
+.dialog.sr3e div,
 .sr3e.sheet.item div,
 .sr3e.sheet.character div {
   color: #1df0ff;
 }
 body.mce-content-body h1,
+.dialog.sr3e h1,
 .sr3e.sheet.item h1,
 .sr3e.sheet.character h1 {
   text-transform: uppercase;
@@ -50,9 +55,11 @@ body.mce-content-body h1,
   font-size: 1.4rem;
 }
 body.mce-content-body summary,
+.dialog.sr3e summary,
 .sr3e.sheet.item summary,
 .sr3e.sheet.character summary,
 body.mce-content-body h2,
+.dialog.sr3e h2,
 .sr3e.sheet.item h2,
 .sr3e.sheet.character h2 {
   text-transform: uppercase;
@@ -61,6 +68,7 @@ body.mce-content-body h2,
   font-size: 1.2rem;
 }
 body.mce-content-body h3,
+.dialog.sr3e h3,
 .sr3e.sheet.item h3,
 .sr3e.sheet.character h3 {
   text-transform: uppercase;
@@ -70,40 +78,48 @@ body.mce-content-body h3,
   font-size: 1.1rem;
 }
 body.mce-content-body h3.no-margin,
+.dialog.sr3e h3.no-margin,
 .sr3e.sheet.item h3.no-margin,
 .sr3e.sheet.character h3.no-margin {
   margin: 0;
 }
 body.mce-content-body h4,
+.dialog.sr3e h4,
 .sr3e.sheet.item h4,
 .sr3e.sheet.character h4 {
   text-transform: uppercase;
   color: #1df0ff;
 }
 body.mce-content-body h4.no-margin,
+.dialog.sr3e h4.no-margin,
 .sr3e.sheet.item h4.no-margin,
 .sr3e.sheet.character h4.no-margin {
   margin: 0;
 }
 body.mce-content-body h5,
+.dialog.sr3e h5,
 .sr3e.sheet.item h5,
 .sr3e.sheet.character h5 {
   text-transform: uppercase;
   color: #3ed199;
 }
 body.mce-content-body h6,
+.dialog.sr3e h6,
 .sr3e.sheet.item h6,
 .sr3e.sheet.character h6 {
   text-transform: uppercase;
   color: #3ed199;
 }
 body.mce-content-body p,
+.dialog.sr3e p,
 .sr3e.sheet.item p,
 .sr3e.sheet.character p,
 body.mce-content-body select,
+.dialog.sr3e select,
 .sr3e.sheet.item select,
 .sr3e.sheet.character select,
 body.mce-content-body input,
+.dialog.sr3e input,
 .sr3e.sheet.item input,
 .sr3e.sheet.character input {
   font-family: 'VT323', monospace;
@@ -113,22 +129,27 @@ body.mce-content-body input,
   color: #1df0ff;
 }
 body.mce-content-body p::placeholder,
+.dialog.sr3e p::placeholder,
 .sr3e.sheet.item p::placeholder,
 .sr3e.sheet.character p::placeholder,
 body.mce-content-body select::placeholder,
+.dialog.sr3e select::placeholder,
 .sr3e.sheet.item select::placeholder,
 .sr3e.sheet.character select::placeholder,
 body.mce-content-body input::placeholder,
+.dialog.sr3e input::placeholder,
 .sr3e.sheet.item input::placeholder,
 .sr3e.sheet.character input::placeholder {
   color: #c8d3f5;
 }
+.dialog.sr3e .stat-grid,
 .sr3e.sheet.item .stat-grid,
 .sr3e.sheet.character .stat-grid {
   display: inline-grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem;
 }
+.dialog.sr3e .stat-grid.one-column,
 .sr3e.sheet.item .stat-grid.one-column,
 .sr3e.sheet.character .stat-grid.one-column {
   display: inline-grid;
@@ -136,6 +157,7 @@ body.mce-content-body input::placeholder,
   max-width: min-content;
   grid-template-columns: repeat(1, auto);
 }
+.dialog.sr3e .stat-grid.two-column,
 .sr3e.sheet.item .stat-grid.two-column,
 .sr3e.sheet.character .stat-grid.two-column {
   display: inline-grid;
@@ -143,12 +165,14 @@ body.mce-content-body input::placeholder,
   max-width: min-content;
   grid-template-columns: repeat(2, auto);
 }
+.dialog.sr3e .details-foldout,
 .sr3e.sheet.item .details-foldout,
 .sr3e.sheet.character .details-foldout {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
   font-size: 1.2rem;
 }
+.dialog.sr3e .inner-background-container,
 .sr3e.sheet.item .inner-background-container,
 .sr3e.sheet.character .inner-background-container {
   position: relative;
@@ -156,6 +180,7 @@ body.mce-content-body input::placeholder,
   width: 100%;
   height: 100%;
 }
+.dialog.sr3e .inner-background-container .inner-background,
 .sr3e.sheet.item .inner-background-container .inner-background,
 .sr3e.sheet.character .inner-background-container .inner-background {
   padding: 0.5rem;
@@ -164,10 +189,12 @@ body.mce-content-body input::placeholder,
   position: relative;
   z-index: 10;
 }
+.dialog.sr3e .inner-background-container .inner-background .header-icon,
 .sr3e.sheet.item .inner-background-container .inner-background .header-icon,
 .sr3e.sheet.character .inner-background-container .inner-background .header-icon {
   justify-content: center;
 }
+.dialog.sr3e .inner-background-container .inner-background.slim,
 .sr3e.sheet.item .inner-background-container .inner-background.slim,
 .sr3e.sheet.character .inner-background-container .inner-background.slim {
   width: auto;
@@ -175,6 +202,7 @@ body.mce-content-body input::placeholder,
   flex: 0 1 auto;
   white-space: nowrap;
 }
+.dialog.sr3e .inner-background-container.slim,
 .sr3e.sheet.item .inner-background-container.slim,
 .sr3e.sheet.character .inner-background-container.slim {
   width: auto;
@@ -201,22 +229,27 @@ body.mce-content-body input::placeholder,
 .character-sheet-masonry {
   backdrop-filter: blur(2px);
 }
+.dialog.sr3e,
 .sr3e.sheet.item,
 .sr3e.sheet.character {
   box-shadow: none;
 }
+.dialog.sr3e .details-foldout,
 .sr3e.sheet.item .details-foldout,
 .sr3e.sheet.character .details-foldout {
   text-shadow: 0 0 10px #ff0095;
 }
+.dialog.sr3e a,
 .sr3e.sheet.item a,
 .sr3e.sheet.character a {
   text-decoration: none;
 }
+.dialog.sr3e .window-resizable-handle,
 .sr3e.sheet.item .window-resizable-handle,
 .sr3e.sheet.character .window-resizable-handle {
   background-color: #ff0095;
 }
+.dialog.sr3e .window-header,
 .sr3e.sheet.item .window-header,
 .sr3e.sheet.character .window-header {
   background-color: transparent;
@@ -226,13 +259,16 @@ body.mce-content-body input::placeholder,
   border: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
 }
+.dialog.sr3e .window-content,
 .sr3e.sheet.item .window-content,
 .sr3e.sheet.character .window-content {
   background: transparent;
   background-image: none;
 }
+.dialog.sr3e input[type="number"],
 .sr3e.sheet.item input[type="number"],
 .sr3e.sheet.character input[type="number"],
+.dialog.sr3e input[type="text"],
 .sr3e.sheet.item input[type="text"],
 .sr3e.sheet.character input[type="text"] {
   background-color: #1c364b;
@@ -246,16 +282,20 @@ body.mce-content-body input::placeholder,
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   transition: box-shadow 0.3s ease;
 }
+.dialog.sr3e input[type="number"].large,
 .sr3e.sheet.item input[type="number"].large,
 .sr3e.sheet.character input[type="number"].large,
+.dialog.sr3e input[type="text"].large,
 .sr3e.sheet.item input[type="text"].large,
 .sr3e.sheet.character input[type="text"].large {
   min-height: 1.5rem;
   font-size: 1.5rem;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
 }
+.dialog.sr3e input[type="number"]::before,
 .sr3e.sheet.item input[type="number"]::before,
 .sr3e.sheet.character input[type="number"]::before,
+.dialog.sr3e input[type="text"]::before,
 .sr3e.sheet.item input[type="text"]::before,
 .sr3e.sheet.character input[type="text"]::before {
   box-shadow: inset 0 0 30px #1d282c;
@@ -270,17 +310,21 @@ body.mce-content-body input::placeholder,
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e input[type="number"]:focus,
 .sr3e.sheet.item input[type="number"]:focus,
 .sr3e.sheet.character input[type="number"]:focus,
+.dialog.sr3e input[type="text"]:focus,
 .sr3e.sheet.item input[type="text"]:focus,
 .sr3e.sheet.character input[type="text"]:focus {
   box-shadow: inset 0 0 10px #1df0ff;
   outline: none;
 }
+.dialog.sr3e img,
 .sr3e.sheet.item img,
 .sr3e.sheet.character img {
   border: none;
 }
+.dialog.sr3e .fake-shadow,
 .sr3e.sheet.item .fake-shadow,
 .sr3e.sheet.character .fake-shadow {
   position: absolute;
@@ -293,12 +337,14 @@ body.mce-content-body input::placeholder,
   filter: blur(20px);
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e .inner-background,
 .sr3e.sheet.item .inner-background,
 .sr3e.sheet.character .inner-background {
   background: #e792cb;
   padding: 0.25rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e .inner-background::before,
 .sr3e.sheet.item .inner-background::before,
 .sr3e.sheet.character .inner-background::before {
   box-shadow: inset 0 0 30px #1d282c;
@@ -313,6 +359,7 @@ body.mce-content-body input::placeholder,
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e .image-mask,
 .sr3e.sheet.item .image-mask,
 .sr3e.sheet.character .image-mask {
   z-index: -1;
@@ -322,6 +369,7 @@ body.mce-content-body input::placeholder,
   background: #e792cb;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.dialog.sr3e .image-mask::before,
 .sr3e.sheet.item .image-mask::before,
 .sr3e.sheet.character .image-mask::before {
   overflow: hidden;
@@ -331,6 +379,7 @@ body.mce-content-body input::placeholder,
   pointer-events: none;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.dialog.sr3e .image-mask img,
 .sr3e.sheet.item .image-mask img,
 .sr3e.sheet.character .image-mask img {
   position: absolute;
@@ -343,6 +392,7 @@ body.mce-content-body input::placeholder,
   z-index: 100;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.dialog.sr3e select,
 .sr3e.sheet.item select,
 .sr3e.sheet.character select {
   background-color: #1b1f24;
@@ -351,6 +401,7 @@ body.mce-content-body input::placeholder,
   border-radius: 0rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e option,
 .sr3e.sheet.item option,
 .sr3e.sheet.character option {
   text-indent: 0.5rem;
@@ -359,10 +410,12 @@ body.mce-content-body input::placeholder,
   border: none;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
+.dialog.sr3e h3.item,
 .sr3e.sheet.item h3.item,
 .sr3e.sheet.character h3.item {
   text-align: center;
 }
+.dialog.sr3e .stat-card,
 .sr3e.sheet.item .stat-card,
 .sr3e.sheet.character .stat-card {
   position: relative;
@@ -372,6 +425,7 @@ body.mce-content-body input::placeholder,
   width: auto;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.dialog.sr3e .stat-card h4.no-margin,
 .sr3e.sheet.item .stat-card h4.no-margin,
 .sr3e.sheet.character .stat-card h4.no-margin {
   max-width: 5rem;
@@ -382,6 +436,7 @@ body.mce-content-body input::placeholder,
   margin-left: 0.5rem;
   margin-right: 0.5rem;
 }
+.dialog.sr3e .stat-card::before,
 .sr3e.sheet.item .stat-card::before,
 .sr3e.sheet.character .stat-card::before {
   box-shadow: inset 0 0 30px #1b1f24;
@@ -396,32 +451,38 @@ body.mce-content-body input::placeholder,
   pointer-events: none;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.dialog.sr3e .stat-card .stat-value,
 .sr3e.sheet.item .stat-card .stat-value,
 .sr3e.sheet.character .stat-card .stat-value {
   margin: 0;
   text-align: center;
 }
+.dialog.sr3e .stat-card .stat-label,
 .sr3e.sheet.item .stat-card .stat-label,
 .sr3e.sheet.character .stat-card .stat-label {
   align-items: center;
   justify-content: center;
   padding: 0.33rem;
 }
+.dialog.sr3e .stat-card .stat-label input,
 .sr3e.sheet.item .stat-card .stat-label input,
 .sr3e.sheet.character .stat-card .stat-label input {
   margin: 0rem;
   clip-path: polygon(0.364658rem 0px, calc(100% - 0.364658rem) 0px, 100% 0.364658rem, 100% calc(100% - 0.729316rem), calc(100% - 0.729316rem) 100%, 0.364658rem 100%, 0px calc(100% - 0.364658rem), 0px 0.364658rem);
 }
+.dialog.sr3e .stat-card .stat-label input:hover,
 .sr3e.sheet.item .stat-card .stat-label input:hover,
 .sr3e.sheet.character .stat-card .stat-label input:hover {
   box-shadow: inset 0 0 25px #1df0ff;
   transition: box-shadow 0.3s ease-in;
 }
+.dialog.sr3e .core-skill .skill-name,
 .sr3e.sheet.item .core-skill .skill-name,
 .sr3e.sheet.character .core-skill .skill-name {
   text-indent: 0rem;
   text-overflow: ellipsis;
 }
+.dialog.sr3e .core-skill .skill-value,
 .sr3e.sheet.item .core-skill .skill-value,
 .sr3e.sheet.character .core-skill .skill-value {
   text-indent: 0rem;
@@ -430,24 +491,29 @@ body.mce-content-body input::placeholder,
   box-shadow: inset 0 0 8px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e .specialisation-container,
 .sr3e.sheet.item .specialisation-container,
 .sr3e.sheet.character .specialisation-container {
   background-color: #1b1f24;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.dialog.sr3e .specialisation-container .specializations,
 .sr3e.sheet.item .specialisation-container .specializations,
 .sr3e.sheet.character .specialisation-container .specializations {
   text-indent: 0rem;
 }
+.dialog.sr3e .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card {
   background-color: #1c364b;
 }
+.dialog.sr3e .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.dialog.sr3e .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-value {
   text-indent: 0rem;

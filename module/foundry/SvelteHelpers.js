@@ -3,16 +3,18 @@ export function localize(key) {
 }
 
 export function openFilePicker(document) {
-  // Use Foundry's FilePicker API
-  new FilePicker({
-    type: "image",
-    current: document.img, // current image path
-    callback: (path) => {
-      // Update the actor's image with the selected path
-      document.update({ img: path }, { render: true });
-    },
-  }).render(true);
+  return new Promise((resolve) => {
+    new FilePicker({
+      type: "image",
+      current: document.img,
+      callback: (path) => {
+        document.update({ img: path }, { render: true });
+        resolve(path);
+      },
+    }).render(true);
+  });
 }
+
 
 export function activateTextEditor({ target, content, owner, editable, callback }) {
   if (editable) {

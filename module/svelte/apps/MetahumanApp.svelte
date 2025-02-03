@@ -12,6 +12,7 @@
     let common = config.common;
     let movement = config.movement;
     let karma = config.karma;
+    let vision = config.vision;
     let traits = config.traits;
 
     $: metahuman = system;
@@ -132,9 +133,24 @@
             value: metahuman.attributeLimits.willpower,
         },
     ];
+
+    $: vision = [
+        {
+            label: localize(vision.type),
+            value: metahuman.vision.type,
+        },
+        {
+            label: localize(vision.description),
+            value: metahuman.vision.description,
+        },
+        {
+            label: localize(vision.rules),
+            value: metahuman.vision.rules,
+        },
+    ];
 </script>
 
-<div class="meta-human-grid">
+<div class="sr3e">
     <div class="item-sheet-component">
         <div class="inner-background-container">
             <div class="fake-shadow"></div>
@@ -159,7 +175,7 @@
                     bind:value={item.name}
                     on:change={(e) =>
                         item.update({
-                            "name": e.target.value,
+                            name: e.target.value,
                         })}
                 />
                 <div class="stat-card">
@@ -344,6 +360,28 @@
                             <div class="stat-label">
                                 <!-- Hidden input to store the value for form submission -->
                                 <input type="number" value={entry.value} />
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Karma Div -->
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h3 class="item">{localize(config.vision.vision)}</h3>
+                <div class="stat-grid one-column">
+                    {#each vision as entry}
+                        <div class="stat-card">
+                            <div>
+                                <h4 class="no-margin">{entry.label}</h4>
+                            </div>
+                            <div class="stat-label">
+                                <input type="text" value={entry.value} />
                             </div>
                         </div>
                     {/each}

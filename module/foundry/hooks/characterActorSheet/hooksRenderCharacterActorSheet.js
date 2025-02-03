@@ -1,4 +1,4 @@
-import Log from "../../../../Log";
+import Log from "../../../../Log.js";
 import CharacterActorSheet from "../../sheets/CharacterActorSheet.js";
 import CharacterSheetApp from "../../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName  from "../../../svelte/apps/injections/NeonName.svelte"
@@ -50,19 +50,4 @@ function _injectNeonName(app) {
   })
 
   Log.success("Neon Name Initialized", CharacterActorSheet.name);
-}
-
-export function closeMainMasonryGrid(app) {
-
-  if (app.svelteApp) {
-
-    app.actor.mainLayoutResizeObserver.disconnect();
-    app.actor.mainLayoutResizeObserver = null;
-
-    Log.success("Masonry observer disconnected.", CharacterActorSheet.name);
-
-    unmount(app.svelteApp);
-
-    console.info("Svelte App Destroyed.", CharacterActorSheet.name);
-  }
 }

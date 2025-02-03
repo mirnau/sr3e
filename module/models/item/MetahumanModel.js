@@ -153,7 +153,7 @@ export default class MetahumanModel extends foundry.abstract.TypeDataModel {
 
       // Vision
       vision: new foundry.data.fields.SchemaField({
-        visionType: new foundry.data.fields.StringField({
+        type: new foundry.data.fields.StringField({
           required: true,
           initial: ""
         }),

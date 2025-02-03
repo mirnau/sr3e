@@ -26,14 +26,16 @@
         "character"
     ],
     "itemTypes": [
-        "metahuman"
+        "metahuman",
+        "magic"
     ],
     "documentTypes": {
         "Actor": {
             "character": {}
         },
         "Item": {
-            "metahuman": {}
+            "metahuman": {},
+            "magic": {}
         }
     },
     "packs": [],

@@ -49,6 +49,12 @@
       "weight": "Weight",
       "metahuman": "Metahuman",
       "agerange": "Playable Age Range"
+    },
+    "vision": {
+      "vision": "Vision",
+      "type": "Type",
+      "description": "Description",
+      "rules": "Rules"
     }
   }
 }
