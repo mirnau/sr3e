@@ -1,3 +1,187 @@
+button {
+  all: unset;
+  position: relative;
+  width: auto;
+  background-color: #ff9fc8;
+  color: #1df0ff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-align: center;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+button::before {
+  box-shadow: inset 0 0 3px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  animation: waveDiagonal 2s infinite linear;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+button:hover {
+  background-color: orange;
+}
+button:active {
+  background-color: purple;
+  box-shadow: inset 0 0 10px magenta;
+}
+button:disabled {
+  background-color: yellow;
+}
+input[type="number"],
+input[type="text"] {
+  background-color: #1c364b;
+  box-shadow: inset 0 0 8px #1df0ff;
+  border: none;
+  font-size: 1.5rem;
+  width: 100%;
+  min-width: 2rem;
+  max-width: 100%;
+  text-align: center;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  transition: box-shadow 0.3s ease;
+}
+input[type="number"].large,
+input[type="text"].large {
+  min-height: 1.5rem;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+}
+input[type="number"]::before,
+input[type="text"]::before {
+  box-shadow: inset 0 0 30px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+input[type="number"]:focus,
+input[type="text"]:focus {
+  box-shadow: inset 0 0 10px #1df0ff;
+  outline: none;
+}
+img {
+  border: none;
+}
+#sidebar {
+  background-color: #ff9fc8;
+  border-radius: 0rem;
+  border: none;
+  padding: 0.5rem;
+  position: relative;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+#sidebar::before {
+  box-shadow: inset 0 0 30px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  box-shadow: inset 0 0 10px #1df0ff;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.directory-header {
+  background-color: transparent;
+}
+.directory-list {
+  background-color: transparent;
+  box-shadow: inset 0 0 30px #1b1f24;
+}
+.directory-list img {
+  margin: 0.25rem;
+  background-color: #ff9fc8;
+  position: relative;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.directory-list img::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.chat-message {
+  background: #1c364b;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.chat-message.whisper {
+  background-color: #1b1f24;
+}
+a {
+  color: #1df0ff;
+  text-shadow: #1df0ff;
+}
+a.nue-tab,
+a.nue-action {
+  color: red;
+  text-shadow: red;
+}
+h3.nue {
+  text-align: center;
+  position: relative;
+  border: none;
+  background-color: #ff9fc8;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+h3.nue::before {
+  box-shadow: inset 0 0 3px #1d282c;
+  content: '';
+  position: absolute;
+  z-index: -1;
+  background: #1b1f24;
+  top: 1px;
+  left: 1px;
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  pointer-events: none;
+  box-shadow: inset 0 0 10px #1df0ff;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+textarea#chat-message {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #1b1f24;
+  box-shadow: inset 0 0 2rem #1df0ff;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+textarea#chat-message::hover {
+  box-shadow: inset 0 0 2rem orange;
+  background-color: red;
+}
+textarea {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem;
+}
+textarea::hover {
+  box-shadow: inset 0 0 2rem orange;
+  background-color: red;
+}
 .dialog.sr3e .meta-human-grid,
 .sr3e.sheet.item .meta-human-grid {
   /* Set a fixed or max width and center it */
@@ -27,26 +211,17 @@
   font-style: normal;
   font-display: swap;
 }
-body.mce-content-body,
-.dialog.sr3e,
-.sr3e.sheet.item,
-.sr3e.sheet.character {
+body {
   font-family: 'VT323', monospace;
   font-size: 14px;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
 }
-body.mce-content-body div,
-.dialog.sr3e div,
-.sr3e.sheet.item div,
-.sr3e.sheet.character div {
+body div {
   color: #1df0ff;
 }
-body.mce-content-body h1,
-.dialog.sr3e h1,
-.sr3e.sheet.item h1,
-.sr3e.sheet.character h1 {
+body h1 {
   text-transform: uppercase;
   color: #1df0ff;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
@@ -54,92 +229,50 @@ body.mce-content-body h1,
   margin-bottom: 0.7rem;
   font-size: 1.4rem;
 }
-body.mce-content-body summary,
-.dialog.sr3e summary,
-.sr3e.sheet.item summary,
-.sr3e.sheet.character summary,
-body.mce-content-body h2,
-.dialog.sr3e h2,
-.sr3e.sheet.item h2,
-.sr3e.sheet.character h2 {
+body summary,
+body h2 {
   text-transform: uppercase;
   color: #ff0095;
   border: none;
   font-size: 1.2rem;
 }
-body.mce-content-body h3,
-.dialog.sr3e h3,
-.sr3e.sheet.item h3,
-.sr3e.sheet.character h3 {
+body h3 {
   text-transform: uppercase;
   color: #3ed199;
   border: none;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   font-size: 1.1rem;
 }
-body.mce-content-body h3.no-margin,
-.dialog.sr3e h3.no-margin,
-.sr3e.sheet.item h3.no-margin,
-.sr3e.sheet.character h3.no-margin {
+body h3.no-margin {
   margin: 0;
 }
-body.mce-content-body h4,
-.dialog.sr3e h4,
-.sr3e.sheet.item h4,
-.sr3e.sheet.character h4 {
+body h4 {
   text-transform: uppercase;
   color: #1df0ff;
 }
-body.mce-content-body h4.no-margin,
-.dialog.sr3e h4.no-margin,
-.sr3e.sheet.item h4.no-margin,
-.sr3e.sheet.character h4.no-margin {
+body h4.no-margin {
   margin: 0;
 }
-body.mce-content-body h5,
-.dialog.sr3e h5,
-.sr3e.sheet.item h5,
-.sr3e.sheet.character h5 {
+body h5 {
   text-transform: uppercase;
   color: #3ed199;
 }
-body.mce-content-body h6,
-.dialog.sr3e h6,
-.sr3e.sheet.item h6,
-.sr3e.sheet.character h6 {
+body h6 {
   text-transform: uppercase;
   color: #3ed199;
 }
-body.mce-content-body p,
-.dialog.sr3e p,
-.sr3e.sheet.item p,
-.sr3e.sheet.character p,
-body.mce-content-body select,
-.dialog.sr3e select,
-.sr3e.sheet.item select,
-.sr3e.sheet.character select,
-body.mce-content-body input,
-.dialog.sr3e input,
-.sr3e.sheet.item input,
-.sr3e.sheet.character input {
+body p,
+body select,
+body input {
   font-family: 'VT323', monospace;
   font-size: 14px;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
 }
-body.mce-content-body p::placeholder,
-.dialog.sr3e p::placeholder,
-.sr3e.sheet.item p::placeholder,
-.sr3e.sheet.character p::placeholder,
-body.mce-content-body select::placeholder,
-.dialog.sr3e select::placeholder,
-.sr3e.sheet.item select::placeholder,
-.sr3e.sheet.character select::placeholder,
-body.mce-content-body input::placeholder,
-.dialog.sr3e input::placeholder,
-.sr3e.sheet.item input::placeholder,
-.sr3e.sheet.character input::placeholder {
+body p::placeholder,
+body select::placeholder,
+body input::placeholder {
   color: #c8d3f5;
 }
 .dialog.sr3e .stat-grid,
@@ -265,63 +398,10 @@ body.mce-content-body input::placeholder,
   background: transparent;
   background-image: none;
 }
-.dialog.sr3e input[type="number"],
-.sr3e.sheet.item input[type="number"],
-.sr3e.sheet.character input[type="number"],
-.dialog.sr3e input[type="text"],
-.sr3e.sheet.item input[type="text"],
-.sr3e.sheet.character input[type="text"] {
-  background-color: #1c364b;
-  box-shadow: inset 0 0 8px #1df0ff;
-  border: none;
-  font-size: 1.5rem;
-  width: 100%;
-  min-width: 2rem;
-  max-width: 100%;
-  text-align: center;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-  transition: box-shadow 0.3s ease;
-}
-.dialog.sr3e input[type="number"].large,
-.sr3e.sheet.item input[type="number"].large,
-.sr3e.sheet.character input[type="number"].large,
-.dialog.sr3e input[type="text"].large,
-.sr3e.sheet.item input[type="text"].large,
-.sr3e.sheet.character input[type="text"].large {
-  min-height: 1.5rem;
-  font-size: 1.5rem;
-  text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
-}
-.dialog.sr3e input[type="number"]::before,
-.sr3e.sheet.item input[type="number"]::before,
-.sr3e.sheet.character input[type="number"]::before,
-.dialog.sr3e input[type="text"]::before,
-.sr3e.sheet.item input[type="text"]::before,
-.sr3e.sheet.character input[type="text"]::before {
-  box-shadow: inset 0 0 30px #1d282c;
-  content: '';
-  position: absolute;
-  z-index: -1;
-  background: #1b1f24;
-  top: 1px;
-  left: 1px;
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
-  pointer-events: none;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-.dialog.sr3e input[type="number"]:focus,
-.sr3e.sheet.item input[type="number"]:focus,
-.sr3e.sheet.character input[type="number"]:focus,
-.dialog.sr3e input[type="text"]:focus,
-.sr3e.sheet.item input[type="text"]:focus,
-.sr3e.sheet.character input[type="text"]:focus {
-  box-shadow: inset 0 0 10px #1df0ff;
-  outline: none;
-}
 .dialog.sr3e img,
 .sr3e.sheet.item img,
 .sr3e.sheet.character img {
+  margin: 0rem;
   border: none;
 }
 .dialog.sr3e .fake-shadow,
@@ -340,7 +420,7 @@ body.mce-content-body input::placeholder,
 .dialog.sr3e .inner-background,
 .sr3e.sheet.item .inner-background,
 .sr3e.sheet.character .inner-background {
-  background: #e792cb;
+  background: #ff9fc8;
   padding: 0.25rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
@@ -366,7 +446,7 @@ body.mce-content-body input::placeholder,
   width: 100%;
   aspect-ratio: 1/1;
   position: relative;
-  background: #e792cb;
+  background: #ff9fc8;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .dialog.sr3e .image-mask::before,
@@ -419,7 +499,7 @@ body.mce-content-body input::placeholder,
 .sr3e.sheet.item .stat-card,
 .sr3e.sheet.character .stat-card {
   position: relative;
-  background: #e792cb;
+  background: #ff9fc8;
   transition: transform 1.3s ease, width 1.3s ease, height 1.3s ease, background-color 1.3s ease;
   text-align: center;
   width: auto;
@@ -713,7 +793,7 @@ body.mce-content-body input::placeholder,
 .sr3e.sheet.item .inner-background-container .editor-field,
 .sr3e.sheet.character .inner-background-container .editor-field {
   position: relative;
-  background: #e792cb;
+  background: #ff9fc8;
   padding: 0rem;
   margin: 0rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);

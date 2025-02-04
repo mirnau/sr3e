@@ -84,6 +84,8 @@ function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
+  CONFIG.canvasTextStyle.fontFamily= "VT323";
+  CONFIG.defaultFontFamily = "VT323";
 
   Actors.unregisterSheet("core", ActorSheet);
   Items.unregisterSheet("core", ItemSheet);

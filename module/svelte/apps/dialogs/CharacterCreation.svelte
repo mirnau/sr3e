@@ -257,4 +257,28 @@
             </div>
         </div>
     </div>
+
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h1>Randomize</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="item-sheet-component">
+        <div class="inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="inner-background">
+                <h1>Buttons</h1>
+                <div class="stat-grid">
+                    <button class="my-button" aria-label="Random"><span><i class="fa-solid fa-shuffle"></i></span></button>
+                    <button class="my-button" aria-label="Mix"><span><i class="fa-solid fa-rotate-right"></i></span></button>
+                    <button class="my-button">Ok</button>
+                    <button class="my-button">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
