@@ -95,7 +95,6 @@ img {
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
-  box-shadow: inset 0 0 10px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .directory-header {
