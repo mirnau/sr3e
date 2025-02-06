@@ -1,0 +1,29 @@
+#textarea.chat-message,
+select.roll-type-select,
+select {
+    appearance: none;
+    background: @secondary-color !important;
+    color: red;
+    width: 100%;
+    border: none;
+    border-radius: 0rem;
+    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+}
+
+select:hover {
+    border-color: #ff00ff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+option {
+    text-indent: 0.5rem;
+    background-color: @secondary-color;
+    border-radius: 0rem;
+    border: none;
+    .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+}

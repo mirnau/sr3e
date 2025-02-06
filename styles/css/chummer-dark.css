@@ -76,25 +76,38 @@ input[type="text"]:focus {
 img {
   border: none;
 }
-#sidebar {
-  background-color: #ff9fc8;
+#textarea.chat-message,
+select.roll-type-select,
+select {
+  appearance: none;
+  background: #1c364b !important;
+  color: red;
+  width: 100%;
+  border: none;
+  border-radius: 0rem;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+select:hover {
+  border-color: #ff00ff;
+}
+select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+option {
+  text-indent: 0.5rem;
+  background-color: #1c364b;
+  border-radius: 0rem;
+  border: none;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+#sidebar.app {
+  position: relative;
+  background: transparent;
   border-radius: 0rem;
   border: none;
   padding: 0.5rem;
-  position: relative;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-#sidebar::before {
-  box-shadow: inset 0 0 30px #1d282c;
-  content: '';
-  position: absolute;
-  z-index: -1;
-  background: #1b1f24;
-  top: 1px;
-  left: 1px;
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
-  pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .directory-header {
@@ -110,11 +123,38 @@ img {
   position: relative;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.directory-list img::before {
+.chat-message .inner-background-container {
+  position: relative;
+  padding: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+.chat-message .inner-background-container .fake-shadow {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background-color: var(--message-color);
+  width: calc(100% - 1.5rem);
+  height: calc(100% - 1.5rem);
+  z-index: -2;
+  filter: blur(20px);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.chat-message .inner-background-container .message-container {
+  padding: 0.5rem;
+  width: 100%;
+  height: 100%;
+  background-color: var(--message-color);
+  z-index: 10;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  position: relative;
+}
+.chat-message .inner-background-container .message-container::before {
+  box-shadow: inset 0 0 10px var(--message-color);
   content: '';
   position: absolute;
   z-index: -1;
-  background: #1b1f24;
+  background: #1c364b;
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -122,21 +162,56 @@ img {
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.chat-message .inner-background-container .message-container .header-icon {
+  justify-content: center;
+}
+.chat-message .inner-background-container .message-container.slim {
+  width: auto;
+  display: inline-block;
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
+.chat-message .inner-background-container.slim {
+  width: auto;
+  display: inline-block;
+  flex: 0 1 auto;
+  white-space: nowrap;
+}
 .chat-message {
-  background: #1c364b;
+  border: 0rem;
+  background: transparent;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  position: relative;
+}
+.chat-message h1,
+.chat-message h2,
+.chat-message h3,
+.chat-message h4 {
+  color: var(--message-color);
+  text-shadow: 0 0 10px var(--message-color);
 }
 .chat-message.whisper {
-  background-color: #1b1f24;
+  border: 0rem;
+  padding: 0rem;
+  background-color: transparent;
 }
+.chat-message span.whisper-to,
+.chat-message time.message-timestamp {
+  color: var(--message-color);
+}
+.nue,
 a {
   color: #1df0ff;
   text-shadow: #1df0ff;
 }
+footer.nue {
+  color: #3ed199;
+}
+.nue a,
 a.nue-tab,
 a.nue-action {
-  color: red;
-  text-shadow: red;
+  color: #ff0095;
+  text-shadow: #ff0095;
 }
 h3.nue {
   text-align: center;
@@ -145,8 +220,7 @@ h3.nue {
   background-color: #ff9fc8;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-h3.nue::before {
-  box-shadow: inset 0 0 3px #1d282c;
+h3.nue:before {
   content: '';
   position: absolute;
   z-index: -1;
@@ -156,30 +230,78 @@ h3.nue::before {
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
-  box-shadow: inset 0 0 10px #1df0ff;
+  box-shadow: inset 0 0 20px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+#chat-controls.flexrow {
+  background: transparent;
+  color: var(--user-color);
 }
 textarea#chat-message {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background-color: #1b1f24;
-  box-shadow: inset 0 0 2rem #1df0ff;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-textarea#chat-message::hover {
-  box-shadow: inset 0 0 2rem orange;
-  background-color: red;
-}
-textarea {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  margin: 0.33rem 0;
+  line-height: 1rem;
+  color: #1df0ff;
+  color: var(--user-color);
+  margin: 0rem;
   position: relative;
   width: 100%;
   height: 100%;
   padding: 0.5rem;
+  background: #1b1f24;
+  border-radius: 0rem;
+  outline: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-textarea::hover {
-  box-shadow: inset 0 0 2rem orange;
-  background-color: red;
+textarea#chat-message:focus {
+  outline: none;
+  box-shadow: 0 0 0.5rem #ff0095, inset 0 0 2rem #1df0ff;
+}
+textarea#chat-message:hover {
+  outline: none;
+  box-shadow: inset 0 0 2rem var(--user-color);
+  animation: flicker 1s ease-in-out;
+}
+textarea#chat-message:not(:hover) {
+  animation: leavinghoverarea 0.5s ease-in-out forwards;
+}
+textarea#chat-message:active {
+  box-shadow: inset 0 0 3rem var(--user-color);
+}
+@keyframes leavinghoverarea {
+  0% {
+    box-shadow: inset 0 0 2rem var(--user-color);
+  }
+  100% {
+    box-shadow: inset 0 0 0.5rem var(--user-color);
+  }
+}
+@keyframes flicker {
+  0% {
+    box-shadow: 0 0 2px var(--user-color), 0 0 1rem var(--user-color), 0 0 20px #fff;
+    opacity: 0.8;
+  }
+  20% {
+    box-shadow: none;
+    opacity: 0.6;
+  }
+  40% {
+    box-shadow: 0 0 2px var(--user-color), 0 0 1.2rem var(--user-color), 0 0 15px #fff;
+    opacity: 1;
+  }
+  60% {
+    box-shadow: none;
+    opacity: 0.4;
+  }
+  80% {
+    box-shadow: 0 0 4px var(--user-color), 0 0 0.7rem var(--user-color), 0 0 25px #fff;
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 4px var(--user-color), 0 0 2rem var(--user-color), 0 0 25px #fff;
+    opacity: 1;
+  }
 }
 .dialog.sr3e .meta-human-grid,
 .sr3e.sheet.item .meta-human-grid {
@@ -470,24 +592,6 @@ body input::placeholder {
   object-fit: cover;
   z-index: 100;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
-}
-.dialog.sr3e select,
-.sr3e.sheet.item select,
-.sr3e.sheet.character select {
-  background-color: #1b1f24;
-  width: 100%;
-  border: none;
-  border-radius: 0rem;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-.dialog.sr3e option,
-.sr3e.sheet.item option,
-.sr3e.sheet.character option {
-  text-indent: 0.5rem;
-  background-color: transparent;
-  border-radius: 0rem;
-  border: none;
-  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 .dialog.sr3e h3.item,
 .sr3e.sheet.item h3.item,

@@ -4964,6 +4964,41 @@ function registerHooks() {
       options.renderSheet = false;
     }
   });
+  Hooks.on("renderChatMessage", (message, html2, data) => {
+    var _a;
+    const sender = game.users.get((_a = message.author) == null ? void 0 : _a.id);
+    if (!sender) return;
+    const senderColor = sender.color;
+    html2[0].style.setProperty("--message-color", senderColor);
+  });
+  Hooks.on("renderChatMessage", (message, html2, data) => {
+    const chatMessage = html2[0];
+    if (!chatMessage) return;
+    if (chatMessage.querySelector(".inner-background-container")) return;
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("inner-background-container");
+    const fakeShadow = document.createElement("div");
+    fakeShadow.classList.add("fake-shadow");
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add("message-container");
+    while (chatMessage.firstChild) {
+      messageContainer.appendChild(chatMessage.firstChild);
+    }
+    wrapper.appendChild(fakeShadow);
+    wrapper.appendChild(messageContainer);
+    chatMessage.appendChild(wrapper);
+  });
+  Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
+    console.log("....................................");
+    console.log("....................................");
+    console.log(messageDoc);
+    console.log(data);
+    console.log(data.content[0]);
+    console.log(options);
+    console.log(userId);
+    console.log("....................................");
+    console.log("....................................");
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
     registerActorTypes([

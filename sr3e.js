@@ -49,16 +49,69 @@ function registerHooks() {
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
 
   Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
-  Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet); 
+  Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
 
 
   Hooks.on(hooks.preCreateActor, (doc, actor, options, userId) => {
-    if (actor.type === "character") { 
+    if (actor.type === "character") {
       options.renderSheet = false;
     }
   });
-
   
+
+  Hooks.on("renderChatMessage", (message, html, data) => {
+    const sender = game.users.get(message.author?.id);
+    if (!sender) return;
+    const senderColor = sender.color;
+    html[0].style.setProperty("--message-color", senderColor);
+  });
+
+  Hooks.on("renderChatMessage", (message, html, data) => {
+    // The actual chat message <li> element
+    const chatMessage = html[0];
+    if (!chatMessage) return;
+  
+    // Prevent multiple modifications
+    if (chatMessage.querySelector(".inner-background-container")) return;
+  
+    // 1. Create the new structure
+    const wrapper = document.createElement("div");
+    wrapper.classList.add("inner-background-container");
+  
+    const fakeShadow = document.createElement("div");
+    fakeShadow.classList.add("fake-shadow");
+  
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add("message-container");
+  
+    // 2. Move all existing content into messageContainer
+    while (chatMessage.firstChild) {
+      messageContainer.appendChild(chatMessage.firstChild);
+    }
+  
+    // 3. Build the new structure inside the <li>
+    wrapper.appendChild(fakeShadow);
+    wrapper.appendChild(messageContainer);
+    chatMessage.appendChild(wrapper);
+  });
+  
+  
+
+  // 2. For system-specific item rolls, override content in preCreate
+Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
+
+  console.log("....................................")
+  console.log("....................................")
+  console.log(messageDoc);
+  console.log(data);
+  console.log(data.content[0]);
+  console.log(options);
+  console.log(userId);
+  console.log("....................................")
+  console.log("....................................")
+
+});
+
 
   Hooks.once(hooks.init, () => {
 
@@ -70,7 +123,7 @@ function registerHooks() {
 
     registerItemTypes([
       { type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-      { type: "magic", model: MagicModel, sheet: MagicItemSheet},
+      { type: "magic", model: MagicModel, sheet: MagicItemSheet },
     ]);
 
     Log.success("Initialization Completed", "sr3e.js");
@@ -84,7 +137,7 @@ function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
-  CONFIG.canvasTextStyle.fontFamily= "VT323";
+  CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
 
   Actors.unregisterSheet("core", ActorSheet);
