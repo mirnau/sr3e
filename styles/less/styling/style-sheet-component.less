@@ -1,5 +1,13 @@
+
+* {
+    border: none !important;
+}
+
+.app,
 .sr3e.window-app.sr3e {
     background: @appwindow-background;
+    box-shadow: none;
+    border: none;
 }
 
 .sheet-component {
@@ -21,10 +29,21 @@
     backdrop-filter: blur(2px);
 }
 
+.window-header {
+    background-color: @window-header-color;
+    box-shadow: inset 0 0 10px @accent-color;
+    border: none !important;
+    .clipped-corners(0.5rem, 0.5rem, 0rem, 0rem);
+}
 
 .dialog.sr3e,
 .sr3e.sheet.item,
 .sr3e.sheet.character {
+
+    .window-content {
+        background: @transparent;
+        background-image: @sheet-background-image;
+    }
 
     .details-foldout {
         text-shadow: 0 0 10px @h2-color;
@@ -40,19 +59,7 @@
         background-color: @accent-color;
     }
 
-    .window-header {
-        background-color: @window-header-color;
-        box-shadow: inset 0 0 10px @accent-color;
-        margin-left: 0.5rem;
-        margin-right: 0.4rem;
-        border: none;
-        .clipped-corners(0.5rem, 0.5rem, 0rem, 0rem);
-    }
 
-    .window-content {
-        background: @transparent;
-        background-image: @sheet-background-image;
-    }
 
     img {
         margin: 0rem;
@@ -66,7 +73,7 @@
 
     .inner-background {
         background: @default-sheet-border-color;
-        padding: 0.25rem;
+        padding: 0.5rem;
         .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
 
         &::before {
@@ -109,10 +116,9 @@
             width: calc(100% - 2px);
             height: calc(100% - 2px);
             object-fit: cover;
-            z-index: 100; // Ensures it is above the pseudo-element
+            z-index: 100;
             .clipped-corners(0.5*0.854rem, 0.5*0.854rem, 0.854rem, 0.5*0.854rem);
         }
-
     }
 
     h3.item {

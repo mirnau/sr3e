@@ -1,14 +1,17 @@
-
-#sidebar.app {
+#ui-right,
+#sidebar .app {
     position: relative;
     background: transparent;
     border-radius: 0rem;
     border: none;
     padding: 0.5rem;
-    
+
     .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-    
-    
+}
+
+
+.tab {
+    background: transparent;
 }
 
 .directory-header {
@@ -39,18 +42,18 @@
         z-index: -2;
         filter: blur(20px);
     }
-    
+
     .inner-background-container {
         position: relative;
-        
+
         .fake-shadow {
             .fake-shadow-in-chat(var(--message-color));
             .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
         }
-        
-        
+
+
         .apply-container();
-        
+
         .message-container {
             .apply-container();
             background-color: var(--message-color);
@@ -58,7 +61,7 @@
             z-index: 10;
             .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
             position: relative;
-            
+
             &::before {
                 box-shadow: inset 0 0 10px var(--message-color);
                 content: '';
@@ -157,5 +160,64 @@ h3.nue {
         pointer-events: none;
         box-shadow: inset 0 0 20px @highlight-color-primary;
         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+    }
+}
+
+#game-details {
+    background: @accent-cherry-blossom;
+    color: @h1-color;
+    padding: 0.5rem;
+    margin: 0rem;
+    position: relative;
+    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        background: @default-inner-background-color;
+        top: 1px;
+        left: 1px;
+        width: calc(100% - 2px);
+        height: calc(100% - 2px);
+        pointer-events: none;
+        box-shadow: inset 0 0 20px @highlight-color-primary;
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+    }
+}
+
+#sidebar-tabs,
+#settings-game,
+#settings-documentation,
+#settings-access {
+    position: relative;
+    background: @accent-cherry-blossom;
+    margin: 0rem;
+    padding: 0.5rem;
+    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        background: @default-inner-background-color;
+        top: 1px;
+        left: 1px;
+        width: calc(100% - 2px);
+        height: calc(100% - 2px);
+        pointer-events: none;
+        box-shadow: inset 0 0 20px @highlight-color-primary;
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+    }
+
+    a.item.active {
+        scale: 100%;
+        box-shadow: none;
+        color: white;
+        text-shadow: 0 0 15rem white;
+    }
+
+    a.item {
+        scale: 80%;
     }
 }

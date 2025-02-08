@@ -1,0 +1,181 @@
+input[type="range"] {
+    // Reset appearance for consistency
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1rem;
+    background: none;
+    cursor: pointer;
+  
+    // ================================
+    // Chrome, Opera, and Edge (Blink)
+    // ================================
+    &::-webkit-slider-runnable-track {
+      -webkit-appearance: none;
+      height: 1rem;
+      background: @primary-color;
+      box-shadow: inset 0 0 0.5rem @highlight-color-primary;
+      border: none;
+      border-radius: 0; // same as 0rem
+      transition: background 0.2s;
+      margin: 0.25px;
+      padding: 0;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+      height: 1rem;
+      width: 1.5rem;
+      box-shadow: inset 0 0 1rem @highlight-color-primary;
+      background: @primary-color;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      /* Center the thumb vertically if needed */
+      margin-top: calc((1rem - 1rem) / 2);
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &:hover::-webkit-slider-runnable-track,
+    &::-webkit-slider-runnable-track:hover {
+      box-shadow: inset 0 0 0.75rem @highlight-color-primary;
+      background: @primary-color;
+    }
+  
+    &:hover::-webkit-slider-thumb,
+    &::-webkit-slider-thumb:hover {
+      border: none;
+    }
+  
+    &:active,
+    &:focus {
+      &::-webkit-slider-thumb,
+      &::-webkit-slider-thumb:active,
+      &::-webkit-slider-thumb:focus {
+        -webkit-appearance: none;
+        box-shadow: inset 0 0 1rem @highlight-color-primary;
+        background: @primary-color;
+        margin-top: calc((1rem - 1rem) / 2);
+        transform: scale(1.05);
+      }
+      &::-webkit-slider-runnable-track,
+      &::-webkit-slider-runnable-track:active,
+      &::-webkit-slider-runnable-track:focus {
+        box-shadow: inset 0 0 0.75rem @highlight-color-primary;
+        background: @primary-color;
+      }
+    }
+  
+    // ================================
+    // Firefox
+    // ================================
+    &::-moz-range-track {
+      height: 1rem;
+      background: @primary-color;
+      box-shadow: inset 0 0 0.5rem @highlight-color-primary;
+      border: none;
+      border-radius: 0;
+      transition: background 0.2s;
+      margin: 0.25px;
+      padding: 0;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &::-moz-range-thumb {
+      border: none;
+      margin: 0;
+      padding: 0;
+      height: 1rem;
+      width: 1.5rem;
+      box-shadow: inset 0 0 1rem @highlight-color-primary;
+      background: @primary-color;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &:hover {
+      &::-moz-range-track,
+      &::-moz-range-track:hover {
+        box-shadow: inset 0 0 0.75rem @highlight-color-primary;
+        background: @primary-color;
+      }
+    }
+  
+    &:active,
+    &:focus {
+      &::-moz-range-thumb,
+      &::-moz-range-thumb:active,
+      &::-moz-range-thumb:focus {
+        box-shadow: inset 0 0 1rem @highlight-color-primary;
+        background: @primary-color;
+        transform: scale(1.05);
+      }
+      &::-moz-range-track,
+      &::-moz-range-track:active,
+      &::-moz-range-track:focus {
+        box-shadow: inset 0 0 0.75rem @highlight-color-primary;
+        background: @primary-color;
+      }
+    }
+  
+    // ================================
+    // IE and Edge (Legacy)
+    // ================================
+    // Hide the default track, which in IE/Edge cannot be styled directly.
+    &::-ms-track {
+      width: 100%;
+      height: 1rem;
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+  
+    // The "fill" elements represent the track on either side of the thumb.
+    &::-ms-fill-lower,
+    &::-ms-fill-upper {
+      background: @primary-color;
+      box-shadow: inset 0 0 0.5rem @highlight-color-primary;
+      border: none;
+      border-radius: 0;
+      margin: 0.25px;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &::-ms-thumb {
+      border: none;
+      margin: 0;
+      padding: 0;
+      height: 1rem;
+      width: 1.5rem;
+      box-shadow: inset 0 0 1rem @highlight-color-primary;
+      background: @primary-color;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+    }
+  
+    &:hover {
+      &::-ms-fill-lower,
+      &::-ms-fill-upper {
+        box-shadow: inset 0 0 0.75rem @highlight-color-primary;
+        background: @primary-color;
+      }
+    }
+  
+    &:active,
+    &:focus {
+      &::-ms-thumb,
+      &::-ms-thumb:active,
+      &::-ms-thumb:focus {
+        box-shadow: inset 0 0 1rem @highlight-color-primary;
+        background: @primary-color;
+        transform: scale(1.05);
+      }
+    }
+  }
+  

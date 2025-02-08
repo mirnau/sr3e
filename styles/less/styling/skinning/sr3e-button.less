@@ -1,9 +1,9 @@
     
 button {
-    all: unset;
+    
     position: relative;
-    width: auto;
-    background-color: @accent-cherry-blossom;
+    width: 100%;
+    background-color: @accent-cherry-blossom !important;
     color: @h1-color;
     border: none;
     padding: 10px 20px;
@@ -23,12 +23,11 @@ button {
         width: calc(100% - 2px);
         height: calc(100% - 2px);
         pointer-events: none;
-         animation: waveDiagonal 2s infinite linear;
         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
     }
 
     &:hover {
-        background-color: orange;
+        background-color: orange !important;
     }
 
     &:active {
@@ -40,3 +39,4 @@ button {
         background-color: yellow;
     }
 }
+
