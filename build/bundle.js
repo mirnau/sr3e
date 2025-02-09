@@ -3546,9 +3546,9 @@ function openFilePicker(document2) {
     }).render(true);
   });
 }
-var root_1$3 = /* @__PURE__ */ template(`<div class="editor"></div>`);
+var root_1$4 = /* @__PURE__ */ template(`<div class="editor"></div>`);
 var root_2$3 = /* @__PURE__ */ template(`<div class="editor-readonly"></div>`);
-var root$5 = /* @__PURE__ */ template(`<div class="editor-field"><!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="editor-field"><!></div>`);
 function Editor($$anchor, $$props) {
   push($$props, false);
   let document2 = prop($$props, "document", 24, () => ({}));
@@ -3585,11 +3585,11 @@ function Editor($$anchor, $$props) {
     Log.success("Editor initialized successfully", "Editor.svelte", get$1(editorContainer));
   });
   init();
-  var div = root$5();
+  var div = root$6();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$3();
+      var div_1 = root_1$4();
       bind_this(div_1, ($$value) => set(editorContainer, $$value), () => get$1(editorContainer));
       append($$anchor2, div_1);
     };
@@ -3606,7 +3606,7 @@ function Editor($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
+var root_1$3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_4$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
@@ -3615,7 +3615,7 @@ var root_6 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no
 var root_7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
 var root_9 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="text"></div></div>`);
-var root$4 = /* @__PURE__ */ template(`<div class="sr3e"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="sr3e"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container slim"><div class="fake-shadow"></div> <div class="inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <!></div></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, false);
   const metahuman = mutable_state();
@@ -3787,7 +3787,7 @@ function MetahumanApp($$anchor, $$props) {
   );
   legacy_pre_effect_reset();
   init();
-  var div = root$4();
+  var div = root$5();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -3805,7 +3805,7 @@ function MetahumanApp($$anchor, $$props) {
     });
   });
   each(select, 4, () => ["C", "D", "E"], index, ($$anchor2, priority) => {
-    var option = root_1$2();
+    var option = root_1$3();
     var option_value = {};
     var text = child(option);
     template_effect(() => {
@@ -4018,6 +4018,144 @@ function MetahumanApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
+var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
+var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div><h1> </h1></div> <input id="player-name" type="text"> <label for="player-avatar"><h1> </h1></label> <div class="config-columns"><input id="player-avatar" type="text"> <button type="button"> </button> <h1> </h1> <div class="colorpicker svelte-16k54sa"><input id="player-color" type="color" aria-label="Player color" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; cursor: pointer;"></div></div> <div><h1> </h1></div> <input id="player-pronoun" type="text"></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><label for="main-character"> </label> <select id="main-character"><option>None</option><!></select></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><button type="button"> </button></div></div></div>`);
+function UserSettings($$anchor, $$props) {
+  push($$props, false);
+  let playerName = mutable_state();
+  let playerAvatar = mutable_state();
+  let playerColor = mutable_state();
+  let playerPronoun = mutable_state();
+  let mainCharacter = mutable_state();
+  let characterOptions = mutable_state([]);
+  let user = {};
+  let app = prop($$props, "app", 8);
+  let config = prop($$props, "config", 8);
+  onMount(() => {
+    const userId = app().id.split(".")[1];
+    user = game.users.find((u) => u.id === userId);
+    set(playerName, user.name);
+    set(playerAvatar, user.avatar);
+    set(playerColor, user.color);
+    set(playerPronoun, user.getFlag("sr3e", "pronoun") || "");
+    set(mainCharacter, user.getFlag("sr3e", "mainCharacter") || "");
+    set(characterOptions, game.actors.filter((actor) => actor.testUserPermission(user, "OBSERVER")).map((actor) => ({ id: actor.id, name: actor.name })));
+  });
+  async function saveSettings() {
+    await game.user.update({
+      name: get$1(playerName),
+      avatar: get$1(playerAvatar),
+      color: get$1(playerColor)
+    });
+    await game.user.setFlag("sr3e", "pronoun", get$1(playerPronoun));
+    await game.user.setFlag("sr3e", "mainCharacter", get$1(mainCharacter));
+    ui.notifications.info("User settings updated!");
+    app().close();
+  }
+  function openFilePicker2() {
+    new FilePicker({
+      type: "image",
+      callback: (path) => set(playerAvatar, path)
+    }).render(true);
+  }
+  init();
+  var div = root$4();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var div_3 = child(div_2);
+  var h1 = child(div_3);
+  var text = child(h1);
+  var input = sibling(div_3, 2);
+  var label = sibling(input, 2);
+  var h1_1 = child(label);
+  var text_1 = child(h1_1);
+  var div_4 = sibling(label, 2);
+  var input_1 = child(div_4);
+  var button = sibling(input_1, 2);
+  var text_2 = child(button);
+  var h1_2 = sibling(button, 2);
+  var text_3 = child(h1_2);
+  var div_5 = sibling(h1_2, 2);
+  var input_2 = child(div_5);
+  var div_6 = sibling(div_4, 2);
+  var h1_3 = child(div_6);
+  var text_4 = child(h1_3);
+  var input_3 = sibling(div_6, 2);
+  var div_7 = sibling(div_1, 2);
+  var div_8 = sibling(child(div_7), 2);
+  var label_1 = child(div_8);
+  var text_5 = child(label_1);
+  var select = sibling(label_1, 2);
+  template_effect(() => {
+    get$1(mainCharacter);
+    invalidate_inner_signals(() => {
+      config();
+      get$1(characterOptions);
+    });
+  });
+  var option = child(select);
+  option.value = null == (option.__value = "") ? "" : "";
+  var node = sibling(option);
+  each(node, 1, () => get$1(characterOptions), index, ($$anchor2, $$item) => {
+    let id = () => get$1($$item).id;
+    let name = () => get$1($$item).name;
+    var option_1 = root_1$2();
+    var option_1_value = {};
+    var text_6 = child(option_1);
+    template_effect(() => {
+      if (option_1_value !== (option_1_value = id())) {
+        option_1.value = null == (option_1.__value = id()) ? "" : id();
+      }
+      set_text(text_6, name());
+    });
+    append($$anchor2, option_1);
+  });
+  var div_9 = sibling(div_7, 2);
+  var div_10 = sibling(child(div_9), 2);
+  var button_1 = child(div_10);
+  var text_7 = child(button_1);
+  template_effect(
+    ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
+      set_text(text, $0);
+      set_attribute(input, "aria-label", $1);
+      set_text(text_1, $2);
+      set_attribute(input_1, "placeholder", config().userconfig.imageFile);
+      set_attribute(input_1, "aria-label", config().userconfig.imageFile);
+      set_attribute(button, "aria-label", $3);
+      set_text(text_2, $3);
+      set_text(text_3, $4);
+      set_attribute(div_5, "style", `background-color: ${get$1(playerColor) ?? ""}`);
+      set_text(text_4, $5);
+      set_attribute(input_3, "placeholder", $5);
+      set_attribute(input_3, "aria-label", $5);
+      set_text(text_5, $6);
+      set_attribute(select, "aria-label", $6);
+      set_attribute(button_1, "aria-label", $7);
+      set_text(text_7, $8);
+    },
+    [
+      () => localize(config().userconfig.setPlayerName),
+      () => localize(config().userconfig.playerName),
+      () => localize(config().userconfig.avatar),
+      () => localize(config().userconfig.openFilePicker),
+      () => localize(config().userconfig.choosePlayerColor),
+      () => localize(config().userconfig.playersPreferredPronoun),
+      () => localize(config().userconfig.selectMainCharacter),
+      () => localize(config().userconfig.saveUserSettings),
+      () => localize(config().userconfig.saveSettings)
+    ],
+    derived_safe_equal
+  );
+  bind_value(input, () => get$1(playerName), ($$value) => set(playerName, $$value));
+  bind_value(input_1, () => get$1(playerAvatar), ($$value) => set(playerAvatar, $$value));
+  event("click", button, openFilePicker2);
+  bind_value(input_2, () => get$1(playerColor), ($$value) => set(playerColor, $$value));
+  bind_value(input_3, () => get$1(playerPronoun), ($$value) => set(playerPronoun, $$value));
+  bind_select_value(select, () => get$1(mainCharacter), ($$value) => set(mainCharacter, $$value));
+  event("click", button_1, saveSettings);
+  append($$anchor, div);
+  pop();
+}
 const sr3e = {};
 sr3e.attributes = {
   body: "sr3e.attributes.body",
@@ -4074,6 +4212,18 @@ sr3e.vision = {
   type: "sr3e.vision.type",
   description: "sr3e.vision.description",
   rules: "sr3e.vision.rules"
+};
+sr3e.userconfig = {
+  setPlayerName: "sr3e.userconfig.setPlayerName",
+  playerName: "sr3e.userconfig.playerName",
+  avatar: "sr3e.userconfig.avatar",
+  imageFile: "sr3e.userconfig.imageFile",
+  openFilePicker: "sr3e.userconfig.openFilePicker",
+  choosePlayerColor: "sr3e.userconfig.choosePlayerColor",
+  playersPreferredPronoun: "sr3e.userconfig.playersPreferredPronoun",
+  selectMainCharacter: "sr3e.userconfig.selectMainCharacter",
+  saveSettings: "sr3e.userconfig.saveSettings",
+  saveUserSettings: "sr3e.userconfig.saveUserSettings"
 };
 const hooks = {
   renderCharacterActorSheet: "renderCharacterActorSheet",
@@ -5036,8 +5186,29 @@ function registerHooks() {
       }
     });
   });
+  Hooks.on("renderUserConfig", (app, html2, data) => {
+    html2.classList.remove("application", "user-config");
+    html2.classList.add("app", "window-app", "sr3e", "item", "playerconfig");
+    Log.info("Modified Player Configuration form to inherit styles", "Userconfig Hack");
+  });
+  Hooks.on("renderUserConfig", (app, form, data) => {
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
+    const container = form.querySelector(".window-content");
+    container.innerHTML = "";
+    app.svelteApp = mount(UserSettings, {
+      target: container,
+      props: {
+        app,
+        config: CONFIG.sr3e
+      }
+    });
+    Log.success("Svelte App Initialized", "UserSettings");
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
+    Users.registerSheet();
     registerActorTypes([
       { type: "character", model: CharacterModel, sheet: CharacterActorSheet }
     ]);

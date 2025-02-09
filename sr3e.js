@@ -6,6 +6,7 @@ import MetahumanModel from "./module/models/item/MetahumanModel.js";
 import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MetahumanItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MetahumanApp from "./module/svelte/apps/MetahumanApp.svelte";
+import UserSettings from "./module/svelte/apps/injections/UserSettings.svelte";
 import { mount, unmount } from "svelte";
 import { sr3e } from "./module/foundry/config.js";
 import {
@@ -165,12 +166,46 @@ function registerHooks() {
   });
 
   ////////////////////////////
+  Hooks.on("renderUserConfig", (app, html, data) => {
+
+    html.classList.remove("application", "user-config");
+    html.classList.add("app", "window-app", "sr3e", "item", "playerconfig");
+
+    Log.info("Modified Player Configuration form to inherit styles", "Userconfig Hack");
+  });
+
+
+  // Replace Userconfig with CustomUserconfig
+  Hooks.on("renderUserConfig", (app, form, data) => {
+ 
+    if(app.svelteApp) {
+      unmount(app.svelteApp);
+    }
+
+    const container = form.querySelector(".window-content");
+
+    container.innerHTML = '';
+  
+    app.svelteApp = mount(UserSettings, {
+      target: container,
+      props: {
+        app: app,
+        config: CONFIG.sr3e,
+      },
+    });
+  
+    Log.success("Svelte App Initialized", "UserSettings");
+
+  });
+
 
   ////////////////////////////
 
   Hooks.once(hooks.init, () => {
 
     configureProject();
+
+    Users.registerSheet()
 
     registerActorTypes([
       { type: "character", model: CharacterModel, sheet: CharacterActorSheet },
@@ -185,8 +220,6 @@ function registerHooks() {
 
   });
 }
-
-
 
 registerHooks();
 

@@ -62,3 +62,16 @@ sr3e.vision = {
     description: "sr3e.vision.description",
     rules: "sr3e.vision.rules",
 }
+
+sr3e.userconfig = {
+    setPlayerName: "sr3e.userconfig.setPlayerName",
+    playerName: "sr3e.userconfig.playerName",
+    avatar: "sr3e.userconfig.avatar",
+    imageFile: "sr3e.userconfig.imageFile",
+    openFilePicker: "sr3e.userconfig.openFilePicker",
+    choosePlayerColor: "sr3e.userconfig.choosePlayerColor",
+    playersPreferredPronoun: "sr3e.userconfig.playersPreferredPronoun",
+    selectMainCharacter: "sr3e.userconfig.selectMainCharacter",
+    saveSettings: "sr3e.userconfig.saveSettings",
+    saveUserSettings: "sr3e.userconfig.saveUserSettings",
+}

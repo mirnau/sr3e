@@ -3,17 +3,20 @@ button {
     
     position: relative;
     width: 100%;
-    min-height: 3rem;
+    min-height: 2rem;
+    min-width: 2rem;
+    text-align: center;
+    justify-content: center;
     background-color: @accent-cherry-blossom !important;
     color: @h1-color;
     border: none;
     cursor: pointer;
+    margin: 0rem;
     
     text-align: center;
     .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 
     &::before {
-        box-shadow: inset 0 0 3px #1d282c;
         content: '';
         position: absolute;
         z-index: -1;
@@ -23,6 +26,7 @@ button {
         width: calc(100% - 2px);
         height: calc(100% - 2px);
         pointer-events: none;
+        box-shadow: inset 0 0 10px magenta !important;
         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
     }
 
@@ -32,7 +36,6 @@ button {
 
     &:active {
         background-color: purple;
-        box-shadow: inset 0 0 10px magenta;
     }
 
     &:disabled {

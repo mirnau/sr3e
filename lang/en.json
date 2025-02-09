@@ -50,6 +50,18 @@
       "metahuman": "Metahuman",
       "agerange": "Playable Age Range"
     },
+    "userconfig": {
+      "setPlayerName": "Set Player Name",
+      "playerName": "The Players Name",
+      "avatar": "Choose an avatar for the player",
+      "imageFile": "Image file",
+      "openFilePicker": "Choose a File",
+      "choosePlayerColor": "Pick a Player Colour",
+      "playersPreferredPronoun": "The Players Preferred Pronoun",
+      "selectMainCharacter": "Select the Players Main Character",
+      "saveSettings": "Save Settings",
+      "saveUserSettings": "Save the Current Users Settings"
+    },
     "vision": {
       "vision": "Vision",
       "type": "Type",

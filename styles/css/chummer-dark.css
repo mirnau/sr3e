@@ -1,16 +1,18 @@
 button {
   position: relative;
   width: 100%;
-  min-height: 3rem;
+  min-height: 2rem;
+  min-width: 2rem;
+  justify-content: center;
   background-color: #ff9fc8 !important;
   color: #1df0ff;
   border: none;
   cursor: pointer;
+  margin: 0rem;
   text-align: center;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 button::before {
-  box-shadow: inset 0 0 3px #1d282c;
   content: '';
   position: absolute;
   z-index: -1;
@@ -20,6 +22,7 @@ button::before {
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
+  box-shadow: inset 0 0 10px magenta !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 button:hover {
@@ -27,7 +30,6 @@ button:hover {
 }
 button:active {
   background-color: purple;
-  box-shadow: inset 0 0 10px magenta;
 }
 button:disabled {
   background-color: yellow;
@@ -38,6 +40,7 @@ input[type="text"] {
   box-shadow: inset 0 0 8px #1df0ff;
   border: none;
   font-size: 1.5rem;
+  color: white;
   width: 100%;
   min-width: 2rem;
   max-width: 100%;
@@ -70,8 +73,34 @@ input[type="text"]:focus {
   box-shadow: inset 0 0 10px #1df0ff;
   outline: none;
 }
-img {
-  border: none;
+input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  background-color: #1b1f24;
+}
+input[type="checkbox"]:checked {
+  background-color: #ff0095;
+}
+input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 5px;
+  border: solid white;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg);
+  top: 6px;
+  left: 5px;
+  display: none;
+}
+input[type="checkbox"]:checked::after {
+  display: block;
 }
 input[type="range"] {
   -webkit-appearance: none;
@@ -233,27 +262,38 @@ input[type="range"]:focus::-ms-thumb:focus {
 select.roll-type-select,
 select {
   appearance: none;
-  background: #1c364b !important;
-  color: red;
+  text-indent: 0.5rem;
+  background: #1b1f24 !important;
+  color: #ff0095;
   width: 100%;
   border: none;
-  border-radius: 0rem;
+  border-radius: 0rem !important;
+  box-shadow: inset 0 0 1rem #ff0095;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-select:hover {
-  border-color: #ff00ff;
-}
-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+optgroup {
+  background-color: #003856;
 }
 option {
   text-indent: 0.5rem;
-  background-color: #1c364b;
+  background-color: #003856;
   border-radius: 0rem;
   border: none;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+select option {
+  background-color: #1b1f24;
+  /* Attempts to override */
+  color: #ff0095;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.units {
+  color: #1df0ff !important;
+  text-shadow: 0 0 10px #1df0ff !important;
+}
+.cards,
+.rolltable {
+  padding: 0.5rem;
 }
 .tab {
   background: transparent;
@@ -277,7 +317,7 @@ li.directory-item.folder::before,
 li.directory-item.folder::after {
   content: "";
   display: block;
-  background-color: #1b1f24;
+  background-color: #003856;
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   width: 100%;
@@ -289,7 +329,19 @@ li.directory-item.folder::after {
 }
 .folder-header.flexrow {
   margin-top: 0.25rem;
+  border-radius: 5px;
 }
+.folder-header.flexrow h3.noborder {
+  text-shadow: none;
+  color: #1df0ff;
+}
+li.directory-item.compendium {
+  margin-left: 0.5;
+  margin-right: 0.5;
+  margin-top: 0.5;
+}
+.directory-item.compendium::before,
+.directory-item.compendium::after,
 .directory-item.document::after,
 .directory-item.document::before {
   display: none;
@@ -367,11 +419,16 @@ li.directory-item.folder::after {
   margin-top: 0.25rem;
   min-height: 2rem;
 }
+div#sidebar.app {
+  position: relative;
+  border-radius: 0rem;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
 #ui-right,
 .directory-list {
   padding: 0.5rem;
   position: relative;
-  box-shadow: inset 0 4px 30px rgba(29, 240, 255, 0.5);
+  box-shadow: inset 0 -4px 30px rgba(29, 240, 255, 0.8), inset 0 -2px 10px rgba(29, 240, 255, 0.6);
 }
 #ui-right:before,
 .directory-list:before {
@@ -382,11 +439,19 @@ li.directory-item.folder::after {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.5) 95%);
-  z-index: 1;
+  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.5) 90%);
+}
+#ui-right h2 {
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #1b1f24;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .directory-list {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+#chat-form {
+  z-index: 100;
 }
 .chat-message .inner-background-container {
   position: relative;
@@ -410,7 +475,6 @@ li.directory-item.folder::after {
   width: 100%;
   height: 100%;
   background-color: var(--message-color);
-  z-index: 10;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   position: relative;
 }
@@ -419,7 +483,7 @@ li.directory-item.folder::after {
   content: '';
   position: absolute;
   z-index: -1;
-  background: #1c364b;
+  background: #003856;
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -442,25 +506,34 @@ li.directory-item.folder::after {
   flex: 0 1 auto;
   white-space: nowrap;
 }
+.chat-controls,
 .chat-message {
+  z-index: 400;
   border: 0rem;
   background: transparent;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   position: relative;
 }
+.chat-controls h1,
 .chat-message h1,
+.chat-controls h2,
 .chat-message h2,
+.chat-controls h3,
 .chat-message h3,
+.chat-controls h4,
 .chat-message h4 {
   color: var(--message-color);
   text-shadow: 0 0 10px var(--message-color);
 }
+.chat-controls.whisper,
 .chat-message.whisper {
   border: 0rem;
   padding: 0rem;
   background-color: transparent;
 }
+.chat-controls span.whisper-to,
 .chat-message span.whisper-to,
+.chat-controls time.message-timestamp,
 .chat-message time.message-timestamp {
   color: var(--message-color);
 }
@@ -560,9 +633,15 @@ h3.nue:before {
 #settings-access a.item {
   scale: 80%;
 }
-header.playlist-header.flexrow h4 {
+.playlist-header.flexrow {
+  background: transparent !important;
+}
+.playlist-header.flexrow h4 {
   color: magenta;
-  background: transparent;
+  background: transparent !important;
+}
+.playlists-sounds i {
+  color: #1df0ff;
 }
 #global-volume {
   all: unset;
@@ -599,7 +678,7 @@ textarea#chat-message {
   width: 100%;
   height: 100%;
   padding: 0.5rem;
-  background: #1b1f24;
+  background: #003856;
   border-radius: 0rem;
   outline: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -630,27 +709,21 @@ textarea#chat-message:active {
 @keyframes flicker {
   0% {
     box-shadow: 0 0 2px var(--user-color), 0 0 1rem var(--user-color), 0 0 20px #fff;
-    opacity: 0.8;
   }
   20% {
     box-shadow: none;
-    opacity: 0.6;
   }
   40% {
     box-shadow: 0 0 2px var(--user-color), 0 0 1.2rem var(--user-color), 0 0 15px #fff;
-    opacity: 1;
   }
   60% {
     box-shadow: none;
-    opacity: 0.4;
   }
   80% {
     box-shadow: 0 0 4px var(--user-color), 0 0 0.7rem var(--user-color), 0 0 25px #fff;
-    opacity: 1;
   }
   100% {
     box-shadow: 0 0 4px var(--user-color), 0 0 2rem var(--user-color), 0 0 25px #fff;
-    opacity: 1;
   }
 }
 aside,
@@ -659,16 +732,6 @@ form {
   color: #c8d3f5;
   background: transparent;
 }
-aside section.window-content,
-.frexrow section.window-content,
-form section.window-content {
-  background-color: red;
-}
-label {
-  color: #3ed199;
-  text-transform: uppercase;
-  text-shadow: 0 0 10px #3ed199;
-}
 button {
   position: relative;
 }
@@ -676,6 +739,13 @@ button label {
   color: #1df0ff;
   text-transform: uppercase;
   text-shadow: 0 0 10px #1df0ff;
+}
+label {
+  font-size: 1.2rem;
+  color: #1df0ff !important;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #1df0ff;
+  margin: 1rem !important;
 }
 .window-content {
   background: transparent !important;
@@ -693,7 +763,7 @@ h3.form-header {
 }
 .form-group.submenu {
   box-shadow: inset 0 0 1.5rem #1df0ff;
-  background-color: #1c364b;
+  background-color: #003856;
   padding: 0.5rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
@@ -711,7 +781,7 @@ h3.form-header {
   box-shadow: inset 0 0 30px #1d282c;
   content: '';
   z-index: -1;
-  background: #1c364b;
+  background: #003856;
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -727,6 +797,58 @@ footer {
 }
 .entry-filter.form-group {
   background-color: red;
+}
+img {
+  background-color: #ff9fc8;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.playerconfig button {
+  padding: 0.5rem;
+  position: relative;
+  justify-content: center !important;
+  text-align: center !important;
+}
+.playerconfig button label {
+  color: #1df0ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #1df0ff;
+}
+.playerconfig .config-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Two equal columns */
+  gap: 0.5rem;
+  /* Space between columns */
+  background-color: red;
+  padding: 0.5rem;
+}
+.playerconfig .config-columns input {
+  height: 100%;
+}
+.playerconfig img {
+  max-width: 5rem;
+  max-height: 5rem;
+}
+.playerconfig legend {
+  padding: 0.5rem;
+  background-color: #1b1f24;
+  box-shadow: inset 0 0 10px #3ed199;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.playerconfig button {
+  z-index: 100;
+}
+.playerconfig p.hint {
+  color: #1df0ff !important;
+}
+.playerconfig section.window-content {
+  background: #1b1f24;
+}
+.playerconfig .window-content {
+  padding: 0rem;
+}
+menu {
+  display: none !important;
 }
 .dialog.sr3e .meta-human-grid,
 .sr3e.sheet.item .meta-human-grid {
@@ -763,6 +885,10 @@ body {
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
+}
+body form.p.hint,
+body p.hint {
+  color: #ff0095;
 }
 body div {
   color: #1df0ff;
@@ -892,11 +1018,13 @@ body input::placeholder {
 * {
   border: none !important;
 }
+.application,
 .app,
 .sr3e.window-app.sr3e {
   background: none;
   box-shadow: none;
   border: none;
+  backdrop-filter: blur(2px);
 }
 .sheet-component {
   box-sizing: border-box;
@@ -924,6 +1052,14 @@ body input::placeholder {
 .sr3e.sheet.item,
 .sr3e.sheet.character {
   box-shadow: none;
+}
+.dialog.sr3e label,
+.sr3e.sheet.item label,
+.sr3e.sheet.character label {
+  color: #1df0ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #1df0ff;
+  padding: 1rem;
 }
 .dialog.sr3e .window-content,
 .sr3e.sheet.item .window-content,
@@ -1053,7 +1189,7 @@ body input::placeholder {
   content: '';
   position: absolute;
   z-index: -1;
-  background: #1c364b;
+  background: #003856;
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -1097,7 +1233,7 @@ body input::placeholder {
 .sr3e.sheet.character .core-skill .skill-value {
   text-indent: 0rem;
   text-align: center;
-  background-color: #1c364b;
+  background-color: #003856;
   box-shadow: inset 0 0 8px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
@@ -1115,7 +1251,7 @@ body input::placeholder {
 .dialog.sr3e .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card {
-  background-color: #1c364b;
+  background-color: #003856;
 }
 .dialog.sr3e .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
