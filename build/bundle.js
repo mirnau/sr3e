@@ -4999,6 +4999,43 @@ function registerHooks() {
     console.log("....................................");
     console.log("....................................");
   });
+  Hooks.on("renderSidebarTab", (app, html2) => {
+    html2.find(".directory-item.document").each((_, el) => {
+      let $el = $(el);
+      let img = $el.find("img.thumbnail");
+      let h4 = $el.find("h4.entry-name");
+      let entryId = $el.attr("data-entry-id");
+      let docType = $el.hasClass("actor") ? "Actor" : $el.hasClass("item") ? "Item" : null;
+      if (!docType) return;
+      if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
+        let wrapper = $('<div class="directory-post"></div>');
+        wrapper.attr("data-entry-id", entryId);
+        wrapper.attr("data-document-type", docType);
+        img.add(h4).wrapAll(wrapper);
+        console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
+      }
+    });
+    html2.on("click", ".directory-post", (event2) => {
+      event2.preventDefault();
+      let $target = $(event2.currentTarget);
+      let entryId = $target.data("entry-id");
+      let docType = $target.data("document-type");
+      let doc;
+      if (docType === "Actor") {
+        doc = game.actors.get(entryId);
+      } else if (docType === "Item") {
+        doc = game.items.get(entryId);
+      } else {
+        console.warn("Unsupported document type:", docType);
+        return;
+      }
+      if (doc) {
+        doc.sheet.render(true);
+      } else {
+        console.warn("Document not found for ID:", entryId);
+      }
+    });
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
     registerActorTypes([

@@ -57,7 +57,7 @@ function registerHooks() {
       options.renderSheet = false;
     }
   });
-  
+
 
   Hooks.on("renderChatMessage", (message, html, data) => {
     const sender = game.users.get(message.author?.id);
@@ -70,48 +70,103 @@ function registerHooks() {
     // The actual chat message <li> element
     const chatMessage = html[0];
     if (!chatMessage) return;
-  
+
     // Prevent multiple modifications
     if (chatMessage.querySelector(".inner-background-container")) return;
-  
+
     // 1. Create the new structure
     const wrapper = document.createElement("div");
     wrapper.classList.add("inner-background-container");
-  
+
     const fakeShadow = document.createElement("div");
     fakeShadow.classList.add("fake-shadow");
-  
+
     const messageContainer = document.createElement("div");
     messageContainer.classList.add("message-container");
-  
+
     // 2. Move all existing content into messageContainer
     while (chatMessage.firstChild) {
       messageContainer.appendChild(chatMessage.firstChild);
     }
-  
+
     // 3. Build the new structure inside the <li>
     wrapper.appendChild(fakeShadow);
     wrapper.appendChild(messageContainer);
     chatMessage.appendChild(wrapper);
   });
-  
-  
+
 
   // 2. For system-specific item rolls, override content in preCreate
-Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
+  Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
 
-  console.log("....................................")
-  console.log("....................................")
-  console.log(messageDoc);
-  console.log(data);
-  console.log(data.content[0]);
-  console.log(options);
-  console.log(userId);
-  console.log("....................................")
-  console.log("....................................")
+    console.log("....................................")
+    console.log("....................................")
+    console.log(messageDoc);
+    console.log(data);
+    console.log(data.content[0]);
+    console.log(options);
+    console.log(userId);
+    console.log("....................................")
+    console.log("....................................")
 
-});
+  });
 
+  Hooks.on("renderSidebarTab", (app, html) => {
+    html.find(".directory-item.document").each((_, el) => {
+      let $el = $(el);
+      let img = $el.find("img.thumbnail");
+      let h4 = $el.find("h4.entry-name");
+
+      // Get the entry ID
+      let entryId = $el.attr("data-entry-id");
+
+      // Determine the document type from the class attribute
+      let docType = $el.hasClass("actor") ? "Actor" :
+        $el.hasClass("item") ? "Item" : null;
+
+      // If we couldn't determine a document type, skip
+      if (!docType) return;
+
+      // Wrap if not already wrapped
+      if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
+        let wrapper = $('<div class="directory-post"></div>');
+        wrapper.attr("data-entry-id", entryId);
+        wrapper.attr("data-document-type", docType);
+
+        img.add(h4).wrapAll(wrapper);
+        console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
+      }
+    });
+
+    // Add a click callback to open the correct document sheet
+    html.on("click", ".directory-post", (event) => {
+      event.preventDefault();
+
+      let $target = $(event.currentTarget);
+      let entryId = $target.data("entry-id");
+      let docType = $target.data("document-type");
+      let doc;
+
+      if (docType === "Actor") {
+        doc = game.actors.get(entryId);
+      } else if (docType === "Item") {
+        doc = game.items.get(entryId);
+      } else {
+        console.warn("Unsupported document type:", docType);
+        return;
+      }
+
+      if (doc) {
+        doc.sheet.render(true);
+      } else {
+        console.warn("Document not found for ID:", entryId);
+      }
+    });
+  });
+
+  ////////////////////////////
+
+  ////////////////////////////
 
   Hooks.once(hooks.init, () => {
 
@@ -130,6 +185,8 @@ Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
 
   });
 }
+
+
 
 registerHooks();
 

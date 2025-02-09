@@ -44,7 +44,8 @@ function watchSvelte() {
     [
       "module/svelte/**/*.svelte", // Svelte components
       "module/foundry/**/*.js",    // Foundry-related JS
-      "module/models/**/*.js"      // Model-related JS
+      "module/models/**/*.js",      // Model-related JS
+      "sr3e.js"      // Model-related JS
     ],
     buildSvelte
   );
