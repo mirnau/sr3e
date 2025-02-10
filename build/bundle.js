@@ -490,6 +490,7 @@ const PROPS_IS_LAZY_INITIAL = 1 << 4;
 const TRANSITION_IN = 1;
 const TRANSITION_OUT = 1 << 1;
 const TRANSITION_GLOBAL = 1 << 2;
+const TEMPLATE_FRAGMENT = 1;
 const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
 const UNINITIALIZED = Symbol();
 const PASSIVE_EVENTS = ["touchstart", "touchmove"];
@@ -913,6 +914,19 @@ function get_next_sibling(node) {
 function child(node, is_text) {
   {
     return /* @__PURE__ */ get_first_child(node);
+  }
+}
+function first_child(fragment, is_text) {
+  {
+    var first = (
+      /** @type {DocumentFragment} */
+      /* @__PURE__ */ get_first_child(
+        /** @type {Node} */
+        fragment
+      )
+    );
+    if (first instanceof Comment && first.data === "") return /* @__PURE__ */ get_next_sibling(first);
+    return first;
   }
 }
 function sibling(node, count = 1, is_text = false) {
@@ -2198,20 +2212,31 @@ function assign_nodes(start, end) {
 }
 // @__NO_SIDE_EFFECTS__
 function template(content, flags2) {
+  var is_fragment = (flags2 & TEMPLATE_FRAGMENT) !== 0;
   var use_import_node = (flags2 & TEMPLATE_USE_IMPORT_NODE) !== 0;
   var node;
   var has_start = !content.startsWith("<!>");
   return () => {
     if (node === void 0) {
       node = create_fragment_from_html(has_start ? content : "<!>" + content);
-      node = /** @type {Node} */
+      if (!is_fragment) node = /** @type {Node} */
       /* @__PURE__ */ get_first_child(node);
     }
     var clone = (
       /** @type {TemplateNode} */
       use_import_node ? document.importNode(node, true) : node.cloneNode(true)
     );
-    {
+    if (is_fragment) {
+      var start = (
+        /** @type {TemplateNode} */
+        /* @__PURE__ */ get_first_child(clone)
+      );
+      var end = (
+        /** @type {TemplateNode} */
+        clone.lastChild
+      );
+      assign_nodes(start, end);
+    } else {
       assign_nodes(clone, clone);
     }
     return clone;
@@ -4019,22 +4044,23 @@ function MetahumanApp($$anchor, $$props) {
   pop();
 }
 var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
-var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div><h1> </h1></div> <input id="player-name" type="text"> <label for="player-avatar"><h1> </h1></label> <div class="config-columns"><input id="player-avatar" type="text"> <button type="button"> </button> <h1> </h1> <div class="colorpicker svelte-16k54sa"><input id="player-color" type="color" aria-label="Player color" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; cursor: pointer;"></div></div> <div><h1> </h1></div> <input id="player-pronoun" type="text"></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><label for="main-character"> </label> <select id="main-character"><option>None</option><!></select></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><button type="button"> </button></div></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="config-columns"><div><h1 class="no-margin"> </h1></div> <input id="player-name" type="text"></div> <div class="config-columns"><h1 class="no-margin"> </h1> <div class="colorpicker"><input id="player-color" type="color" aria-label="Player color" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; cursor: pointer;"></div></div> <div class="config-columns"><div><h1 class="no-margin"> </h1></div> <input id="player-pronoun" type="text"></div></div></div></div> <div class="main-character-portrait"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><img role="none" alt="User Avatar" style="cursor: pointer;"> <div><h3> </h3></div></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><img alt="Main Character Portrait"> <div><h3>Main Character Name</h3></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="config-columns"><label for="main-character"> </label> <select id="main-character"><option>None</option><!></select></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><button type="button"> </button></div></div></div>`, 1);
 function UserSettings($$anchor, $$props) {
   push($$props, false);
-  let playerName = mutable_state();
-  let playerAvatar = mutable_state();
-  let playerColor = mutable_state();
-  let playerPronoun = mutable_state();
-  let mainCharacter = mutable_state();
-  let characterOptions = mutable_state([]);
-  let user = {};
-  let app = prop($$props, "app", 8);
+  const mainCharacterImage = mutable_state();
+  let app = prop($$props, "app", 12);
   let config = prop($$props, "config", 8);
+  let playerName = mutable_state("");
+  let playerAvatar = mutable_state("");
+  let playerColor = mutable_state("#ffffff");
+  let playerPronoun = mutable_state("");
+  let mainCharacter = mutable_state("");
+  let characterOptions = mutable_state([]);
+  let user = null;
   onMount(() => {
     const userId = app().id.split(".")[1];
     user = game.users.find((u) => u.id === userId);
-    set(playerName, user.name);
+    set(playerName, user.name || "fallback");
     set(playerAvatar, user.avatar);
     set(playerColor, user.color);
     set(playerPronoun, user.getFlag("sr3e", "pronoun") || "");
@@ -4042,6 +4068,9 @@ function UserSettings($$anchor, $$props) {
     set(characterOptions, game.actors.filter((actor) => actor.testUserPermission(user, "OBSERVER")).map((actor) => ({ id: actor.id, name: actor.name })));
   });
   async function saveSettings() {
+    if (app().element) {
+      app(app().element.style.display = "none", true);
+    }
     await game.user.update({
       name: get$1(playerName),
       avatar: get$1(playerAvatar),
@@ -4050,6 +4079,9 @@ function UserSettings($$anchor, $$props) {
     await game.user.setFlag("sr3e", "pronoun", get$1(playerPronoun));
     await game.user.setFlag("sr3e", "mainCharacter", get$1(mainCharacter));
     ui.notifications.info("User settings updated!");
+    if (app()._onSubmit) {
+      await app()._onSubmit(new Event("submit"));
+    }
     app().close();
   }
   function openFilePicker2() {
@@ -4058,34 +4090,48 @@ function UserSettings($$anchor, $$props) {
       callback: (path) => set(playerAvatar, path)
     }).render(true);
   }
+  legacy_pre_effect(() => get$1(mainCharacter), () => {
+    var _a;
+    set(mainCharacterImage, get$1(mainCharacter) ? ((_a = game.actors.find((actor) => actor.id === get$1(mainCharacter))) == null ? void 0 : _a.img) || "defaultCharacter.jpg" : "defaultCharacter.jpg");
+  });
+  legacy_pre_effect_reset();
   init();
-  var div = root$4();
+  var fragment = root$4();
+  var div = first_child(fragment);
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
-  var h1 = child(div_3);
+  var div_4 = child(div_3);
+  var h1 = child(div_4);
   var text = child(h1);
-  var input = sibling(div_3, 2);
-  var label = sibling(input, 2);
-  var h1_1 = child(label);
+  var input = sibling(div_4, 2);
+  var div_5 = sibling(div_3, 2);
+  var h1_1 = child(div_5);
   var text_1 = child(h1_1);
-  var div_4 = sibling(label, 2);
-  var input_1 = child(div_4);
-  var button = sibling(input_1, 2);
-  var text_2 = child(button);
-  var h1_2 = sibling(button, 2);
-  var text_3 = child(h1_2);
-  var div_5 = sibling(h1_2, 2);
-  var input_2 = child(div_5);
-  var div_6 = sibling(div_4, 2);
-  var h1_3 = child(div_6);
-  var text_4 = child(h1_3);
-  var input_3 = sibling(div_6, 2);
-  var div_7 = sibling(div_1, 2);
-  var div_8 = sibling(child(div_7), 2);
-  var label_1 = child(div_8);
-  var text_5 = child(label_1);
-  var select = sibling(label_1, 2);
+  var div_6 = sibling(h1_1, 2);
+  var input_1 = child(div_6);
+  var div_7 = sibling(div_5, 2);
+  var div_8 = child(div_7);
+  var h1_2 = child(div_8);
+  var text_2 = child(h1_2);
+  var input_2 = sibling(div_8, 2);
+  var div_9 = sibling(div, 2);
+  var div_10 = child(div_9);
+  var div_11 = sibling(child(div_10), 2);
+  var img = child(div_11);
+  var div_12 = sibling(img, 2);
+  var h3 = child(div_12);
+  var text_3 = child(h3);
+  var div_13 = sibling(div_10, 2);
+  var div_14 = sibling(child(div_13), 2);
+  var img_1 = child(div_14);
+  var div_15 = sibling(div_9, 2);
+  var div_16 = child(div_15);
+  var div_17 = sibling(child(div_16), 2);
+  var div_18 = child(div_17);
+  var label = child(div_18);
+  var text_4 = child(label);
+  var select = sibling(label, 2);
   template_effect(() => {
     get$1(mainCharacter);
     invalidate_inner_signals(() => {
@@ -4101,43 +4147,40 @@ function UserSettings($$anchor, $$props) {
     let name = () => get$1($$item).name;
     var option_1 = root_1$2();
     var option_1_value = {};
-    var text_6 = child(option_1);
+    var text_5 = child(option_1);
     template_effect(() => {
       if (option_1_value !== (option_1_value = id())) {
         option_1.value = null == (option_1.__value = id()) ? "" : id();
       }
-      set_text(text_6, name());
+      set_text(text_5, name());
     });
     append($$anchor2, option_1);
   });
-  var div_9 = sibling(div_7, 2);
-  var div_10 = sibling(child(div_9), 2);
-  var button_1 = child(div_10);
-  var text_7 = child(button_1);
+  var div_19 = sibling(div_15, 2);
+  var div_20 = child(div_19);
+  var div_21 = sibling(child(div_20), 2);
+  var button = child(div_21);
+  var text_6 = child(button);
   template_effect(
-    ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
+    ($0, $1, $2, $3, $4, $5, $6) => {
       set_text(text, $0);
       set_attribute(input, "aria-label", $1);
       set_text(text_1, $2);
-      set_attribute(input_1, "placeholder", config().userconfig.imageFile);
-      set_attribute(input_1, "aria-label", config().userconfig.imageFile);
-      set_attribute(button, "aria-label", $3);
+      set_attribute(div_6, "style", `background-color: ${get$1(playerColor) ?? ""}`);
       set_text(text_2, $3);
-      set_text(text_3, $4);
-      set_attribute(div_5, "style", `background-color: ${get$1(playerColor) ?? ""}`);
-      set_text(text_4, $5);
-      set_attribute(input_3, "placeholder", $5);
-      set_attribute(input_3, "aria-label", $5);
-      set_text(text_5, $6);
-      set_attribute(select, "aria-label", $6);
-      set_attribute(button_1, "aria-label", $7);
-      set_text(text_7, $8);
+      set_attribute(input_2, "placeholder", $3);
+      set_attribute(input_2, "aria-label", $3);
+      set_attribute(img, "src", get$1(playerAvatar));
+      set_text(text_3, get$1(playerName));
+      set_attribute(img_1, "src", get$1(mainCharacterImage));
+      set_text(text_4, $4);
+      set_attribute(select, "aria-label", $4);
+      set_attribute(button, "aria-label", $5);
+      set_text(text_6, $6);
     },
     [
       () => localize(config().userconfig.setPlayerName),
       () => localize(config().userconfig.playerName),
-      () => localize(config().userconfig.avatar),
-      () => localize(config().userconfig.openFilePicker),
       () => localize(config().userconfig.choosePlayerColor),
       () => localize(config().userconfig.playersPreferredPronoun),
       () => localize(config().userconfig.selectMainCharacter),
@@ -4147,13 +4190,12 @@ function UserSettings($$anchor, $$props) {
     derived_safe_equal
   );
   bind_value(input, () => get$1(playerName), ($$value) => set(playerName, $$value));
-  bind_value(input_1, () => get$1(playerAvatar), ($$value) => set(playerAvatar, $$value));
-  event("click", button, openFilePicker2);
-  bind_value(input_2, () => get$1(playerColor), ($$value) => set(playerColor, $$value));
-  bind_value(input_3, () => get$1(playerPronoun), ($$value) => set(playerPronoun, $$value));
+  bind_value(input_1, () => get$1(playerColor), ($$value) => set(playerColor, $$value));
+  bind_value(input_2, () => get$1(playerPronoun), ($$value) => set(playerPronoun, $$value));
+  event("click", img, openFilePicker2);
   bind_select_value(select, () => get$1(mainCharacter), ($$value) => set(mainCharacter, $$value));
-  event("click", button_1, saveSettings);
-  append($$anchor, div);
+  event("click", button, saveSettings);
+  append($$anchor, fragment);
   pop();
 }
 const sr3e = {};
@@ -5103,89 +5145,82 @@ function onCloseMetahumanItemSheet(app, html2, data) {
     unmount(app.svelteApp);
   }
 }
+function haltCharacterSheetRender(doc, actor, options, userId) {
+  if (actor.type === "character") {
+    options.renderSheet = false;
+  }
+}
+function setChatMessageColorFromActorColor(message, html2, data) {
+  var _a;
+  const sender = game.users.get((_a = message.author) == null ? void 0 : _a.id);
+  if (!sender) return;
+  const senderColor = sender.color;
+  html2[0].style.setProperty("--message-color", senderColor);
+}
+function addChatMessageShadow(message, html2, data) {
+  const chatMessage = html2[0];
+  if (!chatMessage) return;
+  if (chatMessage.querySelector(".inner-background-container")) return;
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("inner-background-container");
+  const fakeShadow = document.createElement("div");
+  fakeShadow.classList.add("fake-shadow");
+  const messageContainer = document.createElement("div");
+  messageContainer.classList.add("message-container");
+  while (chatMessage.firstChild) {
+    messageContainer.appendChild(chatMessage.firstChild);
+  }
+  wrapper.appendChild(fakeShadow);
+  wrapper.appendChild(messageContainer);
+  chatMessage.appendChild(wrapper);
+}
+function wrapCharactersAndItemsForSidebar(app, html2) {
+  html2.find(".directory-item.document").each((_, el) => {
+    let $el = $(el);
+    let img = $el.find("img.thumbnail");
+    let h4 = $el.find("h4.entry-name");
+    let entryId = $el.attr("data-entry-id");
+    let docType = $el.hasClass("actor") ? "Actor" : $el.hasClass("item") ? "Item" : null;
+    if (!docType) return;
+    if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
+      let wrapper = $('<div class="directory-post"></div>');
+      wrapper.attr("data-entry-id", entryId);
+      wrapper.attr("data-document-type", docType);
+      img.add(h4).wrapAll(wrapper);
+      console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
+    }
+  });
+  html2.on("click", ".directory-post", (event2) => {
+    event2.preventDefault();
+    let $target = $(event2.currentTarget);
+    let entryId = $target.data("entry-id");
+    let docType = $target.data("document-type");
+    let doc;
+    if (docType === "Actor") {
+      doc = game.actors.get(entryId);
+    } else if (docType === "Item") {
+      doc = game.items.get(entryId);
+    } else {
+      console.warn("Unsupported document type:", docType);
+      return;
+    }
+    if (doc) {
+      doc.sheet.render(true);
+    } else {
+      console.warn("Document not found for ID:", entryId);
+    }
+  });
+}
 function registerHooks() {
   Hooks.on(hooks.createActor, renderCharacterCreationDialog);
   Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
   Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
   Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
   Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
-  Hooks.on(hooks.preCreateActor, (doc, actor, options, userId) => {
-    if (actor.type === "character") {
-      options.renderSheet = false;
-    }
-  });
-  Hooks.on("renderChatMessage", (message, html2, data) => {
-    var _a;
-    const sender = game.users.get((_a = message.author) == null ? void 0 : _a.id);
-    if (!sender) return;
-    const senderColor = sender.color;
-    html2[0].style.setProperty("--message-color", senderColor);
-  });
-  Hooks.on("renderChatMessage", (message, html2, data) => {
-    const chatMessage = html2[0];
-    if (!chatMessage) return;
-    if (chatMessage.querySelector(".inner-background-container")) return;
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("inner-background-container");
-    const fakeShadow = document.createElement("div");
-    fakeShadow.classList.add("fake-shadow");
-    const messageContainer = document.createElement("div");
-    messageContainer.classList.add("message-container");
-    while (chatMessage.firstChild) {
-      messageContainer.appendChild(chatMessage.firstChild);
-    }
-    wrapper.appendChild(fakeShadow);
-    wrapper.appendChild(messageContainer);
-    chatMessage.appendChild(wrapper);
-  });
-  Hooks.on("preCreateChatMessage", async (messageDoc, data, options, userId) => {
-    console.log("....................................");
-    console.log("....................................");
-    console.log(messageDoc);
-    console.log(data);
-    console.log(data.content[0]);
-    console.log(options);
-    console.log(userId);
-    console.log("....................................");
-    console.log("....................................");
-  });
-  Hooks.on("renderSidebarTab", (app, html2) => {
-    html2.find(".directory-item.document").each((_, el) => {
-      let $el = $(el);
-      let img = $el.find("img.thumbnail");
-      let h4 = $el.find("h4.entry-name");
-      let entryId = $el.attr("data-entry-id");
-      let docType = $el.hasClass("actor") ? "Actor" : $el.hasClass("item") ? "Item" : null;
-      if (!docType) return;
-      if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
-        let wrapper = $('<div class="directory-post"></div>');
-        wrapper.attr("data-entry-id", entryId);
-        wrapper.attr("data-document-type", docType);
-        img.add(h4).wrapAll(wrapper);
-        console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
-      }
-    });
-    html2.on("click", ".directory-post", (event2) => {
-      event2.preventDefault();
-      let $target = $(event2.currentTarget);
-      let entryId = $target.data("entry-id");
-      let docType = $target.data("document-type");
-      let doc;
-      if (docType === "Actor") {
-        doc = game.actors.get(entryId);
-      } else if (docType === "Item") {
-        doc = game.items.get(entryId);
-      } else {
-        console.warn("Unsupported document type:", docType);
-        return;
-      }
-      if (doc) {
-        doc.sheet.render(true);
-      } else {
-        console.warn("Document not found for ID:", entryId);
-      }
-    });
-  });
+  Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
+  Hooks.on("renderChatMessage", setChatMessageColorFromActorColor);
+  Hooks.on("renderChatMessage", addChatMessageShadow);
+  Hooks.on("renderSidebarTab", wrapCharactersAndItemsForSidebar);
   Hooks.on("renderUserConfig", (app, html2, data) => {
     html2.classList.remove("application", "user-config");
     html2.classList.add("app", "window-app", "sr3e", "item", "playerconfig");
@@ -5206,9 +5241,16 @@ function registerHooks() {
     });
     Log.success("Svelte App Initialized", "UserSettings");
   });
+  Hooks.on("closeUserConfig", async (app, html2, data) => {
+    if (app.svelteApp) {
+      unmount(app.svelteApp);
+    }
+    for (let message of game.messages.contents) {
+      ui.chat.updateMessage(message);
+    }
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
-    Users.registerSheet();
     registerActorTypes([
       { type: "character", model: CharacterModel, sheet: CharacterActorSheet }
     ]);
