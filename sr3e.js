@@ -7,6 +7,7 @@ import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MetahumanItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MetahumanApp from "./module/svelte/apps/MetahumanApp.svelte";
 import UserSettings from "./module/svelte/apps/injections/UserSettings.svelte";
+import PauseAnimation from "./module/svelte/apps/injections/PauseAnimation.svelte";
 import { mount, unmount } from "svelte";
 import { sr3e } from "./module/foundry/config.js";
 import {
@@ -57,85 +58,85 @@ function setChatMessageColorFromActorColor(message, html, data) {
 }
 
 function addChatMessageShadow(message, html, data) {
-// The actual chat message <li> element
-const chatMessage = html[0];
-if (!chatMessage) return;
+  // The actual chat message <li> element
+  const chatMessage = html[0];
+  if (!chatMessage) return;
 
-// Prevent multiple modifications
-if (chatMessage.querySelector(".inner-background-container")) return;
+  // Prevent multiple modifications
+  if (chatMessage.querySelector(".inner-background-container")) return;
 
-// 1. Create the new structure
-const wrapper = document.createElement("div");
-wrapper.classList.add("inner-background-container");
+  // 1. Create the new structure
+  const wrapper = document.createElement("div");
+  wrapper.classList.add("inner-background-container");
 
-const fakeShadow = document.createElement("div");
-fakeShadow.classList.add("fake-shadow");
+  const fakeShadow = document.createElement("div");
+  fakeShadow.classList.add("fake-shadow");
 
-const messageContainer = document.createElement("div");
-messageContainer.classList.add("message-container");
+  const messageContainer = document.createElement("div");
+  messageContainer.classList.add("message-container");
 
-// 2. Move all existing content into messageContainer
-while (chatMessage.firstChild) {
-  messageContainer.appendChild(chatMessage.firstChild);
-}
+  // 2. Move all existing content into messageContainer
+  while (chatMessage.firstChild) {
+    messageContainer.appendChild(chatMessage.firstChild);
+  }
 
-// 3. Build the new structure inside the <li>
-wrapper.appendChild(fakeShadow);
-wrapper.appendChild(messageContainer);
-chatMessage.appendChild(wrapper);
+  // 3. Build the new structure inside the <li>
+  wrapper.appendChild(fakeShadow);
+  wrapper.appendChild(messageContainer);
+  chatMessage.appendChild(wrapper);
 }
 
 function wrapCharactersAndItemsForSidebar(app, html) {
-html.find(".directory-item.document").each((_, el) => {
-  let $el = $(el);
-  let img = $el.find("img.thumbnail");
-  let h4 = $el.find("h4.entry-name");
+  html.find(".directory-item.document").each((_, el) => {
+    let $el = $(el);
+    let img = $el.find("img.thumbnail");
+    let h4 = $el.find("h4.entry-name");
 
-  // Get the entry ID
-  let entryId = $el.attr("data-entry-id");
+    // Get the entry ID
+    let entryId = $el.attr("data-entry-id");
 
-  // Determine the document type from the class attribute
-  let docType = $el.hasClass("actor") ? "Actor" :
-    $el.hasClass("item") ? "Item" : null;
+    // Determine the document type from the class attribute
+    let docType = $el.hasClass("actor") ? "Actor" :
+      $el.hasClass("item") ? "Item" : null;
 
-  // If we couldn't determine a document type, skip
-  if (!docType) return;
+    // If we couldn't determine a document type, skip
+    if (!docType) return;
 
-  // Wrap if not already wrapped
-  if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
-    let wrapper = $('<div class="directory-post"></div>');
-    wrapper.attr("data-entry-id", entryId);
-    wrapper.attr("data-document-type", docType);
+    // Wrap if not already wrapped
+    if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
+      let wrapper = $('<div class="directory-post"></div>');
+      wrapper.attr("data-entry-id", entryId);
+      wrapper.attr("data-document-type", docType);
 
-    img.add(h4).wrapAll(wrapper);
-    console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
-  }
-});
+      img.add(h4).wrapAll(wrapper);
+      console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
+    }
+  });
 
-// Add a click callback to open the correct document sheet
-html.on("click", ".directory-post", (event) => {
-  event.preventDefault();
+  // Add a click callback to open the correct document sheet
+  html.on("click", ".directory-post", (event) => {
+    event.preventDefault();
 
-  let $target = $(event.currentTarget);
-  let entryId = $target.data("entry-id");
-  let docType = $target.data("document-type");
-  let doc;
+    let $target = $(event.currentTarget);
+    let entryId = $target.data("entry-id");
+    let docType = $target.data("document-type");
+    let doc;
 
-  if (docType === "Actor") {
-    doc = game.actors.get(entryId);
-  } else if (docType === "Item") {
-    doc = game.items.get(entryId);
-  } else {
-    console.warn("Unsupported document type:", docType);
-    return;
-  }
+    if (docType === "Actor") {
+      doc = game.actors.get(entryId);
+    } else if (docType === "Item") {
+      doc = game.items.get(entryId);
+    } else {
+      console.warn("Unsupported document type:", docType);
+      return;
+    }
 
-  if (doc) {
-    doc.sheet.render(true);
-  } else {
-    console.warn("Document not found for ID:", entryId);
-  }
-});
+    if (doc) {
+      doc.sheet.render(true);
+    } else {
+      console.warn("Document not found for ID:", entryId);
+    }
+  });
 }
 function registerHooks() {
 
@@ -146,12 +147,12 @@ function registerHooks() {
   Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
   Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
   Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
-  
+
   Hooks.on("renderChatMessage", setChatMessageColorFromActorColor);
   Hooks.on("renderChatMessage", addChatMessageShadow);
 
   Hooks.on("renderSidebarTab", wrapCharactersAndItemsForSidebar)
-    
+
 
   ////////////////////////////
   Hooks.on("renderUserConfig", (app, html, data) => {
@@ -197,6 +198,35 @@ function registerHooks() {
       ui.chat.updateMessage(message);
     }
   });
+
+  ///////////////////////////////////////////////////
+
+
+  Hooks.on("pauseGame", (paused) => {
+
+    if (paused) {
+
+      const imgSrc = "Perfume.webp";  // Change this to any image URL you want
+
+      const messageContent = `
+        <div style="text-align: center;">
+        <h2 style="color: red;">${paused ? "The game is paused!" : "The game has resumed!"}</h2>
+        <img src="${imgSrc}" alt="Pause Icon" width="100" height="100">
+        </div>
+        `;
+
+      ChatMessage.create({
+        content: messageContent,
+        speaker: { alias: "Commercial Break" },  // Customize the message sender
+      }).then((msg) => {
+        // Delete the message after 60 seconds (60000 milliseconds)
+        setTimeout(() => {
+          msg.delete();
+        }, 6000);
+      });;
+    }
+  });
+
 
 
   ////////////////////////////

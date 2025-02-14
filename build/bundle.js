@@ -5249,6 +5249,26 @@ function registerHooks() {
       ui.chat.updateMessage(message);
     }
   });
+  Hooks.on("pauseGame", (paused) => {
+    if (paused) {
+      const imgSrc = "Perfume.webp";
+      const messageContent = `
+        <div style="text-align: center;">
+        <h2 style="color: red;">${paused ? "The game is paused!" : "The game has resumed!"}</h2>
+        <img src="${imgSrc}" alt="Pause Icon" width="100" height="100">
+        </div>
+        `;
+      ChatMessage.create({
+        content: messageContent,
+        speaker: { alias: "Commercial Break" }
+        // Customize the message sender
+      }).then((msg) => {
+        setTimeout(() => {
+          msg.delete();
+        }, 6e3);
+      });
+    }
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
     registerActorTypes([
