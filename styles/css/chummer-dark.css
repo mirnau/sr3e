@@ -328,6 +328,9 @@ li.directory-item.folder::after {
   left: 0;
   z-index: -1;
 }
+.flavor-text {
+  color: #1df0ff;
+}
 .folder-header.flexrow {
   margin-top: 0.25rem;
   border-radius: 5px;
