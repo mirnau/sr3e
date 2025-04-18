@@ -3,7 +3,9 @@ export const hooks = {
   closeCharacterActorSheet: "closeCharacterActorSheet",
   renderMetahumanItemSheet: "renderMetahumanItemSheet",
   closeMetahumanItemSheet: "closeMetahumanItemSheet",
+  renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
+  renderChatMessage: "renderChatMessage",
   createActor: "createActor",
   init: "init",
   ready: "ready"

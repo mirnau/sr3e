@@ -17,32 +17,9 @@ import {
 import { initMainMasonryGrid } from "./module/foundry/hooks/characterActorSheet/hooksRenderCharacterActorSheet.js";
 import { closeMainMasonryGrid } from "./module/foundry/hooks/characterActorSheet/hooksCloseMainMasonryGrid.js";
 import { renderCharacterCreationDialog } from "./module/foundry/hooks/characterActorSheet/hooksCharacterCreationDialog.js";
+import { onRenderMetahumanItemSheet, onCloseMetahumanItemSheet } from "./module/foundry/hooks/metahumanItemSheet/hooksRenderMetahumanItemSheet.js";
 
-function onRenderMetahumanItemSheet(app, html, data) {
 
-  if (app.svelteApp) {
-    unmount(app.svelteApp);
-  }
-
-  const container = app.element[0].querySelector(".window-content");
-
-  container.innerHTML = '';
-
-  app.svelteApp = mount(MetahumanApp, {
-    target: container,
-    props: {
-      item: app.item,
-      config: CONFIG.sr3e,
-    },
-  });
-}
-
-function onCloseMetahumanItemSheet(app, html, data) {
-
-  if (app.svelteApp) {
-    unmount(app.svelteApp);
-  }
-}
 
 function haltCharacterSheetRender(doc, actor, options, userId) {
   if (actor.type === "character") {
@@ -138,6 +115,7 @@ function wrapCharactersAndItemsForSidebar(app, html) {
     }
   });
 }
+
 function registerHooks() {
 
   Hooks.on(hooks.createActor, renderCharacterCreationDialog);
@@ -148,10 +126,10 @@ function registerHooks() {
   Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
   Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
 
-  Hooks.on("renderChatMessage", setChatMessageColorFromActorColor);
-  Hooks.on("renderChatMessage", addChatMessageShadow);
+  Hooks.on(hooks.renderChatMessage, setChatMessageColorFromActorColor);
+  Hooks.on(hooks.renderChatMessage, addChatMessageShadow);
 
-  Hooks.on("renderSidebarTab", wrapCharactersAndItemsForSidebar)
+  Hooks.on(hooks.renderSidebarTab, wrapCharactersAndItemsForSidebar)
 
 
   ////////////////////////////
@@ -201,35 +179,6 @@ function registerHooks() {
 
   ///////////////////////////////////////////////////
 
-
-  Hooks.on("pauseGame", (paused) => {
-
-    if (paused) {
-
-      const imgSrc = "Perfume.webp";  // Change this to any image URL you want
-
-      const messageContent = `
-        <div style="text-align: center;">
-        <h2 style="color: red;">${paused ? "The game is paused!" : "The game has resumed!"}</h2>
-        <img src="${imgSrc}" alt="Pause Icon" width="100" height="100">
-        </div>
-        `;
-
-      ChatMessage.create({
-        content: messageContent,
-        speaker: { alias: "Commercial Break" },  // Customize the message sender
-      }).then((msg) => {
-        // Delete the message after 60 seconds (60000 milliseconds)
-        setTimeout(() => {
-          msg.delete();
-        }, 6000);
-      });;
-    }
-  });
-
-
-
-  ////////////////////////////
 
   Hooks.once(hooks.init, () => {
 
