@@ -116,6 +116,8 @@ function wrapCharactersAndItemsForSidebar(app, html) {
   });
 }
 
+
+
 function registerHooks() {
 
   Hooks.on(hooks.createActor, renderCharacterCreationDialog);
@@ -124,6 +126,7 @@ function registerHooks() {
 
   Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
   Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
+  
   Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
 
   Hooks.on(hooks.renderChatMessage, setChatMessageColorFromActorColor);
@@ -131,6 +134,59 @@ function registerHooks() {
 
   Hooks.on(hooks.renderSidebarTab, wrapCharactersAndItemsForSidebar)
 
+  Hooks.on("renderChatLog", () => {
+    const uiRight = document.getElementById("ui-right");
+    if (!uiRight) return;
+    uiRight.classList.add("noise-layer");
+
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+    console.log("Added noise layer to right sidebar.");
+
+  });
+  
+  
 
   ////////////////////////////
   Hooks.on("renderUserConfig", (app, html, data) => {

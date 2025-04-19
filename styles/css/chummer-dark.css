@@ -259,7 +259,6 @@ input[type="range"]:focus::-ms-thumb:focus {
   background: #1b1f24;
   transform: scale(1.05);
 }
-#textarea.chat-message,
 select.roll-type-select,
 select {
   appearance: none;
@@ -270,6 +269,7 @@ select {
   border: none;
   border-radius: 0rem !important;
   box-shadow: inset 0 0 1rem #ff0095;
+  margin: 0rem !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 optgroup {
@@ -445,11 +445,8 @@ div#sidebar.app {
   pointer-events: none;
   background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.5) 90%);
 }
-#ui-right h2 {
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #1b1f24;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+#ui-right::after {
+  animation: sr3d-crt-flicker 2s infinite;
 }
 .directory-list {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -510,7 +507,23 @@ div#sidebar.app {
   flex: 0 1 auto;
   white-space: nowrap;
 }
-.chat-controls,
+div#chat-controls.flexrow {
+  background: transparent;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  margin: 0.25rem;
+}
+.chat-control-icon {
+  background: transparent;
+  padding: 0.5rem !important;
+  /* Ensure padding is completely removed */
+  margin: 0rem !important;
+  /* Ensure margin is completely removed */
+  box-sizing: border-box;
+  /* Prevent padding or border from affecting size */
+  text-align: center;
+}
 .chat-message {
   z-index: 400;
   border: 0rem;
@@ -518,26 +531,19 @@ div#sidebar.app {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   position: relative;
 }
-.chat-controls h1,
 .chat-message h1,
-.chat-controls h2,
 .chat-message h2,
-.chat-controls h3,
 .chat-message h3,
-.chat-controls h4,
 .chat-message h4 {
   color: var(--message-color);
   text-shadow: 0 0 10px var(--message-color);
 }
-.chat-controls.whisper,
 .chat-message.whisper {
   border: 0rem;
   padding: 0rem;
   background-color: transparent;
 }
-.chat-controls span.whisper-to,
 .chat-message span.whisper-to,
-.chat-controls time.message-timestamp,
 .chat-message time.message-timestamp {
   color: var(--message-color);
 }
@@ -559,7 +565,7 @@ h3.nue {
   text-align: center;
   position: relative;
   border: none;
-  background-color: #ff1d9d;
+  background-color: orange;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 h3.nue:before {
@@ -572,7 +578,7 @@ h3.nue:before {
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
-  box-shadow: inset 0 0 20px #1df0ff;
+  box-shadow: inset 0 0 10px #ffffc9;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 #game-details {
@@ -601,7 +607,7 @@ h3.nue:before {
 #settings-documentation,
 #settings-access {
   position: relative;
-  background: #ff1d9d;
+  background: #ff0095;
   margin: 0rem;
   padding: 0.5rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -619,7 +625,7 @@ h3.nue:before {
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   pointer-events: none;
-  box-shadow: inset 0 0 20px #1df0ff;
+  box-shadow: inset 0 0 10px magenta;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 #sidebar-tabs a.item.active,
@@ -988,6 +994,75 @@ menu {
   box-shadow: 0 0 30px aquamarine, 
             0 0 30px aquamarine,
             0 0 75px blue;
+}
+#ui-right.noise-layer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+#ui-right.noise-layer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='turbulence' baseFrequency='2.2' numOctaves='6'/%3E%3C/filter%3E%3Crect width='128' height='128' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  mix-blend-mode: difference;
+  opacity: 1;
+  animation: grain 1s steps(5) infinite, grain2 1s steps(5) infinite;
+}
+#ui-right.noise-layer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, white 50%, transparent), linear-gradient(to right, transparent, white 50%, transparent);
+  background-repeat: no-repeat;
+  background-size: 100% 3px, 100% 3px;
+  background-position: 0 100%, 0 100%;
+  filter: blur(2px);
+  box-shadow: 0 0 12px cyan,
+        0 0 8px cyan;
+  opacity: 0.8;
+  animation: scanline1 6s linear infinite, scanline2 6.5s linear infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+@keyframes grain {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -128px 128px;
+  }
+}
+@keyframes grain2 {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 128px -128px;
+  }
+}
+@keyframes scanline1 {
+  0% {
+    background-position: 0 100%, 0 100%;
+  }
+  100% {
+    background-position: 0 -10%, 0 100%;
+  }
+}
+@keyframes scanline2 {
+  0% {
+    background-position: 0 100%, 0 100%;
+  }
+  100% {
+    background-position: 0 100%, 0 -10%;
+  }
 }
 .dialog.sr3e .meta-human-grid,
 .sr3e.sheet.item .meta-human-grid {
