@@ -419,6 +419,9 @@ li.directory-item.compendium {
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.jump-to-bottom {
+  z-index: 1000;
+}
 .directory-footer {
   margin-top: 0.25rem;
   min-height: 2rem;
@@ -428,13 +431,11 @@ div#sidebar.app {
   border-radius: 0rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-#ui-right,
 .directory-list {
   padding: 0.5rem;
   position: relative;
   box-shadow: inset 0 -4px 30px rgba(29, 240, 255, 0.8), inset 0 -2px 10px rgba(29, 240, 255, 0.6);
 }
-#ui-right:before,
 .directory-list:before {
   content: "";
   position: absolute;
@@ -443,7 +444,7 @@ div#sidebar.app {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.5) 90%);
+  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.75) 90%);
 }
 #ui-right::after {
   animation: sr3d-crt-flicker 2s infinite;
@@ -995,13 +996,14 @@ menu {
             0 0 30px aquamarine,
             0 0 75px blue;
 }
-#ui-right.noise-layer {
+#ui-right {
+  padding: 0.5rem;
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
-#ui-right.noise-layer::before {
-  content: "";
+.noise-layer::before {
+  content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -1010,27 +1012,22 @@ menu {
   background-repeat: repeat;
   background-size: 256px 256px;
   mix-blend-mode: difference;
-  opacity: 1;
+  opacity: 0.5;
   animation: grain 1s steps(5) infinite, grain2 1s steps(5) infinite;
 }
-#ui-right.noise-layer::after {
-  content: "";
+.noise-layer::after {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, white 50%, transparent), linear-gradient(to right, transparent, white 50%, transparent);
-  background-repeat: no-repeat;
-  background-size: 100% 3px, 100% 3px;
-  background-position: 0 100%, 0 100%;
-  filter: blur(2px);
-  box-shadow: 0 0 12px cyan,
-        0 0 8px cyan;
-  opacity: 0.8;
-  animation: scanline1 6s linear infinite, scanline2 6.5s linear infinite;
+  inset: 0;
   z-index: 2;
   pointer-events: none;
+  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.75) 90%), linear-gradient(to bottom, #00ffff 0%, #00ffff 2%, rgba(0, 255, 255, 0) 12%), linear-gradient(to top, #00ffff 0%, #00ffff 2%, rgba(0, 255, 255, 0) 12%), radial-gradient(ellipse 60% 120% at top center, #00ffff 0%, rgba(0, 255, 255, 0.35) 35%, transparent 60%), radial-gradient(ellipse 60% 120% at bottom center, #00ffff 0%, rgba(0, 255, 255, 0.35) 35%, transparent 60%), linear-gradient(to top, rgba(0, 255, 255, 0.55) 0%, transparent 45%, transparent 55%, rgba(0, 255, 255, 0.55) 100%), repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0, rgba(255, 255, 255, 0.3) 1px, rgba(0, 0, 0, 0.6) 1px, rgba(0, 0, 0, 0.6) 3px);
+  background-size: 100% 100%,100% 100%,100% 100%,100% 100%,100% 100%,100% 130%,100% 3px;
+  background-blend-mode: lighten,screen,screen,screen,screen,screen,difference;
+  mix-blend-mode: difference;
+  opacity: 0.3;
+  filter: blur(0.2px);
+  animation: glitch-scan 0.35s steps(3) infinite;
 }
 @keyframes grain {
   0% {
@@ -1048,20 +1045,21 @@ menu {
     background-position: 128px -128px;
   }
 }
-@keyframes scanline1 {
+@keyframes glitch-scan {
   0% {
-    background-position: 0 100%, 0 100%;
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(1px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
+  75% {
+    transform: translateY(0.5px);
   }
   100% {
-    background-position: 0 -10%, 0 100%;
-  }
-}
-@keyframes scanline2 {
-  0% {
-    background-position: 0 100%, 0 100%;
-  }
-  100% {
-    background-position: 0 100%, 0 -10%;
+    transform: translateY(0px);
   }
 }
 .dialog.sr3e .meta-human-grid,

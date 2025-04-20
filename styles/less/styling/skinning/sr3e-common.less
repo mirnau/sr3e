@@ -169,6 +169,10 @@ li.directory-item.compendium {
     }
 }
 
+.jump-to-bottom {
+    z-index: 1000;
+}
+
 .directory-footer {
     margin-top: 0.25rem;
     min-height: 2rem;
@@ -181,7 +185,6 @@ div#sidebar.app {
     .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 }
 
-#ui-right,
 .directory-list {
     padding: 0.5rem;
     position: relative;
@@ -205,7 +208,7 @@ div#sidebar.app {
                 fade(@highlight-color-primary, 8%) 60%, // Slight increase
                 fade(@highlight-color-primary, 15%) 75%, // Noticeable increase
                 fade(@highlight-color-primary, 25%) 85%, // Almost full intensity
-                fade(@highlight-color-primary, 50%) 90% // Full intensity at the bottom
+                fade(@highlight-color-primary, 75%) 90% // Full intensity at the bottom
             );
     }
 }
