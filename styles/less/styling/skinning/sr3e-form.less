@@ -5,8 +5,6 @@ form {
     background: @transparent;
 }
 
-
-
 button {
     position: relative;
 
@@ -16,7 +14,6 @@ button {
         text-shadow: 0 0 10px @h1-color;
     }
 }
-
 
 label {
     font-size: 1.2rem;
@@ -58,17 +55,23 @@ h3.form-header {
 
     &::before {
         position: absolute;
-        .regular-border(@secondary-color);
+        .regular-border(@background-color);
     }
 }
 
 footer
 {
-    background-color: transparent;
-    box-shadow: inset 0 0 2rem @accent-color;
+    background: transparent;
+    box-shadow: inset 0 0 1rem var(--user-color);
     .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
     padding: 0.5rem;
+    margin-right: 0.5rem;
 }
+
+.directory-footer {
+    box-shadow: inset 0 0 1rem @highlight-color-primary;
+}
+
 
 .regular-border(@color) {
     box-shadow: inset 0 0 30px #1d282c;

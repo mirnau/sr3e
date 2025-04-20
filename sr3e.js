@@ -63,7 +63,7 @@ function addChatMessageShadow(message, html, data) {
   chatMessage.appendChild(wrapper);
 }
 
-function wrapCharactersAndItemsForSidebar(app, html) {
+function wrapSidebarItems(app, html) {
   html.find(".directory-item.document").each((_, el) => {
     let $el = $(el);
     let img = $el.find("img.thumbnail");
@@ -74,23 +74,48 @@ function wrapCharactersAndItemsForSidebar(app, html) {
 
     // Determine the document type from the class attribute
     let docType = $el.hasClass("actor") ? "Actor" :
-      $el.hasClass("item") ? "Item" : null;
+                  $el.hasClass("item") ? "Item" :
+                  $el.hasClass("journalentry") ? "JournalEntry" :
+                  $el.hasClass("cards") ? "Cards" :
+                  $el.hasClass("playlist") ? "PlayList" :
+                  $el.hasClass("rolltable") ? "RollTable" :
+                  $el.hasClass("compendium") ? "Compendium" :
+                  $el.hasClass("scene") ? "Scene" : null;
 
     // If we couldn't determine a document type, skip
     if (!docType) return;
 
-    // Wrap if not already wrapped
-    if (img.length && h4.length && !img.parent().hasClass("directory-post")) {
-      let wrapper = $('<div class="directory-post"></div>');
-      wrapper.attr("data-entry-id", entryId);
-      wrapper.attr("data-document-type", docType);
+    // Use h4 when available, otherwise, for Scene use the element itself
+    let target = h4.length ? h4 : (docType === "Scene" ? $el : null);
+    if (!target) return;
+    if (target.parent().hasClass("directory-post")) return;
 
-      img.add(h4).wrapAll(wrapper);
-      console.log(`Wrapped elements in .directory-post with entry ID: ${entryId} (Type: ${docType})`);
+    // Create a new wrapper for the directory-post
+    let wrapper = $('<div class="directory-post"></div>');
+    wrapper.attr("data-entry-id", entryId);
+    wrapper.attr("data-document-type", docType);
+
+    if (img.length && target[0] !== $el[0]) {
+      img.add(target).wrapAll(wrapper);
+    } else {
+      target.wrap(wrapper);
     }
+    
+    // For PlayList type, add sound-controls and playlist-button class into the wrapper
+    let $wrapper = target.closest('.directory-post');
+    if (docType.toLowerCase() === "playlist") {
+      let existingControls = $el.find(".sound-controls.playlist-controls").first();
+      if (existingControls.length) {
+        $wrapper.append(existingControls);
+        console.log("Moved existing sound-controls to playlist entry", entryId);
+      }
+      $wrapper.addClass("playlist-button");
+    }
+    
+    console.log(`Wrapped .directory-post for entry ID: ${entryId} (Type: ${docType})`);
   });
 
-  // Add a click callback to open the correct document sheet
+  // Click callback remains the same, with added support for Scene
   html.on("click", ".directory-post", (event) => {
     event.preventDefault();
 
@@ -103,6 +128,14 @@ function wrapCharactersAndItemsForSidebar(app, html) {
       doc = game.actors.get(entryId);
     } else if (docType === "Item") {
       doc = game.items.get(entryId);
+    } else if (docType === "JournalEntry") {
+      doc = game.journal.get(entryId);
+    } else if (docType === "RollTable") {
+      doc = game.tables.get(entryId);
+    } else if (docType === "Compendium") {
+      doc = game.packs.get(entryId);
+    } else if (docType === "Scene") {
+      doc = game.scenes.get(entryId);
     } else {
       console.warn("Unsupported document type:", docType);
       return;
@@ -116,8 +149,6 @@ function wrapCharactersAndItemsForSidebar(app, html) {
   });
 }
 
-
-
 function registerHooks() {
 
   Hooks.on(hooks.createActor, renderCharacterCreationDialog);
@@ -126,67 +157,21 @@ function registerHooks() {
 
   Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
   Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
-  
+
   Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
 
   Hooks.on(hooks.renderChatMessage, setChatMessageColorFromActorColor);
   Hooks.on(hooks.renderChatMessage, addChatMessageShadow);
 
-  Hooks.on(hooks.renderSidebarTab, wrapCharactersAndItemsForSidebar)
+  Hooks.on(hooks.renderSidebarTab, wrapSidebarItems);
 
-  Hooks.on("renderChatLog", () => {
+  Hooks.on(hooks.renderChatLog, () => {
     const uiRight = document.getElementById("ui-right");
     if (!uiRight) return;
     uiRight.classList.add("noise-layer");
-
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-    console.log("Added noise layer to right sidebar.");
-
   });
-  
-  
+
+
 
   ////////////////////////////
   Hooks.on("renderUserConfig", (app, html, data) => {

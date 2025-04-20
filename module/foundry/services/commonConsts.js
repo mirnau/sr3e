@@ -6,6 +6,7 @@ export const hooks = {
   renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
   renderChatMessage: "renderChatMessage",
+  renderChatLog: "renderChatLog",
   createActor: "createActor",
   init: "init",
   ready: "ready"

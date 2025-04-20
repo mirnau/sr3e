@@ -34,34 +34,40 @@ button:active {
 button:disabled {
   background-color: yellow;
 }
+input[type="search"],
 input[type="number"],
 input[type="text"] {
-  background-color: #1c364b;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e) !important;
   box-shadow: inset 0 0 8px #1df0ff;
+  color: #c8d3f5 !important;
   border: none;
   font-size: 1.5rem;
-  color: white;
   width: 100%;
   min-width: 2rem;
   max-width: 100%;
+  text-indent: 0.5rem;
+  font-size: 1rem;
   text-align: center;
   margin: 0rem !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   transition: box-shadow 0.3s ease;
 }
+input[type="search"].large,
 input[type="number"].large,
 input[type="text"].large {
   min-height: 1.5rem;
   font-size: 1.5rem;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
 }
+input[type="search"]::before,
 input[type="number"]::before,
 input[type="text"]::before {
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e) !important;
   box-shadow: inset 0 0 30px #1d282c;
+  color: #c8d3f5 !important;
   content: '';
   position: absolute;
   z-index: -1;
-  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -69,6 +75,7 @@ input[type="text"]::before {
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+input[type="search"]:focus,
 input[type="number"]:focus,
 input[type="text"]:focus {
   box-shadow: inset 0 0 10px #1df0ff;
@@ -344,18 +351,42 @@ li.directory-item.compendium {
   margin-right: 0.5;
   margin-top: 0.5;
 }
+.directory-item,
+.directory-item.playlist,
 .directory-item.compendium::before,
 .directory-item.compendium::after,
 .directory-item.document::after,
 .directory-item.document::before {
   display: none;
+  padding: 0rem;
+  margin: 0rem;
+}
+.directory-post.playlist-button {
+  padding: 0.5rem !important;
+  display: flex;
+  justify-content: space-between;
+  text-indent: 0.5rem;
+}
+.directory-item.scene {
+  padding: 0rem;
+  margin: 0rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.directory-item.compendium {
+  margin: 0.125rem 0.25rem !important;
+  padding: 0.125rem 0.25rem !important;
 }
 .directory-post {
   display: flex;
   flex-direction: row;
   position: relative;
-  margin: 0.25rem;
-  padding: 0.25rem;
+  margin: 0.125rem 0.25rem !important;
+  padding: 1px;
   background-color: #ff1d9d;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
@@ -368,7 +399,7 @@ li.directory-item.compendium {
 }
 .directory-post::before {
   position: absolute;
-  box-shadow: inset 0 0 30px #1d282c;
+  box-shadow: inset 0 0 15px magenta;
   content: '';
   z-index: -1;
   background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
@@ -432,22 +463,10 @@ div#sidebar.app {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .directory-list {
+  padding-top: 0.125rem !important;
   padding: 0.5rem;
   position: relative;
   box-shadow: inset 0 -4px 30px rgba(29, 240, 255, 0.8), inset 0 -2px 10px rgba(29, 240, 255, 0.6);
-}
-.directory-list:before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(29, 240, 255, 0.05) 0%, rgba(29, 240, 255, 0.08) 60%, rgba(29, 240, 255, 0.15) 75%, rgba(29, 240, 255, 0.25) 85%, rgba(29, 240, 255, 0.75) 90%);
-}
-#ui-right::after {
-  animation: sr3d-crt-flicker 2s infinite;
 }
 .directory-list {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -582,6 +601,11 @@ h3.nue:before {
   box-shadow: inset 0 0 10px #ffffc9;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.combat-tracker-header {
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+.combat-tracker-header,
 #game-details {
   background: #ff1d9d;
   color: #1df0ff;
@@ -590,6 +614,7 @@ h3.nue:before {
   position: relative;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.combat-tracker-header::before,
 #game-details::before {
   content: '';
   position: absolute;
@@ -643,16 +668,6 @@ h3.nue:before {
 #settings-documentation a.item,
 #settings-access a.item {
   scale: 80%;
-}
-.playlist-header.flexrow {
-  background: transparent !important;
-}
-.playlist-header.flexrow h4 {
-  color: magenta;
-  background: transparent !important;
-}
-.playlists-sounds i {
-  color: #1df0ff;
 }
 #global-volume {
   all: unset;
@@ -792,7 +807,7 @@ h3.form-header {
   box-shadow: inset 0 0 30px #1d282c;
   content: '';
   z-index: -1;
-  background: #003856;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
   top: 1px;
   left: 1px;
   width: calc(100% - 2px);
@@ -801,16 +816,20 @@ h3.form-header {
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 footer {
-  background-color: transparent;
-  box-shadow: inset 0 0 2rem #ff0095;
+  background: transparent;
+  box-shadow: inset 0 0 1rem var(--user-color);
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   padding: 0.5rem;
+  margin-right: 0.5rem;
+}
+.directory-footer {
+  box-shadow: inset 0 0 1rem #1df0ff;
 }
 .entry-filter.form-group {
   background-color: red;
 }
 img {
-  background-color: #ff1d9d;
+  background-color: transparent;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 thead,
