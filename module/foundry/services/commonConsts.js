@@ -5,7 +5,7 @@ export const hooks = {
   closeMetahumanItemSheet: "closeMetahumanItemSheet",
   renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
-  renderChatMessage: "renderChatMessage",
+  renderChatMessageHTML: "renderChatMessageHTML",
   renderChatLog: "renderChatLog",
   createActor: "createActor",
   init: "init",

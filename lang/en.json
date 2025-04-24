@@ -1,6 +1,7 @@
 {
   "sr3e": {
     "attributes": {
+      "attributes": "Attributes",
       "body": "Body",
       "quickness": "Quickness",
       "strength": "Strength",
@@ -11,6 +12,15 @@
       "initiative": "Initiative",
       "modifiers": "Attribute Modifiers",
       "limits": "Attribute Limits"
+    },
+    "health": {
+      "health": "Health"
+    },
+    "skills": {
+      "skills": "Skills"
+    },
+    "inventory": {
+      "inventory": "Inventory"
     },
     "common": {
       "max": "Maximum",

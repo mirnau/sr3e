@@ -2,6 +2,8 @@ export function localize(key) {
   return game.i18n.localize(key);
 }
 
+//const localize = (args) => game?.i18n?.localize?.(args) ?? args;
+
 export function openFilePicker(document) {
   return new Promise((resolve) => {
     new FilePicker({

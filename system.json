@@ -1,5 +1,5 @@
 {
-    "name": "sr3e",
+    "id": "sr3e",
     "title": "Shadowrun Third Edition Homebrew",
     "description": "An unofficial fan system for Shadowrun Third Edition",
     "background": "systems/sr3e/textures/ai-generated/cyberpunkcity.webp",
@@ -10,8 +10,8 @@
     ],
     "version": "0.01",
     "compatibility": {
-        "minimum": "12.331",
-        "verified": "12.331"
+        "minimum": "13.340",
+        "verified": "13.340"
     },
     "esmodules": [
         "build/bundle.js"

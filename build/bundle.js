@@ -1,3 +1,17 @@
+var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __reflectGet = Reflect.get;
+var __typeError = (msg) => {
+  throw TypeError(msg);
+};
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
+var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
+var _app, _neon;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -262,221 +276,9 @@ class CharacterModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-class CharacterActorSheet extends ActorSheet {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["sr3e", "sheet", "character"],
-      template: "systems/sr3e/default.html",
-      left: 200,
-      top: 200
-    });
-  }
-  /** @override prevent submission, since Svelte is managing state */
-  _onSubmit(event2) {
-    return;
-  }
-}
-class MetahumanModel extends foundry.abstract.TypeDataModel {
-  static defineSchema() {
-    return {
-      // agerange
-      agerange: new foundry.data.fields.SchemaField({
-        min: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        average: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        max: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-      // Physical: height & weight
-      physical: new foundry.data.fields.SchemaField({
-        height: new foundry.data.fields.SchemaField({
-          min: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          average: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          max: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          })
-        }),
-        weight: new foundry.data.fields.SchemaField({
-          min: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          average: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          max: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          })
-        })
-      }),
-      // Modifiers
-      modifiers: new foundry.data.fields.SchemaField({
-        strength: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        quickness: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        body: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        charisma: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        intelligence: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        willpower: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-      // Attribute limits
-      attributeLimits: new foundry.data.fields.SchemaField({
-        strength: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        quickness: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        body: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        charisma: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        intelligence: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        willpower: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-      // The running speed modifier
-      movement: new foundry.data.fields.SchemaField({
-        base: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        modifier: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-      // Karma advancement fraction
-      karma: new foundry.data.fields.SchemaField({
-        factor: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-      // Vision
-      vision: new foundry.data.fields.SchemaField({
-        type: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
-        description: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
-        rules: new foundry.data.fields.SchemaField({
-          darknessPenaltyNegation: new foundry.data.fields.StringField({
-            required: true,
-            initial: ""
-          })
-        })
-      }),
-      // Priority
-      priority: new foundry.data.fields.StringField({
-        required: true,
-        initial: ""
-      }),
-      // Description
-      description: new foundry.data.fields.StringField({
-        required: true,
-        initial: ""
-      })
-    };
-  }
-}
-class MagicItemSheet extends ItemSheet {
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      template: "systems/sr3e/default.html",
-      width: "100%",
-      height: "100%",
-      left: 200,
-      top: 200,
-      classes: ["sr3e", "sheet", "item"],
-      resizable: false
-    });
-  }
-  /** @override prevent submission, since Svelte is managing state */
-  _onSubmit(event2) {
-    return;
-  }
-}
 const PUBLIC_VERSION = "5";
 if (typeof window !== "undefined")
   (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
-let legacy_mode_flag = false;
-let tracing_mode_flag = false;
-function enable_legacy_mode_flag() {
-  legacy_mode_flag = true;
-}
-enable_legacy_mode_flag();
 const EACH_ITEM_REACTIVE = 1;
 const EACH_INDEX_REACTIVE = 1 << 1;
 const EACH_ITEM_IMMUTABLE = 1 << 4;
@@ -488,7 +290,6 @@ const PROPS_IS_LAZY_INITIAL = 1 << 4;
 const TRANSITION_IN = 1;
 const TRANSITION_OUT = 1 << 1;
 const TRANSITION_GLOBAL = 1 << 2;
-const TEMPLATE_FRAGMENT = 1;
 const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
 const UNINITIALIZED = Symbol();
 const PASSIVE_EVENTS = ["touchstart", "touchmove"];
@@ -546,6 +347,9 @@ function equals(value) {
 function safe_not_equal(a, b) {
   return a != a ? b == b : a !== b || a !== null && typeof a === "object" || typeof a === "function";
 }
+function not_equal(a, b) {
+  return a !== b;
+}
 function safe_equals(value) {
   return !safe_not_equal(value, this.v);
 }
@@ -594,6 +398,11 @@ function state_unsafe_mutation() {
     throw new Error(`https://svelte.dev/e/state_unsafe_mutation`);
   }
 }
+let legacy_mode_flag = false;
+let tracing_mode_flag = false;
+function enable_legacy_mode_flag() {
+  legacy_mode_flag = true;
+}
 function source(v, stack) {
   var signal = {
     f: 0,
@@ -605,6 +414,9 @@ function source(v, stack) {
     wv: 0
   };
   return signal;
+}
+function state(v) {
+  return /* @__PURE__ */ push_derived_source(source(v));
 }
 // @__NO_SIDE_EFFECTS__
 function mutable_source(initial_value, immutable = false) {
@@ -862,15 +674,6 @@ function proxy(value, parent = null, prev) {
 }
 function update_version(signal, d = 1) {
   set(signal, signal.v + d);
-}
-function get_proxied_value(value) {
-  if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
-    return value[STATE_SYMBOL];
-  }
-  return value;
-}
-function is(a, b) {
-  return Object.is(get_proxied_value(a), get_proxied_value(b));
 }
 var $window;
 var first_child_getter;
@@ -1367,11 +1170,6 @@ function queue_micro_task(fn) {
   }
   current_queued_micro_tasks.push(fn);
 }
-function lifecycle_outside_component(name) {
-  {
-    throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
-  }
-}
 let is_throwing_error = false;
 let is_micro_task_queued = false;
 let last_scheduled_effect = null;
@@ -1408,7 +1206,6 @@ function set_untracked_writes(value) {
 let write_version = 1;
 let read_version = 0;
 let skip_reaction = false;
-let captured_signals = null;
 let component_context = null;
 function increment_write_version() {
   return ++write_version;
@@ -1601,13 +1398,13 @@ function update_reaction(reaction) {
 function remove_reaction(signal, dependency) {
   let reactions = dependency.reactions;
   if (reactions !== null) {
-    var index2 = index_of.call(reactions, signal);
-    if (index2 !== -1) {
+    var index = index_of.call(reactions, signal);
+    if (index !== -1) {
       var new_length = reactions.length - 1;
       if (new_length === 0) {
         reactions = dependency.reactions = null;
       } else {
-        reactions[index2] = reactions[new_length];
+        reactions[index] = reactions[new_length];
         reactions.pop();
       }
     }
@@ -1825,9 +1622,6 @@ function get$1(signal) {
     );
     return value;
   }
-  if (captured_signals !== null) {
-    captured_signals.add(signal);
-  }
   if (active_reaction !== null && !untracking) {
     if (derived_sources !== null && derived_sources.includes(signal)) {
       state_unsafe_local_read();
@@ -1880,41 +1674,6 @@ function get$1(signal) {
   }
   return signal.v;
 }
-function capture_signals(fn) {
-  var previous_captured_signals = captured_signals;
-  captured_signals = /* @__PURE__ */ new Set();
-  var captured = captured_signals;
-  var signal;
-  try {
-    untrack(fn);
-    if (previous_captured_signals !== null) {
-      for (signal of captured_signals) {
-        previous_captured_signals.add(signal);
-      }
-    }
-  } finally {
-    captured_signals = previous_captured_signals;
-  }
-  return captured;
-}
-function invalidate_inner_signals(fn) {
-  var captured = capture_signals(() => untrack(fn));
-  for (var signal of captured) {
-    if ((signal.f & LEGACY_DERIVED_PROP) !== 0) {
-      for (
-        const dep of
-        /** @type {Derived} */
-        signal.deps || []
-      ) {
-        if ((dep.f & DERIVED) === 0) {
-          internal_set(dep, dep.v);
-        }
-      }
-    } else {
-      internal_set(signal, signal.v);
-    }
-  }
-}
 function untrack(fn) {
   var previous_untracking = untracking;
   try {
@@ -1947,7 +1706,7 @@ function push(props, runes = false, fn) {
     };
   }
 }
-function pop(component) {
+function pop(component2) {
   const context_stack_item = component_context;
   if (context_stack_item !== null) {
     const component_effects = context_stack_item.e;
@@ -2018,31 +1777,6 @@ function deep_read(value, visited = /* @__PURE__ */ new Set()) {
     }
   }
 }
-let listening_to_form_reset = false;
-function add_form_reset_listener() {
-  if (!listening_to_form_reset) {
-    listening_to_form_reset = true;
-    document.addEventListener(
-      "reset",
-      (evt) => {
-        Promise.resolve().then(() => {
-          var _a;
-          if (!evt.defaultPrevented) {
-            for (
-              const e of
-              /**@type {HTMLFormElement} */
-              evt.target.elements
-            ) {
-              (_a = e.__on_r) == null ? void 0 : _a.call(e);
-            }
-          }
-        });
-      },
-      // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
-      { capture: true }
-    );
-  }
-}
 function without_reactive_context(fn) {
   var previous_reaction = active_reaction;
   var previous_effect = active_effect;
@@ -2054,19 +1788,6 @@ function without_reactive_context(fn) {
     set_active_reaction(previous_reaction);
     set_active_effect(previous_effect);
   }
-}
-function listen_to_event_and_reset_event(element, event2, handler, on_reset = handler) {
-  element.addEventListener(event2, () => without_reactive_context(handler));
-  const prev = element.__on_r;
-  if (prev) {
-    element.__on_r = () => {
-      prev();
-      on_reset(true);
-    };
-  } else {
-    element.__on_r = () => on_reset(true);
-  }
-  add_form_reset_listener();
 }
 const all_registered_events = /* @__PURE__ */ new Set();
 const root_event_handles = /* @__PURE__ */ new Set();
@@ -2097,6 +1818,14 @@ function event(event_name, dom, handler, capture, passive) {
     teardown(() => {
       dom.removeEventListener(event_name, target_handler, options);
     });
+  }
+}
+function delegate(events) {
+  for (var i = 0; i < events.length; i++) {
+    all_registered_events.add(events[i]);
+  }
+  for (var fn of root_event_handles) {
+    fn(events);
   }
 }
 function handle_event_propagation(event2) {
@@ -2203,35 +1932,39 @@ function assign_nodes(start, end) {
 }
 // @__NO_SIDE_EFFECTS__
 function template(content, flags2) {
-  var is_fragment = (flags2 & TEMPLATE_FRAGMENT) !== 0;
   var use_import_node = (flags2 & TEMPLATE_USE_IMPORT_NODE) !== 0;
   var node;
   var has_start = !content.startsWith("<!>");
   return () => {
     if (node === void 0) {
       node = create_fragment_from_html(has_start ? content : "<!>" + content);
-      if (!is_fragment) node = /** @type {Node} */
+      node = /** @type {Node} */
       /* @__PURE__ */ get_first_child(node);
     }
     var clone = (
       /** @type {TemplateNode} */
       use_import_node ? document.importNode(node, true) : node.cloneNode(true)
     );
-    if (is_fragment) {
-      var start = (
-        /** @type {TemplateNode} */
-        /* @__PURE__ */ get_first_child(clone)
-      );
-      var end = (
-        /** @type {TemplateNode} */
-        clone.lastChild
-      );
-      assign_nodes(start, end);
-    } else {
+    {
       assign_nodes(clone, clone);
     }
     return clone;
   };
+}
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
+function comment() {
+  var frag = document.createDocumentFragment();
+  var start = document.createComment("");
+  var anchor = create_text();
+  frag.append(start, anchor);
+  assign_nodes(start, anchor);
+  return frag;
 }
 function append(anchor, dom) {
   if (anchor === null) {
@@ -2243,15 +1976,15 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
-function mount$1(component, options) {
-  return _mount(component, options);
+function mount(component2, options) {
+  return _mount(component2, options);
 }
 const document_listeners = /* @__PURE__ */ new Map();
 function _mount(Component, { target, anchor, props = {}, events, context, intro = true }) {
@@ -2275,7 +2008,7 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
   };
   event_handle(array_from(all_registered_events));
   root_event_handles.add(event_handle);
-  var component = void 0;
+  var component2 = void 0;
   var unmount2 = component_root(() => {
     var anchor_node = anchor ?? target.appendChild(create_text());
     branch(() => {
@@ -2291,7 +2024,7 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
         props.$$events = events;
       }
       should_intro = intro;
-      component = Component(anchor_node, props) || {};
+      component2 = Component(anchor_node, props) || {};
       should_intro = true;
       if (context) {
         pop();
@@ -2318,14 +2051,14 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
       }
     };
   });
-  mounted_components.set(component, unmount2);
-  return component;
+  mounted_components.set(component2, unmount2);
+  return component2;
 }
 let mounted_components = /* @__PURE__ */ new WeakMap();
-function unmount$1(component, options) {
-  const fn = mounted_components.get(component);
+function unmount(component2, options) {
+  const fn = mounted_components.get(component2);
   if (fn) {
-    mounted_components.delete(component);
+    mounted_components.delete(component2);
     return fn(options);
   }
   return Promise.resolve();
@@ -2375,10 +2108,21 @@ function if_block(node, fn, elseif = false) {
     }
   }, flags2);
 }
-function index(_, i) {
-  return i;
+function key_block(node, get_key, render_fn) {
+  var anchor = node;
+  var key = UNINITIALIZED;
+  var effect2;
+  var changed = is_runes() ? not_equal : safe_not_equal;
+  block(() => {
+    if (changed(key, key = get_key())) {
+      if (effect2) {
+        pause_effect(effect2);
+      }
+      effect2 = branch(() => render_fn(anchor));
+    }
+  });
 }
-function pause_effects(state, items, controlled_anchor, items_map) {
+function pause_effects(state2, items, controlled_anchor, items_map) {
   var transitions = [];
   var length = items.length;
   for (var i = 0; i < length; i++) {
@@ -2397,22 +2141,22 @@ function pause_effects(state, items, controlled_anchor, items_map) {
       controlled_anchor
     );
     items_map.clear();
-    link(state, items[0].prev, items[length - 1].next);
+    link(state2, items[0].prev, items[length - 1].next);
   }
   run_out_transitions(transitions, () => {
     for (var i2 = 0; i2 < length; i2++) {
-      var item = items[i2];
+      var item2 = items[i2];
       if (!is_controlled) {
-        items_map.delete(item.k);
-        link(state, item.prev, item.next);
+        items_map.delete(item2.k);
+        link(state2, item2.prev, item2.next);
       }
-      destroy_effect(item.e, !is_controlled);
+      destroy_effect(item2.e, !is_controlled);
     }
   });
 }
 function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = null) {
   var anchor = node;
-  var state = { flags: flags2, items: /* @__PURE__ */ new Map(), first: null };
+  var state2 = { flags: flags2, items: /* @__PURE__ */ new Map(), first: null };
   var fallback = null;
   var was_empty = false;
   var each_array = /* @__PURE__ */ derived_safe_equal(() => {
@@ -2433,7 +2177,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
       );
       reconcile(
         array,
-        state,
+        state2,
         anchor,
         render_fn,
         flags2,
@@ -2458,10 +2202,10 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
     get$1(each_array);
   });
 }
-function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
+function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
   var length = array.length;
-  var items = state.items;
-  var first = state.first;
+  var items = state2.items;
+  var first = state2.first;
   var current = first;
   var seen;
   var prev = null;
@@ -2469,22 +2213,22 @@ function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, g
   var stashed = [];
   var value;
   var key;
-  var item;
+  var item2;
   var i;
   for (i = 0; i < length; i += 1) {
     value = array[i];
     key = get_key(value, i);
-    item = items.get(key);
-    if (item === void 0) {
+    item2 = items.get(key);
+    if (item2 === void 0) {
       var child_anchor = current ? (
         /** @type {TemplateNode} */
         current.e.nodes_start
       ) : anchor;
       prev = create_item(
         child_anchor,
-        state,
+        state2,
         prev,
-        prev === null ? state.first : prev.next,
+        prev === null ? state2.first : prev.next,
         value,
         key,
         i,
@@ -2499,13 +2243,13 @@ function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, g
       continue;
     }
     {
-      update_item(item, value, i);
+      update_item(item2, value, i);
     }
-    if ((item.e.f & INERT) !== 0) {
-      resume_effect(item.e);
+    if ((item2.e.f & INERT) !== 0) {
+      resume_effect(item2.e);
     }
-    if (item !== current) {
-      if (seen !== void 0 && seen.has(item)) {
+    if (item2 !== current) {
+      if (seen !== void 0 && seen.has(item2)) {
         if (matched.length < stashed.length) {
           var start = stashed[0];
           var j;
@@ -2518,21 +2262,21 @@ function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, g
           for (j = 0; j < stashed.length; j += 1) {
             seen.delete(stashed[j]);
           }
-          link(state, a.prev, b.next);
-          link(state, prev, a);
-          link(state, b, start);
+          link(state2, a.prev, b.next);
+          link(state2, prev, a);
+          link(state2, b, start);
           current = start;
           prev = b;
           i -= 1;
           matched = [];
           stashed = [];
         } else {
-          seen.delete(item);
-          move(item, current, anchor);
-          link(state, item.prev, item.next);
-          link(state, item, prev === null ? state.first : prev.next);
-          link(state, prev, item);
-          prev = item;
+          seen.delete(item2);
+          move(item2, current, anchor);
+          link(state2, item2.prev, item2.next);
+          link(state2, item2, prev === null ? state2.first : prev.next);
+          link(state2, prev, item2);
+          prev = item2;
         }
         continue;
       }
@@ -2548,11 +2292,11 @@ function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, g
       if (current === null) {
         continue;
       }
-      item = current;
+      item2 = current;
     }
-    matched.push(item);
-    prev = item;
-    current = item.next;
+    matched.push(item2);
+    prev = item2;
+    current = item2.next;
   }
   if (current !== null || seen !== void 0) {
     var to_destroy = seen === void 0 ? [] : array_from(seen);
@@ -2565,26 +2309,26 @@ function reconcile(array, state, anchor, render_fn, flags2, is_inert, get_key, g
     var destroy_length = to_destroy.length;
     if (destroy_length > 0) {
       var controlled_anchor = null;
-      pause_effects(state, to_destroy, controlled_anchor, items);
+      pause_effects(state2, to_destroy, controlled_anchor, items);
     }
   }
-  active_effect.first = state.first && state.first.e;
+  active_effect.first = state2.first && state2.first.e;
   active_effect.last = prev && prev.e;
 }
-function update_item(item, value, index2, type) {
+function update_item(item2, value, index, type) {
   {
-    internal_set(item.v, value);
+    internal_set(item2.v, value);
   }
   {
-    item.i = index2;
+    item2.i = index;
   }
 }
-function create_item(anchor, state, prev, next, value, key, index2, render_fn, flags2, get_collection) {
+function create_item(anchor, state2, prev, next, value, key, index, render_fn, flags2, get_collection) {
   var reactive = (flags2 & EACH_ITEM_REACTIVE) !== 0;
   var mutable = (flags2 & EACH_ITEM_IMMUTABLE) === 0;
   var v = reactive ? mutable ? /* @__PURE__ */ mutable_source(value) : source(value) : value;
-  var i = (flags2 & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
-  var item = {
+  var i = (flags2 & EACH_INDEX_REACTIVE) === 0 ? index : source(index);
+  var item2 = {
     i,
     v,
     k: key,
@@ -2595,27 +2339,27 @@ function create_item(anchor, state, prev, next, value, key, index2, render_fn, f
     next
   };
   try {
-    item.e = branch(() => render_fn(anchor, v, i, get_collection), hydrating);
-    item.e.prev = prev && prev.e;
-    item.e.next = next && next.e;
+    item2.e = branch(() => render_fn(anchor, v, i, get_collection), hydrating);
+    item2.e.prev = prev && prev.e;
+    item2.e.next = next && next.e;
     if (prev === null) {
-      state.first = item;
+      state2.first = item2;
     } else {
-      prev.next = item;
-      prev.e.next = item.e;
+      prev.next = item2;
+      prev.e.next = item2.e;
     }
     if (next !== null) {
-      next.prev = item;
-      next.e.prev = item.e;
+      next.prev = item2;
+      next.e.prev = item2.e;
     }
-    return item;
+    return item2;
   } finally {
   }
 }
-function move(item, next, anchor) {
-  var end = item.next ? (
+function move(item2, next, anchor) {
+  var end = item2.next ? (
     /** @type {TemplateNode} */
-    item.next.e.nodes_start
+    item2.next.e.nodes_start
   ) : anchor;
   var dest = next ? (
     /** @type {TemplateNode} */
@@ -2623,7 +2367,7 @@ function move(item, next, anchor) {
   ) : anchor;
   var node = (
     /** @type {TemplateNode} */
-    item.e.nodes_start
+    item2.e.nodes_start
   );
   while (node !== end) {
     var next_node = (
@@ -2634,9 +2378,9 @@ function move(item, next, anchor) {
     node = next_node;
   }
 }
-function link(state, prev, next) {
+function link(state2, prev, next) {
   if (prev === null) {
-    state.first = next;
+    state2.first = next;
   } else {
     prev.next = next;
     prev.e.next = next && next.e;
@@ -2674,6 +2418,31 @@ function html(node, get_value, svg, mathml, skip_warning) {
     });
   });
 }
+function component(node, get_component, render_fn) {
+  var anchor = node;
+  var component2;
+  var effect2;
+  block(() => {
+    if (component2 === (component2 = get_component())) return;
+    if (effect2) {
+      pause_effect(effect2);
+      effect2 = null;
+    }
+    if (component2) {
+      effect2 = branch(() => render_fn(anchor, component2));
+    }
+  }, EFFECT_TRANSPARENT);
+}
+function set_value(element, value) {
+  var attributes = element.__attributes ?? (element.__attributes = {});
+  if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
+  value ?? void 0) || // @ts-expect-error
+  // `progress` elements always need their value set when it's `0`
+  element.value === value && (value !== 0 || element.nodeName !== "PROGRESS")) {
+    return;
+  }
+  element.value = value ?? "";
+}
 function set_attribute(element, attribute, value, skip_warning) {
   var attributes = element.__attributes ?? (element.__attributes = {});
   if (attributes[attribute] === (attributes[attribute] = value)) return;
@@ -2709,6 +2478,15 @@ function get_setters(element) {
     proto = get_prototype_of(proto);
   }
   return setters;
+}
+function toggle_class(dom, class_name, value) {
+  if (value) {
+    if (dom.classList.contains(class_name)) return;
+    dom.classList.add(class_name);
+  } else {
+    if (!dom.classList.contains(class_name)) return;
+    dom.classList.remove(class_name);
+  }
 }
 const now = () => performance.now();
 const raf = {
@@ -2974,144 +2752,34 @@ function animate(element, options, counterpart, t2, on_finish) {
     t: () => get_t()
   };
 }
-function bind_value(input, get2, set2 = get2) {
-  var runes = is_runes();
-  listen_to_event_and_reset_event(input, "input", (is_reset) => {
-    var value = is_reset ? input.defaultValue : input.value;
-    value = is_numberlike_input(input) ? to_number(value) : value;
-    set2(value);
-    if (runes && value !== (value = get2())) {
-      var start = input.selectionStart;
-      var end = input.selectionEnd;
-      input.value = value ?? "";
-      if (end !== null) {
-        input.selectionStart = start;
-        input.selectionEnd = Math.min(end, input.value.length);
-      }
-    }
-  });
-  if (
-    // If we are hydrating and the value has since changed,
-    // then use the updated value from the input instead.
-    // If defaultValue is set, then value == defaultValue
-    // TODO Svelte 6: remove input.value check and set to empty string?
-    untrack(get2) == null && input.value
-  ) {
-    set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
-  }
-  render_effect(() => {
-    var value = get2();
-    if (is_numberlike_input(input) && value === to_number(input.value)) {
-      return;
-    }
-    if (input.type === "date" && !value && !input.value) {
-      return;
-    }
-    if (value !== input.value) {
-      input.value = value ?? "";
-    }
-  });
+function is_bound_this(bound_value, element_or_component) {
+  return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
 }
-function is_numberlike_input(input) {
-  var type = input.type;
-  return type === "number" || type === "range";
-}
-function to_number(value) {
-  return value === "" ? null : +value;
-}
-function select_option(select, value, mounting) {
-  if (select.multiple) {
-    return select_options(select, value);
-  }
-  for (var option of select.options) {
-    var option_value = get_option_value(option);
-    if (is(option_value, value)) {
-      option.selected = true;
-      return;
-    }
-  }
-  if (!mounting || value !== void 0) {
-    select.selectedIndex = -1;
-  }
-}
-function init_select(select, get_value) {
+function bind_this(element_or_component = {}, update, get_value, get_parts) {
   effect(() => {
-    var observer = new MutationObserver(() => {
-      var value = select.__value;
-      select_option(select, value);
-    });
-    observer.observe(select, {
-      // Listen to option element changes
-      childList: true,
-      subtree: true,
-      // because of <optgroup>
-      // Listen to option element value attribute changes
-      // (doesn't get notified of select value changes,
-      // because that property is not reflected as an attribute)
-      attributes: true,
-      attributeFilter: ["value"]
+    var old_parts;
+    var parts;
+    render_effect(() => {
+      old_parts = parts;
+      parts = [];
+      untrack(() => {
+        if (element_or_component !== get_value(...parts)) {
+          update(element_or_component, ...parts);
+          if (old_parts && is_bound_this(get_value(...old_parts), element_or_component)) {
+            update(null, ...old_parts);
+          }
+        }
+      });
     });
     return () => {
-      observer.disconnect();
+      queue_micro_task(() => {
+        if (parts && is_bound_this(get_value(...parts), element_or_component)) {
+          update(null, ...parts);
+        }
+      });
     };
   });
-}
-function bind_select_value(select, get2, set2 = get2) {
-  var mounting = true;
-  listen_to_event_and_reset_event(select, "change", (is_reset) => {
-    var query = is_reset ? "[selected]" : ":checked";
-    var value;
-    if (select.multiple) {
-      value = [].map.call(select.querySelectorAll(query), get_option_value);
-    } else {
-      var selected_option = select.querySelector(query) ?? // will fall back to first non-disabled option if no option is selected
-      select.querySelector("option:not([disabled])");
-      value = selected_option && get_option_value(selected_option);
-    }
-    set2(value);
-  });
-  effect(() => {
-    var value = get2();
-    select_option(select, value, mounting);
-    if (mounting && value === void 0) {
-      var selected_option = select.querySelector(":checked");
-      if (selected_option !== null) {
-        value = get_option_value(selected_option);
-        set2(value);
-      }
-    }
-    select.__value = value;
-    mounting = false;
-  });
-  init_select(select);
-}
-function select_options(select, value) {
-  for (var option of select.options) {
-    option.selected = ~value.indexOf(get_option_value(option));
-  }
-}
-function get_option_value(option) {
-  if ("__value" in option) {
-    return option.__value;
-  } else {
-    return option.value;
-  }
-}
-function bind_property(property, event_name, element, set2, get2) {
-  var handler = () => {
-    set2(element[property]);
-  };
-  element.addEventListener(event_name, handler);
-  {
-    render_effect(() => {
-      element[property] = get2();
-    });
-  }
-  if (element === document.body || element === window || element === document) {
-    teardown(() => {
-      element.removeEventListener(event_name, handler);
-    });
-  }
+  return element_or_component;
 }
 function init(immutable = false) {
   const context = (
@@ -3169,29 +2837,6 @@ function observe_all(context, props) {
     for (const signal of context.l.s) get$1(signal);
   }
   props();
-}
-function onMount(fn) {
-  if (component_context === null) {
-    lifecycle_outside_component();
-  }
-  if (legacy_mode_flag && component_context.l !== null) {
-    init_update_callbacks(component_context).m.push(fn);
-  } else {
-    user_effect(() => {
-      const cleanup = untrack(fn);
-      if (typeof cleanup === "function") return (
-        /** @type {() => void} */
-        cleanup
-      );
-    });
-  }
-}
-function init_update_callbacks(context) {
-  var l = (
-    /** @type {ComponentContextLegacy} */
-    context.l
-  );
-  return l.u ?? (l.u = { a: [], b: [], m: [] });
 }
 function subscribe_to_store(store, run2, invalidate) {
   if (store == null) {
@@ -3316,6 +2961,64 @@ function capture_store_binding(fn) {
     is_store_binding = previous_is_store_binding;
   }
 }
+const spread_props_handler = {
+  get(target, key) {
+    let i = target.props.length;
+    while (i--) {
+      let p = target.props[i];
+      if (is_function(p)) p = p();
+      if (typeof p === "object" && p !== null && key in p) return p[key];
+    }
+  },
+  set(target, key, value) {
+    let i = target.props.length;
+    while (i--) {
+      let p = target.props[i];
+      if (is_function(p)) p = p();
+      const desc = get_descriptor(p, key);
+      if (desc && desc.set) {
+        desc.set(value);
+        return true;
+      }
+    }
+    return false;
+  },
+  getOwnPropertyDescriptor(target, key) {
+    let i = target.props.length;
+    while (i--) {
+      let p = target.props[i];
+      if (is_function(p)) p = p();
+      if (typeof p === "object" && p !== null && key in p) {
+        const descriptor = get_descriptor(p, key);
+        if (descriptor && !descriptor.configurable) {
+          descriptor.configurable = true;
+        }
+        return descriptor;
+      }
+    }
+  },
+  has(target, key) {
+    if (key === STATE_SYMBOL || key === LEGACY_PROPS) return false;
+    for (let p of target.props) {
+      if (is_function(p)) p = p();
+      if (p != null && key in p) return true;
+    }
+    return false;
+  },
+  ownKeys(target) {
+    const keys = [];
+    for (let p of target.props) {
+      if (is_function(p)) p = p();
+      for (const key in p) {
+        if (!keys.includes(key)) keys.push(key);
+      }
+    }
+    return keys;
+  }
+};
+function spread_props(...props) {
+  return new Proxy({ props }, spread_props_handler);
+}
 function with_parent_branch(fn) {
   var effect2 = active_effect;
   var previous_effect = active_effect;
@@ -3438,11 +3141,6 @@ function prop(props, key, flags2, fallback) {
   );
   if (!immutable) current_value.equals = safe_equals;
   return function(value, mutation) {
-    if (captured_signals !== null) {
-      from_child = was_from_child;
-      getter();
-      get$1(inner_current_value);
-    }
     if (arguments.length > 0) {
       const new_value = mutation ? get$1(current_value) : runes && bindable ? proxy(value) : value;
       if (!current_value.equals(new_value)) {
@@ -3457,6 +3155,1497 @@ function prop(props, key, flags2, fallback) {
     }
     return get$1(current_value);
   };
+}
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+var masonry = { exports: {} };
+var outlayer = { exports: {} };
+var evEmitter$1 = { exports: {} };
+var evEmitter = evEmitter$1.exports;
+var hasRequiredEvEmitter;
+function requireEvEmitter() {
+  if (hasRequiredEvEmitter) return evEmitter$1.exports;
+  hasRequiredEvEmitter = 1;
+  (function(module) {
+    (function(global, factory) {
+      if (module.exports) {
+        module.exports = factory();
+      } else {
+        global.EvEmitter = factory();
+      }
+    })(typeof window != "undefined" ? window : evEmitter, function() {
+      function EvEmitter() {
+      }
+      var proto = EvEmitter.prototype;
+      proto.on = function(eventName, listener) {
+        if (!eventName || !listener) {
+          return;
+        }
+        var events = this._events = this._events || {};
+        var listeners = events[eventName] = events[eventName] || [];
+        if (listeners.indexOf(listener) == -1) {
+          listeners.push(listener);
+        }
+        return this;
+      };
+      proto.once = function(eventName, listener) {
+        if (!eventName || !listener) {
+          return;
+        }
+        this.on(eventName, listener);
+        var onceEvents = this._onceEvents = this._onceEvents || {};
+        var onceListeners = onceEvents[eventName] = onceEvents[eventName] || {};
+        onceListeners[listener] = true;
+        return this;
+      };
+      proto.off = function(eventName, listener) {
+        var listeners = this._events && this._events[eventName];
+        if (!listeners || !listeners.length) {
+          return;
+        }
+        var index = listeners.indexOf(listener);
+        if (index != -1) {
+          listeners.splice(index, 1);
+        }
+        return this;
+      };
+      proto.emitEvent = function(eventName, args) {
+        var listeners = this._events && this._events[eventName];
+        if (!listeners || !listeners.length) {
+          return;
+        }
+        listeners = listeners.slice(0);
+        args = args || [];
+        var onceListeners = this._onceEvents && this._onceEvents[eventName];
+        for (var i = 0; i < listeners.length; i++) {
+          var listener = listeners[i];
+          var isOnce = onceListeners && onceListeners[listener];
+          if (isOnce) {
+            this.off(eventName, listener);
+            delete onceListeners[listener];
+          }
+          listener.apply(this, args);
+        }
+        return this;
+      };
+      proto.allOff = function() {
+        delete this._events;
+        delete this._onceEvents;
+      };
+      return EvEmitter;
+    });
+  })(evEmitter$1);
+  return evEmitter$1.exports;
+}
+var getSize = { exports: {} };
+/*!
+ * getSize v2.0.3
+ * measure size of elements
+ * MIT license
+ */
+var hasRequiredGetSize;
+function requireGetSize() {
+  if (hasRequiredGetSize) return getSize.exports;
+  hasRequiredGetSize = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory();
+      } else {
+        window2.getSize = factory();
+      }
+    })(window, function factory() {
+      function getStyleSize(value) {
+        var num = parseFloat(value);
+        var isValid = value.indexOf("%") == -1 && !isNaN(num);
+        return isValid && num;
+      }
+      function noop2() {
+      }
+      var logError = typeof console == "undefined" ? noop2 : function(message) {
+        console.error(message);
+      };
+      var measurements = [
+        "paddingLeft",
+        "paddingRight",
+        "paddingTop",
+        "paddingBottom",
+        "marginLeft",
+        "marginRight",
+        "marginTop",
+        "marginBottom",
+        "borderLeftWidth",
+        "borderRightWidth",
+        "borderTopWidth",
+        "borderBottomWidth"
+      ];
+      var measurementsLength = measurements.length;
+      function getZeroSize() {
+        var size = {
+          width: 0,
+          height: 0,
+          innerWidth: 0,
+          innerHeight: 0,
+          outerWidth: 0,
+          outerHeight: 0
+        };
+        for (var i = 0; i < measurementsLength; i++) {
+          var measurement = measurements[i];
+          size[measurement] = 0;
+        }
+        return size;
+      }
+      function getStyle(elem) {
+        var style = getComputedStyle(elem);
+        if (!style) {
+          logError("Style returned " + style + ". Are you running this code in a hidden iframe on Firefox? See https://bit.ly/getsizebug1");
+        }
+        return style;
+      }
+      var isSetup = false;
+      var isBoxSizeOuter;
+      function setup() {
+        if (isSetup) {
+          return;
+        }
+        isSetup = true;
+        var div = document.createElement("div");
+        div.style.width = "200px";
+        div.style.padding = "1px 2px 3px 4px";
+        div.style.borderStyle = "solid";
+        div.style.borderWidth = "1px 2px 3px 4px";
+        div.style.boxSizing = "border-box";
+        var body = document.body || document.documentElement;
+        body.appendChild(div);
+        var style = getStyle(div);
+        isBoxSizeOuter = Math.round(getStyleSize(style.width)) == 200;
+        getSize2.isBoxSizeOuter = isBoxSizeOuter;
+        body.removeChild(div);
+      }
+      function getSize2(elem) {
+        setup();
+        if (typeof elem == "string") {
+          elem = document.querySelector(elem);
+        }
+        if (!elem || typeof elem != "object" || !elem.nodeType) {
+          return;
+        }
+        var style = getStyle(elem);
+        if (style.display == "none") {
+          return getZeroSize();
+        }
+        var size = {};
+        size.width = elem.offsetWidth;
+        size.height = elem.offsetHeight;
+        var isBorderBox = size.isBorderBox = style.boxSizing == "border-box";
+        for (var i = 0; i < measurementsLength; i++) {
+          var measurement = measurements[i];
+          var value = style[measurement];
+          var num = parseFloat(value);
+          size[measurement] = !isNaN(num) ? num : 0;
+        }
+        var paddingWidth = size.paddingLeft + size.paddingRight;
+        var paddingHeight = size.paddingTop + size.paddingBottom;
+        var marginWidth = size.marginLeft + size.marginRight;
+        var marginHeight = size.marginTop + size.marginBottom;
+        var borderWidth = size.borderLeftWidth + size.borderRightWidth;
+        var borderHeight = size.borderTopWidth + size.borderBottomWidth;
+        var isBorderBoxSizeOuter = isBorderBox && isBoxSizeOuter;
+        var styleWidth = getStyleSize(style.width);
+        if (styleWidth !== false) {
+          size.width = styleWidth + // add padding and border unless it's already including it
+          (isBorderBoxSizeOuter ? 0 : paddingWidth + borderWidth);
+        }
+        var styleHeight = getStyleSize(style.height);
+        if (styleHeight !== false) {
+          size.height = styleHeight + // add padding and border unless it's already including it
+          (isBorderBoxSizeOuter ? 0 : paddingHeight + borderHeight);
+        }
+        size.innerWidth = size.width - (paddingWidth + borderWidth);
+        size.innerHeight = size.height - (paddingHeight + borderHeight);
+        size.outerWidth = size.width + marginWidth;
+        size.outerHeight = size.height + marginHeight;
+        return size;
+      }
+      return getSize2;
+    });
+  })(getSize);
+  return getSize.exports;
+}
+var utils = { exports: {} };
+var matchesSelector = { exports: {} };
+var hasRequiredMatchesSelector;
+function requireMatchesSelector() {
+  if (hasRequiredMatchesSelector) return matchesSelector.exports;
+  hasRequiredMatchesSelector = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory();
+      } else {
+        window2.matchesSelector = factory();
+      }
+    })(window, function factory() {
+      var matchesMethod = function() {
+        var ElemProto = window.Element.prototype;
+        if (ElemProto.matches) {
+          return "matches";
+        }
+        if (ElemProto.matchesSelector) {
+          return "matchesSelector";
+        }
+        var prefixes = ["webkit", "moz", "ms", "o"];
+        for (var i = 0; i < prefixes.length; i++) {
+          var prefix = prefixes[i];
+          var method = prefix + "MatchesSelector";
+          if (ElemProto[method]) {
+            return method;
+          }
+        }
+      }();
+      return function matchesSelector2(elem, selector) {
+        return elem[matchesMethod](selector);
+      };
+    });
+  })(matchesSelector);
+  return matchesSelector.exports;
+}
+var hasRequiredUtils;
+function requireUtils() {
+  if (hasRequiredUtils) return utils.exports;
+  hasRequiredUtils = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory(
+          window2,
+          requireMatchesSelector()
+        );
+      } else {
+        window2.fizzyUIUtils = factory(
+          window2,
+          window2.matchesSelector
+        );
+      }
+    })(window, function factory(window2, matchesSelector2) {
+      var utils2 = {};
+      utils2.extend = function(a, b) {
+        for (var prop2 in b) {
+          a[prop2] = b[prop2];
+        }
+        return a;
+      };
+      utils2.modulo = function(num, div) {
+        return (num % div + div) % div;
+      };
+      var arraySlice = Array.prototype.slice;
+      utils2.makeArray = function(obj) {
+        if (Array.isArray(obj)) {
+          return obj;
+        }
+        if (obj === null || obj === void 0) {
+          return [];
+        }
+        var isArrayLike = typeof obj == "object" && typeof obj.length == "number";
+        if (isArrayLike) {
+          return arraySlice.call(obj);
+        }
+        return [obj];
+      };
+      utils2.removeFrom = function(ary, obj) {
+        var index = ary.indexOf(obj);
+        if (index != -1) {
+          ary.splice(index, 1);
+        }
+      };
+      utils2.getParent = function(elem, selector) {
+        while (elem.parentNode && elem != document.body) {
+          elem = elem.parentNode;
+          if (matchesSelector2(elem, selector)) {
+            return elem;
+          }
+        }
+      };
+      utils2.getQueryElement = function(elem) {
+        if (typeof elem == "string") {
+          return document.querySelector(elem);
+        }
+        return elem;
+      };
+      utils2.handleEvent = function(event2) {
+        var method = "on" + event2.type;
+        if (this[method]) {
+          this[method](event2);
+        }
+      };
+      utils2.filterFindElements = function(elems, selector) {
+        elems = utils2.makeArray(elems);
+        var ffElems = [];
+        elems.forEach(function(elem) {
+          if (!(elem instanceof HTMLElement)) {
+            return;
+          }
+          if (!selector) {
+            ffElems.push(elem);
+            return;
+          }
+          if (matchesSelector2(elem, selector)) {
+            ffElems.push(elem);
+          }
+          var childElems = elem.querySelectorAll(selector);
+          for (var i = 0; i < childElems.length; i++) {
+            ffElems.push(childElems[i]);
+          }
+        });
+        return ffElems;
+      };
+      utils2.debounceMethod = function(_class, methodName, threshold) {
+        threshold = threshold || 100;
+        var method = _class.prototype[methodName];
+        var timeoutName = methodName + "Timeout";
+        _class.prototype[methodName] = function() {
+          var timeout = this[timeoutName];
+          clearTimeout(timeout);
+          var args = arguments;
+          var _this = this;
+          this[timeoutName] = setTimeout(function() {
+            method.apply(_this, args);
+            delete _this[timeoutName];
+          }, threshold);
+        };
+      };
+      utils2.docReady = function(callback) {
+        var readyState = document.readyState;
+        if (readyState == "complete" || readyState == "interactive") {
+          setTimeout(callback);
+        } else {
+          document.addEventListener("DOMContentLoaded", callback);
+        }
+      };
+      utils2.toDashed = function(str) {
+        return str.replace(/(.)([A-Z])/g, function(match, $1, $2) {
+          return $1 + "-" + $2;
+        }).toLowerCase();
+      };
+      var console2 = window2.console;
+      utils2.htmlInit = function(WidgetClass, namespace) {
+        utils2.docReady(function() {
+          var dashedNamespace = utils2.toDashed(namespace);
+          var dataAttr = "data-" + dashedNamespace;
+          var dataAttrElems = document.querySelectorAll("[" + dataAttr + "]");
+          var jsDashElems = document.querySelectorAll(".js-" + dashedNamespace);
+          var elems = utils2.makeArray(dataAttrElems).concat(utils2.makeArray(jsDashElems));
+          var dataOptionsAttr = dataAttr + "-options";
+          var jQuery = window2.jQuery;
+          elems.forEach(function(elem) {
+            var attr = elem.getAttribute(dataAttr) || elem.getAttribute(dataOptionsAttr);
+            var options;
+            try {
+              options = attr && JSON.parse(attr);
+            } catch (error) {
+              if (console2) {
+                console2.error("Error parsing " + dataAttr + " on " + elem.className + ": " + error);
+              }
+              return;
+            }
+            var instance = new WidgetClass(elem, options);
+            if (jQuery) {
+              jQuery.data(elem, namespace, instance);
+            }
+          });
+        });
+      };
+      return utils2;
+    });
+  })(utils);
+  return utils.exports;
+}
+var item = { exports: {} };
+var hasRequiredItem;
+function requireItem() {
+  if (hasRequiredItem) return item.exports;
+  hasRequiredItem = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory(
+          requireEvEmitter(),
+          requireGetSize()
+        );
+      } else {
+        window2.Outlayer = {};
+        window2.Outlayer.Item = factory(
+          window2.EvEmitter,
+          window2.getSize
+        );
+      }
+    })(window, function factory(EvEmitter, getSize2) {
+      function isEmptyObj(obj) {
+        for (var prop2 in obj) {
+          return false;
+        }
+        prop2 = null;
+        return true;
+      }
+      var docElemStyle = document.documentElement.style;
+      var transitionProperty = typeof docElemStyle.transition == "string" ? "transition" : "WebkitTransition";
+      var transformProperty = typeof docElemStyle.transform == "string" ? "transform" : "WebkitTransform";
+      var transitionEndEvent = {
+        WebkitTransition: "webkitTransitionEnd",
+        transition: "transitionend"
+      }[transitionProperty];
+      var vendorProperties = {
+        transform: transformProperty,
+        transition: transitionProperty,
+        transitionDuration: transitionProperty + "Duration",
+        transitionProperty: transitionProperty + "Property",
+        transitionDelay: transitionProperty + "Delay"
+      };
+      function Item2(element, layout) {
+        if (!element) {
+          return;
+        }
+        this.element = element;
+        this.layout = layout;
+        this.position = {
+          x: 0,
+          y: 0
+        };
+        this._create();
+      }
+      var proto = Item2.prototype = Object.create(EvEmitter.prototype);
+      proto.constructor = Item2;
+      proto._create = function() {
+        this._transn = {
+          ingProperties: {},
+          clean: {},
+          onEnd: {}
+        };
+        this.css({
+          position: "absolute"
+        });
+      };
+      proto.handleEvent = function(event2) {
+        var method = "on" + event2.type;
+        if (this[method]) {
+          this[method](event2);
+        }
+      };
+      proto.getSize = function() {
+        this.size = getSize2(this.element);
+      };
+      proto.css = function(style) {
+        var elemStyle = this.element.style;
+        for (var prop2 in style) {
+          var supportedProp = vendorProperties[prop2] || prop2;
+          elemStyle[supportedProp] = style[prop2];
+        }
+      };
+      proto.getPosition = function() {
+        var style = getComputedStyle(this.element);
+        var isOriginLeft = this.layout._getOption("originLeft");
+        var isOriginTop = this.layout._getOption("originTop");
+        var xValue = style[isOriginLeft ? "left" : "right"];
+        var yValue = style[isOriginTop ? "top" : "bottom"];
+        var x = parseFloat(xValue);
+        var y = parseFloat(yValue);
+        var layoutSize = this.layout.size;
+        if (xValue.indexOf("%") != -1) {
+          x = x / 100 * layoutSize.width;
+        }
+        if (yValue.indexOf("%") != -1) {
+          y = y / 100 * layoutSize.height;
+        }
+        x = isNaN(x) ? 0 : x;
+        y = isNaN(y) ? 0 : y;
+        x -= isOriginLeft ? layoutSize.paddingLeft : layoutSize.paddingRight;
+        y -= isOriginTop ? layoutSize.paddingTop : layoutSize.paddingBottom;
+        this.position.x = x;
+        this.position.y = y;
+      };
+      proto.layoutPosition = function() {
+        var layoutSize = this.layout.size;
+        var style = {};
+        var isOriginLeft = this.layout._getOption("originLeft");
+        var isOriginTop = this.layout._getOption("originTop");
+        var xPadding = isOriginLeft ? "paddingLeft" : "paddingRight";
+        var xProperty = isOriginLeft ? "left" : "right";
+        var xResetProperty = isOriginLeft ? "right" : "left";
+        var x = this.position.x + layoutSize[xPadding];
+        style[xProperty] = this.getXValue(x);
+        style[xResetProperty] = "";
+        var yPadding = isOriginTop ? "paddingTop" : "paddingBottom";
+        var yProperty = isOriginTop ? "top" : "bottom";
+        var yResetProperty = isOriginTop ? "bottom" : "top";
+        var y = this.position.y + layoutSize[yPadding];
+        style[yProperty] = this.getYValue(y);
+        style[yResetProperty] = "";
+        this.css(style);
+        this.emitEvent("layout", [this]);
+      };
+      proto.getXValue = function(x) {
+        var isHorizontal = this.layout._getOption("horizontal");
+        return this.layout.options.percentPosition && !isHorizontal ? x / this.layout.size.width * 100 + "%" : x + "px";
+      };
+      proto.getYValue = function(y) {
+        var isHorizontal = this.layout._getOption("horizontal");
+        return this.layout.options.percentPosition && isHorizontal ? y / this.layout.size.height * 100 + "%" : y + "px";
+      };
+      proto._transitionTo = function(x, y) {
+        this.getPosition();
+        var curX = this.position.x;
+        var curY = this.position.y;
+        var didNotMove = x == this.position.x && y == this.position.y;
+        this.setPosition(x, y);
+        if (didNotMove && !this.isTransitioning) {
+          this.layoutPosition();
+          return;
+        }
+        var transX = x - curX;
+        var transY = y - curY;
+        var transitionStyle = {};
+        transitionStyle.transform = this.getTranslate(transX, transY);
+        this.transition({
+          to: transitionStyle,
+          onTransitionEnd: {
+            transform: this.layoutPosition
+          },
+          isCleaning: true
+        });
+      };
+      proto.getTranslate = function(x, y) {
+        var isOriginLeft = this.layout._getOption("originLeft");
+        var isOriginTop = this.layout._getOption("originTop");
+        x = isOriginLeft ? x : -x;
+        y = isOriginTop ? y : -y;
+        return "translate3d(" + x + "px, " + y + "px, 0)";
+      };
+      proto.goTo = function(x, y) {
+        this.setPosition(x, y);
+        this.layoutPosition();
+      };
+      proto.moveTo = proto._transitionTo;
+      proto.setPosition = function(x, y) {
+        this.position.x = parseFloat(x);
+        this.position.y = parseFloat(y);
+      };
+      proto._nonTransition = function(args) {
+        this.css(args.to);
+        if (args.isCleaning) {
+          this._removeStyles(args.to);
+        }
+        for (var prop2 in args.onTransitionEnd) {
+          args.onTransitionEnd[prop2].call(this);
+        }
+      };
+      proto.transition = function(args) {
+        if (!parseFloat(this.layout.options.transitionDuration)) {
+          this._nonTransition(args);
+          return;
+        }
+        var _transition = this._transn;
+        for (var prop2 in args.onTransitionEnd) {
+          _transition.onEnd[prop2] = args.onTransitionEnd[prop2];
+        }
+        for (prop2 in args.to) {
+          _transition.ingProperties[prop2] = true;
+          if (args.isCleaning) {
+            _transition.clean[prop2] = true;
+          }
+        }
+        if (args.from) {
+          this.css(args.from);
+          this.element.offsetHeight;
+        }
+        this.enableTransition(args.to);
+        this.css(args.to);
+        this.isTransitioning = true;
+      };
+      function toDashedAll(str) {
+        return str.replace(/([A-Z])/g, function($1) {
+          return "-" + $1.toLowerCase();
+        });
+      }
+      var transitionProps = "opacity," + toDashedAll(transformProperty);
+      proto.enableTransition = function() {
+        if (this.isTransitioning) {
+          return;
+        }
+        var duration = this.layout.options.transitionDuration;
+        duration = typeof duration == "number" ? duration + "ms" : duration;
+        this.css({
+          transitionProperty: transitionProps,
+          transitionDuration: duration,
+          transitionDelay: this.staggerDelay || 0
+        });
+        this.element.addEventListener(transitionEndEvent, this, false);
+      };
+      proto.onwebkitTransitionEnd = function(event2) {
+        this.ontransitionend(event2);
+      };
+      proto.onotransitionend = function(event2) {
+        this.ontransitionend(event2);
+      };
+      var dashedVendorProperties = {
+        "-webkit-transform": "transform"
+      };
+      proto.ontransitionend = function(event2) {
+        if (event2.target !== this.element) {
+          return;
+        }
+        var _transition = this._transn;
+        var propertyName = dashedVendorProperties[event2.propertyName] || event2.propertyName;
+        delete _transition.ingProperties[propertyName];
+        if (isEmptyObj(_transition.ingProperties)) {
+          this.disableTransition();
+        }
+        if (propertyName in _transition.clean) {
+          this.element.style[event2.propertyName] = "";
+          delete _transition.clean[propertyName];
+        }
+        if (propertyName in _transition.onEnd) {
+          var onTransitionEnd = _transition.onEnd[propertyName];
+          onTransitionEnd.call(this);
+          delete _transition.onEnd[propertyName];
+        }
+        this.emitEvent("transitionEnd", [this]);
+      };
+      proto.disableTransition = function() {
+        this.removeTransitionStyles();
+        this.element.removeEventListener(transitionEndEvent, this, false);
+        this.isTransitioning = false;
+      };
+      proto._removeStyles = function(style) {
+        var cleanStyle = {};
+        for (var prop2 in style) {
+          cleanStyle[prop2] = "";
+        }
+        this.css(cleanStyle);
+      };
+      var cleanTransitionStyle = {
+        transitionProperty: "",
+        transitionDuration: "",
+        transitionDelay: ""
+      };
+      proto.removeTransitionStyles = function() {
+        this.css(cleanTransitionStyle);
+      };
+      proto.stagger = function(delay) {
+        delay = isNaN(delay) ? 0 : delay;
+        this.staggerDelay = delay + "ms";
+      };
+      proto.removeElem = function() {
+        this.element.parentNode.removeChild(this.element);
+        this.css({ display: "" });
+        this.emitEvent("remove", [this]);
+      };
+      proto.remove = function() {
+        if (!transitionProperty || !parseFloat(this.layout.options.transitionDuration)) {
+          this.removeElem();
+          return;
+        }
+        this.once("transitionEnd", function() {
+          this.removeElem();
+        });
+        this.hide();
+      };
+      proto.reveal = function() {
+        delete this.isHidden;
+        this.css({ display: "" });
+        var options = this.layout.options;
+        var onTransitionEnd = {};
+        var transitionEndProperty = this.getHideRevealTransitionEndProperty("visibleStyle");
+        onTransitionEnd[transitionEndProperty] = this.onRevealTransitionEnd;
+        this.transition({
+          from: options.hiddenStyle,
+          to: options.visibleStyle,
+          isCleaning: true,
+          onTransitionEnd
+        });
+      };
+      proto.onRevealTransitionEnd = function() {
+        if (!this.isHidden) {
+          this.emitEvent("reveal");
+        }
+      };
+      proto.getHideRevealTransitionEndProperty = function(styleProperty) {
+        var optionStyle = this.layout.options[styleProperty];
+        if (optionStyle.opacity) {
+          return "opacity";
+        }
+        for (var prop2 in optionStyle) {
+          return prop2;
+        }
+      };
+      proto.hide = function() {
+        this.isHidden = true;
+        this.css({ display: "" });
+        var options = this.layout.options;
+        var onTransitionEnd = {};
+        var transitionEndProperty = this.getHideRevealTransitionEndProperty("hiddenStyle");
+        onTransitionEnd[transitionEndProperty] = this.onHideTransitionEnd;
+        this.transition({
+          from: options.visibleStyle,
+          to: options.hiddenStyle,
+          // keep hidden stuff hidden
+          isCleaning: true,
+          onTransitionEnd
+        });
+      };
+      proto.onHideTransitionEnd = function() {
+        if (this.isHidden) {
+          this.css({ display: "none" });
+          this.emitEvent("hide");
+        }
+      };
+      proto.destroy = function() {
+        this.css({
+          position: "",
+          left: "",
+          right: "",
+          top: "",
+          bottom: "",
+          transition: "",
+          transform: ""
+        });
+      };
+      return Item2;
+    });
+  })(item);
+  return item.exports;
+}
+/*!
+ * Outlayer v2.1.1
+ * the brains and guts of a layout library
+ * MIT license
+ */
+var hasRequiredOutlayer;
+function requireOutlayer() {
+  if (hasRequiredOutlayer) return outlayer.exports;
+  hasRequiredOutlayer = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory(
+          window2,
+          requireEvEmitter(),
+          requireGetSize(),
+          requireUtils(),
+          requireItem()
+        );
+      } else {
+        window2.Outlayer = factory(
+          window2,
+          window2.EvEmitter,
+          window2.getSize,
+          window2.fizzyUIUtils,
+          window2.Outlayer.Item
+        );
+      }
+    })(window, function factory(window2, EvEmitter, getSize2, utils2, Item2) {
+      var console2 = window2.console;
+      var jQuery = window2.jQuery;
+      var noop2 = function() {
+      };
+      var GUID = 0;
+      var instances = {};
+      function Outlayer(element, options) {
+        var queryElement = utils2.getQueryElement(element);
+        if (!queryElement) {
+          if (console2) {
+            console2.error("Bad element for " + this.constructor.namespace + ": " + (queryElement || element));
+          }
+          return;
+        }
+        this.element = queryElement;
+        if (jQuery) {
+          this.$element = jQuery(this.element);
+        }
+        this.options = utils2.extend({}, this.constructor.defaults);
+        this.option(options);
+        var id = ++GUID;
+        this.element.outlayerGUID = id;
+        instances[id] = this;
+        this._create();
+        var isInitLayout = this._getOption("initLayout");
+        if (isInitLayout) {
+          this.layout();
+        }
+      }
+      Outlayer.namespace = "outlayer";
+      Outlayer.Item = Item2;
+      Outlayer.defaults = {
+        containerStyle: {
+          position: "relative"
+        },
+        initLayout: true,
+        originLeft: true,
+        originTop: true,
+        resize: true,
+        resizeContainer: true,
+        // item options
+        transitionDuration: "0.4s",
+        hiddenStyle: {
+          opacity: 0,
+          transform: "scale(0.001)"
+        },
+        visibleStyle: {
+          opacity: 1,
+          transform: "scale(1)"
+        }
+      };
+      var proto = Outlayer.prototype;
+      utils2.extend(proto, EvEmitter.prototype);
+      proto.option = function(opts) {
+        utils2.extend(this.options, opts);
+      };
+      proto._getOption = function(option) {
+        var oldOption = this.constructor.compatOptions[option];
+        return oldOption && this.options[oldOption] !== void 0 ? this.options[oldOption] : this.options[option];
+      };
+      Outlayer.compatOptions = {
+        // currentName: oldName
+        initLayout: "isInitLayout",
+        horizontal: "isHorizontal",
+        layoutInstant: "isLayoutInstant",
+        originLeft: "isOriginLeft",
+        originTop: "isOriginTop",
+        resize: "isResizeBound",
+        resizeContainer: "isResizingContainer"
+      };
+      proto._create = function() {
+        this.reloadItems();
+        this.stamps = [];
+        this.stamp(this.options.stamp);
+        utils2.extend(this.element.style, this.options.containerStyle);
+        var canBindResize = this._getOption("resize");
+        if (canBindResize) {
+          this.bindResize();
+        }
+      };
+      proto.reloadItems = function() {
+        this.items = this._itemize(this.element.children);
+      };
+      proto._itemize = function(elems) {
+        var itemElems = this._filterFindItemElements(elems);
+        var Item3 = this.constructor.Item;
+        var items = [];
+        for (var i = 0; i < itemElems.length; i++) {
+          var elem = itemElems[i];
+          var item2 = new Item3(elem, this);
+          items.push(item2);
+        }
+        return items;
+      };
+      proto._filterFindItemElements = function(elems) {
+        return utils2.filterFindElements(elems, this.options.itemSelector);
+      };
+      proto.getItemElements = function() {
+        return this.items.map(function(item2) {
+          return item2.element;
+        });
+      };
+      proto.layout = function() {
+        this._resetLayout();
+        this._manageStamps();
+        var layoutInstant = this._getOption("layoutInstant");
+        var isInstant = layoutInstant !== void 0 ? layoutInstant : !this._isLayoutInited;
+        this.layoutItems(this.items, isInstant);
+        this._isLayoutInited = true;
+      };
+      proto._init = proto.layout;
+      proto._resetLayout = function() {
+        this.getSize();
+      };
+      proto.getSize = function() {
+        this.size = getSize2(this.element);
+      };
+      proto._getMeasurement = function(measurement, size) {
+        var option = this.options[measurement];
+        var elem;
+        if (!option) {
+          this[measurement] = 0;
+        } else {
+          if (typeof option == "string") {
+            elem = this.element.querySelector(option);
+          } else if (option instanceof HTMLElement) {
+            elem = option;
+          }
+          this[measurement] = elem ? getSize2(elem)[size] : option;
+        }
+      };
+      proto.layoutItems = function(items, isInstant) {
+        items = this._getItemsForLayout(items);
+        this._layoutItems(items, isInstant);
+        this._postLayout();
+      };
+      proto._getItemsForLayout = function(items) {
+        return items.filter(function(item2) {
+          return !item2.isIgnored;
+        });
+      };
+      proto._layoutItems = function(items, isInstant) {
+        this._emitCompleteOnItems("layout", items);
+        if (!items || !items.length) {
+          return;
+        }
+        var queue = [];
+        items.forEach(function(item2) {
+          var position = this._getItemLayoutPosition(item2);
+          position.item = item2;
+          position.isInstant = isInstant || item2.isLayoutInstant;
+          queue.push(position);
+        }, this);
+        this._processLayoutQueue(queue);
+      };
+      proto._getItemLayoutPosition = function() {
+        return {
+          x: 0,
+          y: 0
+        };
+      };
+      proto._processLayoutQueue = function(queue) {
+        this.updateStagger();
+        queue.forEach(function(obj, i) {
+          this._positionItem(obj.item, obj.x, obj.y, obj.isInstant, i);
+        }, this);
+      };
+      proto.updateStagger = function() {
+        var stagger = this.options.stagger;
+        if (stagger === null || stagger === void 0) {
+          this.stagger = 0;
+          return;
+        }
+        this.stagger = getMilliseconds(stagger);
+        return this.stagger;
+      };
+      proto._positionItem = function(item2, x, y, isInstant, i) {
+        if (isInstant) {
+          item2.goTo(x, y);
+        } else {
+          item2.stagger(i * this.stagger);
+          item2.moveTo(x, y);
+        }
+      };
+      proto._postLayout = function() {
+        this.resizeContainer();
+      };
+      proto.resizeContainer = function() {
+        var isResizingContainer = this._getOption("resizeContainer");
+        if (!isResizingContainer) {
+          return;
+        }
+        var size = this._getContainerSize();
+        if (size) {
+          this._setContainerMeasure(size.width, true);
+          this._setContainerMeasure(size.height, false);
+        }
+      };
+      proto._getContainerSize = noop2;
+      proto._setContainerMeasure = function(measure, isWidth) {
+        if (measure === void 0) {
+          return;
+        }
+        var elemSize = this.size;
+        if (elemSize.isBorderBox) {
+          measure += isWidth ? elemSize.paddingLeft + elemSize.paddingRight + elemSize.borderLeftWidth + elemSize.borderRightWidth : elemSize.paddingBottom + elemSize.paddingTop + elemSize.borderTopWidth + elemSize.borderBottomWidth;
+        }
+        measure = Math.max(measure, 0);
+        this.element.style[isWidth ? "width" : "height"] = measure + "px";
+      };
+      proto._emitCompleteOnItems = function(eventName, items) {
+        var _this = this;
+        function onComplete() {
+          _this.dispatchEvent(eventName + "Complete", null, [items]);
+        }
+        var count = items.length;
+        if (!items || !count) {
+          onComplete();
+          return;
+        }
+        var doneCount = 0;
+        function tick() {
+          doneCount++;
+          if (doneCount == count) {
+            onComplete();
+          }
+        }
+        items.forEach(function(item2) {
+          item2.once(eventName, tick);
+        });
+      };
+      proto.dispatchEvent = function(type, event2, args) {
+        var emitArgs = event2 ? [event2].concat(args) : args;
+        this.emitEvent(type, emitArgs);
+        if (jQuery) {
+          this.$element = this.$element || jQuery(this.element);
+          if (event2) {
+            var $event = jQuery.Event(event2);
+            $event.type = type;
+            this.$element.trigger($event, args);
+          } else {
+            this.$element.trigger(type, args);
+          }
+        }
+      };
+      proto.ignore = function(elem) {
+        var item2 = this.getItem(elem);
+        if (item2) {
+          item2.isIgnored = true;
+        }
+      };
+      proto.unignore = function(elem) {
+        var item2 = this.getItem(elem);
+        if (item2) {
+          delete item2.isIgnored;
+        }
+      };
+      proto.stamp = function(elems) {
+        elems = this._find(elems);
+        if (!elems) {
+          return;
+        }
+        this.stamps = this.stamps.concat(elems);
+        elems.forEach(this.ignore, this);
+      };
+      proto.unstamp = function(elems) {
+        elems = this._find(elems);
+        if (!elems) {
+          return;
+        }
+        elems.forEach(function(elem) {
+          utils2.removeFrom(this.stamps, elem);
+          this.unignore(elem);
+        }, this);
+      };
+      proto._find = function(elems) {
+        if (!elems) {
+          return;
+        }
+        if (typeof elems == "string") {
+          elems = this.element.querySelectorAll(elems);
+        }
+        elems = utils2.makeArray(elems);
+        return elems;
+      };
+      proto._manageStamps = function() {
+        if (!this.stamps || !this.stamps.length) {
+          return;
+        }
+        this._getBoundingRect();
+        this.stamps.forEach(this._manageStamp, this);
+      };
+      proto._getBoundingRect = function() {
+        var boundingRect = this.element.getBoundingClientRect();
+        var size = this.size;
+        this._boundingRect = {
+          left: boundingRect.left + size.paddingLeft + size.borderLeftWidth,
+          top: boundingRect.top + size.paddingTop + size.borderTopWidth,
+          right: boundingRect.right - (size.paddingRight + size.borderRightWidth),
+          bottom: boundingRect.bottom - (size.paddingBottom + size.borderBottomWidth)
+        };
+      };
+      proto._manageStamp = noop2;
+      proto._getElementOffset = function(elem) {
+        var boundingRect = elem.getBoundingClientRect();
+        var thisRect = this._boundingRect;
+        var size = getSize2(elem);
+        var offset = {
+          left: boundingRect.left - thisRect.left - size.marginLeft,
+          top: boundingRect.top - thisRect.top - size.marginTop,
+          right: thisRect.right - boundingRect.right - size.marginRight,
+          bottom: thisRect.bottom - boundingRect.bottom - size.marginBottom
+        };
+        return offset;
+      };
+      proto.handleEvent = utils2.handleEvent;
+      proto.bindResize = function() {
+        window2.addEventListener("resize", this);
+        this.isResizeBound = true;
+      };
+      proto.unbindResize = function() {
+        window2.removeEventListener("resize", this);
+        this.isResizeBound = false;
+      };
+      proto.onresize = function() {
+        this.resize();
+      };
+      utils2.debounceMethod(Outlayer, "onresize", 100);
+      proto.resize = function() {
+        if (!this.isResizeBound || !this.needsResizeLayout()) {
+          return;
+        }
+        this.layout();
+      };
+      proto.needsResizeLayout = function() {
+        var size = getSize2(this.element);
+        var hasSizes = this.size && size;
+        return hasSizes && size.innerWidth !== this.size.innerWidth;
+      };
+      proto.addItems = function(elems) {
+        var items = this._itemize(elems);
+        if (items.length) {
+          this.items = this.items.concat(items);
+        }
+        return items;
+      };
+      proto.appended = function(elems) {
+        var items = this.addItems(elems);
+        if (!items.length) {
+          return;
+        }
+        this.layoutItems(items, true);
+        this.reveal(items);
+      };
+      proto.prepended = function(elems) {
+        var items = this._itemize(elems);
+        if (!items.length) {
+          return;
+        }
+        var previousItems = this.items.slice(0);
+        this.items = items.concat(previousItems);
+        this._resetLayout();
+        this._manageStamps();
+        this.layoutItems(items, true);
+        this.reveal(items);
+        this.layoutItems(previousItems);
+      };
+      proto.reveal = function(items) {
+        this._emitCompleteOnItems("reveal", items);
+        if (!items || !items.length) {
+          return;
+        }
+        var stagger = this.updateStagger();
+        items.forEach(function(item2, i) {
+          item2.stagger(i * stagger);
+          item2.reveal();
+        });
+      };
+      proto.hide = function(items) {
+        this._emitCompleteOnItems("hide", items);
+        if (!items || !items.length) {
+          return;
+        }
+        var stagger = this.updateStagger();
+        items.forEach(function(item2, i) {
+          item2.stagger(i * stagger);
+          item2.hide();
+        });
+      };
+      proto.revealItemElements = function(elems) {
+        var items = this.getItems(elems);
+        this.reveal(items);
+      };
+      proto.hideItemElements = function(elems) {
+        var items = this.getItems(elems);
+        this.hide(items);
+      };
+      proto.getItem = function(elem) {
+        for (var i = 0; i < this.items.length; i++) {
+          var item2 = this.items[i];
+          if (item2.element == elem) {
+            return item2;
+          }
+        }
+      };
+      proto.getItems = function(elems) {
+        elems = utils2.makeArray(elems);
+        var items = [];
+        elems.forEach(function(elem) {
+          var item2 = this.getItem(elem);
+          if (item2) {
+            items.push(item2);
+          }
+        }, this);
+        return items;
+      };
+      proto.remove = function(elems) {
+        var removeItems = this.getItems(elems);
+        this._emitCompleteOnItems("remove", removeItems);
+        if (!removeItems || !removeItems.length) {
+          return;
+        }
+        removeItems.forEach(function(item2) {
+          item2.remove();
+          utils2.removeFrom(this.items, item2);
+        }, this);
+      };
+      proto.destroy = function() {
+        var style = this.element.style;
+        style.height = "";
+        style.position = "";
+        style.width = "";
+        this.items.forEach(function(item2) {
+          item2.destroy();
+        });
+        this.unbindResize();
+        var id = this.element.outlayerGUID;
+        delete instances[id];
+        delete this.element.outlayerGUID;
+        if (jQuery) {
+          jQuery.removeData(this.element, this.constructor.namespace);
+        }
+      };
+      Outlayer.data = function(elem) {
+        elem = utils2.getQueryElement(elem);
+        var id = elem && elem.outlayerGUID;
+        return id && instances[id];
+      };
+      Outlayer.create = function(namespace, options) {
+        var Layout = subclass(Outlayer);
+        Layout.defaults = utils2.extend({}, Outlayer.defaults);
+        utils2.extend(Layout.defaults, options);
+        Layout.compatOptions = utils2.extend({}, Outlayer.compatOptions);
+        Layout.namespace = namespace;
+        Layout.data = Outlayer.data;
+        Layout.Item = subclass(Item2);
+        utils2.htmlInit(Layout, namespace);
+        if (jQuery && jQuery.bridget) {
+          jQuery.bridget(namespace, Layout);
+        }
+        return Layout;
+      };
+      function subclass(Parent) {
+        function SubClass() {
+          Parent.apply(this, arguments);
+        }
+        SubClass.prototype = Object.create(Parent.prototype);
+        SubClass.prototype.constructor = SubClass;
+        return SubClass;
+      }
+      var msUnits = {
+        ms: 1,
+        s: 1e3
+      };
+      function getMilliseconds(time) {
+        if (typeof time == "number") {
+          return time;
+        }
+        var matches = time.match(/(^\d*\.?\d*)(\w*)/);
+        var num = matches && matches[1];
+        var unit = matches && matches[2];
+        if (!num.length) {
+          return 0;
+        }
+        num = parseFloat(num);
+        var mult = msUnits[unit] || 1;
+        return num * mult;
+      }
+      Outlayer.Item = Item2;
+      return Outlayer;
+    });
+  })(outlayer);
+  return outlayer.exports;
+}
+/*!
+ * Masonry v4.2.2
+ * Cascading grid layout library
+ * https://masonry.desandro.com
+ * MIT License
+ * by David DeSandro
+ */
+var hasRequiredMasonry;
+function requireMasonry() {
+  if (hasRequiredMasonry) return masonry.exports;
+  hasRequiredMasonry = 1;
+  (function(module) {
+    (function(window2, factory) {
+      if (module.exports) {
+        module.exports = factory(
+          requireOutlayer(),
+          requireGetSize()
+        );
+      } else {
+        window2.Masonry = factory(
+          window2.Outlayer,
+          window2.getSize
+        );
+      }
+    })(window, function factory(Outlayer, getSize2) {
+      var Masonry2 = Outlayer.create("masonry");
+      Masonry2.compatOptions.fitWidth = "isFitWidth";
+      var proto = Masonry2.prototype;
+      proto._resetLayout = function() {
+        this.getSize();
+        this._getMeasurement("columnWidth", "outerWidth");
+        this._getMeasurement("gutter", "outerWidth");
+        this.measureColumns();
+        this.colYs = [];
+        for (var i = 0; i < this.cols; i++) {
+          this.colYs.push(0);
+        }
+        this.maxY = 0;
+        this.horizontalColIndex = 0;
+      };
+      proto.measureColumns = function() {
+        this.getContainerWidth();
+        if (!this.columnWidth) {
+          var firstItem = this.items[0];
+          var firstItemElem = firstItem && firstItem.element;
+          this.columnWidth = firstItemElem && getSize2(firstItemElem).outerWidth || // if first elem has no width, default to size of container
+          this.containerWidth;
+        }
+        var columnWidth = this.columnWidth += this.gutter;
+        var containerWidth = this.containerWidth + this.gutter;
+        var cols = containerWidth / columnWidth;
+        var excess = columnWidth - containerWidth % columnWidth;
+        var mathMethod = excess && excess < 1 ? "round" : "floor";
+        cols = Math[mathMethod](cols);
+        this.cols = Math.max(cols, 1);
+      };
+      proto.getContainerWidth = function() {
+        var isFitWidth = this._getOption("fitWidth");
+        var container = isFitWidth ? this.element.parentNode : this.element;
+        var size = getSize2(container);
+        this.containerWidth = size && size.innerWidth;
+      };
+      proto._getItemLayoutPosition = function(item2) {
+        item2.getSize();
+        var remainder = item2.size.outerWidth % this.columnWidth;
+        var mathMethod = remainder && remainder < 1 ? "round" : "ceil";
+        var colSpan = Math[mathMethod](item2.size.outerWidth / this.columnWidth);
+        colSpan = Math.min(colSpan, this.cols);
+        var colPosMethod = this.options.horizontalOrder ? "_getHorizontalColPosition" : "_getTopColPosition";
+        var colPosition = this[colPosMethod](colSpan, item2);
+        var position = {
+          x: this.columnWidth * colPosition.col,
+          y: colPosition.y
+        };
+        var setHeight = colPosition.y + item2.size.outerHeight;
+        var setMax = colSpan + colPosition.col;
+        for (var i = colPosition.col; i < setMax; i++) {
+          this.colYs[i] = setHeight;
+        }
+        return position;
+      };
+      proto._getTopColPosition = function(colSpan) {
+        var colGroup = this._getTopColGroup(colSpan);
+        var minimumY = Math.min.apply(Math, colGroup);
+        return {
+          col: colGroup.indexOf(minimumY),
+          y: minimumY
+        };
+      };
+      proto._getTopColGroup = function(colSpan) {
+        if (colSpan < 2) {
+          return this.colYs;
+        }
+        var colGroup = [];
+        var groupCount = this.cols + 1 - colSpan;
+        for (var i = 0; i < groupCount; i++) {
+          colGroup[i] = this._getColGroupY(i, colSpan);
+        }
+        return colGroup;
+      };
+      proto._getColGroupY = function(col, colSpan) {
+        if (colSpan < 2) {
+          return this.colYs[col];
+        }
+        var groupColYs = this.colYs.slice(col, col + colSpan);
+        return Math.max.apply(Math, groupColYs);
+      };
+      proto._getHorizontalColPosition = function(colSpan, item2) {
+        var col = this.horizontalColIndex % this.cols;
+        var isOver = colSpan > 1 && col + colSpan > this.cols;
+        col = isOver ? 0 : col;
+        var hasSize = item2.size.outerWidth && item2.size.outerHeight;
+        this.horizontalColIndex = hasSize ? col + colSpan : this.horizontalColIndex;
+        return {
+          col,
+          y: this._getColGroupY(col, colSpan)
+        };
+      };
+      proto._manageStamp = function(stamp) {
+        var stampSize = getSize2(stamp);
+        var offset = this._getElementOffset(stamp);
+        var isOriginLeft = this._getOption("originLeft");
+        var firstX = isOriginLeft ? offset.left : offset.right;
+        var lastX = firstX + stampSize.outerWidth;
+        var firstCol = Math.floor(firstX / this.columnWidth);
+        firstCol = Math.max(0, firstCol);
+        var lastCol = Math.floor(lastX / this.columnWidth);
+        lastCol -= lastX % this.columnWidth ? 0 : 1;
+        lastCol = Math.min(this.cols - 1, lastCol);
+        var isOriginTop = this._getOption("originTop");
+        var stampMaxY = (isOriginTop ? offset.top : offset.bottom) + stampSize.outerHeight;
+        for (var i = firstCol; i <= lastCol; i++) {
+          this.colYs[i] = Math.max(stampMaxY, this.colYs[i]);
+        }
+      };
+      proto._getContainerSize = function() {
+        this.maxY = Math.max.apply(Math, this.colYs);
+        var size = {
+          height: this.maxY
+        };
+        if (this._getOption("fitWidth")) {
+          size.width = this._getContainerFitWidth();
+        }
+        return size;
+      };
+      proto._getContainerFitWidth = function() {
+        var unusedCols = 0;
+        var i = this.cols;
+        while (--i) {
+          if (this.colYs[i] !== 0) {
+            break;
+          }
+          unusedCols++;
+        }
+        return (this.cols - unusedCols) * this.columnWidth - this.gutter;
+      };
+      proto.needsResizeLayout = function() {
+        var previousWidth = this.containerWidth;
+        this.getContainerWidth();
+        return previousWidth != this.containerWidth;
+      };
+      return Masonry2;
+    });
+  })(masonry);
+  return masonry.exports;
+}
+var masonryExports = requireMasonry();
+const Masonry = /* @__PURE__ */ getDefaultExportFromCjs(masonryExports);
+function cubic_out(t) {
+  const f = t - 1;
+  return f * f * f + 1;
+}
+function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
+  const style = getComputedStyle(node);
+  const opacity = +style.opacity;
+  const primary_property = axis === "y" ? "height" : "width";
+  const primary_property_value = parseFloat(style[primary_property]);
+  const secondary_properties = axis === "y" ? ["top", "bottom"] : ["left", "right"];
+  const capitalized_secondary_properties = secondary_properties.map(
+    (e) => (
+      /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
+      `${e[0].toUpperCase()}${e.slice(1)}`
+    )
+  );
+  const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
+  const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
+  const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
+  const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
+  const border_width_start_value = parseFloat(
+    style[`border${capitalized_secondary_properties[0]}Width`]
+  );
+  const border_width_end_value = parseFloat(
+    style[`border${capitalized_secondary_properties[1]}Width`]
+  );
+  return {
+    delay,
+    duration,
+    easing,
+    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
+  };
+}
+const actorStores = /* @__PURE__ */ new Map();
+function getActorStore(actorId, actorName) {
+  let initialState = { name: actorName };
+  if (!actorStores.has(actorId)) {
+    actorStores.set(actorId, writable(initialState));
+  }
+  return actorStores.get(actorId);
 }
 function localize(key) {
   return game.i18n.localize(key);
@@ -3473,163 +4662,531 @@ function openFilePicker(document2) {
     }).render(true);
   });
 }
-var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
-var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="config-columns"><div><h1 class="no-margin"> </h1></div> <input id="player-name" type="text"></div> <div class="config-columns"><h1 class="no-margin"> </h1> <div class="colorpicker"><input id="player-color" type="color" aria-label="Player color" style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; cursor: pointer;"></div></div> <div class="config-columns"><div><h1 class="no-margin"> </h1></div> <input id="player-pronoun" type="text"></div></div></div></div> <div class="main-character-portrait"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><img role="none" alt="User Avatar" style="cursor: pointer;"> <div><h3> </h3></div></div></div> <div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><img alt="Main Character Portrait"> <div><h3>Main Character Name</h3></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="config-columns"><label for="main-character"> </label> <select id="main-character"><option>None</option><!></select></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><button type="button"> </button></div></div></div>`, 1);
-function UserSettings($$anchor, $$props) {
-  push($$props, false);
-  const mainCharacterImage = mutable_state();
-  let app = prop($$props, "app", 12);
-  let config = prop($$props, "config", 8);
-  let playerName = mutable_state("");
-  let playerAvatar = mutable_state("");
-  let playerColor = mutable_state("#ffffff");
-  let playerPronoun = mutable_state("");
-  let mainCharacter = mutable_state("");
-  let characterOptions = mutable_state([]);
-  let user = null;
-  onMount(() => {
-    const userId = app().id.split(".")[1];
-    user = game.users.find((u) => u.id === userId);
-    set(playerName, user.name || "fallback");
-    set(playerAvatar, user.avatar);
-    set(playerColor, user.color);
-    set(playerPronoun, user.getFlag("sr3e", "pronoun") || "");
-    set(mainCharacter, user.getFlag("sr3e", "mainCharacter") || "");
-    set(characterOptions, game.actors.filter((actor) => actor.testUserPermission(user, "OBSERVER")).map((actor) => ({ id: actor.id, name: actor.name })));
+function toggleDetails(_, isDetailsOpen, actor, actorStore) {
+  var _a, _b, _c, _d;
+  set(isDetailsOpen, !get$1(isDetailsOpen));
+  (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+    _a,
+    {
+      "system.profile.isDetailsOpen": get$1(isDetailsOpen)
+    },
+    { render: false }
+  );
+  (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({
+    ...store,
+    isDetailsOpen: get$1(isDetailsOpen)
+  }));
+}
+function handleFilePicker(__1, actor) {
+  openFilePicker(actor());
+}
+var root_1$1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
+var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+function Dossier($$anchor, $$props) {
+  var _a, _b, _c, _d;
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actorStore = /* @__PURE__ */ derived(() => {
+    var _a2, _b2;
+    return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
   });
-  async function saveSettings() {
-    if (app().element) {
-      app(app().element.style.display = "none", true);
-    }
-    await game.user.update({
-      name: get$1(playerName),
-      avatar: get$1(playerAvatar),
-      color: get$1(playerColor)
+  let fieldName = state(proxy(((_a = actor()) == null ? void 0 : _a.name) ?? ""));
+  let isDetailsOpen = state(proxy(((_d = (_c = (_b = actor()) == null ? void 0 : _b.system) == null ? void 0 : _c.profile) == null ? void 0 : _d.isDetailsOpen) ?? false));
+  user_effect(() => {
+    if (!get$1(actorStore)) return;
+    const unsubscribe = get$1(actorStore).subscribe((store) => {
+      if ((store == null ? void 0 : store.name) !== void 0) set(fieldName, proxy(store.name));
+      if ((store == null ? void 0 : store.isDetailsOpen) !== void 0) set(isDetailsOpen, proxy(store.isDetailsOpen));
     });
-    await game.user.setFlag("sr3e", "pronoun", get$1(playerPronoun));
-    await game.user.setFlag("sr3e", "mainCharacter", get$1(mainCharacter));
-    ui.notifications.info("User settings updated!");
-    if (app()._onSubmit) {
-      await app()._onSubmit(new Event("submit"));
+    return () => unsubscribe();
+  });
+  function saveActorName(event2) {
+    var _a2, _b2, _c2, _d2;
+    const newName = event2.target.value;
+    (_b2 = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, { name: newName }, { render: true });
+    (_d2 = (_c2 = get$1(actorStore)) == null ? void 0 : _c2.update) == null ? void 0 : _d2.call(_c2, (store) => ({ ...store, name: newName }));
+  }
+  function multiply(value, factor) {
+    return (value * factor).toFixed(2);
+  }
+  function cubicInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function updateStoreName(newName) {
+    var _a2, _b2;
+    set(fieldName, proxy(newName));
+    (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
+  }
+  var div = root$6();
+  var node = child(div);
+  {
+    var consequent = ($$anchor2) => {
+      var div_1 = root_1$1();
+      append($$anchor2, div_1);
+    };
+    var alternate = ($$anchor2) => {
+      var div_2 = root_2();
+      var img = child(div_2);
+      img.__click = [handleFilePicker, actor];
+      template_effect(() => {
+        set_attribute(img, "src", actor().img);
+        set_attribute(img, "alt", actor().name);
+        set_attribute(img, "title", actor().name);
+      });
+      append($$anchor2, div_2);
+    };
+    if_block(node, ($$render) => {
+      if (get$1(isDetailsOpen)) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  var div_3 = sibling(node, 2);
+  var div_4 = child(div_3);
+  div_4.__click = [
+    toggleDetails,
+    isDetailsOpen,
+    actor,
+    actorStore
+  ];
+  var text2 = sibling(child(div_4));
+  var node_1 = sibling(div_4, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div_5 = root_3();
+      var div_6 = child(div_5);
+      var input = child(div_6);
+      input.__input = [on_input, updateStoreName];
+      var div_7 = sibling(div_6, 2);
+      var h3 = child(div_7);
+      var text_1 = child(h3);
+      var span = sibling(text_1);
+      var text_2 = child(span);
+      var div_8 = sibling(div_7, 2);
+      var h3_1 = child(div_8);
+      var text_3 = child(h3_1);
+      var div_9 = sibling(div_8, 2);
+      var h3_2 = child(div_9);
+      var text_4 = child(h3_2);
+      var div_10 = sibling(div_9, 2);
+      var h3_3 = child(div_10);
+      var text_5 = child(h3_3);
+      var a = sibling(div_10, 2);
+      var h3_4 = child(a);
+      var text_6 = child(h3_4);
+      template_effect(
+        ($0, $1, $2, $3, $4, $5, $6) => {
+          var _a2, _b2, _c2, _d2, _e, _f, _g, _h;
+          set_value(input, get$1(fieldName));
+          set_text(text_1, `${$0 ?? ""}: `);
+          set_text(text_2, ((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
+          set_text(text_3, `${$1 ?? ""}: ${((_d2 = (_c2 = actor().system) == null ? void 0 : _c2.profile) == null ? void 0 : _d2.age) ?? ""}`);
+          set_text(text_4, `${$2 ?? ""}: ${((_f = (_e = actor().system) == null ? void 0 : _e.profile) == null ? void 0 : _f.height) ?? ""} cm (${$3 ?? ""} feet)`);
+          set_text(text_5, `${$4 ?? ""}: ${((_h = (_g = actor().system) == null ? void 0 : _g.profile) == null ? void 0 : _h.weight) ?? ""} kg (${$5 ?? ""} stones)`);
+          set_text(text_6, $6);
+        },
+        [
+          () => localize(config().traits.metahuman),
+          () => localize(config().traits.age),
+          () => localize(config().traits.height),
+          () => {
+            var _a2, _b2;
+            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
+          },
+          () => localize(config().traits.weight),
+          () => {
+            var _a2, _b2;
+            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
+          },
+          () => localize(config().sheet.viewbackground)
+        ]
+      );
+      event("blur", input, saveActorName);
+      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
+      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      append($$anchor2, div_5);
+    };
+    if_block(node_1, ($$render) => {
+      if (get$1(isDetailsOpen)) $$render(consequent_1);
+    });
+  }
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "input"]);
+var root$5 = /* @__PURE__ */ template(`<div class="attributes"><h1> </h1> <h2> </h2> <h3> </h3> <h4> </h4> <p> </p> <span> </span></div>`);
+function Attributes($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  var div = root$5();
+  var h1 = child(div);
+  var text2 = child(h1);
+  var h2 = sibling(h1, 2);
+  var text_1 = child(h2);
+  var h3 = sibling(h2, 2);
+  var text_2 = child(h3);
+  var h4 = sibling(h3, 2);
+  var text_3 = child(h4);
+  var p = sibling(h4, 2);
+  var text_4 = child(p);
+  var span = sibling(p, 2);
+  var text_5 = child(span);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, $0);
+      set_text(text_2, $0);
+      set_text(text_3, $0);
+      set_text(text_4, $0);
+      set_text(text_5, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+    },
+    [
+      () => localize(config().attributes.attributes)
+    ]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root$4 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <span> </span></div>`);
+function Skills($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  var div = root$4();
+  var h1 = child(div);
+  var text2 = child(h1);
+  var span = sibling(h1, 2);
+  var text_1 = child(span);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+    },
+    [() => localize(config().skills.skills)]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root$3 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
+function Health($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  var div = root$3();
+  var h1 = child(div);
+  var text2 = child(h1);
+  var span = sibling(h1, 2);
+  var text_1 = child(span);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+    },
+    [() => localize(config().health.health)]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root$2 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
+function Inventory($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  var div = root$2();
+  var h1 = child(div);
+  var text2 = child(h1);
+  var span = sibling(h1, 2);
+  var text_1 = child(span);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+    },
+    [
+      () => localize(config().inventory.inventory)
+    ]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root_1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+function CharacterSheetApp($$anchor, $$props) {
+  push($$props, true);
+  const cards = proxy([
+    {
+      id: 0,
+      comp: Dossier,
+      props: { actor: $$props.actor, config: $$props.config }
+    },
+    {
+      id: 1,
+      comp: Attributes,
+      props: { actor: $$props.actor, config: $$props.config }
+    },
+    {
+      id: 2,
+      comp: Skills,
+      props: { actor: $$props.actor, config: $$props.config }
+    },
+    {
+      id: 3,
+      comp: Health,
+      props: { actor: $$props.actor, config: $$props.config }
+    },
+    {
+      id: 4,
+      comp: Inventory,
+      props: { actor: $$props.actor, config: $$props.config }
+    },
+    { id: 5, txt: "Testing Databind" },
+    { id: 6, txt: "Testing Databind" },
+    { id: 7, txt: "Testing Databind" },
+    { id: 8, txt: "Testing Databind" },
+    { id: 9, txt: "Testing Databind" }
+  ]);
+  let container = null;
+  let mason = null;
+  let resizeObserver = null;
+  let formWidth = state(0);
+  let formHeight = state(0);
+  const maxWidth = 1400;
+  const lowerLimit = 0.5 * maxWidth;
+  const middleLimit = 0.66 * maxWidth;
+  let layoutState = /* @__PURE__ */ derived(() => () => {
+    if (get$1(formWidth) > middleLimit) return "wide";
+    if (get$1(formWidth) > lowerLimit) return "medium";
+    return "small";
+  });
+  function calcAndApplyColumnWidths() {
+    if (!container || !$$props.form) return;
+    const style = getComputedStyle($$props.form);
+    const parentPadding = parseFloat(style.paddingLeft) || 0;
+    const parentWidth = $$props.form.offsetWidth - 2 * parentPadding;
+    const gutterEl = container.querySelector(".layout-gutter-sizer");
+    const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
+    const firstItem = container.querySelector(".sheet-component");
+    const minItemWidthPx = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || 220 : 220;
+    let columnCount = Math.floor((parentWidth + gutterPx) / (minItemWidthPx + gutterPx));
+    columnCount = Math.max(columnCount, 1);
+    const totalGutterWidthPx = gutterPx * (columnCount - 1);
+    const itemWidthPx = (parentWidth - totalGutterWidthPx) / columnCount;
+    const adjustedItemWidthPx = Math.floor(itemWidthPx);
+    container.querySelectorAll(".sheet-component").forEach((item2) => {
+      item2.style.width = `${adjustedItemWidthPx}px`;
+    });
+    const sizer = container.querySelector(".layout-grid-sizer");
+    if (sizer) sizer.style.width = `${adjustedItemWidthPx}px`;
+    const twoSpan = container.querySelectorAll(".two-span-selectable");
+    const threeSpan = container.querySelectorAll(".three-span-selectable");
+    if (get$1(layoutState) === "small") {
+      twoSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
+      threeSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
+    } else if (get$1(layoutState) === "medium") {
+      twoSpan.forEach((c) => c.style.width = `calc(${2 * adjustedItemWidthPx}px + ${gutterPx}px)`);
+      threeSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
+    } else if (get$1(layoutState) === "wide") {
+      twoSpan.forEach((c) => c.style.width = `calc(${2 * adjustedItemWidthPx}px + ${gutterPx}px)`);
+      threeSpan.forEach((c) => c.style.width = `calc(${3 * adjustedItemWidthPx}px + ${2 * gutterPx}px)`);
     }
-    app().close();
   }
-  function openFilePicker2() {
-    new FilePicker({
-      type: "image",
-      callback: (path) => set(playerAvatar, path)
-    }).render(true);
+  user_effect(() => {
+    calcAndApplyColumnWidths();
+    mason = new Masonry(container, {
+      itemSelector: ".sheet-component",
+      columnWidth: ".layout-grid-sizer",
+      gutter: ".layout-gutter-sizer",
+      percentPosition: true
+    });
+    mason.reloadItems();
+    mason.layout();
+    resizeObserver = new ResizeObserver(() => {
+      calcAndApplyColumnWidths();
+      mason.reloadItems();
+      mason.layout();
+      set(formWidth, proxy($$props.form.offsetWidth));
+      set(formHeight, proxy($$props.form.offsetHeight));
+    });
+    resizeObserver.observe($$props.form);
+    const itemObservers = [];
+    container.querySelectorAll(".sheet-component").forEach((item2) => {
+      const obs = new ResizeObserver(() => {
+        mason.reloadItems();
+        mason.layout();
+      });
+      obs.observe(item2);
+      itemObservers.push(obs);
+    });
+    return () => {
+      resizeObserver == null ? void 0 : resizeObserver.disconnect();
+      itemObservers.forEach((obs) => obs.disconnect());
+      mason == null ? void 0 : mason.destroy();
+      mason = null;
+      resizeObserver = null;
+    };
+  });
+  user_effect(() => {
+    if (mason && container && container.isConnected) {
+      calcAndApplyColumnWidths();
+      mason.reloadItems();
+      mason.layout();
+    }
+    get$1(formWidth);
+    get$1(layoutState);
+  });
+  var div = root$1();
+  var node = sibling(child(div), 4);
+  each(node, 17, () => cards, (c) => c.id, ($$anchor2, c) => {
+    var div_1 = root_1();
+    var div_2 = child(div_1);
+    var div_3 = sibling(child(div_2), 2);
+    var node_1 = child(div_3);
+    {
+      var consequent = ($$anchor3) => {
+        var fragment = comment();
+        var node_2 = first_child(fragment);
+        key_block(node_2, () => get$1(c).comp, ($$anchor4) => {
+          var fragment_1 = comment();
+          var node_3 = first_child(fragment_1);
+          component(node_3, () => get$1(c).comp, ($$anchor5, $$component) => {
+            $$component($$anchor5, spread_props(() => get$1(c).props));
+          });
+          append($$anchor4, fragment_1);
+        });
+        append($$anchor3, fragment);
+      };
+      var alternate = ($$anchor3) => {
+        var text$1 = text();
+        template_effect(() => set_text(text$1, get$1(c).txt));
+        append($$anchor3, text$1);
+      };
+      if_block(node_1, ($$render) => {
+        if (get$1(c).comp) $$render(consequent);
+        else $$render(alternate, false);
+      });
+    }
+    template_effect(() => {
+      toggle_class(div_1, "two-span-selectable", get$1(c).span === 2);
+      toggle_class(div_1, "three-span-selectable", get$1(c).span === 3);
+    });
+    append($$anchor2, div_1);
+  });
+  bind_this(div, ($$value) => container = $$value, () => container);
+  append($$anchor, div);
+  pop();
+}
+enable_legacy_mode_flag();
+var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+function NeonName($$anchor, $$props) {
+  push($$props, false);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
+  const name = mutable_state();
+  let actor = prop($$props, "actor", 8);
+  let malfunctioningIndexes = [];
+  let neonHTML = mutable_state();
+  const actorStore = getActorStore(actor().id, actor().name);
+  const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  function getNeonHtml(name2) {
+    malfunctioningIndexes = [];
+    if (name2.length < 4) {
+      malfunctioningIndexes.push(randomInRange(0, name2.length - 1));
+    } else {
+      const malfunctionInNplaces = name2.length % 4;
+      for (let i = 0; i < malfunctionInNplaces; i++) {
+        let index;
+        do {
+          index = randomInRange(0, name2.length - 1);
+        } while (malfunctioningIndexes.includes(index));
+        malfunctioningIndexes.push(index);
+      }
+    }
+    return [...name2].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
   }
-  legacy_pre_effect(() => get$1(mainCharacter), () => {
-    var _a;
-    set(mainCharacterImage, get$1(mainCharacter) ? ((_a = game.actors.find((actor) => actor.id === get$1(mainCharacter))) == null ? void 0 : _a.img) || "defaultCharacter.jpg" : "defaultCharacter.jpg");
+  legacy_pre_effect(() => $actorStore(), () => {
+    set(name, $actorStore().name);
+  });
+  legacy_pre_effect(() => get$1(name), () => {
+    set(neonHTML, getNeonHtml(get$1(name)));
   });
   legacy_pre_effect_reset();
   init();
-  var fragment = root$4();
-  var div = first_child(fragment);
-  var div_1 = child(div);
-  var div_2 = sibling(child(div_1), 2);
-  var div_3 = child(div_2);
-  var div_4 = child(div_3);
-  var h1 = child(div_4);
-  var text = child(h1);
-  var input = sibling(div_4, 2);
-  var div_5 = sibling(div_3, 2);
-  var h1_1 = child(div_5);
-  var text_1 = child(h1_1);
-  var div_6 = sibling(h1_1, 2);
-  var input_1 = child(div_6);
-  var div_7 = sibling(div_5, 2);
-  var div_8 = child(div_7);
-  var h1_2 = child(div_8);
-  var text_2 = child(h1_2);
-  var input_2 = sibling(div_8, 2);
-  var div_9 = sibling(div, 2);
-  var div_10 = child(div_9);
-  var div_11 = sibling(child(div_10), 2);
-  var img = child(div_11);
-  var div_12 = sibling(img, 2);
-  var h3 = child(div_12);
-  var text_3 = child(h3);
-  var div_13 = sibling(div_10, 2);
-  var div_14 = sibling(child(div_13), 2);
-  var img_1 = child(div_14);
-  var div_15 = sibling(div_9, 2);
-  var div_16 = child(div_15);
-  var div_17 = sibling(child(div_16), 2);
-  var div_18 = child(div_17);
-  var label = child(div_18);
-  var text_4 = child(label);
-  var select = sibling(label, 2);
-  template_effect(() => {
-    get$1(mainCharacter);
-    invalidate_inner_signals(() => {
-      config();
-      get$1(characterOptions);
-    });
-  });
-  var option = child(select);
-  option.value = null == (option.__value = "") ? "" : "";
-  var node = sibling(option);
-  each(node, 1, () => get$1(characterOptions), index, ($$anchor2, $$item) => {
-    let id = () => get$1($$item).id;
-    let name = () => get$1($$item).name;
-    var option_1 = root_1$2();
-    var option_1_value = {};
-    var text_5 = child(option_1);
-    template_effect(() => {
-      if (option_1_value !== (option_1_value = id())) {
-        option_1.value = null == (option_1.__value = id()) ? "" : id();
-      }
-      set_text(text_5, name());
-    });
-    append($$anchor2, option_1);
-  });
-  var div_19 = sibling(div_15, 2);
-  var div_20 = child(div_19);
-  var div_21 = sibling(child(div_20), 2);
-  var button = child(div_21);
-  var text_6 = child(button);
-  template_effect(
-    ($0, $1, $2, $3, $4, $5, $6) => {
-      set_text(text, $0);
-      set_attribute(input, "aria-label", $1);
-      set_text(text_1, $2);
-      set_attribute(div_6, "style", `background-color: ${get$1(playerColor) ?? ""}`);
-      set_text(text_2, $3);
-      set_attribute(input_2, "placeholder", $3);
-      set_attribute(input_2, "aria-label", $3);
-      set_attribute(img, "src", get$1(playerAvatar));
-      set_text(text_3, get$1(playerName));
-      set_attribute(img_1, "src", get$1(mainCharacterImage));
-      set_text(text_4, $4);
-      set_attribute(select, "aria-label", $4);
-      set_attribute(button, "aria-label", $5);
-      set_text(text_6, $6);
-    },
-    [
-      () => localize(config().userconfig.setPlayerName),
-      () => localize(config().userconfig.playerName),
-      () => localize(config().userconfig.choosePlayerColor),
-      () => localize(config().userconfig.playersPreferredPronoun),
-      () => localize(config().userconfig.selectMainCharacter),
-      () => localize(config().userconfig.saveUserSettings),
-      () => localize(config().userconfig.saveSettings)
-    ],
-    derived_safe_equal
-  );
-  bind_value(input, () => get$1(playerName), ($$value) => set(playerName, $$value));
-  bind_value(input_1, () => get$1(playerColor), ($$value) => set(playerColor, $$value));
-  bind_value(input_2, () => get$1(playerPronoun), ($$value) => set(playerPronoun, $$value));
-  event("click", img, openFilePicker2);
-  bind_select_value(select, () => get$1(mainCharacter), ($$value) => set(mainCharacter, $$value));
-  event("click", button, saveSettings);
-  append($$anchor, fragment);
+  var div = root();
+  var node = child(div);
+  html(node, () => get$1(neonHTML));
+  append($$anchor, div);
   pop();
+  $$cleanup();
 }
+const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _app);
+    // Svelte component instance
+    __privateAdd(this, _neon);
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(result, windowContent) {
+    var _a;
+    windowContent.innerHTML = "";
+    const form = windowContent.parentNode;
+    __privateSet(this, _app, mount(CharacterSheetApp, {
+      target: windowContent,
+      props: {
+        actor: this.actor,
+        config: CONFIG.sr3e,
+        form
+        // for ResizeObserver/layout logic
+      }
+    }));
+    const header = form.querySelector("header.window-header");
+    let neonSlot = header == null ? void 0 : header.previousElementSibling;
+    if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
+      neonSlot = document.createElement("div");
+      neonSlot.classList.add("neon-name-position");
+      header.parentElement.insertBefore(neonSlot, header);
+      __privateSet(this, _neon, mount(NeonName, {
+        target: neonSlot,
+        props: { actor: this.actor }
+      }));
+    }
+    Log.success("Svelte mounted", this.constructor.name);
+    return windowContent;
+  }
+  async _tearDown() {
+    if (__privateGet(this, _app)) await unmount(__privateGet(this, _app));
+    if (__privateGet(this, _neon)) await unmount(__privateGet(this, _neon));
+    __privateSet(this, _app, __privateSet(this, _neon, null));
+    return super._tearDown();
+  }
+  _onSubmit() {
+    return false;
+  }
+};
+_app = new WeakMap();
+_neon = new WeakMap();
+// NeonName injection instance
+__publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
+  ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
+  id: "sr3e-character-sheet",
+  classes: ["sr3e", "sheet", "actor", "character"],
+  title: null,
+  template: null,
+  position: { width: 820, height: 820 },
+  window: {
+    resizable: true
+  },
+  tag: "form",
+  submitOnChange: true,
+  closeOnSubmit: false
+});
+let CharacterActorSheet = _CharacterActorSheet;
 const sr3e = {};
 sr3e.attributes = {
+  attributes: "sr3e.attributes.attributes",
   body: "sr3e.attributes.body",
   quickness: "sr3e.attributes.quickness",
   strength: "sr3e.attributes.strength",
@@ -3640,6 +5197,15 @@ sr3e.attributes = {
   initiative: "sr3e.attributes.initiative",
   modifiers: "sr3e.attributes.modifiers",
   limits: "sr3e.attributes.limits"
+};
+sr3e.health = {
+  health: "sr3e.health.health"
+};
+sr3e.skills = {
+  skills: "sr3e.skills.skills"
+};
+sr3e.inventory = {
+  inventory: "sr3e.inventory.inventory"
 };
 sr3e.common = {
   max: "sr3e.common.max",
@@ -3704,7 +5270,7 @@ const hooks = {
   closeMetahumanItemSheet: "closeMetahumanItemSheet",
   renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
-  renderChatMessage: "renderChatMessage",
+  renderChatMessageHTML: "renderChatMessageHTML",
   renderChatLog: "renderChatLog",
   createActor: "createActor",
   init: "init",
@@ -3716,1031 +5282,40 @@ const flags = {
     isDossierDetailsOpen: "isDossierDetailsOpen"
   }
 };
-function getResizeObserver(masonryInstance, gridElement, func = null) {
-  gridElement.masonryInstance = masonryInstance;
-  const resizeObserver = new ResizeObserver(() => {
-    if (func) {
-      func();
-    }
-    masonryInstance.layout();
-    masonryInstance.options.transitionDuration = "0.4s";
-  });
-  resizeObserver.observe(gridElement);
-  resizeObserver.masonryInstance = masonryInstance;
-  resizeObserver.masonryInstance.layout();
-  resizeObserver.masonryInstance.options.transitionDuration = "0";
-  return resizeObserver;
-}
-function observeMasonryResize(masonryResizeConfig, isMainGrid = false) {
-  const {
-    jQueryObject,
-    // The jQuery object representing the sheet
-    parentSelector,
-    childSelector,
-    gridSizerSelector,
-    gutterSizerSelector,
-    app
-  } = masonryResizeConfig;
-  const $grid = jQueryObject.find(parentSelector);
-  Log.info("Grid", observeMasonryResize.name, $grid);
-  masonryResizeConfig.grid = $grid;
-  const rawGrid = $grid[0];
-  if (!rawGrid) {
-    Log.warn("No matching grid found in jQuery object", observeMasonryResize.name);
-    return;
-  }
-  if (!rawGrid.masonryInstance) {
-    const masonryInstance = new Masonry(rawGrid, {
-      itemSelector: childSelector,
-      columnWidth: gridSizerSelector,
-      gutter: gutterSizerSelector,
-      fitWidth: true
-    });
-    rawGrid.masonryInstance = masonryInstance;
-    if (isMainGrid) {
-      masonryInstance.on("layoutComplete", function() {
-      });
-    }
-    let resizeHandler = () => {
-      adjustMasonryOnResize(masonryResizeConfig);
-    };
-    if (isMainGrid) {
-      resizeHandler = () => {
-        adjustMasonryOnResize(masonryResizeConfig);
-        layoutStateMachine(app, $grid);
-      };
-    }
-    masonryResizeConfig.observer = getResizeObserver(masonryInstance, rawGrid, resizeHandler);
-  }
-  rawGrid.masonryInstance.layout();
-  Log.success("Masonry Resize Observer Initialized", observeMasonryResize.name, masonryResizeConfig.observer);
-  return masonryResizeConfig.observer;
-}
-function adjustMasonryOnResize(masonryResizeConfig) {
-  const { grid, childSelector, gridSizerSelector, gutterSizerSelector } = masonryResizeConfig;
-  if (!grid || !grid.length) return;
-  const $gridItems = grid.find(childSelector);
-  const $gridSizer = grid.find(gridSizerSelector);
-  const $gutter = grid.find(gutterSizerSelector);
-  if (!$gridSizer.length || !$gridItems.length) return;
-  const rawGrid = grid[0];
-  const rawSizer = $gridSizer[0];
-  const rawGutter = $gutter[0];
-  const parentPadding = parseFloat(getComputedStyle(rawGrid.parentNode).paddingLeft) || 0;
-  const gridWidthPx = rawGrid.parentNode.offsetWidth - 2 * parentPadding;
-  const gutterPx = parseFloat(getComputedStyle(rawGutter).width);
-  const minItemWidthPx = parseFloat(getComputedStyle($gridItems[0]).minWidth);
-  let columnCount = Math.floor((gridWidthPx + gutterPx) / (minItemWidthPx + gutterPx));
-  columnCount = Math.max(columnCount, 1);
-  const totalGutterWidthPx = gutterPx * (columnCount - 1);
-  const itemWidthPx = (gridWidthPx - totalGutterWidthPx) / columnCount;
-  const adjustedItemWidthPx = Math.floor(itemWidthPx);
-  $gridItems.toArray().forEach((item) => {
-    item.style.width = `${adjustedItemWidthPx}px`;
-  });
-  rawSizer.style.width = `${adjustedItemWidthPx}px`;
-  if (rawGrid.masonryInstance) {
-    rawGrid.masonryInstance.layout();
-  }
-}
-function layoutStateMachine(app, $html) {
-  var _a;
-  const sheetWidth = ((_a = app.position) == null ? void 0 : _a.width) || 1400;
-  const maxWidth = 1400;
-  const lowerLimit = 0.5 * maxWidth;
-  const middleLimit = 0.66 * maxWidth;
-  let layoutState = "small";
-  if (sheetWidth > middleLimit) {
-    layoutState = "wide";
-  } else if (sheetWidth > lowerLimit) {
-    layoutState = "medium";
-  }
-  const columnWidthPercent = { small: 100, medium: 50, wide: 25 };
-  const columnWidth = columnWidthPercent[layoutState];
-  const rawHtml = $html[0];
-  rawHtml.style.setProperty("--column-width", `${columnWidth}%`);
-  const $twoSpan = $html.find(".two-span-selectable");
-  const $threeSpan = $html.find(".three-span-selectable");
-  const twoSpanArray = $twoSpan.toArray();
-  const threeSpanArray = $threeSpan.toArray();
-  switch (layoutState) {
-    case "small":
-      twoSpanArray.forEach((c) => c.style.width = `var(--column-width)`);
-      threeSpanArray.forEach((c) => c.style.width = `var(--column-width)`);
-      break;
-    case "medium":
-      twoSpanArray.forEach((c) => c.style.width = `calc(2 * var(--column-width) - 10px)`);
-      threeSpanArray.forEach((c) => c.style.width = `var(--column-width)`);
-      break;
-    case "wide":
-      twoSpanArray.forEach((c) => c.style.width = `calc(2 * var(--column-width) - 10px)`);
-      threeSpanArray.forEach((c) => c.style.width = `calc(3 * var(--column-width) - 20px)`);
-      break;
-  }
-}
-function initializeMasonryLayout(masonryResizeConfig) {
-  const actor = masonryResizeConfig.app.actor;
-  if (actor.mainLayoutResizeObserver) {
-    const rawGrid = actor.mainLayoutResizeObserver.masonryInstance.element;
-    if (rawGrid.masonryInstance) {
-      rawGrid.masonryInstance = null;
-    }
-    actor.mainLayoutResizeObserver.masonryInstance.destroy();
-    actor.mainLayoutResizeObserver.disconnect();
-    actor.mainLayoutResizeObserver = null;
-  }
-  actor.mainLayoutResizeObserver = observeMasonryResize(masonryResizeConfig, true);
-}
-function cubic_out(t) {
-  const f = t - 1;
-  return f * f * f + 1;
-}
-function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
-  const style = getComputedStyle(node);
-  const opacity = +style.opacity;
-  const primary_property = axis === "y" ? "height" : "width";
-  const primary_property_value = parseFloat(style[primary_property]);
-  const secondary_properties = axis === "y" ? ["top", "bottom"] : ["left", "right"];
-  const capitalized_secondary_properties = secondary_properties.map(
-    (e) => (
-      /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
-      `${e[0].toUpperCase()}${e.slice(1)}`
-    )
-  );
-  const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
-  const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
-  const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
-  const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
-  const border_width_start_value = parseFloat(
-    style[`border${capitalized_secondary_properties[0]}Width`]
-  );
-  const border_width_end_value = parseFloat(
-    style[`border${capitalized_secondary_properties[1]}Width`]
-  );
-  return {
-    delay,
-    duration,
-    easing,
-    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
-  };
-}
-const actorStores = /* @__PURE__ */ new Map();
-function getActorStore(actorId, actorName) {
-  let initialState = { name: actorName };
-  if (!actorStores.has(actorId)) {
-    actorStores.set(actorId, writable(initialState));
-  }
-  return actorStores.get(actorId);
-}
-var root_1$1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var root_3$1 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="dossier"><!> <details class="dossier-details"><summary class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </summary> <!></details></div>`);
-function Dossier($$anchor, $$props) {
-  push($$props, false);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
-  const isDetailsOpen = mutable_state();
-  const fieldName = mutable_state();
-  let actor = prop($$props, "actor", 24, () => ({}));
-  let config = prop($$props, "config", 24, () => ({}));
-  const actorStore = getActorStore(actor().id, actor().name);
-  onMount(() => {
-    set(isDetailsOpen, actor().system.profile.isDetailsOpen);
-    Log.inspect("Dossier actor", "SVELTE", actor());
-  });
-  function toggleDetails() {
-    actor().update(
-      {
-        "system.profile.isDetailsOpen": get$1(isDetailsOpen)
-      },
-      { render: false }
-    );
-    actor().mainLayoutResizeObserver.masonryInstance.layout();
-  }
-  const localize2 = (args) => game.i18n.localize(args);
-  function saveActorName(event2) {
-    const newName = event2.target.value;
-    actor().update({ name: newName }, { render: true });
-  }
-  function multiply(value, factor) {
-    return (value * factor).toFixed(2);
-  }
-  function cubicInOut(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
-  function updateStoreName(newName) {
-    actorStore.update((store) => {
-      store.name = newName;
-      return store;
-    });
-  }
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(isDetailsOpen, actor().system.profile.isDetailsOpen);
-  });
-  legacy_pre_effect(() => $actorStore(), () => {
-    set(fieldName, $actorStore().name);
-  });
-  legacy_pre_effect_reset();
-  init();
-  var div = root$3();
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var div_1 = root_1$1();
-      append($$anchor2, div_1);
-    };
-    var alternate = ($$anchor2) => {
-      var div_2 = root_2$1();
-      var img = child(div_2);
-      var event_handler = /* @__PURE__ */ derived(() => openFilePicker(document));
-      template_effect(() => {
-        set_attribute(img, "src", actor().img);
-        set_attribute(img, "alt", actor().name);
-        set_attribute(img, "title", actor().name);
-      });
-      event("click", img, function(...$$args) {
-        var _a;
-        (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-      });
-      append($$anchor2, div_2);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  var details = sibling(node, 2);
-  var summary = child(details);
-  var text = sibling(child(summary));
-  var node_1 = sibling(summary, 2);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var div_3 = root_3$1();
-      var div_4 = child(div_3);
-      var input = child(div_4);
-      var div_5 = sibling(div_4, 2);
-      var h3 = child(div_5);
-      var text_1 = child(h3);
-      var span = sibling(text_1);
-      var text_2 = child(span);
-      var div_6 = sibling(div_5, 2);
-      var h3_1 = child(div_6);
-      var text_3 = child(h3_1);
-      var div_7 = sibling(div_6, 2);
-      var h3_2 = child(div_7);
-      var text_4 = child(h3_2);
-      var div_8 = sibling(div_7, 2);
-      var h3_3 = child(div_8);
-      var text_5 = child(h3_3);
-      var a = sibling(div_8, 2);
-      var h3_4 = child(a);
-      var text_6 = child(h3_4);
-      template_effect(
-        ($0, $1, $2, $3, $4, $5, $6) => {
-          set_text(text_1, `${$0 ?? ""}: `);
-          set_text(text_2, actor().system.profile.metaHumanity);
-          set_text(text_3, `${$1 ?? ""}: ${actor().system.profile.age ?? ""}`);
-          set_text(text_4, `${$2 ?? ""}: ${actor().system.profile.height ?? ""} cm (${$3 ?? ""} feet)`);
-          set_text(text_5, `${$4 ?? ""}: ${actor().system.profile.weight ?? ""} kg (${$5 ?? ""} stones)`);
-          set_text(text_6, $6);
-        },
-        [
-          () => localize2(config().actor.character.metahuman),
-          () => localize2(config().actor.character.age),
-          () => localize2(config().actor.character.height),
-          () => multiply(actor().system.profile.height, 0.0328084),
-          () => localize2(config().actor.character.weight),
-          () => multiply(actor().system.profile.weight, 0.157473),
-          () => localize2(config().sheet.viewbackground)
-        ],
-        derived_safe_equal
-      );
-      bind_value(input, () => get$1(fieldName), ($$value) => set(fieldName, $$value));
-      event("blur", input, saveActorName);
-      event("input", input, (e) => updateStoreName(e.target.value));
-      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_3, () => slide, () => ({ duration: 400, easing: cubicInOut }));
-      transition(2, div_3, () => slide, () => ({ duration: 300, easing: cubicInOut }));
-      append($$anchor2, div_3);
-    };
-    if_block(node_1, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent_1);
-    });
-  }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize2(config().sheet.details)], derived_safe_equal);
-  bind_property("open", "toggle", details, ($$value) => set(isDetailsOpen, $$value), () => get$1(isDetailsOpen));
-  event("toggle", details, toggleDetails);
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component two-span-selectable"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div> <div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background">Testing Databind</div></div></div></div>`);
-function CharacterSheetApp($$anchor, $$props) {
-  push($$props, true);
-  let actor = $$props.app.actor;
-  onMount(() => {
-    const args = {
-      jQueryObject: $$props.jQueryObject,
-      parentSelector: ".window-content",
-      childSelector: ".sheet-component",
-      gridSizerSelector: ".layout-grid-sizer",
-      gutterSizerSelector: ".layout-gutter-sizer",
-      observer: actor.mainLayoutResizeObserver,
-      app: $$props.app
-    };
-    initializeMasonryLayout(args);
-    Log.success("Masonry layout initialized", "CharacterSheetApp.svelte");
-  });
-  var div = root$2();
-  var div_1 = sibling(child(div), 4);
-  var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var node = child(div_3);
-  Dossier(node, {
-    actor,
-    get config() {
-      return $$props.config;
-    }
-  });
-  append($$anchor, div);
-  pop();
-}
-var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
-function NeonName($$anchor, $$props) {
-  push($$props, false);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
-  const name = mutable_state();
-  let actor = prop($$props, "actor", 8);
-  let malfunctioningIndexes = [];
-  let neonHTML = mutable_state();
-  const actorStore = getActorStore(actor().id, actor().name);
-  const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  function getNeonHtml(name2) {
-    malfunctioningIndexes = [];
-    if (name2.length < 4) {
-      malfunctioningIndexes.push(randomInRange(0, name2.length - 1));
-    } else {
-      const malfunctionInNplaces = name2.length % 4;
-      for (let i = 0; i < malfunctionInNplaces; i++) {
-        let index2;
-        do {
-          index2 = randomInRange(0, name2.length - 1);
-        } while (malfunctioningIndexes.includes(index2));
-        malfunctioningIndexes.push(index2);
-      }
-    }
-    return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
-  }
-  legacy_pre_effect(() => $actorStore(), () => {
-    set(name, $actorStore().name);
-  });
-  legacy_pre_effect(() => get$1(name), () => {
-    set(neonHTML, getNeonHtml(get$1(name)));
-  });
-  legacy_pre_effect_reset();
-  init();
-  var div = root$1();
-  var node = child(div);
-  html(node, () => get$1(neonHTML));
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-function initMainMasonryGrid(app, html2, data) {
-  if (app.svelteApp) {
-    unmount$1(app.svelteApp);
-  }
-  if (app.neonInjection) {
-    unmount$1(app.neonInjection);
-  }
-  _initSheet(app);
-  _injectNeonName(app);
-}
-function _initSheet(app) {
-  const container = app.element[0].querySelector(".window-content");
-  container.innerHTML = "";
-  app.svelteApp = mount$1(CharacterSheetApp, {
-    target: container,
-    props: {
-      app,
-      config: CONFIG.sr3e,
-      jQueryObject: app.element
-    }
-  });
-  Log.success("Svelte App Initialized", CharacterActorSheet.name);
-}
-function _injectNeonName(app) {
-  const header = app.element[0].querySelector("header.window-header");
-  const placeholder = document.createElement("div");
-  placeholder.classList.add("neon-name-position");
-  header.insertAdjacentElement("afterend", placeholder);
-  app.neonInjection = mount$1(NeonName, {
-    target: placeholder,
-    props: {
-      actor: app.actor
-    }
-  });
-  Log.success("Neon Name Initialized", CharacterActorSheet.name);
-}
-function closeMainMasonryGrid(app) {
-  if (app.svelteApp) {
-    app.actor.mainLayoutResizeObserver.disconnect();
-    app.actor.mainLayoutResizeObserver = null;
-    Log.success("Masonry observer disconnected.", CharacterActorSheet.name);
-    unmount$1(app.svelteApp);
-    console.info("Svelte App Destroyed.", CharacterActorSheet.name);
-  }
-}
-class ItemDataService {
-  static getDefaultHumanItem() {
-    return {
-      name: "Human",
-      type: "metahuman",
-      img: "systems/sr3e/textures/ai-generated/humans.webp",
-      system: {
-        lifespan: { min: 10, average: 30, max: 100 },
-        physical: {
-          height: { min: 150, average: 170, max: 200 },
-          weight: { min: 50, average: 70, max: 120 }
-        },
-        modifiers: {
-          strength: 0,
-          quickness: 0,
-          body: 0,
-          charisma: 0,
-          intelligence: 0,
-          willpower: 0
-        },
-        attributeLimits: {
-          strength: 6,
-          quickness: 6,
-          body: 6,
-          charisma: 6,
-          intelligence: 6,
-          willpower: 6
-        },
-        karmaAdvancementFraction: { value: 0.1 },
-        vision: {
-          type: "Normal",
-          description: "Standard human vision",
-          rules: { darknessPenaltyNegation: "" }
-        },
-        priority: "E",
-        description: "<p>Humans are the baseline metatype, versatile and adaptive.</p>"
-      }
-    };
-  }
-  static getDefaultMagic() {
-    return {
-      name: "Full Shaman",
-      type: "magic",
-      system: {
-        type: "Full",
-        priority: "A",
-        focus: "None",
-        drainResistanceAttribute: "Charisma",
-        totem: "Bear"
-      }
-    };
-  }
-}
-var root_1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3 = /* @__PURE__ */ template(`<option> </option>`);
-var root_4 = /* @__PURE__ */ template(`<option> </option>`);
-var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <div><h1>Placeholder</h1></div></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Sliders</h1> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"> <h3> </h3> <input type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Multi Selections</h1> <select id="metahuman"><option selected>Localize Select</option><!></select> <select id="magic"><option selected>Localize Select</option><!></select> <select id="attributePoints"><option selected>Localize Select</option><!></select> <select id="skillPoints"><option selected>Localize Select</option><!></select> <select id="nuyen"><option selected>Localize Select</option><!></select></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Randomize</h1></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Randomize</h1></div></div></div> <div class="item-sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><h1>Buttons</h1> <div class="stat-grid"><button class="my-button" aria-label="Random"><span><i class="fa-solid fa-shuffle"></i></span></button> <button class="my-button" aria-label="Mix"><span><i class="fa-solid fa-rotate-right"></i></span></button> <button class="my-button">Ok</button> <button class="my-button">Cancel</button></div></div></div></div></div>`);
-function CharacterCreation($$anchor, $$props) {
-  push($$props, false);
-  const age = mutable_state();
-  const ageMin = mutable_state();
-  const ageMax = mutable_state();
-  const height = mutable_state();
-  const heightMin = mutable_state();
-  const heightMax = mutable_state();
-  const weight = mutable_state();
-  const weightMin = mutable_state();
-  const weightMax = mutable_state();
-  prop($$props, "resolve", 24, () => ({}));
-  let actor = prop($$props, "actor", 28, () => ({}));
-  let metahumanImg = mutable_state("");
-  let metahumans = mutable_state([]);
-  let magics = mutable_state([]);
-  let attributePointCollection = [
-    { priority: "A", points: 30 },
-    { priority: "B", points: 27 },
-    { priority: "C", points: 24 },
-    { priority: "D", points: 21 },
-    { priority: "E", points: 18 }
-  ];
-  let skillPointCollection = [
-    { priority: "A", points: 50 },
-    { priority: "B", points: 40 },
-    { priority: "C", points: 34 },
-    { priority: "D", points: 30 },
-    { priority: "E", points: 27 }
-  ];
-  let assets = [
-    { priority: "A", points: 1e6 },
-    { priority: "B", points: 4e5 },
-    { priority: "C", points: 9e4 },
-    { priority: "D", points: 2e4 },
-    { priority: "E", points: 5e3 }
-  ];
-  let img = mutable_state("");
-  let metahumanSelection = mutable_state("");
-  let magicSelection = mutable_state("");
-  let attributePoints = mutable_state(0);
-  let skillPoints = mutable_state(0);
-  let nuyen = mutable_state(0);
-  onMount(async () => {
+const docs = foundry.applications.apps.DocumentSheetConfig;
+function registerDocumentTypes({ args }) {
+  args.forEach(({ docClass, type, model, sheet }) => {
     var _a;
-    set(metahumans, game.items.filter((item) => item.type === "metahuman"));
-    if (get$1(metahumans).length === 0) {
-      const humanItem = ItemDataService.getDefaultHumanItem();
-      Item.create(humanItem);
-      set(metahumans, game.items.filter((item) => item.type === "metahuman"));
-    }
-    set(magics, game.items.filter((item) => item.type === "magic"));
-    if (get$1(magics).length === 0) {
-      const magicItem = ItemDataService.getDefaultMagic();
-      Item.create(magicItem);
-      set(magics, game.items.filter((item) => item.type === "magic"));
-    }
-    set(metahumanImg, (_a = get$1(metahumans).find((item) => item.name.toLowerCase() === "human")) == null ? void 0 : _a.img);
-    set(img, actor().img);
-  });
-  function currency(number) {
-    return `¥${number.toLocaleString()}`;
-  }
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    actor(actor());
-  });
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(age, actor().system.profile.age);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(ageMin, 0);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(ageMax, 100);
-  });
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(height, actor().system.profile.height);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(heightMin, 70);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(heightMax, 220);
-  });
-  legacy_pre_effect(() => deep_read_state(actor()), () => {
-    set(weight, actor().system.profile.weight);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(weightMin, 30);
-  });
-  legacy_pre_effect(() => {
-  }, () => {
-    set(weightMax, 250);
-  });
-  legacy_pre_effect_reset();
-  init();
-  var div = root();
-  var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img_1 = child(div_4);
-  var input = sibling(div_4, 2);
-  var div_5 = sibling(div_1, 2);
-  var div_6 = child(div_5);
-  var div_7 = sibling(child(div_6), 2);
-  var div_8 = child(div_7);
-  var img_2 = child(div_8);
-  var div_9 = sibling(div_5, 2);
-  var div_10 = child(div_9);
-  var div_11 = sibling(child(div_10), 2);
-  var h3 = sibling(child(div_11), 2);
-  var text = child(h3);
-  var input_1 = sibling(h3, 2);
-  var h3_1 = sibling(input_1, 2);
-  var text_1 = child(h3_1);
-  var input_2 = sibling(h3_1, 2);
-  var h3_2 = sibling(input_2, 2);
-  var text_2 = child(h3_2);
-  var input_3 = sibling(h3_2, 2);
-  var div_12 = sibling(div_9, 2);
-  var div_13 = child(div_12);
-  var div_14 = sibling(child(div_13), 2);
-  var select = sibling(child(div_14), 2);
-  template_effect(() => {
-    get$1(metahumanSelection);
-    invalidate_inner_signals(() => {
-      get$1(metahumanImg);
-      game;
-      get$1(metahumans);
-    });
-  });
-  var option = child(select);
-  option.value = null == (option.__value = "") ? "" : "";
-  var node = sibling(option);
-  each(node, 1, () => get$1(metahumans), index, ($$anchor2, metahuman) => {
-    var option_1 = root_1();
-    var option_1_value = {};
-    var text_3 = child(option_1);
-    template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(metahuman).id)) {
-        option_1.value = null == (option_1.__value = get$1(metahuman).id) ? "" : get$1(metahuman).id;
-      }
-      set_text(text_3, `${get$1(metahuman).name ?? ""} ${get$1(metahuman).system.priority ?? ""}`);
-    });
-    append($$anchor2, option_1);
-  });
-  var select_1 = sibling(select, 2);
-  template_effect(() => {
-    get$1(magicSelection);
-    invalidate_inner_signals(() => {
-      get$1(magics);
-    });
-  });
-  var option_2 = child(select_1);
-  option_2.value = null == (option_2.__value = "") ? "" : "";
-  var node_1 = sibling(option_2);
-  each(node_1, 1, () => get$1(magics), index, ($$anchor2, magic) => {
-    var option_3 = root_2();
-    var option_3_value = {};
-    var text_4 = child(option_3);
-    template_effect(() => {
-      if (option_3_value !== (option_3_value = get$1(magic).id)) {
-        option_3.value = null == (option_3.__value = get$1(magic).id) ? "" : get$1(magic).id;
-      }
-      set_text(text_4, `${get$1(magic).name ?? ""} ${get$1(magic).system.priority ?? ""}`);
-    });
-    append($$anchor2, option_3);
-  });
-  var select_2 = sibling(select_1, 2);
-  template_effect(() => {
-    get$1(attributePoints);
-    invalidate_inner_signals(() => {
-    });
-  });
-  var option_4 = child(select_2);
-  option_4.value = null == (option_4.__value = 0) ? "" : 0;
-  var node_2 = sibling(option_4);
-  each(node_2, 1, () => attributePointCollection, index, ($$anchor2, attribute) => {
-    var option_5 = root_3();
-    var option_5_value = {};
-    var text_5 = child(option_5);
-    template_effect(() => {
-      if (option_5_value !== (option_5_value = get$1(attribute).points)) {
-        option_5.value = null == (option_5.__value = get$1(attribute).points) ? "" : get$1(attribute).points;
-      }
-      set_text(text_5, `${get$1(attribute).points ?? ""} ${get$1(attribute).priority ?? ""}`);
-    });
-    append($$anchor2, option_5);
-  });
-  var select_3 = sibling(select_2, 2);
-  template_effect(() => {
-    get$1(skillPoints);
-    invalidate_inner_signals(() => {
-    });
-  });
-  var option_6 = child(select_3);
-  option_6.value = null == (option_6.__value = 0) ? "" : 0;
-  var node_3 = sibling(option_6);
-  each(node_3, 1, () => skillPointCollection, index, ($$anchor2, skill) => {
-    var option_7 = root_4();
-    var option_7_value = {};
-    var text_6 = child(option_7);
-    template_effect(() => {
-      if (option_7_value !== (option_7_value = get$1(skill).points)) {
-        option_7.value = null == (option_7.__value = get$1(skill).points) ? "" : get$1(skill).points;
-      }
-      set_text(text_6, `${get$1(skill).points ?? ""} ${get$1(skill).priority ?? ""}`);
-    });
-    append($$anchor2, option_7);
-  });
-  var select_4 = sibling(select_3, 2);
-  template_effect(() => {
-    get$1(nuyen);
-    invalidate_inner_signals(() => {
-    });
-  });
-  var option_8 = child(select_4);
-  option_8.value = null == (option_8.__value = 0) ? "" : 0;
-  var node_4 = sibling(option_8);
-  each(node_4, 1, () => assets, index, ($$anchor2, asset) => {
-    var option_9 = root_5();
-    var option_9_value = {};
-    var text_7 = child(option_9);
-    template_effect(
-      ($0) => {
-        if (option_9_value !== (option_9_value = get$1(asset).points)) {
-          option_9.value = null == (option_9.__value = get$1(asset).points) ? "" : get$1(asset).points;
-        }
-        set_text(text_7, `${$0 ?? ""} ${get$1(asset).priority ?? ""}`);
-      },
-      [() => currency(get$1(asset).points)],
-      derived_safe_equal
+    const docName = docClass.documentName;
+    (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
+    CONFIG[docName].dataModels[type] = model;
+    docs.registerSheet(
+      docClass,
+      flags.sr3e,
+      sheet,
+      { types: [type], makeDefault: true }
     );
-    append($$anchor2, option_9);
-  });
-  template_effect(() => {
-    set_attribute(img_1, "src", get$1(img));
-    set_attribute(img_1, "title", actor().name);
-    set_attribute(img_1, "alt", actor().name);
-    set_attribute(img_2, "src", get$1(metahumanImg));
-    set_attribute(img_2, "title", actor().name);
-    set_attribute(img_2, "alt", actor().name);
-    set_text(text, `Age: ${get$1(age) ?? ""}`);
-    set_attribute(input_1, "min", get$1(ageMin));
-    set_attribute(input_1, "max", get$1(ageMax));
-    set_text(text_1, `Height: ${get$1(height) ?? ""}`);
-    set_attribute(input_2, "min", get$1(heightMin));
-    set_attribute(input_2, "max", get$1(heightMax));
-    set_text(text_2, `Weight: ${get$1(weight) ?? ""}`);
-    set_attribute(input_3, "min", get$1(weightMin));
-    set_attribute(input_3, "max", get$1(weightMax));
-  });
-  event("click", img_1, async () => {
-    const path = await openFilePicker(actor());
-    set(img, path);
-  });
-  bind_value(input, () => actor().name, ($$value) => actor(actor().name = $$value, true));
-  event("change", input, (e) => actor().update({ name: e.target.value }));
-  event("keydown", input, (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      e.stopPropagation();
-      actor().update({ name: e.target.value });
-    }
-  });
-  bind_value(input_1, () => get$1(age), ($$value) => set(age, $$value));
-  bind_value(input_2, () => get$1(height), ($$value) => set(height, $$value));
-  bind_value(input_3, () => get$1(weight), ($$value) => set(weight, $$value));
-  bind_select_value(select, () => get$1(metahumanSelection), ($$value) => set(metahumanSelection, $$value));
-  event("change", select, (e) => set(metahumanImg, game.items.contents.find((item) => item.type === e.target.value).img));
-  bind_select_value(select_1, () => get$1(magicSelection), ($$value) => set(magicSelection, $$value));
-  bind_select_value(select_2, () => get$1(attributePoints), ($$value) => set(attributePoints, $$value));
-  bind_select_value(select_3, () => get$1(skillPoints), ($$value) => set(skillPoints, $$value));
-  bind_select_value(select_4, () => get$1(nuyen), ($$value) => set(nuyen, $$value));
-  append($$anchor, div);
-  pop();
-}
-class CharacterCreationDialog extends Dialog {
-  constructor(actor, resolve) {
-    super({
-      title: "Character Creation",
-      content: "<p>If this displays, there was an issue with the Svelte component in CharacterCreationDialog.js</p>",
-      default: "ok",
-      buttons: {
-        ok: {
-          label: "OK",
-          callback: async (html2) => console.log("OK clicked")
-        },
-        cancel: {
-          label: "Cancel",
-          callback: () => console.log("Cancel clicked")
-        }
-      },
-      render: (html2) => {
-        this.element.addClass("sr3e");
-        const container = this.element[0].querySelector(".window-content");
-        container.innerHTML = "";
-        this.svelteApp = mount$1(CharacterCreation, {
-          target: container,
-          props: {
-            actor,
-            resolve
-          }
-        });
-      }
-    });
-  }
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      width: "100%",
-      height: "100%",
-      left: 200,
-      top: 200,
-      resizable: false
-    });
-  }
-  /** @override */
-  close(options = {}) {
-    if (this.svelteApp) {
-      unmount$1(this.svelteApp);
-    }
-    return super.close(options);
-  }
-}
-async function renderCharacterCreationDialog(actor, options, userId) {
-  if (actor.type !== "character") return;
-  Log.info("Character Dialog Initiated", "Create Actor Hook");
-  const dialogResult = await _showCharacterCreationDialog(actor);
-  if (!dialogResult) {
-    console.log(`Character creation canceled for actor: ${actor.name}. Deleting actor.`);
-    await actor.delete();
-    return false;
-  }
-  actor.sheet.render(true);
-  Log.success("Character Dialog Completed", "Create Actor Hook");
-}
-async function _showCharacterCreationDialog(actor) {
-  return new Promise((resolve) => {
-    new CharacterCreationDialog(actor, resolve).render(true);
   });
 }
-function onRenderMetahumanItemSheet(app, html2, data) {
-  if (app.svelteApp) {
-    unmount(app.svelteApp);
-  }
-  const container = app.element[0].querySelector(".window-content");
-  container.innerHTML = "";
-  app.svelteApp = mount(MetahumanApp, {
-    target: container,
-    props: {
-      item: app.item,
-      config: CONFIG.sr3e
-    }
-  });
-}
-function onCloseMetahumanItemSheet(app, html2, data) {
-  if (app.svelteApp) {
-    unmount(app.svelteApp);
-  }
-}
-function haltCharacterSheetRender(doc, actor, options, userId) {
-  if (actor.type === "character") {
-    options.renderSheet = false;
-  }
-}
-function setChatMessageColorFromActorColor(message, html2, data) {
-  var _a;
-  const sender = game.users.get((_a = message.author) == null ? void 0 : _a.id);
-  if (!sender) return;
-  const senderColor = sender.color;
-  html2[0].style.setProperty("--message-color", senderColor);
-}
-function addChatMessageShadow(message, html2, data) {
-  const chatMessage = html2[0];
-  if (!chatMessage) return;
-  if (chatMessage.querySelector(".inner-background-container")) return;
-  const wrapper = document.createElement("div");
-  wrapper.classList.add("inner-background-container");
-  const fakeShadow = document.createElement("div");
-  fakeShadow.classList.add("fake-shadow");
-  const messageContainer = document.createElement("div");
-  messageContainer.classList.add("message-container");
-  while (chatMessage.firstChild) {
-    messageContainer.appendChild(chatMessage.firstChild);
-  }
-  wrapper.appendChild(fakeShadow);
-  wrapper.appendChild(messageContainer);
-  chatMessage.appendChild(wrapper);
-}
-function wrapSidebarItems(app, html2) {
-  html2.find(".directory-item.document").each((_, el) => {
-    let $el = $(el);
-    let img = $el.find("img.thumbnail");
-    let h4 = $el.find("h4.entry-name");
-    let entryId = $el.attr("data-entry-id");
-    let docType = $el.hasClass("actor") ? "Actor" : $el.hasClass("item") ? "Item" : $el.hasClass("journalentry") ? "JournalEntry" : $el.hasClass("cards") ? "Cards" : $el.hasClass("playlist") ? "PlayList" : $el.hasClass("rolltable") ? "RollTable" : $el.hasClass("compendium") ? "Compendium" : $el.hasClass("scene") ? "Scene" : null;
-    if (!docType) return;
-    let target = h4.length ? h4 : docType === "Scene" ? $el : null;
-    if (!target) return;
-    if (target.parent().hasClass("directory-post")) return;
-    let wrapper = $('<div class="directory-post"></div>');
-    wrapper.attr("data-entry-id", entryId);
-    wrapper.attr("data-document-type", docType);
-    if (img.length && target[0] !== $el[0]) {
-      img.add(target).wrapAll(wrapper);
-    } else {
-      target.wrap(wrapper);
-    }
-    let $wrapper = target.closest(".directory-post");
-    if (docType.toLowerCase() === "playlist") {
-      let existingControls = $el.find(".sound-controls.playlist-controls").first();
-      if (existingControls.length) {
-        $wrapper.append(existingControls);
-        console.log("Moved existing sound-controls to playlist entry", entryId);
-      }
-      $wrapper.addClass("playlist-button");
-    }
-    console.log(`Wrapped .directory-post for entry ID: ${entryId} (Type: ${docType})`);
-  });
-  html2.on("click", ".directory-post", (event2) => {
-    event2.preventDefault();
-    let $target = $(event2.currentTarget);
-    let entryId = $target.data("entry-id");
-    let docType = $target.data("document-type");
-    let doc;
-    if (docType === "Actor") {
-      doc = game.actors.get(entryId);
-    } else if (docType === "Item") {
-      doc = game.items.get(entryId);
-    } else if (docType === "JournalEntry") {
-      doc = game.journal.get(entryId);
-    } else if (docType === "RollTable") {
-      doc = game.tables.get(entryId);
-    } else if (docType === "Compendium") {
-      doc = game.packs.get(entryId);
-    } else if (docType === "Scene") {
-      doc = game.scenes.get(entryId);
-    } else {
-      console.warn("Unsupported document type:", docType);
-      return;
-    }
-    if (doc) {
-      doc.sheet.render(true);
-    } else {
-      console.warn("Document not found for ID:", entryId);
-    }
-  });
-}
-function registerHooks() {
-  Hooks.on(hooks.createActor, renderCharacterCreationDialog);
-  Hooks.on(hooks.renderCharacterActorSheet, initMainMasonryGrid);
-  Hooks.on(hooks.closeCharacterActorSheet, closeMainMasonryGrid);
-  Hooks.on(hooks.renderMetahumanItemSheet, onRenderMetahumanItemSheet);
-  Hooks.on(hooks.closeMetahumanItemSheet, onCloseMetahumanItemSheet);
-  Hooks.on(hooks.preCreateActor, haltCharacterSheetRender);
-  Hooks.on(hooks.renderChatMessage, setChatMessageColorFromActorColor);
-  Hooks.on(hooks.renderChatMessage, addChatMessageShadow);
-  Hooks.on(hooks.renderSidebarTab, wrapSidebarItems);
-  Hooks.on(hooks.renderChatLog, () => {
-    const uiRight = document.getElementById("ui-right");
-    if (!uiRight) return;
-    uiRight.classList.add("noise-layer");
-  });
-  Hooks.on("renderUserConfig", (app, html2, data) => {
-    html2.classList.remove("application", "user-config");
-    html2.classList.add("app", "window-app", "sr3e", "item", "playerconfig");
-    Log.info("Modified Player Configuration form to inherit styles", "Userconfig Hack");
-  });
-  Hooks.on("renderUserConfig", (app, form, data) => {
-    if (app.svelteApp) {
-      unmount$1(app.svelteApp);
-    }
-    const container = form.querySelector(".window-content");
-    container.innerHTML = "";
-    app.svelteApp = mount$1(UserSettings, {
-      target: container,
-      props: {
-        app,
-        config: CONFIG.sr3e
-      }
-    });
-    Log.success("Svelte App Initialized", "UserSettings");
-  });
-  Hooks.on("closeUserConfig", async (app, html2, data) => {
-    if (app.svelteApp) {
-      unmount$1(app.svelteApp);
-    }
-    for (let message of game.messages.contents) {
-      ui.chat.updateMessage(message);
-    }
-  });
-  Hooks.once(hooks.init, () => {
-    configureProject();
-    registerActorTypes([
-      { type: "character", model: CharacterModel, sheet: CharacterActorSheet }
-    ]);
-    registerItemTypes([
-      { type: "metahuman", model: MetahumanModel, sheet: MagicItemSheet },
-      { type: "magic", model: MetahumanModel, sheet: MagicItemSheet }
-    ]);
-    Log.success("Initialization Completed", "sr3e.js");
-  });
-}
-registerHooks();
 function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
-  Actors.unregisterSheet("core", ActorSheet);
-  Items.unregisterSheet("core", ItemSheet);
+  docs.unregisterSheet(Actor, "core", "ActorSheetV2");
+  docs.unregisterSheet(Item, "core", "ItemSheetV2");
 }
-function registerActorTypes(actorsTypes) {
-  actorsTypes.forEach(({ type, model, sheet }) => {
-    CONFIG.Actor.dataModels[type] = model;
-    Actors.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
+function registerHooks() {
+  Hooks.once(hooks.init, () => {
+    configureProject();
+    registerDocumentTypes({
+      args: [
+        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
+      ]
+    });
+    Log.success("Initialization Completed", "sr3e.js");
   });
 }
-function registerItemTypes(itemTypes) {
-  itemTypes.forEach(({ type, model, sheet }) => {
-    CONFIG.Item.dataModels[type] = model;
-    Items.registerSheet(flags.sr3e, sheet, { types: [type], makeDefault: true });
-  });
-}
+registerHooks();
 //# sourceMappingURL=bundle.js.map

@@ -1,6 +1,7 @@
 export const sr3e = {};
 
 sr3e.attributes = {
+    attributes: "sr3e.attributes.attributes",
     body: "sr3e.attributes.body",
     quickness: "sr3e.attributes.quickness",
     strength: "sr3e.attributes.strength",
@@ -11,6 +12,18 @@ sr3e.attributes = {
     initiative: "sr3e.attributes.initiative",
     modifiers: "sr3e.attributes.modifiers",
     limits: "sr3e.attributes.limits",
+}
+
+sr3e.health = {
+    health: "sr3e.health.health",
+}
+
+sr3e.skills = {
+    skills: "sr3e.skills.skills"
+}
+
+sr3e.inventory = {
+    inventory: "sr3e.inventory.inventory",
 }
 
 sr3e.common = {
