@@ -4684,7 +4684,7 @@ var root_1$1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><im
 var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -4720,7 +4720,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var div = root$6();
+  var div = root$7();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -4818,11 +4818,11 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root$5 = /* @__PURE__ */ template(`<div class="attributes"><h1> </h1> <h2> </h2> <h3> </h3> <h4> </h4> <p> </p> <span> </span></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="attributes"><h1> </h1> <h2> </h2> <h3> </h3> <h4> </h4> <p> </p> <span> </span></div>`);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$5();
+  var div = root$6();
   var h1 = child(div);
   var text2 = child(h1);
   var h2 = sibling(h1, 2);
@@ -4851,11 +4851,11 @@ function Attributes($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$4 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <span> </span></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <span> </span></div>`);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$4();
+  var div = root$5();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -4870,11 +4870,11 @@ function Skills($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$3 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$3();
+  var div = root$4();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -4889,11 +4889,11 @@ function Health($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$2 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$2();
+  var div = root$3();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -4911,7 +4911,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 var root_1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const cards = proxy([
@@ -5035,7 +5035,7 @@ function CharacterSheetApp($$anchor, $$props) {
     get$1(formWidth);
     get$1(layoutState);
   });
-  var div = root$1();
+  var div = root$2();
   var node = sibling(child(div), 4);
   each(node, 17, () => cards, (c) => c.id, ($$anchor2, c) => {
     var div_1 = root_1();
@@ -5077,7 +5077,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
 }
 enable_legacy_mode_flag();
-var root = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5102,7 +5102,7 @@ function NeonName($$anchor, $$props) {
         malfunctioningIndexes.push(index);
       }
     }
-    return [...name2].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="malfunc">${char}</div>` : `<div>${char}</div>`).join("");
+    return [...name2].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
   legacy_pre_effect(() => $actorStore(), () => {
     set(name, $actorStore().name);
@@ -5112,12 +5112,17 @@ function NeonName($$anchor, $$props) {
   });
   legacy_pre_effect_reset();
   init();
-  var div = root();
+  var div = root$1();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
+}
+var root = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+function NewsFeed($$anchor) {
+  var div = root();
+  append($$anchor, div);
 }
 const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
@@ -5153,6 +5158,18 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
         props: { actor: this.actor }
       }));
     }
+    const title = form.querySelector(".window-title");
+    title.remove();
+    const svelteInejction = document.createElement("div");
+    svelteInejction.classList.add("svelte-injection");
+    header.prepend(svelteInejction);
+    __privateSet(this, _app, mount(NewsFeed, {
+      target: header,
+      anchor: header.firstChild,
+      props: {
+        actor: this.actor
+      }
+    }));
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
   }
@@ -5173,7 +5190,6 @@ __publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
   ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
   id: "sr3e-character-sheet",
   classes: ["sr3e", "sheet", "actor", "character"],
-  title: null,
   template: null,
   position: { width: 820, height: 820 },
   window: {
@@ -5306,14 +5322,36 @@ function configureProject() {
   docs.unregisterSheet(Actor, "core", "ActorSheetV2");
   docs.unregisterSheet(Item, "core", "ItemSheetV2");
 }
+function configureThemes() {
+  game.settings.register("sr3e", "theme", {
+    name: "Theme",
+    hint: "Choose a UI theme.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      "chummer": "Chummer",
+      "steel": "Steel"
+    },
+    default: "chummer"
+  });
+  Hooks.on("ready", () => {
+    const theme = game.settings.get("sr3e", "theme");
+    document.body.classList.remove("theme-chummer", "theme-steel");
+    document.body.classList.add(`theme-${theme}`);
+  });
+}
 function registerHooks() {
   Hooks.once(hooks.init, () => {
+    var _a, _b;
     configureProject();
+    configureThemes();
     registerDocumentTypes({
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
       ]
     });
+    console.log((_b = (_a = game.version) == null ? void 0 : _a.data) == null ? void 0 : _b.core);
     Log.success("Initialization Completed", "sr3e.js");
   });
 }

@@ -35,10 +35,35 @@ function configureProject() {
   docs.unregisterSheet(Item,  "core", "ItemSheetV2");
 }
 
+function configureThemes() { 
+  game.settings.register("sr3e", "theme", {
+    name: "Theme",
+    hint: "Choose a UI theme.",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      "chummer": "Chummer",
+      "steel": "Steel"
+    },
+    default: "chummer"
+  });
+  
+  Hooks.on("ready", () => {
+    const theme = game.settings.get("sr3e", "theme");
+    document.body.classList.remove("theme-chummer", "theme-steel");
+    document.body.classList.add(`theme-${theme}`);
+  });
+  
+}
+
 function registerHooks() {
+
+  
   Hooks.once(hooks.init, () => {
 
     configureProject();
+    configureThemes();
 
     registerDocumentTypes({
       args: [
@@ -47,6 +72,7 @@ function registerHooks() {
       ]
     });
 
+    console.log(game.version?.data?.core);
     Log.success("Initialization Completed", "sr3e.js");
   });
 }

@@ -4,7 +4,7 @@
 
     let malfunctioningIndexes = [];
     let neonHTML;
-    
+
     const actorStore = getActorStore(actor.id, actor.name);
 
     $: name = $actorStore.name;
@@ -31,11 +31,10 @@
         }
 
         return [...name]
-            .map(
-                (char, index) =>
-                    malfunctioningIndexes.includes(index)
-                        ? `<div class="malfunc">${char}</div>`
-                        : `<div>${char}</div>`
+            .map((char, index) =>
+                malfunctioningIndexes.includes(index)
+                    ? `<div class="neon-name-text malfunc">${char}</div>`
+                    : `<div class="neon-name-text">${char}</div>`,
             )
             .join("");
     }
@@ -44,3 +43,5 @@
 <div class="neon-name">
     {@html neonHTML}
 </div>
+
+

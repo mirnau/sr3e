@@ -19,7 +19,7 @@ function compileLess() {
         this.emit("end");
       })
     )
-    .pipe(gulp.dest("styles/css"));
+    .pipe(gulp.dest("themes/chummer/css"));
 }
 
 

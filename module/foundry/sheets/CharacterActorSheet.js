@@ -1,5 +1,6 @@
 import CharacterSheetApp from "../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName from "../../svelte/apps/injections/NeonName.svelte";
+import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
 
@@ -11,7 +12,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     ...super.DEFAULT_OPTIONS,
     id: "sr3e-character-sheet",
     classes: ["sr3e", "sheet", "actor", "character"],
-    title: null,
     template: null,
     position: { width: 820, height: 820 },
     window: {
@@ -57,9 +57,23 @@ _replaceHTML(result, windowContent) {
       props: { actor: this.actor }
     });
   }
-  
-  
 
+  // 5. Rip out the window title
+  const title = form.querySelector(".window-title");
+  title.remove();
+  const svelteInejction = document.createElement("div");
+  svelteInejction.classList.add("svelte-injection");
+  header.prepend(svelteInejction);
+
+  this.#app = mount(NewsFeed, {
+    target: header,
+    anchor: header.firstChild,
+    props: {
+      actor: this.actor,
+    }
+  });
+  // 6. Rip out the window header
+  
   SR3DLog.success("Svelte mounted", this.constructor.name);
 
   return windowContent;

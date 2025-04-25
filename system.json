@@ -8,7 +8,7 @@
             "name": "Otterbeast"
         }
     ],
-    "version": "0.01",
+    "version": "0.0.1",
     "compatibility": {
         "minimum": "13.340",
         "verified": "13.340"
@@ -18,9 +18,6 @@
     ],
     "scripts": [
         "https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
-    ],
-    "styles": [
-        "styles/css/chummer-dark.css"
     ],
     "actorTypes": [
         "character"
@@ -38,7 +35,11 @@
             "magic": {}
         }
     },
-    "packs": [],
+    "styles": [
+        "themes/chummer/css/core-styles.css",
+        "themes/chummer/css/chummer-light.css",
+        "themes/chummer/css/chummer-dark.css"
+      ],
     "languages": [
         {
             "lang": "en",

@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'VT323';
-    src: url('../../fonts/VT323/VT323-Regular.ttf') format('truetype');
+    src: url('../../../fonts/VT323/VT323-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
     font-family: 'Neonderthaw';
-    src: url('../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
+    src: url('../../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -28,7 +28,7 @@
 
 body {
     .VTT323();
-    
+
     form.p.hint,
     p.hint {
         color: @accent-color;
@@ -40,6 +40,7 @@ body {
 
     h1 {
         .VTT323-header();
+        .VTT323();
         color: @h1-color;
         text-shadow: @h1-color-bloom-primary;
         border: none;
@@ -50,6 +51,7 @@ body {
     summary,
     h2 {
         .VTT323-header();
+        .VTT323();
         color: @h2-color;
         border: none;
         font-size: 1.2rem;
@@ -57,6 +59,7 @@ body {
 
     h3 {
         .VTT323-header();
+        .VTT323();
         color: @h3-color;
         border: none;
         text-shadow: @h3-color-bloom-primary;
@@ -67,9 +70,15 @@ body {
         }
     }
 
+    label,
+    span,
     h4 {
         .VTT323-header();
+        .VTT323();
         color: @h4-color;
+        border: none;
+        text-shadow: @h3-color-bloom-primary;
+        font-size: 1.0rem;
 
         &.no-margin {
             margin: 0;
@@ -78,12 +87,26 @@ body {
 
     h5 {
         .VTT323-header();
+        .VTT323();
         color: @h5-color;
     }
 
     h6 {
         .VTT323-header();
+        .VTT323();
         color: @h6-color;
+    }
+    
+    span  {
+        .VTT323();
+        color: @h4-color;
+        border: none;
+        text-shadow: @h3-color-bloom-primary;
+        font-size: 1.0rem;
+
+        &.no-margin {
+            margin: 0;
+        }
     }
 
     p,
