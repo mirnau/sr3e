@@ -32,10 +32,10 @@ function configureProject() {
   CONFIG.defaultFontFamily = "VT323";
 
   docs.unregisterSheet(Actor, "core", "ActorSheetV2");
-  docs.unregisterSheet(Item,  "core", "ItemSheetV2");
+  docs.unregisterSheet(Item, "core", "ItemSheetV2");
 }
 
-function configureThemes() { 
+function configureThemes() {
   game.settings.register("sr3e", "theme", {
     name: "Theme",
     hint: "Choose a UI theme.",
@@ -48,18 +48,39 @@ function configureThemes() {
     },
     default: "chummer"
   });
-  
+
   Hooks.on("ready", () => {
     const theme = game.settings.get("sr3e", "theme");
     document.body.classList.remove("theme-chummer", "theme-steel");
     document.body.classList.add(`theme-${theme}`);
   });
-  
 }
+
+
 
 function registerHooks() {
 
-  
+  console.log("TESTING BEGINNING");
+  ////// TESTING ONLY //////
+
+  Hooks.on('renderApplicationV2', (app, element, ctx, data) => {
+    const footer = document.createElement('div');
+    footer.classList.add('window-app-footer');
+
+    if (app instanceof foundry.applications.sheets.ActorSheetV2) {
+      element.appendChild(footer);
+    } else if (app instanceof foundry.applications.api.DialogV2) {
+      // TODO: Make this visible
+      element.appendChild(footer);
+      form.appendChild(footer); 
+    }
+    
+  });
+
+  ///// TEST END ////
+  console.log("TESTING ENDING");
+
+
   Hooks.once(hooks.init, () => {
 
     configureProject();
@@ -68,11 +89,10 @@ function registerHooks() {
     registerDocumentTypes({
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
-    
+
       ]
     });
 
-    console.log(game.version?.data?.core);
     Log.success("Initialization Completed", "sr3e.js");
   });
 }

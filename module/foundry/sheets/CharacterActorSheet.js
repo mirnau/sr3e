@@ -72,7 +72,10 @@ _replaceHTML(result, windowContent) {
       actor: this.actor,
     }
   });
-  // 6. Rip out the window header
+
+
+  // 7. Add noise layer to background
+  windowContent.classList.add("noise-layer");
   
   SR3DLog.success("Svelte mounted", this.constructor.name);
 

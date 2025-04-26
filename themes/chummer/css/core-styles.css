@@ -10,7 +10,6 @@
 @import "./styling/skinning/sr3e-table.less";
 @import "./styling/skinning/sr3e-playerconfig.less";
 @import "./styling/skinning/sr3e-pause-container.less";
-@import "./styling/skinning/ui/sr3e-ui-right.less";
 
 //Sheet specific styles
 @import "./sheets/sheet-metahuman.less";
@@ -157,6 +156,7 @@ body input::placeholder {
 .dialog.sr3e .window-content,
 .sr3e.sheet.item .window-content,
 .sr3e.sheet.character .window-content {
+  display: flex;
   padding: 0rem;
   margin: 0rem;
 }
@@ -289,9 +289,14 @@ button .ui-control {
   min-width: calc(20rem + 0.25rem * 3);
 }
 .sr3e.sheet.character .sheet-character-masonry-main {
-  display: block;
+  z-index: -1;
   margin: 0 auto;
+  flex: 1 1 auto;
   width: 100%;
+  height: auto;
+  /* Let flex determine height */
+  height: 100%;
+  background: linear-gradient(to right, transparent 0%, rgba(0, 255, 255, 0.1) 20%, rgba(0, 255, 255, 0.1) 80%, transparent 100%), radial-gradient(ellipse 50% 5% at 50% 100%, rgba(0, 255, 255, 0.8) 0%, transparent 100%), radial-gradient(ellipse 50% 5% at 50% 0%, rgba(0, 255, 255, 0.8) 0%, transparent 100%);
 }
 .sr3e.sheet.character .sheet-character-masonry-main .layout-gutter-sizer {
   width: 0.25rem;
@@ -795,4 +800,15 @@ button .ui-control {
   animation: marquee-move 7s linear infinite;
   line-height: 0;
   margin: 0;
+}
+.window-app-footer {
+  height: 2.3rem;
+  bottom: -2.3rem;
+  box-shadow: inset 0 0 30px #ff0095;
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  box-sizing: border-box;
+  clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
+  backdrop-filter: blur(8px);
 }

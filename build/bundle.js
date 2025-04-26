@@ -5137,17 +5137,17 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
   _replaceHTML(result, windowContent) {
     var _a;
     windowContent.innerHTML = "";
-    const form = windowContent.parentNode;
+    const form2 = windowContent.parentNode;
     __privateSet(this, _app, mount(CharacterSheetApp, {
       target: windowContent,
       props: {
         actor: this.actor,
         config: CONFIG.sr3e,
-        form
+        form: form2
         // for ResizeObserver/layout logic
       }
     }));
-    const header = form.querySelector("header.window-header");
+    const header = form2.querySelector("header.window-header");
     let neonSlot = header == null ? void 0 : header.previousElementSibling;
     if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
       neonSlot = document.createElement("div");
@@ -5158,7 +5158,7 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
         props: { actor: this.actor }
       }));
     }
-    const title = form.querySelector(".window-title");
+    const title = form2.querySelector(".window-title");
     title.remove();
     const svelteInejction = document.createElement("div");
     svelteInejction.classList.add("svelte-injection");
@@ -5170,6 +5170,7 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
         actor: this.actor
       }
     }));
+    windowContent.classList.add("noise-layer");
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
   }
@@ -5342,8 +5343,19 @@ function configureThemes() {
   });
 }
 function registerHooks() {
+  console.log("TESTING BEGINNING");
+  Hooks.on("renderApplicationV2", (app, element, ctx, data) => {
+    const footer = document.createElement("div");
+    footer.classList.add("window-app-footer");
+    if (app instanceof foundry.applications.sheets.ActorSheetV2) {
+      element.appendChild(footer);
+    } else if (app instanceof foundry.applications.api.DialogV2) {
+      element.appendChild(footer);
+      form.appendChild(footer);
+    }
+  });
+  console.log("TESTING ENDING");
   Hooks.once(hooks.init, () => {
-    var _a, _b;
     configureProject();
     configureThemes();
     registerDocumentTypes({
@@ -5351,7 +5363,6 @@ function registerHooks() {
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
       ]
     });
-    console.log((_b = (_a = game.version) == null ? void 0 : _a.data) == null ? void 0 : _b.core);
     Log.success("Initialization Completed", "sr3e.js");
   });
 }
