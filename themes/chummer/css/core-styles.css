@@ -289,6 +289,8 @@ button .ui-control {
   min-width: calc(20rem + 0.25rem * 3);
 }
 .sr3e.sheet.character .sheet-character-masonry-main {
+  overflow-y: auto;
+  overflow-x: hidden;
   z-index: -1;
   margin: 0 auto;
   flex: 1 1 auto;

@@ -1,7 +1,9 @@
 .sr3e.sheet.character {
     min-width: calc(@component-unit + @component-distance * 3);
-
+    
     .sheet-character-masonry-main {
+        overflow-y: auto;
+        overflow-x: hidden;
         z-index: -1;
         margin: 0 auto;
         flex: 1 1 auto;
