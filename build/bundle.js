@@ -290,6 +290,7 @@ const PROPS_IS_LAZY_INITIAL = 1 << 4;
 const TRANSITION_IN = 1;
 const TRANSITION_OUT = 1 << 1;
 const TRANSITION_GLOBAL = 1 << 2;
+const TEMPLATE_FRAGMENT = 1;
 const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
 const UNINITIALIZED = Symbol();
 const PASSIVE_EVENTS = ["touchstart", "touchmove"];
@@ -1398,13 +1399,13 @@ function update_reaction(reaction) {
 function remove_reaction(signal, dependency) {
   let reactions = dependency.reactions;
   if (reactions !== null) {
-    var index = index_of.call(reactions, signal);
-    if (index !== -1) {
+    var index2 = index_of.call(reactions, signal);
+    if (index2 !== -1) {
       var new_length = reactions.length - 1;
       if (new_length === 0) {
         reactions = dependency.reactions = null;
       } else {
-        reactions[index] = reactions[new_length];
+        reactions[index2] = reactions[new_length];
         reactions.pop();
       }
     }
@@ -1932,20 +1933,31 @@ function assign_nodes(start, end) {
 }
 // @__NO_SIDE_EFFECTS__
 function template(content, flags2) {
+  var is_fragment = (flags2 & TEMPLATE_FRAGMENT) !== 0;
   var use_import_node = (flags2 & TEMPLATE_USE_IMPORT_NODE) !== 0;
   var node;
   var has_start = !content.startsWith("<!>");
   return () => {
     if (node === void 0) {
       node = create_fragment_from_html(has_start ? content : "<!>" + content);
-      node = /** @type {Node} */
+      if (!is_fragment) node = /** @type {Node} */
       /* @__PURE__ */ get_first_child(node);
     }
     var clone = (
       /** @type {TemplateNode} */
       use_import_node ? document.importNode(node, true) : node.cloneNode(true)
     );
-    {
+    if (is_fragment) {
+      var start = (
+        /** @type {TemplateNode} */
+        /* @__PURE__ */ get_first_child(clone)
+      );
+      var end = (
+        /** @type {TemplateNode} */
+        clone.lastChild
+      );
+      assign_nodes(start, end);
+    } else {
       assign_nodes(clone, clone);
     }
     return clone;
@@ -2121,6 +2133,9 @@ function key_block(node, get_key, render_fn) {
       effect2 = branch(() => render_fn(anchor));
     }
   });
+}
+function index(_, i) {
+  return i;
 }
 function pause_effects(state2, items, controlled_anchor, items_map) {
   var transitions = [];
@@ -2315,19 +2330,19 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
   active_effect.first = state2.first && state2.first.e;
   active_effect.last = prev && prev.e;
 }
-function update_item(item2, value, index, type) {
+function update_item(item2, value, index2, type) {
   {
     internal_set(item2.v, value);
   }
   {
-    item2.i = index;
+    item2.i = index2;
   }
 }
-function create_item(anchor, state2, prev, next, value, key, index, render_fn, flags2, get_collection) {
+function create_item(anchor, state2, prev, next, value, key, index2, render_fn, flags2, get_collection) {
   var reactive = (flags2 & EACH_ITEM_REACTIVE) !== 0;
   var mutable = (flags2 & EACH_ITEM_IMMUTABLE) === 0;
   var v = reactive ? mutable ? /* @__PURE__ */ mutable_source(value) : source(value) : value;
-  var i = (flags2 & EACH_INDEX_REACTIVE) === 0 ? index : source(index);
+  var i = (flags2 & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
   var item2 = {
     i,
     v,
@@ -3204,9 +3219,9 @@ function requireEvEmitter() {
         if (!listeners || !listeners.length) {
           return;
         }
-        var index = listeners.indexOf(listener);
-        if (index != -1) {
-          listeners.splice(index, 1);
+        var index2 = listeners.indexOf(listener);
+        if (index2 != -1) {
+          listeners.splice(index2, 1);
         }
         return this;
       };
@@ -3454,9 +3469,9 @@ function requireUtils() {
         return [obj];
       };
       utils2.removeFrom = function(ary, obj) {
-        var index = ary.indexOf(obj);
-        if (index != -1) {
-          ary.splice(index, 1);
+        var index2 = ary.indexOf(obj);
+        if (index2 != -1) {
+          ary.splice(index2, 1);
         }
       };
       utils2.getParent = function(elem, selector) {
@@ -4680,11 +4695,11 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$1 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$7 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+var root$8 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -4720,15 +4735,15 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var div = root$7();
+  var div = root$8();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$1();
+      var div_1 = root_1$3();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2();
+      var div_2 = root_2$1();
       var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
@@ -4818,37 +4833,75 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root$6 = /* @__PURE__ */ template(`<div class="attributes"><h1> </h1> <h2> </h2> <h3> </h3> <h4> </h4> <p> </p> <span> </span></div>`);
+var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i>`, 1);
+var root$7 = /* @__PURE__ */ template(`<div class="stat-card"><h3> </h3> <!></div>`);
+function AttributeCard($$anchor, $$props) {
+  push($$props, true);
+  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
+  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
+  var div = root$7();
+  var h3 = child(div);
+  var text2 = child(h3);
+  var node = sibling(h3, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var h1 = root_1$2();
+      var text_1 = child(h1);
+      template_effect(() => set_text(text_1, get$1(baseTotal)));
+      append($$anchor2, h1);
+    };
+    var alternate = ($$anchor2) => {
+      var fragment = root_2();
+      var h1_1 = sibling(first_child(fragment), 2);
+      var text_2 = child(h1_1);
+      template_effect(() => set_text(text_2, get$1(total)));
+      append($$anchor2, fragment);
+    };
+    if_block(node, ($$render) => {
+      if ($$props.stat.meta == null) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(($0) => set_text(text2, $0), [
+    () => localize($$props.config.attributes[$$props.statKey] || $$props.statKey)
+  ]);
+  append($$anchor, div);
+  pop();
+}
+var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$6 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$6();
-  var h1 = child(div);
+  let attributes = proxy(actor().system.attributes);
+  var fragment = root$6();
+  var h1 = first_child(fragment);
   var text2 = child(h1);
-  var h2 = sibling(h1, 2);
-  var text_1 = child(h2);
-  var h3 = sibling(h2, 2);
-  var text_2 = child(h3);
-  var h4 = sibling(h3, 2);
-  var text_3 = child(h4);
-  var p = sibling(h4, 2);
-  var text_4 = child(p);
-  var span = sibling(p, 2);
-  var text_5 = child(span);
-  template_effect(
-    ($0) => {
-      set_text(text2, $0);
-      set_text(text_1, $0);
-      set_text(text_2, $0);
-      set_text(text_3, $0);
-      set_text(text_4, $0);
-      set_text(text_5, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
-    },
-    [
-      () => localize(config().attributes.attributes)
-    ]
-  );
-  append($$anchor, div);
+  var div = sibling(h1, 2);
+  var node = sibling(child(div), 4);
+  each(node, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
+    let key = () => get$1($$item)[0];
+    let stat = () => get$1($$item)[1];
+    var div_1 = root_1$1();
+    var node_1 = child(div_1);
+    AttributeCard(node_1, {
+      get statKey() {
+        return key();
+      },
+      get stat() {
+        return stat();
+      },
+      get config() {
+        return config();
+      }
+    });
+    append($$anchor2, div_1);
+  });
+  template_effect(($0) => set_text(text2, $0), [
+    () => localize(config().attributes.attributes)
+  ]);
+  append($$anchor, fragment);
   pop();
 }
 var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <span> </span></div>`);
@@ -5095,14 +5148,14 @@ function NeonName($$anchor, $$props) {
     } else {
       const malfunctionInNplaces = name2.length % 4;
       for (let i = 0; i < malfunctionInNplaces; i++) {
-        let index;
+        let index2;
         do {
-          index = randomInRange(0, name2.length - 1);
-        } while (malfunctioningIndexes.includes(index));
-        malfunctioningIndexes.push(index);
+          index2 = randomInRange(0, name2.length - 1);
+        } while (malfunctioningIndexes.includes(index2));
+        malfunctioningIndexes.push(index2);
       }
     }
-    return [...name2].map((char, index) => malfunctioningIndexes.includes(index) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
+    return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
   legacy_pre_effect(() => $actorStore(), () => {
     set(name, $actorStore().name);

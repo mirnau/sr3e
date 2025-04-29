@@ -1,0 +1,27 @@
+
+    //Attributes, dicepools, movement
+    .stat-card {
+        .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+
+        padding: 0.25rem;
+        min-height: 3rem;
+        margin-top: 0.25rem;
+
+        .stat-value {
+            margin: 0;
+        }
+
+        .stat-label {
+            display: flex;
+            .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+        }
+
+        &:hover {
+            z-index: 10;
+        }
+
+        select {
+            height: 2rem;
+            width: 100%;
+        }
+    }

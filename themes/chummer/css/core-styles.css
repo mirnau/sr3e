@@ -22,6 +22,7 @@
 //Third Party
 @import "./styling/editor.less";
 
+
 */
 @font-face {
   font-family: 'VT323';
@@ -295,8 +296,6 @@ button .ui-control {
   margin: 0 auto;
   flex: 1 1 auto;
   width: 100%;
-  height: auto;
-  /* Let flex determine height */
   height: 100%;
   background: linear-gradient(to right, transparent 0%, rgba(0, 255, 255, 0.1) 20%, rgba(0, 255, 255, 0.1) 80%, transparent 100%), radial-gradient(ellipse 50% 5% at 50% 100%, rgba(0, 255, 255, 0.8) 0%, transparent 100%), radial-gradient(ellipse 50% 5% at 50% 0%, rgba(0, 255, 255, 0.8) 0%, transparent 100%);
 }
@@ -802,6 +801,58 @@ button .ui-control {
   animation: marquee-move 7s linear infinite;
   line-height: 0;
   margin: 0;
+}
+/* Firefox (Gecko) */
+.system-sr3e,
+.system-sr3e * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 255, 0.5) transparent;
+}
+/* WebKit browsers (Chrome, Edge, Safari) */
+.system-sr3e::-webkit-scrollbar,
+.system-sr3e *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+.system-sr3e::-webkit-scrollbar-track,
+.system-sr3e *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.system-sr3e::-webkit-scrollbar-thumb,
+.system-sr3e *::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 255, 0.5);
+  border-radius: 6px;
+}
+.system-sr3e::-webkit-scrollbar-corner,
+.system-sr3e *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+/* Attempt to hide arrows (may not work in all browsers) */
+.system-sr3e::-webkit-scrollbar-button,
+.system-sr3e *::-webkit-scrollbar-button {
+  background: transparent;
+  display: none;
+}
+.stat-card {
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  padding: 0.25rem;
+  min-height: 3rem;
+  margin-top: 0.25rem;
+}
+.stat-card .stat-value {
+  margin: 0;
+}
+.stat-card .stat-label {
+  display: flex;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.stat-card:hover {
+  z-index: 10;
+}
+.stat-card select {
+  height: 2rem;
+  width: 100%;
 }
 .window-app-footer {
   height: 2.3rem;

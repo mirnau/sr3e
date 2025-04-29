@@ -1,12 +1,19 @@
 <script>
+    import AttributeCard from "./AttributeCard.svelte";
     import { localize } from "../../../foundry/SvelteHelpers.js";
     let { actor = {}, config = {} } = $props();
+
+    // Expose all attributes from the actor record.
+    let attributes = $state(actor.system.attributes);
 </script>
-<div class="attributes">
-            <h1>{localize(config.attributes.attributes)}</h1>
-            <h2>{localize(config.attributes.attributes)}</h2>
-            <h3>{localize(config.attributes.attributes)}</h3>
-            <h4>{localize(config.attributes.attributes)}</h4>
-            <p>{localize(config.attributes.attributes)}</p>
-            <span>{actor.system.profile.metaHumanity ?? "Fluffy Dog Lasagna"}</span>
+
+<h1>{localize(config.attributes.attributes)}</h1>
+<div class="attribute-masonry-grid">
+    <div class="attribute-grid-sizer"></div>
+    <div class="attribute-gutter-sizer"></div>
+    {#each Object.entries(attributes) as [key, stat]}
+        <div class="stat-card">
+            <AttributeCard statKey={key} {stat} {config} />
+        </div>
+    {/each}
 </div>

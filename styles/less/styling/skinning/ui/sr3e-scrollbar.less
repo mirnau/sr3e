@@ -1,0 +1,36 @@
+/* Firefox (Gecko) */
+.system-sr3e, .system-sr3e * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,255,255,0.5) transparent;
+}
+
+/* WebKit browsers (Chrome, Edge, Safari) */
+.system-sr3e::-webkit-scrollbar,
+.system-sr3e *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+
+.system-sr3e::-webkit-scrollbar-track,
+.system-sr3e *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.system-sr3e::-webkit-scrollbar-thumb,
+.system-sr3e *::-webkit-scrollbar-thumb {
+  background: rgba(0,255,255,0.5);
+  border-radius: 6px;
+}
+
+.system-sr3e::-webkit-scrollbar-corner,
+.system-sr3e *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Attempt to hide arrows (may not work in all browsers) */
+.system-sr3e::-webkit-scrollbar-button,
+.system-sr3e *::-webkit-scrollbar-button {
+  background: transparent;
+  display: none;
+}
