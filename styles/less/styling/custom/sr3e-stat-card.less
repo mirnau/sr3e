@@ -1,27 +1,87 @@
+.attribute-masonry-grid {
+    display: grid;
+    margin: 0 auto;
 
-    //Attributes, dicepools, movement
-    .stat-card {
-        .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+    h1,
+    h4 {
+        margin: 0;
+    }
 
-        padding: 0.25rem;
-        min-height: 3rem;
-        margin-top: 0.25rem;
+    h1 {
+        text-indent: 0;
+    }
 
-        .stat-value {
-            margin: 0;
+    h4 {
+        text-align: center;
+
+        &:hover {
+            color: @primary-color;
         }
+    }
+
+    .attribute-gutter-sizer {
+        width: 0.25rem;
+    }
+
+    //NOTE: the width is to account for double digits
+    .attribute-grid-sizer,
+    .stat-card {
+        min-width: 6.5rem;
+    }
+
+    .stat-card {
+        background: @attribute-stat-card-color;
+        margin-top: 0.25rem;
+        padding: 0.5rem;
 
         .stat-label {
             display: flex;
-            .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+            align-items: center;
+            justify-content: center; // or center, depending on your layout
+            padding: 0.33rem;
+
+            input {
+                margin: 0rem;
+                .clipped-corners(0.5*0.854*0.854rem, 0.5*0.854*0.854rem, 0.854*0.854rem, 0.5*0.854*0.854rem);
+
+                &:hover {
+                    box-shadow: inset 0 0 25px @highlight-color-primary;
+                    transition: box-shadow 0.3s ease-in;
+                }
+            }
+
+            i {
+                margin-right: 0.5rem;
+                margin-left: 0.5rem;
+            }
+            
+            .decrement-attribute,
+            .increment-attribute {
+                text-align: center;
+                font-size: 0.8rem;
+                color: @attribute-stat-card-button-color;
+                cursor: pointer;
+
+                &:hover {
+                    filter: brightness(1.15);
+                    z-index: 10;
+                }
+
+                &:active {
+                    filter: brightness(1);
+                }
+
+                &.disabled {
+                    color: grey;
+                    pointer-events: none;
+                    opacity: 0.5;
+                }
+            }
         }
 
         &:hover {
+            background-color: @accent-color;
             z-index: 10;
         }
-
-        select {
-            height: 2rem;
-            width: 100%;
-        }
     }
+}

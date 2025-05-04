@@ -9,7 +9,8 @@ export const hooks = {
   renderChatLog: "renderChatLog",
   createActor: "createActor",
   init: "init",
-  ready: "ready"
+  ready: "ready",
+  renderApplicationV2: "renderApplicationV2"
 };
 
 export const flags = {

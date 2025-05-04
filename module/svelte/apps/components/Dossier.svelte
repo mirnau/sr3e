@@ -62,7 +62,7 @@
       <img
         src={actor.img}
         role="presentation"
-        alt={actor.name}
+        alt={actor.name + "!"}
         title={actor.name}
         data-edit="img"
         onclick={handleFilePicker}

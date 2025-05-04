@@ -1,16 +1,10 @@
-var __defProp = Object.defineProperty;
-var __getProtoOf = Object.getPrototypeOf;
-var __reflectGet = Reflect.get;
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
 var _app, _neon;
 class Log {
   static error(message, sender, obj) {
@@ -3171,6 +3165,254 @@ function prop(props, key, flags2, fallback) {
     return get$1(current_value);
   };
 }
+function cubic_out(t) {
+  const f = t - 1;
+  return f * f * f + 1;
+}
+function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
+  const style = getComputedStyle(node);
+  const opacity = +style.opacity;
+  const primary_property = axis === "y" ? "height" : "width";
+  const primary_property_value = parseFloat(style[primary_property]);
+  const secondary_properties = axis === "y" ? ["top", "bottom"] : ["left", "right"];
+  const capitalized_secondary_properties = secondary_properties.map(
+    (e) => (
+      /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
+      `${e[0].toUpperCase()}${e.slice(1)}`
+    )
+  );
+  const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
+  const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
+  const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
+  const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
+  const border_width_start_value = parseFloat(
+    style[`border${capitalized_secondary_properties[0]}Width`]
+  );
+  const border_width_end_value = parseFloat(
+    style[`border${capitalized_secondary_properties[1]}Width`]
+  );
+  return {
+    delay,
+    duration,
+    easing,
+    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
+  };
+}
+const actorStores = /* @__PURE__ */ new Map();
+function getActorStore(actorId, actorName) {
+  let initialState = { name: actorName };
+  if (!actorStores.has(actorId)) {
+    actorStores.set(actorId, writable(initialState));
+  }
+  return actorStores.get(actorId);
+}
+function localize(key) {
+  return game.i18n.localize(key);
+}
+function openFilePicker(document2) {
+  return new Promise((resolve) => {
+    new FilePicker({
+      type: "image",
+      current: document2.img,
+      callback: (path) => {
+        document2.update({ img: path }, { render: true });
+        resolve(path);
+      }
+    }).render(true);
+  });
+}
+function toggleDetails(_, isDetailsOpen, actor, actorStore) {
+  var _a, _b, _c, _d;
+  set(isDetailsOpen, !get$1(isDetailsOpen));
+  (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+    _a,
+    {
+      "system.profile.isDetailsOpen": get$1(isDetailsOpen)
+    },
+    { render: false }
+  );
+  (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({
+    ...store,
+    isDetailsOpen: get$1(isDetailsOpen)
+  }));
+}
+function handleFilePicker(__1, actor) {
+  openFilePicker(actor());
+}
+var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
+var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$b = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+function Dossier($$anchor, $$props) {
+  var _a, _b, _c, _d;
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actorStore = /* @__PURE__ */ derived(() => {
+    var _a2, _b2;
+    return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
+  });
+  let fieldName = state(proxy(((_a = actor()) == null ? void 0 : _a.name) ?? ""));
+  let isDetailsOpen = state(proxy(((_d = (_c = (_b = actor()) == null ? void 0 : _b.system) == null ? void 0 : _c.profile) == null ? void 0 : _d.isDetailsOpen) ?? false));
+  user_effect(() => {
+    if (!get$1(actorStore)) return;
+    const unsubscribe = get$1(actorStore).subscribe((store) => {
+      if ((store == null ? void 0 : store.name) !== void 0) set(fieldName, proxy(store.name));
+      if ((store == null ? void 0 : store.isDetailsOpen) !== void 0) set(isDetailsOpen, proxy(store.isDetailsOpen));
+    });
+    return () => unsubscribe();
+  });
+  function saveActorName(event2) {
+    var _a2, _b2, _c2, _d2;
+    const newName = event2.target.value;
+    (_b2 = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, { name: newName }, { render: true });
+    (_d2 = (_c2 = get$1(actorStore)) == null ? void 0 : _c2.update) == null ? void 0 : _d2.call(_c2, (store) => ({ ...store, name: newName }));
+  }
+  function multiply(value, factor) {
+    return (value * factor).toFixed(2);
+  }
+  function cubicInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function updateStoreName(newName) {
+    var _a2, _b2;
+    set(fieldName, proxy(newName));
+    (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
+  }
+  var div = root$b();
+  var node = child(div);
+  {
+    var consequent = ($$anchor2) => {
+      var div_1 = root_1$3();
+      append($$anchor2, div_1);
+    };
+    var alternate = ($$anchor2) => {
+      var div_2 = root_2$1();
+      var img = child(div_2);
+      img.__click = [handleFilePicker, actor];
+      template_effect(() => {
+        set_attribute(img, "src", actor().img);
+        set_attribute(img, "alt", actor().name + "!");
+        set_attribute(img, "title", actor().name);
+      });
+      append($$anchor2, div_2);
+    };
+    if_block(node, ($$render) => {
+      if (get$1(isDetailsOpen)) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  var div_3 = sibling(node, 2);
+  var div_4 = child(div_3);
+  div_4.__click = [
+    toggleDetails,
+    isDetailsOpen,
+    actor,
+    actorStore
+  ];
+  var text2 = sibling(child(div_4));
+  var node_1 = sibling(div_4, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div_5 = root_3();
+      var div_6 = child(div_5);
+      var input = child(div_6);
+      input.__input = [on_input, updateStoreName];
+      var div_7 = sibling(div_6, 2);
+      var h3 = child(div_7);
+      var text_1 = child(h3);
+      var span = sibling(text_1);
+      var text_2 = child(span);
+      var div_8 = sibling(div_7, 2);
+      var h3_1 = child(div_8);
+      var text_3 = child(h3_1);
+      var div_9 = sibling(div_8, 2);
+      var h3_2 = child(div_9);
+      var text_4 = child(h3_2);
+      var div_10 = sibling(div_9, 2);
+      var h3_3 = child(div_10);
+      var text_5 = child(h3_3);
+      var a = sibling(div_10, 2);
+      var h3_4 = child(a);
+      var text_6 = child(h3_4);
+      template_effect(
+        ($0, $1, $2, $3, $4, $5, $6) => {
+          var _a2, _b2, _c2, _d2, _e, _f, _g, _h;
+          set_value(input, get$1(fieldName));
+          set_text(text_1, `${$0 ?? ""}: `);
+          set_text(text_2, ((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
+          set_text(text_3, `${$1 ?? ""}: ${((_d2 = (_c2 = actor().system) == null ? void 0 : _c2.profile) == null ? void 0 : _d2.age) ?? ""}`);
+          set_text(text_4, `${$2 ?? ""}: ${((_f = (_e = actor().system) == null ? void 0 : _e.profile) == null ? void 0 : _f.height) ?? ""} cm (${$3 ?? ""} feet)`);
+          set_text(text_5, `${$4 ?? ""}: ${((_h = (_g = actor().system) == null ? void 0 : _g.profile) == null ? void 0 : _h.weight) ?? ""} kg (${$5 ?? ""} stones)`);
+          set_text(text_6, $6);
+        },
+        [
+          () => localize(config().traits.metahuman),
+          () => localize(config().traits.age),
+          () => localize(config().traits.height),
+          () => {
+            var _a2, _b2;
+            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
+          },
+          () => localize(config().traits.weight),
+          () => {
+            var _a2, _b2;
+            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
+          },
+          () => localize(config().sheet.viewbackground)
+        ]
+      );
+      event("blur", input, saveActorName);
+      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
+      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      append($$anchor2, div_5);
+    };
+    if_block(node_1, ($$render) => {
+      if (get$1(isDetailsOpen)) $$render(consequent_1);
+    });
+  }
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "input"]);
+var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_2 = /* @__PURE__ */ template(`<div class="stat-label"><i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i></div>`);
+var root$a = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+function AttributeCard($$anchor, $$props) {
+  push($$props, true);
+  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
+  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
+  var fragment = root$a();
+  var h3 = first_child(fragment);
+  var text2 = child(h3);
+  var node = sibling(h3, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var h1 = root_1$2();
+      var text_1 = child(h1);
+      template_effect(() => set_text(text_1, get$1(baseTotal)));
+      append($$anchor2, h1);
+    };
+    var alternate = ($$anchor2) => {
+      var div = root_2();
+      var h1_1 = sibling(child(div), 2);
+      var text_2 = child(h1_1);
+      template_effect(() => set_text(text_2, get$1(total)));
+      append($$anchor2, div);
+    };
+    if_block(node, ($$render) => {
+      if ($$props.stat.meta == null) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(($0) => set_text(text2, $0), [
+    () => localize($$props.config.attributes[$$props.statKey] || $$props.statKey)
+  ]);
+  append($$anchor, fragment);
+  pop();
+}
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -4621,261 +4863,91 @@ function requireMasonry() {
 }
 var masonryExports = requireMasonry();
 const Masonry = /* @__PURE__ */ getDefaultExportFromCjs(masonryExports);
-function cubic_out(t) {
-  const f = t - 1;
-  return f * f * f + 1;
-}
-function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
-  const style = getComputedStyle(node);
-  const opacity = +style.opacity;
-  const primary_property = axis === "y" ? "height" : "width";
-  const primary_property_value = parseFloat(style[primary_property]);
-  const secondary_properties = axis === "y" ? ["top", "bottom"] : ["left", "right"];
-  const capitalized_secondary_properties = secondary_properties.map(
-    (e) => (
-      /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
-      `${e[0].toUpperCase()}${e.slice(1)}`
-    )
-  );
-  const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
-  const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
-  const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
-  const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
-  const border_width_start_value = parseFloat(
-    style[`border${capitalized_secondary_properties[0]}Width`]
-  );
-  const border_width_end_value = parseFloat(
-    style[`border${capitalized_secondary_properties[1]}Width`]
-  );
-  return {
-    delay,
-    duration,
-    easing,
-    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
+function setupMasonry({
+  container,
+  itemSelector,
+  gridSizerSelector,
+  gutterSizerSelector,
+  minItemWidth = 220,
+  stateMachineThresholds = { small: 0, medium: 800, wide: 1100 },
+  onLayoutStateChange = () => {
+  }
+}) {
+  if (!container) return () => {
+  };
+  const form = container.parentElement;
+  const getLayoutState = (w) => {
+    if (w > stateMachineThresholds.wide) return "wide";
+    if (w > stateMachineThresholds.medium) return "medium";
+    return "small";
+  };
+  const applyWidths = () => {
+    const style = getComputedStyle(form);
+    const parentPadding = parseFloat(style.paddingLeft) || 0;
+    const parentWidth = form.offsetWidth - 2 * parentPadding;
+    const gutterEl = container.querySelector(gutterSizerSelector);
+    const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
+    const firstItem = container.querySelector(itemSelector);
+    const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
+    let columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
+    const totalGutter = gutterPx * (columnCount - 1);
+    const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
+    container.querySelectorAll(itemSelector).forEach((item2) => {
+      item2.style.width = `${itemWidth}px`;
+    });
+    const sizer = container.querySelector(gridSizerSelector);
+    if (sizer) sizer.style.width = `${itemWidth}px`;
+    const state2 = getLayoutState(parentWidth);
+    onLayoutStateChange(state2);
+  };
+  const msnry = new Masonry(container, {
+    itemSelector,
+    columnWidth: gridSizerSelector,
+    gutter: gutterSizerSelector,
+    percentPosition: true
+  });
+  const resizeObserver = new ResizeObserver(() => {
+    applyWidths();
+    msnry.reloadItems();
+    msnry.layout();
+  });
+  resizeObserver.observe(form);
+  const itemObservers = [];
+  container.querySelectorAll(itemSelector).forEach((item2) => {
+    const obs = new ResizeObserver(() => {
+      msnry.reloadItems();
+      msnry.layout();
+    });
+    obs.observe(item2);
+    itemObservers.push(obs);
+  });
+  applyWidths();
+  msnry.reloadItems();
+  msnry.layout();
+  return () => {
+    resizeObserver.disconnect();
+    itemObservers.forEach((obs) => obs.disconnect());
+    msnry.destroy();
   };
 }
-const actorStores = /* @__PURE__ */ new Map();
-function getActorStore(actorId, actorName) {
-  let initialState = { name: actorName };
-  if (!actorStores.has(actorId)) {
-    actorStores.set(actorId, writable(initialState));
-  }
-  return actorStores.get(actorId);
-}
-function localize(key) {
-  return game.i18n.localize(key);
-}
-function openFilePicker(document2) {
-  return new Promise((resolve) => {
-    new FilePicker({
-      type: "image",
-      current: document2.img,
-      callback: (path) => {
-        document2.update({ img: path }, { render: true });
-        resolve(path);
-      }
-    }).render(true);
-  });
-}
-function toggleDetails(_, isDetailsOpen, actor, actorStore) {
-  var _a, _b, _c, _d;
-  set(isDetailsOpen, !get$1(isDetailsOpen));
-  (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-    _a,
-    {
-      "system.profile.isDetailsOpen": get$1(isDetailsOpen)
-    },
-    { render: false }
-  );
-  (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({
-    ...store,
-    isDetailsOpen: get$1(isDetailsOpen)
-  }));
-}
-function handleFilePicker(__1, actor) {
-  openFilePicker(actor());
-}
-var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$8 = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
-function Dossier($$anchor, $$props) {
-  var _a, _b, _c, _d;
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let actorStore = /* @__PURE__ */ derived(() => {
-    var _a2, _b2;
-    return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
-  });
-  let fieldName = state(proxy(((_a = actor()) == null ? void 0 : _a.name) ?? ""));
-  let isDetailsOpen = state(proxy(((_d = (_c = (_b = actor()) == null ? void 0 : _b.system) == null ? void 0 : _c.profile) == null ? void 0 : _d.isDetailsOpen) ?? false));
-  user_effect(() => {
-    if (!get$1(actorStore)) return;
-    const unsubscribe = get$1(actorStore).subscribe((store) => {
-      if ((store == null ? void 0 : store.name) !== void 0) set(fieldName, proxy(store.name));
-      if ((store == null ? void 0 : store.isDetailsOpen) !== void 0) set(isDetailsOpen, proxy(store.isDetailsOpen));
-    });
-    return () => unsubscribe();
-  });
-  function saveActorName(event2) {
-    var _a2, _b2, _c2, _d2;
-    const newName = event2.target.value;
-    (_b2 = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, { name: newName }, { render: true });
-    (_d2 = (_c2 = get$1(actorStore)) == null ? void 0 : _c2.update) == null ? void 0 : _d2.call(_c2, (store) => ({ ...store, name: newName }));
-  }
-  function multiply(value, factor) {
-    return (value * factor).toFixed(2);
-  }
-  function cubicInOut(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  }
-  function updateStoreName(newName) {
-    var _a2, _b2;
-    set(fieldName, proxy(newName));
-    (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
-  }
-  var div = root$8();
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var div_1 = root_1$3();
-      append($$anchor2, div_1);
-    };
-    var alternate = ($$anchor2) => {
-      var div_2 = root_2$1();
-      var img = child(div_2);
-      img.__click = [handleFilePicker, actor];
-      template_effect(() => {
-        set_attribute(img, "src", actor().img);
-        set_attribute(img, "alt", actor().name);
-        set_attribute(img, "title", actor().name);
-      });
-      append($$anchor2, div_2);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  var div_3 = sibling(node, 2);
-  var div_4 = child(div_3);
-  div_4.__click = [
-    toggleDetails,
-    isDetailsOpen,
-    actor,
-    actorStore
-  ];
-  var text2 = sibling(child(div_4));
-  var node_1 = sibling(div_4, 2);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3();
-      var div_6 = child(div_5);
-      var input = child(div_6);
-      input.__input = [on_input, updateStoreName];
-      var div_7 = sibling(div_6, 2);
-      var h3 = child(div_7);
-      var text_1 = child(h3);
-      var span = sibling(text_1);
-      var text_2 = child(span);
-      var div_8 = sibling(div_7, 2);
-      var h3_1 = child(div_8);
-      var text_3 = child(h3_1);
-      var div_9 = sibling(div_8, 2);
-      var h3_2 = child(div_9);
-      var text_4 = child(h3_2);
-      var div_10 = sibling(div_9, 2);
-      var h3_3 = child(div_10);
-      var text_5 = child(h3_3);
-      var a = sibling(div_10, 2);
-      var h3_4 = child(a);
-      var text_6 = child(h3_4);
-      template_effect(
-        ($0, $1, $2, $3, $4, $5, $6) => {
-          var _a2, _b2, _c2, _d2, _e, _f, _g, _h;
-          set_value(input, get$1(fieldName));
-          set_text(text_1, `${$0 ?? ""}: `);
-          set_text(text_2, ((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
-          set_text(text_3, `${$1 ?? ""}: ${((_d2 = (_c2 = actor().system) == null ? void 0 : _c2.profile) == null ? void 0 : _d2.age) ?? ""}`);
-          set_text(text_4, `${$2 ?? ""}: ${((_f = (_e = actor().system) == null ? void 0 : _e.profile) == null ? void 0 : _f.height) ?? ""} cm (${$3 ?? ""} feet)`);
-          set_text(text_5, `${$4 ?? ""}: ${((_h = (_g = actor().system) == null ? void 0 : _g.profile) == null ? void 0 : _h.weight) ?? ""} kg (${$5 ?? ""} stones)`);
-          set_text(text_6, $6);
-        },
-        [
-          () => localize(config().traits.metahuman),
-          () => localize(config().traits.age),
-          () => localize(config().traits.height),
-          () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
-          },
-          () => localize(config().traits.weight),
-          () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
-          },
-          () => localize(config().sheet.viewbackground)
-        ]
-      );
-      event("blur", input, saveActorName);
-      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
-      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
-      append($$anchor2, div_5);
-    };
-    if_block(node_1, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent_1);
-    });
-  }
-  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
-  append($$anchor, div);
-  pop();
-}
-delegate(["click", "input"]);
-var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i>`, 1);
-var root$7 = /* @__PURE__ */ template(`<div class="stat-card"><h3> </h3> <!></div>`);
-function AttributeCard($$anchor, $$props) {
-  push($$props, true);
-  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
-  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var div = root$7();
-  var h3 = child(div);
-  var text2 = child(h3);
-  var node = sibling(h3, 2);
-  {
-    var consequent = ($$anchor2) => {
-      var h1 = root_1$2();
-      var text_1 = child(h1);
-      template_effect(() => set_text(text_1, get$1(baseTotal)));
-      append($$anchor2, h1);
-    };
-    var alternate = ($$anchor2) => {
-      var fragment = root_2();
-      var h1_1 = sibling(first_child(fragment), 2);
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, fragment);
-    };
-    if_block(node, ($$render) => {
-      if ($$props.stat.meta == null) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  template_effect(($0) => set_text(text2, $0), [
-    () => localize($$props.config.attributes[$$props.statKey] || $$props.statKey)
-  ]);
-  append($$anchor, div);
-  pop();
-}
 var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$6 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$9 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
-  var fragment = root$6();
+  let gridContainer;
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$9();
   var h1 = first_child(fragment);
   var text2 = child(h1);
   var div = sibling(h1, 2);
@@ -4896,33 +4968,104 @@ function Attributes($$anchor, $$props) {
         return config();
       }
     });
+    template_effect(() => {
+      toggle_class(div_1, "stat-card", key());
+      toggle_class(div_1, "attribute-card", key());
+    });
     append($$anchor2, div_1);
   });
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
 }
-var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <span> </span></div>`);
+enable_legacy_mode_flag();
+var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsLangauge($$anchor) {
+  var div = root$8();
+  append($$anchor, div);
+}
+var root$7 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
+  var div = root$7();
+  append($$anchor, div);
+}
+var root$6 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+function SkillsActive($$anchor) {
+  var div = root$6();
+  append($$anchor, div);
+}
+var on_click = (_, activeTab) => set(activeTab, "active");
+var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
+var on_click_2 = (__2, activeTab) => set(activeTab, "language");
+var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let activeTab = state("active");
+  actor().skills || [];
   var div = root$5();
   var h1 = child(div);
   var text2 = child(h1);
-  var span = sibling(h1, 2);
-  var text_1 = child(span);
-  template_effect(
-    ($0) => {
-      set_text(text2, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
-    },
-    [() => localize(config().skills.skills)]
-  );
+  var div_1 = sibling(h1, 2);
+  var button = child(div_1);
+  button.__click = [on_click, activeTab];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_1, activeTab];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [on_click_2, activeTab];
+  var node = sibling(div_1, 2);
+  {
+    var consequent = ($$anchor2) => {
+      SkillsActive($$anchor2);
+    };
+    var alternate_1 = ($$anchor2) => {
+      var fragment_1 = comment();
+      var node_1 = first_child(fragment_1);
+      {
+        var consequent_1 = ($$anchor3) => {
+          SkillsKnowledge($$anchor3);
+        };
+        var alternate = ($$anchor3) => {
+          var fragment_3 = comment();
+          var node_2 = first_child(fragment_3);
+          {
+            var consequent_2 = ($$anchor4) => {
+              SkillsLangauge($$anchor4);
+            };
+            if_block(
+              node_2,
+              ($$render) => {
+                if (get$1(activeTab) === "language") $$render(consequent_2);
+              },
+              true
+            );
+          }
+          append($$anchor3, fragment_3);
+        };
+        if_block(
+          node_1,
+          ($$render) => {
+            if (get$1(activeTab) === "knowledge") $$render(consequent_1);
+            else $$render(alternate, false);
+          },
+          true
+        );
+      }
+      append($$anchor2, fragment_1);
+    };
+    if_block(node, ($$render) => {
+      if (get$1(activeTab) === "active") $$render(consequent);
+      else $$render(alternate_1, false);
+    });
+  }
+  template_effect(($0) => set_text(text2, $0), [() => localize(config().skills.skills)]);
   append($$anchor, div);
   pop();
 }
+delegate(["click"]);
 var root$4 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
 function Health($$anchor, $$props) {
   push($$props, true);
@@ -5000,93 +5143,25 @@ function CharacterSheetApp($$anchor, $$props) {
     { id: 9, txt: "Testing Databind" }
   ]);
   let container = null;
-  let mason = null;
-  let resizeObserver = null;
-  let formWidth = state(0);
-  let formHeight = state(0);
+  let layoutState = state("small");
   const maxWidth = 1400;
-  const lowerLimit = 0.5 * maxWidth;
-  const middleLimit = 0.66 * maxWidth;
-  let layoutState = /* @__PURE__ */ derived(() => () => {
-    if (get$1(formWidth) > middleLimit) return "wide";
-    if (get$1(formWidth) > lowerLimit) return "medium";
-    return "small";
-  });
-  function calcAndApplyColumnWidths() {
-    if (!container || !$$props.form) return;
-    const style = getComputedStyle($$props.form);
-    const parentPadding = parseFloat(style.paddingLeft) || 0;
-    const parentWidth = $$props.form.offsetWidth - 2 * parentPadding;
-    const gutterEl = container.querySelector(".layout-gutter-sizer");
-    const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
-    const firstItem = container.querySelector(".sheet-component");
-    const minItemWidthPx = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || 220 : 220;
-    let columnCount = Math.floor((parentWidth + gutterPx) / (minItemWidthPx + gutterPx));
-    columnCount = Math.max(columnCount, 1);
-    const totalGutterWidthPx = gutterPx * (columnCount - 1);
-    const itemWidthPx = (parentWidth - totalGutterWidthPx) / columnCount;
-    const adjustedItemWidthPx = Math.floor(itemWidthPx);
-    container.querySelectorAll(".sheet-component").forEach((item2) => {
-      item2.style.width = `${adjustedItemWidthPx}px`;
-    });
-    const sizer = container.querySelector(".layout-grid-sizer");
-    if (sizer) sizer.style.width = `${adjustedItemWidthPx}px`;
-    const twoSpan = container.querySelectorAll(".two-span-selectable");
-    const threeSpan = container.querySelectorAll(".three-span-selectable");
-    if (get$1(layoutState) === "small") {
-      twoSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
-      threeSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
-    } else if (get$1(layoutState) === "medium") {
-      twoSpan.forEach((c) => c.style.width = `calc(${2 * adjustedItemWidthPx}px + ${gutterPx}px)`);
-      threeSpan.forEach((c) => c.style.width = `${adjustedItemWidthPx}px`);
-    } else if (get$1(layoutState) === "wide") {
-      twoSpan.forEach((c) => c.style.width = `calc(${2 * adjustedItemWidthPx}px + ${gutterPx}px)`);
-      threeSpan.forEach((c) => c.style.width = `calc(${3 * adjustedItemWidthPx}px + ${2 * gutterPx}px)`);
-    }
-  }
   user_effect(() => {
-    calcAndApplyColumnWidths();
-    mason = new Masonry(container, {
+    const cleanup = setupMasonry({
+      container,
       itemSelector: ".sheet-component",
-      columnWidth: ".layout-grid-sizer",
-      gutter: ".layout-gutter-sizer",
-      percentPosition: true
+      gridSizerSelector: ".layout-grid-sizer",
+      gutterSizerSelector: ".layout-gutter-sizer",
+      minItemWidth: 220,
+      stateMachineThresholds: {
+        small: 0,
+        medium: 0.5 * maxWidth,
+        wide: 0.66 * maxWidth
+      },
+      onLayoutStateChange: (state2) => {
+        set(layoutState, proxy(state2));
+      }
     });
-    mason.reloadItems();
-    mason.layout();
-    resizeObserver = new ResizeObserver(() => {
-      calcAndApplyColumnWidths();
-      mason.reloadItems();
-      mason.layout();
-      set(formWidth, proxy($$props.form.offsetWidth));
-      set(formHeight, proxy($$props.form.offsetHeight));
-    });
-    resizeObserver.observe($$props.form);
-    const itemObservers = [];
-    container.querySelectorAll(".sheet-component").forEach((item2) => {
-      const obs = new ResizeObserver(() => {
-        mason.reloadItems();
-        mason.layout();
-      });
-      obs.observe(item2);
-      itemObservers.push(obs);
-    });
-    return () => {
-      resizeObserver == null ? void 0 : resizeObserver.disconnect();
-      itemObservers.forEach((obs) => obs.disconnect());
-      mason == null ? void 0 : mason.destroy();
-      mason = null;
-      resizeObserver = null;
-    };
-  });
-  user_effect(() => {
-    if (mason && container && container.isConnected) {
-      calcAndApplyColumnWidths();
-      mason.reloadItems();
-      mason.layout();
-    }
-    get$1(formWidth);
-    get$1(layoutState);
+    return cleanup;
   });
   var div = root$2();
   var node = sibling(child(div), 4);
@@ -5129,7 +5204,6 @@ function CharacterSheetApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-enable_legacy_mode_flag();
 var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
@@ -5177,11 +5251,10 @@ function NewsFeed($$anchor) {
   var div = root();
   append($$anchor, div);
 }
-const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
+class CharacterActorSheet extends foundry.applications.sheets.DocumentSheetV2 {
   constructor() {
     super(...arguments);
     __privateAdd(this, _app);
-    // Svelte component instance
     __privateAdd(this, _neon);
   }
   _renderHTML() {
@@ -5190,17 +5263,16 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
   _replaceHTML(result, windowContent) {
     var _a;
     windowContent.innerHTML = "";
-    const form2 = windowContent.parentNode;
+    const form = windowContent.parentNode;
     __privateSet(this, _app, mount(CharacterSheetApp, {
       target: windowContent,
       props: {
-        actor: this.actor,
+        actor: this.document,
         config: CONFIG.sr3e,
-        form: form2
-        // for ResizeObserver/layout logic
+        form
       }
     }));
-    const header = form2.querySelector("header.window-header");
+    const header = form.querySelector("header.window-header");
     let neonSlot = header == null ? void 0 : header.previousElementSibling;
     if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
       neonSlot = document.createElement("div");
@@ -5208,10 +5280,10 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
       header.parentElement.insertBefore(neonSlot, header);
       __privateSet(this, _neon, mount(NeonName, {
         target: neonSlot,
-        props: { actor: this.actor }
+        props: { actor: this.document }
       }));
     }
-    const title = form2.querySelector(".window-title");
+    const title = form.querySelector(".window-title");
     title.remove();
     const svelteInejction = document.createElement("div");
     svelteInejction.classList.add("svelte-injection");
@@ -5220,7 +5292,7 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
       target: header,
       anchor: header.firstChild,
       props: {
-        actor: this.actor
+        actor: this.document
       }
     }));
     windowContent.classList.add("noise-layer");
@@ -5236,24 +5308,9 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
   _onSubmit() {
     return false;
   }
-};
+}
 _app = new WeakMap();
 _neon = new WeakMap();
-// NeonName injection instance
-__publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
-  ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
-  id: "sr3e-character-sheet",
-  classes: ["sr3e", "sheet", "actor", "character"],
-  template: null,
-  position: { width: 820, height: 820 },
-  window: {
-    resizable: true
-  },
-  tag: "form",
-  submitOnChange: true,
-  closeOnSubmit: false
-});
-let CharacterActorSheet = _CharacterActorSheet;
 const sr3e = {};
 sr3e.attributes = {
   attributes: "sr3e.attributes.attributes",
@@ -5344,7 +5401,8 @@ const hooks = {
   renderChatLog: "renderChatLog",
   createActor: "createActor",
   init: "init",
-  ready: "ready"
+  ready: "ready",
+  renderApplicationV2: "renderApplicationV2"
 };
 const flags = {
   sr3e: "sr3e",
@@ -5352,6 +5410,31 @@ const flags = {
     isDossierDetailsOpen: "isDossierDetailsOpen"
   }
 };
+function injectFooterIntoWindowApp(app, element, ctx, data) {
+  var _a;
+  const rawTypes = [
+    foundry.applications.api.DialogV2,
+    foundry.applications.sheets.ActorSheetV2,
+    foundry.applications.sheets.ItemSheetV2,
+    foundry.applications.sheets.JournalSheetV2,
+    foundry.applications.sheets.CardsSheetV2
+  ];
+  const allowedTypes = rawTypes.filter((t) => typeof t === "function");
+  if (!allowedTypes.some((type) => app instanceof type)) return;
+  const el = (element == null ? void 0 : element.nodeType) === 1 ? element : element == null ? void 0 : element[0];
+  if (!el) return;
+  if (el.querySelector(".window-app-footer")) return;
+  const isNested = ((_a = el.parentElement) == null ? void 0 : _a.closest(".application")) !== null;
+  if (isNested) return;
+  const footer = document.createElement("div");
+  footer.classList.add("window-app-footer");
+  const resizeHandle = el.querySelector(".window-resize-handle");
+  if (resizeHandle == null ? void 0 : resizeHandle.parentNode) {
+    resizeHandle.parentNode.insertBefore(footer, resizeHandle.nextSibling);
+  } else {
+    el.appendChild(footer);
+  }
+}
 const docs = foundry.applications.apps.DocumentSheetConfig;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -5397,17 +5480,8 @@ function configureThemes() {
 }
 function registerHooks() {
   console.log("TESTING BEGINNING");
-  Hooks.on("renderApplicationV2", (app, element, ctx, data) => {
-    const footer = document.createElement("div");
-    footer.classList.add("window-app-footer");
-    if (app instanceof foundry.applications.sheets.ActorSheetV2) {
-      element.appendChild(footer);
-    } else if (app instanceof foundry.applications.api.DialogV2) {
-      element.appendChild(footer);
-      form.appendChild(footer);
-    }
-  });
   console.log("TESTING ENDING");
+  Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.once(hooks.init, () => {
     configureProject();
     configureThemes();

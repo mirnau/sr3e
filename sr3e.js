@@ -6,6 +6,7 @@ import {
   hooks,
   flags
 } from "./module/foundry/services/commonConsts.js";
+import { injectFooterIntoWindowApp } from "./module/foundry/hooks/renderApplicationV2/injectFooterIntoWindowApp.js";
 
 const docs = foundry.applications.apps.DocumentSheetConfig;
 
@@ -56,33 +57,19 @@ function configureThemes() {
   });
 }
 
-
-
 function registerHooks() {
 
   console.log("TESTING BEGINNING");
   ////// TESTING ONLY //////
 
-  Hooks.on('renderApplicationV2', (app, element, ctx, data) => {
-    const footer = document.createElement('div');
-    footer.classList.add('window-app-footer');
-
-    if (app instanceof foundry.applications.sheets.ActorSheetV2) {
-      element.appendChild(footer);
-    } else if (app instanceof foundry.applications.api.DialogV2) {
-      // TODO: Make this visible
-      element.appendChild(footer);
-      form.appendChild(footer); 
-    }
     
-  });
-
   ///// TEST END ////
   console.log("TESTING ENDING");
-
+  
+  Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
 
   Hooks.once(hooks.init, () => {
-
+    
     configureProject();
     configureThemes();
 
