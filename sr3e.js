@@ -35,7 +35,7 @@ function configureProject() {
 
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
-  DocumentSheetConfig.unregisterSheet(JournalEntry, flags.core, JournalEntrySheet);
+  //DocumentSheetConfig.unregisterSheet(JournalEntry, flags.core, JournalEntrySheet);
 }
 
 function configureThemes() {

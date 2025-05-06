@@ -11,7 +11,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   static DEFAULT_OPTIONS = {
     ...super.DEFAULT_OPTIONS,
     id: "sr3e-character-sheet",
-    classes: ["sr3e", "sheet", "actor", "character"],
+    classes: ["sr3e", "sheet", "actor", "character", "ActorSheetV2"],
     template: null,
     position: { width: 820, height: 820 },
     window: {
@@ -22,13 +22,11 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     closeOnSubmit: false
   };
 
-
-
-  _renderHTML() {
+  _renderHTML() { 
     return null;
   }
 
-  _replaceHTML(result, windowContent) {
+  _replaceHTML(_, windowContent) {
     windowContent.innerHTML = "";
     const form = windowContent.parentNode;
 
@@ -75,8 +73,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   }
 
   async _tearDown() {
-    if (this.#app) await unmount(this.#app);
     if (this.#neon) await unmount(this.#neon);
+    if (this.#app) await unmount(this.#app);
     this.#app = this.#neon = null;
     return super._tearDown();
   }
