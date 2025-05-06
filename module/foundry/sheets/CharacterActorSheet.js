@@ -3,11 +3,26 @@ import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
-import { DocumentSheetV2 } from "#runtime/sheets/document/sheet-v2.js";
 
-export default class CharacterActorSheet extends DocumentSheetV2 {
+export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
   #neon;
+
+  static DEFAULT_OPTIONS = {
+    ...super.DEFAULT_OPTIONS,
+    id: "sr3e-character-sheet",
+    classes: ["sr3e", "sheet", "actor", "character"],
+    template: null,
+    position: { width: 820, height: 820 },
+    window: {
+      resizable: true
+    },
+    tag: "form",
+    submitOnChange: true,
+    closeOnSubmit: false
+  };
+
+
 
   _renderHTML() {
     return null;

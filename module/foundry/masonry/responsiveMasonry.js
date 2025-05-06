@@ -55,9 +55,11 @@ export function setupMasonry({
   });
 
   const resizeObserver = new ResizeObserver(() => {
-    applyWidths();
-    msnry.reloadItems();
-    msnry.layout();
+    requestAnimationFrame(() => {
+        applyWidths();
+        msnry.reloadItems();
+        msnry.layout();
+    });
   });
 
   resizeObserver.observe(form);
@@ -65,11 +67,12 @@ export function setupMasonry({
   const itemObservers = [];
   container.querySelectorAll(itemSelector).forEach((item) => {
     const obs = new ResizeObserver(() => {
-      msnry.reloadItems();
-      msnry.layout();
+        requestAnimationFrame(() => {
+            msnry.reloadItems();
+            msnry.layout();
+        });
     });
     obs.observe(item);
-    itemObservers.push(obs);
   });
 
   // Initial apply

@@ -1,11 +1,17 @@
+var __defProp = Object.defineProperty;
+var __getProtoOf = Object.getPrototypeOf;
+var __reflectGet = Reflect.get;
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon;
+var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
+var _app, _neon, _app2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3243,7 +3249,7 @@ var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><im
 var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$b = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+var root$c = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3279,7 +3285,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var div = root$b();
+  var div = root$c();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -3379,12 +3385,12 @@ function Dossier($$anchor, $$props) {
 delegate(["click", "input"]);
 var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_2 = /* @__PURE__ */ template(`<div class="stat-label"><i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i></div>`);
-var root$a = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root$b = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$a();
+  var fragment = root$b();
   var h3 = first_child(fragment);
   var text2 = child(h3);
   var node = sibling(h3, 2);
@@ -4907,19 +4913,22 @@ function setupMasonry({
     percentPosition: true
   });
   const resizeObserver = new ResizeObserver(() => {
-    applyWidths();
-    msnry.reloadItems();
-    msnry.layout();
+    requestAnimationFrame(() => {
+      applyWidths();
+      msnry.reloadItems();
+      msnry.layout();
+    });
   });
   resizeObserver.observe(form);
   const itemObservers = [];
   container.querySelectorAll(itemSelector).forEach((item2) => {
     const obs = new ResizeObserver(() => {
-      msnry.reloadItems();
-      msnry.layout();
+      requestAnimationFrame(() => {
+        msnry.reloadItems();
+        msnry.layout();
+      });
     });
     obs.observe(item2);
-    itemObservers.push(obs);
   });
   applyWidths();
   msnry.reloadItems();
@@ -4931,7 +4940,7 @@ function setupMasonry({
   };
 }
 var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$9 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$a = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -4947,7 +4956,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$9();
+  var fragment = root$a();
   var h1 = first_child(fragment);
   var text2 = child(h1);
   var div = sibling(h1, 2);
@@ -4982,31 +4991,31 @@ function Attributes($$anchor, $$props) {
   pop();
 }
 enable_legacy_mode_flag();
-var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$9 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$9();
+  append($$anchor, div);
+}
+var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$8();
   append($$anchor, div);
 }
-var root$7 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$7();
-  append($$anchor, div);
-}
-var root$6 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+var root$7 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
 function SkillsActive($$anchor) {
-  var div = root$6();
+  var div = root$7();
   append($$anchor, div);
 }
 var on_click = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var div = root$5();
+  var div = root$6();
   var h1 = child(div);
   var text2 = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5066,11 +5075,11 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$4 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$4();
+  var div = root$5();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -5085,11 +5094,11 @@ function Health($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$3 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$3();
+  var div = root$4();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -5107,7 +5116,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 var root_1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="inner-background-container"><div class="fake-shadow"></div> <div class="inner-background"><!></div></div></div>`);
-var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const cards = proxy([
@@ -5153,7 +5162,6 @@ function CharacterSheetApp($$anchor, $$props) {
       gutterSizerSelector: ".layout-gutter-sizer",
       minItemWidth: 220,
       stateMachineThresholds: {
-        small: 0,
         medium: 0.5 * maxWidth,
         wide: 0.66 * maxWidth
       },
@@ -5163,7 +5171,7 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$2();
+  var div = root$3();
   var node = sibling(child(div), 4);
   each(node, 17, () => cards, (c) => c.id, ($$anchor2, c) => {
     var div_1 = root_1();
@@ -5204,7 +5212,7 @@ function CharacterSheetApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5239,19 +5247,19 @@ function NeonName($$anchor, $$props) {
   });
   legacy_pre_effect_reset();
   init();
-  var div = root$1();
+  var div = root$2();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root();
+  var div = root$1();
   append($$anchor, div);
 }
-class CharacterActorSheet extends foundry.applications.sheets.DocumentSheetV2 {
+const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
     super(...arguments);
     __privateAdd(this, _app);
@@ -5308,9 +5316,66 @@ class CharacterActorSheet extends foundry.applications.sheets.DocumentSheetV2 {
   _onSubmit() {
     return false;
   }
-}
+};
 _app = new WeakMap();
 _neon = new WeakMap();
+__publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
+  ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
+  id: "sr3e-character-sheet",
+  classes: ["sr3e", "sheet", "actor", "character"],
+  template: null,
+  position: { width: 820, height: 820 },
+  window: {
+    resizable: true
+  },
+  tag: "form",
+  submitOnChange: true,
+  closeOnSubmit: false
+});
+let CharacterActorSheet = _CharacterActorSheet;
+var root = /* @__PURE__ */ template(`<div>Hello Jornal Entry App</div>`);
+function JournalEntryApp($$anchor) {
+  var div = root();
+  append($$anchor, div);
+}
+const { DocumentSheetV2 } = foundry.applications.api;
+class SR3EJournalEntry extends DocumentSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _app2);
+  }
+  async _renderHTML() {
+    const form = document.createElement("form");
+    form.dataset.documentId = this.document.id;
+    const root2 = document.createElement("div");
+    root2.id = "svelte-root";
+    form.append(root2);
+    return form;
+  }
+  _replaceHTML(result, content) {
+    content.replaceChildren(result);
+  }
+  async _onRender() {
+    if (__privateGet(this, _app2)) return;
+    __privateSet(this, _app2, mount(JournalEntryApp, {
+      target: this.element.querySelector("#svelte-root"),
+      props: { doc: this.document }
+    }));
+  }
+  async _onClose() {
+    await unmount(__privateGet(this, _app2));
+    __privateSet(this, _app2, null);
+  }
+}
+_app2 = new WeakMap();
+__publicField(SR3EJournalEntry, "DEFAULT_OPTIONS", {
+  ...DocumentSheetV2.DEFAULT_OPTIONS,
+  id: "sr3e-journal-sheet",
+  classes: ["sr3e", "journal", "v2"],
+  width: 640,
+  height: 720,
+  title: "SR3E Journal"
+});
 const sr3e = {};
 sr3e.attributes = {
   attributes: "sr3e.attributes.attributes",
@@ -5391,24 +5456,12 @@ sr3e.userconfig = {
   saveUserSettings: "sr3e.userconfig.saveUserSettings"
 };
 const hooks = {
-  renderCharacterActorSheet: "renderCharacterActorSheet",
-  closeCharacterActorSheet: "closeCharacterActorSheet",
-  renderMetahumanItemSheet: "renderMetahumanItemSheet",
-  closeMetahumanItemSheet: "closeMetahumanItemSheet",
-  renderSidebarTab: "renderSidebarTab",
-  preCreateActor: "preCreateActor",
-  renderChatMessageHTML: "renderChatMessageHTML",
-  renderChatLog: "renderChatLog",
-  createActor: "createActor",
   init: "init",
-  ready: "ready",
   renderApplicationV2: "renderApplicationV2"
 };
 const flags = {
   sr3e: "sr3e",
-  actor: {
-    isDossierDetailsOpen: "isDossierDetailsOpen"
-  }
+  core: "core"
 };
 function injectFooterIntoWindowApp(app, element, ctx, data) {
   var _a;
@@ -5435,14 +5488,15 @@ function injectFooterIntoWindowApp(app, element, ctx, data) {
     el.appendChild(footer);
   }
 }
-const docs = foundry.applications.apps.DocumentSheetConfig;
+const { DocumentSheetConfig } = foundry.applications.apps;
+const { JournalEntrySheet } = foundry.applications.sheets.journal;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
     var _a;
     const docName = docClass.documentName;
     (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
     CONFIG[docName].dataModels[type] = model;
-    docs.registerSheet(
+    DocumentSheetConfig.registerSheet(
       docClass,
       flags.sr3e,
       sheet,
@@ -5456,8 +5510,9 @@ function configureProject() {
   CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
-  docs.unregisterSheet(Actor, "core", "ActorSheetV2");
-  docs.unregisterSheet(Item, "core", "ItemSheetV2");
+  DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
+  DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
+  DocumentSheetConfig.unregisterSheet(JournalEntry, flags.core, JournalEntrySheet);
 }
 function configureThemes() {
   game.settings.register("sr3e", "theme", {
@@ -5489,6 +5544,10 @@ function registerHooks() {
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
       ]
+    });
+    DocumentSheetConfig.registerSheet(JournalEntry, flags.sr3e, SR3EJournalEntry, {
+      label: "SR3E Journal Entry",
+      makeDefault: true
     });
     Log.success("Initialization Completed", "sr3e.js");
   });

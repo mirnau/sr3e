@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "target": "ESNext",
+      "module": "ESNext",
+      "allowJs": true,
+      "checkJs": false,
+      "baseUrl": ".",
+      "paths": {
+        "foundry/*": ["node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
+      },
+      "typeRoots": [
+        "node_modules/@types"
+      ]
+    },
+    "include": ["**/*.js", "foundry-globals.js"],
+    "exclude": ["node_modules"]
+  }
+  

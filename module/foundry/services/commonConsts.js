@@ -15,6 +15,7 @@ export const hooks = {
 
 export const flags = {
   sr3e: "sr3e",
+  core: "core",
   actor: {
     isDossierDetailsOpen: "isDossierDetailsOpen"
   }
