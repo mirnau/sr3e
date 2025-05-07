@@ -1,4 +1,5 @@
 <script>
+    import { writable } from 'svelte/store';
     import JournalSidebar from "./components/JournalSidebar.svelte";
     import JournalPageView from "./components/JournalPageView.svelte";
 
@@ -6,9 +7,13 @@
 
     let pageIndex = $state(0);
 
-    const pages = $derived(() => {
+    // Use a writable store for pages
+    const pages = writable([]);
+
+    // Initialize the pages store with sorted pages
+    $effect(() => {
         const list = doc.pages?.contents ?? [];
-        return [...list].sort((a, b) => a.sort - b.sort);
+        pages.set([...list].sort((a, b) => a.sort - b.sort));
     });
 
     let isLocked = $state(true);
@@ -30,17 +35,17 @@
     };
 
     const nextPage = () => {
-        pageIndex = Math.min(pages.length - 1, pageIndex + 1);
+        pageIndex = Math.min($pages.length - 1, pageIndex + 1);
     };
 
     const setPageIndex = (i) => {
         pageIndex = i;
     };
 
-    const createPage = () => {
-        doc.createEmbeddedDocuments("JournalEntryPage", [
+    const createPage = async () => {
+        const newPage = await doc.createEmbeddedDocuments("JournalEntryPage", [
             {
-                name: `Page ${pages.length + 1}`,
+                name: `Page ${$pages.length + 1}`,
                 type: "text",
                 text: {
                     content: "",
@@ -48,12 +53,14 @@
                 },
             },
         ]);
+        // Update the pages store with the new page
+        pages.update((current) => [...current, ...newPage]);
     };
 </script>
 
 <section class="window-content">
     <JournalSidebar
-        pages={pages()}
+        pages={$pages}
         {pageIndex}
         {isLocked}
         {toggleLock}
@@ -79,13 +86,13 @@
         </header>
 
         <div class="journal-entry-pages scrollable editable">
-            {#if pages().length > 0}
+            {#if $pages.length > 0}
                 {#if viewMode}
-                    {#each pages() as page}
+                    {#each $pages as page}
                         <JournalPageView {doc} {page} />
                     {/each}
                 {:else}
-                    <JournalPageView {doc} page={pages()[pageIndex]} />
+                    <JournalPageView {doc} page={$pages[pageIndex]} />
                 {/if}
             {/if}
         </div>

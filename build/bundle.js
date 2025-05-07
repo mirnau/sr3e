@@ -5438,15 +5438,35 @@ __publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
   closeOnSubmit: false
 });
 let CharacterActorSheet = _CharacterActorSheet;
+const handlePrevious = (_, idx, $$props) => {
+  var _a;
+  if (get$1(idx) === 0) return;
+  (_a = $$props.previousPage) == null ? void 0 : _a.call($$props);
+  set(idx, get$1(idx) - 1);
+};
+const handleNext = (__1, idx, localPages, $$props) => {
+  var _a;
+  if (get$1(idx) === get$1(localPages).length - 1) return;
+  (_a = $$props.nextPage) == null ? void 0 : _a.call($$props);
+  set(idx, get$1(idx) + 1);
+};
+const handleCreate = async (__2, $$props, localPages, idx) => {
+  var _a;
+  await ((_a = $$props.createPage) == null ? void 0 : _a.call($$props));
+  set(localPages, proxy([...$$props.pages]));
+  set(idx, get$1(localPages).length - 1);
+};
 var root_1 = /* @__PURE__ */ template(`<li draggable="true"><button type="button" class="page-heading" data-action="goToHeading"><span class="page-index"> </span> <span class="page-title ellipsis"> </span></button></li>`);
-var root$2 = /* @__PURE__ */ template(`<aside class="sidebar journal-sidebar flexcol" data-application-part="sidebar"><search><button type="button" data-action="toggleLock"></button> <button type="button" class="inline-control view-mode icon fas fa-notes" data-action="toggleMode" aria-label="Multiple Page Mode"></button> <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass" data-action="toggleSearch" aria-label="Search by Name only"></button> <input type="search" name="search" autocomplete="off" placeholder="Search Pages" aria-label="Search Pages"> <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right" data-action="toggleSidebar" aria-label="Collapse Sidebar"></button></search> <nav class="toc" data-tooltip-direction="RIGHT"><ol></ol></nav> <footer class="action-buttons flexrow"><button type="button" class="previous icon fas fa-chevron-left" data-action="previousPage" aria-label="Previous Page"></button> <button type="button" class="create" data-action="createPage"><i class="fas fa-file-circle-plus" inert></i> <span>Add Page</span></button> <button type="button" class="next icon fas fa-chevron-right" data-action="nextPage" aria-label="Next Page"></button></footer></aside>`);
+var root$2 = /* @__PURE__ */ template(`<aside class="sidebar journal-sidebar flexcol" data-application-part="sidebar"><search><button type="button" data-action="toggleLock"></button> <button type="button" class="inline-control view-mode icon fas fa-notes" data-action="toggleMode" aria-label="Multiple Page Mode"></button> <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass" data-action="toggleSearch" aria-label="Search by Name only"></button> <input type="search" name="search" autocomplete="off" placeholder="Search Pages" aria-label="Search Pages"> <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right" data-action="toggleSidebar" aria-label="Collapse Sidebar"></button></search> <nav class="toc" data-tooltip-direction="RIGHT"><ol></ol></nav> <footer class="action-buttons flexrow"><button type="button" class="previous icon fas fa-chevron-left" aria-label="Previous Page"></button> <button type="button" class="create" aria-label="Add Page"><i class="fas fa-file-circle-plus" inert></i> <span>Add Page</span></button> <button type="button" class="next icon fas fa-chevron-right" aria-label="Next Page"></button></footer></aside>`);
 function JournalSidebar($$anchor, $$props) {
   push($$props, true);
   const dispatch = createEventDispatcher();
   let sidebarEl = state(null);
-  let localPages = state(proxy([...$$props.pages]));
+  let localPages = state(proxy([]));
+  let idx = state(proxy($$props.pageIndex));
   user_effect(() => {
     set(localPages, proxy([...$$props.pages]));
+    set(idx, proxy($$props.pageIndex));
   });
   const updateOrder = (from, to) => {
     const updated = [...get$1(localPages)];
@@ -5526,7 +5546,7 @@ function JournalSidebar($$anchor, $$props) {
     var text_1 = child(span_1);
     template_effect(() => {
       var _a;
-      set_class(li_1, `text page level${((_a = get$1(page).title) == null ? void 0 : _a.level) ?? 1} ${get$1(i) === $$props.pageIndex ? "active" : ""}`);
+      set_class(li_1, `text page level${((_a = get$1(page).title) == null ? void 0 : _a.level) ?? 1} ${get$1(i) === get$1(idx) ? "active" : ""}`);
       set_attribute(li_1, "data-page-id", get$1(page).id);
       set_attribute(button_4, "aria-label", `Go to page ${get$1(page).name}`);
       set_attribute(span, "data-tooltip-text", get$1(page).name);
@@ -5540,26 +5560,17 @@ function JournalSidebar($$anchor, $$props) {
   });
   var footer = sibling(nav, 2);
   var button_5 = child(footer);
-  button_5.__click = function(...$$args) {
-    var _a;
-    (_a = $$props.previousPage) == null ? void 0 : _a.apply(this, $$args);
-  };
+  button_5.__click = [handlePrevious, idx, $$props];
   var button_6 = sibling(button_5, 2);
-  button_6.__click = function(...$$args) {
-    var _a;
-    (_a = $$props.createPage) == null ? void 0 : _a.apply(this, $$args);
-  };
+  button_6.__click = [handleCreate, $$props, localPages, idx];
   var button_7 = sibling(button_6, 2);
-  button_7.__click = function(...$$args) {
-    var _a;
-    (_a = $$props.nextPage) == null ? void 0 : _a.apply(this, $$args);
-  };
+  button_7.__click = [handleNext, idx, localPages, $$props];
   bind_this(aside, ($$value) => set(sidebarEl, $$value), () => get$1(sidebarEl));
   template_effect(() => {
     set_class(button, `inline-control lock-mode icon fa-solid ${$$props.isLocked ? "fa-lock" : "fa-unlock"}`);
     set_attribute(button, "aria-label", $$props.isLocked ? "Table of contents locked. Click to unlock." : "Table of contents unlocked. Click to lock.");
-    button_5.disabled = $$props.pageIndex === 0;
-    button_7.disabled = $$props.pageIndex === get$1(localPages).length - 1;
+    button_5.disabled = get$1(idx) === 0;
+    button_7.disabled = get$1(idx) === get$1(localPages).length - 1;
   });
   append($$anchor, aside);
   pop();
@@ -5593,11 +5604,14 @@ function JournalPageView($$anchor, $$props) {
 var root = /* @__PURE__ */ template(`<section class="window-content"><!> <section class="journal-entry-content flexcol" data-application-part="pages"><header class="journal-header"><input class="title" name="name" type="text" placeholder="Entry Title" aria-label="Entry Title"></header> <div class="journal-entry-pages scrollable editable"><!></div></section></section>`);
 function JournalEntryApp($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $pages = () => store_get(pages, "$pages", $$stores);
   let pageIndex = state(0);
-  const pages = /* @__PURE__ */ derived(() => () => {
+  const pages = writable([]);
+  user_effect(() => {
     var _a;
     const list = ((_a = $$props.doc.pages) == null ? void 0 : _a.contents) ?? [];
-    return [...list].sort((a, b) => a.sort - b.sort);
+    pages.set([...list].sort((a, b) => a.sort - b.sort));
   });
   let isLocked = state(true);
   const toggleLock = () => set(isLocked, !get$1(isLocked));
@@ -5611,15 +5625,15 @@ function JournalEntryApp($$anchor, $$props) {
     set(pageIndex, proxy(Math.max(0, get$1(pageIndex) - 1)));
   };
   const nextPage = () => {
-    set(pageIndex, proxy(Math.min(get$1(pages).length - 1, get$1(pageIndex) + 1)));
+    set(pageIndex, proxy(Math.min($pages().length - 1, get$1(pageIndex) + 1)));
   };
   const setPageIndex = (i) => {
     set(pageIndex, proxy(i));
   };
-  const createPage = () => {
-    $$props.doc.createEmbeddedDocuments("JournalEntryPage", [
+  const createPage = async () => {
+    const newPage = await $$props.doc.createEmbeddedDocuments("JournalEntryPage", [
       {
-        name: `Page ${get$1(pages).length + 1}`,
+        name: `Page ${$pages().length + 1}`,
         type: "text",
         text: {
           content: "",
@@ -5627,13 +5641,13 @@ function JournalEntryApp($$anchor, $$props) {
         }
       }
     ]);
+    pages.update((current) => [...current, ...newPage]);
   };
   var section = root();
   var node = child(section);
-  const expression = /* @__PURE__ */ derived(() => get$1(pages)());
   JournalSidebar(node, {
     get pages() {
-      return get$1(expression);
+      return $pages();
     },
     get pageIndex() {
       return get$1(pageIndex);
@@ -5663,7 +5677,7 @@ function JournalEntryApp($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var fragment_1 = comment();
           var node_3 = first_child(fragment_1);
-          each(node_3, 17, () => get$1(pages)(), index, ($$anchor4, page) => {
+          each(node_3, 1, $pages, index, ($$anchor4, page) => {
             JournalPageView($$anchor4, {
               get doc() {
                 return $$props.doc;
@@ -5681,7 +5695,7 @@ function JournalEntryApp($$anchor, $$props) {
               return $$props.doc;
             },
             get page() {
-              return get$1(pages)()[get$1(pageIndex)];
+              return $pages()[get$1(pageIndex)];
             }
           });
         };
@@ -5693,12 +5707,13 @@ function JournalEntryApp($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     if_block(node_1, ($$render) => {
-      if (get$1(pages)().length > 0) $$render(consequent_1);
+      if ($pages().length > 0) $$render(consequent_1);
     });
   }
   template_effect(() => set_value(input, $$props.doc.name));
   append($$anchor, section);
   pop();
+  $$cleanup();
 }
 const { DocumentSheetV2 } = foundry.applications.api;
 class SR3EJournalEntry extends DocumentSheetV2 {
