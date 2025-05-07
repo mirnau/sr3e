@@ -7,10 +7,8 @@
 
     let pageIndex = $state(0);
 
-    // Use a writable store for pages
     const pages = writable([]);
 
-    // Initialize the pages store with sorted pages
     $effect(() => {
         const list = doc.pages?.contents ?? [];
         pages.set([...list].sort((a, b) => a.sort - b.sort));
@@ -53,8 +51,15 @@
                 },
             },
         ]);
-        // Update the pages store with the new page
         pages.update((current) => [...current, ...newPage]);
+    };
+
+    const deletePage = async (id) => {
+        await doc.deleteEmbeddedDocuments("JournalEntryPage", [id]);
+        pages.update((current) => current.filter((page) => page.id !== id));
+        if (pageIndex >= $pages.length) {
+            pageIndex = Math.max(0, $pages.length - 1);
+        }
     };
 </script>
 
@@ -71,6 +76,7 @@
         {createPage}
         {nextPage}
         {setPageIndex}
+        on:delete={(e) => deletePage(e.detail)} 
     />
 
     <section class="journal-entry-content flexcol" data-application-part="pages">

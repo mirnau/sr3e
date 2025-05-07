@@ -5491,7 +5491,9 @@ function JournalSidebar($$anchor, $$props) {
     dragSrc = -1;
   };
   const duplicatePage = (id) => console.log(`Duplicating ${id}`);
-  const deletePage = (id) => console.log(`Deleting ${id}`);
+  const deletePage = (id) => {
+    dispatch("delete", id);
+  };
   const menuItems = [
     {
       name: "Duplicate Page",
@@ -5643,6 +5645,13 @@ function JournalEntryApp($$anchor, $$props) {
     ]);
     pages.update((current) => [...current, ...newPage]);
   };
+  const deletePage = async (id) => {
+    await $$props.doc.deleteEmbeddedDocuments("JournalEntryPage", [id]);
+    pages.update((current) => current.filter((page) => page.id !== id));
+    if (get$1(pageIndex) >= $pages().length) {
+      set(pageIndex, proxy(Math.max(0, $pages().length - 1)));
+    }
+  };
   var section = root();
   var node = child(section);
   JournalSidebar(node, {
@@ -5662,7 +5671,8 @@ function JournalEntryApp($$anchor, $$props) {
     previousPage,
     createPage,
     nextPage,
-    setPageIndex
+    setPageIndex,
+    $$events: { delete: (e) => deletePage(e.detail) }
   });
   var section_1 = sibling(node, 2);
   var header = child(section_1);

@@ -72,7 +72,9 @@
 
     /** Context‑menu (duplicate / delete) */
     const duplicatePage = (id) => console.log(`Duplicating ${id}`);
-    const deletePage = (id) => console.log(`Deleting ${id}`);
+    const deletePage = (id) => {
+        dispatch('delete', id); // Notify parent about the deletion
+    };
 
     const menuItems = [
         {
