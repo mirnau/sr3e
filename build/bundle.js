@@ -1173,6 +1173,11 @@ function queue_micro_task(fn) {
   }
   current_queued_micro_tasks.push(fn);
 }
+function lifecycle_outside_component(name) {
+  {
+    throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
+  }
+}
 let is_throwing_error = false;
 let is_micro_task_queued = false;
 let last_scheduled_effect = null;
@@ -2919,6 +2924,39 @@ function observe_all(context, props) {
     for (const signal of context.l.s) get$1(signal);
   }
   props();
+}
+function create_custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
+  return new CustomEvent(type, { detail, bubbles, cancelable });
+}
+function createEventDispatcher() {
+  const active_component_context = component_context;
+  if (active_component_context === null) {
+    lifecycle_outside_component();
+  }
+  return (type, detail, options) => {
+    var _a;
+    const events = (
+      /** @type {Record<string, Function | Function[]>} */
+      (_a = active_component_context.s.$$events) == null ? void 0 : _a[
+        /** @type {any} */
+        type
+      ]
+    );
+    if (events) {
+      const callbacks = is_array(events) ? events.slice() : [events];
+      const event2 = create_custom_event(
+        /** @type {string} */
+        type,
+        detail,
+        options
+      );
+      for (const fn of callbacks) {
+        fn.call(active_component_context.x, event2);
+      }
+      return !event2.defaultPrevented;
+    }
+    return true;
+  };
 }
 function subscribe_to_store(store, run2, invalidate) {
   if (store == null) {
@@ -5400,10 +5438,60 @@ __publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
   closeOnSubmit: false
 });
 let CharacterActorSheet = _CharacterActorSheet;
-var root_1 = /* @__PURE__ */ template(`<li draggable="true"><button type="button" class="page-heading" data-action="goToHeading"><span class="page-index"></span> <span class="page-title ellipsis"> </span></button></li>`);
+var root_1 = /* @__PURE__ */ template(`<li draggable="true"><button type="button" class="page-heading" data-action="goToHeading"><span class="page-index"> </span> <span class="page-title ellipsis"> </span></button></li>`);
 var root$2 = /* @__PURE__ */ template(`<aside class="sidebar journal-sidebar flexcol" data-application-part="sidebar"><search><button type="button" data-action="toggleLock"></button> <button type="button" class="inline-control view-mode icon fas fa-notes" data-action="toggleMode" aria-label="Multiple Page Mode"></button> <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass" data-action="toggleSearch" aria-label="Search by Name only"></button> <input type="search" name="search" autocomplete="off" placeholder="Search Pages" aria-label="Search Pages"> <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right" data-action="toggleSidebar" aria-label="Collapse Sidebar"></button></search> <nav class="toc" data-tooltip-direction="RIGHT"><ol></ol></nav> <footer class="action-buttons flexrow"><button type="button" class="previous icon fas fa-chevron-left" data-action="previousPage" aria-label="Previous Page"></button> <button type="button" class="create" data-action="createPage"><i class="fas fa-file-circle-plus" inert></i> <span>Add Page</span></button> <button type="button" class="next icon fas fa-chevron-right" data-action="nextPage" aria-label="Next Page"></button></footer></aside>`);
 function JournalSidebar($$anchor, $$props) {
   push($$props, true);
+  const dispatch = createEventDispatcher();
+  let sidebarEl = state(null);
+  let localPages = state(proxy([...$$props.pages]));
+  user_effect(() => {
+    set(localPages, proxy([...$$props.pages]));
+  });
+  const updateOrder = (from, to) => {
+    const updated = [...get$1(localPages)];
+    const [moved] = updated.splice(from, 1);
+    updated.splice(to, 0, moved);
+    set(localPages, proxy(updated));
+    dispatch("reorder", { pages: updated });
+  };
+  let dragSrc = -1;
+  const handleDragStart = (e, i) => {
+    dragSrc = i;
+    e.dataTransfer.effectAllowed = "move";
+  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+  const handleDrop = (e, i) => {
+    e.preventDefault();
+    if (dragSrc === -1 || dragSrc === i) return;
+    updateOrder(dragSrc, i);
+    dragSrc = -1;
+  };
+  const duplicatePage = (id) => console.log(`Duplicating ${id}`);
+  const deletePage = (id) => console.log(`Deleting ${id}`);
+  const menuItems = [
+    {
+      name: "Duplicate Page",
+      icon: '<i class="fas fa-copy"></i>',
+      callback: (li) => duplicatePage(li.dataset.pageId)
+    },
+    {
+      name: "Delete Page",
+      icon: '<i class="fas fa-trash"></i>',
+      callback: (li) => deletePage(li.dataset.pageId)
+    }
+  ];
+  user_effect(() => {
+    var _a, _b;
+    if (!get$1(sidebarEl)) return;
+    const legacy13 = ((_a = game == null ? void 0 : game.release) == null ? void 0 : _a.generation) === 13 || ((_b = game == null ? void 0 : game.version) == null ? void 0 : _b.startsWith("13."));
+    const opts = legacy13 ? { jQuery: false } : {};
+    const ctx = new foundry.applications.ux.ContextMenu(get$1(sidebarEl), "li.page", menuItems, opts);
+    return () => ctx.close();
+  });
   var aside = root$2();
   var search = child(aside);
   var button = child(search);
@@ -5428,23 +5516,27 @@ function JournalSidebar($$anchor, $$props) {
   };
   var nav = sibling(search, 2);
   var ol = child(nav);
-  each(ol, 21, () => $$props.pages, index, ($$anchor2, page, i) => {
-    var li = root_1();
-    var button_4 = child(li);
-    button_4.__click = () => $$props.setPageIndex(i);
+  each(ol, 23, () => get$1(localPages), (page) => page.id, ($$anchor2, page, i) => {
+    var li_1 = root_1();
+    var button_4 = child(li_1);
+    button_4.__click = () => $$props.setPageIndex(get$1(i));
     var span = child(button_4);
-    span.textContent = i + 1;
+    var text2 = child(span);
     var span_1 = sibling(span, 2);
-    var text2 = child(span_1);
+    var text_1 = child(span_1);
     template_effect(() => {
       var _a;
-      set_class(li, `text page level${((_a = get$1(page).title) == null ? void 0 : _a.level) ?? 1} ${i === $$props.pageIndex ? "active" : ""}`);
-      set_attribute(li, "data-page-id", get$1(page).id);
+      set_class(li_1, `text page level${((_a = get$1(page).title) == null ? void 0 : _a.level) ?? 1} ${get$1(i) === $$props.pageIndex ? "active" : ""}`);
+      set_attribute(li_1, "data-page-id", get$1(page).id);
       set_attribute(button_4, "aria-label", `Go to page ${get$1(page).name}`);
       set_attribute(span, "data-tooltip-text", get$1(page).name);
-      set_text(text2, get$1(page).name);
+      set_text(text2, get$1(i) + 1);
+      set_text(text_1, get$1(page).name);
     });
-    append($$anchor2, li);
+    event("dragstart", li_1, (e) => handleDragStart(e, get$1(i)));
+    event("dragover", li_1, handleDragOver);
+    event("drop", li_1, (e) => handleDrop(e, get$1(i)));
+    append($$anchor2, li_1);
   });
   var footer = sibling(nav, 2);
   var button_5 = child(footer);
@@ -5462,11 +5554,12 @@ function JournalSidebar($$anchor, $$props) {
     var _a;
     (_a = $$props.nextPage) == null ? void 0 : _a.apply(this, $$args);
   };
+  bind_this(aside, ($$value) => set(sidebarEl, $$value), () => get$1(sidebarEl));
   template_effect(() => {
     set_class(button, `inline-control lock-mode icon fa-solid ${$$props.isLocked ? "fa-lock" : "fa-unlock"}`);
     set_attribute(button, "aria-label", $$props.isLocked ? "Table of contents locked. Click to unlock." : "Table of contents unlocked. Click to lock.");
     button_5.disabled = $$props.pageIndex === 0;
-    button_7.disabled = $$props.pageIndex === $$props.pages.length - 1;
+    button_7.disabled = $$props.pageIndex === get$1(localPages).length - 1;
   });
   append($$anchor, aside);
   pop();
