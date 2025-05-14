@@ -56,9 +56,9 @@
       class:two-span-selectable={c.span === 2}
       class:three-span-selectable={c.span === 3}
     >
-      <div class="inner-background-container">
+      <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
-        <div class="inner-background">
+        <div class="sr3e-inner-background">
           {#if c.comp}
             {#key c.comp}
               <c.comp {...c.props} />

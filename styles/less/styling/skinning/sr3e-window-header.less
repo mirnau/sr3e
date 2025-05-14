@@ -1,7 +1,16 @@
 header.window-header {
-    background-color: transparent;
-    box-shadow: inset 0 0 10px @accent-color;
     text-shadow: #006eff 0 0 12px;
     border: none !important;
     .clipped-corners(0.5rem, 0.5rem, 0rem, 0rem);
+}
+
+.sr3e-item-header,
+.sr3e-actor-header {
+    background-color: @window-header-color;
+    box-shadow: inset 0 0 10px @accent-color;
+    .clipped-corners(0.5rem, 0.5rem, 0rem, 0rem);
+}
+
+.sr3e-dialog-header {
+    background: transparent;
 }

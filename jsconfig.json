@@ -12,7 +12,7 @@
         "node_modules/@types"
       ]
     },
-    "include": ["**/*.js", "foundry-globals.js"],
+    "include": ["**/*.js", "foundry-globals.js", "module/svelte/apps/JournalEditorApp.svelte"],
     "exclude": ["node_modules"]
   }
   

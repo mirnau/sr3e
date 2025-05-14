@@ -7,7 +7,7 @@ export default class SR3EJournalEntry extends DocumentSheetV2 {
   static DEFAULT_OPTIONS = {
     ...DocumentSheetV2.DEFAULT_OPTIONS,
     id: "sr3e-journal-sheet",
-    classes: ["sr3e", "sheet", "journal-sheet", "journal-entry","expanded"],
+    classes: ["sr3e", "sheet", "journal-sheet", "journal-entry", "expanded"],
     position: { width: 820, height: 820 },
     window: {
       resizable: true
@@ -21,6 +21,10 @@ export default class SR3EJournalEntry extends DocumentSheetV2 {
     return null;
   }
 
+  async activateEditor(name, options = {}, initialContent = "") {
+    console.log("The Editor was Opened", name, options, initialContent);
+  }
+
   async _replaceHTML(_, content) {
     if (this.#app) return;
 
@@ -28,7 +32,9 @@ export default class SR3EJournalEntry extends DocumentSheetV2 {
 
     this.#app = mount(JournalEntryApp, {
       target: content,
-      props: { doc: this.document }
+      props: {
+        doc: this.document,
+      }
     });
   }
 
@@ -39,4 +45,5 @@ export default class SR3EJournalEntry extends DocumentSheetV2 {
   }
 
   #app;
+
 }

@@ -52,7 +52,8 @@
 @import "./styling/skinning/sr3e-editor-container.less";
 @import "./styling/custom/sr3e-stat-card.less";
 
-
+.dialog-footer,
+.actor-footer,
 .window-app-footer {
     position: absolute;
     left: 0rem;
@@ -74,3 +75,31 @@ dialog {
 .journal-entry {
     background: red !important;
 }
+
+//Journal Entry
+
+.journal-page-header {
+    position: relative;
+}
+
+.journal-page-header .edit-button {
+    position: absolute;
+    top: 0rem;
+    right: 0rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.journal-page-header .edit-button:hover {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.journal-page-header:hover .edit-button {
+    opacity: 0.8;
+    pointer-events: auto;
+}
+
+
+

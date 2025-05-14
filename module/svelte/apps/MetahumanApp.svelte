@@ -152,9 +152,9 @@
 
 <div class="sr3e">
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <div class="image-mask">
                     <img
                         src={item.img}
@@ -204,9 +204,9 @@
 
     <!-- Age Range Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.agerange)}</h3>
                 <div class="stat-grid">
                     {#each agerange as entry}
@@ -227,9 +227,9 @@
 
     <!-- Height Attributes Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.height)}</h3>
                 <div class="stat-grid">
                     {#each height as entry}
@@ -250,9 +250,9 @@
 
     <!-- Weight Attributes Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.weight)}</h3>
                 <div class="stat-grid">
                     {#each weight as entry}
@@ -273,9 +273,9 @@
 
     <!-- Modifiers Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">
                     {localize(attributes.modifiers)}
                 </h3>
@@ -302,9 +302,9 @@
 
     <!-- Attribute Limits Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(attributes.limits)}</h3>
                 <div class="stat-grid">
                     {#each attributeLimits as entry}
@@ -324,9 +324,9 @@
 
     <!-- Movement Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container slim">
+        <div class="sr3e-inner-background-container slim">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(config.movement.movement)}</h3>
                 <div class="stat-grid two-column">
                     {#each movement as entry}
@@ -347,9 +347,9 @@
 
     <!-- Karma Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container slim">
+        <div class="sr3e-inner-background-container slim">
             <div class="fake-shadow"></div>
-            <div class="inner-background slim">
+            <div class="sr3e-inner-background slim">
                 <h3 class="item">{localize(config.karma.karma)}</h3>
                 <div class="stat-grid one-column">
                     {#each karma as entry}
@@ -370,9 +370,9 @@
 
     <!-- Karma Div -->
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <div class="inner-background">
+            <div class="sr3e-inner-background">
                 <h3 class="item">{localize(config.vision.vision)}</h3>
                 <div class="stat-grid one-column">
                     {#each vision as entry}
@@ -391,7 +391,7 @@
     </div>
 
     <div class="item-sheet-component">
-        <div class="inner-background-container">
+        <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <Editor document={item} editable={true} owner={item.isOwner} />
         </div>

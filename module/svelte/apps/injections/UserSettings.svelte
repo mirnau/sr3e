@@ -81,9 +81,9 @@ let user = null;  // Should be null (not an empty object)
 
 <!-- User Settings -->
 <div class="item-sheet-component">
-  <div class="inner-background-container">
+  <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
-    <div class="inner-background">
+    <div class="sr3e-inner-background">
       <div class="config-columns">
         <div>
           <h1 class="no-margin">{localize(config.userconfig.setPlayerName)}</h1>
@@ -133,9 +133,9 @@ let user = null;  // Should be null (not an empty object)
 <!-- Display the avatar and main character images -->
 <div class="main-character-portrait">
   <!-- User Avatar Section -->
-  <div class="inner-background-container">
+  <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
-    <div class="inner-background">
+    <div class="sr3e-inner-background">
       <img
         role="none"
         src={playerAvatar}
@@ -148,9 +148,9 @@ let user = null;  // Should be null (not an empty object)
   </div>
 
   <!-- Main Character Section -->
-  <div class="inner-background-container">
+  <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
-    <div class="inner-background">
+    <div class="sr3e-inner-background">
       <img src={mainCharacterImage} alt="Main Character Portrait" />
       <div><h3>Main Character Name</h3></div>
     </div>
@@ -159,9 +159,9 @@ let user = null;  // Should be null (not an empty object)
 
 <!-- Main Character selection (dropdown) -->
 <div class="item-sheet-component">
-  <div class="inner-background-container">
+  <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
-    <div class="inner-background">
+    <div class="sr3e-inner-background">
       <div class="config-columns">
         <label for="main-character">
           {localize(config.userconfig.selectMainCharacter)}
@@ -183,9 +183,9 @@ let user = null;  // Should be null (not an empty object)
 
 <!-- Save Button -->
 <div class="item-sheet-component">
-  <div class="inner-background-container">
+  <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
-    <div class="inner-background">
+    <div class="sr3e-inner-background">
       <button
         type="button"
         on:click={saveSettings}

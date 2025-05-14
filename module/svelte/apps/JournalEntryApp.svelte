@@ -1,136 +1,276 @@
 <script>
-    import { onMount } from 'svelte';
-    import { createEventDispatcher } from 'svelte';
-    import { writable, derived } from 'svelte/store';
+	let { doc } = $props();
 
-    export let doc;
-    const dispatch = createEventDispatcher();
+	// Reactive state for pages and active index
+	let localPages = $state(
+		Array.from(doc.pages.values()).sort((a, b) => a.sort - b.sort),
+	);
+	let activePageIndex = $state(0);
+	let viewMode = $state("single"); // 'single' or 'all'
 
-    // Store for pages
-    const pages = writable([]);
-    const activePageIndex = writable(0);
+	// Centralized page actions
+	async function createPage() {
+		try {
+			const newPage = await doc.createEmbeddedDocuments(
+				"JournalEntryPage",
+				[
+					{
+						_id: foundry.utils.randomID(),
+						name: "New Page",
+						text: {
+							content: "",
+							format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML,
+						},
+						sort: Date.now(),
+					},
+				],
+			);
+			localPages = [...localPages, ...newPage].sort(
+				(a, b) => a.sort - b.sort,
+			);
+			activePageIndex = localPages.length - 1;
+		} catch (error) {
+			console.error("Failed to create page:", error);
+		}
+	}
 
-    // Load pages on mount, ensuring they are sorted correctly
-    onMount(() => {
-        const initialPages = doc.pages?.contents.map(p => p.toObject()).sort((a, b) => a.sort - b.sort) || [];
-        pages.set(initialPages);
-    });
+	async function deletePage(index) {
+		const page = localPages[index];
+		if (!page) return;
+		try {
+			await doc.deleteEmbeddedDocuments("JournalEntryPage", [page._id]);
+			localPages = localPages
+				.filter((_, i) => i !== index)
+				.sort((a, b) => a.sort - b.sort);
+			activePageIndex = Math.min(activePageIndex, localPages.length - 1);
+		} catch (error) {
+			console.error("Failed to delete page:", error);
+		}
+	}
 
-    // Derived store for active page
-    const activePage = derived([pages, activePageIndex], ([$pages, $activePageIndex]) => $pages[$activePageIndex] || {});
+	function toggleViewMode() {
+		viewMode = viewMode === "single" ? "all" : "single";
+	}
 
-    function goToPage(index) {
-        activePageIndex.set(index);
-        dispatch('navigate', { index });
-    }
+	function viewModeIcon() {
+		return viewMode === "single" ? "fas fa-book-open" : "fas fa-file-alt";
+	}
 
-    function createPage() {
-        const newPage = { _id: Date.now().toString(), name: 'New Page', text: { content: '', format: 'HTML' }, sort: Date.now() };
-        pages.update(p => {
-            const updatedPages = [...p, newPage];
-            doc.createEmbeddedDocuments('JournalEntryPage', [newPage]);
-            return updatedPages;
-        });
-        activePageIndex.set(pages.length - 1);
-        dispatch('create', { page: newPage });
-    }
+	function goToPage(index) {
+		activePageIndex = index;
+	}
 
-    function movePage(fromIndex, toIndex) {
-        pages.update(p => {
-            const updated = [...p];
-            const [moved] = updated.splice(fromIndex, 1);
-            updated.splice(toIndex, 0, moved);
+	function nextPage() {
+		activePageIndex = Math.min(localPages.length - 1, activePageIndex + 1);
+	}
 
-            // Update sort order based on new index positions
-            updated.forEach((page, idx) => (page.sort = idx * 1000));
+	function previousPage() {
+		activePageIndex = Math.max(0, activePageIndex - 1);
+	}
 
-            // Persist the sort order to the Foundry VTT document
-            doc.updateEmbeddedDocuments('JournalEntryPage', updated.map(p => ({ _id: p._id, sort: p.sort })));
-            return updated;
-        });
-    }
+	function handleDragOver(event) {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = "move";
+	}
 
-    function previousPage() {
-        activePageIndex.update(index => Math.max(0, index - 1));
-    }
+	let draggedIndex = null;
 
-    function nextPage() {
-        pages.subscribe($pages => {
-            activePageIndex.update(index => Math.min($pages.length - 1, index + 1));
-        });
-    }
+	function handleDragStart(index) {
+		draggedIndex = index;
+	}
 
-    let dragSrcIndex = -1;
+	function handleDrop(event, dropIndex) {
+		event.preventDefault();
+		if (draggedIndex === null || draggedIndex === dropIndex) return;
 
-    function handleDragStart(index) {
-        dragSrcIndex = index;
-    }
+		// Reorder local pages
+		const updatedPages = [...localPages];
+		const [movedPage] = updatedPages.splice(draggedIndex, 1);
+		updatedPages.splice(dropIndex, 0, movedPage);
 
-    function handleDrop(event, index) {
-        event.preventDefault();
-        if (dragSrcIndex !== -1 && dragSrcIndex !== index) {
-            movePage(dragSrcIndex, index);
-            dragSrcIndex = -1;
-        }
-    }
+		// Persist order in the journal
+		updatedPages.forEach((page, i) => (page.sort = i));
+		localPages = updatedPages.sort((a, b) => a.sort - b.sort);
 
-    function handleDragOver(event) {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-    }
+		// Persist order in Foundry
+		doc.updateEmbeddedDocuments(
+			"JournalEntryPage",
+			updatedPages.map((page, i) => ({ _id: page._id, sort: i })),
+		)
+			.then(() => {
+				console.log("Order updated in Foundry");
+			})
+			.catch((error) => console.error("Failed to persist order:", error));
+
+		draggedIndex = null;
+	}
+	let hoveredIndex = $state(null);
+
+	function editPage(index) {
+		const page = localPages[index];
+		if (!page) return;
+
+		// Trigger the native Foundry editor for the page
+		const pageDocument = doc.pages.get(page._id);
+		if (pageDocument) {
+			pageDocument.sheet.render(true);
+		}
+	}
 </script>
 
 <section class="window-content">
-    <aside class="sidebar journal-sidebar flexcol" data-application-part="sidebar">
-        <search>
-            <button type="button" class="inline-control lock-mode icon fa-solid fa-unlock" data-action="toggleLock"></button>
-            <button type="button" class="inline-control view-mode icon fas fa-note" data-action="toggleMode"></button>
-            <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass" data-action="toggleSearch"></button>
-            <input type="search" placeholder="Search Pages" />
-            <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right" data-action="toggleSidebar"></button>
-        </search>
+	<aside
+		class="sidebar journal-sidebar flexcol"
+		data-application-part="sidebar"
+	>
+		<search>
+			<button
+				type="button"
+				class="inline-control lock-mode icon fa-solid fa-unlock"
+				data-action="toggleLock"
+				aria-label="Table of contents unlocked. Click to lock."
+				data-tooltip=""
+			></button>
+			<button
+				type="button"
+				class="inline-control view-mode icon"
+				data-action="toggleMode"
+				aria-label={viewMode === "single"
+					? "Single Page Mode"
+					: "All Pages Mode"}
+				data-tooltip=""
+				on:click={toggleViewMode}
+			>
+				<i class={viewModeIcon()}></i>
+			</button>
+			<button
+				type="button"
+				class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass"
+				data-action="toggleSearch"
+				aria-label="Search by Name only"
+				data-tooltip=""
+			></button>
+			<input
+				type="search"
+				name="search"
+				autocomplete="off"
+				placeholder="Search Pages"
+				aria-label="Search Pages"
+			/>
+			<button
+				type="button"
+				class="inline-control collapse-toggle icon fas fa-caret-right"
+				data-action="toggleSidebar"
+				aria-label="Collapse Sidebar"
+				data-tooltip=""
+			></button>
+		</search>
 
-        <nav class="toc" data-tooltip-direction="RIGHT">
-            <ol>
-                {#each $pages as page, index}
-                    <li class="text level1 page" class:active={index === $activePageIndex} draggable="true" 
-                        on:dragstart={() => handleDragStart(index)} 
-                        on:drop={(event) => handleDrop(event, index)}
-                        on:dragover={handleDragOver}
-                        on:click={() => goToPage(index)}>
-                        <div class="page-heading" data-action="goToHeading">
-                            <span class="page-index">{index}</span>
-                            <span class="page-title ellipsis">{page.name}</span>
-                        </div>
-                    </li>
-                {/each}
-            </ol>
-        </nav>
+		<nav class="toc" data-tooltip-direction="RIGHT">
+			<ol>
+				{#each localPages as page, index}
+					<li
+						class="text level1 page {index === activePageIndex
+							? 'active'
+							: ''}"
+						data-page-id={page._id}
+						draggable="true"
+						on:click={() => goToPage(index)}
+						on:dragstart={() => handleDragStart(index)}
+						on:drop={(event) => handleDrop(event, index)}
+						on:dragover={handleDragOver}
+					>
+						<div class="page-heading" data-action="goToHeading">
+							<span
+								class="page-index"
+								data-tooltip-text={page.name}>{index}</span
+							>
+							<span class="page-title ellipsis">{page.name}</span>
+						</div>
+					</li>
+				{/each}
+			</ol>
+		</nav>
 
-        <footer class="action-buttons flexrow">
-            <button type="button" class="previous icon fas fa-chevron-left" data-action="previousPage" on:click={previousPage}></button>
-            <button type="button" class="create" data-action="createPage" on:click={createPage}>
-                <i class="fas fa-file-circle-plus"></i>
-                <span>Add Page</span>
-            </button>
-            <button type="button" class="next icon fas fa-chevron-right" data-action="nextPage" on:click={nextPage}></button>
-        </footer>
-    </aside>
+		<footer class="action-buttons flexrow">
+			<button
+				type="button"
+				class="previous icon fas fa-chevron-left"
+				data-action="previousPage"
+				aria-label="Previous Page"
+				on:click={previousPage}
+			></button>
+			<button
+				type="button"
+				class="create"
+				data-action="createPage"
+				on:click={createPage}
+			>
+				<i class="fas fa-file-circle-plus"></i>
+				<span>Add Page</span>
+			</button>
+			<button
+				type="button"
+				class="next icon fas fa-chevron-right"
+				data-action="nextPage"
+				aria-label="Next Page"
+				on:click={nextPage}
+			></button>
+		</footer>
+	</aside>
 
-    <section class="journal-entry-content flexcol" data-application-part="pages">
-        <header class="journal-header">
-            <input class="title" name="name" type="text" bind:value={doc.name} placeholder="Entry Title" />
-        </header>
+	<section
+		class="journal-entry-content flexcol"
+		data-application-part="pages"
+	>
+		<header class="journal-header">
+			<input
+				class="title"
+				name="name"
+				type="text"
+				bind:value={doc.name}
+				placeholder="Entry Title"
+				aria-label="Entry Title"
+			/>
+		</header>
 
-        <div class="journal-entry-pages scrollable editable">
-            <article class="journal-entry-page text level1 page">
-                <header class="journal-page-header">
-                    <h1>{$activePage.name}</h1>
-                </header>
-                <section class="journal-page-content">
-                    {@html $activePage.text?.content || '<p><em>No content</em></p>'}
-                </section>
-            </article>
-        </div>
-    </section>
+		<div class="journal-entry-pages scrollable editable">
+			{#if viewMode === "single"}
+				<article class="journal-entry-page text level1 page">
+					<header class="journal-page-header">
+						<h1>
+							{localPages[activePageIndex]?.name || "Untitled Page"}
+						</h1>
+						<button
+							type="button"
+							class="edit-button icon fa-solid fa-pen"
+							aria-label="Edit Page"
+							on:click={() => editPage(activePageIndex)}
+						></button>
+					</header>
+					<section class="journal-page-content">
+						{@html localPages[activePageIndex]?.text?.content || "<p><em>No content</em></p>"}
+					</section>
+				</article>
+			{:else}
+				{#each localPages as page, index}
+					<article class="journal-entry-page text level1 page">
+						<header class="journal-page-header">
+							<h1>{page.name}</h1>
+							<button
+								type="button"
+								class="edit-button icon fa-solid fa-pen"
+								aria-label="Edit Page"
+								on:click={() => editPage(index)}
+							></button>
+						</header>
+						<section class="journal-page-content">
+							{@html page.text?.content || "<p><em>No content</em></p>"}
+						</section>
+					</article>
+				{/each}
+			{/if}
+		</div>
+		
+	</section>
 </section>
