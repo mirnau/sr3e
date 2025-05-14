@@ -67,49 +67,65 @@ function registerHooks() {
   console.log("TESTING BEGINNING");
   ////// TESTING ONLY //////
 
-  Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
-    const typeSelectors = [
-      { type: foundry.applications.api.DialogV2 },
-      //{ type: foundry.applications.api.DocumentSheetV2 },
-      // { type: foundry.applications.sheets.FolderConfig }
-    ];
-  
-    const typeDeselectors = [
-      { type: foundry.applications.sheets.ActorSheetV2 },
-      { type: foundry.applications.sheets.ItemSheetV2 }
-    ];
-  
-    if (typeDeselectors.some(entry => app instanceof entry.type)) return;
-    if (!typeSelectors.some(entry => app instanceof entry.type)) return;
-    if (element.classList.contains("sheet-component")) return;
-  
-    element.classList.add("sheet-component");
-  
-    const sr3einnerbackgroundcontainer = document.createElement("div");
-    sr3einnerbackgroundcontainer.classList.add("sr3e-inner-background-container");
-  
-    const fakeShadow = document.createElement("div");
-    fakeShadow.classList.add("fake-shadow");
-  
-    const sr3einnerbackground = document.createElement("div");
-    sr3einnerbackground.classList.add("sr3e-inner-background");
-  
-    while (element.firstChild) {
-      sr3einnerbackground.appendChild(element.firstChild);
-    }
-  
-    sr3einnerbackgroundcontainer.appendChild(fakeShadow);
-    sr3einnerbackgroundcontainer.appendChild(sr3einnerbackground);
-    element.appendChild(sr3einnerbackgroundcontainer);
-  });
-  
+Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
+  const typeSelectors = [
+    { type: foundry.applications.api.DialogV2 },
+    { type: foundry.applications.api.DocumentSheetV2 },
+    { type: foundry.applications.apps.CombatTrackerConfig },
+    { type: foundry.applications.sidebar.apps.ControlsConfig },
+    { type: foundry.applications.sidebar.apps.ModuleManagement },
+    { type: foundry.applications.sidebar.apps.WorldConfig }, //TODO: fix editor
+    { type: foundry.applications.sidebar.apps.ToursManagement }, //TODO: figrue out crop
+    { type: foundry.applications.sidebar.apps.SupportDetails },
+    { type: foundry.applications.sidebar.apps.InvitationLinks },
+    { type: foundry.applications.sheets.FolderConfig },
+    { type: foundry.applications.settings.SettingsConfig },
+    { type: foundry.applications.sheets.UserConfig }
+
+
+  ];
+
+  const typeDeselectors = [
+    { type: foundry.applications.sheets.ActorSheetV2 },
+    { type: foundry.applications.sheets.ItemSheetV2 }
+  ];
+
+  if (typeDeselectors.some(entry => app instanceof entry.type)) return;
+  if (!typeSelectors.some(entry => app instanceof entry.type)) return;
+
+  // Create a dedicated wrapper div
+  const sheetComponent = document.createElement('div');
+  sheetComponent.classList.add('sheet-component');
+
+  // Build the container structure
+  const sr3eInnerContainer = document.createElement('div');
+  sr3eInnerContainer.classList.add('sr3e-inner-background-container');
+
+  const fakeShadow = document.createElement('div');
+  fakeShadow.classList.add('fake-shadow');
+
+  const sr3eInnerBackground = document.createElement('div');
+  sr3eInnerBackground.classList.add('sr3e-inner-background');
+
+  // Move original children into inner background
+  while (element.firstChild) {
+    sr3eInnerBackground.appendChild(element.firstChild);
+  }
+
+  sr3eInnerContainer.appendChild(fakeShadow);
+  sr3eInnerContainer.appendChild(sr3eInnerBackground);
+  sheetComponent.appendChild(sr3eInnerContainer);
+  element.appendChild(sheetComponent);
+});
+
+
 
   ///// TEST END ////
   console.log("TESTING ENDING");
 
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
-  
+
   Hooks.once(hooks.init, () => {
 
     configureProject();
@@ -128,12 +144,12 @@ function registerHooks() {
       makeDefault: true
     });
 
-    
+
     DocumentSheetConfig.registerSheet(JournalEntryPage, flags.sr3e, SR3EJournalEntryPage, {
       label: 'SR3E Journal Entry Page',
       makeDefault: true
     });
-    
+
 
     Log.success("Initialization Completed", "sr3e.js");
   });

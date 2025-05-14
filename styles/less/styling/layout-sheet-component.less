@@ -30,16 +30,18 @@
     margin: 0rem;
 }
 
-
 dialog,
-form.folder-config,
+form,
 .sr3e.sheet.item,
+.application.category-browser,
+div#support-details,
+div#invitation-links,
 .sr3e.sheet.character {
 
 
     .stat-grid {
         display: inline-grid;
-        
+
         grid-template-columns: repeat(3, 1fr);
 
         &.one-column {
@@ -48,7 +50,7 @@ form.folder-config,
             max-width: min-content;
             grid-template-columns: repeat(1, auto);
         }
-        
+
         &.two-column {
             display: inline-grid;
             width: fit-content;
@@ -66,8 +68,8 @@ form.folder-config,
     }
 
     .sr3e-inner-background-container {
-    
-    .apply-container();
+
+        .apply-container();
         padding: 0.5rem;
 
         .sr3e-inner-background {

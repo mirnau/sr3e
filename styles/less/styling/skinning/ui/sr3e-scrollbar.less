@@ -34,3 +34,86 @@
   background: transparent;
   display: none;
 }
+
+
+//Scrollability
+.application.category-browser {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  form.application {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    height: 100%;
+    width: auto; // allow full width internally
+  }
+
+  .sheet-component {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .sr3e-inner-background-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .sr3e-inner-background {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+
+    .window-content {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+      overflow: hidden;
+      width: 100%;
+
+      > .flexcol[data-application-part="sidebar"] {
+        flex: 0 0 auto;
+        min-width: 160px; // Adjust this as needed
+        max-width: 220px;
+        padding-right: 0.5rem;
+        overflow: hidden;
+      }
+
+      > .main {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+    }
+
+    .main,
+    .flexcol {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0; // <-- allow horizontal flex children to shrink
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .categories.scrollable,
+    .tabs.scrollable {
+      flex: 1 1 auto;
+      min-height: 0;
+      min-width: 0;
+      overflow-y: auto;
+      overflow-x: auto;
+    }
+  }
+}

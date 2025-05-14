@@ -296,16 +296,22 @@ body input::placeholder {
   margin: 0rem;
 }
 dialog .stat-grid,
-form.folder-config .stat-grid,
+form .stat-grid,
 .sr3e.sheet.item .stat-grid,
+.application.category-browser .stat-grid,
+div#support-details .stat-grid,
+div#invitation-links .stat-grid,
 .sr3e.sheet.character .stat-grid {
   display: inline-grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem;
 }
 dialog .stat-grid.one-column,
-form.folder-config .stat-grid.one-column,
+form .stat-grid.one-column,
 .sr3e.sheet.item .stat-grid.one-column,
+.application.category-browser .stat-grid.one-column,
+div#support-details .stat-grid.one-column,
+div#invitation-links .stat-grid.one-column,
 .sr3e.sheet.character .stat-grid.one-column {
   display: inline-grid;
   width: fit-content;
@@ -313,8 +319,11 @@ form.folder-config .stat-grid.one-column,
   grid-template-columns: repeat(1, auto);
 }
 dialog .stat-grid.two-column,
-form.folder-config .stat-grid.two-column,
+form .stat-grid.two-column,
 .sr3e.sheet.item .stat-grid.two-column,
+.application.category-browser .stat-grid.two-column,
+div#support-details .stat-grid.two-column,
+div#invitation-links .stat-grid.two-column,
 .sr3e.sheet.character .stat-grid.two-column {
   display: inline-grid;
   width: fit-content;
@@ -322,16 +331,22 @@ form.folder-config .stat-grid.two-column,
   grid-template-columns: repeat(2, auto);
 }
 dialog .details-foldout,
-form.folder-config .details-foldout,
+form .details-foldout,
 .sr3e.sheet.item .details-foldout,
+.application.category-browser .details-foldout,
+div#support-details .details-foldout,
+div#invitation-links .details-foldout,
 .sr3e.sheet.character .details-foldout {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
   font-size: 1.2rem;
 }
 dialog .sr3e-inner-background-container,
-form.folder-config .sr3e-inner-background-container,
+form .sr3e-inner-background-container,
 .sr3e.sheet.item .sr3e-inner-background-container,
+.application.category-browser .sr3e-inner-background-container,
+div#support-details .sr3e-inner-background-container,
+div#invitation-links .sr3e-inner-background-container,
 .sr3e.sheet.character .sr3e-inner-background-container {
   position: relative;
   width: 100%;
@@ -339,8 +354,11 @@ form.folder-config .sr3e-inner-background-container,
   padding: 0.5rem;
 }
 dialog .sr3e-inner-background-container .sr3e-inner-background,
-form.folder-config .sr3e-inner-background-container .sr3e-inner-background,
+form .sr3e-inner-background-container .sr3e-inner-background,
 .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background,
+.application.category-browser .sr3e-inner-background-container .sr3e-inner-background,
+div#support-details .sr3e-inner-background-container .sr3e-inner-background,
+div#invitation-links .sr3e-inner-background-container .sr3e-inner-background,
 .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background {
   position: relative;
   width: 100%;
@@ -349,14 +367,20 @@ form.folder-config .sr3e-inner-background-container .sr3e-inner-background,
   z-index: 10;
 }
 dialog .sr3e-inner-background-container .sr3e-inner-background .header-icon,
-form.folder-config .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+form .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+.application.category-browser .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+div#support-details .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+div#invitation-links .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background .header-icon {
   justify-content: center;
 }
 dialog .sr3e-inner-background-container .sr3e-inner-background.slim,
-form.folder-config .sr3e-inner-background-container .sr3e-inner-background.slim,
+form .sr3e-inner-background-container .sr3e-inner-background.slim,
 .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background.slim,
+.application.category-browser .sr3e-inner-background-container .sr3e-inner-background.slim,
+div#support-details .sr3e-inner-background-container .sr3e-inner-background.slim,
+div#invitation-links .sr3e-inner-background-container .sr3e-inner-background.slim,
 .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background.slim {
   width: auto;
   display: inline-block;
@@ -364,8 +388,11 @@ form.folder-config .sr3e-inner-background-container .sr3e-inner-background.slim,
   white-space: nowrap;
 }
 dialog .sr3e-inner-background-container.slim,
-form.folder-config .sr3e-inner-background-container.slim,
+form .sr3e-inner-background-container.slim,
 .sr3e.sheet.item .sr3e-inner-background-container.slim,
+.application.category-browser .sr3e-inner-background-container.slim,
+div#support-details .sr3e-inner-background-container.slim,
+div#invitation-links .sr3e-inner-background-container.slim,
 .sr3e.sheet.character .sr3e-inner-background-container.slim {
   width: auto;
   display: inline-block;
@@ -373,6 +400,8 @@ form.folder-config .sr3e-inner-background-container.slim,
   white-space: nowrap;
 }
 a.button,
+button.plain,
+button.plain.active,
 button {
   position: relative;
   background-color: hotpink;
@@ -380,9 +409,12 @@ button {
   border: none;
   cursor: pointer;
   margin: 0rem;
+  padding: 0.5rem;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 a.button::after,
+button.plain::after,
+button.plain.active::after,
 button::after {
   content: "";
   z-index: -1;
@@ -399,32 +431,46 @@ button::after {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 a.button:hover::after,
+button.plain:hover::after,
+button.plain.active:hover::after,
 button:hover::after {
   box-shadow: inset 0 0 15px magenta;
   transition: box-shadow 1.5s ease;
 }
 a.button:active::after,
+button.plain:active::after,
+button.plain.active:active::after,
 button:active::after {
   box-shadow: 0 0 0 3px purple, inset 0 0 20px orange;
 }
 a.button:disabled::after,
+button.plain:disabled::after,
+button.plain.active:disabled::after,
 button:disabled::after {
   box-shadow: none;
 }
 a.button:hover,
+button.plain:hover,
+button.plain.active:hover,
 button:hover {
   background-color: red;
   transition: background-color 1.5s ease;
 }
 a.button:active,
+button.plain:active,
+button.plain.active:active,
 button:active {
   background-color: purple;
 }
 a.button:disabled,
+button.plain:disabled,
+button.plain.active:disabled,
 button:disabled {
   background-color: yellow;
 }
 a.button .ui-control,
+button.plain .ui-control,
+button.plain.active .ui-control,
 button .ui-control {
   background-color: hotpink;
   color: cyan;
@@ -668,12 +714,20 @@ header.window-header {
   background-image: none;
 }
 dialog,
+form,
 .sr3e.sheet.item,
+.application.category-browser,
+div#support-details,
+div#invitation-links,
 .sr3e.sheet.character {
   box-shadow: none;
 }
 dialog label,
+form label,
 .sr3e.sheet.item label,
+.application.category-browser label,
+div#support-details label,
+div#invitation-links label,
 .sr3e.sheet.character label {
   color: #1df0ff;
   text-transform: uppercase;
@@ -681,29 +735,49 @@ dialog label,
   padding: 1rem;
 }
 dialog .details-foldout,
+form .details-foldout,
 .sr3e.sheet.item .details-foldout,
+.application.category-browser .details-foldout,
+div#support-details .details-foldout,
+div#invitation-links .details-foldout,
 .sr3e.sheet.character .details-foldout {
   text-shadow: 0 0 10px #ff0095;
 }
 dialog a,
+form a,
 .sr3e.sheet.item a,
+.application.category-browser a,
+div#support-details a,
+div#invitation-links a,
 .sr3e.sheet.character a {
   text-decoration: none;
 }
 dialog .window-resizable-handle,
+form .window-resizable-handle,
 .sr3e.sheet.item .window-resizable-handle,
+.application.category-browser .window-resizable-handle,
+div#support-details .window-resizable-handle,
+div#invitation-links .window-resizable-handle,
 .sr3e.sheet.character .window-resizable-handle {
   background-color: #ff0095 I !important;
   z-index: 1000 !important;
 }
 dialog img,
+form img,
 .sr3e.sheet.item img,
+.application.category-browser img,
+div#support-details img,
+div#invitation-links img,
 .sr3e.sheet.character img {
   margin: 0rem;
   border: none;
 }
 dialog .fake-shadow,
+form .fake-shadow,
 .sr3e.sheet.item .fake-shadow,
+.application.category-browser .fake-shadow,
+div#support-details .fake-shadow,
+div#invitation-links .fake-shadow,
 .sr3e.sheet.character .fake-shadow {
   position: absolute;
   top: 1.5rem;
@@ -716,14 +790,22 @@ dialog .fake-shadow,
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 dialog .sr3e-inner-background,
+form .sr3e-inner-background,
 .sr3e.sheet.item .sr3e-inner-background,
+.application.category-browser .sr3e-inner-background,
+div#support-details .sr3e-inner-background,
+div#invitation-links .sr3e-inner-background,
 .sr3e.sheet.character .sr3e-inner-background {
   background: #ff1d9d;
   padding: 0.5rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 dialog .sr3e-inner-background::before,
+form .sr3e-inner-background::before,
 .sr3e.sheet.item .sr3e-inner-background::before,
+.application.category-browser .sr3e-inner-background::before,
+div#support-details .sr3e-inner-background::before,
+div#invitation-links .sr3e-inner-background::before,
 .sr3e.sheet.character .sr3e-inner-background::before {
   box-shadow: inset 0 0 30px #1d282c;
   content: '';
@@ -738,7 +820,11 @@ dialog .sr3e-inner-background::before,
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 dialog .image-mask,
+form .image-mask,
 .sr3e.sheet.item .image-mask,
+.application.category-browser .image-mask,
+div#support-details .image-mask,
+div#invitation-links .image-mask,
 .sr3e.sheet.character .image-mask {
   width: 100%;
   aspect-ratio: 1/1;
@@ -747,7 +833,11 @@ dialog .image-mask,
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 dialog .image-mask::before,
+form .image-mask::before,
 .sr3e.sheet.item .image-mask::before,
+.application.category-browser .image-mask::before,
+div#support-details .image-mask::before,
+div#invitation-links .image-mask::before,
 .sr3e.sheet.character .image-mask::before {
   overflow: hidden;
   content: '';
@@ -757,7 +847,11 @@ dialog .image-mask::before,
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 dialog .image-mask img,
+form .image-mask img,
 .sr3e.sheet.item .image-mask img,
+.application.category-browser .image-mask img,
+div#support-details .image-mask img,
+div#invitation-links .image-mask img,
 .sr3e.sheet.character .image-mask img {
   position: absolute;
   top: 50%;
@@ -770,12 +864,20 @@ dialog .image-mask img,
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 dialog h3.item,
+form h3.item,
 .sr3e.sheet.item h3.item,
+.application.category-browser h3.item,
+div#support-details h3.item,
+div#invitation-links h3.item,
 .sr3e.sheet.character h3.item {
   text-align: center;
 }
 dialog .stat-card,
+form .stat-card,
 .sr3e.sheet.item .stat-card,
+.application.category-browser .stat-card,
+div#support-details .stat-card,
+div#invitation-links .stat-card,
 .sr3e.sheet.character .stat-card {
   position: relative;
   background: #ff1d9d;
@@ -785,7 +887,11 @@ dialog .stat-card,
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 dialog .stat-card h4.no-margin,
+form .stat-card h4.no-margin,
 .sr3e.sheet.item .stat-card h4.no-margin,
+.application.category-browser .stat-card h4.no-margin,
+div#support-details .stat-card h4.no-margin,
+div#invitation-links .stat-card h4.no-margin,
 .sr3e.sheet.character .stat-card h4.no-margin {
   max-width: 5rem;
   overflow: hidden;
@@ -796,7 +902,11 @@ dialog .stat-card h4.no-margin,
   margin-right: 0.5rem;
 }
 dialog .stat-card::before,
+form .stat-card::before,
 .sr3e.sheet.item .stat-card::before,
+.application.category-browser .stat-card::before,
+div#support-details .stat-card::before,
+div#invitation-links .stat-card::before,
 .sr3e.sheet.character .stat-card::before {
   box-shadow: inset 0 0 30px #1b1f24;
   content: '';
@@ -811,19 +921,31 @@ dialog .stat-card::before,
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 dialog .stat-card .stat-value,
+form .stat-card .stat-value,
 .sr3e.sheet.item .stat-card .stat-value,
+.application.category-browser .stat-card .stat-value,
+div#support-details .stat-card .stat-value,
+div#invitation-links .stat-card .stat-value,
 .sr3e.sheet.character .stat-card .stat-value {
   margin: 0;
   text-align: center;
 }
 dialog .core-skill .skill-name,
+form .core-skill .skill-name,
 .sr3e.sheet.item .core-skill .skill-name,
+.application.category-browser .core-skill .skill-name,
+div#support-details .core-skill .skill-name,
+div#invitation-links .core-skill .skill-name,
 .sr3e.sheet.character .core-skill .skill-name {
   text-indent: 0rem;
   text-overflow: ellipsis;
 }
 dialog .core-skill .skill-value,
+form .core-skill .skill-value,
 .sr3e.sheet.item .core-skill .skill-value,
+.application.category-browser .core-skill .skill-value,
+div#support-details .core-skill .skill-value,
+div#invitation-links .core-skill .skill-value,
 .sr3e.sheet.character .core-skill .skill-value {
   text-indent: 0rem;
   text-align: center;
@@ -832,29 +954,49 @@ dialog .core-skill .skill-value,
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 dialog .specialisation-container,
+form .specialisation-container,
 .sr3e.sheet.item .specialisation-container,
+.application.category-browser .specialisation-container,
+div#support-details .specialisation-container,
+div#invitation-links .specialisation-container,
 .sr3e.sheet.character .specialisation-container {
   background-color: #1b1f24;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 dialog .specialisation-container .specializations,
+form .specialisation-container .specializations,
 .sr3e.sheet.item .specialisation-container .specializations,
+.application.category-browser .specialisation-container .specializations,
+div#support-details .specialisation-container .specializations,
+div#invitation-links .specialisation-container .specializations,
 .sr3e.sheet.character .specialisation-container .specializations {
   text-indent: 0rem;
 }
 dialog .specialisation-container .specializations .skill-specialization-card,
+form .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
+.application.category-browser .specialisation-container .specializations .skill-specialization-card,
+div#support-details .specialisation-container .specializations .skill-specialization-card,
+div#invitation-links .specialisation-container .specializations .skill-specialization-card,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card {
   background-color: #003856;
 }
 dialog .specialisation-container .specializations .skill-specialization-card .specialization-name,
+form .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
+.application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-name,
+div#support-details .specialisation-container .specializations .skill-specialization-card .specialization-name,
+div#invitation-links .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 dialog .specialisation-container .specializations .skill-specialization-card .specialization-value,
+form .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-value,
+.application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-value,
+div#support-details .specialisation-container .specializations .skill-specialization-card .specialization-value,
+div#invitation-links .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-value {
   text-indent: 0rem;
   text-align: center;
@@ -958,6 +1100,77 @@ dialog .specialisation-container .specializations .skill-specialization-card .sp
 .system-sr3e *::-webkit-scrollbar-button {
   background: transparent;
   display: none;
+}
+.application.category-browser {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.application.category-browser form.application {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  width: auto;
+}
+.application.category-browser .sheet-component {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.application.category-browser .sr3e-inner-background-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.application.category-browser .sr3e-inner-background {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+.application.category-browser .sr3e-inner-background .window-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+.application.category-browser .sr3e-inner-background .window-content > .flexcol[data-application-part="sidebar"] {
+  flex: 0 0 auto;
+  min-width: 160px;
+  max-width: 220px;
+  padding-right: 0.5rem;
+  overflow: hidden;
+}
+.application.category-browser .sr3e-inner-background .window-content > .main {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.application.category-browser .sr3e-inner-background .main,
+.application.category-browser .sr3e-inner-background .flexcol {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.application.category-browser .sr3e-inner-background .categories.scrollable,
+.application.category-browser .sr3e-inner-background .tabs.scrollable {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 .journal-entry-page.window-content {
   background: bisque;
@@ -1084,4 +1297,7 @@ dialog {
 .journal-page-header:hover .edit-button {
   opacity: 0.8;
   pointer-events: auto;
+}
+#div.form-group {
+  padding: 0.5rem;
 }
