@@ -82,7 +82,6 @@ Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
     { type: foundry.applications.settings.SettingsConfig },
     { type: foundry.applications.sheets.UserConfig }
 
-
   ];
 
   const typeDeselectors = [
@@ -118,8 +117,6 @@ Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
   element.appendChild(sheetComponent);
 });
 
-
-
   ///// TEST END ////
   console.log("TESTING ENDING");
 
@@ -138,11 +135,13 @@ Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
       ]
     });
 
-    // NOTE This is the Journal itself
+    // NOTE This is the Journal itself 
+    /*
     DocumentSheetConfig.registerSheet(JournalEntry, flags.sr3e, SR3EJournalEntry, {
       label: 'SR3E Journal Entry',
       makeDefault: true
     });
+    */
 
 
     DocumentSheetConfig.registerSheet(JournalEntryPage, flags.sr3e, SR3EJournalEntryPage, {

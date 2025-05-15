@@ -5993,10 +5993,6 @@ function registerHooks() {
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
       ]
     });
-    DocumentSheetConfig.registerSheet(JournalEntry, flags.sr3e, SR3EJournalEntry, {
-      label: "SR3E Journal Entry",
-      makeDefault: true
-    });
     DocumentSheetConfig.registerSheet(JournalEntryPage, flags.sr3e, SR3EJournalEntryPage, {
       label: "SR3E Journal Entry Page",
       makeDefault: true
