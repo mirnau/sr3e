@@ -1,8 +1,6 @@
 import Log from "./Log.js";
 import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
-import SR3EJournalEntry from "./module/foundry/sheets/SR3EJournalEntry.js";
-import SR3EJournalEntryPage from "./module/foundry/sheets/SR3EJournalEntryPage.js";
 import { sr3e } from "./module/foundry/config.js";
 import {
   hooks,
@@ -37,7 +35,6 @@ function configureProject() {
 
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
-  //DocumentSheetConfig.unregisterSheet(JournalEntry, flags.core, JournalEntrySheet);
 }
 
 function configureThemes() {
@@ -134,21 +131,6 @@ Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
 
       ]
     });
-
-    // NOTE This is the Journal itself 
-    /*
-    DocumentSheetConfig.registerSheet(JournalEntry, flags.sr3e, SR3EJournalEntry, {
-      label: 'SR3E Journal Entry',
-      makeDefault: true
-    });
-    */
-
-
-    DocumentSheetConfig.registerSheet(JournalEntryPage, flags.sr3e, SR3EJournalEntryPage, {
-      label: 'SR3E Journal Entry Page',
-      makeDefault: true
-    });
-
 
     Log.success("Initialization Completed", "sr3e.js");
   });

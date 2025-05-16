@@ -11,7 +11,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
-var _app, _neon, _app2, _app3, _editorApp;
+var _app, _neon;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -281,8 +281,6 @@ if (typeof window !== "undefined")
   (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
 const EACH_ITEM_REACTIVE = 1;
 const EACH_INDEX_REACTIVE = 1 << 1;
-const EACH_IS_CONTROLLED = 1 << 2;
-const EACH_IS_ANIMATED = 1 << 3;
 const EACH_ITEM_IMMUTABLE = 1 << 4;
 const PROPS_IS_IMMUTABLE = 1;
 const PROPS_IS_RUNES = 1 << 1;
@@ -1780,31 +1778,6 @@ function deep_read(value, visited = /* @__PURE__ */ new Set()) {
     }
   }
 }
-let listening_to_form_reset = false;
-function add_form_reset_listener() {
-  if (!listening_to_form_reset) {
-    listening_to_form_reset = true;
-    document.addEventListener(
-      "reset",
-      (evt) => {
-        Promise.resolve().then(() => {
-          var _a;
-          if (!evt.defaultPrevented) {
-            for (
-              const e of
-              /**@type {HTMLFormElement} */
-              evt.target.elements
-            ) {
-              (_a = e.__on_r) == null ? void 0 : _a.call(e);
-            }
-          }
-        });
-      },
-      // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
-      { capture: true }
-    );
-  }
-}
 function without_reactive_context(fn) {
   var previous_reaction = active_reaction;
   var previous_effect = active_effect;
@@ -1816,19 +1789,6 @@ function without_reactive_context(fn) {
     set_active_reaction(previous_reaction);
     set_active_effect(previous_effect);
   }
-}
-function listen_to_event_and_reset_event(element, event2, handler, on_reset = handler) {
-  element.addEventListener(event2, () => without_reactive_context(handler));
-  const prev = element.__on_r;
-  if (prev) {
-    element.__on_r = () => {
-      prev();
-      on_reset(true);
-    };
-  } else {
-    element.__on_r = () => on_reset(true);
-  }
-  add_form_reset_listener();
 }
 const all_registered_events = /* @__PURE__ */ new Set();
 const root_event_handles = /* @__PURE__ */ new Set();
@@ -2212,14 +2172,6 @@ function pause_effects(state2, items, controlled_anchor, items_map) {
 function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = null) {
   var anchor = node;
   var state2 = { flags: flags2, items: /* @__PURE__ */ new Map(), first: null };
-  var is_controlled = (flags2 & EACH_IS_CONTROLLED) !== 0;
-  if (is_controlled) {
-    var parent_node = (
-      /** @type {Element} */
-      node
-    );
-    anchor = parent_node.appendChild(create_text());
-  }
   var fallback = null;
   var was_empty = false;
   var each_array = /* @__PURE__ */ derived_safe_equal(() => {
@@ -2266,33 +2218,18 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
   });
 }
 function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
-  var _a, _b, _c, _d;
-  var is_animated = (flags2 & EACH_IS_ANIMATED) !== 0;
-  var should_update = (flags2 & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
   var length = array.length;
   var items = state2.items;
   var first = state2.first;
   var current = first;
   var seen;
   var prev = null;
-  var to_animate;
   var matched = [];
   var stashed = [];
   var value;
   var key;
   var item2;
   var i;
-  if (is_animated) {
-    for (i = 0; i < length; i += 1) {
-      value = array[i];
-      key = get_key(value, i);
-      item2 = items.get(key);
-      if (item2 !== void 0) {
-        (_a = item2.a) == null ? void 0 : _a.measure();
-        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).add(item2);
-      }
-    }
-  }
   for (i = 0; i < length; i += 1) {
     value = array[i];
     key = get_key(value, i);
@@ -2320,15 +2257,11 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
       current = prev.next;
       continue;
     }
-    if (should_update) {
-      update_item(item2, value, i, flags2);
+    {
+      update_item(item2, value, i);
     }
     if ((item2.e.f & INERT) !== 0) {
       resume_effect(item2.e);
-      if (is_animated) {
-        (_b = item2.a) == null ? void 0 : _b.unfix();
-        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).delete(item2);
-      }
     }
     if (item2 !== current) {
       if (seen !== void 0 && seen.has(item2)) {
@@ -2390,41 +2323,18 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
     }
     var destroy_length = to_destroy.length;
     if (destroy_length > 0) {
-      var controlled_anchor = (flags2 & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
-      if (is_animated) {
-        for (i = 0; i < destroy_length; i += 1) {
-          (_c = to_destroy[i].a) == null ? void 0 : _c.measure();
-        }
-        for (i = 0; i < destroy_length; i += 1) {
-          (_d = to_destroy[i].a) == null ? void 0 : _d.fix();
-        }
-      }
+      var controlled_anchor = null;
       pause_effects(state2, to_destroy, controlled_anchor, items);
     }
-  }
-  if (is_animated) {
-    queue_micro_task(() => {
-      var _a2;
-      if (to_animate === void 0) return;
-      for (item2 of to_animate) {
-        (_a2 = item2.a) == null ? void 0 : _a2.apply();
-      }
-    });
   }
   active_effect.first = state2.first && state2.first.e;
   active_effect.last = prev && prev.e;
 }
 function update_item(item2, value, index2, type) {
-  if ((type & EACH_ITEM_REACTIVE) !== 0) {
+  {
     internal_set(item2.v, value);
   }
-  if ((type & EACH_INDEX_REACTIVE) !== 0) {
-    internal_set(
-      /** @type {Value<number>} */
-      item2.i,
-      index2
-    );
-  } else {
+  {
     item2.i = index2;
   }
 }
@@ -2538,26 +2448,6 @@ function component(node, get_component, render_fn) {
     }
   }, EFFECT_TRANSPARENT);
 }
-function r(e) {
-  var t, f, n = "";
-  if ("string" == typeof e || "number" == typeof e) n += e;
-  else if ("object" == typeof e) if (Array.isArray(e)) {
-    var o = e.length;
-    for (t = 0; t < o; t++) e[t] && (f = r(e[t])) && (n && (n += " "), n += f);
-  } else for (f in e) e[f] && (n && (n += " "), n += f);
-  return n;
-}
-function clsx$1() {
-  for (var e, t, f = 0, n = "", o = arguments.length; f < o; f++) (e = arguments[f]) && (t = r(e)) && (n && (n += " "), n += t);
-  return n;
-}
-function clsx(value) {
-  if (typeof value === "object") {
-    return clsx$1(value);
-  } else {
-    return value ?? "";
-  }
-}
 function set_value(element, value) {
   var attributes = element.__attributes ?? (element.__attributes = {});
   if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
@@ -2603,21 +2493,6 @@ function get_setters(element) {
     proto = get_prototype_of(proto);
   }
   return setters;
-}
-function set_class(dom, value, hash) {
-  var prev_class_name = dom.__className;
-  var next_class_name = to_class(value);
-  if (prev_class_name !== next_class_name || hydrating) {
-    if (value == null && true) {
-      dom.removeAttribute("class");
-    } else {
-      dom.className = next_class_name;
-    }
-    dom.__className = next_class_name;
-  }
-}
-function to_class(value, hash) {
-  return (value == null ? "" : value) + "";
 }
 function toggle_class(dom, class_name, value) {
   if (value) {
@@ -2891,51 +2766,6 @@ function animate(element, options, counterpart, t2, on_finish) {
     },
     t: () => get_t()
   };
-}
-function bind_value(input, get2, set2 = get2) {
-  var runes = is_runes();
-  listen_to_event_and_reset_event(input, "input", (is_reset) => {
-    var value = is_reset ? input.defaultValue : input.value;
-    value = is_numberlike_input(input) ? to_number(value) : value;
-    set2(value);
-    if (runes && value !== (value = get2())) {
-      var start = input.selectionStart;
-      var end = input.selectionEnd;
-      input.value = value ?? "";
-      if (end !== null) {
-        input.selectionStart = start;
-        input.selectionEnd = Math.min(end, input.value.length);
-      }
-    }
-  });
-  if (
-    // If we are hydrating and the value has since changed,
-    // then use the updated value from the input instead.
-    // If defaultValue is set, then value == defaultValue
-    // TODO Svelte 6: remove input.value check and set to empty string?
-    untrack(get2) == null && input.value
-  ) {
-    set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
-  }
-  render_effect(() => {
-    var value = get2();
-    if (is_numberlike_input(input) && value === to_number(input.value)) {
-      return;
-    }
-    if (input.type === "date" && !value && !input.value) {
-      return;
-    }
-    if (value !== input.value) {
-      input.value = value ?? "";
-    }
-  });
-}
-function is_numberlike_input(input) {
-  var type = input.type;
-  return type === "number" || type === "range";
-}
-function to_number(value) {
-  return value === "" ? null : +value;
 }
 function is_bound_this(bound_value, element_or_component) {
   return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
@@ -3415,11 +3245,11 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$4 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$d = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+var root$b = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3455,15 +3285,15 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var div = root$d();
+  var div = root$b();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$4();
+      var div_1 = root_1$3();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$2();
+      var div_2 = root_2$1();
       var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
@@ -3553,26 +3383,26 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root_1$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="stat-label"><i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i></div>`);
-var root$c = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_2 = /* @__PURE__ */ template(`<div class="stat-label"><i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i></div>`);
+var root$a = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$c();
+  var fragment = root$a();
   var h3 = first_child(fragment);
   var text2 = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
-      var h1 = root_1$3();
+      var h1 = root_1$2();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, get$1(baseTotal)));
       append($$anchor2, h1);
     };
     var alternate = ($$anchor2) => {
-      var div = root_2$1();
+      var div = root_2();
       var h1_1 = sibling(child(div), 2);
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, get$1(total)));
@@ -5109,8 +4939,8 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-var root_1$2 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$b = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$9 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5126,7 +4956,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$b();
+  var fragment = root$9();
   var h1 = first_child(fragment);
   var text2 = child(h1);
   var div = sibling(h1, 2);
@@ -5134,7 +4964,7 @@ function Attributes($$anchor, $$props) {
   each(node, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_1 = root_1$2();
+    var div_1 = root_1$1();
     var node_1 = child(div_1);
     AttributeCard(node_1, {
       get statKey() {
@@ -5161,31 +4991,31 @@ function Attributes($$anchor, $$props) {
   pop();
 }
 enable_legacy_mode_flag();
-var root$a = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
-  var div = root$a();
-  append($$anchor, div);
-}
-var root$9 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$9();
-  append($$anchor, div);
-}
-var root$8 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
-function SkillsActive($$anchor) {
   var div = root$8();
+  append($$anchor, div);
+}
+var root$7 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
+  var div = root$7();
+  append($$anchor, div);
+}
+var root$6 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+function SkillsActive($$anchor) {
+  var div = root$6();
   append($$anchor, div);
 }
 var on_click = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$7 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var div = root$7();
+  var div = root$5();
   var h1 = child(div);
   var text2 = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5245,11 +5075,11 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$6 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$6();
+  var div = root$4();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -5264,11 +5094,11 @@ function Health($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$5 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$5();
+  var div = root$3();
   var h1 = child(div);
   var text2 = child(h1);
   var span = sibling(h1, 2);
@@ -5285,8 +5115,8 @@ function Inventory($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$4 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root_1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const cards = proxy([
@@ -5341,10 +5171,10 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$4();
+  var div = root$2();
   var node = sibling(child(div), 4);
   each(node, 17, () => cards, (c) => c.id, ($$anchor2, c) => {
-    var div_1 = root_1$1();
+    var div_1 = root_1();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -5382,7 +5212,7 @@ function CharacterSheetApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$3 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, false);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5417,16 +5247,16 @@ function NeonName($$anchor, $$props) {
   });
   legacy_pre_effect_reset();
   init();
-  var div = root$3();
+  var div = root$1();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root$2 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root$2();
+  var div = root();
   append($$anchor, div);
 }
 const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
@@ -5503,272 +5333,6 @@ __publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
   closeOnSubmit: false
 });
 let CharacterActorSheet = _CharacterActorSheet;
-var root_1 = /* @__PURE__ */ template(`<li draggable="true"><div class="page-heading" data-action="goToHeading"><span class="page-index"></span> <span class="page-title ellipsis"> </span></div></li>`);
-var root_2 = /* @__PURE__ */ template(`<article class="journal-entry-page text level1 page"><header class="journal-page-header"><h1> </h1> <button type="button" class="edit-button icon fa-solid fa-pen" aria-label="Edit Page"></button></header> <section class="journal-page-content"><!></section></article>`);
-var root_4 = /* @__PURE__ */ template(`<article class="journal-entry-page text level1 page"><header class="journal-page-header"><h1> </h1> <button type="button" class="edit-button icon fa-solid fa-pen" aria-label="Edit Page"></button></header> <section class="journal-page-content"><!></section></article>`);
-var root$1 = /* @__PURE__ */ template(`<section class="window-content"><aside class="sidebar journal-sidebar flexcol" data-application-part="sidebar"><search><button type="button" class="inline-control lock-mode icon fa-solid fa-unlock" data-action="toggleLock" aria-label="Table of contents unlocked. Click to lock." data-tooltip=""></button> <button type="button" class="inline-control view-mode icon" data-action="toggleMode" data-tooltip=""><i></i></button> <button type="button" class="inline-control toggle-search-mode icon fa-solid fa-magnifying-glass" data-action="toggleSearch" aria-label="Search by Name only" data-tooltip=""></button> <input type="search" name="search" autocomplete="off" placeholder="Search Pages" aria-label="Search Pages"> <button type="button" class="inline-control collapse-toggle icon fas fa-caret-right" data-action="toggleSidebar" aria-label="Collapse Sidebar" data-tooltip=""></button></search> <nav class="toc" data-tooltip-direction="RIGHT"><ol></ol></nav> <footer class="action-buttons flexrow"><button type="button" class="previous icon fas fa-chevron-left" data-action="previousPage" aria-label="Previous Page"></button> <button type="button" class="create" data-action="createPage"><i class="fas fa-file-circle-plus"></i> <span>Add Page</span></button> <button type="button" class="next icon fas fa-chevron-right" data-action="nextPage" aria-label="Next Page"></button></footer></aside> <section class="journal-entry-content flexcol" data-application-part="pages"><header class="journal-header"><input class="title" name="name" type="text" placeholder="Entry Title" aria-label="Entry Title"></header> <div class="journal-entry-pages scrollable editable"><!></div></section></section>`);
-function JournalEntryApp($$anchor, $$props) {
-  push($$props, true);
-  let doc = prop($$props, "doc", 7);
-  let localPages = state(proxy(Array.from(doc().pages.values()).sort((a, b) => a.sort - b.sort)));
-  let activePageIndex = state(0);
-  let viewMode = state("single");
-  async function createPage() {
-    try {
-      const newPage = await doc().createEmbeddedDocuments("JournalEntryPage", [
-        {
-          _id: foundry.utils.randomID(),
-          name: "New Page",
-          text: {
-            content: "",
-            format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML
-          },
-          sort: Date.now()
-        }
-      ]);
-      set(localPages, proxy([...get$1(localPages), ...newPage].sort((a, b) => a.sort - b.sort)));
-      set(activePageIndex, get$1(localPages).length - 1);
-    } catch (error) {
-      console.error("Failed to create page:", error);
-    }
-  }
-  function toggleViewMode() {
-    set(viewMode, proxy(get$1(viewMode) === "single" ? "all" : "single"));
-  }
-  function viewModeIcon() {
-    return get$1(viewMode) === "single" ? "fas fa-book-open" : "fas fa-file-alt";
-  }
-  function goToPage(index2) {
-    set(activePageIndex, proxy(index2));
-  }
-  function nextPage() {
-    set(activePageIndex, proxy(Math.min(get$1(localPages).length - 1, get$1(activePageIndex) + 1)));
-  }
-  function previousPage() {
-    set(activePageIndex, proxy(Math.max(0, get$1(activePageIndex) - 1)));
-  }
-  function handleDragOver(event2) {
-    event2.preventDefault();
-    event2.dataTransfer.dropEffect = "move";
-  }
-  let draggedIndex = null;
-  function handleDragStart(index2) {
-    draggedIndex = index2;
-  }
-  function handleDrop(event2, dropIndex) {
-    event2.preventDefault();
-    if (draggedIndex === null || draggedIndex === dropIndex) return;
-    const updatedPages = [...get$1(localPages)];
-    const [movedPage] = updatedPages.splice(draggedIndex, 1);
-    updatedPages.splice(dropIndex, 0, movedPage);
-    updatedPages.forEach((page, i) => page.sort = i);
-    set(localPages, proxy(updatedPages.sort((a, b) => a.sort - b.sort)));
-    doc().updateEmbeddedDocuments("JournalEntryPage", updatedPages.map((page, i) => ({ _id: page._id, sort: i }))).then(() => {
-      console.log("Order updated in Foundry");
-    }).catch((error) => console.error("Failed to persist order:", error));
-    draggedIndex = null;
-  }
-  function editPage(index2) {
-    const page = get$1(localPages)[index2];
-    if (!page) return;
-    const pageDocument = doc().pages.get(page._id);
-    if (pageDocument) {
-      pageDocument.sheet.render(true);
-    }
-  }
-  var section = root$1();
-  var aside = child(section);
-  var search = child(aside);
-  var button = sibling(child(search), 2);
-  var i_1 = child(button);
-  var nav = sibling(search, 2);
-  var ol = child(nav);
-  each(ol, 21, () => get$1(localPages), index, ($$anchor2, page, index2) => {
-    var li = root_1();
-    var div = child(li);
-    var span = child(div);
-    span.textContent = index2;
-    var span_1 = sibling(span, 2);
-    var text2 = child(span_1);
-    template_effect(() => {
-      set_class(li, `text level1 page ${(index2 === get$1(activePageIndex) ? "active" : "") ?? ""}`);
-      set_attribute(li, "data-page-id", get$1(page)._id);
-      set_attribute(span, "data-tooltip-text", get$1(page).name);
-      set_text(text2, get$1(page).name);
-    });
-    event("click", li, () => goToPage(index2));
-    event("dragstart", li, () => handleDragStart(index2));
-    event("drop", li, (event2) => handleDrop(event2, index2));
-    event("dragover", li, handleDragOver);
-    append($$anchor2, li);
-  });
-  var footer = sibling(nav, 2);
-  var button_1 = child(footer);
-  var button_2 = sibling(button_1, 2);
-  var button_3 = sibling(button_2, 2);
-  var section_1 = sibling(aside, 2);
-  var header = child(section_1);
-  var input = child(header);
-  var div_1 = sibling(header, 2);
-  var node = child(div_1);
-  {
-    var consequent = ($$anchor2) => {
-      var article = root_2();
-      var header_1 = child(article);
-      var h1 = child(header_1);
-      var text_1 = child(h1);
-      var button_4 = sibling(h1, 2);
-      var section_2 = sibling(header_1, 2);
-      var node_1 = child(section_2);
-      html(node_1, () => {
-        var _a, _b;
-        return ((_b = (_a = get$1(localPages)[get$1(activePageIndex)]) == null ? void 0 : _a.text) == null ? void 0 : _b.content) || "<p><em>No content</em></p>";
-      });
-      template_effect(() => {
-        var _a;
-        return set_text(text_1, ((_a = get$1(localPages)[get$1(activePageIndex)]) == null ? void 0 : _a.name) || "Untitled Page");
-      });
-      event("click", button_4, () => editPage(get$1(activePageIndex)));
-      append($$anchor2, article);
-    };
-    var alternate = ($$anchor2) => {
-      var fragment = comment();
-      var node_2 = first_child(fragment);
-      each(node_2, 17, () => get$1(localPages), index, ($$anchor3, page, index2) => {
-        var article_1 = root_4();
-        var header_2 = child(article_1);
-        var h1_1 = child(header_2);
-        var text_2 = child(h1_1);
-        var button_5 = sibling(h1_1, 2);
-        var section_3 = sibling(header_2, 2);
-        var node_3 = child(section_3);
-        html(node_3, () => {
-          var _a;
-          return ((_a = get$1(page).text) == null ? void 0 : _a.content) || "<p><em>No content</em></p>";
-        });
-        template_effect(() => set_text(text_2, get$1(page).name));
-        event("click", button_5, () => editPage(index2));
-        append($$anchor3, article_1);
-      });
-      append($$anchor2, fragment);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(viewMode) === "single") $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  template_effect(
-    ($0) => {
-      set_attribute(button, "aria-label", get$1(viewMode) === "single" ? "Single Page Mode" : "All Pages Mode");
-      set_class(i_1, clsx($0));
-    },
-    [viewModeIcon]
-  );
-  event("click", button, toggleViewMode);
-  event("click", button_1, previousPage);
-  event("click", button_2, createPage);
-  event("click", button_3, nextPage);
-  bind_value(input, () => doc().name, ($$value) => doc().name = $$value);
-  append($$anchor, section);
-  pop();
-}
-const { DocumentSheetV2 } = foundry.applications.api;
-class SR3EJournalEntry extends DocumentSheetV2 {
-  constructor() {
-    super(...arguments);
-    __privateAdd(this, _app2);
-  }
-  _renderHTML() {
-    return null;
-  }
-  async activateEditor(name, options = {}, initialContent = "") {
-    console.log("The Editor was Opened", name, options, initialContent);
-  }
-  async _replaceHTML(_, content) {
-    var _a, _b;
-    if (__privateGet(this, _app2)) return;
-    await ((_b = (_a = this.document).loadEmbeddedDocuments) == null ? void 0 : _b.call(_a, "JournalEntryPage"));
-    __privateSet(this, _app2, mount(JournalEntryApp, {
-      target: content,
-      props: {
-        doc: this.document
-      }
-    }));
-  }
-  async _tearDown() {
-    await unmount(__privateGet(this, _app2));
-    __privateSet(this, _app2, null);
-    return super._tearDown();
-  }
-}
-_app2 = new WeakMap();
-__publicField(SR3EJournalEntry, "DEFAULT_OPTIONS", {
-  ...DocumentSheetV2.DEFAULT_OPTIONS,
-  id: "sr3e-journal-sheet",
-  classes: ["sr3e", "sheet", "journal-sheet", "journal-entry", "expanded"],
-  position: { width: 820, height: 820 },
-  window: {
-    resizable: true
-  },
-  tag: "form",
-  submitOnChange: true,
-  closeOnSubmit: false
-});
-var root = /* @__PURE__ */ template(`<section class="astyle svelte-1y8r8bn"><!></section>`);
-function JournalEntryPageApp($$anchor, $$props) {
-  console.log($$props.doc, "doc");
-  console.log($$props.initialContent, "initialContent");
-  var section = root();
-  var node = child(section);
-  html(node, () => $$props.initialContent);
-  append($$anchor, section);
-}
-const { JournalEntryPageSheet } = foundry.applications.sheets.journal;
-class SR3EJournalEntryPage extends JournalEntryPageSheet {
-  constructor() {
-    super(...arguments);
-    __privateAdd(this, _app3);
-    __privateAdd(this, _editorApp);
-  }
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["sr3e", "sheet", "journal-sheet", "journal-entry-page", "expanded"],
-      submitOnChange: true,
-      closeOnSubmit: false,
-      resizable: true
-    });
-  }
-  _renderHTML() {
-    return null;
-  }
-  async _replaceHTML(_, content) {
-    if (__privateGet(this, _app3)) return;
-    console.log("Attempting to wrap existing HTML...");
-    const rawHTML = content.innerHTML;
-    console.log("Captured HTML:", rawHTML);
-    content.innerHTML = "";
-    __privateSet(this, _app3, mount(JournalEntryPageApp, {
-      target: content,
-      props: {
-        doc: this.document,
-        initialContent: rawHTML
-      }
-    }));
-  }
-  async close(options) {
-    if (__privateGet(this, _app3)) {
-      await unmount(__privateGet(this, _app3));
-      __privateSet(this, _app3, null);
-    }
-    if (__privateGet(this, _editorApp)) {
-      await unmount(__privateGet(this, _editorApp));
-      __privateSet(this, _editorApp, null);
-    }
-    return super.close(options);
-  }
-}
-_app3 = new WeakMap();
-_editorApp = new WeakMap();
 const sr3e = {};
 sr3e.attributes = {
   attributes: "sr3e.attributes.attributes",
@@ -5992,10 +5556,6 @@ function registerHooks() {
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
       ]
-    });
-    DocumentSheetConfig.registerSheet(JournalEntryPage, flags.sr3e, SR3EJournalEntryPage, {
-      label: "SR3E Journal Entry Page",
-      makeDefault: true
     });
     Log.success("Initialization Completed", "sr3e.js");
   });
