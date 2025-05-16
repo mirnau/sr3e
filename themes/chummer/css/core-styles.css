@@ -1276,28 +1276,6 @@ form,
 dialog {
   overflow: visible;
 }
-.journal-entry {
-  background: red !important;
-}
-.journal-page-header {
-  position: relative;
-}
-.journal-page-header .edit-button {
-  position: absolute;
-  top: 0rem;
-  right: 0rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.journal-page-header .edit-button:hover {
-  opacity: 1;
-  pointer-events: auto;
-}
-.journal-page-header:hover .edit-button {
-  opacity: 0.8;
-  pointer-events: auto;
-}
 #div.form-group {
   padding: 0.5rem;
 }
