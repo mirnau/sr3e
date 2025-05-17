@@ -5508,6 +5508,8 @@ function configureThemes() {
 function registerHooks() {
   console.log("TESTING BEGINNING");
   Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
+    var _a;
+    if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
       { type: foundry.applications.api.DocumentSheetV2 },

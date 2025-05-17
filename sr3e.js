@@ -65,6 +65,9 @@ function registerHooks() {
   ////// TESTING ONLY //////
 
   Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
+
+    if (element.firstElementChild?.classList.contains('sheet-component')) return;
+
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
       { type: foundry.applications.api.DocumentSheetV2 },

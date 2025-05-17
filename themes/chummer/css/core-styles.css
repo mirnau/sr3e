@@ -322,6 +322,50 @@
   backdrop-filter: blur(8px);
   z-index: 1;
 }
+.system-sr3e section.journal-entry-content.flexcol {
+  border-radius: 0;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
+}
+.system-sr3e .journal-entry-pages {
+  margin: 0;
+  padding: 0;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
+}
+.system-sr3e .journal-header {
+  background: transparent;
+}
+.system-sr3e form.journal-sheet.journal-entry {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.system-sr3e form.journal-sheet.journal-entry .sheet-component,
+.system-sr3e form.journal-sheet.journal-entry .sr3e-inner-background-container,
+.system-sr3e form.journal-sheet.journal-entry .sr3e-inner-background {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.system-sr3e form.journal-sheet.journal-entry .window-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  min-height: 0;
+}
+.system-sr3e form.journal-sheet.journal-entry .window-content > * {
+  flex-shrink: 1;
+  box-sizing: border-box;
+  min-height: 0;
+}
+.system-sr3e form.journal-sheet.journal-entry .form-footer {
+  flex-shrink: 0;
+}
+.system-sr3e button.icon.fa-pen-to-square[data-action="editPage"] {
+  z-index: 1000;
+  position: relative;
+}
 .system-sr3e .form-group {
   padding: 0.5rem;
 }
