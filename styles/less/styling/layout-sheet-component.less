@@ -1,4 +1,4 @@
-// NOTE: LESS mixins for brevity
+// Mixins
 .apply-container() {
     position: relative;
     width: 100%;
@@ -23,6 +23,7 @@
     padding: 0.5rem;
 }
 
+// General window layout adjustments
 .window-content.standard-form,
 .window-content {
     display: flex;
@@ -30,6 +31,8 @@
     margin: 0rem;
 }
 
+// Layout for supported app wrappers
+// (these should probably be scoped tighter)
 dialog,
 form,
 .sr3e.sheet.item,
@@ -37,24 +40,15 @@ form,
 div#support-details,
 div#invitation-links,
 .sr3e.sheet.character {
-
-
     .stat-grid {
         display: inline-grid;
-
         grid-template-columns: repeat(3, 1fr);
 
         &.one-column {
-            display: inline-grid;
-            width: fit-content;
-            max-width: min-content;
             grid-template-columns: repeat(1, auto);
         }
 
         &.two-column {
-            display: inline-grid;
-            width: fit-content;
-            max-width: min-content;
             grid-template-columns: repeat(2, auto);
         }
 
@@ -68,14 +62,12 @@ div#invitation-links,
     }
 
     .sr3e-inner-background-container {
-
         .apply-container();
         padding: 0.5rem;
-
+        
         .sr3e-inner-background {
             .apply-container();
             padding: 0.5rem;
-
             z-index: 10;
 
             .header-icon {
@@ -95,6 +87,161 @@ div#invitation-links,
             display: inline-block;
             flex: 0 1 auto;
             white-space: nowrap;
+        }
+    }
+}
+
+
+* {
+    border: none;
+}
+
+.application {
+    background: @appwindow-background;
+    box-shadow: none;
+    border: none;
+    backdrop-filter: blur(2px);
+}
+
+
+#sr3e-character-sheet>.window-content {
+    .gradient-overlay() !important;
+    border: none;
+    background-image: @sheet-background-image;
+}
+
+.window-resizable-handle {
+    background-color: @accent-color I !important;
+    z-index: 1000 !important;
+}
+
+// Remaining scoped styles (same app block as layout)
+dialog,
+form,
+.sr3e.sheet.item,
+.application.category-browser,
+div#support-details,
+div#invitation-links,
+.sr3e.sheet.character {
+    label {
+        color: @h1-color;
+        text-transform: uppercase;
+        text-shadow: 0 0 10px @h1-color;
+        padding: 1rem;
+    }
+
+    .details-foldout {
+        text-shadow: 0 0 10px @h2-color;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    box-shadow: none;
+
+    .fake-shadow {
+        .fake-shadow(@default-fake-shadow-color);
+        .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
+    }
+
+    .sr3e-inner-background {
+        position: relative;
+        overflow: hidden;
+        z-index: 0; 
+        background: @default-sheet-border-color;
+        padding: 0.5rem;
+        .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            z-index: -1;
+            background: @default-sr3e-inner-background-color;
+            box-shadow: inset 0 0 30px #1d282c;
+            pointer-events: none;
+            .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+        }
+    }
+
+
+    .stat-card {
+        position: relative;
+        background: @accent-cherry-blossom;
+        transition: transform 1.3s ease, width 1.3s ease, height 1.3s ease, background-color 1.3s ease;
+        text-align: center;
+        width: auto;
+
+        h4.no-margin {
+            max-width: 5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .clipped-corners(0.5*0.854rem, 0.5*0.854rem, 0.854rem, 0.5*0.854rem);
+
+        &::before {
+            box-shadow: inset 0 0 30px @primary-color;
+            content: '';
+            position: absolute;
+            z-index: -1;
+            background: @secondary-color;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            pointer-events: none;
+            .clipped-corners(0.5*0.854rem, 0.5*0.854rem, 0.854rem, 0.5*0.854rem);
+        }
+
+        .stat-value {
+            margin: 0;
+            text-align: center;
+        }
+    }
+
+    .core-skill {
+        .skill-name {
+            text-indent: 0rem;
+            text-overflow: ellipsis;
+        }
+
+        .skill-value {
+            text-indent: 0rem;
+            text-align: center;
+            background-color: @secondary-color;
+            box-shadow: inset 0 0 8px @highlight-color-primary;
+            .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+        }
+    }
+
+    .specialisation-container {
+        background-color: @primary-color;
+        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+        .specializations {
+            text-indent: 0rem;
+
+            .skill-specialization-card {
+                background-color: @secondary-color;
+
+                .specialization-name {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .specialization-value {
+                    text-indent: 0rem;
+                    text-align: center;
+                    background-color: @primary-color;
+                    box-shadow: inset 0 0 8px @highlight-color-primary;
+                    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+                }
+            }
         }
     }
 }

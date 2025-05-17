@@ -3,13 +3,10 @@
 //Skinning
 /*
 
-@import "./styling/skinning/sr3e-input.less";
-@import "./styling/skinning/sr3e-input-range.less";
 @import "./styling/skinning/sr3e-select.less";
 @import "./styling/skinning/sr3e-common.less";
 @import "./styling/skinning/sr3e-textarea.less";
 @import "./styling/skinning/sr3e-form.less";
-@import "./styling/skinning/sr3e-img.less";
 @import "./styling/skinning/sr3e-table.less";
 @import "./styling/skinning/sr3e-playerconfig.less";
 @import "./styling/skinning/sr3e-pause-container.less";
@@ -20,59 +17,47 @@
 
 //Common styles
 
-
-
-
-//Third Party
-@import "./styling/editor.less";
-
-
-//Theme specific
-
-@import "./styling/common-fonts.less";
+//||||||||||||||   GLOBAL BEGIN  
+// Variables
 @import "./chummer-dark/theme.less";
-
-@import "./styling/layout-sheet-component.less";
-
-
-@import "./styling/skinning/sr3e-button.less";
-@import "./styling/skinning/sr3e-window-header.less";
-
-
+// Global font styling
+@import "./styling/common/common-fonts.less";
+@import "./styling/common/common-mixins.less";
 @import "./masonry/masonry-layout.less";
-@import "./styling/common-mixins.less";
-@import "./styling/injections/neoname.less";
 
+//||||||||||||||   GLOBAL END  
 
-@import "./styling/style-sheet-component.less";
-
-@import "./styling/injections/newsfeed.less";
-
-@import "./styling/skinning/ui/sr3e-scrollbar.less";
-@import "./styling/skinning/sr3e-editor-container.less";
-@import "./styling/custom/sr3e-stat-card.less";
-
-.dialog-footer,
-.actor-footer,
-.window-app-footer {
-    position: absolute;
-    left: 0rem;
-    width: 100%;
-    bottom: -2.30rem;
-    height: 2.3rem;
-    box-shadow: inset 0 0 30px @accent-color;
-    box-sizing: border-box;
-    .clipped-corners(0rem, 0rem, 0.5rem, 0.5rem);
-    backdrop-filter: blur(8px);
-    z-index: 1;
+.system-sr3e {
+    
+    // Third Party
+    @import "./styling/editor.less";
+    
+    // All the style directives for themes
+    
+    // Apps
+    
+    @import "./styling/apps/app-sheet-actor.less";
+    
+    // Components
+    @import "./styling/components/component-form-group.less";
+    @import "./styling/components/sr3e-window-header.less";
+    @import "./styling/components/sr3e-button.less";
+    @import "./styling/components/sr3e-editor-container.less";
+    @import "./styling/skinning/sr3e-img.less";
+    @import "./styling/components/sr3e-scrollbar.less";
+    @import "./styling/components/sr3e-input.less";
+    @import "./styling/components/sr3e-window-content.less";
+    
+    //Custom Components
+    @import "./styling/custom-components/sr3e-stat-card.less";
+    @import "./styling/custom-components/sr3e-sheet-component.less";
+    
+    // Injections
+    @import "./styling/injections/neoname.less";
+    @import "./styling/injections/newsfeed.less";
+    
+    // Not yet refactored:
+    
+    @import "./styling/skinning/sr3e-input-range.less";
+    @import "./styling/layout-sheet-component.less";
 }
-
-form,
-dialog {
-    overflow: visible;
-}
-
-#div.form-group {
-    padding: 0.5rem;
-}
-

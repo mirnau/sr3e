@@ -5550,6 +5550,9 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.once(hooks.init, () => {
+    document.querySelectorAll(".window-content *").forEach((el) => {
+      el.style.outline = "1px solid red";
+    });
     configureProject();
     configureThemes();
     registerDocumentTypes({
