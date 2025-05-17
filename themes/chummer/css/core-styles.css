@@ -324,15 +324,21 @@
 }
 .system-sr3e section.journal-entry-content.flexcol {
   border-radius: 0;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
 }
 .system-sr3e .journal-entry-pages {
   margin: 0;
   padding: 0;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
 }
 .system-sr3e .journal-header {
   background: transparent;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.system-sr3e .journal-header input[type="text"] {
+  color: #1df0ff;
+  font-size: 2rem;
 }
 .system-sr3e form.journal-sheet.journal-entry {
   display: flex;
@@ -365,6 +371,41 @@
 .system-sr3e button.icon.fa-pen-to-square[data-action="editPage"] {
   z-index: 1000;
   position: relative;
+}
+.system-sr3e form.journal-entry-page.text {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.system-sr3e form.journal-entry-page.text .sheet-component,
+.system-sr3e form.journal-entry-page.text .sr3e-inner-background-container,
+.system-sr3e form.journal-entry-page.text .sr3e-inner-background {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.system-sr3e form.journal-entry-page.text section.window-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+.system-sr3e form.journal-entry-page.text section.window-content prose-mirror.editor {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.system-sr3e form.journal-entry-page.text section.window-content prose-mirror.editor .editor-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+.system-sr3e form.journal-entry-page.text section.window-content footer.form-footer {
+  flex: 0 0 auto;
 }
 .system-sr3e .form-group {
   padding: 0.5rem;
@@ -466,6 +507,7 @@
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 .system-sr3e .editor-content {
+  height: 100%;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .system-sr3e .editor-content p {
@@ -606,9 +648,9 @@
 .system-sr3e input[type="search"],
 .system-sr3e input[type="number"],
 .system-sr3e input[type="text"] {
-  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e) !important;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
   box-shadow: inset 0 0 1rem #1df0ff;
-  color: #c8d3f5 !important;
+  color: #c8d3f5;
   border: none;
   font-size: 1.5rem;
   width: 100%;

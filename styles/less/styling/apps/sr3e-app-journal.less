@@ -1,17 +1,24 @@
 section.journal-entry-content.flexcol {
     border-radius: 0;
-    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem) !important;
+    .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem) !important;
 }
 
 .journal-entry-pages {
     margin: 0;
     padding: 0;
-    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem) !important;
+    .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem) !important;
 }
 
 
 .journal-header {
     background: transparent;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+
+    input[type="text"] {
+        color: @h1-color;
+        font-size: 2rem;
+    }
 }
 
 form.journal-sheet.journal-entry {
@@ -48,6 +55,6 @@ form.journal-sheet.journal-entry {
 }
 
 button.icon.fa-pen-to-square[data-action="editPage"] {
-  z-index: 1000;
-  position: relative;
+    z-index: 1000;
+    position: relative;
 }
