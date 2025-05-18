@@ -5462,7 +5462,6 @@ function injectCssSelectors(app, element, ctx, data) {
   }
 }
 const { DocumentSheetConfig } = foundry.applications.apps;
-const { JournalEntrySheet } = foundry.applications.sheets.journal;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
     var _a;
@@ -5493,10 +5492,7 @@ function configureThemes() {
     scope: "world",
     config: true,
     type: String,
-    choices: {
-      "chummer": "Chummer",
-      "steel": "Steel"
-    },
+    choices: { chummer: "Chummer", steel: "Steel" },
     default: "chummer"
   });
   Hooks.on("ready", () => {
@@ -5505,10 +5501,30 @@ function configureThemes() {
     document.body.classList.add(`theme-${theme}`);
   });
 }
+function wrapContent(root2, { skipEditorStub = false } = {}) {
+  const sheetComponent = Object.assign(document.createElement("div"), { className: "sheet-component" });
+  const innerContainer = Object.assign(document.createElement("div"), { className: "sr3e-inner-background-container" });
+  const fakeShadow = Object.assign(document.createElement("div"), { className: "fake-shadow" });
+  const innerBackground = Object.assign(document.createElement("div"), { className: "sr3e-inner-background" });
+  while (root2.firstChild) innerBackground.append(root2.firstChild);
+  if (!skipEditorStub) {
+    innerBackground.querySelectorAll("prose-mirror.editor").forEach((pm) => {
+      var _a;
+      if (!((_a = pm.previousElementSibling) == null ? void 0 : _a.classList.contains("editor-menu"))) {
+        const stub = document.createElement("div");
+        stub.className = "editor-menu";
+        pm.insertAdjacentElement("beforebegin", stub);
+      }
+    });
+  }
+  innerContainer.append(fakeShadow, innerBackground);
+  sheetComponent.append(innerContainer);
+  root2.append(sheetComponent);
+}
 function registerHooks() {
-  console.log("TESTING BEGINNING");
-  Hooks.on(hooks.renderApplicationV2, (app, element, ctx, data) => {
+  Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
+    if (app.constructor.name === "JournalEntryPageProseMirrorSheet") return;
     if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
@@ -5517,9 +5533,7 @@ function registerHooks() {
       { type: foundry.applications.sidebar.apps.ControlsConfig },
       { type: foundry.applications.sidebar.apps.ModuleManagement },
       { type: foundry.applications.sidebar.apps.WorldConfig },
-      //TODO: fix editor
       { type: foundry.applications.sidebar.apps.ToursManagement },
-      //TODO: figrue out crop
       { type: foundry.applications.sidebar.apps.SupportDetails },
       { type: foundry.applications.sidebar.apps.InvitationLinks },
       { type: foundry.applications.sheets.FolderConfig },
@@ -5532,29 +5546,16 @@ function registerHooks() {
     ];
     if (typeDeselectors.some((entry) => app instanceof entry.type)) return;
     if (!typeSelectors.some((entry) => app instanceof entry.type)) return;
-    const sheetComponent = document.createElement("div");
-    sheetComponent.classList.add("sheet-component");
-    const sr3eInnerContainer = document.createElement("div");
-    sr3eInnerContainer.classList.add("sr3e-inner-background-container");
-    const fakeShadow = document.createElement("div");
-    fakeShadow.classList.add("fake-shadow");
-    const sr3eInnerBackground = document.createElement("div");
-    sr3eInnerBackground.classList.add("sr3e-inner-background");
-    while (element.firstChild) {
-      sr3eInnerBackground.appendChild(element.firstChild);
-    }
-    sr3eInnerContainer.appendChild(fakeShadow);
-    sr3eInnerContainer.appendChild(sr3eInnerBackground);
-    sheetComponent.appendChild(sr3eInnerContainer);
-    element.appendChild(sheetComponent);
+    wrapContent(element);
   });
-  console.log("TESTING ENDING");
+  Hooks.on("renderJournalEntryPageProseMirrorSheet", (app, htmlOrElement) => {
+    const root2 = htmlOrElement instanceof HTMLElement ? htmlOrElement : htmlOrElement[0];
+    if (!root2 || root2.querySelector(":scope > .sheet-component")) return;
+    requestAnimationFrame(() => wrapContent(root2, { skipEditorStub: true }));
+  });
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.once(hooks.init, () => {
-    document.querySelectorAll(".window-content *").forEach((el) => {
-      el.style.outline = "1px solid red";
-    });
     configureProject();
     configureThemes();
     registerDocumentTypes({
