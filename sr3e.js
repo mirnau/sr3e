@@ -49,34 +49,36 @@ function configureThemes() {
   });
 }
 
-function wrapContent(root, { skipEditorStub = false } = {}) {
-  const sheetComponent = Object.assign(document.createElement("div"), { className: "sheet-component" });
-  const innerContainer = Object.assign(document.createElement("div"), { className: "sr3e-inner-background-container" });
-  const fakeShadow = Object.assign(document.createElement("div"), { className: "fake-shadow" });
-  const innerBackground = Object.assign(document.createElement("div"), { className: "sr3e-inner-background" });
+function wrapContent(root) {
 
-  while (root.firstChild) innerBackground.append(root.firstChild);
+  if (!root || root.firstElementChild?.classList.contains("sheet-component")) return;
 
-  if (!skipEditorStub) {
-    innerBackground.querySelectorAll("prose-mirror.editor").forEach(pm => {
-      if (!pm.previousElementSibling?.classList.contains("editor-menu")) {
-        const stub = document.createElement("div");
-        stub.className = "editor-menu";
-        pm.insertAdjacentElement("beforebegin", stub);
-      }
-    });
-  }
+  const existing = Array.from(root.children);
 
+  const sheetComponent = document.createElement("div");
+  sheetComponent.classList.add("sheet-component");
+
+  const innerContainer = document.createElement("div");
+  innerContainer.classList.add("sr3e-inner-background-container");
+
+  const fakeShadow = document.createElement("div");
+  fakeShadow.classList.add("fake-shadow");
+
+  const innerBackground = document.createElement("div");
+  innerBackground.classList.add("sr3e-inner-background");
+
+  // Instead of moving nodes, just rewrap in place
+  innerBackground.append(...existing);
   innerContainer.append(fakeShadow, innerBackground);
   sheetComponent.append(innerContainer);
-  root.append(sheetComponent);
+
+  root.appendChild(sheetComponent);
 }
 
 
 
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
-    if (app.constructor.name === "JournalEntryPageProseMirrorSheet") return;
     if (element.firstElementChild?.classList.contains("sheet-component")) return;
 
     const typeSelectors = [
@@ -102,20 +104,9 @@ function registerHooks() {
     if (typeDeselectors.some(entry => app instanceof entry.type)) return;
     if (!typeSelectors.some(entry => app instanceof entry.type)) return;
 
-    wrapContent(element);
+     wrapContent(element);
 
   });
-
-  Hooks.on("renderJournalEntryPageProseMirrorSheet", (app, htmlOrElement) => {
-    const root = htmlOrElement instanceof HTMLElement ? htmlOrElement : htmlOrElement[0];
-    if (!root || root.querySelector(":scope > .sheet-component")) return;
-
-    // Defer until ProseMirrorMenu has wrapped the editor
-    requestAnimationFrame(() => wrapContent(root, { skipEditorStub: true }));
-  });
-
-
-
 
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);

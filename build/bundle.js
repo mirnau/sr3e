@@ -5501,30 +5501,26 @@ function configureThemes() {
     document.body.classList.add(`theme-${theme}`);
   });
 }
-function wrapContent(root2, { skipEditorStub = false } = {}) {
-  const sheetComponent = Object.assign(document.createElement("div"), { className: "sheet-component" });
-  const innerContainer = Object.assign(document.createElement("div"), { className: "sr3e-inner-background-container" });
-  const fakeShadow = Object.assign(document.createElement("div"), { className: "fake-shadow" });
-  const innerBackground = Object.assign(document.createElement("div"), { className: "sr3e-inner-background" });
-  while (root2.firstChild) innerBackground.append(root2.firstChild);
-  if (!skipEditorStub) {
-    innerBackground.querySelectorAll("prose-mirror.editor").forEach((pm) => {
-      var _a;
-      if (!((_a = pm.previousElementSibling) == null ? void 0 : _a.classList.contains("editor-menu"))) {
-        const stub = document.createElement("div");
-        stub.className = "editor-menu";
-        pm.insertAdjacentElement("beforebegin", stub);
-      }
-    });
-  }
+function wrapContent(root2) {
+  var _a;
+  if (!root2 || ((_a = root2.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component"))) return;
+  const existing = Array.from(root2.children);
+  const sheetComponent = document.createElement("div");
+  sheetComponent.classList.add("sheet-component");
+  const innerContainer = document.createElement("div");
+  innerContainer.classList.add("sr3e-inner-background-container");
+  const fakeShadow = document.createElement("div");
+  fakeShadow.classList.add("fake-shadow");
+  const innerBackground = document.createElement("div");
+  innerBackground.classList.add("sr3e-inner-background");
+  innerBackground.append(...existing);
   innerContainer.append(fakeShadow, innerBackground);
   sheetComponent.append(innerContainer);
-  root2.append(sheetComponent);
+  root2.appendChild(sheetComponent);
 }
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
-    if (app.constructor.name === "JournalEntryPageProseMirrorSheet") return;
     if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
@@ -5547,11 +5543,6 @@ function registerHooks() {
     if (typeDeselectors.some((entry) => app instanceof entry.type)) return;
     if (!typeSelectors.some((entry) => app instanceof entry.type)) return;
     wrapContent(element);
-  });
-  Hooks.on("renderJournalEntryPageProseMirrorSheet", (app, htmlOrElement) => {
-    const root2 = htmlOrElement instanceof HTMLElement ? htmlOrElement : htmlOrElement[0];
-    if (!root2 || root2.querySelector(":scope > .sheet-component")) return;
-    requestAnimationFrame(() => wrapContent(root2, { skipEditorStub: true }));
   });
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
