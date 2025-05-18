@@ -98,7 +98,8 @@ function registerHooks() {
 
     const typeDeselectors = [
       { type: foundry.applications.sheets.ActorSheetV2 },
-      { type: foundry.applications.sheets.ItemSheetV2 }
+      { type: foundry.applications.sheets.ItemSheetV2 },
+      { type: foundry.applications.sheets.journal.JournalEntryPageSheet }
     ];
 
     if (typeDeselectors.some(entry => app instanceof entry.type)) return;
