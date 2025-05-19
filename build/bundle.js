@@ -11,7 +11,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
-var _app, _neon;
+var _app, _neon, _feed;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -5124,6 +5124,7 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
     super(...arguments);
     __privateAdd(this, _app);
     __privateAdd(this, _neon);
+    __privateAdd(this, _feed);
   }
   _renderHTML() {
     return null;
@@ -5152,17 +5153,19 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
       }));
     }
     const title = form.querySelector(".window-title");
-    title.remove();
-    const svelteInejction = document.createElement("div");
-    svelteInejction.classList.add("svelte-injection");
-    header.prepend(svelteInejction);
-    __privateSet(this, _app, mount(NewsFeed, {
-      target: header,
-      anchor: header.firstChild,
-      props: {
-        actor: this.document
-      }
-    }));
+    if (title) {
+      title.remove();
+      const svelteInejction = document.createElement("div");
+      svelteInejction.classList.add("svelte-injection");
+      header.prepend(svelteInejction);
+      __privateSet(this, _feed, mount(NewsFeed, {
+        target: header,
+        anchor: header.firstChild,
+        props: {
+          actor: this.document
+        }
+      }));
+    }
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
   }
@@ -5178,6 +5181,7 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
 };
 _app = new WeakMap();
 _neon = new WeakMap();
+_feed = new WeakMap();
 __publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
   ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
   id: "sr3e-character-sheet",

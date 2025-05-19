@@ -7,6 +7,7 @@ import { mount, unmount } from 'svelte';
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
   #neon;
+  #feed;
 
   static DEFAULT_OPTIONS = {
     ...super.DEFAULT_OPTIONS,
@@ -53,19 +54,21 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     }
 
     const title = form.querySelector(".window-title");
-    title.remove();
-    const svelteInejction = document.createElement("div");
-    svelteInejction.classList.add("svelte-injection");
-    header.prepend(svelteInejction);
-
-    this.#app = mount(NewsFeed, {
-      target: header,
-      anchor: header.firstChild,
-      props: {
-        actor: this.document
-      }
-    });
-
+    if (title) { 
+      title.remove() 
+      const svelteInejction = document.createElement("div");
+      svelteInejction.classList.add("svelte-injection");
+      header.prepend(svelteInejction);
+      
+      this.#feed = mount(NewsFeed, {
+        target: header,
+        anchor: header.firstChild,
+        props: {
+          actor: this.document
+        }
+      });
+    };
+      
     //windowContent.classList.add("noise-layer");
 
     SR3DLog.success("Svelte mounted", this.constructor.name);
