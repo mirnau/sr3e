@@ -23,7 +23,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     closeOnSubmit: false
   };
 
-  _renderHTML() { 
+  _renderHTML() {
     return null;
   }
 
@@ -54,12 +54,12 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     }
 
     const title = form.querySelector(".window-title");
-    if (title) { 
-      title.remove() 
+    if (title) {
+      title.remove()
       const svelteInejction = document.createElement("div");
       svelteInejction.classList.add("svelte-injection");
       header.prepend(svelteInejction);
-      
+
       this.#feed = mount(NewsFeed, {
         target: header,
         anchor: header.firstChild,
@@ -68,7 +68,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
         }
       });
     };
-      
+
     //windowContent.classList.add("noise-layer");
 
     SR3DLog.success("Svelte mounted", this.constructor.name);
@@ -78,9 +78,11 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   async _tearDown() {
     if (this.#neon) await unmount(this.#neon);
     if (this.#app) await unmount(this.#app);
-    this.#app = this.#neon = null;
+    if (this.#feed) await unmount(this.#feed);
+    this.#app = this.#neon = this.#feed = null;
     return super._tearDown();
   }
+
 
   _onSubmit() {
     return false;

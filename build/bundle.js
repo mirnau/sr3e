@@ -5172,7 +5172,8 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
   async _tearDown() {
     if (__privateGet(this, _neon)) await unmount(__privateGet(this, _neon));
     if (__privateGet(this, _app)) await unmount(__privateGet(this, _app));
-    __privateSet(this, _app, __privateSet(this, _neon, null));
+    if (__privateGet(this, _feed)) await unmount(__privateGet(this, _feed));
+    __privateSet(this, _app, __privateSet(this, _neon, __privateSet(this, _feed, null)));
     return super._tearDown();
   }
   _onSubmit() {
