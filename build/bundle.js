@@ -5155,9 +5155,8 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
     const title = form.querySelector(".window-title");
     if (title) {
       title.remove();
-      const svelteInejction = document.createElement("div");
-      svelteInejction.classList.add("svelte-injection");
-      header.prepend(svelteInejction);
+      const newsfeedInjection = document.createElement("div");
+      header.prepend(newsfeedInjection);
       __privateSet(this, _feed, mount(NewsFeed, {
         target: header,
         anchor: header.firstChild,

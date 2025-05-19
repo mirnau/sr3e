@@ -56,9 +56,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     const title = form.querySelector(".window-title");
     if (title) {
       title.remove()
-      const svelteInejction = document.createElement("div");
-      svelteInejction.classList.add("svelte-injection");
-      header.prepend(svelteInejction);
+      const newsfeedInjection = document.createElement("div");
+      header.prepend(newsfeedInjection);
 
       this.#feed = mount(NewsFeed, {
         target: header,
