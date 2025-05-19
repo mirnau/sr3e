@@ -66,7 +66,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       }
     });
 
-    windowContent.classList.add("noise-layer");
+    //windowContent.classList.add("noise-layer");
 
     SR3DLog.success("Svelte mounted", this.constructor.name);
     return windowContent;

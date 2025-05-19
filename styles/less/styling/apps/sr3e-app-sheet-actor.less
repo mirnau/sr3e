@@ -2,13 +2,13 @@
 
 .actor-footer {
     position: absolute;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 30px @accent-color;
+    z-index: 1;
     left: 0rem;
     width: 100%;
     bottom: -2.30rem;
     height: 2.3rem;
-    box-shadow: inset 0 0 30px @accent-color;
-    box-sizing: border-box;
-    .clipped-corners(0rem, 0rem, 0.5rem, 0.5rem);
     backdrop-filter: blur(8px);
-    z-index: 1;
+    .clipped-corners(0rem, 0rem, 0.5rem, 0.5rem);
 }

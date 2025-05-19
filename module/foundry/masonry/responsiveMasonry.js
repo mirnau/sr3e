@@ -1,4 +1,3 @@
-// useMasonry.js
 import Masonry from "masonry-layout";
 
 export function setupMasonry({
@@ -7,17 +6,36 @@ export function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  stateMachineThresholds = { small: 0, medium: 800, wide: 1100 },
   onLayoutStateChange = () => {},
 }) {
   if (!container) return () => {};
 
   const form = container.parentElement;
 
-  const getLayoutState = (w) => {
-    if (w > stateMachineThresholds.wide) return "wide";
-    if (w > stateMachineThresholds.medium) return "medium";
+  const getLayoutState = (columnCount) => {
+    if (columnCount >= 3) return "wide";
+    if (columnCount === 2) return "medium";
     return "small";
+  };
+
+  const applySpanWidths = (columnCount, itemWidth, gutterPx) => {
+    const twoSpan = container.querySelectorAll(".two-span-selectable");
+    const threeSpan = container.querySelectorAll(".three-span-selectable");
+
+    // Compute true span widths in px
+    const twoSpanWidth = columnCount >= 2 ? itemWidth * 2 + gutterPx : itemWidth;
+    const threeSpanWidth = columnCount >= 3 ? itemWidth * 3 + gutterPx * 2 : itemWidth;
+
+    twoSpan.forEach((el) => {
+      el.style.width = `${twoSpanWidth}px`;
+    });
+
+    threeSpan.forEach((el) => {
+      el.style.width = `${threeSpanWidth}px`;
+    });
+
+    const state = getLayoutState(columnCount);
+    onLayoutStateChange(state);
   };
 
   const applyWidths = () => {
@@ -31,8 +49,7 @@ export function setupMasonry({
     const firstItem = container.querySelector(itemSelector);
     const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
 
-    let columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
-
+    const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
     const totalGutter = gutterPx * (columnCount - 1);
     const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
 
@@ -43,8 +60,7 @@ export function setupMasonry({
     const sizer = container.querySelector(gridSizerSelector);
     if (sizer) sizer.style.width = `${itemWidth}px`;
 
-    const state = getLayoutState(parentWidth);
-    onLayoutStateChange(state);
+    applySpanWidths(columnCount, itemWidth, gutterPx);
   };
 
   const msnry = new Masonry(container, {
@@ -56,9 +72,9 @@ export function setupMasonry({
 
   const resizeObserver = new ResizeObserver(() => {
     requestAnimationFrame(() => {
-        applyWidths();
-        msnry.reloadItems();
-        msnry.layout();
+      applyWidths();
+      msnry.reloadItems();
+      msnry.layout();
     });
   });
 
@@ -67,12 +83,13 @@ export function setupMasonry({
   const itemObservers = [];
   container.querySelectorAll(itemSelector).forEach((item) => {
     const obs = new ResizeObserver(() => {
-        requestAnimationFrame(() => {
-            msnry.reloadItems();
-            msnry.layout();
-        });
+      requestAnimationFrame(() => {
+        msnry.reloadItems();
+        msnry.layout();
+      });
     });
     obs.observe(item);
+    itemObservers.push(obs);
   });
 
   // Initial apply

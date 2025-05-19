@@ -2494,6 +2494,21 @@ function get_setters(element) {
   }
   return setters;
 }
+function set_class(dom, value, hash) {
+  var prev_class_name = dom.__className;
+  var next_class_name = to_class(value);
+  if (prev_class_name !== next_class_name || hydrating) {
+    if (value == null && true) {
+      dom.removeAttribute("class");
+    } else {
+      dom.className = next_class_name;
+    }
+    dom.__className = next_class_name;
+  }
+}
+function to_class(value, hash) {
+  return (value == null ? "" : value) + "";
+}
 function toggle_class(dom, class_name, value) {
   if (value) {
     if (dom.classList.contains(class_name)) return;
@@ -4875,17 +4890,30 @@ function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  stateMachineThresholds = { small: 0, medium: 800, wide: 1100 },
   onLayoutStateChange = () => {
   }
 }) {
   if (!container) return () => {
   };
   const form = container.parentElement;
-  const getLayoutState = (w) => {
-    if (w > stateMachineThresholds.wide) return "wide";
-    if (w > stateMachineThresholds.medium) return "medium";
+  const getLayoutState = (columnCount) => {
+    if (columnCount >= 3) return "wide";
+    if (columnCount === 2) return "medium";
     return "small";
+  };
+  const applySpanWidths = (columnCount, itemWidth, gutterPx) => {
+    const twoSpan = container.querySelectorAll(".two-span-selectable");
+    const threeSpan = container.querySelectorAll(".three-span-selectable");
+    const twoSpanWidth = columnCount >= 2 ? itemWidth * 2 + gutterPx : itemWidth;
+    const threeSpanWidth = columnCount >= 3 ? itemWidth * 3 + gutterPx * 2 : itemWidth;
+    twoSpan.forEach((el) => {
+      el.style.width = `${twoSpanWidth}px`;
+    });
+    threeSpan.forEach((el) => {
+      el.style.width = `${threeSpanWidth}px`;
+    });
+    const state2 = getLayoutState(columnCount);
+    onLayoutStateChange(state2);
   };
   const applyWidths = () => {
     const style = getComputedStyle(form);
@@ -4895,7 +4923,7 @@ function setupMasonry({
     const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
     const firstItem = container.querySelector(itemSelector);
     const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
-    let columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
+    const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
     const totalGutter = gutterPx * (columnCount - 1);
     const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
     container.querySelectorAll(itemSelector).forEach((item2) => {
@@ -4903,8 +4931,7 @@ function setupMasonry({
     });
     const sizer = container.querySelector(gridSizerSelector);
     if (sizer) sizer.style.width = `${itemWidth}px`;
-    const state2 = getLayoutState(parentWidth);
-    onLayoutStateChange(state2);
+    applySpanWidths(columnCount, itemWidth, gutterPx);
   };
   const msnry = new Masonry(container, {
     itemSelector,
@@ -4929,6 +4956,7 @@ function setupMasonry({
       });
     });
     obs.observe(item2);
+    itemObservers.push(obs);
   });
   applyWidths();
   msnry.reloadItems();
@@ -5009,7 +5037,7 @@ function SkillsActive($$anchor) {
 var on_click = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="tabs"><button>Active</button> <button>Knowledge</button> <button>Language</button></div> <!></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5025,7 +5053,8 @@ function Skills($$anchor, $$props) {
   button_1.__click = [on_click_1, activeTab];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [on_click_2, activeTab];
-  var node = sibling(div_1, 2);
+  var div_2 = sibling(div_1, 2);
+  var node = child(div_2);
   {
     var consequent = ($$anchor2) => {
       SkillsActive($$anchor2);
@@ -5070,7 +5099,15 @@ function Skills($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(($0) => set_text(text2, $0), [() => localize(config().skills.skills)]);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      toggle_class(button, "active", get$1(activeTab) === "active");
+      toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
+      toggle_class(button_2, "active", get$1(activeTab) === "language");
+    },
+    [() => localize(config().skills.skills)]
+  );
   append($$anchor, div);
   pop();
 }
@@ -5115,7 +5152,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5123,48 +5160,59 @@ function CharacterSheetApp($$anchor, $$props) {
     {
       id: 0,
       comp: Dossier,
-      props: { actor: $$props.actor, config: $$props.config }
+      props: { actor: $$props.actor, config: $$props.config },
+      classes: []
     },
     {
       id: 1,
       comp: Attributes,
-      props: { actor: $$props.actor, config: $$props.config }
+      props: { actor: $$props.actor, config: $$props.config },
+      classes: ["two-span-selectable"]
     },
     {
       id: 2,
       comp: Skills,
-      props: { actor: $$props.actor, config: $$props.config }
+      props: { actor: $$props.actor, config: $$props.config },
+      classes: [
+        "two-span-selectable",
+        "three-span-selectable"
+      ]
     },
     {
       id: 3,
       comp: Health,
-      props: { actor: $$props.actor, config: $$props.config }
+      props: { actor: $$props.actor, config: $$props.config },
+      classes: ["two-span-selectable"]
     },
     {
       id: 4,
       comp: Inventory,
-      props: { actor: $$props.actor, config: $$props.config }
+      props: { actor: $$props.actor, config: $$props.config },
+      classes: [
+        "two-span-selectable",
+        "three-span-selectable"
+      ]
     },
-    { id: 5, txt: "Testing Databind" },
-    { id: 6, txt: "Testing Databind" },
-    { id: 7, txt: "Testing Databind" },
-    { id: 8, txt: "Testing Databind" },
-    { id: 9, txt: "Testing Databind" }
+    {
+      id: 5,
+      txt: "Testing Databind",
+      classes: ["debug-box"]
+    },
+    { id: 6, txt: "Testing Databind", classes: [] },
+    { id: 7, txt: "Testing Databind", classes: [] },
+    { id: 8, txt: "Testing Databind", classes: [] },
+    { id: 9, txt: "Testing Databind", classes: [] }
   ]);
   let container = null;
   let layoutState = state("small");
-  const maxWidth = 1400;
   user_effect(() => {
+    if (!container) return;
     const cleanup = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
       gutterSizerSelector: ".layout-gutter-sizer",
       minItemWidth: 220,
-      stateMachineThresholds: {
-        medium: 0.5 * maxWidth,
-        wide: 0.66 * maxWidth
-      },
       onLayoutStateChange: (state2) => {
         set(layoutState, proxy(state2));
       }
@@ -5182,7 +5230,7 @@ function CharacterSheetApp($$anchor, $$props) {
       var consequent = ($$anchor3) => {
         var fragment = comment();
         var node_2 = first_child(fragment);
-        key_block(node_2, () => get$1(c).comp, ($$anchor4) => {
+        key_block(node_2, () => get$1(c).id, ($$anchor4) => {
           var fragment_1 = comment();
           var node_3 = first_child(fragment_1);
           component(node_3, () => get$1(c).comp, ($$anchor5, $$component) => {
@@ -5202,10 +5250,12 @@ function CharacterSheetApp($$anchor, $$props) {
         else $$render(alternate, false);
       });
     }
-    template_effect(() => {
-      toggle_class(div_1, "two-span-selectable", get$1(c).span === 2);
-      toggle_class(div_1, "three-span-selectable", get$1(c).span === 3);
-    });
+    template_effect(($0) => set_class(div_1, $0), [
+      () => {
+        var _a;
+        return "sheet-component " + (((_a = get$1(c).classes) == null ? void 0 : _a.join(" ")) ?? "");
+      }
+    ]);
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => container = $$value, () => container);
@@ -5303,7 +5353,6 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
         actor: this.document
       }
     }));
-    windowContent.classList.add("noise-layer");
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
   }
@@ -5524,7 +5573,7 @@ function registerHooks() {
     if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
-      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.sheets.journal.JournalEntryPageSheet },
       { type: foundry.applications.apps.CombatTrackerConfig },
       { type: foundry.applications.sidebar.apps.ControlsConfig },
       { type: foundry.applications.sidebar.apps.ModuleManagement },
@@ -5534,12 +5583,13 @@ function registerHooks() {
       { type: foundry.applications.sidebar.apps.InvitationLinks },
       { type: foundry.applications.sheets.FolderConfig },
       { type: foundry.applications.settings.SettingsConfig },
-      { type: foundry.applications.sheets.UserConfig }
+      { type: foundry.applications.sheets.UserConfig },
+      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.apps.FilePicker }
     ];
     const typeDeselectors = [
       { type: foundry.applications.sheets.ActorSheetV2 },
-      { type: foundry.applications.sheets.ItemSheetV2 },
-      { type: foundry.applications.sheets.journal.JournalEntryPageSheet }
+      { type: foundry.applications.sheets.ItemSheetV2 }
     ];
     if (typeDeselectors.some((entry) => app instanceof entry.type)) return;
     if (!typeSelectors.some((entry) => app instanceof entry.type)) return;

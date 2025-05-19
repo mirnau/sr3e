@@ -78,12 +78,13 @@ function wrapContent(root) {
 
 
 function registerHooks() {
+
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     if (element.firstElementChild?.classList.contains("sheet-component")) return;
 
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
-      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.sheets.journal.JournalEntryPageSheet },
       { type: foundry.applications.apps.CombatTrackerConfig },
       { type: foundry.applications.sidebar.apps.ControlsConfig },
       { type: foundry.applications.sidebar.apps.ModuleManagement },
@@ -93,13 +94,14 @@ function registerHooks() {
       { type: foundry.applications.sidebar.apps.InvitationLinks },
       { type: foundry.applications.sheets.FolderConfig },
       { type: foundry.applications.settings.SettingsConfig },
-      { type: foundry.applications.sheets.UserConfig }
+      { type: foundry.applications.sheets.UserConfig },
+      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.apps.FilePicker }
     ];
 
     const typeDeselectors = [
       { type: foundry.applications.sheets.ActorSheetV2 },
-      { type: foundry.applications.sheets.ItemSheetV2 },
-      { type: foundry.applications.sheets.journal.JournalEntryPageSheet }
+      { type: foundry.applications.sheets.ItemSheetV2 }
     ];
 
     if (typeDeselectors.some(entry => app instanceof entry.type)) return;
