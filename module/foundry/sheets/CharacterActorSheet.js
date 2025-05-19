@@ -9,19 +9,21 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   #neon;
   #feed;
 
-  static DEFAULT_OPTIONS = {
-    ...super.DEFAULT_OPTIONS,
-    id: "sr3e-character-sheet",
-    classes: ["sr3e", "sheet", "actor", "character", "ActorSheetV2"],
-    template: null,
-    position: { width: 820, height: 820 },
-    window: {
-      resizable: true
-    },
-    tag: "form",
-    submitOnChange: true,
-    closeOnSubmit: false
-  };
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "actor", "character", "ActorSheetV2"],
+      template: null,
+      position: { width: 820, height: 820 },
+      window: {
+        resizable: true
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
 
   _renderHTML() {
     return null;

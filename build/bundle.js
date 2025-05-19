@@ -1,16 +1,10 @@
-var __defProp = Object.defineProperty;
-var __getProtoOf = Object.getPrototypeOf;
-var __reflectGet = Reflect.get;
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var __superGet = (cls, obj, key) => __reflectGet(__getProtoOf(cls), key, obj);
 var _app, _neon, _feed;
 class Log {
   static error(message, sender, obj) {
@@ -338,9 +332,6 @@ function equals(value) {
 }
 function safe_not_equal(a, b) {
   return a != a ? b == b : a !== b || a !== null && typeof a === "object" || typeof a === "function";
-}
-function not_equal(a, b) {
-  return a !== b;
 }
 function safe_equals(value) {
   return !safe_not_equal(value, this.v);
@@ -1105,7 +1096,15 @@ function queue_micro_task(fn) {
   }
   current_queued_micro_tasks.push(fn);
 }
+function flush_tasks() {
+  if (is_micro_task_queued$1) {
+    process_micro_tasks();
+  }
+}
+const FLUSH_MICROTASK = 0;
+const FLUSH_SYNC = 1;
 let is_throwing_error = false;
+let scheduler_mode = FLUSH_MICROTASK;
 let is_micro_task_queued = false;
 let last_scheduled_effect = null;
 let is_flushing_effect = false;
@@ -1472,7 +1471,7 @@ function process_deferred() {
   }
 }
 function schedule_effect(signal) {
-  {
+  if (scheduler_mode === FLUSH_MICROTASK) {
     if (!is_micro_task_queued) {
       is_micro_task_queued = true;
       queueMicrotask(process_deferred);
@@ -1541,6 +1540,34 @@ function process_effects(effect2, collected_effects) {
     collected_effects.push(child2);
     process_effects(child2, collected_effects);
   }
+}
+function flush_sync(fn) {
+  var previous_scheduler_mode = scheduler_mode;
+  var previous_queued_root_effects = queued_root_effects;
+  try {
+    infinite_loop_guard();
+    const root_effects = [];
+    scheduler_mode = FLUSH_SYNC;
+    queued_root_effects = root_effects;
+    is_micro_task_queued = false;
+    flush_queued_root_effects(previous_queued_root_effects);
+    var result = fn == null ? void 0 : fn();
+    flush_tasks();
+    if (queued_root_effects.length > 0 || root_effects.length > 0) {
+      flush_sync();
+    }
+    flush_count = 0;
+    last_scheduled_effect = null;
+    if (DEV) ;
+    return result;
+  } finally {
+    scheduler_mode = previous_scheduler_mode;
+    queued_root_effects = previous_queued_root_effects;
+  }
+}
+async function tick() {
+  await Promise.resolve();
+  flush_sync();
 }
 function get$1(signal) {
   var _a;
@@ -1846,13 +1873,6 @@ function template(content, flags2) {
     return clone;
   };
 }
-function text(value = "") {
-  {
-    var t = create_text(value + "");
-    assign_nodes(t, t);
-    return t;
-  }
-}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1871,11 +1891,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text2, value) {
+function set_text(text, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
-    text2.__t = str;
-    text2.nodeValue = str == null ? "" : str + "";
+  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
+    text.__t = str;
+    text.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -2002,20 +2022,6 @@ function if_block(node, fn, elseif = false) {
       update_branch(null, null);
     }
   }, flags2);
-}
-function key_block(node, get_key, render_fn) {
-  var anchor = node;
-  var key = UNINITIALIZED;
-  var effect2;
-  var changed = not_equal;
-  block(() => {
-    if (changed(key, key = get_key())) {
-      if (effect2) {
-        pause_effect(effect2);
-      }
-      effect2 = branch(() => render_fn(anchor));
-    }
-  });
 }
 function index(_, i) {
   return i;
@@ -2586,11 +2592,11 @@ function animate(element, options, counterpart, t2, on_finish) {
       t: () => t2
     };
   }
-  const { delay = 0, css, tick, easing = linear } = options;
+  const { delay = 0, css, tick: tick2, easing = linear } = options;
   var keyframes = [];
   if (is_intro && counterpart === void 0) {
-    if (tick) {
-      tick(0, 1);
+    if (tick2) {
+      tick2(0, 1);
     }
     if (css) {
       var styles = css_to_keyframe(css(0, 1));
@@ -2630,11 +2636,11 @@ function animate(element, options, counterpart, t2, on_finish) {
         );
         return t1 + delta * easing(time / duration);
       };
-      if (tick) {
+      if (tick2) {
         loop(() => {
           if (animation.playState !== "running") return false;
           var t3 = get_t();
-          tick(t3, 1 - t3);
+          tick2(t3, 1 - t3);
           return true;
         });
       }
@@ -2642,7 +2648,7 @@ function animate(element, options, counterpart, t2, on_finish) {
     animation = element.animate(keyframes2, { duration, fill: "forwards" });
     animation.onfinish = () => {
       get_t = () => t2;
-      tick == null ? void 0 : tick(t2, 1 - t2);
+      tick2 == null ? void 0 : tick2(t2, 1 - t2);
       on_finish();
     };
   };
@@ -2659,7 +2665,7 @@ function animate(element, options, counterpart, t2, on_finish) {
     },
     reset: () => {
       if (t2 === 0) {
-        tick == null ? void 0 : tick(1, 0);
+        tick2 == null ? void 0 : tick2(1, 0);
       }
     },
     t: () => get_t()
@@ -2964,7 +2970,18 @@ function openFilePicker(document2) {
     }).render(true);
   });
 }
-function toggleCardSpanById$1(id) {
+function moveCardById(id, direction) {
+  cardLayout.update((cards) => {
+    const index2 = cards.findIndex((c) => c.id === id);
+    if (index2 === -1) return cards;
+    const newIndex = direction === "up" ? index2 - 1 : index2 + 1;
+    if (newIndex < 0 || newIndex >= cards.length) return cards;
+    const reordered = [...cards];
+    [reordered[index2], reordered[newIndex]] = [reordered[newIndex], reordered[index2]];
+    return reordered;
+  });
+}
+function toggleCardSpanById(id) {
   cardLayout.update((cards) => {
     return cards.map((card) => {
       if (card.id === id) {
@@ -2976,10 +2993,38 @@ function toggleCardSpanById$1(id) {
     });
   });
 }
-function toggleSpan$4(_, id) {
-  toggleCardSpanById(id());
+function handleToggleSpan(_, $$props) {
+  toggleCardSpanById($$props.id);
 }
-function toggleDetails(__1, isDetailsOpen, actor, actorStore) {
+var on_click$1 = (e) => e.stopPropagation();
+var on_keydown = (e) => {
+  if (e.key === "Escape") {
+    e.currentTarget.blur();
+  }
+};
+var on_click_1$1 = (__1, handleMove) => handleMove("up");
+var on_click_2$1 = (__2, handleMove) => handleMove("down");
+var root$c = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button aria-label="Toggle card span"><i class="fa-solid fa-expand-arrows-alt"></i></button></div>`);
+function CardToolbar($$anchor, $$props) {
+  push($$props, true);
+  function handleMove(direction) {
+    console.log("handle move called");
+    moveCardById($$props.id, direction);
+  }
+  var div = root$c();
+  div.__click = [on_click$1];
+  div.__keydown = [on_keydown];
+  var button = child(div);
+  button.__click = [on_click_1$1, handleMove];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_2$1, handleMove];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [handleToggleSpan, $$props];
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "keydown"]);
+function toggleDetails(_, isDetailsOpen, actor, actorStore) {
   var _a, _b, _c, _d;
   set(isDetailsOpen, !get$1(isDetailsOpen));
   (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
@@ -2994,21 +3039,19 @@ function toggleDetails(__1, isDetailsOpen, actor, actorStore) {
     isDetailsOpen: get$1(isDetailsOpen)
   }));
 }
-function handleFilePicker(__2, actor) {
+function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var on_click$4 = (e) => e.stopPropagation();
-var on_click_1$4 = () => moveCard("up");
-var on_click_2$4 = () => moveCard("down");
 var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$b = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$b = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
   let actorStore = /* @__PURE__ */ derived(() => {
     var _a2, _b2;
     return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
@@ -3041,68 +3084,66 @@ function Dossier($$anchor, $$props) {
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
   var fragment = root$b();
-  var div = first_child(fragment);
-  div.__click = [on_click$4];
-  var button = child(div);
-  button.__click = [on_click_1$4];
-  var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$4];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [toggleSpan$4, id];
-  var div_1 = sibling(div, 2);
-  var node = child(div_1);
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_2 = root_1$3();
-      append($$anchor2, div_2);
+      var div_1 = root_1$3();
+      append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_3 = root_2$1();
-      var img = child(div_3);
+      var div_2 = root_2$1();
+      var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
         set_attribute(img, "src", actor().img);
         set_attribute(img, "alt", actor().name + "!");
         set_attribute(img, "title", actor().name);
       });
-      append($$anchor2, div_3);
+      append($$anchor2, div_2);
     };
-    if_block(node, ($$render) => {
+    if_block(node_1, ($$render) => {
       if (get$1(isDetailsOpen)) $$render(consequent);
       else $$render(alternate, false);
     });
   }
-  var div_4 = sibling(node, 2);
-  var div_5 = child(div_4);
-  div_5.__click = [
+  var div_3 = sibling(node_1, 2);
+  var div_4 = child(div_3);
+  div_4.__click = [
     toggleDetails,
     isDetailsOpen,
     actor,
     actorStore
   ];
-  var text2 = sibling(child(div_5));
-  var node_1 = sibling(div_5, 2);
+  var text = sibling(child(div_4));
+  var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_6 = root_3();
-      var div_7 = child(div_6);
-      var input = child(div_7);
+      var div_5 = root_3();
+      var div_6 = child(div_5);
+      var input = child(div_6);
       input.__input = [on_input, updateStoreName];
-      var div_8 = sibling(div_7, 2);
-      var h3 = child(div_8);
+      var div_7 = sibling(div_6, 2);
+      var h3 = child(div_7);
       var text_1 = child(h3);
-      var span = sibling(text_1);
-      var text_2 = child(span);
-      var div_9 = sibling(div_8, 2);
-      var h3_1 = child(div_9);
+      var span_1 = sibling(text_1);
+      var text_2 = child(span_1);
+      var div_8 = sibling(div_7, 2);
+      var h3_1 = child(div_8);
       var text_3 = child(h3_1);
-      var div_10 = sibling(div_9, 2);
-      var h3_2 = child(div_10);
+      var div_9 = sibling(div_8, 2);
+      var h3_2 = child(div_9);
       var text_4 = child(h3_2);
-      var div_11 = sibling(div_10, 2);
-      var h3_3 = child(div_11);
+      var div_10 = sibling(div_9, 2);
+      var h3_3 = child(div_10);
       var text_5 = child(h3_3);
-      var a = sibling(div_11, 2);
+      var a = sibling(div_10, 2);
       var h3_4 = child(a);
       var text_6 = child(h3_4);
       template_effect(
@@ -3134,15 +3175,15 @@ function Dossier($$anchor, $$props) {
       );
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_6, () => slide, () => ({ duration: 400, easing: cubicInOut }));
-      transition(2, div_6, () => slide, () => ({ duration: 300, easing: cubicInOut }));
-      append($$anchor2, div_6);
+      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
+      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      append($$anchor2, div_5);
     };
-    if_block(node_1, ($$render) => {
+    if_block(node_2, ($$render) => {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -3156,7 +3197,7 @@ function AttributeCard($$anchor, $$props) {
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
   var fragment = root$a();
   var h3 = first_child(fragment);
-  var text2 = child(h3);
+  var text = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
@@ -3177,7 +3218,7 @@ function AttributeCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text2, $0), [
+  template_effect(($0) => set_text(text, $0), [
     () => localize($$props.config.attributes[$$props.statKey] || $$props.statKey)
   ]);
   append($$anchor, fragment);
@@ -4192,14 +4233,14 @@ function requireOutlayer() {
           return;
         }
         var doneCount = 0;
-        function tick() {
+        function tick2() {
           doneCount++;
           if (doneCount == count) {
             onComplete();
           }
         }
         items.forEach(function(item2) {
-          item2.once(eventName, tick);
+          item2.once(eventName, tick2);
         });
       };
       proto.dispatchEvent = function(type, event2, args) {
@@ -4716,14 +4757,8 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-function toggleSpan$3(_, id) {
-  toggleCardSpanById$1(id());
-}
-var on_click$3 = (e) => e.stopPropagation();
-var on_click_1$3 = () => moveCard("up");
-var on_click_2$3 = () => moveCard("down");
 var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$9 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$9 = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -4741,24 +4776,22 @@ function Attributes($$anchor, $$props) {
     return cleanup;
   });
   var fragment = root$9();
-  var div = first_child(fragment);
-  div.__click = [on_click$3];
-  var button = child(div);
-  button.__click = [on_click_1$3];
-  var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$3];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [toggleSpan$3, id];
-  var h1 = sibling(div, 2);
-  var text2 = child(h1);
-  var div_1 = sibling(h1, 2);
-  var node = sibling(child(div_1), 4);
-  each(node, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var node_1 = sibling(child(div), 4);
+  each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_2 = root_1$1();
-    var node_1 = child(div_2);
-    AttributeCard(node_1, {
+    var div_1 = root_1$1();
+    var node_2 = child(div_1);
+    AttributeCard(node_2, {
       get statKey() {
         return key();
       },
@@ -4770,19 +4803,18 @@ function Attributes($$anchor, $$props) {
       }
     });
     template_effect(() => {
-      toggle_class(div_2, "stat-card", key());
-      toggle_class(div_2, "attribute-card", key());
+      toggle_class(div_1, "stat-card", key());
+      toggle_class(div_1, "attribute-card", key());
     });
-    append($$anchor2, div_2);
+    append($$anchor2, div_1);
   });
-  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text2, $0), [
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
     () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
 }
-delegate(["click"]);
 var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
   var div = root$8();
@@ -4798,62 +4830,55 @@ function SkillsActive($$anchor) {
   var div = root$6();
   append($$anchor, div);
 }
-function toggleSpan$2(_, id) {
-  toggleCardSpanById$1(id());
-}
-var on_click$2 = (e) => e.stopPropagation();
-var on_click_1$2 = () => moveCard("up");
-var on_click_2$2 = () => moveCard("down");
-var on_click_3 = (__1, activeTab) => set(activeTab, "active");
-var on_click_4 = (__2, activeTab) => set(activeTab, "knowledge");
-var on_click_5 = (__3, activeTab) => set(activeTab, "language");
-var root$5 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var on_click = (_, activeTab) => set(activeTab, "active");
+var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
+var on_click_2 = (__2, activeTab) => set(activeTab, "language");
+var root$5 = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
   var fragment = root$5();
-  var div = first_child(fragment);
-  div.__click = [on_click$2];
-  var button = child(div);
-  button.__click = [on_click_1$2];
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var h1 = child(div);
+  var text = child(h1);
+  var div_1 = sibling(h1, 2);
+  var button = child(div_1);
+  button.__click = [on_click, activeTab];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$2];
+  button_1.__click = [on_click_1, activeTab];
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [toggleSpan$2, id];
-  var div_1 = sibling(div, 2);
-  var h1 = child(div_1);
-  var text2 = child(h1);
-  var div_2 = sibling(h1, 2);
-  var button_3 = child(div_2);
-  button_3.__click = [on_click_3, activeTab];
-  var button_4 = sibling(button_3, 2);
-  button_4.__click = [on_click_4, activeTab];
-  var button_5 = sibling(button_4, 2);
-  button_5.__click = [on_click_5, activeTab];
-  var div_3 = sibling(div_2, 2);
-  var node = child(div_3);
+  button_2.__click = [on_click_2, activeTab];
+  var div_2 = sibling(div_1, 2);
+  var node_1 = child(div_2);
   {
     var consequent = ($$anchor2) => {
       SkillsActive($$anchor2);
     };
     var alternate_1 = ($$anchor2) => {
       var fragment_2 = comment();
-      var node_1 = first_child(fragment_2);
+      var node_2 = first_child(fragment_2);
       {
         var consequent_1 = ($$anchor3) => {
           SkillsKnowledge($$anchor3);
         };
         var alternate = ($$anchor3) => {
           var fragment_4 = comment();
-          var node_2 = first_child(fragment_4);
+          var node_3 = first_child(fragment_4);
           {
             var consequent_2 = ($$anchor4) => {
               SkillsLangauge($$anchor4);
             };
             if_block(
-              node_2,
+              node_3,
               ($$render) => {
                 if (get$1(activeTab) === "language") $$render(consequent_2);
               },
@@ -4863,7 +4888,7 @@ function Skills($$anchor, $$props) {
           append($$anchor3, fragment_4);
         };
         if_block(
-          node_1,
+          node_2,
           ($$render) => {
             if (get$1(activeTab) === "knowledge") $$render(consequent_1);
             else $$render(alternate, false);
@@ -4873,17 +4898,17 @@ function Skills($$anchor, $$props) {
       }
       append($$anchor2, fragment_2);
     };
-    if_block(node, ($$render) => {
+    if_block(node_1, ($$render) => {
       if (get$1(activeTab) === "active") $$render(consequent);
       else $$render(alternate_1, false);
     });
   }
   template_effect(
     ($0) => {
-      set_text(text2, $0);
-      toggle_class(button_3, "active", get$1(activeTab) === "active");
-      toggle_class(button_4, "active", get$1(activeTab) === "knowledge");
-      toggle_class(button_5, "active", get$1(activeTab) === "language");
+      set_text(text, $0);
+      toggle_class(button, "active", get$1(activeTab) === "active");
+      toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
+      toggle_class(button_2, "active", get$1(activeTab) === "language");
     },
     [() => localize(config().skills.skills)]
   );
@@ -4891,33 +4916,25 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-function toggleSpan$1(_, id) {
-  toggleCardSpanById$1(id());
-}
-var on_click$1 = (e) => e.stopPropagation();
-var on_click_1$1 = () => moveCard("up");
-var on_click_2$1 = () => moveCard("down");
-var root$4 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+var root$4 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   var fragment = root$4();
-  var div = first_child(fragment);
-  div.__click = [on_click$1];
-  var button = child(div);
-  button.__click = [on_click_1$1];
-  var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$1];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [toggleSpan$1, id];
-  var div_1 = sibling(div, 2);
-  var h1 = child(div_1);
-  var text2 = child(h1);
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var h1 = child(div);
+  var text = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [() => localize(config().health.health)]
@@ -4925,34 +4942,26 @@ function Health($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-delegate(["click"]);
-function toggleSpan(_, id) {
-  toggleCardSpanById$1(id());
-}
-var on_click = (e) => e.stopPropagation();
-var on_click_1 = () => moveCard("up");
-var on_click_2 = () => moveCard("down");
-var root$3 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+var root$3 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
   var fragment = root$3();
-  var div = first_child(fragment);
-  div.__click = [on_click];
-  var button = child(div);
-  button.__click = [on_click_1];
-  var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [toggleSpan, id];
-  var div_1 = sibling(div, 2);
-  var h1 = child(div_1);
-  var text2 = child(h1);
-  var span = sibling(h1, 2);
-  var text_1 = child(span);
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var h1 = child(div);
+  var text = child(h1);
+  var span_1 = sibling(h1, 2);
+  var text_1 = child(span_1);
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
@@ -4962,66 +4971,106 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-delegate(["click"]);
 var root_1 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $cardLayout = () => store_get(cardLayout, "$cardLayout", $$stores);
   const defaultCardArray = [
     {
-      id: 0,
       comp: Dossier,
-      props: { actor: $$props.actor, config: $$props.config },
-      span: 1
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 0,
+        span: 1
+      }
     },
     {
-      id: 1,
       comp: Attributes,
-      props: { actor: $$props.actor, config: $$props.config },
-      span: 2
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 1,
+        span: 1
+      }
     },
     {
-      id: 2,
       comp: Skills,
-      props: { actor: $$props.actor, config: $$props.config },
-      span: 2
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 2,
+        span: 1
+      }
     },
     {
-      id: 3,
       comp: Health,
-      props: { actor: $$props.actor, config: $$props.config },
-      span: 2
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 3,
+        span: 1
+      }
     },
     {
-      id: 4,
       comp: Inventory,
-      props: { actor: $$props.actor, config: $$props.config },
-      span: 2
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 4,
+        span: 1
+      }
     }
-    //{ id: 5, txt: "Testing Databind", span: 1 },
   ];
-  user_effect(async () => {
-    const layout = await $$props.actor.getFlag("sr3e", "customLayout");
-    cardLayout.set(layout ?? [...defaultCardArray]);
-  });
-  const cards = defaultCardArray;
-  let saveTimeout = null;
   user_effect(() => {
-    const unsubscribe = cardLayout.subscribe((layout) => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(
-        () => {
-          $$props.actor.setFlag("sr3e", "customLayout", layout);
-        },
-        200
-      );
-    });
-    return () => {
-      unsubscribe();
-      clearTimeout(saveTimeout);
-    };
+    console.log("💬 cardLayout state:", $cardLayout());
+  });
+  user_effect(async () => {
+    var _a;
+    console.log("Actor ID " + $$props.actor.id);
+    if (!((_a = $$props.actor) == null ? void 0 : _a.id)) return;
+    const layout = await $$props.actor.getFlag("sr3e", "customLayout");
+    const defaultLayout = defaultCardArray.map((c) => ({ id: c.props.id, span: c.props.span }));
+    if (!Array.isArray(layout) || layout.length === 0) {
+      console.warn("⚠️ Layout flag was missing or empty. Using default layout.");
+      cardLayout.set(defaultLayout);
+      await $$props.actor.setFlag("sr3e", "customLayout", defaultLayout);
+    } else {
+      cardLayout.set(layout);
+    }
+  });
+  let cards = state(proxy([]));
+  user_effect(() => {
+    set(cards, proxy($cardLayout().map(({ id, span }) => {
+      const match = defaultCardArray.find((c) => c.props.id === id);
+      if (!match) return null;
+      return {
+        ...match,
+        props: {
+          ...match.props,
+          span: span ?? match.props.span
+        }
+      };
+    }).filter(Boolean)));
   });
   let container = null;
+  user_effect(async () => {
+    await tick();
+    container == null ? void 0 : container.dispatchEvent(new CustomEvent("masonry-reflow"));
+  });
+  let saveTimeout = null;
+  user_effect(() => {
+    const layout = $cardLayout();
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(
+      () => {
+        $$props.actor.setFlag("sr3e", "customLayout", layout);
+      },
+      200
+    );
+  });
   let layoutState = state("small");
   user_effect(() => {
     if (!container) return;
@@ -5039,46 +5088,23 @@ function CharacterSheetApp($$anchor, $$props) {
   });
   var div = root$2();
   var node = sibling(child(div), 4);
-  each(node, 17, () => cards, (c) => c.id, ($$anchor2, c) => {
+  each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
+    let Comp = () => get$1($$item).comp;
+    let props = () => get$1($$item).props;
     var div_1 = root_1();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
-    {
-      var consequent = ($$anchor3) => {
-        var fragment = comment();
-        var node_2 = first_child(fragment);
-        key_block(node_2, () => get$1(c).id, ($$anchor4) => {
-          var fragment_1 = comment();
-          var node_3 = first_child(fragment_1);
-          component(node_3, () => get$1(c).comp, ($$anchor5, $$component) => {
-            $$component($$anchor5, spread_props(() => get$1(c).props));
-          });
-          append($$anchor4, fragment_1);
-        });
-        append($$anchor3, fragment);
-      };
-      var alternate = ($$anchor3) => {
-        var text$1 = text();
-        template_effect(() => set_text(text$1, get$1(c).txt));
-        append($$anchor3, text$1);
-      };
-      if_block(node_1, ($$render) => {
-        if (get$1(c).comp) $$render(consequent);
-        else $$render(alternate, false);
-      });
-    }
-    template_effect(($0) => set_class(div_1, $0), [
-      () => {
-        var _a;
-        return "sheet-component " + (((_a = get$1(c).classes) == null ? void 0 : _a.join(" ")) ?? "");
-      }
-    ]);
+    component(node_1, Comp, ($$anchor3, $$component) => {
+      $$component($$anchor3, spread_props(props));
+    });
+    template_effect(() => set_class(div_1, "sheet-component span-" + (props().span ?? 1)));
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => container = $$value, () => container);
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
@@ -5119,12 +5145,27 @@ function NewsFeed($$anchor) {
   var div = root();
   append($$anchor, div);
 }
-const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
+class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
     super(...arguments);
     __privateAdd(this, _app);
     __privateAdd(this, _neon);
     __privateAdd(this, _feed);
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "actor", "character", "ActorSheetV2"],
+      template: null,
+      position: { width: 820, height: 820 },
+      window: {
+        resizable: true
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
   }
   _renderHTML() {
     return null;
@@ -5178,24 +5219,10 @@ const _CharacterActorSheet = class _CharacterActorSheet extends foundry.applicat
   _onSubmit() {
     return false;
   }
-};
+}
 _app = new WeakMap();
 _neon = new WeakMap();
 _feed = new WeakMap();
-__publicField(_CharacterActorSheet, "DEFAULT_OPTIONS", {
-  ...__superGet(_CharacterActorSheet, _CharacterActorSheet, "DEFAULT_OPTIONS"),
-  id: "sr3e-character-sheet",
-  classes: ["sr3e", "sheet", "actor", "character", "ActorSheetV2"],
-  template: null,
-  position: { width: 820, height: 820 },
-  window: {
-    resizable: true
-  },
-  tag: "form",
-  submitOnChange: true,
-  closeOnSubmit: false
-});
-let CharacterActorSheet = _CharacterActorSheet;
 const sr3e = {};
 sr3e.attributes = {
   attributes: "sr3e.attributes.attributes",

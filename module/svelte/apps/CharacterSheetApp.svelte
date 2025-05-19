@@ -4,46 +4,85 @@
   import Skills from "./components/Skills.svelte";
   import Health from "./components/Health.svelte";
   import Inventory from "./components/Inventory.svelte";
+
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
+  import { tick } from "svelte";
 
   let { actor, config, form } = $props();
 
   const defaultCardArray = [
-    { id: 0, comp: Dossier, props: { actor, config }, span: 1 },
-    { id: 1, comp: Attributes, props: { actor, config }, span: 2 },
-    { id: 2, comp: Skills, props: { actor, config }, span: 2 },
-    { id: 3, comp: Health, props: { actor, config }, span: 2 },
-    { id: 4, comp: Inventory, props: { actor, config }, span: 2 },
-    //{ id: 5, txt: "Testing Databind", span: 1 },
+    { comp: Dossier, props: { actor, config, id: 0, span: 1 } },
+    { comp: Attributes, props: { actor, config, id: 1, span: 1 } },
+    { comp: Skills, props: { actor, config, id: 2, span: 1 } },
+    { comp: Health, props: { actor, config, id: 3, span: 1 } },
+    { comp: Inventory, props: { actor, config, id: 4, span: 1 } },
   ];
 
-  $effect(async () => {
-    const layout = await actor.getFlag("sr3e", "customLayout");
-    cardLayout.set(layout ?? [...defaultCardArray]);
+  $effect(() => {
+    console.log("💬 cardLayout state:", $cardLayout);
   });
 
-  const cards = defaultCardArray;
+  $effect(async () => {
+    console.log("Actor ID " + actor.id);
+    if (!actor?.id) return;
 
-  let saveTimeout = null;
+    const layout = await actor.getFlag("sr3e", "customLayout");
+
+    const defaultLayout = defaultCardArray.map((c) => ({
+      id: c.props.id,
+      span: c.props.span,
+    }));
+
+    if (!Array.isArray(layout) || layout.length === 0) {
+      console.warn("⚠️ Layout flag was missing or empty. Using default layout.");
+      cardLayout.set(defaultLayout);
+      await actor.setFlag("sr3e", "customLayout", defaultLayout);
+    } else {
+      cardLayout.set(layout);
+    }
+  });
+
+  // Rehydrated full card list based on stored ID list
+  let cards = $state([]);
 
   $effect(() => {
-    const unsubscribe = cardLayout.subscribe((layout) => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        actor.setFlag("sr3e", "customLayout", layout);
-      }, 200);
-    });
+    cards = $cardLayout
+      .map(({ id, span }) => {
+        const match = defaultCardArray.find((c) => c.props.id === id);
+        if (!match) return null;
 
-    return () => {
-      unsubscribe();
-      clearTimeout(saveTimeout);
-    };
+        return {
+          ...match,
+          props: {
+            ...match.props,
+            span: span ?? match.props.span,
+          },
+        };
+      })
+      .filter(Boolean);
   });
 
+  // Re-trigger masonry layout after cards change
   let container = null;
-  let layoutState = $state("small");
 
+  $effect(async () => {
+    await tick(); // Wait for DOM updates
+    container?.dispatchEvent(new CustomEvent("masonry-reflow"));
+  });
+
+  // Save layout to flag with debounce (runes-safe)
+  let saveTimeout = null;
+  $effect(() => {
+    const layout = $cardLayout;
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      actor.setFlag("sr3e", "customLayout", layout);
+    }, 200);
+  });
+
+  // Responsive layout container
+  let layoutState = $state("small");
   const maxWidth = 1400;
 
   $effect(() => {
@@ -73,18 +112,12 @@
   <div class="layout-grid-sizer"></div>
   <div class="layout-gutter-sizer"></div>
 
-  {#each cards as c (c.id)}
-    <div class={"sheet-component " + (c.classes?.join(" ") ?? "")}>
+  {#each cards as { comp: Comp, props } (props.id)}
+    <div class={"sheet-component span-" + (props.span ?? 1)}>
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          {#if c.comp}
-            {#key c.id}
-              <c.comp {...c.props} />
-            {/key}
-          {:else}
-            {c.txt}
-          {/if}
+          <Comp {...props} />
         </div>
       </div>
     </div>

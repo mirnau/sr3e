@@ -55,6 +55,7 @@ export function moveCardById(id, direction) {
   });
 }
 
+
 export function toggleCardSpanById(id) {
   cardLayout.update(cards => {
     return cards.map(card => {

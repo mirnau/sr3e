@@ -2,12 +2,9 @@
   import { slide } from "svelte/transition";
   import { getActorStore } from "../../stores/actorStoreRegistry";
   import { openFilePicker, localize } from "../../../svelteHelpers.js";
+  import CardToolbar from "./CardToolbar.svelte";
 
-  let { actor = {}, config = {}, id = {} } = $props();
-
-  function toggleSpan() {
-    toggleCardSpanById(id);
-  }
+  let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
   let actorStore = $derived(
     actor?.id && actor?.name ? getActorStore(actor.id, actor.name) : null,
@@ -60,17 +57,7 @@
   }
 </script>
 
-<div class="toolbar" onclick={(e) => e.stopPropagation()}>
-  <button onclick={() => moveCard("up")}
-    ><i class="fa-solid fa-arrow-up"></i></button
-  >
-  <button onclick={() => moveCard("down")}
-    ><i class="fa-solid fa-arrow-down"></i></button
-  >
-  <button onclick={toggleSpan}
-    ><i class="fa-solid fa-expand-arrows-alt"></i></button
-  >
-</div>
+<CardToolbar {id} />
 
 <div class="dossier">
   {#if isDetailsOpen}

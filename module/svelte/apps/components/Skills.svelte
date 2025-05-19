@@ -1,17 +1,11 @@
 <script>
-	import { localize, toggleCardSpanById } from "../../../svelteHelpers.js";
+	import { localize } from "../../../svelteHelpers.js";
 	import SkillsLanguage from "../components/SkillsLangauge.svelte";
 	import SkillsKnowledge from "../components/SkillsKnowledge.svelte";
 	import SkillsActive from "../components/SkillsActive.svelte";
+	import CardToolbar from "./CardToolbar.svelte";
 
-	let { actor = {}, config = {}, id = {} } = $props();
-
-
-	    function toggleSpan() {
-    toggleCardSpanById(id); 
-    }
-
-
+	let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
 	let activeTab = $state("active");
 
@@ -24,11 +18,7 @@
 </script>
 
 
-<div class="toolbar" onclick={(e) => e.stopPropagation()}>
-  <button onclick={() => moveCard('up')}><i class="fa-solid fa-arrow-up"></i></button>
-  <button onclick={() => moveCard('down')}><i class="fa-solid fa-arrow-down"></i></button>
-  <button onclick={toggleSpan}><i class="fa-solid fa-expand-arrows-alt"></i></button>
-</div>
+<CardToolbar id={id} />
 
 <div class="skills">
 	<h1>{localize(config.skills.skills)}</h1>
