@@ -1,13 +1,20 @@
 <script>
     import AttributeCard from "./AttributeCard.svelte";
-    import { localize } from "../../../foundry/SvelteHelpers.js";
+    import { localize, toggleCardSpanById } from "../../../svelteHelpers.js";
     import { setupMasonry } from '../../../foundry/masonry/responsiveMasonry.js';
 
-    let { actor = {}, config = {} } = $props();
+    let { actor = {}, config = {}, id = {}, span = {} } = $props();
+    
+    function toggleSpan() {
+         toggleCardSpanById(id); 
+    }
+
 
     let attributes = $state(actor.system.attributes);
 
     let gridContainer;
+
+
 
     $effect(() => {
         const cleanup = setupMasonry({
@@ -21,6 +28,12 @@
         return cleanup;
     });
 </script>
+
+<div class="toolbar" onclick={(e) => e.stopPropagation()}>
+  <button onclick={() => moveCard('up')}><i class="fa-solid fa-arrow-up"></i></button>
+  <button onclick={() => moveCard('down')}><i class="fa-solid fa-arrow-down"></i></button>
+  <button onclick={toggleSpan}><i class="fa-solid fa-expand-arrows-alt"></i></button>
+</div>
 
 <h1>{localize(config.attributes.attributes)}</h1>
 <div bind:this={gridContainer} class="attribute-masonry-grid ">

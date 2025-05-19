@@ -1,12 +1,16 @@
 <script>
   import { slide } from "svelte/transition";
   import { getActorStore } from "../../stores/actorStoreRegistry";
-  import { openFilePicker, localize } from "../../../foundry/SvelteHelpers.js";
+  import { openFilePicker, localize } from "../../../svelteHelpers.js";
 
-  let { actor = {}, config = {} } = $props();
+  let { actor = {}, config = {}, id = {} } = $props();
+
+  function toggleSpan() {
+    toggleCardSpanById(id);
+  }
 
   let actorStore = $derived(
-    actor?.id && actor?.name ? getActorStore(actor.id, actor.name) : null
+    actor?.id && actor?.name ? getActorStore(actor.id, actor.name) : null,
   );
 
   let fieldName = $state(actor?.name ?? "");
@@ -17,14 +21,18 @@
 
     const unsubscribe = actorStore.subscribe((store) => {
       if (store?.name !== undefined) fieldName = store.name;
-      if (store?.isDetailsOpen !== undefined) isDetailsOpen = store.isDetailsOpen;
+      if (store?.isDetailsOpen !== undefined)
+        isDetailsOpen = store.isDetailsOpen;
     });
     return () => unsubscribe();
   });
 
   function toggleDetails() {
     isDetailsOpen = !isDetailsOpen;
-    actor?.update?.({ "system.profile.isDetailsOpen": isDetailsOpen }, { render: false });
+    actor?.update?.(
+      { "system.profile.isDetailsOpen": isDetailsOpen },
+      { render: false },
+    );
     actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
   }
 
@@ -51,6 +59,18 @@
     actorStore?.update?.((store) => ({ ...store, name: newName }));
   }
 </script>
+
+<div class="toolbar" onclick={(e) => e.stopPropagation()}>
+  <button onclick={() => moveCard("up")}
+    ><i class="fa-solid fa-arrow-up"></i></button
+  >
+  <button onclick={() => moveCard("down")}
+    ><i class="fa-solid fa-arrow-down"></i></button
+  >
+  <button onclick={toggleSpan}
+    ><i class="fa-solid fa-expand-arrows-alt"></i></button
+  >
+</div>
 
 <div class="dossier">
   {#if isDetailsOpen}
@@ -108,19 +128,15 @@
 
         <div>
           <h3>
-            {localize(config.traits.height)}: {actor.system?.profile?.height ?? ""} cm ({multiply(
-              actor.system?.profile?.height ?? 0,
-              0.0328084
-            )} feet)
+            {localize(config.traits.height)}: {actor.system?.profile?.height ??
+              ""} cm ({multiply(actor.system?.profile?.height ?? 0, 0.0328084)} feet)
           </h3>
         </div>
 
         <div>
           <h3>
-            {localize(config.traits.weight)}: {actor.system?.profile?.weight ?? ""} kg ({multiply(
-              actor.system?.profile?.weight ?? 0,
-              0.157473
-            )} stones)
+            {localize(config.traits.weight)}: {actor.system?.profile?.weight ??
+              ""} kg ({multiply(actor.system?.profile?.weight ?? 0, 0.157473)} stones)
           </h3>
         </div>
 

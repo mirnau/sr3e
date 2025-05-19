@@ -1,14 +1,14 @@
 <script>
     import { getActorStore } from "../../stores/actorStoreRegistry";
-    export let actor;
+
+    let { actor = {} } = $props();
 
     let malfunctioningIndexes = [];
-    let neonHTML;
 
     const actorStore = getActorStore(actor.id, actor.name);
 
-    $: name = $actorStore.name;
-    $: neonHTML = getNeonHtml(name);
+    let name = $derived($actorStore.name);
+    let neonHTML = $derived(getNeonHtml(name));
 
     const randomInRange = (min, max) =>
         Math.floor(Math.random() * (max - min + 1)) + min;
@@ -43,5 +43,3 @@
 <div class="neon-name">
     {@html neonHTML}
 </div>
-
-

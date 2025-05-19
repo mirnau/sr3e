@@ -5,21 +5,41 @@
   import Health from "./components/Health.svelte";
   import Inventory from "./components/Inventory.svelte";
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
+  import { cardLayout } from "../../svelteStore.js";
 
   let { actor, config, form } = $props();
 
-  const cards = $state([
-    { id: 0, comp: Dossier, props: { actor, config }, classes: [] },
-    { id: 1, comp: Attributes, props: { actor, config }, classes: ["two-span-selectable"] },
-    { id: 2, comp: Skills, props: { actor, config }, classes: ["two-span-selectable", "three-span-selectable"] },
-    { id: 3, comp: Health, props: { actor, config }, classes: ["two-span-selectable"] },
-    { id: 4, comp: Inventory, props: { actor, config }, classes: ["two-span-selectable", "three-span-selectable"] },
-    { id: 5, txt: "Testing Databind", classes: ["debug-box"] },
-    { id: 6, txt: "Testing Databind", classes: [] },
-    { id: 7, txt: "Testing Databind", classes: [] },
-    { id: 8, txt: "Testing Databind", classes: [] },
-    { id: 9, txt: "Testing Databind", classes: [] },
-  ]);
+  const defaultCardArray = [
+    { id: 0, comp: Dossier, props: { actor, config }, span: 1 },
+    { id: 1, comp: Attributes, props: { actor, config }, span: 2 },
+    { id: 2, comp: Skills, props: { actor, config }, span: 2 },
+    { id: 3, comp: Health, props: { actor, config }, span: 2 },
+    { id: 4, comp: Inventory, props: { actor, config }, span: 2 },
+    //{ id: 5, txt: "Testing Databind", span: 1 },
+  ];
+
+  $effect(async () => {
+    const layout = await actor.getFlag("sr3e", "customLayout");
+    cardLayout.set(layout ?? [...defaultCardArray]);
+  });
+
+  const cards = defaultCardArray;
+
+  let saveTimeout = null;
+
+  $effect(() => {
+    const unsubscribe = cardLayout.subscribe((layout) => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        actor.setFlag("sr3e", "customLayout", layout);
+      }, 200);
+    });
+
+    return () => {
+      unsubscribe();
+      clearTimeout(saveTimeout);
+    };
+  });
 
   let container = null;
   let layoutState = $state("small");

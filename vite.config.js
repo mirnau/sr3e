@@ -3,7 +3,15 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
   plugins: [
-    svelte()
+    svelte({
+      compilerOptions: {
+        runes: true
+      },
+      onwarn(warning, handler) {
+        if (warning.code === 'event_directive_deprecated') return;
+        handler(warning);
+      }
+    })
   ],
   build: {
     sourcemap: true,

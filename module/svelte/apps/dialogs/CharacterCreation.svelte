@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import { openFilePicker } from "../../../foundry/SvelteHelpers";
+    import { openFilePicker } from "../../../svelteHelpers";
     import ItemDataService from "../../../foundry/services/ItemDataService.js";
     export let resolve = {};
     export let actor = {};

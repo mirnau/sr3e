@@ -1,5 +1,5 @@
 <script>
-    import { localize } from "../../../foundry/SvelteHelpers.js";
+    import { localize } from "../../../svelteHelpers.js";
 
     let { stat, config, statKey } = $props();
 

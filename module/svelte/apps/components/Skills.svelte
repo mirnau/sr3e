@@ -1,10 +1,17 @@
 <script>
-	import { localize } from "../../../foundry/SvelteHelpers.js";
+	import { localize, toggleCardSpanById } from "../../../svelteHelpers.js";
 	import SkillsLanguage from "../components/SkillsLangauge.svelte";
 	import SkillsKnowledge from "../components/SkillsKnowledge.svelte";
 	import SkillsActive from "../components/SkillsActive.svelte";
 
-	let { actor = {}, config = {} } = $props();
+	let { actor = {}, config = {}, id = {} } = $props();
+
+
+	    function toggleSpan() {
+    toggleCardSpanById(id); 
+    }
+
+
 
 	let activeTab = $state("active");
 
@@ -15,6 +22,13 @@
 	);
 	let languageSkills = $derived(skills.filter((s) => s.type === "language"));
 </script>
+
+
+<div class="toolbar" onclick={(e) => e.stopPropagation()}>
+  <button onclick={() => moveCard('up')}><i class="fa-solid fa-arrow-up"></i></button>
+  <button onclick={() => moveCard('down')}><i class="fa-solid fa-arrow-down"></i></button>
+  <button onclick={toggleSpan}><i class="fa-solid fa-expand-arrows-alt"></i></button>
+</div>
 
 <div class="skills">
 	<h1>{localize(config.skills.skills)}</h1>

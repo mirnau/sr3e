@@ -282,11 +282,6 @@ if (typeof window !== "undefined")
 const EACH_ITEM_REACTIVE = 1;
 const EACH_INDEX_REACTIVE = 1 << 1;
 const EACH_ITEM_IMMUTABLE = 1 << 4;
-const PROPS_IS_IMMUTABLE = 1;
-const PROPS_IS_RUNES = 1 << 1;
-const PROPS_IS_UPDATED = 1 << 2;
-const PROPS_IS_BINDABLE = 1 << 3;
-const PROPS_IS_LAZY_INITIAL = 1 << 4;
 const TRANSITION_IN = 1;
 const TRANSITION_OUT = 1 << 1;
 const TRANSITION_GLOBAL = 1 << 2;
@@ -312,9 +307,6 @@ function is_function(thing) {
 }
 const noop = () => {
 };
-function run(fn) {
-  return fn();
-}
 function run_all(arr) {
   for (var i = 0; i < arr.length; i++) {
     arr[i]();
@@ -336,7 +328,6 @@ const INERT = 1 << 13;
 const DESTROYED = 1 << 14;
 const EFFECT_RAN = 1 << 15;
 const EFFECT_TRANSPARENT = 1 << 16;
-const LEGACY_DERIVED_PROP = 1 << 17;
 const HEAD_EFFECT = 1 << 19;
 const EFFECT_HAS_DERIVED = 1 << 20;
 const STATE_SYMBOL = Symbol("$state");
@@ -374,11 +365,6 @@ function effect_update_depth_exceeded() {
     throw new Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
   }
 }
-function props_invalid_value(key) {
-  {
-    throw new Error(`https://svelte.dev/e/props_invalid_value`);
-  }
-}
 function state_descriptors_fixed() {
   {
     throw new Error(`https://svelte.dev/e/state_descriptors_fixed`);
@@ -399,11 +385,7 @@ function state_unsafe_mutation() {
     throw new Error(`https://svelte.dev/e/state_unsafe_mutation`);
   }
 }
-let legacy_mode_flag = false;
 let tracing_mode_flag = false;
-function enable_legacy_mode_flag() {
-  legacy_mode_flag = true;
-}
 function source(v, stack) {
   var signal = {
     f: 0,
@@ -421,18 +403,11 @@ function state(v) {
 }
 // @__NO_SIDE_EFFECTS__
 function mutable_source(initial_value, immutable = false) {
-  var _a;
   const s = source(initial_value);
   if (!immutable) {
     s.equals = safe_equals;
   }
-  if (legacy_mode_flag && component_context !== null && component_context.l !== null) {
-    ((_a = component_context.l).s ?? (_a.s = [])).push(s);
-  }
   return s;
-}
-function mutable_state(v, immutable = false) {
-  return /* @__PURE__ */ push_derived_source(/* @__PURE__ */ mutable_source(v, immutable));
 }
 // @__NO_SIDE_EFFECTS__
 function push_derived_source(source2) {
@@ -459,7 +434,7 @@ function internal_set(source2, value) {
     source2.v = value;
     source2.wv = increment_write_version();
     mark_reactions(source2, DIRTY);
-    if (is_runes() && active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
+    if (active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
       if (untracked_writes === null) {
         set_untracked_writes([source2]);
       } else {
@@ -472,13 +447,11 @@ function internal_set(source2, value) {
 function mark_reactions(signal, status) {
   var reactions = signal.reactions;
   if (reactions === null) return;
-  var runes = is_runes();
   var length = reactions.length;
   for (var i = 0; i < length; i++) {
     var reaction = reactions[i];
     var flags2 = reaction.f;
     if ((flags2 & DIRTY) !== 0) continue;
-    if (!runes && reaction === active_effect) continue;
     set_signal_status(reaction, status);
     if ((flags2 & (CLEAN | UNOWNED)) !== 0) {
       if ((flags2 & DERIVED) !== 0) {
@@ -933,10 +906,6 @@ function user_effect(fn) {
     return signal;
   }
 }
-function user_pre_effect(fn) {
-  validate_effect();
-  return render_effect(fn);
-}
 function component_root(fn) {
   const effect2 = create_effect(ROOT_EFFECT, fn, true);
   return (options = {}) => {
@@ -955,41 +924,6 @@ function component_root(fn) {
 }
 function effect(fn) {
   return create_effect(EFFECT, fn, false);
-}
-function legacy_pre_effect(deps, fn) {
-  var context = (
-    /** @type {ComponentContextLegacy} */
-    component_context
-  );
-  var token = { effect: null, ran: false };
-  context.l.r1.push(token);
-  token.effect = render_effect(() => {
-    deps();
-    if (token.ran) return;
-    token.ran = true;
-    set(context.l.r2, true);
-    untrack(fn);
-  });
-}
-function legacy_pre_effect_reset() {
-  var context = (
-    /** @type {ComponentContextLegacy} */
-    component_context
-  );
-  render_effect(() => {
-    if (!get$1(context.l.r2)) return;
-    for (var token of context.l.r1) {
-      var effect2 = token.effect;
-      if ((effect2.f & CLEAN) !== 0) {
-        set_signal_status(effect2, MAYBE_DIRTY);
-      }
-      if (check_dirtiness(effect2)) {
-        update_effect(effect2);
-      }
-      token.ran = false;
-    }
-    context.l.r2.v = false;
-  });
 }
 function render_effect(fn) {
   return create_effect(RENDER_EFFECT, fn, true);
@@ -1212,7 +1146,7 @@ function increment_write_version() {
   return ++write_version;
 }
 function is_runes() {
-  return !legacy_mode_flag || component_context !== null && component_context.l === null;
+  return true;
 }
 function check_dirtiness(reaction) {
   var _a;
@@ -1698,14 +1632,6 @@ function push(props, runes = false, fn) {
     x: null,
     l: null
   };
-  if (legacy_mode_flag && !runes) {
-    component_context.l = {
-      s: null,
-      u: null,
-      r1: [],
-      r2: source(false)
-    };
-  }
 }
 function pop(component2) {
   const context_stack_item = component_context;
@@ -1734,49 +1660,6 @@ function pop(component2) {
     /** @type {T} */
     {}
   );
-}
-function deep_read_state(value) {
-  if (typeof value !== "object" || !value || value instanceof EventTarget) {
-    return;
-  }
-  if (STATE_SYMBOL in value) {
-    deep_read(value);
-  } else if (!Array.isArray(value)) {
-    for (let key in value) {
-      const prop2 = value[key];
-      if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
-        deep_read(prop2);
-      }
-    }
-  }
-}
-function deep_read(value, visited = /* @__PURE__ */ new Set()) {
-  if (typeof value === "object" && value !== null && // We don't want to traverse DOM elements
-  !(value instanceof EventTarget) && !visited.has(value)) {
-    visited.add(value);
-    if (value instanceof Date) {
-      value.getTime();
-    }
-    for (let key in value) {
-      try {
-        deep_read(value[key], visited);
-      } catch (e) {
-      }
-    }
-    const proto = get_prototype_of(value);
-    if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
-      const descriptors = get_descriptors(proto);
-      for (let key in descriptors) {
-        const get2 = descriptors[key].get;
-        if (get2) {
-          try {
-            get2.call(value);
-          } catch (e) {
-          }
-        }
-      }
-    }
-  }
 }
 function without_reactive_context(fn) {
   var previous_reaction = active_reaction;
@@ -2124,7 +2007,7 @@ function key_block(node, get_key, render_fn) {
   var anchor = node;
   var key = UNINITIALIZED;
   var effect2;
-  var changed = is_runes() ? not_equal : safe_not_equal;
+  var changed = not_equal;
   block(() => {
     if (changed(key, key = get_key())) {
       if (effect2) {
@@ -2653,8 +2536,8 @@ function transition(flags2, element, get_fn, get_params) {
   );
   (e.transitions ?? (e.transitions = [])).push(transition2);
   if (is_intro && should_intro) {
-    var run2 = is_global;
-    if (!run2) {
+    var run = is_global;
+    if (!run) {
       var block2 = (
         /** @type {Effect | null} */
         e.parent
@@ -2664,9 +2547,9 @@ function transition(flags2, element, get_fn, get_params) {
           if ((block2.f & BLOCK_EFFECT) !== 0) break;
         }
       }
-      run2 = !block2 || (block2.f & EFFECT_RAN) !== 0;
+      run = !block2 || (block2.f & EFFECT_RAN) !== 0;
     }
-    if (run2) {
+    if (run) {
       effect(() => {
         untrack(() => transition2.in());
       });
@@ -2811,71 +2694,14 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
-function init(immutable = false) {
-  const context = (
-    /** @type {ComponentContextLegacy} */
-    component_context
-  );
-  const callbacks = context.l.u;
-  if (!callbacks) return;
-  let props = () => deep_read_state(context.s);
-  if (immutable) {
-    let version = 0;
-    let prev = (
-      /** @type {Record<string, any>} */
-      {}
-    );
-    const d = /* @__PURE__ */ derived(() => {
-      let changed = false;
-      const props2 = context.s;
-      for (const key in props2) {
-        if (props2[key] !== prev[key]) {
-          prev[key] = props2[key];
-          changed = true;
-        }
-      }
-      if (changed) version++;
-      return version;
-    });
-    props = () => get$1(d);
-  }
-  if (callbacks.b.length) {
-    user_pre_effect(() => {
-      observe_all(context, props);
-      run_all(callbacks.b);
-    });
-  }
-  user_effect(() => {
-    const fns = untrack(() => callbacks.m.map(run));
-    return () => {
-      for (const fn of fns) {
-        if (typeof fn === "function") {
-          fn();
-        }
-      }
-    };
-  });
-  if (callbacks.a.length) {
-    user_effect(() => {
-      observe_all(context, props);
-      run_all(callbacks.a);
-    });
-  }
-}
-function observe_all(context, props) {
-  if (context.l.s) {
-    for (const signal of context.l.s) get$1(signal);
-  }
-  props();
-}
-function subscribe_to_store(store, run2, invalidate) {
+function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
-    run2(void 0);
+    run(void 0);
     return noop;
   }
   const unsub = untrack(
     () => store.subscribe(
-      run2,
+      run,
       // @ts-expect-error
       invalidate
     )
@@ -2910,13 +2736,13 @@ function writable(value, start = noop) {
       value
     ));
   }
-  function subscribe(run2, invalidate = noop) {
-    const subscriber = [run2, invalidate];
+  function subscribe(run, invalidate = noop) {
+    const subscriber = [run, invalidate];
     subscribers.add(subscriber);
     if (subscribers.size === 1) {
       stop = start(set2, update) || noop;
     }
-    run2(
+    run(
       /** @type {T} */
       value
     );
@@ -2935,7 +2761,6 @@ function get(store) {
   subscribe_to_store(store, (_) => value = _)();
   return value;
 }
-let is_store_binding = false;
 let IS_UNMOUNTED = Symbol();
 function store_get(store, store_name, stores) {
   const entry = stores[store_name] ?? (stores[store_name] = {
@@ -2981,15 +2806,6 @@ function setup_stores() {
     });
   }
   return [stores, cleanup];
-}
-function capture_store_binding(fn) {
-  var previous_is_store_binding = is_store_binding;
-  try {
-    is_store_binding = false;
-    return [fn(), is_store_binding];
-  } finally {
-    is_store_binding = previous_is_store_binding;
-  }
 }
 const spread_props_handler = {
   get(target, key) {
@@ -3049,69 +2865,34 @@ const spread_props_handler = {
 function spread_props(...props) {
   return new Proxy({ props }, spread_props_handler);
 }
-function with_parent_branch(fn) {
-  var effect2 = active_effect;
-  var previous_effect = active_effect;
-  while (effect2 !== null && (effect2.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
-    effect2 = effect2.parent;
-  }
-  try {
-    set_active_effect(effect2);
-    return fn();
-  } finally {
-    set_active_effect(previous_effect);
-  }
-}
 function prop(props, key, flags2, fallback) {
-  var _a;
-  var immutable = (flags2 & PROPS_IS_IMMUTABLE) !== 0;
-  var runes = !legacy_mode_flag || (flags2 & PROPS_IS_RUNES) !== 0;
-  var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
-  var lazy = (flags2 & PROPS_IS_LAZY_INITIAL) !== 0;
-  var is_store_sub = false;
   var prop_value;
-  if (bindable) {
-    [prop_value, is_store_sub] = capture_store_binding(() => (
-      /** @type {V} */
-      props[key]
-    ));
-  } else {
+  {
     prop_value = /** @type {V} */
     props[key];
   }
-  var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-  var setter = bindable && (((_a = get_descriptor(props, key)) == null ? void 0 : _a.set) ?? (is_entry_props && key in props && ((v) => props[key] = v))) || void 0;
   var fallback_value = (
     /** @type {V} */
     fallback
   );
   var fallback_dirty = true;
-  var fallback_used = false;
   var get_fallback = () => {
-    fallback_used = true;
     if (fallback_dirty) {
       fallback_dirty = false;
-      if (lazy) {
+      {
         fallback_value = untrack(
           /** @type {() => V} */
           fallback
         );
-      } else {
-        fallback_value = /** @type {V} */
-        fallback;
       }
     }
     return fallback_value;
   };
   if (prop_value === void 0 && fallback !== void 0) {
-    if (setter && runes) {
-      props_invalid_value();
-    }
     prop_value = get_fallback();
-    if (setter) setter(prop_value);
   }
   var getter;
-  if (runes) {
+  {
     getter = () => {
       var value = (
         /** @type {V} */
@@ -3119,72 +2900,12 @@ function prop(props, key, flags2, fallback) {
       );
       if (value === void 0) return get_fallback();
       fallback_dirty = true;
-      fallback_used = false;
       return value;
     };
-  } else {
-    var derived_getter = with_parent_branch(
-      () => (immutable ? derived : derived_safe_equal)(() => (
-        /** @type {V} */
-        props[key]
-      ))
-    );
-    derived_getter.f |= LEGACY_DERIVED_PROP;
-    getter = () => {
-      var value = get$1(derived_getter);
-      if (value !== void 0) fallback_value = /** @type {V} */
-      void 0;
-      return value === void 0 ? fallback_value : value;
-    };
   }
-  if ((flags2 & PROPS_IS_UPDATED) === 0) {
+  {
     return getter;
   }
-  if (setter) {
-    var legacy_parent = props.$$legacy;
-    return function(value, mutation) {
-      if (arguments.length > 0) {
-        if (!runes || !mutation || legacy_parent || is_store_sub) {
-          setter(mutation ? getter() : value);
-        }
-        return value;
-      } else {
-        return getter();
-      }
-    };
-  }
-  var from_child = false;
-  var was_from_child = false;
-  var inner_current_value = /* @__PURE__ */ mutable_source(prop_value);
-  var current_value = with_parent_branch(
-    () => /* @__PURE__ */ derived(() => {
-      var parent_value = getter();
-      var child_value = get$1(inner_current_value);
-      if (from_child) {
-        from_child = false;
-        was_from_child = true;
-        return child_value;
-      }
-      was_from_child = false;
-      return inner_current_value.v = parent_value;
-    })
-  );
-  if (!immutable) current_value.equals = safe_equals;
-  return function(value, mutation) {
-    if (arguments.length > 0) {
-      const new_value = mutation ? get$1(current_value) : runes && bindable ? proxy(value) : value;
-      if (!current_value.equals(new_value)) {
-        from_child = true;
-        set(inner_current_value, new_value);
-        if (fallback_used && fallback_value !== void 0) {
-          fallback_value = new_value;
-        }
-        untrack(() => get$1(current_value));
-      }
-      return value;
-    }
-    return get$1(current_value);
-  };
 }
 function cubic_out(t) {
   const f = t - 1;
@@ -3227,6 +2948,7 @@ function getActorStore(actorId, actorName) {
   }
   return actorStores.get(actorId);
 }
+const cardLayout = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
@@ -3242,7 +2964,22 @@ function openFilePicker(document2) {
     }).render(true);
   });
 }
-function toggleDetails(_, isDetailsOpen, actor, actorStore) {
+function toggleCardSpanById$1(id) {
+  cardLayout.update((cards) => {
+    return cards.map((card) => {
+      if (card.id === id) {
+        let nextSpan = (card.span ?? 1) + 1;
+        if (nextSpan > 3) nextSpan = 1;
+        return { ...card, span: nextSpan };
+      }
+      return card;
+    });
+  });
+}
+function toggleSpan$4(_, id) {
+  toggleCardSpanById(id());
+}
+function toggleDetails(__1, isDetailsOpen, actor, actorStore) {
   var _a, _b, _c, _d;
   set(isDetailsOpen, !get$1(isDetailsOpen));
   (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
@@ -3257,18 +2994,21 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
     isDetailsOpen: get$1(isDetailsOpen)
   }));
 }
-function handleFilePicker(__1, actor) {
+function handleFilePicker(__2, actor) {
   openFilePicker(actor());
 }
+var on_click$4 = (e) => e.stopPropagation();
+var on_click_1$4 = () => moveCard("up");
+var on_click_2$4 = () => moveCard("down");
 var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$b = /* @__PURE__ */ template(`<div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`);
+var root$b = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let actorStore = /* @__PURE__ */ derived(() => {
     var _a2, _b2;
     return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
@@ -3300,60 +3040,69 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var div = root$b();
-  var node = child(div);
+  var fragment = root$b();
+  var div = first_child(fragment);
+  div.__click = [on_click$4];
+  var button = child(div);
+  button.__click = [on_click_1$4];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_2$4];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [toggleSpan$4, id];
+  var div_1 = sibling(div, 2);
+  var node = child(div_1);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$3();
-      append($$anchor2, div_1);
+      var div_2 = root_1$3();
+      append($$anchor2, div_2);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$1();
-      var img = child(div_2);
+      var div_3 = root_2$1();
+      var img = child(div_3);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
         set_attribute(img, "src", actor().img);
         set_attribute(img, "alt", actor().name + "!");
         set_attribute(img, "title", actor().name);
       });
-      append($$anchor2, div_2);
+      append($$anchor2, div_3);
     };
     if_block(node, ($$render) => {
       if (get$1(isDetailsOpen)) $$render(consequent);
       else $$render(alternate, false);
     });
   }
-  var div_3 = sibling(node, 2);
-  var div_4 = child(div_3);
-  div_4.__click = [
+  var div_4 = sibling(node, 2);
+  var div_5 = child(div_4);
+  div_5.__click = [
     toggleDetails,
     isDetailsOpen,
     actor,
     actorStore
   ];
-  var text2 = sibling(child(div_4));
-  var node_1 = sibling(div_4, 2);
+  var text2 = sibling(child(div_5));
+  var node_1 = sibling(div_5, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3();
-      var div_6 = child(div_5);
-      var input = child(div_6);
+      var div_6 = root_3();
+      var div_7 = child(div_6);
+      var input = child(div_7);
       input.__input = [on_input, updateStoreName];
-      var div_7 = sibling(div_6, 2);
-      var h3 = child(div_7);
+      var div_8 = sibling(div_7, 2);
+      var h3 = child(div_8);
       var text_1 = child(h3);
       var span = sibling(text_1);
       var text_2 = child(span);
-      var div_8 = sibling(div_7, 2);
-      var h3_1 = child(div_8);
-      var text_3 = child(h3_1);
       var div_9 = sibling(div_8, 2);
-      var h3_2 = child(div_9);
-      var text_4 = child(h3_2);
+      var h3_1 = child(div_9);
+      var text_3 = child(h3_1);
       var div_10 = sibling(div_9, 2);
-      var h3_3 = child(div_10);
+      var h3_2 = child(div_10);
+      var text_4 = child(h3_2);
+      var div_11 = sibling(div_10, 2);
+      var h3_3 = child(div_11);
       var text_5 = child(h3_3);
-      var a = sibling(div_10, 2);
+      var a = sibling(div_11, 2);
       var h3_4 = child(a);
       var text_6 = child(h3_4);
       template_effect(
@@ -3385,16 +3134,16 @@ function Dossier($$anchor, $$props) {
       );
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
-      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
-      append($$anchor2, div_5);
+      transition(1, div_6, () => slide, () => ({ duration: 400, easing: cubicInOut }));
+      transition(2, div_6, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      append($$anchor2, div_6);
     };
     if_block(node_1, ($$render) => {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
   template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
 }
 delegate(["click", "input"]);
@@ -4967,11 +4716,18 @@ function setupMasonry({
     msnry.destroy();
   };
 }
+function toggleSpan$3(_, id) {
+  toggleCardSpanById$1(id());
+}
+var on_click$3 = (e) => e.stopPropagation();
+var on_click_1$3 = () => moveCard("up");
+var on_click_2$3 = () => moveCard("down");
 var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$9 = /* @__PURE__ */ template(`<h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$9 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let gridContainer;
   user_effect(() => {
@@ -4985,15 +4741,23 @@ function Attributes($$anchor, $$props) {
     return cleanup;
   });
   var fragment = root$9();
-  var h1 = first_child(fragment);
+  var div = first_child(fragment);
+  div.__click = [on_click$3];
+  var button = child(div);
+  button.__click = [on_click_1$3];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_2$3];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [toggleSpan$3, id];
+  var h1 = sibling(div, 2);
   var text2 = child(h1);
-  var div = sibling(h1, 2);
-  var node = sibling(child(div), 4);
+  var div_1 = sibling(h1, 2);
+  var node = sibling(child(div_1), 4);
   each(node, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_1 = root_1$1();
-    var node_1 = child(div_1);
+    var div_2 = root_1$1();
+    var node_1 = child(div_2);
     AttributeCard(node_1, {
       get statKey() {
         return key();
@@ -5006,19 +4770,19 @@ function Attributes($$anchor, $$props) {
       }
     });
     template_effect(() => {
-      toggle_class(div_1, "stat-card", key());
-      toggle_class(div_1, "attribute-card", key());
+      toggle_class(div_2, "stat-card", key());
+      toggle_class(div_2, "attribute-card", key());
     });
-    append($$anchor2, div_1);
+    append($$anchor2, div_2);
   });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
 }
-enable_legacy_mode_flag();
+delegate(["click"]);
 var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
   var div = root$8();
@@ -5034,41 +4798,56 @@ function SkillsActive($$anchor) {
   var div = root$6();
   append($$anchor, div);
 }
-var on_click = (_, activeTab) => set(activeTab, "active");
-var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
-var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$5 = /* @__PURE__ */ template(`<div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`);
+function toggleSpan$2(_, id) {
+  toggleCardSpanById$1(id());
+}
+var on_click$2 = (e) => e.stopPropagation();
+var on_click_1$2 = () => moveCard("up");
+var on_click_2$2 = () => moveCard("down");
+var on_click_3 = (__1, activeTab) => set(activeTab, "active");
+var on_click_4 = (__2, activeTab) => set(activeTab, "knowledge");
+var on_click_5 = (__3, activeTab) => set(activeTab, "language");
+var root$5 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var div = root$5();
-  var h1 = child(div);
-  var text2 = child(h1);
-  var div_1 = sibling(h1, 2);
-  var button = child(div_1);
-  button.__click = [on_click, activeTab];
+  var fragment = root$5();
+  var div = first_child(fragment);
+  div.__click = [on_click$2];
+  var button = child(div);
+  button.__click = [on_click_1$2];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_1, activeTab];
+  button_1.__click = [on_click_2$2];
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [on_click_2, activeTab];
-  var div_2 = sibling(div_1, 2);
-  var node = child(div_2);
+  button_2.__click = [toggleSpan$2, id];
+  var div_1 = sibling(div, 2);
+  var h1 = child(div_1);
+  var text2 = child(h1);
+  var div_2 = sibling(h1, 2);
+  var button_3 = child(div_2);
+  button_3.__click = [on_click_3, activeTab];
+  var button_4 = sibling(button_3, 2);
+  button_4.__click = [on_click_4, activeTab];
+  var button_5 = sibling(button_4, 2);
+  button_5.__click = [on_click_5, activeTab];
+  var div_3 = sibling(div_2, 2);
+  var node = child(div_3);
   {
     var consequent = ($$anchor2) => {
       SkillsActive($$anchor2);
     };
     var alternate_1 = ($$anchor2) => {
-      var fragment_1 = comment();
-      var node_1 = first_child(fragment_1);
+      var fragment_2 = comment();
+      var node_1 = first_child(fragment_2);
       {
         var consequent_1 = ($$anchor3) => {
           SkillsKnowledge($$anchor3);
         };
         var alternate = ($$anchor3) => {
-          var fragment_3 = comment();
-          var node_2 = first_child(fragment_3);
+          var fragment_4 = comment();
+          var node_2 = first_child(fragment_4);
           {
             var consequent_2 = ($$anchor4) => {
               SkillsLangauge($$anchor4);
@@ -5081,7 +4860,7 @@ function Skills($$anchor, $$props) {
               true
             );
           }
-          append($$anchor3, fragment_3);
+          append($$anchor3, fragment_4);
         };
         if_block(
           node_1,
@@ -5092,7 +4871,7 @@ function Skills($$anchor, $$props) {
           true
         );
       }
-      append($$anchor2, fragment_1);
+      append($$anchor2, fragment_2);
     };
     if_block(node, ($$render) => {
       if (get$1(activeTab) === "active") $$render(consequent);
@@ -5102,22 +4881,37 @@ function Skills($$anchor, $$props) {
   template_effect(
     ($0) => {
       set_text(text2, $0);
-      toggle_class(button, "active", get$1(activeTab) === "active");
-      toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
-      toggle_class(button_2, "active", get$1(activeTab) === "language");
+      toggle_class(button_3, "active", get$1(activeTab) === "active");
+      toggle_class(button_4, "active", get$1(activeTab) === "knowledge");
+      toggle_class(button_5, "active", get$1(activeTab) === "language");
     },
     [() => localize(config().skills.skills)]
   );
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
 }
 delegate(["click"]);
-var root$4 = /* @__PURE__ */ template(`<div class="health"><h1> </h1> <span> </span></div>`);
+function toggleSpan$1(_, id) {
+  toggleCardSpanById$1(id());
+}
+var on_click$1 = (e) => e.stopPropagation();
+var on_click_1$1 = () => moveCard("up");
+var on_click_2$1 = () => moveCard("down");
+var root$4 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$4();
-  var h1 = child(div);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  var fragment = root$4();
+  var div = first_child(fragment);
+  div.__click = [on_click$1];
+  var button = child(div);
+  button.__click = [on_click_1$1];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_2$1];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [toggleSpan$1, id];
+  var div_1 = sibling(div, 2);
+  var h1 = child(div_1);
   var text2 = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
@@ -5128,15 +4922,31 @@ function Health($$anchor, $$props) {
     },
     [() => localize(config().health.health)]
   );
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
 }
-var root$3 = /* @__PURE__ */ template(`<div class="inventory"><h1> </h1> <span> </span></div>`);
+delegate(["click"]);
+function toggleSpan(_, id) {
+  toggleCardSpanById$1(id());
+}
+var on_click = (e) => e.stopPropagation();
+var on_click_1 = () => moveCard("up");
+var on_click_2 = () => moveCard("down");
+var root$3 = /* @__PURE__ */ template(`<div class="toolbar"><button><i class="fa-solid fa-arrow-up"></i></button> <button><i class="fa-solid fa-arrow-down"></i></button> <button><i class="fa-solid fa-expand-arrows-alt"></i></button></div> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  var div = root$3();
-  var h1 = child(div);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  var fragment = root$3();
+  var div = first_child(fragment);
+  div.__click = [on_click];
+  var button = child(div);
+  button.__click = [on_click_1];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_2];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [toggleSpan, id];
+  var div_1 = sibling(div, 2);
+  var h1 = child(div_1);
   var text2 = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
@@ -5149,60 +4959,68 @@ function Inventory($$anchor, $$props) {
       () => localize(config().inventory.inventory)
     ]
   );
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
 }
+delegate(["click"]);
 var root_1 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$2 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
-  const cards = proxy([
+  const defaultCardArray = [
     {
       id: 0,
       comp: Dossier,
       props: { actor: $$props.actor, config: $$props.config },
-      classes: []
+      span: 1
     },
     {
       id: 1,
       comp: Attributes,
       props: { actor: $$props.actor, config: $$props.config },
-      classes: ["two-span-selectable"]
+      span: 2
     },
     {
       id: 2,
       comp: Skills,
       props: { actor: $$props.actor, config: $$props.config },
-      classes: [
-        "two-span-selectable",
-        "three-span-selectable"
-      ]
+      span: 2
     },
     {
       id: 3,
       comp: Health,
       props: { actor: $$props.actor, config: $$props.config },
-      classes: ["two-span-selectable"]
+      span: 2
     },
     {
       id: 4,
       comp: Inventory,
       props: { actor: $$props.actor, config: $$props.config },
-      classes: [
-        "two-span-selectable",
-        "three-span-selectable"
-      ]
-    },
-    {
-      id: 5,
-      txt: "Testing Databind",
-      classes: ["debug-box"]
-    },
-    { id: 6, txt: "Testing Databind", classes: [] },
-    { id: 7, txt: "Testing Databind", classes: [] },
-    { id: 8, txt: "Testing Databind", classes: [] },
-    { id: 9, txt: "Testing Databind", classes: [] }
-  ]);
+      span: 2
+    }
+    //{ id: 5, txt: "Testing Databind", span: 1 },
+  ];
+  user_effect(async () => {
+    const layout = await $$props.actor.getFlag("sr3e", "customLayout");
+    cardLayout.set(layout ?? [...defaultCardArray]);
+  });
+  const cards = defaultCardArray;
+  let saveTimeout = null;
+  user_effect(() => {
+    const unsubscribe = cardLayout.subscribe((layout) => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(
+        () => {
+          $$props.actor.setFlag("sr3e", "customLayout", layout);
+        },
+        200
+      );
+    });
+    return () => {
+      unsubscribe();
+      clearTimeout(saveTimeout);
+    };
+  });
   let container = null;
   let layoutState = state("small");
   user_effect(() => {
@@ -5264,14 +5082,14 @@ function CharacterSheetApp($$anchor, $$props) {
 }
 var root$1 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
-  push($$props, false);
+  push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
-  const name = mutable_state();
-  let actor = prop($$props, "actor", 8);
+  let actor = prop($$props, "actor", 19, () => ({}));
   let malfunctioningIndexes = [];
-  let neonHTML = mutable_state();
   const actorStore = getActorStore(actor().id, actor().name);
+  let name = /* @__PURE__ */ derived(() => $actorStore().name);
+  let neonHTML = /* @__PURE__ */ derived(() => getNeonHtml(get$1(name)));
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   function getNeonHtml(name2) {
     malfunctioningIndexes = [];
@@ -5289,14 +5107,6 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  legacy_pre_effect(() => $actorStore(), () => {
-    set(name, $actorStore().name);
-  });
-  legacy_pre_effect(() => get$1(name), () => {
-    set(neonHTML, getNeonHtml(get$1(name)));
-  });
-  legacy_pre_effect_reset();
-  init();
   var div = root$1();
   var node = child(div);
   html(node, () => get$1(neonHTML));
