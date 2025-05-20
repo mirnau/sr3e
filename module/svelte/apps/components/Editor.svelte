@@ -1,58 +1,61 @@
 <script>
-    import { onMount } from "svelte";
     import Log from "../../../../Log";
 
-    export let document = {};
-    export let owner = {};
-    export let editable = {};
+    let { item = {} } = $props();
 
-    let editor;
-    let editorContainer;
-    let textValue = document.system.description;
+    let editor = $state(null);
+    let editorContainer = $state(null);
+    let textValue = $state(item.system.description);
 
-    onMount(async () => {
-        if (
-            !document.system?.description &&
-            document.system?.description !== ""
-        ) {
+    let isOwner = $derived(item.isOwner);
+    let editable = true;
+
+    $effect(() => {
+
+
+        if (item.system?.description === undefined) {
             Log.error(
-                `This editor requires that the data model has a ${document.name}.system.description field`,
+                `This editor requires that the data model has a ${item.name}.system.description field`,
                 "Editor.svelte",
-                { document },
+                { item },
             );
             return;
         }
 
-        if (editable) {
-            editor = await TextEditor.create({
-                target: editorContainer,
-                height: 300,
-                save_onsubmit: false,
-                buttons: true,
-                owner: owner,
-                parent: ".editor-field",
-                content_css: 'systems/sr3e/styles/css/chummer-dark.css',
-                 content_style: 'html { margin: 0.5rem; }',
-                save_onsavecallback: async (html) => {
-                    let content = html.getContent(editorContainer);
-                    await document.update(
-                        { "system.description": content },
-                        { render: false },
-                    );
-                },
-            });
-            editor.setContent(document.system.description);
-        } else {
-            editorContainer.innerHTML = TextEditor.enrichHTML(textValue, {
-                async: false,
-            });
-        }
+        (async () => {
+            if (editable) {
+                editor.set(
+                    await TextEditor.create({
+                        target: editorContainer,
+                        height: 300,
+                        save_onsubmit: false,
+                        buttons: true,
+                        owner,
+                        parent: ".editor-field",
+                        content_css: "systems/sr3e/styles/css/chummer-dark.css",
+                        content_style: "html { margin: 0.5rem; }",
+                        save_onsavecallback: async (html) => {
+                            let content = html.getContent(editorContainer);
+                            await item.update(
+                                { "system.description": content },
+                                { render: false },
+                            );
+                        },
+                    }),
+                );
+                editor()?.setContent(item.system.description);
+            } else {
+                editorContainer.innerHTML = TextEditor.enrichHTML(textValue, {
+                    async: false,
+                });
+            }
 
-        Log.success(
-            "Editor initialized successfully",
-            "Editor.svelte",
-            editorContainer,
-        );
+            Log.success(
+                "Editor initialized successfully",
+                "Editor.svelte",
+                editorContainer,
+            );
+        })();
     });
 </script>
 

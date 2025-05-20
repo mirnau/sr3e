@@ -1,15 +1,32 @@
-export default class MagicItemSheet extends ItemSheet {
+export default class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            template: "systems/sr3e/default.html",
-            width: "100%",
-            height: "100%",
-            left: 200,  
-            top: 200,   
-            classes: ["sr3e", "sheet", "item"],
-            resizable: false
-        });
+    #magic
+
+    static get DEFAULT_OPTIONS() {
+        return {
+            ...super.DEFAULT_OPTIONS,
+            id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+            classes: ["sr3e", "sheet", "item", "magic"],
+            template: null,
+            position: { width: 820, height: 820 },
+            window: {
+                resizable: true
+            },
+            tag: "form",
+            submitOnChange: true,
+            closeOnSubmit: false
+        };
+    }
+
+    _renderHTML() {
+        return null;
+    }
+
+    _replaceHTML(_, windowContent) {
+
+        
+
+        return windowContent;
     }
 
     /** @override prevent submission, since Svelte is managing state */

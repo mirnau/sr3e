@@ -322,6 +322,32 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
+.system-sr3e .meta-human-grid {
+  /* Set a fixed or max width and center it */
+  width: 40rem;
+  margin: 0 auto;
+  column-count: 2;
+  column-gap: 0.5rem;
+}
+.system-sr3e .meta-human-grid .item-sheet-component {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  break-inside: avoid;
+}
+.system-sr3e .meta-human-grid .inner-background-container .inner-background {
+  display: grid;
+  text-align: center;
+}
+.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card {
+  background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
+}
+.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card .stat-label {
+  background-color: #003856;
+}
+.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card:hover {
+  z-index: 10;
+}
 .system-sr3e section.journal-entry-content.flexcol {
   border-radius: 0;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
@@ -1297,19 +1323,19 @@
 }
 .system-sr3e dialog,
 .system-sr3e form,
-.system-sr3e .sr3e.sheet.item,
-.system-sr3e .application.category-browser,
 .system-sr3e div#support-details,
 .system-sr3e div#invitation-links,
+.system-sr3e .application.category-browser,
+.system-sr3e .sr3e.sheet.item,
 .system-sr3e .sr3e.sheet.character {
   box-shadow: none;
 }
 .system-sr3e dialog .stat-grid,
 .system-sr3e form .stat-grid,
-.system-sr3e .sr3e.sheet.item .stat-grid,
-.system-sr3e .application.category-browser .stat-grid,
 .system-sr3e div#support-details .stat-grid,
 .system-sr3e div#invitation-links .stat-grid,
+.system-sr3e .application.category-browser .stat-grid,
+.system-sr3e .sr3e.sheet.item .stat-grid,
 .system-sr3e .sr3e.sheet.character .stat-grid {
   display: inline-grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1317,28 +1343,28 @@
 }
 .system-sr3e dialog .stat-grid.two-column,
 .system-sr3e form .stat-grid.two-column,
-.system-sr3e .sr3e.sheet.item .stat-grid.two-column,
-.system-sr3e .application.category-browser .stat-grid.two-column,
 .system-sr3e div#support-details .stat-grid.two-column,
 .system-sr3e div#invitation-links .stat-grid.two-column,
+.system-sr3e .application.category-browser .stat-grid.two-column,
+.system-sr3e .sr3e.sheet.item .stat-grid.two-column,
 .system-sr3e .sr3e.sheet.character .stat-grid.two-column {
   grid-template-columns: repeat(2, auto);
 }
 .system-sr3e dialog .stat-grid.three-column,
 .system-sr3e form .stat-grid.three-column,
-.system-sr3e .sr3e.sheet.item .stat-grid.three-column,
-.system-sr3e .application.category-browser .stat-grid.three-column,
 .system-sr3e div#support-details .stat-grid.three-column,
 .system-sr3e div#invitation-links .stat-grid.three-column,
+.system-sr3e .application.category-browser .stat-grid.three-column,
+.system-sr3e .sr3e.sheet.item .stat-grid.three-column,
 .system-sr3e .sr3e.sheet.character .stat-grid.three-column {
   grid-template-columns: repeat(3, auto);
 }
 .system-sr3e dialog .details-foldout,
 .system-sr3e form .details-foldout,
-.system-sr3e .sr3e.sheet.item .details-foldout,
-.system-sr3e .application.category-browser .details-foldout,
 .system-sr3e div#support-details .details-foldout,
 .system-sr3e div#invitation-links .details-foldout,
+.system-sr3e .application.category-browser .details-foldout,
+.system-sr3e .sr3e.sheet.item .details-foldout,
 .system-sr3e .sr3e.sheet.character .details-foldout {
   margin-top: 0.5rem;
   margin-bottom: 1rem;
@@ -1347,10 +1373,10 @@
 }
 .system-sr3e dialog .sr3e-inner-background-container,
 .system-sr3e form .sr3e-inner-background-container,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container,
-.system-sr3e .application.category-browser .sr3e-inner-background-container,
 .system-sr3e div#support-details .sr3e-inner-background-container,
 .system-sr3e div#invitation-links .sr3e-inner-background-container,
+.system-sr3e .application.category-browser .sr3e-inner-background-container,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background-container {
   position: relative;
   width: 100%;
@@ -1359,10 +1385,10 @@
 }
 .system-sr3e dialog .sr3e-inner-background-container.slim,
 .system-sr3e form .sr3e-inner-background-container.slim,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container.slim,
-.system-sr3e .application.category-browser .sr3e-inner-background-container.slim,
 .system-sr3e div#support-details .sr3e-inner-background-container.slim,
 .system-sr3e div#invitation-links .sr3e-inner-background-container.slim,
+.system-sr3e .application.category-browser .sr3e-inner-background-container.slim,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container.slim,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background-container.slim {
   width: auto;
   display: inline-block;
@@ -1371,10 +1397,10 @@
 }
 .system-sr3e dialog .sr3e-inner-background-container .sr3e-inner-background,
 .system-sr3e form .sr3e-inner-background-container .sr3e-inner-background,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background,
-.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background,
 .system-sr3e div#support-details .sr3e-inner-background-container .sr3e-inner-background,
 .system-sr3e div#invitation-links .sr3e-inner-background-container .sr3e-inner-background,
+.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background {
   position: relative;
   width: 100%;
@@ -1384,19 +1410,19 @@
 }
 .system-sr3e dialog .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .system-sr3e form .sr3e-inner-background-container .sr3e-inner-background .header-icon,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background .header-icon,
-.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .system-sr3e div#support-details .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .system-sr3e div#invitation-links .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background .header-icon {
   justify-content: center;
 }
 .system-sr3e dialog .sr3e-inner-background-container .sr3e-inner-background.slim,
 .system-sr3e form .sr3e-inner-background-container .sr3e-inner-background.slim,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background.slim,
-.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background.slim,
 .system-sr3e div#support-details .sr3e-inner-background-container .sr3e-inner-background.slim,
 .system-sr3e div#invitation-links .sr3e-inner-background-container .sr3e-inner-background.slim,
+.system-sr3e .application.category-browser .sr3e-inner-background-container .sr3e-inner-background.slim,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background.slim,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background.slim {
   width: auto;
   display: inline-block;
@@ -1405,10 +1431,10 @@
 }
 .system-sr3e dialog label,
 .system-sr3e form label,
-.system-sr3e .sr3e.sheet.item label,
-.system-sr3e .application.category-browser label,
 .system-sr3e div#support-details label,
 .system-sr3e div#invitation-links label,
+.system-sr3e .application.category-browser label,
+.system-sr3e .sr3e.sheet.item label,
 .system-sr3e .sr3e.sheet.character label {
   color: #1df0ff;
   text-transform: uppercase;
@@ -1417,19 +1443,19 @@
 }
 .system-sr3e dialog a,
 .system-sr3e form a,
-.system-sr3e .sr3e.sheet.item a,
-.system-sr3e .application.category-browser a,
 .system-sr3e div#support-details a,
 .system-sr3e div#invitation-links a,
+.system-sr3e .application.category-browser a,
+.system-sr3e .sr3e.sheet.item a,
 .system-sr3e .sr3e.sheet.character a {
   text-decoration: none;
 }
 .system-sr3e dialog .fake-shadow,
 .system-sr3e form .fake-shadow,
-.system-sr3e .sr3e.sheet.item .fake-shadow,
-.system-sr3e .application.category-browser .fake-shadow,
 .system-sr3e div#support-details .fake-shadow,
 .system-sr3e div#invitation-links .fake-shadow,
+.system-sr3e .application.category-browser .fake-shadow,
+.system-sr3e .sr3e.sheet.item .fake-shadow,
 .system-sr3e .sr3e.sheet.character .fake-shadow {
   position: absolute;
   top: 1.5rem;
@@ -1443,10 +1469,10 @@
 }
 .system-sr3e dialog .sr3e-inner-background,
 .system-sr3e form .sr3e-inner-background,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background,
-.system-sr3e .application.category-browser .sr3e-inner-background,
 .system-sr3e div#support-details .sr3e-inner-background,
 .system-sr3e div#invitation-links .sr3e-inner-background,
+.system-sr3e .application.category-browser .sr3e-inner-background,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background {
   position: relative;
   z-index: 0;
@@ -1456,10 +1482,10 @@
 }
 .system-sr3e dialog .sr3e-inner-background::before,
 .system-sr3e form .sr3e-inner-background::before,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background::before,
-.system-sr3e .application.category-browser .sr3e-inner-background::before,
 .system-sr3e div#support-details .sr3e-inner-background::before,
 .system-sr3e div#invitation-links .sr3e-inner-background::before,
+.system-sr3e .application.category-browser .sr3e-inner-background::before,
+.system-sr3e .sr3e.sheet.item .sr3e-inner-background::before,
 .system-sr3e .sr3e.sheet.character .sr3e-inner-background::before {
   content: '';
   position: absolute;
@@ -1472,10 +1498,10 @@
 }
 .system-sr3e dialog .stat-card,
 .system-sr3e form .stat-card,
-.system-sr3e .sr3e.sheet.item .stat-card,
-.system-sr3e .application.category-browser .stat-card,
 .system-sr3e div#support-details .stat-card,
 .system-sr3e div#invitation-links .stat-card,
+.system-sr3e .application.category-browser .stat-card,
+.system-sr3e .sr3e.sheet.item .stat-card,
 .system-sr3e .sr3e.sheet.character .stat-card {
   position: relative;
   background: #ff1d9d;
@@ -1486,10 +1512,10 @@
 }
 .system-sr3e dialog .stat-card h4.no-margin,
 .system-sr3e form .stat-card h4.no-margin,
-.system-sr3e .sr3e.sheet.item .stat-card h4.no-margin,
-.system-sr3e .application.category-browser .stat-card h4.no-margin,
 .system-sr3e div#support-details .stat-card h4.no-margin,
 .system-sr3e div#invitation-links .stat-card h4.no-margin,
+.system-sr3e .application.category-browser .stat-card h4.no-margin,
+.system-sr3e .sr3e.sheet.item .stat-card h4.no-margin,
 .system-sr3e .sr3e.sheet.character .stat-card h4.no-margin {
   max-width: 5rem;
   overflow: hidden;
@@ -1499,10 +1525,10 @@
 }
 .system-sr3e dialog .stat-card::before,
 .system-sr3e form .stat-card::before,
-.system-sr3e .sr3e.sheet.item .stat-card::before,
-.system-sr3e .application.category-browser .stat-card::before,
 .system-sr3e div#support-details .stat-card::before,
 .system-sr3e div#invitation-links .stat-card::before,
+.system-sr3e .application.category-browser .stat-card::before,
+.system-sr3e .sr3e.sheet.item .stat-card::before,
 .system-sr3e .sr3e.sheet.character .stat-card::before {
   content: '';
   position: absolute;
@@ -1518,30 +1544,30 @@
 }
 .system-sr3e dialog .stat-card .stat-value,
 .system-sr3e form .stat-card .stat-value,
-.system-sr3e .sr3e.sheet.item .stat-card .stat-value,
-.system-sr3e .application.category-browser .stat-card .stat-value,
 .system-sr3e div#support-details .stat-card .stat-value,
 .system-sr3e div#invitation-links .stat-card .stat-value,
+.system-sr3e .application.category-browser .stat-card .stat-value,
+.system-sr3e .sr3e.sheet.item .stat-card .stat-value,
 .system-sr3e .sr3e.sheet.character .stat-card .stat-value {
   margin: 0;
   text-align: center;
 }
 .system-sr3e dialog .core-skill .skill-name,
 .system-sr3e form .core-skill .skill-name,
-.system-sr3e .sr3e.sheet.item .core-skill .skill-name,
-.system-sr3e .application.category-browser .core-skill .skill-name,
 .system-sr3e div#support-details .core-skill .skill-name,
 .system-sr3e div#invitation-links .core-skill .skill-name,
+.system-sr3e .application.category-browser .core-skill .skill-name,
+.system-sr3e .sr3e.sheet.item .core-skill .skill-name,
 .system-sr3e .sr3e.sheet.character .core-skill .skill-name {
   text-indent: 0;
   text-overflow: ellipsis;
 }
 .system-sr3e dialog .core-skill .skill-value,
 .system-sr3e form .core-skill .skill-value,
-.system-sr3e .sr3e.sheet.item .core-skill .skill-value,
-.system-sr3e .application.category-browser .core-skill .skill-value,
 .system-sr3e div#support-details .core-skill .skill-value,
 .system-sr3e div#invitation-links .core-skill .skill-value,
+.system-sr3e .application.category-browser .core-skill .skill-value,
+.system-sr3e .sr3e.sheet.item .core-skill .skill-value,
 .system-sr3e .sr3e.sheet.character .core-skill .skill-value {
   text-indent: 0;
   text-align: center;
@@ -1551,48 +1577,48 @@
 }
 .system-sr3e dialog .specialisation-container,
 .system-sr3e form .specialisation-container,
-.system-sr3e .sr3e.sheet.item .specialisation-container,
-.system-sr3e .application.category-browser .specialisation-container,
 .system-sr3e div#support-details .specialisation-container,
 .system-sr3e div#invitation-links .specialisation-container,
+.system-sr3e .application.category-browser .specialisation-container,
+.system-sr3e .sr3e.sheet.item .specialisation-container,
 .system-sr3e .sr3e.sheet.character .specialisation-container {
   background-color: #1b1f24;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
 .system-sr3e dialog .specialisation-container .specializations,
 .system-sr3e form .specialisation-container .specializations,
-.system-sr3e .sr3e.sheet.item .specialisation-container .specializations,
-.system-sr3e .application.category-browser .specialisation-container .specializations,
 .system-sr3e div#support-details .specialisation-container .specializations,
 .system-sr3e div#invitation-links .specialisation-container .specializations,
+.system-sr3e .application.category-browser .specialisation-container .specializations,
+.system-sr3e .sr3e.sheet.item .specialisation-container .specializations,
 .system-sr3e .sr3e.sheet.character .specialisation-container .specializations {
   text-indent: 0;
 }
 .system-sr3e dialog .specialisation-container .specializations .skill-specialization-card,
 .system-sr3e form .specialisation-container .specializations .skill-specialization-card,
-.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
-.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card,
 .system-sr3e div#support-details .specialisation-container .specializations .skill-specialization-card,
 .system-sr3e div#invitation-links .specialisation-container .specializations .skill-specialization-card,
+.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card,
+.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card,
 .system-sr3e .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card {
   background-color: #003856;
 }
 .system-sr3e dialog .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .system-sr3e form .specialisation-container .specializations .skill-specialization-card .specialization-name,
-.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
-.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .system-sr3e div#support-details .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .system-sr3e div#invitation-links .specialisation-container .specializations .skill-specialization-card .specialization-name,
+.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-name,
+.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-name,
 .system-sr3e .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .system-sr3e dialog .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .system-sr3e form .specialisation-container .specializations .skill-specialization-card .specialization-value,
-.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-value,
-.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .system-sr3e div#support-details .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .system-sr3e div#invitation-links .specialisation-container .specializations .skill-specialization-card .specialization-value,
+.system-sr3e .application.category-browser .specialisation-container .specializations .skill-specialization-card .specialization-value,
+.system-sr3e .sr3e.sheet.item .specialisation-container .specializations .skill-specialization-card .specialization-value,
 .system-sr3e .sr3e.sheet.character .specialisation-container .specializations .skill-specialization-card .specialization-value {
   text-indent: 0;
   text-align: center;

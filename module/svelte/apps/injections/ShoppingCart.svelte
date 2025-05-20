@@ -1,6 +1,7 @@
 <script>
 	import { flags } from "../../../foundry/services/commonConsts.js";
 	import { localize } from "../../../svelteHelpers.js";
+	import { shoppingState } from "../../../svelteStore.js";
 
 	let { actor = {}, config = {} } = $props();
 
@@ -18,6 +19,7 @@
 
 	function toggleShoppingState() {
 		isShoppingState = !isShoppingState;
+		shoppingState.set(isShoppingState);
 		actor.setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
 	}
 </script>

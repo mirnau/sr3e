@@ -1,156 +1,153 @@
 <script>
-    import { localize } from "../../foundry/SvelteHelpers.js";
-    import { openFilePicker } from "../../foundry/SvelteHelpers.js";
+    import { localize, openFilePicker } from "../../svelteHelpers.js";
     import Editor from "./components/Editor.svelte";
 
-    export let item = {};
-    export let config = {};
+    let { item = {}, config = {} } = $props();
 
-    let system = item.system;
+    const system = $state(item.system);
 
-    let attributes = config.attributes;
-    let common = config.common;
-    let movement = config.movement;
-    let karma = config.karma;
-    let vision = config.vision;
-    let traits = config.traits;
+    const attributes = config.attributes;
+    const common = config.common;
+    const movementConfig = config.movement;
+    const karmaConfig = config.karma;
+    const visionConfig = config.vision;
+    const traits = config.traits;
 
-    $: metahuman = system;
-
-    $: movement = [
+    const movement = $derived([
         {
-            label: localize(movement.walking),
-            value: metahuman.movement.base,
+            label: localize(movementConfig.walking),
+            value: system.movement.base,
         },
         {
-            label: localize(movement.runSpeedModifier),
-            value: metahuman.movement.modifier,
+            label: localize(movementConfig.runSpeedModifier),
+            value: system.movement.modifier,
         },
-    ];
+    ]);
 
-    $: karma = [
+    const karma = $derived([
         {
-            label: localize(karma.advancementRatio),
-            value: metahuman.karma.factor,
+            label: localize(karmaConfig.advancementRatio),
+            value: system.karma.factor,
         },
-    ];
+    ]);
 
-    $: agerange = [
+    const agerange = $derived([
         {
             label: localize(common.min),
-            value: metahuman.agerange.min,
+            value: system.agerange.min,
         },
         {
             label: localize(common.average),
-            value: metahuman.agerange.average,
+            value: system.agerange.average,
         },
         {
             label: localize(common.max),
-            value: metahuman.agerange.max,
+            value: system.agerange.max,
         },
-    ];
+    ]);
 
-    $: height = [
+    const height = $derived([
         {
             label: localize(common.min),
-            value: metahuman.physical.height.min,
+            value: system.physical.height.min,
+        },
+
+        {
+            label: localize(common.average),
+            value: system.physical.height.average,
+        },
+        {
+            label: localize(common.max),
+            value: system.physical.height.max,
+        },
+    ]);
+
+    const weight = $derived([
+        {
+            label: localize(common.min),
+            value: system.physical.weight.min,
         },
         {
             label: localize(common.average),
-            value: metahuman.physical.height.average,
+            value: system.physical.weight.average,
         },
         {
             label: localize(common.max),
-            value: metahuman.physical.height.max,
+            value: system.physical.weight.max,
         },
-    ];
+    ]);
 
-    $: weight = [
-        {
-            label: localize(common.min),
-            value: metahuman.physical.weight.min,
-        },
-        {
-            label: localize(common.average),
-            value: metahuman.physical.weight.average,
-        },
-        {
-            label: localize(common.max),
-            value: metahuman.physical.weight.max,
-        },
-    ];
-
-    $: attributeModifiers = [
+    const attributeModifiers = $derived([
         {
             label: localize(attributes.strength),
-            value: metahuman.modifiers.strength,
+            value: system.modifiers.strength,
         },
         {
             label: localize(attributes.quickness),
-            value: metahuman.modifiers.quickness,
+            value: system.modifiers.quickness,
         },
         {
             label: localize(attributes.body),
-            value: metahuman.modifiers.body,
+            value: system.modifiers.body,
         },
         {
             label: localize(attributes.charisma),
-            value: metahuman.modifiers.charisma,
+            value: system.modifiers.charisma,
         },
         {
             label: localize(attributes.intelligence),
-            value: metahuman.modifiers.intelligence,
+            value: system.modifiers.intelligence,
         },
         {
             label: localize(attributes.willpower),
-            value: metahuman.modifiers.willpower,
+            value: system.modifiers.willpower,
         },
-    ];
+    ]);
 
-    $: attributeLimits = [
+    const attributeLimits = $derived([
         {
             label: localize(attributes.strength),
-            value: metahuman.attributeLimits.strength,
+            value: system.attributeLimits.strength,
         },
         {
             label: localize(attributes.quickness),
-            value: metahuman.attributeLimits.quickness,
+            value: system.attributeLimits.quickness,
         },
         {
             label: localize(attributes.body),
-            value: metahuman.attributeLimits.body,
+            value: system.attributeLimits.body,
         },
         {
             label: localize(attributes.charisma),
-            value: metahuman.attributeLimits.charisma,
+            value: system.attributeLimits.charisma,
         },
         {
             label: localize(attributes.intelligence),
-            value: metahuman.attributeLimits.intelligence,
+            value: system.attributeLimits.intelligence,
         },
         {
             label: localize(attributes.willpower),
-            value: metahuman.attributeLimits.willpower,
+            value: system.attributeLimits.willpower,
         },
-    ];
+    ]);
 
-    $: vision = [
+    const vision = $derived([
         {
-            label: localize(vision.type),
-            value: metahuman.vision.type,
+            label: localize(visionConfig.type),
+            value: system.vision.type,
         },
         {
-            label: localize(vision.description),
-            value: metahuman.vision.description,
+            label: localize(visionConfig.description),
+            value: system.vision.description,
         },
         {
-            label: localize(vision.rules),
-            value: metahuman.vision.rules,
+            label: localize(visionConfig.rules),
+            value: system.vision.rules,
         },
-    ];
+    ]);
 </script>
 
-<div class="sr3e">
+<div class="meta-human-grid">
     <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
@@ -162,18 +159,16 @@
                         title={item.name}
                         role="presentation"
                         alt={item.name}
-                        on:click={openFilePicker(item)}
+                        onclick={openFilePicker(item)}
                     />
                 </div>
-
-                <!-- svelte-ignore a11y_missing_content -->
 
                 <input
                     class="large"
                     name="name"
                     type="text"
                     bind:value={item.name}
-                    on:change={(e) =>
+                    onchange={(e) =>
                         item.update({
                             name: e.target.value,
                         })}
@@ -187,7 +182,7 @@
                             name="system.priority"
                             class="priority-select"
                             bind:value={system.priority}
-                            on:change={(e) =>
+                            onchange={(e) =>
                                 item.update({
                                     "system.priority": e.target.value,
                                 })}
@@ -389,11 +384,12 @@
             </div>
         </div>
     </div>
-
+    <!--
     <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
-            <Editor document={item} editable={true} owner={item.isOwner} />
+            <Editor item />
         </div>
     </div>
+    -->
 </div>

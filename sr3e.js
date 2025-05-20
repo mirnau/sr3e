@@ -5,6 +5,10 @@ import { sr3e } from "./module/foundry/config.js";
 import { hooks, flags } from "./module/foundry/services/commonConsts.js";
 import { injectFooterIntoWindowApp } from "./module/foundry/hooks/renderApplicationV2/injectFooterIntoWindowApp.js";
 import injectCssSelectors from "./module/foundry/hooks/renderApplicationV2/injectCssSelectors.js";
+import MetahumanModel from "./module/models/item/MetahumanModel.js";
+import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
+import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
+import MagicModel from "./module/models/item/MagicModel.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -75,8 +79,6 @@ function wrapContent(root) {
   root.appendChild(sheetComponent);
 }
 
-
-
 function registerHooks() {
 
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
@@ -119,7 +121,9 @@ function registerHooks() {
     configureThemes();
     registerDocumentTypes({
       args: [
-        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
+        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
+        { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
+        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");
@@ -127,5 +131,3 @@ function registerHooks() {
 }
 
 registerHooks();
-
-

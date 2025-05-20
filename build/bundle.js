@@ -5,7 +5,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart;
+var _app, _neon, _feed, _cart, _metahuman, _magic;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -275,7 +275,13 @@ if (typeof window !== "undefined")
   (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
 const EACH_ITEM_REACTIVE = 1;
 const EACH_INDEX_REACTIVE = 1 << 1;
+const EACH_IS_CONTROLLED = 1 << 2;
+const EACH_IS_ANIMATED = 1 << 3;
 const EACH_ITEM_IMMUTABLE = 1 << 4;
+const PROPS_IS_IMMUTABLE = 1;
+const PROPS_IS_UPDATED = 1 << 2;
+const PROPS_IS_BINDABLE = 1 << 3;
+const PROPS_IS_LAZY_INITIAL = 1 << 4;
 const TRANSITION_IN = 1;
 const TRANSITION_OUT = 1 << 1;
 const TRANSITION_GLOBAL = 1 << 2;
@@ -354,6 +360,11 @@ function effect_orphan(rune) {
 function effect_update_depth_exceeded() {
   {
     throw new Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
+  }
+}
+function props_invalid_value(key) {
+  {
+    throw new Error(`https://svelte.dev/e/props_invalid_value`);
   }
 }
 function state_descriptors_fixed() {
@@ -639,6 +650,15 @@ function proxy(value, parent = null, prev) {
 }
 function update_version(signal, d = 1) {
   set(signal, signal.v + d);
+}
+function get_proxied_value(value) {
+  if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
+    return value[STATE_SYMBOL];
+  }
+  return value;
+}
+function is(a, b) {
+  return Object.is(get_proxied_value(a), get_proxied_value(b));
 }
 var $window;
 var first_child_getter;
@@ -1688,6 +1708,31 @@ function pop(component2) {
     {}
   );
 }
+let listening_to_form_reset = false;
+function add_form_reset_listener() {
+  if (!listening_to_form_reset) {
+    listening_to_form_reset = true;
+    document.addEventListener(
+      "reset",
+      (evt) => {
+        Promise.resolve().then(() => {
+          var _a;
+          if (!evt.defaultPrevented) {
+            for (
+              const e of
+              /**@type {HTMLFormElement} */
+              evt.target.elements
+            ) {
+              (_a = e.__on_r) == null ? void 0 : _a.call(e);
+            }
+          }
+        });
+      },
+      // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
+      { capture: true }
+    );
+  }
+}
 function without_reactive_context(fn) {
   var previous_reaction = active_reaction;
   var previous_effect = active_effect;
@@ -1699,6 +1744,19 @@ function without_reactive_context(fn) {
     set_active_reaction(previous_reaction);
     set_active_effect(previous_effect);
   }
+}
+function listen_to_event_and_reset_event(element, event2, handler, on_reset = handler) {
+  element.addEventListener(event2, () => without_reactive_context(handler));
+  const prev = element.__on_r;
+  if (prev) {
+    element.__on_r = () => {
+      prev();
+      on_reset(true);
+    };
+  } else {
+    element.__on_r = () => on_reset(true);
+  }
+  add_form_reset_listener();
 }
 const all_registered_events = /* @__PURE__ */ new Set();
 const root_event_handles = /* @__PURE__ */ new Set();
@@ -2061,6 +2119,14 @@ function pause_effects(state2, items, controlled_anchor, items_map) {
 function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = null) {
   var anchor = node;
   var state2 = { flags: flags2, items: /* @__PURE__ */ new Map(), first: null };
+  var is_controlled = (flags2 & EACH_IS_CONTROLLED) !== 0;
+  if (is_controlled) {
+    var parent_node = (
+      /** @type {Element} */
+      node
+    );
+    anchor = parent_node.appendChild(create_text());
+  }
   var fallback = null;
   var was_empty = false;
   var each_array = /* @__PURE__ */ derived_safe_equal(() => {
@@ -2107,18 +2173,33 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
   });
 }
 function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
+  var _a, _b, _c, _d;
+  var is_animated = (flags2 & EACH_IS_ANIMATED) !== 0;
+  var should_update = (flags2 & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
   var length = array.length;
   var items = state2.items;
   var first = state2.first;
   var current = first;
   var seen;
   var prev = null;
+  var to_animate;
   var matched = [];
   var stashed = [];
   var value;
   var key;
   var item2;
   var i;
+  if (is_animated) {
+    for (i = 0; i < length; i += 1) {
+      value = array[i];
+      key = get_key(value, i);
+      item2 = items.get(key);
+      if (item2 !== void 0) {
+        (_a = item2.a) == null ? void 0 : _a.measure();
+        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).add(item2);
+      }
+    }
+  }
   for (i = 0; i < length; i += 1) {
     value = array[i];
     key = get_key(value, i);
@@ -2146,11 +2227,15 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
       current = prev.next;
       continue;
     }
-    {
-      update_item(item2, value, i);
+    if (should_update) {
+      update_item(item2, value, i, flags2);
     }
     if ((item2.e.f & INERT) !== 0) {
       resume_effect(item2.e);
+      if (is_animated) {
+        (_b = item2.a) == null ? void 0 : _b.unfix();
+        (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).delete(item2);
+      }
     }
     if (item2 !== current) {
       if (seen !== void 0 && seen.has(item2)) {
@@ -2212,18 +2297,41 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
     }
     var destroy_length = to_destroy.length;
     if (destroy_length > 0) {
-      var controlled_anchor = null;
+      var controlled_anchor = (flags2 & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
+      if (is_animated) {
+        for (i = 0; i < destroy_length; i += 1) {
+          (_c = to_destroy[i].a) == null ? void 0 : _c.measure();
+        }
+        for (i = 0; i < destroy_length; i += 1) {
+          (_d = to_destroy[i].a) == null ? void 0 : _d.fix();
+        }
+      }
       pause_effects(state2, to_destroy, controlled_anchor, items);
     }
+  }
+  if (is_animated) {
+    queue_micro_task(() => {
+      var _a2;
+      if (to_animate === void 0) return;
+      for (item2 of to_animate) {
+        (_a2 = item2.a) == null ? void 0 : _a2.apply();
+      }
+    });
   }
   active_effect.first = state2.first && state2.first.e;
   active_effect.last = prev && prev.e;
 }
 function update_item(item2, value, index2, type) {
-  {
+  if ((type & EACH_ITEM_REACTIVE) !== 0) {
     internal_set(item2.v, value);
   }
-  {
+  if ((type & EACH_INDEX_REACTIVE) !== 0) {
+    internal_set(
+      /** @type {Value<number>} */
+      item2.i,
+      index2
+    );
+  } else {
     item2.i = index2;
   }
 }
@@ -2671,6 +2779,128 @@ function animate(element, options, counterpart, t2, on_finish) {
     t: () => get_t()
   };
 }
+function bind_value(input, get2, set2 = get2) {
+  listen_to_event_and_reset_event(input, "input", (is_reset) => {
+    var value = is_reset ? input.defaultValue : input.value;
+    value = is_numberlike_input(input) ? to_number(value) : value;
+    set2(value);
+    if (value !== (value = get2())) {
+      var start = input.selectionStart;
+      var end = input.selectionEnd;
+      input.value = value ?? "";
+      if (end !== null) {
+        input.selectionStart = start;
+        input.selectionEnd = Math.min(end, input.value.length);
+      }
+    }
+  });
+  if (
+    // If we are hydrating and the value has since changed,
+    // then use the updated value from the input instead.
+    // If defaultValue is set, then value == defaultValue
+    // TODO Svelte 6: remove input.value check and set to empty string?
+    untrack(get2) == null && input.value
+  ) {
+    set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
+  }
+  render_effect(() => {
+    var value = get2();
+    if (is_numberlike_input(input) && value === to_number(input.value)) {
+      return;
+    }
+    if (input.type === "date" && !value && !input.value) {
+      return;
+    }
+    if (value !== input.value) {
+      input.value = value ?? "";
+    }
+  });
+}
+function is_numberlike_input(input) {
+  var type = input.type;
+  return type === "number" || type === "range";
+}
+function to_number(value) {
+  return value === "" ? null : +value;
+}
+function select_option(select, value, mounting) {
+  if (select.multiple) {
+    return select_options(select, value);
+  }
+  for (var option of select.options) {
+    var option_value = get_option_value(option);
+    if (is(option_value, value)) {
+      option.selected = true;
+      return;
+    }
+  }
+  if (!mounting || value !== void 0) {
+    select.selectedIndex = -1;
+  }
+}
+function init_select(select, get_value) {
+  effect(() => {
+    var observer = new MutationObserver(() => {
+      var value = select.__value;
+      select_option(select, value);
+    });
+    observer.observe(select, {
+      // Listen to option element changes
+      childList: true,
+      subtree: true,
+      // because of <optgroup>
+      // Listen to option element value attribute changes
+      // (doesn't get notified of select value changes,
+      // because that property is not reflected as an attribute)
+      attributes: true,
+      attributeFilter: ["value"]
+    });
+    return () => {
+      observer.disconnect();
+    };
+  });
+}
+function bind_select_value(select, get2, set2 = get2) {
+  var mounting = true;
+  listen_to_event_and_reset_event(select, "change", (is_reset) => {
+    var query = is_reset ? "[selected]" : ":checked";
+    var value;
+    if (select.multiple) {
+      value = [].map.call(select.querySelectorAll(query), get_option_value);
+    } else {
+      var selected_option = select.querySelector(query) ?? // will fall back to first non-disabled option if no option is selected
+      select.querySelector("option:not([disabled])");
+      value = selected_option && get_option_value(selected_option);
+    }
+    set2(value);
+  });
+  effect(() => {
+    var value = get2();
+    select_option(select, value, mounting);
+    if (mounting && value === void 0) {
+      var selected_option = select.querySelector(":checked");
+      if (selected_option !== null) {
+        value = get_option_value(selected_option);
+        set2(value);
+      }
+    }
+    select.__value = value;
+    mounting = false;
+  });
+  init_select(select);
+}
+function select_options(select, value) {
+  for (var option of select.options) {
+    option.selected = ~value.indexOf(get_option_value(option));
+  }
+}
+function get_option_value(option) {
+  if ("__value" in option) {
+    return option.__value;
+  } else {
+    return option.value;
+  }
+}
 function is_bound_this(bound_value, element_or_component) {
   return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
 }
@@ -2767,6 +2997,7 @@ function get(store) {
   subscribe_to_store(store, (_) => value = _)();
   return value;
 }
+let is_store_binding = false;
 let IS_UNMOUNTED = Symbol();
 function store_get(store, store_name, stores) {
   const entry = stores[store_name] ?? (stores[store_name] = {
@@ -2812,6 +3043,15 @@ function setup_stores() {
     });
   }
   return [stores, cleanup];
+}
+function capture_store_binding(fn) {
+  var previous_is_store_binding = is_store_binding;
+  try {
+    is_store_binding = false;
+    return [fn(), is_store_binding];
+  } finally {
+    is_store_binding = previous_is_store_binding;
+  }
 }
 const spread_props_handler = {
   get(target, key) {
@@ -2871,31 +3111,66 @@ const spread_props_handler = {
 function spread_props(...props) {
   return new Proxy({ props }, spread_props_handler);
 }
+function with_parent_branch(fn) {
+  var effect2 = active_effect;
+  var previous_effect = active_effect;
+  while (effect2 !== null && (effect2.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
+    effect2 = effect2.parent;
+  }
+  try {
+    set_active_effect(effect2);
+    return fn();
+  } finally {
+    set_active_effect(previous_effect);
+  }
+}
 function prop(props, key, flags2, fallback) {
+  var _a;
+  var immutable = (flags2 & PROPS_IS_IMMUTABLE) !== 0;
+  var runes = true;
+  var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
+  var lazy = (flags2 & PROPS_IS_LAZY_INITIAL) !== 0;
+  var is_store_sub = false;
   var prop_value;
-  {
+  if (bindable) {
+    [prop_value, is_store_sub] = capture_store_binding(() => (
+      /** @type {V} */
+      props[key]
+    ));
+  } else {
     prop_value = /** @type {V} */
     props[key];
   }
+  var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
+  var setter = bindable && (((_a = get_descriptor(props, key)) == null ? void 0 : _a.set) ?? (is_entry_props && key in props && ((v) => props[key] = v))) || void 0;
   var fallback_value = (
     /** @type {V} */
     fallback
   );
   var fallback_dirty = true;
+  var fallback_used = false;
   var get_fallback = () => {
+    fallback_used = true;
     if (fallback_dirty) {
       fallback_dirty = false;
-      {
+      if (lazy) {
         fallback_value = untrack(
           /** @type {() => V} */
           fallback
         );
+      } else {
+        fallback_value = /** @type {V} */
+        fallback;
       }
     }
     return fallback_value;
   };
   if (prop_value === void 0 && fallback !== void 0) {
+    if (setter && runes) {
+      props_invalid_value();
+    }
     prop_value = get_fallback();
+    if (setter) setter(prop_value);
   }
   var getter;
   {
@@ -2906,12 +3181,58 @@ function prop(props, key, flags2, fallback) {
       );
       if (value === void 0) return get_fallback();
       fallback_dirty = true;
+      fallback_used = false;
       return value;
     };
   }
-  {
+  if ((flags2 & PROPS_IS_UPDATED) === 0) {
     return getter;
   }
+  if (setter) {
+    var legacy_parent = props.$$legacy;
+    return function(value, mutation) {
+      if (arguments.length > 0) {
+        if (!mutation || legacy_parent || is_store_sub) {
+          setter(mutation ? getter() : value);
+        }
+        return value;
+      } else {
+        return getter();
+      }
+    };
+  }
+  var from_child = false;
+  var was_from_child = false;
+  var inner_current_value = /* @__PURE__ */ mutable_source(prop_value);
+  var current_value = with_parent_branch(
+    () => /* @__PURE__ */ derived(() => {
+      var parent_value = getter();
+      var child_value = get$1(inner_current_value);
+      if (from_child) {
+        from_child = false;
+        was_from_child = true;
+        return child_value;
+      }
+      was_from_child = false;
+      return inner_current_value.v = parent_value;
+    })
+  );
+  if (!immutable) current_value.equals = safe_equals;
+  return function(value, mutation) {
+    if (arguments.length > 0) {
+      const new_value = mutation ? get$1(current_value) : bindable ? proxy(value) : value;
+      if (!current_value.equals(new_value)) {
+        from_child = true;
+        set(inner_current_value, new_value);
+        if (fallback_used && fallback_value !== void 0) {
+          fallback_value = new_value;
+        }
+        untrack(() => get$1(current_value));
+      }
+      return value;
+    }
+    return get$1(current_value);
+  };
 }
 function cubic_out(t) {
   const f = t - 1;
@@ -2955,6 +3276,7 @@ function getActorStore(actorId, actorName) {
   return actorStores.get(actorId);
 }
 const cardLayout = writable([]);
+const shoppingState = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
@@ -3004,14 +3326,14 @@ var on_keydown = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$d = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$e = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$d();
+  var div = root$e();
   div.__click = [on_click$1];
   div.__keydown = [on_keydown];
   var button = child(div);
@@ -3042,11 +3364,11 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$3 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_1$4 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$c = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$2 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$d = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3083,7 +3405,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$c();
+  var fragment = root$d();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3094,11 +3416,11 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$3();
+      var div_1 = root_1$4();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$1();
+      var div_2 = root_2$2();
       var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
@@ -3125,7 +3447,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3();
+      var div_5 = root_3$2();
       var div_6 = child(div_5);
       var input = child(div_6);
       input.__input = [on_input, updateStoreName];
@@ -3188,28 +3510,50 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root_1$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_2 = /* @__PURE__ */ template(`<div class="stat-label"><i class="fa-solid fa-circle-chevron-down"></i> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up"></i></div>`);
-var root$b = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root_1$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
+var root_4$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root$c = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$b();
+  var fragment = root$c();
   var h3 = first_child(fragment);
   var text = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
-      var h1 = root_1$2();
+      var h1 = root_1$3();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, get$1(baseTotal)));
       append($$anchor2, h1);
     };
     var alternate = ($$anchor2) => {
-      var div = root_2();
-      var h1_1 = sibling(child(div), 2);
+      var div = root_2$1();
+      var node_1 = child(div);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i = root_3$1();
+          append($$anchor3, i);
+        };
+        if_block(node_1, ($$render) => {
+          if ($$props.isShoppingState) $$render(consequent_1);
+        });
+      }
+      var h1_1 = sibling(node_1, 2);
       var text_2 = child(h1_1);
+      var node_2 = sibling(h1_1, 2);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var i_1 = root_4$1();
+          append($$anchor3, i_1);
+        };
+        if_block(node_2, ($$render) => {
+          if ($$props.isShoppingState) $$render(consequent_2);
+        });
+      }
       template_effect(() => set_text(text_2, get$1(total)));
       append($$anchor2, div);
     };
@@ -3219,7 +3563,7 @@ function AttributeCard($$anchor, $$props) {
     });
   }
   template_effect(($0) => set_text(text, $0), [
-    () => localize($$props.config.attributes[$$props.statKey] || $$props.statKey)
+    () => localize($$props.config.attributes[$$props.key] || $$props.key)
   ]);
   append($$anchor, fragment);
   pop();
@@ -4757,14 +5101,19 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-var root_1$1 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$a = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid "><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_1$2 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$b = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let gridContainer;
+  let isShoppingState = state(false);
+  user_effect(() => {
+    const unsubscribe = shoppingState.subscribe((v) => set(isShoppingState, proxy(v)));
+    return unsubscribe;
+  });
   user_effect(() => {
     const cleanup = setupMasonry({
       container: gridContainer,
@@ -4775,7 +5124,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$a();
+  var fragment = root$b();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -4789,22 +5138,21 @@ function Attributes($$anchor, $$props) {
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_1 = root_1$1();
+    var div_1 = root_1$2();
     var node_2 = child(div_1);
     AttributeCard(node_2, {
-      get statKey() {
-        return key();
-      },
       get stat() {
         return stat();
       },
       get config() {
         return config();
+      },
+      get key() {
+        return key();
+      },
+      get isShoppingState() {
+        return get$1(isShoppingState);
       }
-    });
-    template_effect(() => {
-      toggle_class(div_1, "stat-card", key());
-      toggle_class(div_1, "attribute-card", key());
     });
     append($$anchor2, div_1);
   });
@@ -4815,32 +5163,32 @@ function Attributes($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$9 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$a = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$a();
+  append($$anchor, div);
+}
+var root$9 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$9();
   append($$anchor, div);
 }
-var root$8 = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$8();
-  append($$anchor, div);
-}
-var root$7 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+var root$8 = /* @__PURE__ */ template(`<div>Hello Component</div>`);
 function SkillsActive($$anchor) {
-  var div = root$7();
+  var div = root$8();
   append($$anchor, div);
 }
 var on_click = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$6 = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$7 = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var fragment = root$6();
+  var fragment = root$7();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -4916,11 +5264,11 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$5 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+var root$6 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  var fragment = root$5();
+  var fragment = root$6();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -4942,12 +5290,12 @@ function Health($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$4 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+var root$5 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  var fragment = root$4();
+  var fragment = root$5();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -4971,8 +5319,8 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root_1$1 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5082,12 +5430,12 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$3();
+  var div = root$4();
   var node = sibling(child(div), 4);
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
     let props = () => get$1($$item).props;
-    var div_1 = root_1();
+    var div_1 = root_1$1();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -5102,7 +5450,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$2 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5129,16 +5477,16 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  var div = root$2();
+  var div = root$3();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root$1 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root$1();
+  var div = root$2();
   append($$anchor, div);
 }
 const hooks = {
@@ -5154,9 +5502,10 @@ const flags = {
 };
 function toggleShoppingState(_, isShoppingState, actor) {
   set(isShoppingState, !get$1(isShoppingState));
+  shoppingState.set(get$1(isShoppingState));
   actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
 }
-var root = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
+var root$1 = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5166,7 +5515,7 @@ function ShoppingCart($$anchor, $$props) {
     set(isShoppingState, proxy(current ?? true));
     if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
   })();
-  var div = root();
+  var div = root$1();
   var button = child(div);
   button.__click = [toggleShoppingState, isShoppingState, actor];
   template_effect(
@@ -5407,6 +5756,642 @@ function injectCssSelectors(app, element, ctx, data) {
     header.classList.add("sr3e-document-header");
   }
 }
+class MetahumanModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      // agerange
+      agerange: new foundry.data.fields.SchemaField({
+        min: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        average: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        max: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Physical: height & weight
+      physical: new foundry.data.fields.SchemaField({
+        height: new foundry.data.fields.SchemaField({
+          min: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          average: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          max: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          })
+        }),
+        weight: new foundry.data.fields.SchemaField({
+          min: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          average: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          }),
+          max: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            integer: true
+          })
+        })
+      }),
+      // Modifiers
+      modifiers: new foundry.data.fields.SchemaField({
+        strength: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        quickness: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        body: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        charisma: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        intelligence: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        willpower: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Attribute limits
+      attributeLimits: new foundry.data.fields.SchemaField({
+        strength: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        quickness: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        body: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        charisma: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        intelligence: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        willpower: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // The running speed modifier
+      movement: new foundry.data.fields.SchemaField({
+        base: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        }),
+        modifier: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Karma advancement fraction
+      karma: new foundry.data.fields.SchemaField({
+        factor: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
+        })
+      }),
+      // Vision
+      vision: new foundry.data.fields.SchemaField({
+        type: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
+        }),
+        description: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
+        }),
+        rules: new foundry.data.fields.SchemaField({
+          darknessPenaltyNegation: new foundry.data.fields.StringField({
+            required: true,
+            initial: ""
+          })
+        })
+      }),
+      // Priority
+      priority: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
+      }),
+      // Description
+      description: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
+      })
+    };
+  }
+}
+var on_change = (e, item2) => item2().update({ name: e.target.value });
+var on_change_1 = (e, item2) => item2().update({ "system.priority": e.target.value });
+var root_1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_3 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_4 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_5 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_6 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="number"></div></div>`);
+var root_9 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><input type="text"></div></div>`);
+var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <div class="stat-card"><div><h4>Select Priority</h4></div> <div class="stat-label"><select name="system.priority" class="priority-select"></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="grid-container"><div class="stat-grid"></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div></div>`);
+function MetahumanApp($$anchor, $$props) {
+  push($$props, true);
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  const system = proxy(item2().system);
+  const attributes = config().attributes;
+  const common = config().common;
+  const movementConfig = config().movement;
+  const karmaConfig = config().karma;
+  const visionConfig = config().vision;
+  const traits = config().traits;
+  const movement = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(movementConfig.walking),
+      value: system.movement.base
+    },
+    {
+      label: localize(movementConfig.runSpeedModifier),
+      value: system.movement.modifier
+    }
+  ]);
+  const karma = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(karmaConfig.advancementRatio),
+      value: system.karma.factor
+    }
+  ]);
+  const agerange = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(common.min),
+      value: system.agerange.min
+    },
+    {
+      label: localize(common.average),
+      value: system.agerange.average
+    },
+    {
+      label: localize(common.max),
+      value: system.agerange.max
+    }
+  ]);
+  const height = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(common.min),
+      value: system.physical.height.min
+    },
+    {
+      label: localize(common.average),
+      value: system.physical.height.average
+    },
+    {
+      label: localize(common.max),
+      value: system.physical.height.max
+    }
+  ]);
+  const weight = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(common.min),
+      value: system.physical.weight.min
+    },
+    {
+      label: localize(common.average),
+      value: system.physical.weight.average
+    },
+    {
+      label: localize(common.max),
+      value: system.physical.weight.max
+    }
+  ]);
+  const attributeModifiers = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(attributes.strength),
+      value: system.modifiers.strength
+    },
+    {
+      label: localize(attributes.quickness),
+      value: system.modifiers.quickness
+    },
+    {
+      label: localize(attributes.body),
+      value: system.modifiers.body
+    },
+    {
+      label: localize(attributes.charisma),
+      value: system.modifiers.charisma
+    },
+    {
+      label: localize(attributes.intelligence),
+      value: system.modifiers.intelligence
+    },
+    {
+      label: localize(attributes.willpower),
+      value: system.modifiers.willpower
+    }
+  ]);
+  const attributeLimits = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(attributes.strength),
+      value: system.attributeLimits.strength
+    },
+    {
+      label: localize(attributes.quickness),
+      value: system.attributeLimits.quickness
+    },
+    {
+      label: localize(attributes.body),
+      value: system.attributeLimits.body
+    },
+    {
+      label: localize(attributes.charisma),
+      value: system.attributeLimits.charisma
+    },
+    {
+      label: localize(attributes.intelligence),
+      value: system.attributeLimits.intelligence
+    },
+    {
+      label: localize(attributes.willpower),
+      value: system.attributeLimits.willpower
+    }
+  ]);
+  const vision = /* @__PURE__ */ derived(() => [
+    {
+      label: localize(visionConfig.type),
+      value: system.vision.type
+    },
+    {
+      label: localize(visionConfig.description),
+      value: system.vision.description
+    },
+    {
+      label: localize(visionConfig.rules),
+      value: system.vision.rules
+    }
+  ]);
+  var div = root();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = sibling(child(div_2), 2);
+  var div_4 = child(div_3);
+  var img = child(div_4);
+  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
+  img.__click = function(...$$args) {
+    var _a;
+    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
+  };
+  var input = sibling(div_4, 2);
+  input.__change = [on_change, item2];
+  var div_5 = sibling(input, 2);
+  var div_6 = sibling(child(div_5), 2);
+  var select = child(div_6);
+  select.__change = [on_change_1, item2];
+  each(select, 20, () => ["C", "D", "E"], index, ($$anchor2, priority) => {
+    var option = root_1();
+    var option_value = {};
+    var text = child(option);
+    template_effect(() => {
+      if (option_value !== (option_value = priority)) {
+        option.value = null == (option.__value = priority) ? "" : priority;
+      }
+      set_text(text, priority);
+    });
+    append($$anchor2, option);
+  });
+  var div_7 = sibling(div_1, 2);
+  var div_8 = child(div_7);
+  var div_9 = sibling(child(div_8), 2);
+  var h3 = child(div_9);
+  var text_1 = child(h3);
+  var div_10 = sibling(h3, 2);
+  each(div_10, 21, () => get$1(agerange), index, ($$anchor2, entry) => {
+    var div_11 = root_2();
+    var div_12 = child(div_11);
+    var h4 = child(div_12);
+    var text_2 = child(h4);
+    var div_13 = sibling(div_12, 2);
+    var input_1 = child(div_13);
+    template_effect(() => {
+      set_text(text_2, get$1(entry).label);
+      set_value(input_1, get$1(entry).value);
+    });
+    append($$anchor2, div_11);
+  });
+  var div_14 = sibling(div_7, 2);
+  var div_15 = child(div_14);
+  var div_16 = sibling(child(div_15), 2);
+  var h3_1 = child(div_16);
+  var text_3 = child(h3_1);
+  var div_17 = sibling(h3_1, 2);
+  each(div_17, 21, () => get$1(height), index, ($$anchor2, entry) => {
+    var div_18 = root_3();
+    var div_19 = child(div_18);
+    var h4_1 = child(div_19);
+    var text_4 = child(h4_1);
+    var div_20 = sibling(div_19, 2);
+    var input_2 = child(div_20);
+    template_effect(() => {
+      set_text(text_4, get$1(entry).label);
+      set_value(input_2, get$1(entry).value);
+    });
+    append($$anchor2, div_18);
+  });
+  var div_21 = sibling(div_14, 2);
+  var div_22 = child(div_21);
+  var div_23 = sibling(child(div_22), 2);
+  var h3_2 = child(div_23);
+  var text_5 = child(h3_2);
+  var div_24 = sibling(h3_2, 2);
+  each(div_24, 21, () => get$1(weight), index, ($$anchor2, entry) => {
+    var div_25 = root_4();
+    var div_26 = child(div_25);
+    var h4_2 = child(div_26);
+    var text_6 = child(h4_2);
+    var div_27 = sibling(div_26, 2);
+    var input_3 = child(div_27);
+    template_effect(() => {
+      set_text(text_6, get$1(entry).label);
+      set_value(input_3, get$1(entry).value);
+    });
+    append($$anchor2, div_25);
+  });
+  var div_28 = sibling(div_21, 2);
+  var div_29 = child(div_28);
+  var div_30 = sibling(child(div_29), 2);
+  var h3_3 = child(div_30);
+  var text_7 = child(h3_3);
+  var div_31 = sibling(h3_3, 2);
+  var div_32 = child(div_31);
+  each(div_32, 21, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
+    var div_33 = root_5();
+    var div_34 = child(div_33);
+    var h4_3 = child(div_34);
+    var text_8 = child(h4_3);
+    var div_35 = sibling(div_34, 2);
+    var input_4 = child(div_35);
+    template_effect(() => {
+      set_text(text_8, get$1(entry).label);
+      set_value(input_4, get$1(entry).value);
+    });
+    append($$anchor2, div_33);
+  });
+  var div_36 = sibling(div_28, 2);
+  var div_37 = child(div_36);
+  var div_38 = sibling(child(div_37), 2);
+  var h3_4 = child(div_38);
+  var text_9 = child(h3_4);
+  var div_39 = sibling(h3_4, 2);
+  each(div_39, 21, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
+    var div_40 = root_6();
+    var div_41 = child(div_40);
+    var h4_4 = child(div_41);
+    var text_10 = child(h4_4);
+    var div_42 = sibling(div_41, 2);
+    var input_5 = child(div_42);
+    template_effect(() => {
+      set_text(text_10, get$1(entry).label);
+      set_value(input_5, get$1(entry).value);
+    });
+    append($$anchor2, div_40);
+  });
+  var div_43 = sibling(div_36, 2);
+  var div_44 = child(div_43);
+  var div_45 = sibling(child(div_44), 2);
+  var h3_5 = child(div_45);
+  var text_11 = child(h3_5);
+  var div_46 = sibling(h3_5, 2);
+  each(div_46, 21, () => get$1(movement), index, ($$anchor2, entry) => {
+    var div_47 = root_7();
+    var div_48 = child(div_47);
+    var h4_5 = child(div_48);
+    var text_12 = child(h4_5);
+    var div_49 = sibling(div_48, 2);
+    var input_6 = child(div_49);
+    template_effect(() => {
+      set_text(text_12, get$1(entry).label);
+      set_value(input_6, get$1(entry).value);
+    });
+    append($$anchor2, div_47);
+  });
+  var div_50 = sibling(div_43, 2);
+  var div_51 = child(div_50);
+  var div_52 = sibling(child(div_51), 2);
+  var h3_6 = child(div_52);
+  var text_13 = child(h3_6);
+  var div_53 = sibling(h3_6, 2);
+  each(div_53, 21, () => get$1(karma), index, ($$anchor2, entry) => {
+    var div_54 = root_8();
+    var div_55 = child(div_54);
+    var h4_6 = child(div_55);
+    var text_14 = child(h4_6);
+    var div_56 = sibling(div_55, 2);
+    var input_7 = child(div_56);
+    template_effect(() => {
+      set_text(text_14, get$1(entry).label);
+      set_value(input_7, get$1(entry).value);
+    });
+    append($$anchor2, div_54);
+  });
+  var div_57 = sibling(div_50, 2);
+  var div_58 = child(div_57);
+  var div_59 = sibling(child(div_58), 2);
+  var h3_7 = child(div_59);
+  var text_15 = child(h3_7);
+  var div_60 = sibling(h3_7, 2);
+  each(div_60, 21, () => get$1(vision), index, ($$anchor2, entry) => {
+    var div_61 = root_9();
+    var div_62 = child(div_61);
+    var h4_7 = child(div_62);
+    var text_16 = child(h4_7);
+    var div_63 = sibling(div_62, 2);
+    var input_8 = child(div_63);
+    template_effect(() => {
+      set_text(text_16, get$1(entry).label);
+      set_value(input_8, get$1(entry).value);
+    });
+    append($$anchor2, div_61);
+  });
+  template_effect(
+    ($0, $1, $2, $3, $4, $5, $6, $7) => {
+      set_attribute(img, "src", item2().img);
+      set_attribute(img, "title", item2().name);
+      set_attribute(img, "alt", item2().name);
+      set_text(text_1, $0);
+      set_text(text_3, $1);
+      set_text(text_5, $2);
+      set_text(text_7, $3);
+      set_text(text_9, $4);
+      set_text(text_11, $5);
+      set_text(text_13, $6);
+      set_text(text_15, $7);
+    },
+    [
+      () => localize(traits.agerange),
+      () => localize(traits.height),
+      () => localize(traits.weight),
+      () => localize(attributes.modifiers),
+      () => localize(attributes.limits),
+      () => localize(config().movement.movement),
+      () => localize(config().karma.karma),
+      () => localize(config().vision.vision)
+    ]
+  );
+  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  bind_select_value(select, () => system.priority, ($$value) => system.priority = $$value);
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "change"]);
+class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _metahuman);
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "magic"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    __privateSet(this, _metahuman, mount(MetahumanApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  async _tearDown() {
+    if (__privateGet(this, _metahuman)) await unmount(__privateGet(this, _metahuman));
+    __privateSet(this, _metahuman, null);
+    return super._tearDown();
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_metahuman = new WeakMap();
+class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _magic);
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "magic"],
+      template: null,
+      position: { width: 820, height: 820 },
+      window: {
+        resizable: true
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_magic = new WeakMap();
+class MagicModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      type: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      }),
+      focus: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      }),
+      drainResistanceAttribute: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      }),
+      totem: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      }),
+      priority: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      })
+    };
+  }
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -5499,7 +6484,9 @@ function registerHooks() {
     configureThemes();
     registerDocumentTypes({
       args: [
-        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet }
+        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
+        { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
+        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

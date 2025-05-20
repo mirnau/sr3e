@@ -1,14 +1,19 @@
 <script>
     import AttributeCard from "./AttributeCard.svelte";
     import { localize } from "../../../svelteHelpers.js";
-    import { setupMasonry } from '../../../foundry/masonry/responsiveMasonry.js';
+    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+    import { shoppingState } from "../../../svelteStore.js";
     import CardToolbar from "./CardToolbar.svelte";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
- 
     let attributes = $state(actor.system.attributes);
-
     let gridContainer;
+    let isShoppingState = $state(false);
+
+    $effect(() => {
+        const unsubscribe = shoppingState.subscribe((v) => isShoppingState = v);
+        return unsubscribe;
+    });
 
     $effect(() => {
         const cleanup = setupMasonry({
@@ -18,20 +23,18 @@
             gutterSizerSelector: ".attribute-gutter-sizer",
             minItemWidth: 180,
         });
-
         return cleanup;
     });
 </script>
 
-<CardToolbar id={id} />
-
+<CardToolbar {id} />
 <h1>{localize(config.attributes.attributes)}</h1>
-<div bind:this={gridContainer} class="attribute-masonry-grid ">
+<div bind:this={gridContainer} class="attribute-masonry-grid">
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
-        <div class="stat-card" class:stat-card={key} class:attribute-card={key}>
-            <AttributeCard statKey={key} {stat} {config} />
+        <div class="stat-card">
+            <AttributeCard {stat} {config} {key} {isShoppingState}/>
         </div>
     {/each}
 </div>
