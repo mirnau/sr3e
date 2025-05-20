@@ -1,5 +1,5 @@
 .pulsing-green-cart {
-    color: inherit; // Inherit color from parent styles
+    color: inherit;
     cursor: pointer;
     animation: pulse-color-scale 2s infinite ease-in-out;
 
@@ -12,12 +12,12 @@
     0%, 100% {
         transform: scale(0.98);
         color: @shopping-cart-primary;
-        text-shadow: none; // No bloom
+        text-shadow: none;
     }
     50% {
-        transform: scale(1.0); // Slightly larger at midpoint
-        color: @shopping-cart-secondary;     // Brighter green
+        transform: scale(1.0);
+        color: @shopping-cart-secondary;
 
-        text-shadow: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary; // Bloom effect
+        text-shadow: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
     }
 }

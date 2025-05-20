@@ -1,25 +1,32 @@
 <script>
-    let { actor = {} } = $props();
+	import { flags } from "../../../foundry/services/commonConsts.js";
+	import { localize } from "../../../svelteHelpers.js";
 
-    let isShoppingState = $state(true);
+	let { actor = {}, config = {} } = $props();
 
-    (async () => {
-        const current = await actor.getFlag("sr3e", "isShoppingState");
-        isShoppingState = current ?? true;
-        if (current === null) actor.setFlag("sr3e", "isShoppingState", true);
-    })();
+	let isShoppingState = $state(true);
 
-    function toggleShoppingState() {
-        isShoppingState = !isShoppingState;
-        actor.setFlag("sr3e", "isShoppingState", isShoppingState);
-    }
+	(async () => {
+		const current = await actor.getFlag(
+			flags.sr3e,
+			flags.actor.isShoppingState,
+		);
+		isShoppingState = current ?? true;
+		if (current === null)
+			actor.setFlag(flags.sr3e, flags.actor.isShoppingState, true);
+	})();
+
+	function toggleShoppingState() {
+		isShoppingState = !isShoppingState;
+		actor.setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
+	}
 </script>
 
 <div>
-    <button
-        type="button"
-        aria-label="Buy upgrades"
-        class={`header-control icon fa-solid fa-cart-shopping ${isShoppingState ? "pulsing-green-cart" : ""}`}
-        onclick={toggleShoppingState}
-    ></button>
+	<button
+		type="button"
+		aria-label={localize(config.sheet.buyupgrades)}
+		class={`header-control icon fa-solid fa-cart-shopping ${isShoppingState ? "pulsing-green-cart" : ""}`}
+		onclick={toggleShoppingState}
+	></button>
 </div>

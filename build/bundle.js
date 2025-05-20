@@ -5141,24 +5141,43 @@ function NewsFeed($$anchor) {
   var div = root$1();
   append($$anchor, div);
 }
+const hooks = {
+  init: "init",
+  renderApplicationV2: "renderApplicationV2"
+};
+const flags = {
+  sr3e: "sr3e",
+  core: "core",
+  actor: {
+    isShoppingState: "isShoppingState"
+  }
+};
 function toggleShoppingState(_, isShoppingState, actor) {
   set(isShoppingState, !get$1(isShoppingState));
-  actor().setFlag("sr3e", "isShoppingState", get$1(isShoppingState));
+  actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
 }
-var root = /* @__PURE__ */ template(`<div><button type="button" aria-label="Buy upgrades"></button></div>`);
+var root = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let isShoppingState = state(true);
   (async () => {
-    const current = await actor().getFlag("sr3e", "isShoppingState");
+    const current = await actor().getFlag(flags.sr3e, flags.actor.isShoppingState);
     set(isShoppingState, proxy(current ?? true));
-    if (current === null) actor().setFlag("sr3e", "isShoppingState", true);
+    if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
   })();
   var div = root();
   var button = child(div);
   button.__click = [toggleShoppingState, isShoppingState, actor];
-  template_effect(() => set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`));
+  template_effect(
+    ($0) => {
+      set_attribute(button, "aria-label", $0);
+      set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`);
+    },
+    [
+      () => localize(config().sheet.buyupgrades)
+    ]
+  );
   append($$anchor, div);
   pop();
 }
@@ -5231,7 +5250,8 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     __privateSet(this, _cart, mount(ShoppingCart, {
       target: cartSlot,
       props: {
-        actor: this.document
+        actor: this.document,
+        config: CONFIG.sr3e
       }
     }));
   }
@@ -5318,7 +5338,8 @@ sr3e.movement = {
 };
 sr3e.sheet = {
   details: "sr3e.sheet.details",
-  viewbackground: "sr3e.sheet.viewbackground"
+  viewbackground: "sr3e.sheet.viewbackground",
+  buyupgrades: "sr3e.sheet.buyupgrades"
 };
 sr3e.traits = {
   age: "sr3e.traits.age",
@@ -5344,14 +5365,6 @@ sr3e.userconfig = {
   selectMainCharacter: "sr3e.userconfig.selectMainCharacter",
   saveSettings: "sr3e.userconfig.saveSettings",
   saveUserSettings: "sr3e.userconfig.saveUserSettings"
-};
-const hooks = {
-  init: "init",
-  renderApplicationV2: "renderApplicationV2"
-};
-const flags = {
-  sr3e: "sr3e",
-  core: "core"
 };
 function injectFooterIntoWindowApp(app, element, ctx, data) {
   var _a;

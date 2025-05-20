@@ -59,6 +59,7 @@ sr3e.movement = {
 sr3e.sheet = { 
     details: "sr3e.sheet.details",
     viewbackground: "sr3e.sheet.viewbackground",
+    buyupgrades: "sr3e.sheet.buyupgrades",
 }
 
 sr3e.traits = {

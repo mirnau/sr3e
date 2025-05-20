@@ -85,7 +85,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     this.#cart = mount(ShoppingCart, {
       target: cartSlot,
       props: {
-        actor: this.document
+        actor: this.document,
+        config: CONFIG.sr3e
       }
     });
   }

@@ -17,6 +17,7 @@ export const flags = {
   sr3e: "sr3e",
   core: "core",
   actor: {
+    isShoppingState: "isShoppingState",
     isDossierDetailsOpen: "isDossierDetailsOpen"
   }
 };

@@ -51,7 +51,8 @@
     },
     "sheet": {
       "details": "Details",
-      "viewbackground": "View Background"
+      "viewbackground": "View Background",
+      "buyupgrades": "Buy upgrades"
     },
     "traits": {
       "age": "Age",
