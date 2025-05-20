@@ -161,154 +161,9 @@
   min-width: 20rem;
 }
 .system-sr3e {
-  /* Style the TinyMCE select menu (dropdown) container */
-  /* Style the group container (if you have multiple groups, you can add spacing or borders) */
-  /* Style each menu item */
   /* Firefox (Gecko) */
   /* WebKit browsers (Chrome, Edge, Safari) */
   /* Attempt to hide arrows (may not work in all browsers) */
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field {
-  position: relative;
-  background: #ff1d9d;
-  padding: 0rem;
-  margin: 0rem;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-  /* LESS snippet to restyle TinyMCE header and its toolbar */
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field::before,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field::before {
-  box-shadow: inset 0 0 30px #1d282c;
-  content: '';
-  position: absolute;
-  z-index: -1;
-  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
-  top: 1px;
-  left: 1px;
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
-  pointer-events: none;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header {
-  padding: 0rem !important;
-  background: transparent !important;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord {
-  background: transparent !important;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary {
-  background: transparent !important;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group {
-  position: relative;
-  background: #1df0ff !important;
-  margin: 0.5rem !important;
-  padding: 0rem !important;
-  clip-path: polygon(0.364658rem 0px, calc(100% - 0.364658rem) 0px, 100% 0.364658rem, 100% calc(100% - 0.729316rem), calc(100% - 0.729316rem) 100%, 0.364658rem 100%, 0px calc(100% - 0.364658rem), 0px 0.364658rem);
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group::before,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  box-shadow: inset 0 0 1rem #1df0ff !important;
-  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e) !important;
-  top: 1px;
-  left: 1px;
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
-  pointer-events: none;
-  clip-path: polygon(0.364658rem 0px, calc(100% - 0.364658rem) 0px, 100% 0.364658rem, 100% calc(100% - 0.729316rem), calc(100% - 0.729316rem) 100%, 0.364658rem 100%, 0px calc(100% - 0.364658rem), 0px 0.364658rem);
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button {
-  font-family: 'VT323', monospace;
-  font-size: 14px;
-  margin: 0.33rem 0;
-  line-height: 1rem;
-  color: #1df0ff;
-  background: transparent !important;
-  border: none !important;
-  cursor: pointer !important;
-  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button:hover,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button:hover {
-  box-shadow: inset 0 0 1rem #1df0ff;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button.tox-tbtn--disabled,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button.tox-tbtn--disabled,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button[aria-disabled="true"],
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button[aria-disabled="true"] {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg,
-.system-sr3e .sr3e.sheet.item .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg path,
-.system-sr3e .sr3e.sheet.character .sr3e-inner-background-container .editor-field .tox-editor-container .tox-editor-header .tox-toolbar-overlord .tox-toolbar__primary .tox-toolbar__group button .tox-tbtn__icon-wrap svg path {
-  fill: #1df0ff !important;
-}
-.system-sr3e .tox-menu.tox-collection {
-  font-family: 'VT323', monospace;
-  font-size: 14px;
-  margin: 0.33rem 0;
-  line-height: 1rem;
-  color: #1df0ff;
-  background: #1b1f24 !important;
-  box-shadow: inset 0 0 1rem #1df0ff !important;
-  border-radius: 0px !important;
-  padding: 5px 0 !important;
-  min-width: 112px !important;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem) !important;
-}
-.system-sr3e .tox-collection__group {
-  margin: 0;
-  padding: 0;
-}
-.system-sr3e .tox-collection__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px !important;
-  color: #1df0ff !important;
-  cursor: pointer !important;
-  transition: background 0.2s ease-in-out;
-  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem) !important;
-}
-.system-sr3e .tox-collection__item:hover {
-  box-shadow: inset 0 0 1rem #1df0ff !important;
-  background-color: transparent !important;
-}
-.system-sr3e .tox-collection__item.tox-collection__item--active {
-  background: transparent !important;
-}
-.system-sr3e .tox-collection__item[aria-disabled="true"] {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-}
-.system-sr3e .tox-collection__item .tox-collection__item-label {
-  font-size: 14px;
-  line-height: 1.2;
-}
-.system-sr3e .tox-collection__item .tox-collection__item-caret {
-  margin-left: 8px;
-  display: flex;
-  align-items: center;
-}
-.system-sr3e .tox-collection__item .tox-collection__item-caret svg,
-.system-sr3e .tox-collection__item .tox-collection__item-caret svg path {
-  fill: #1df0ff !important;
-}
-.system-sr3e .tox-collection__item[aria-checked="true"],
-.system-sr3e .tox-collection__item[aria-selected="true"] {
-  background: transparent !important;
 }
 .system-sr3e .actor-footer {
   position: absolute;
@@ -531,14 +386,6 @@
 }
 .system-sr3e footer.form-footer button:last-of-type::after {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
-}
-.system-sr3e .editor-content {
-  height: 100%;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
-.system-sr3e .editor-content p {
-  text-indent: 0.5rem;
-  margin: 0.5rem;
 }
 .system-sr3e img {
   margin: 0rem;
@@ -766,6 +613,67 @@
 }
 .system-sr3e .sr3e.sheet.character .skills .sr3e-inner-background::before {
   clip-path: polygon(0rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
+}
+.system-sr3e .journal-viewer {
+  min-height: 20rem;
+}
+.system-sr3e .journal-viewer .journal-search-bar {
+  margin-bottom: 0.5rem;
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-wrapper {
+  position: relative;
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-lightest);
+  border: 1px solid var(--color-border-light-primary);
+  max-height: 12rem;
+  overflow-y: auto;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-item {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-item:hover {
+  background-color: var(--color-bg-light);
+}
+.system-sr3e .journal-viewer .journal-search-bar .dropdown-empty {
+  padding: 0.4rem 0.6rem;
+  color: var(--color-text-dark-inactive);
+  font-style: italic;
+}
+.system-sr3e .journal-viewer .journal-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+.system-sr3e .journal-viewer .open-journal-button {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.4rem;
+}
+.system-sr3e .journal-viewer .journal-preview {
+  font-size: 0.85rem;
+  padding: 0.5rem;
+  background: var(--color-bg-lightest);
+  border: 1px solid var(--color-border-light);
+  max-height: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .system-sr3e .attribute-masonry-grid {
   display: grid;

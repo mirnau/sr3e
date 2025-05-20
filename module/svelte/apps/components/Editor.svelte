@@ -1,6 +1,4 @@
 <script>
-    import Log from "../../../../Log";
-
     let { item = {} } = $props();
 
     let editor = $state(null);
@@ -10,9 +8,7 @@
     let isOwner = $derived(item.isOwner);
     let editable = true;
 
-    $effect(() => {
-
-
+    $effect(async () => {
         if (item.system?.description === undefined) {
             Log.error(
                 `This editor requires that the data model has a ${item.name}.system.description field`,
@@ -22,40 +18,42 @@
             return;
         }
 
-        (async () => {
-            if (editable) {
-                editor.set(
-                    await TextEditor.create({
-                        target: editorContainer,
-                        height: 300,
-                        save_onsubmit: false,
-                        buttons: true,
-                        owner,
-                        parent: ".editor-field",
-                        content_css: "systems/sr3e/styles/css/chummer-dark.css",
-                        content_style: "html { margin: 0.5rem; }",
-                        save_onsavecallback: async (html) => {
-                            let content = html.getContent(editorContainer);
-                            await item.update(
-                                { "system.description": content },
-                                { render: false },
-                            );
-                        },
-                    }),
-                );
-                editor()?.setContent(item.system.description);
-            } else {
-                editorContainer.innerHTML = TextEditor.enrichHTML(textValue, {
+        if (!editorContainer) return;
+
+        if (editable) {
+            const newEditor = await foundry.applications.ux.TextEditor.create({
+                target: editorContainer,
+                height: 300,
+                save_onsubmit: false,
+                buttons: true,
+                owner: isOwner,
+                engine: "prosemirror",
+                parent: ".editor-field",
+                content_css: "systems/sr3e/styles/css/chummer-dark.css",
+                content_style: "html { margin: 0.5rem; }",
+                save_onsavecallback: async (html) => {
+                    let content = html.getContent(editorContainer);
+                    await item.update(
+                        { "system.description": content },
+                        { render: false },
+                    );
+                },
+            });
+
+            editor.set(newEditor);
+            editor()?.setContent(item.system.description);
+        } else {
+            editorContainer.innerHTML =
+                foundry.applications.ux.TextEditor.enrichHTML(textValue, {
                     async: false,
                 });
-            }
+        }
 
-            Log.success(
-                "Editor initialized successfully",
-                "Editor.svelte",
-                editorContainer,
-            );
-        })();
+        Log.success(
+            "Editor initialized successfully",
+            "Editor.svelte",
+            editorContainer,
+        );
     });
 </script>
 

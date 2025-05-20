@@ -15,5 +15,8 @@
     "less": "^4.2.1",
     "svelte": "^5.19.3",
     "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "svelte-select": "^5.8.3"
   }
 }

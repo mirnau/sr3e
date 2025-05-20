@@ -26,6 +26,10 @@ export default class MetahumanItemSheet extends foundry.applications.sheets.Item
     }
 
     _replaceHTML(_, windowContent) {
+        if (this.#metahuman) {
+            unmount(this.#metahuman);
+            this.#metahuman = null;
+        }
 
         this.#metahuman = mount(MetaHumanApp, {
             target: windowContent,
@@ -39,7 +43,7 @@ export default class MetahumanItemSheet extends foundry.applications.sheets.Item
     }
 
     async _tearDown() {
-        if(this.#metahuman) await unmount(this.#metahuman);
+        if (this.#metahuman) await unmount(this.#metahuman);
         this.#metahuman = null;
         return super._tearDown();
     }
