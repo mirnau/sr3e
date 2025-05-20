@@ -1,6 +1,7 @@
 import CharacterSheetApp from "../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
+import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
 
@@ -8,6 +9,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   #app;
   #neon;
   #feed;
+  #cart;
 
   static get DEFAULT_OPTIONS() {
     return {
@@ -43,6 +45,20 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     });
 
     const header = form.querySelector("header.window-header");
+
+    this._injectNeonName(header);
+
+    this._injectShoppingCart(header);
+
+    this._injectNewsFeed(form, header);
+
+
+    SR3DLog.success("Svelte mounted", this.constructor.name);
+    return windowContent;
+
+  }
+
+  _injectNeonName(header) {
     let neonSlot = header?.previousElementSibling;
     if (!neonSlot?.classList?.contains("neon-name-position")) {
       neonSlot = document.createElement("div");
@@ -54,10 +70,30 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
         props: { actor: this.document }
       });
     }
+  }
 
+  _injectShoppingCart(header) {
+    if (this.#cart) return;
+
+    let cartSlot = header.querySelector(".shopping-cart-slot");
+    if (!cartSlot) {
+      cartSlot = document.createElement("div");
+      cartSlot.classList.add("shopping-cart-slot");
+      header.insertBefore(cartSlot, header.firstChild);
+    }
+
+    this.#cart = mount(ShoppingCart, {
+      target: cartSlot,
+      props: {
+        actor: this.document
+      }
+    });
+  }
+
+  _injectNewsFeed(form, header) {
     const title = form.querySelector(".window-title");
     if (title) {
-      title.remove()
+      title.remove();
       const newsfeedInjection = document.createElement("div");
       header.prepend(newsfeedInjection);
 
@@ -68,22 +104,17 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
           actor: this.document
         }
       });
-    };
-
-    //windowContent.classList.add("noise-layer");
-
-    SR3DLog.success("Svelte mounted", this.constructor.name);
-    return windowContent;
+    }
   }
 
   async _tearDown() {
     if (this.#neon) await unmount(this.#neon);
     if (this.#app) await unmount(this.#app);
     if (this.#feed) await unmount(this.#feed);
-    this.#app = this.#neon = this.#feed = null;
+    if (this.#cart) await unmount(this.#cart);
+    this.#app = this.#neon = this.#feed = this.#cart = null;
     return super._tearDown();
   }
-
 
   _onSubmit() {
     return false;

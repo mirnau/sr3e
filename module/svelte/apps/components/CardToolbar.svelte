@@ -24,13 +24,25 @@
     }
   }}
 >
-  <button aria-label="Move card up" onclick={() => handleMove("up")}>
+  <button
+    class="header-control icon sr3e-toolbar-button"
+    aria-label="Move card up"
+    onclick={() => handleMove("up")}
+  >
     <i class="fa-solid fa-arrow-up"></i>
   </button>
-  <button aria-label="Move card down" onclick={() => handleMove("down")}>
+  <button
+    class="header-control icon sr3e-toolbar-button"
+    aria-label="Move card down"
+    onclick={() => handleMove("down")}
+  >
     <i class="fa-solid fa-arrow-down"></i>
   </button>
-  <button aria-label="Toggle card span" onclick={handleToggleSpan}>
-    <i class="fa-solid fa-expand-arrows-alt"></i>
+  <button
+    class="header-control icon sr3e-toolbar-button"
+    aria-label="Toggle card span"
+    onclick={handleToggleSpan}
+  >
+    <i class="fa-solid fa-arrows-spin"></i>
   </button>
 </div>

@@ -831,6 +831,44 @@
   z-index: 1;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.system-sr3e .toolbar {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+  padding: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.system-sr3e .toolbar:hover {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+.system-sr3e .toolbar .sr3e-toolbar-button {
+  margin-left: 0.25rem;
+}
+.system-sr3e .pulsing-green-cart {
+  color: inherit;
+  cursor: pointer;
+  animation: pulse-color-scale 2s infinite ease-in-out;
+}
+.system-sr3e .pulsing-green-cart i {
+  animation: pulse-color-scale 2s infinite ease-in-out;
+}
+@keyframes pulse-color-scale {
+  0%,
+  100% {
+    transform: scale(0.98);
+    color: #00FC00C0;
+    text-shadow: none;
+  }
+  50% {
+    transform: scale(1);
+    color: cyan;
+    text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+  }
+}
 .system-sr3e .sr3e.sheet.character {
   overflow: visible !important;
 }

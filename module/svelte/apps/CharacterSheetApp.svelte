@@ -19,10 +19,6 @@
     { comp: Inventory, props: { actor, config, id: 4, span: 1 } },
   ];
 
-  $effect(() => {
-    console.log("💬 cardLayout state:", $cardLayout);
-  });
-
   $effect(async () => {
     console.log("Actor ID " + actor.id);
     if (!actor?.id) return;
@@ -35,7 +31,6 @@
     }));
 
     if (!Array.isArray(layout) || layout.length === 0) {
-      console.warn("⚠️ Layout flag was missing or empty. Using default layout.");
       cardLayout.set(defaultLayout);
       await actor.setFlag("sr3e", "customLayout", defaultLayout);
     } else {
