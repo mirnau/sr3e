@@ -4,7 +4,7 @@
     import JournalSearchModal from "../../apps/dialogs/JournalSearchModal.svelte";
     import { mount, unmount } from "svelte";
 
-    const { onJournalContentSelected, config = {}, id={} } = $props();
+    const { onJournalContentSelected, config = {}, id = {} } = $props();
     let journalId = $state(id ?? null);
     let showModal = $state(false);
 

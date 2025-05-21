@@ -25,11 +25,14 @@
         const page = journal?.pages?.contents?.[0];
 
         const content = page?.text?.content || "";
-        previewContent = await foundry.applications.ux.TextEditor.enrichHTML(content, {
-            async: true,
-            secrets: false,
-            documents: true,
-        });
+        previewContent = await foundry.applications.ux.TextEditor.enrichHTML(
+            content,
+            {
+                async: true,
+                secrets: false,
+                documents: true,
+            },
+        );
     });
 
     async function handleJournalSelection(result) {
@@ -46,7 +49,7 @@
 <JournalViewerToolbar
     bind:this={toolbar}
     onJournalContentSelected={handleJournalSelection}
-    config={config}
+    {config}
     id={journalId}
 />
 
