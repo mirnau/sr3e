@@ -288,6 +288,83 @@
 .system-sr3e form.journal-entry-page.text section.window-content footer.form-footer {
   flex: 0 0 auto;
 }
+.system-sr3e .popup {
+  backdrop-filter: blur(5px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  overflow: visible;
+}
+.system-sr3e .popup-container {
+  position: relative;
+  background: #ff0095;
+  max-width: 50vw;
+  padding: 1rem;
+  z-index: 1000;
+  overflow: visible;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .popup-container::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 30px #1d282c;
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .popup-container .input-group {
+  position: relative;
+}
+.system-sr3e .popup-container .buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+.system-sr3e .dropdown-list.floating {
+  position: fixed;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  padding: 0;
+  list-style: none;
+  backdrop-filter: blur(5px);
+  margin: 0;
+  animation: fadeIn 80ms ease-out;
+  font-family: var(--font-primary);
+  font-size: var(--font-size);
+  z-index: 1001;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .dropdown-item {
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #ddd;
+  display: flex;
+  align-items: center;
+}
+.system-sr3e .dropdown-item i {
+  margin-right: 0.5rem;
+}
+.system-sr3e .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.system-sr3e .dropdown-empty {
+  padding: 0.5rem;
+  color: #888;
+  text-align: center;
+}
 .system-sr3e .form-group {
   padding: 0.5rem;
 }
@@ -620,57 +697,78 @@
 .system-sr3e .journal-viewer .journal-search-bar {
   margin-bottom: 0.5rem;
 }
-.system-sr3e .journal-viewer .journal-search-bar .dropdown-wrapper {
+.system-sr3e .journal-viewer .journal-search-bar .search-button-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+.system-sr3e .journal-viewer .journal-search-bar .search-button-row .dropdown-wrapper {
   position: relative;
+  flex: 1;
 }
 .system-sr3e .journal-viewer .journal-search-bar .dropdown-input {
   width: 100%;
   padding: 0.5rem;
   font-size: 0.9rem;
   box-sizing: border-box;
+  background: #1e1e1e;
+  color: #f0f0f0;
+  border: 1px solid #444;
+  border-radius: 4px;
 }
 .system-sr3e .journal-viewer .journal-search-bar .dropdown-list {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--color-bg-lightest);
-  border: 1px solid var(--color-border-light-primary);
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   max-height: 12rem;
   overflow-y: auto;
-  z-index: 20;
   list-style: none;
   margin: 0;
   padding: 0;
+  pointer-events: all;
+  z-index: 20;
 }
 .system-sr3e .journal-viewer .journal-search-bar .dropdown-item {
   padding: 0.4rem 0.6rem;
   cursor: pointer;
+  color: #f0f0f0;
 }
 .system-sr3e .journal-viewer .journal-search-bar .dropdown-item:hover {
-  background-color: var(--color-bg-light);
+  background-color: #2e2e2e;
 }
 .system-sr3e .journal-viewer .journal-search-bar .dropdown-empty {
   padding: 0.4rem 0.6rem;
-  color: var(--color-text-dark-inactive);
+  color: #888;
+  background-color: #1e1e1e;
   font-style: italic;
 }
-.system-sr3e .journal-viewer .journal-toolbar {
+.system-sr3e .journal-viewer .journal-search-bar .open-journal-button {
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
-  margin-bottom: 0.3rem;
+  justify-content: center;
 }
-.system-sr3e .journal-viewer .open-journal-button {
-  font-size: 0.85rem;
-  padding: 0.2rem 0.4rem;
+.system-sr3e .journal-viewer .journal-search-bar .open-journal-button:hover {
+  background: #3a3a3a;
 }
 .system-sr3e .journal-viewer .journal-preview {
   font-size: 0.85rem;
   padding: 0.5rem;
-  background: var(--color-bg-lightest);
-  border: 1px solid var(--color-border-light);
+  background: #121212;
+  color: #ddd;
+  border: 1px solid #444;
   max-height: 10rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1315,6 +1413,7 @@
   height: 100%;
   padding: 0.5rem;
   z-index: 10;
+  min-height: 3rem;
 }
 .system-sr3e dialog .sr3e-inner-background-container .sr3e-inner-background .header-icon,
 .system-sr3e form .sr3e-inner-background-container .sr3e-inner-background .header-icon,

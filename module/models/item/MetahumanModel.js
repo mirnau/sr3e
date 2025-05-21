@@ -175,8 +175,8 @@ export default class MetahumanModel extends foundry.abstract.TypeDataModel {
         initial: ""
       }),
 
-      // Description
-      description: new foundry.data.fields.StringField({
+      // journalId
+      journalId: new foundry.data.fields.StringField({
         required: true,
         initial: ""
       })

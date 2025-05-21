@@ -3304,23 +3304,23 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$2 = (e) => e.stopPropagation();
-var on_keydown = (e) => {
+var on_keydown$1 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$g = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$h = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$g();
+  var div = root$h();
   div.__click = [on_click$2];
-  div.__keydown = [on_keydown];
+  div.__keydown = [on_keydown$1];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3350,10 +3350,10 @@ function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
 var root_1$5 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$2 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_2$3 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$f = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$2 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$g = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3390,7 +3390,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$f();
+  var fragment = root$g();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3405,7 +3405,7 @@ function Dossier($$anchor, $$props) {
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$2();
+      var div_2 = root_2$3();
       var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
@@ -3432,7 +3432,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3$3();
+      var div_5 = root_3$2();
       var div_6 = child(div_5);
       var input = child(div_6);
       input.__input = [on_input$1, updateStoreName];
@@ -3496,15 +3496,15 @@ function Dossier($$anchor, $$props) {
 }
 delegate(["click", "input"]);
 var root_1$4 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_3$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
+var root_3$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
 var root_4$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root$e = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root_2$2 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root$f = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$e();
+  var fragment = root$f();
   var h3 = first_child(fragment);
   var text = child(h3);
   var node = sibling(h3, 2);
@@ -3516,11 +3516,11 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, h1);
     };
     var alternate = ($$anchor2) => {
-      var div = root_2$1();
+      var div = root_2$2();
       var node_1 = child(div);
       {
         var consequent_1 = ($$anchor3) => {
-          var i = root_3$2();
+          var i = root_3$1();
           append($$anchor3, i);
         };
         if_block(node_1, ($$render) => {
@@ -5087,7 +5087,7 @@ function setupMasonry({
   };
 }
 var root_1$3 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$d = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$e = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5109,7 +5109,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$d();
+  var fragment = root$e();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5148,32 +5148,32 @@ function Attributes($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$c = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$d = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$d();
+  append($$anchor, div);
+}
+var root$c = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$c();
   append($$anchor, div);
 }
-var root$b = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$b();
-  append($$anchor, div);
-}
-var root$a = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+var root$b = /* @__PURE__ */ template(`<div>Hello Component</div>`);
 function SkillsActive($$anchor) {
-  var div = root$a();
+  var div = root$b();
   append($$anchor, div);
 }
 var on_click$1 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$9 = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$a = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var fragment = root$9();
+  var fragment = root$a();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5249,11 +5249,11 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$8 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+var root$9 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  var fragment = root$8();
+  var fragment = root$9();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5275,12 +5275,12 @@ function Health($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$7 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+var root$8 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  var fragment = root$7();
+  var fragment = root$8();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5305,7 +5305,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 var root_1$2 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5415,7 +5415,7 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$6();
+  var div = root$7();
   var node = sibling(child(div), 4);
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
@@ -5435,7 +5435,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$5 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5462,16 +5462,16 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  var div = root$5();
+  var div = root$6();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root$4 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root$4();
+  var div = root$5();
   append($$anchor, div);
 }
 const hooks = {
@@ -5490,7 +5490,7 @@ function toggleShoppingState(_, isShoppingState, actor) {
   shoppingState.set(get$1(isShoppingState));
   actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
 }
-var root$3 = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
+var root$4 = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5500,7 +5500,7 @@ function ShoppingCart($$anchor, $$props) {
     set(isShoppingState, proxy(current ?? true));
     if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
   })();
-  var div = root$3();
+  var div = root$4();
   var button = child(div);
   button.__click = [toggleShoppingState, isShoppingState, actor];
   template_effect(
@@ -5908,134 +5908,245 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
         required: true,
         initial: ""
       }),
-      // Description
-      description: new foundry.data.fields.StringField({
+      // journalId
+      journalId: new foundry.data.fields.StringField({
         required: true,
         initial: ""
       })
     };
   }
 }
-function openJournal(_, journalId) {
-  const journal = game.journal.get(get$1(journalId));
-  if (journal) journal.sheet.render(true);
-}
-var on_input = (__1, showDropdown) => set(showDropdown, true);
-var on_click = (__2, selectJournal, option) => selectJournal(get$1(option));
-var root_3$1 = /* @__PURE__ */ template(`<li class="dropdown-item"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </li>`);
-var root_4 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
-var root_1$1 = /* @__PURE__ */ template(`<ul class="dropdown-list"><!></ul>`);
-var root_5 = /* @__PURE__ */ template(`<div class="journal-toolbar"><strong>Linked:</strong> <button class="open-journal-button"><i class="fa-solid fa-up-right-from-square"></i> Open</button></div> <div class="journal-preview"><!></div>`, 1);
-var root$2 = /* @__PURE__ */ template(`<div class="journal-viewer"><div class="journal-search-bar"><div class="dropdown-wrapper"><input type="search" class="dropdown-input" placeholder="Search Journals" autocomplete="off"> <!></div></div> <!></div>`);
-function JournalViewer($$anchor, $$props) {
+function ok(_, visible, $$props, selected) {
   var _a;
+  set(visible, false);
+  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$1(selected));
+}
+function cancel(__1, visible, $$props) {
+  var _a;
+  set(visible, false);
+  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, null);
+}
+var on_input = (__2, showDropdown, selected) => {
+  set(showDropdown, true);
+  set(selected, null);
+};
+var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
+var root_4 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
+var root_5 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
+var root_2$1 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
+var root_1$1 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text" placeholder="Search journals..."></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+function JournalSearchModal($$anchor, $$props) {
+  push($$props, true);
+  let visible = state(true);
+  let search = state("");
+  let selected = state(null);
+  let options = state(proxy([]));
+  let showDropdown = state(false);
+  let inputEl = state(null);
+  let dropdownStyle = state("");
+  user_effect(() => {
+    const journals = game.journal.contents;
+    set(options, proxy(journals.flatMap((entry) => {
+      var _a;
+      const items = [
+        {
+          value: entry.id,
+          type: "entry",
+          label: entry.name
+        }
+      ];
+      for (const page of ((_a = entry.pages) == null ? void 0 : _a.contents) ?? []) {
+        items.push({
+          value: page.id,
+          type: "page",
+          label: `${entry.name} › ${page.name}`
+        });
+      }
+      return items;
+    })));
+  });
+  user_effect(() => {
+    if (get$1(showDropdown) && get$1(inputEl)) {
+      requestAnimationFrame(() => {
+        const rect = get$1(inputEl).getBoundingClientRect();
+        set(dropdownStyle, `
+                position: fixed;
+                top: ${rect.bottom + 2}px;
+                left: ${rect.left}px;
+                width: ${rect.width}px;
+                z-index: 1001;
+            `);
+      });
+    }
+  });
+  function filteredOptions() {
+    const q = get$1(search).toLowerCase().trim();
+    return q ? get$1(options).filter((o) => o.label.toLowerCase().includes(q)) : get$1(options);
+  }
+  function selectJournal(option) {
+    set(selected, proxy(option));
+    set(search, proxy(option.label));
+    set(showDropdown, false);
+  }
+  var fragment = comment();
+  var node = first_child(fragment);
+  {
+    var consequent_2 = ($$anchor2) => {
+      var div = root_1$1();
+      var div_1 = child(div);
+      var div_2 = child(div_1);
+      var input = child(div_2);
+      input.__input = [on_input, showDropdown, selected];
+      bind_this(input, ($$value) => set(inputEl, $$value), () => get$1(inputEl));
+      var div_3 = sibling(div_2, 2);
+      var button = child(div_3);
+      button.__click = [ok, visible, $$props, selected];
+      var button_1 = sibling(button, 2);
+      button_1.__click = [cancel, visible, $$props];
+      var node_1 = sibling(div_1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var ul = root_2$1();
+          var node_2 = child(ul);
+          {
+            var consequent = ($$anchor4) => {
+              var fragment_1 = comment();
+              var node_3 = first_child(fragment_1);
+              each(node_3, 17, filteredOptions, (option) => option.value, ($$anchor5, option) => {
+                var li = root_4();
+                var div_4 = child(li);
+                div_4.__mousedown = [on_mousedown, selectJournal, option];
+                var text = sibling(child(div_4));
+                template_effect(() => {
+                  set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
+                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                });
+                append($$anchor5, li);
+              });
+              append($$anchor4, fragment_1);
+            };
+            var alternate = ($$anchor4) => {
+              var li_1 = root_5();
+              append($$anchor4, li_1);
+            };
+            if_block(node_2, ($$render) => {
+              if (filteredOptions().length > 0) $$render(consequent);
+              else $$render(alternate, false);
+            });
+          }
+          template_effect(() => set_attribute(ul, "style", get$1(dropdownStyle)));
+          append($$anchor3, ul);
+        };
+        if_block(node_1, ($$render) => {
+          if (get$1(showDropdown)) $$render(consequent_1);
+        });
+      }
+      template_effect(() => button.disabled = !get$1(selected));
+      event("focus", input, () => set(showDropdown, true));
+      event("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
+      bind_value(input, () => get$1(search), ($$value) => set(search, $$value));
+      append($$anchor2, div);
+    };
+    if_block(node, ($$render) => {
+      if (get$1(visible)) $$render(consequent_2);
+    });
+  }
+  append($$anchor, fragment);
+  pop();
+}
+delegate(["input", "click", "mousedown"]);
+function handleOpen(_, journalEntry) {
+  var _a;
+  if (!journalEntry) return;
+  const entry = game.journal.get(journalEntry.id);
+  (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
+}
+function handleConfigureOwnership(__1, journalEntry) {
+  var _a;
+  if (!journalEntry) return;
+  const entry = game.journal.get(journalEntry.id);
+  (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a._onConfigureOwnership();
+}
+function handleSearch(__2, $$props) {
+  const modal = mount(JournalSearchModal, {
+    target: document.body,
+    props: {
+      message: "Search for a journal entry",
+      onclose: (result) => {
+        var _a;
+        unmount(modal);
+        if (result) {
+          console.log("User clicked OK", { result });
+          (_a = $$props.onJournalContentSelected) == null ? void 0 : _a.call($$props, result);
+        } else {
+          console.log("User clicked Cancel");
+        }
+      }
+    }
+  });
+}
+var on_click = (e) => e.stopPropagation();
+var on_keydown = (e) => {
+  if (e.key === "Escape") {
+    e.currentTarget.blur();
+  }
+};
+var root$3 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons svelte-szh9op" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Configure ownership"><i class="fa-solid fa-user-gear"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
+function JournalViewerToolbar($$anchor, $$props) {
+  push($$props, true);
+  let journalEntry = null;
+  var div = root$3();
+  div.__click = [on_click];
+  div.__keydown = [on_keydown];
+  var button = child(div);
+  button.__click = [handleOpen, journalEntry];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [handleConfigureOwnership, journalEntry];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [handleSearch, $$props];
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "keydown"]);
+var root$2 = /* @__PURE__ */ template(`<!> <div class="preview journal-content"><!></div>`, 1);
+function JournalViewer($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 19, () => ({}));
-  let journalId = state(proxy(((_a = item2().system.journalReference) == null ? void 0 : _a.journalId) ?? null));
+  let toolbar;
+  let journalId = state(proxy(item2().system.journalId ?? null));
   let previewContent = state("");
-  let filter = state("");
-  let showDropdown = state(false);
-  let journalOptions = /* @__PURE__ */ derived(() => () => {
-    var _a2, _b;
-    return ((_b = (_a2 = game.journal) == null ? void 0 : _a2.contents) == null ? void 0 : _b.map((j) => ({ label: j.name, value: j.id }))) ?? [];
-  });
-  let filteredOptions = /* @__PURE__ */ derived(() => () => get$1(journalOptions)().filter((j) => j.label.toLowerCase().includes(get$1(filter).trim().toLowerCase())));
-  user_effect(() => {
-    var _a2;
+  user_effect(async () => {
+    var _a, _b, _c;
     if (!get$1(journalId)) {
       set(previewContent, "");
       return;
     }
     const journal = game.journal.get(get$1(journalId));
-    if (!journal) {
-      set(previewContent, "[Linked journal not found]");
-      return;
-    }
-    const page = journal.pages.contents[0];
-    if (!page) {
-      set(previewContent, "[No pages found in the journal]");
-      return;
-    }
-    const content = ((_a2 = page.text) == null ? void 0 : _a2.content) || "";
-    const snippet = content.replace(/<[^>]+>/g, "").slice(0, 300);
-    set(previewContent, snippet + (content.length > 300 ? "..." : ""));
+    const page = (_b = (_a = journal == null ? void 0 : journal.pages) == null ? void 0 : _a.contents) == null ? void 0 : _b[0];
+    const content = ((_c = page == null ? void 0 : page.text) == null ? void 0 : _c.content) || "";
+    set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, { async: true, secrets: false, documents: true })));
   });
-  async function selectJournal(option) {
-    set(journalId, proxy(option.value));
-    set(filter, proxy(option.label));
-    set(showDropdown, false);
-    await item2().update({
-      "system.journalReference.journalId": option.value
-    });
+  async function handleJournalSelection(result) {
+    if (!result) return;
+    set(journalId, proxy(result.value));
+    await item2().update({ "system.journalId": result.value });
   }
-  var div = root$2();
-  var div_1 = child(div);
-  var div_2 = child(div_1);
-  var input = child(div_2);
-  input.__input = [on_input, showDropdown];
-  var node = sibling(input, 2);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var ul = root_1$1();
-      var node_1 = child(ul);
-      {
-        var consequent = ($$anchor3) => {
-          var fragment = comment();
-          var node_2 = first_child(fragment);
-          each(node_2, 17, () => get$1(filteredOptions)(), (option) => option.value, ($$anchor4, option) => {
-            var li = root_3$1();
-            li.__click = [on_click, selectJournal, option];
-            var text = sibling(child(li));
-            template_effect(() => set_text(text, ` ${get$1(option).label ?? ""}`));
-            append($$anchor4, li);
-          });
-          append($$anchor3, fragment);
-        };
-        var alternate = ($$anchor3) => {
-          var li_1 = root_4();
-          append($$anchor3, li_1);
-        };
-        if_block(node_1, ($$render) => {
-          if (get$1(filteredOptions)().length > 0) $$render(consequent);
-          else $$render(alternate, false);
-        });
-      }
-      append($$anchor2, ul);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(showDropdown)) $$render(consequent_1);
-    });
-  }
-  var node_3 = sibling(div_1, 2);
-  {
-    var consequent_2 = ($$anchor2) => {
-      var fragment_1 = root_5();
-      var div_3 = first_child(fragment_1);
-      var text_1 = sibling(child(div_3));
-      var button = sibling(text_1);
-      button.__click = [openJournal, journalId];
-      var div_4 = sibling(div_3, 2);
-      var node_4 = child(div_4);
-      html(node_4, () => get$1(previewContent));
-      template_effect(($0) => set_text(text_1, ` ${$0 ?? ""} `), [
-        () => {
-          var _a2;
-          return (_a2 = game.journal.get(get$1(journalId))) == null ? void 0 : _a2.name;
-        }
-      ]);
-      append($$anchor2, fragment_1);
-    };
-    if_block(node_3, ($$render) => {
-      if (get$1(journalId)) $$render(consequent_2);
-    });
-  }
-  event("focus", input, () => set(showDropdown, true));
-  event("blur", input, () => setTimeout(() => set(showDropdown, false), 150));
-  bind_value(input, () => get$1(filter), ($$value) => set(filter, $$value));
-  append($$anchor, div);
+  var fragment = root$2();
+  var node = first_child(fragment);
+  bind_this(
+    JournalViewerToolbar(node, {
+      message: "Search for a journal entry",
+      onJournalContentSelected: handleJournalSelection
+    }),
+    ($$value) => toolbar = $$value,
+    () => toolbar
+  );
+  var div = sibling(node, 2);
+  var node_1 = child(div);
+  html(node_1, () => get$1(previewContent));
+  append($$anchor, fragment);
   pop();
 }
-delegate(["input", "click"]);
 var root_2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_1 = /* @__PURE__ */ template(`<select></select>`);
 var root_3 = /* @__PURE__ */ template(`<input>`);
