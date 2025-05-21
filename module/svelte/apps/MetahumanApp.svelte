@@ -371,7 +371,7 @@
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
-                <JournalViewer {item} />
+                <JournalViewer item={item} config={config}/>
             </div>
         </div>
     </div>

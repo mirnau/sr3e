@@ -5673,7 +5673,8 @@ sr3e.movement = {
 sr3e.sheet = {
   details: "sr3e.sheet.details",
   viewbackground: "sr3e.sheet.viewbackground",
-  buyupgrades: "sr3e.sheet.buyupgrades"
+  buyupgrades: "sr3e.sheet.buyupgrades",
+  searchJournals: "sr3e.sheet.searchJournals"
 };
 sr3e.traits = {
   age: "sr3e.traits.age",
@@ -5934,7 +5935,7 @@ var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
 var root_4 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
 var root_5 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
 var root_2$1 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
-var root_1$1 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text" placeholder="Search journals..."></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+var root_1$1 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
   push($$props, true);
   let visible = state(true);
@@ -6041,7 +6042,15 @@ function JournalSearchModal($$anchor, $$props) {
           if (get$1(showDropdown)) $$render(consequent_1);
         });
       }
-      template_effect(() => button.disabled = !get$1(selected));
+      template_effect(
+        ($0) => {
+          set_attribute(input, "placeholder", $0);
+          button.disabled = !get$1(selected);
+        },
+        [
+          () => localize($$props.config.sheet.searchJournals)
+        ]
+      );
       event("focus", input, () => set(showDropdown, true));
       event("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
       bind_value(input, () => get$1(search), ($$value) => set(search, $$value));
@@ -6067,11 +6076,11 @@ function handleConfigureOwnership(__1, journalEntry) {
   const entry = game.journal.get(journalEntry.id);
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a._onConfigureOwnership();
 }
-function handleSearch(__2, $$props) {
+function handleSearch(__2, config, $$props) {
   const modal = mount(JournalSearchModal, {
     target: document.body,
     props: {
-      message: "Search for a journal entry",
+      config: config(),
       onclose: (result) => {
         var _a;
         unmount(modal);
@@ -6094,6 +6103,7 @@ var on_keydown = (e) => {
 var root$3 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons svelte-szh9op" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Configure ownership"><i class="fa-solid fa-user-gear"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
+  const config = prop($$props, "config", 19, () => ({}));
   let journalEntry = null;
   var div = root$3();
   div.__click = [on_click];
@@ -6103,7 +6113,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [handleConfigureOwnership, journalEntry];
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [handleSearch, $$props];
+  button_2.__click = [handleSearch, config, $$props];
   append($$anchor, div);
   pop();
 }
@@ -6111,7 +6121,7 @@ delegate(["click", "keydown"]);
 var root$2 = /* @__PURE__ */ template(`<!> <div class="preview journal-content"><!></div>`, 1);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 19, () => ({}));
+  let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let toolbar;
   let journalId = state(proxy(item2().system.journalId ?? null));
   let previewContent = state("");
@@ -6135,8 +6145,10 @@ function JournalViewer($$anchor, $$props) {
   var node = first_child(fragment);
   bind_this(
     JournalViewerToolbar(node, {
-      message: "Search for a journal entry",
-      onJournalContentSelected: handleJournalSelection
+      onJournalContentSelected: handleJournalSelection,
+      get config() {
+        return config();
+      }
     }),
     ($$value) => toolbar = $$value,
     () => toolbar
@@ -6555,6 +6567,9 @@ function MetahumanApp($$anchor, $$props) {
   JournalViewer(node_1, {
     get item() {
       return item2();
+    },
+    get config() {
+      return config();
     }
   });
   template_effect(

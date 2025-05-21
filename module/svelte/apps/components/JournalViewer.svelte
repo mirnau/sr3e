@@ -1,7 +1,7 @@
 <script>
     import JournalViewerToolbar from "./JournalViewerToolbar.svelte";
 
-    let { item = {} } = $props();
+    let { item = {}, config = {} } = $props();
 
     let toolbar;
     let journalId = $state(item.system.journalId ?? null);
@@ -45,8 +45,8 @@
 
 <JournalViewerToolbar
     bind:this={toolbar}
-    message="Search for a journal entry"
     onJournalContentSelected={handleJournalSelection}
+    config={config}
 />
 
 <div class="preview journal-content">

@@ -52,7 +52,8 @@
     "sheet": {
       "details": "Details",
       "viewbackground": "View Background",
-      "buyupgrades": "Buy upgrades"
+      "buyupgrades": "Buy upgrades",
+      "searchJournals": "Search Journals"
     },
     "traits": {
       "age": "Age",

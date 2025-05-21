@@ -1,6 +1,7 @@
 <script>
+    import { localize } from "../../../svelteHelpers.js";
     // @runes
-    const { onclose } = $props();
+    const { config, onclose } = $props();
 
     let visible = $state(true);
     let search = $state("");
@@ -74,7 +75,7 @@
                 <input
                     bind:this={inputEl}
                     type="text"
-                    placeholder="Search journals..."
+                    placeholder={localize(config.sheet.searchJournals)}
                     bind:value={search}
                     oninput={() => {
                         showDropdown = true;

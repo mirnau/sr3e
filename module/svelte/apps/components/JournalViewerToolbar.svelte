@@ -4,7 +4,7 @@
     import JournalSearchModal from "../../apps/dialogs/JournalSearchModal.svelte";
     import { mount, unmount } from "svelte";
 
-    const { onJournalContentSelected } = $props();
+    const { onJournalContentSelected, config = {} } = $props();
     let journalEntry = $state(null);
     let showModal = $state(false);
 
@@ -24,7 +24,7 @@
         const modal = mount(JournalSearchModal, {
             target: document.body,
             props: {
-                message: "Search for a journal entry",
+                config,
                 onclose: (result) => {
                     unmount(modal);
                     if (result) {
