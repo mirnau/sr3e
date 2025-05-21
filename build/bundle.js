@@ -6064,19 +6064,13 @@ function JournalSearchModal($$anchor, $$props) {
   pop();
 }
 delegate(["input", "click", "mousedown"]);
-function handleOpen(_, journalEntry) {
+function handleOpen(_, journalId) {
   var _a;
-  if (!journalEntry) return;
-  const entry = game.journal.get(journalEntry.id);
+  if (!get$1(journalId)) return;
+  const entry = game.journal.get(get$1(journalId));
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
 }
-function handleConfigureOwnership(__1, journalEntry) {
-  var _a;
-  if (!journalEntry) return;
-  const entry = game.journal.get(journalEntry.id);
-  (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a._onConfigureOwnership();
-}
-function handleSearch(__2, config, $$props) {
+function handleSearch(__1, config, journalId, $$props) {
   const modal = mount(JournalSearchModal, {
     target: document.body,
     props: {
@@ -6086,6 +6080,7 @@ function handleSearch(__2, config, $$props) {
         unmount(modal);
         if (result) {
           console.log("User clicked OK", { result });
+          set(journalId, proxy(result.value));
           (_a = $$props.onJournalContentSelected) == null ? void 0 : _a.call($$props, result);
         } else {
           console.log("User clicked Cancel");
@@ -6100,20 +6095,18 @@ var on_keydown = (e) => {
     e.currentTarget.blur();
   }
 };
-var root$3 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons svelte-szh9op" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Configure ownership"><i class="fa-solid fa-user-gear"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
-  const config = prop($$props, "config", 19, () => ({}));
-  let journalEntry = null;
+  const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let journalId = state(proxy(id() ?? null));
   var div = root$3();
   div.__click = [on_click];
   div.__keydown = [on_keydown];
   var button = child(div);
-  button.__click = [handleOpen, journalEntry];
+  button.__click = [handleOpen, journalId];
   var button_1 = sibling(button, 2);
-  button_1.__click = [handleConfigureOwnership, journalEntry];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [handleSearch, config, $$props];
+  button_1.__click = [handleSearch, config, journalId, $$props];
   append($$anchor, div);
   pop();
 }
@@ -6148,6 +6141,9 @@ function JournalViewer($$anchor, $$props) {
       onJournalContentSelected: handleJournalSelection,
       get config() {
         return config();
+      },
+      get id() {
+        return get$1(journalId);
       }
     }),
     ($$value) => toolbar = $$value,

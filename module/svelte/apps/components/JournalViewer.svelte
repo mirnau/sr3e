@@ -47,6 +47,7 @@
     bind:this={toolbar}
     onJournalContentSelected={handleJournalSelection}
     config={config}
+    id={journalId}
 />
 
 <div class="preview journal-content">

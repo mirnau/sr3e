@@ -4,20 +4,14 @@
     import JournalSearchModal from "../../apps/dialogs/JournalSearchModal.svelte";
     import { mount, unmount } from "svelte";
 
-    const { onJournalContentSelected, config = {} } = $props();
-    let journalEntry = $state(null);
+    const { onJournalContentSelected, config = {}, id={} } = $props();
+    let journalId = $state(id ?? null);
     let showModal = $state(false);
 
     function handleOpen() {
-        if (!journalEntry) return;
-        const entry = game.journal.get(journalEntry.id);
+        if (!journalId) return;
+        const entry = game.journal.get(journalId);
         entry?.sheet?.render(true);
-    }
-
-    function handleConfigureOwnership() {
-        if (!journalEntry) return;
-        const entry = game.journal.get(journalEntry.id);
-        entry?.sheet?._onConfigureOwnership();
     }
 
     function handleSearch() {
@@ -29,6 +23,7 @@
                     unmount(modal);
                     if (result) {
                         console.log("User clicked OK", { result });
+                        journalId = result.value;
                         onJournalContentSelected?.(result);
                     } else {
                         console.log("User clicked Cancel");
@@ -57,13 +52,7 @@
     >
         <i class="fa-solid fa-book-open"></i>
     </button>
-    <button
-        class="header-control icon sr3e-toolbar-button"
-        aria-label="Configure ownership"
-        onclick={handleConfigureOwnership}
-    >
-        <i class="fa-solid fa-user-gear"></i>
-    </button>
+
     <button
         class="header-control icon sr3e-toolbar-button"
         aria-label="Search journal entries"
@@ -72,9 +61,3 @@
         <i class="fa-solid fa-magnifying-glass"></i>
     </button>
 </div>
-
-<style>
-    .searchbuttons {
-        z-index: 9999 !important;
-    }
-</style>
