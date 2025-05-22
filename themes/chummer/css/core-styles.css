@@ -11,6 +11,11 @@
 //Sheet specific styles
 @import "./sheets/sheet-metahuman.less";
 */
+* {
+  /* Define your scrollbar‐color variable */
+  --color-scrollbar: #ff009572;
+  /* fallback example */
+}
 @font-face {
   font-family: 'VT323';
   src: url('../../../fonts/VT323/VT323-Regular.ttf') format('truetype');
@@ -128,6 +133,7 @@
   margin: 0;
 }
 .system-sr3e p,
+.system-sr3e span,
 .system-sr3e select,
 .system-sr3e input {
   font-family: 'VT323', monospace;
@@ -137,9 +143,10 @@
   color: #1df0ff;
 }
 .system-sr3e p::placeholder,
+.system-sr3e span::placeholder,
 .system-sr3e select::placeholder,
 .system-sr3e input::placeholder {
-  color: #c8d3f5;
+  color: #1df0ff;
 }
 .sr3e.sheet.character {
   min-width: calc(20rem + 0.25rem * 3);
@@ -177,31 +184,70 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
-.system-sr3e .meta-human-grid {
-  /* Set a fixed or max width and center it */
+.system-sr3e .sr3e.sheet.item .meta-human-grid {
   width: 40rem;
   margin: 0 auto;
   column-count: 2;
   column-gap: 0.5rem;
 }
-.system-sr3e .meta-human-grid .item-sheet-component {
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component {
   display: inline-block;
   width: 100%;
   margin-bottom: 0.5rem;
   break-inside: avoid;
 }
-.system-sr3e .meta-human-grid .inner-background-container .inner-background {
-  display: grid;
-  text-align: center;
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .fake-shadow {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background-color: #ff0095;
+  width: calc(100% - 1.5rem);
+  height: calc(100% - 1.5rem);
+  z-index: -2;
+  filter: blur(20px);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card {
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
+  display: grid;
+  background-color: #ff0095;
+}
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 30px #1d282c;
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
+  padding: 0.25rem;
+  text-align: center;
+  text-indent: 0;
   background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
 }
-.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card .stat-label {
-  background-color: #003856;
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
+  width: 100%;
+  display: block;
+  padding: 0.25rem;
 }
-.system-sr3e .meta-human-grid .inner-background-container .inner-background .stat-card:hover {
-  z-index: 10;
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  font: inherit;
+  margin: 0;
+  color: #1df0ff;
+  font-size: 1.5rem;
+  text-indent: 0;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
+  margin: 0;
 }
 .system-sr3e section.journal-entry-content.flexcol {
   border-radius: 0;
@@ -500,10 +546,39 @@
   z-index: 100;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.system-sr3e select.roll-type-select,
+.system-sr3e select {
+  appearance: none;
+  text-indent: 0.5rem;
+  background: #1b1f24 !important;
+  color: #ff0095;
+  width: 100%;
+  border: none;
+  border-radius: 0rem !important;
+  box-shadow: inset 0 0 1rem #ff0095;
+  margin: 0 !important;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e optgroup {
+  background-color: #003856;
+}
+.system-sr3e option {
+  text-indent: 0.5rem;
+  background-color: #003856;
+  border-radius: 0rem;
+  border: none;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e select option {
+  background-color: #1b1f24;
+  /* Attempts to override */
+  color: #ff0095;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
 .system-sr3e .system-sr3e,
 .system-sr3e .system-sr3e * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 255, 255, 0.5) transparent;
+  scrollbar-color: rgba(0, 255, 255, 0.5);
 }
 .system-sr3e .system-sr3e::-webkit-scrollbar,
 .system-sr3e .system-sr3e *::-webkit-scrollbar {
@@ -605,7 +680,7 @@
 .system-sr3e input[type="text"] {
   background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
   box-shadow: inset 0 0 1rem #1df0ff;
-  color: #c8d3f5;
+  color: #1df0ff;
   border: none;
   font-size: 1.5rem;
   width: 100%;
@@ -629,7 +704,7 @@
 .system-sr3e input[type="text"]::before {
   background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e) !important;
   box-shadow: inset 0 0 30px #1d282c;
-  color: #c8d3f5 !important;
+  color: #1df0ff !important;
   content: '';
   position: absolute;
   z-index: -1;
@@ -1637,4 +1712,8 @@
   background-color: #1b1f24;
   box-shadow: inset 0 0 8px #1df0ff;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e section.body.flexcol.scrollable {
+  overflow-y: auto;
+  max-height: 20rem;
 }

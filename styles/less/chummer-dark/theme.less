@@ -6,195 +6,197 @@
 @line-height: 1rem;
 
 
-@background-color: linear-gradient(
-  35deg,
-  #1a1a1a,    // Deep blackened steel
-  #2f2f2f 35%, // Mid-tone gunmetal
-  #4d4d4d 65%, // Brushed metallic edge
-  #3b3b3b 90%, // Slight cool gray tint
-  #1e1e1e      // Back to dark shadow
-);
+@background-color: linear-gradient(35deg,
+    #1a1a1a, // Deep blackened steel
+    #2f2f2f 35%, // Mid-tone gunmetal
+    #4d4d4d 65%, // Brushed metallic edge
+    #3b3b3b 90%, // Slight cool gray tint
+    #1e1e1e // Back to dark shadow
+  );
 
 
 
-@primary-color:                      #1b1f24; // Dark background
-@secondary-color:                    #003856; // Soft green
-@tertiary-color:                     #6825c0; // Soft green
-@quartiery-color:                    #552791; // Soft green
+@primary-color: #1b1f24; // Dark background
+@secondary-color: #003856; // Soft green
+@tertiary-color: #6825c0; // Soft green
+@quartiery-color: #552791; // Soft green
 
-    @accent-color:                   #ff0095; // Neon blue
-    @accent-apricot:                 #f4a370;
-    @accent-cherry-blossom:          #ff1d9d;
-    @highlight-color-primary:        #1df0ff; // Pink for highlights
-    @highlight-color-secondary:      #ff0095; // Pink for highlights
-    @highlight-color-tertiary:       #5fd3ae; // Pink for highlights
-    @text-color:                     #c8d3f5;
-    @warning-color:                  #ff0095;
+@accent-color: #ff0095; // Neon blue
+@accent-apricot: #f4a370;
+@accent-cherry-blossom: #ff1d9d;
+@highlight-color-primary: #1df0ff; // Pink for highlights
+@highlight-color-secondary: #ff0095; // Pink for highlights
+@highlight-color-tertiary: #5fd3ae; // Pink for highlights
+@text-color: @highlight-color-primary;
+@warning-color: #ff0095;
 
 @primary-fake-shadow: @accent-color;
 
-@chummer-dark-fallback: repeating-linear-gradient(
-    0deg,
+@chummer-dark-fallback: repeating-linear-gradient(0deg,
     rgba(81, 106, 134, 0.6) 1px,
     rgba(57, 77, 100, 0.6) 5px,
     rgba(31, 44, 66, 0.6) 2px,
   );
 
-    //Main Window Background
-    @appwindow-background: none; //Makes the entire app transparent
-    @transparent: transparent;
-    @background-back-panel: none; // rgba(20, 49, 34, 0.4);
-    @sheet-background-image: none;
-    @window-header-color: transparent;
+* {
+  /* Define your scrollbar‐color variable */
+  --color-scrollbar: #ff009572;
+  /* fallback example */
+}
 
-    //Default
-    @default-sr3e-inner-background-color: @background-color;
-    @default-fake-shadow-color: @primary-fake-shadow;
-    @default-sheet-border-color: @accent-cherry-blossom;
-    
-    //Default Input element 
-    @input-background: #1c364b;
+//Main Window Background
+@appwindow-background: none; //Makes the entire app transparent
+@transparent: transparent;
+@background-back-panel: none; // rgba(20, 49, 34, 0.4);
+@sheet-background-image: none;
+@window-header-color: transparent;
 
-    //Attribute Sheet Component 
-   
-    //Character Attribute Stat Card
-    @attribute-stat-card-color:         @chummer-dark-fallback;
-    @attribute-stat-card-label-color:   @secondary-color;
-    @attribute-stat-card-button-color:  @h1-color;
+//Default
+@default-sr3e-inner-background-color: @background-color;
+@default-fake-shadow-color: @primary-fake-shadow;
+@default-sheet-border-color: @accent-cherry-blossom;
 
-    //Character Dice Pool Stat Card
-    @dicepool-stat-card-color:          @chummer-dark-fallback;
-    @dicepool-stat-card-label-color:    @secondary-color;
+//Default Input element 
+@input-background: #1c364b;
 
-    //Character Movement Stat Card
-    @movement-stat-card-color:          @chummer-dark-fallback;
-    @movement-stat-card-label-color:    @secondary-color;
+//Attribute Sheet Component 
 
-    //Character Karma Stat Card
-    @karma-stat-card-color:             @chummer-dark-fallback;
-    @karma-stat-card-label-color:       @secondary-color;
+//Character Attribute Stat Card
+@attribute-stat-card-color: @chummer-dark-fallback;
+@attribute-stat-card-label-color: @secondary-color;
+@attribute-stat-card-button-color: @h1-color;
 
-    //Active skill-card
-    @active-card-background: @chummer-dark-fallback;
-    //Knowledge skill-card
-    @knowledge-card-background: @chummer-dark-fallback;
-    //language skill-card
-    @language-card-background: @chummer-dark-fallback;
-    
+//Character Dice Pool Stat Card
+@dicepool-stat-card-color: @chummer-dark-fallback;
+@dicepool-stat-card-label-color: @secondary-color;
 
-    //Character Tabs
-    @tab-idle: @chummer-dark-fallback;
-    @tab-active: @chummer-dark-fallback;
-    @tab-hover:  @accent-cherry-blossom;
-    @tab-neon-border: inset 0 0 15px @accent-cherry-blossom;
-    @tab-neon-border-active: inset 0 0 15px @highlight-color-tertiary;
-    @active-tab-font-color: @highlight-color-tertiary;
-    @active-tab-text-shadow: @active-tab-font-color;
+//Character Movement Stat Card
+@movement-stat-card-color: @chummer-dark-fallback;
+@movement-stat-card-label-color: @secondary-color;
+
+//Character Karma Stat Card
+@karma-stat-card-color: @chummer-dark-fallback;
+@karma-stat-card-label-color: @secondary-color;
+
+//Active skill-card
+@active-card-background: @chummer-dark-fallback;
+//Knowledge skill-card
+@knowledge-card-background: @chummer-dark-fallback;
+//language skill-card
+@language-card-background: @chummer-dark-fallback;
 
 
-    //Metahuman fake shadow
-    //Meta Human Item StatCard
-    @metahuman-stat-card-color:         @chummer-dark-fallback;
-    @metahuman-stat-card-label-color:   @secondary-color;
-
-    //Ammunition fake shadow
-    //Ammunition Item StatCard
-    @ammuntion-stat-card-color:         @chummer-dark-fallback;
-    @ammuntion-stat-card-label-color:   @secondary-color;
-
-    //Weapon Sheet fake shadow
-    //Weapon Sheet Item StatCard
-    @weapon-stat-card-color:         @chummer-dark-fallback;
-    @weapon-stat-card-label-color:   @secondary-color;
-    
-
-    //Derivative styles:
-    //Text
-    @h1-color: @highlight-color-primary;
-    @h2-color: @highlight-color-secondary;
-    @h3-color: @highlight-color-tertiary;
-    @h4-color: @highlight-color-primary;
-    @h5-color: @highlight-color-tertiary;
-    @h6-color: @highlight-color-tertiary;
-
-    @option-background: @accent-color;
+//Character Tabs
+@tab-idle: @chummer-dark-fallback;
+@tab-active: @chummer-dark-fallback;
+@tab-hover: @accent-cherry-blossom;
+@tab-neon-border: inset 0 0 15px @accent-cherry-blossom;
+@tab-neon-border-active: inset 0 0 15px @highlight-color-tertiary;
+@active-tab-font-color: @highlight-color-tertiary;
+@active-tab-text-shadow: @active-tab-font-color;
 
 
-    //Attribute Point Pulse Colors
-    @attribute-pulse-primary:       magenta;
-    @attribute-pulse-secondary:     blueViolet;
+//Metahuman fake shadow
+//Meta Human Item StatCard
+@metahuman-stat-card-color: @chummer-dark-fallback;
+@metahuman-stat-card-label-color: @secondary-color;
 
-    //Shopping-Cart Pulse Colors
-    @shopping-cart-primary:         #00FC00C0;
-    @shopping-cart-secondary:       cyan;
+//Ammunition fake shadow
+//Ammunition Item StatCard
+@ammuntion-stat-card-color: @chummer-dark-fallback;
+@ammuntion-stat-card-label-color: @secondary-color;
 
-    //Fake Bloom
-    @shopping-cart-bloom-primary:   #45d06b;
-    @shopping-cart-bloom-secondary: #e6ff8d;
-    @h1-color-bloom-primary:        0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
-    
-    @h3-color-bloom-primary:      0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
-    
+//Weapon Sheet fake shadow
+//Weapon Sheet Item StatCard
+@weapon-stat-card-color: @chummer-dark-fallback;
+@weapon-stat-card-label-color: @secondary-color;
 
-    
-    
-    //Unused colors BELOW HERE:
-    
-    // Primary Colors
-    @background: #1A1B26;          // Main background
-    @background-deep: #16161E;     // Deep background
-    @foreground: #C0CAF5;          // Main text
-    @foreground-secondary: #A9B1D6; // Secondary text
-    
-    // Accent Colors
-    @blue: #7AA2F7;                // Vibrant blue
-    @cyan: #2AC3DE;                // Cyan
-    @purple-light: #9D7CD8;        // Light purple
-    @purple-lavender: #BB9AF7;     // Lavender
-    @red: #F7768E;                 // Bright red
-    @green: #9ECE6A;               // Soft green
-    @teal-green: #73DACA;          // Teal green
-    @yellow: #E0AF68;              // Warm yellow
-    
-    // Neutral Shades
-    @gray-dark: #414868;           // Dark gray-blue
-    @gray-medium: #565F89;         // Medium gray-blue
-    
-    
-    // Primary and Neutral Shades
-    @primary-dark: #1e2234;
-    @primary-deep-dark: #232739;
-    @primary-medium-dark: #272c40;
-    @neutral-gray-dark: #373e5c;
-    @neutral-gray-medium: #3a4160;
-    
-    // Blue Tones
-    @blue-dark: #394b6e;
-    @blue-medium: #3d579a;
-    @blue-light: #425fa6;
-    @blue-bright: #7399eb;
-    @blue-soft: #79a4f4;
-    
-    // Cyan Tones
-    @cyan-dark: #7ec9fc;
-    @cyan-medium: #83d1fe;
-    @cyan-light: #b1f3fa;
-    
-    // Purple Tones
-    @purple-light: #b293ed;
-    @purple-medium: #977ad7;
-    @purple-dark: #9e7bcb;
-    
-    // Red Tones
-    @red-bright: #f17d82;
-    @red-dark: #cd4a58;
-    
-    // Yellow/Orange Tones
-    @orange-light: #f5c580;
-    
-    // Teal and Green Tones
-    @teal-light: #4dd8bd;
-    @teal-medium: #4cd3bc;
-    @green-soft: #c5e994;
 
-    
+//Derivative styles:
+//Text
+@h1-color: @highlight-color-primary;
+@h2-color: @highlight-color-secondary;
+@h3-color: @highlight-color-tertiary;
+@h4-color: @highlight-color-primary;
+@h5-color: @highlight-color-tertiary;
+@h6-color: @highlight-color-tertiary;
+
+@option-background: @accent-color;
+
+
+//Attribute Point Pulse Colors
+@attribute-pulse-primary: magenta;
+@attribute-pulse-secondary: blueViolet;
+
+//Shopping-Cart Pulse Colors
+@shopping-cart-primary: #00FC00C0;
+@shopping-cart-secondary: cyan;
+
+//Fake Bloom
+@shopping-cart-bloom-primary: #45d06b;
+@shopping-cart-bloom-secondary: #e6ff8d;
+@h1-color-bloom-primary: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
+
+@h3-color-bloom-primary: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
+
+
+
+
+//Unused colors BELOW HERE:
+
+// Primary Colors
+@background: #1A1B26; // Main background
+@background-deep: #16161E; // Deep background
+@foreground: #C0CAF5; // Main text
+@foreground-secondary: #A9B1D6; // Secondary text
+
+// Accent Colors
+@blue: #7AA2F7; // Vibrant blue
+@cyan: #2AC3DE; // Cyan
+@purple-light: #9D7CD8; // Light purple
+@purple-lavender: #BB9AF7; // Lavender
+@red: #F7768E; // Bright red
+@green: #9ECE6A; // Soft green
+@teal-green: #73DACA; // Teal green
+@yellow: #E0AF68; // Warm yellow
+
+// Neutral Shades
+@gray-dark: #414868; // Dark gray-blue
+@gray-medium: #565F89; // Medium gray-blue
+
+
+// Primary and Neutral Shades
+@primary-dark: #1e2234;
+@primary-deep-dark: #232739;
+@primary-medium-dark: #272c40;
+@neutral-gray-dark: #373e5c;
+@neutral-gray-medium: #3a4160;
+
+// Blue Tones
+@blue-dark: #394b6e;
+@blue-medium: #3d579a;
+@blue-light: #425fa6;
+@blue-bright: #7399eb;
+@blue-soft: #79a4f4;
+
+// Cyan Tones
+@cyan-dark: #7ec9fc;
+@cyan-medium: #83d1fe;
+@cyan-light: #b1f3fa;
+
+// Purple Tones
+@purple-light: #b293ed;
+@purple-medium: #977ad7;
+@purple-dark: #9e7bcb;
+
+// Red Tones
+@red-bright: #f17d82;
+@red-dark: #cd4a58;
+
+// Yellow/Orange Tones
+@orange-light: #f5c580;
+
+// Teal and Green Tones
+@teal-light: #4dd8bd;
+@teal-medium: #4cd3bc;
+@green-soft: #c5e994;

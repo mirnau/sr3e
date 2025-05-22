@@ -5,7 +5,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart, _metahuman, _magic;
+var _app, _neon, _feed, _cart, _metahuman, _magic, _a, _magic2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -530,13 +530,13 @@ function proxy(value, parent = null, prev) {
         return true;
       },
       get(target, prop2, receiver) {
-        var _a;
+        var _a2;
         if (prop2 === STATE_SYMBOL) {
           return value;
         }
         var s = sources.get(prop2);
         var exists = prop2 in target;
-        if (s === void 0 && (!exists || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
+        if (s === void 0 && (!exists || ((_a2 = get_descriptor(target, prop2)) == null ? void 0 : _a2.writable))) {
           s = source(proxy(exists ? target[prop2] : UNINITIALIZED, metadata));
           sources.set(prop2, s);
         }
@@ -566,13 +566,13 @@ function proxy(value, parent = null, prev) {
         return descriptor;
       },
       has(target, prop2) {
-        var _a;
+        var _a2;
         if (prop2 === STATE_SYMBOL) {
           return true;
         }
         var s = sources.get(prop2);
         var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
-        if (s !== void 0 || active_effect !== null && (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
+        if (s !== void 0 || active_effect !== null && (!has || ((_a2 = get_descriptor(target, prop2)) == null ? void 0 : _a2.writable))) {
           if (s === void 0) {
             s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
             sources.set(prop2, s);
@@ -585,7 +585,7 @@ function proxy(value, parent = null, prev) {
         return has;
       },
       set(target, prop2, value2, receiver) {
-        var _a;
+        var _a2;
         var s = sources.get(prop2);
         var has = prop2 in target;
         if (is_proxied_array && prop2 === "length") {
@@ -601,7 +601,7 @@ function proxy(value, parent = null, prev) {
           }
         }
         if (s === void 0) {
-          if (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable)) {
+          if (!has || ((_a2 = get_descriptor(target, prop2)) == null ? void 0 : _a2.writable)) {
             s = source(void 0);
             set(s, proxy(value2, metadata));
             sources.set(prop2, s);
@@ -1168,7 +1168,7 @@ function is_runes() {
   return true;
 }
 function check_dirtiness(reaction) {
-  var _a;
+  var _a2;
   var flags2 = reaction.f;
   if ((flags2 & DIRTY) !== 0) {
     return true;
@@ -1185,7 +1185,7 @@ function check_dirtiness(reaction) {
       if (is_disconnected || is_unowned_connected) {
         for (i = 0; i < length; i++) {
           dependency = dependencies[i];
-          if (is_disconnected || !((_a = dependency == null ? void 0 : dependency.reactions) == null ? void 0 : _a.includes(reaction))) {
+          if (is_disconnected || !((_a2 = dependency == null ? void 0 : dependency.reactions) == null ? void 0 : _a2.includes(reaction))) {
             (dependency.reactions ?? (dependency.reactions = [])).push(reaction);
           }
         }
@@ -1278,7 +1278,7 @@ function schedule_possible_effect_self_invalidation(signal, effect2, depth = 0) 
   }
 }
 function update_reaction(reaction) {
-  var _a;
+  var _a2;
   var previous_deps = new_deps;
   var previous_skipped_deps = skipped_deps;
   var previous_untracked_writes = untracked_writes;
@@ -1317,7 +1317,7 @@ function update_reaction(reaction) {
       }
       if (!skip_reaction) {
         for (i = skipped_deps; i < deps.length; i++) {
-          ((_a = deps[i]).reactions ?? (_a.reactions = [])).push(reaction);
+          ((_a2 = deps[i]).reactions ?? (_a2.reactions = [])).push(reaction);
         }
       }
     } else if (deps !== null && skipped_deps < deps.length) {
@@ -1590,7 +1590,7 @@ async function tick() {
   flush_sync();
 }
 function get$1(signal) {
-  var _a;
+  var _a2;
   var flags2 = signal.f;
   var is_derived = (flags2 & DERIVED) !== 0;
   if (is_derived && (flags2 & DESTROYED) !== 0) {
@@ -1640,7 +1640,7 @@ function get$1(signal) {
           /** @type {Effect} */
           parent
         );
-        if (!((_a = parent_effect.deriveds) == null ? void 0 : _a.includes(target))) {
+        if (!((_a2 = parent_effect.deriveds) == null ? void 0 : _a2.includes(target))) {
           (parent_effect.deriveds ?? (parent_effect.deriveds = [])).push(target);
         }
         break;
@@ -1716,14 +1716,14 @@ function add_form_reset_listener() {
       "reset",
       (evt) => {
         Promise.resolve().then(() => {
-          var _a;
+          var _a2;
           if (!evt.defaultPrevented) {
             for (
               const e of
               /**@type {HTMLFormElement} */
               evt.target.elements
             ) {
-              (_a = e.__on_r) == null ? void 0 : _a.call(e);
+              (_a2 = e.__on_r) == null ? void 0 : _a2.call(e);
             }
           }
         });
@@ -1798,14 +1798,14 @@ function delegate(events) {
   }
 }
 function handle_event_propagation(event2) {
-  var _a;
+  var _a2;
   var handler_element = this;
   var owner_document = (
     /** @type {Node} */
     handler_element.ownerDocument
   );
   var event_name = event2.type;
-  var path = ((_a = event2.composedPath) == null ? void 0 : _a.call(event2)) || [];
+  var path = ((_a2 = event2.composedPath) == null ? void 0 : _a2.call(event2)) || [];
   var current_target = (
     /** @type {null | Element} */
     path[0] || event2.target
@@ -1931,6 +1931,13 @@ function template(content, flags2) {
     return clone;
   };
 }
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1949,11 +1956,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -2004,7 +2011,7 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
       }
     });
     return () => {
-      var _a;
+      var _a2;
       for (var event_name of registered_events) {
         target.removeEventListener(event_name, handle_event_propagation);
         var n = (
@@ -2020,7 +2027,7 @@ function _mount(Component, { target, anchor, props = {}, events, context, intro 
       }
       root_event_handles.delete(event_handle);
       if (anchor_node !== anchor) {
-        (_a = anchor_node.parentNode) == null ? void 0 : _a.removeChild(anchor_node);
+        (_a2 = anchor_node.parentNode) == null ? void 0 : _a2.removeChild(anchor_node);
       }
     };
   });
@@ -2173,7 +2180,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
   });
 }
 function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
-  var _a, _b, _c, _d;
+  var _a2, _b, _c, _d;
   var is_animated = (flags2 & EACH_IS_ANIMATED) !== 0;
   var should_update = (flags2 & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
   var length = array.length;
@@ -2195,7 +2202,7 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
       key = get_key(value, i);
       item2 = items.get(key);
       if (item2 !== void 0) {
-        (_a = item2.a) == null ? void 0 : _a.measure();
+        (_a2 = item2.a) == null ? void 0 : _a2.measure();
         (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).add(item2);
       }
     }
@@ -2311,10 +2318,10 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
   }
   if (is_animated) {
     queue_micro_task(() => {
-      var _a2;
+      var _a3;
       if (to_animate === void 0) return;
       for (item2 of to_animate) {
-        (_a2 = item2.a) == null ? void 0 : _a2.apply();
+        (_a3 = item2.a) == null ? void 0 : _a3.apply();
       }
     });
   }
@@ -2617,11 +2624,11 @@ function transition(flags2, element, get_fn, get_params) {
   var transition2 = {
     is_global,
     in() {
-      var _a;
+      var _a2;
       element.inert = inert;
       if (!is_intro) {
         outro == null ? void 0 : outro.abort();
-        (_a = outro == null ? void 0 : outro.reset) == null ? void 0 : _a.call(outro);
+        (_a2 = outro == null ? void 0 : outro.reset) == null ? void 0 : _a2.call(outro);
         return;
       }
       if (!is_outro) {
@@ -3110,7 +3117,7 @@ function with_parent_branch(fn) {
   }
 }
 function prop(props, key, flags2, fallback) {
-  var _a;
+  var _a2;
   var immutable = (flags2 & PROPS_IS_IMMUTABLE) !== 0;
   var runes = true;
   var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
@@ -3127,7 +3134,7 @@ function prop(props, key, flags2, fallback) {
     props[key];
   }
   var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-  var setter = bindable && (((_a = get_descriptor(props, key)) == null ? void 0 : _a.set) ?? (is_entry_props && key in props && ((v) => props[key] = v))) || void 0;
+  var setter = bindable && (((_a2 = get_descriptor(props, key)) == null ? void 0 : _a2.set) ?? (is_entry_props && key in props && ((v) => props[key] = v))) || void 0;
   var fallback_value = (
     /** @type {V} */
     fallback
@@ -3311,14 +3318,14 @@ var on_keydown$1 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$h = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$i = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$h();
+  var div = root$i();
   div.__click = [on_click$2];
   div.__keydown = [on_keydown$1];
   var button = child(div);
@@ -3332,10 +3339,10 @@ function CardToolbar($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 function toggleDetails(_, isDetailsOpen, actor, actorStore) {
-  var _a, _b, _c, _d;
+  var _a2, _b, _c, _d;
   set(isDetailsOpen, !get$1(isDetailsOpen));
-  (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-    _a,
+  (_b = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b.call(
+    _a2,
     {
       "system.profile.isDetailsOpen": get$1(isDetailsOpen)
     },
@@ -3349,21 +3356,21 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$5 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
-var root_2$3 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var root_1$6 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_2$4 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$2 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$g = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$3 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
+var root$h = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
-  var _a, _b, _c, _d;
+  var _a2, _b, _c, _d;
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let actorStore = /* @__PURE__ */ derived(() => {
-    var _a2, _b2;
-    return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
+    var _a3, _b2;
+    return ((_a3 = actor()) == null ? void 0 : _a3.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
   });
-  let fieldName = state(proxy(((_a = actor()) == null ? void 0 : _a.name) ?? ""));
+  let fieldName = state(proxy(((_a2 = actor()) == null ? void 0 : _a2.name) ?? ""));
   let isDetailsOpen = state(proxy(((_d = (_c = (_b = actor()) == null ? void 0 : _b.system) == null ? void 0 : _c.profile) == null ? void 0 : _d.isDetailsOpen) ?? false));
   user_effect(() => {
     if (!get$1(actorStore)) return;
@@ -3374,9 +3381,9 @@ function Dossier($$anchor, $$props) {
     return () => unsubscribe();
   });
   function saveActorName(event2) {
-    var _a2, _b2, _c2, _d2;
+    var _a3, _b2, _c2, _d2;
     const newName = event2.target.value;
-    (_b2 = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, { name: newName }, { render: true });
+    (_b2 = (_a3 = actor()) == null ? void 0 : _a3.update) == null ? void 0 : _b2.call(_a3, { name: newName }, { render: true });
     (_d2 = (_c2 = get$1(actorStore)) == null ? void 0 : _c2.update) == null ? void 0 : _d2.call(_c2, (store) => ({ ...store, name: newName }));
   }
   function multiply(value, factor) {
@@ -3386,11 +3393,11 @@ function Dossier($$anchor, $$props) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
   function updateStoreName(newName) {
-    var _a2, _b2;
+    var _a3, _b2;
     set(fieldName, proxy(newName));
-    (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
+    (_b2 = (_a3 = get$1(actorStore)) == null ? void 0 : _a3.update) == null ? void 0 : _b2.call(_a3, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$g();
+  var fragment = root$h();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3401,11 +3408,11 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$5();
+      var div_1 = root_1$6();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$3();
+      var div_2 = root_2$4();
       var img = child(div_2);
       img.__click = [handleFilePicker, actor];
       template_effect(() => {
@@ -3428,11 +3435,11 @@ function Dossier($$anchor, $$props) {
     actor,
     actorStore
   ];
-  var text = sibling(child(div_4));
+  var text2 = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3$2();
+      var div_5 = root_3$3();
       var div_6 = child(div_5);
       var input = child(div_6);
       input.__input = [on_input$1, updateStoreName];
@@ -3455,10 +3462,10 @@ function Dossier($$anchor, $$props) {
       var text_6 = child(h3_4);
       template_effect(
         ($0, $1, $2, $3, $4, $5, $6) => {
-          var _a2, _b2, _c2, _d2, _e, _f, _g, _h;
+          var _a3, _b2, _c2, _d2, _e, _f, _g, _h;
           set_value(input, get$1(fieldName));
           set_text(text_1, `${$0 ?? ""}: `);
-          set_text(text_2, ((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
+          set_text(text_2, ((_b2 = (_a3 = actor().system) == null ? void 0 : _a3.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
           set_text(text_3, `${$1 ?? ""}: ${((_d2 = (_c2 = actor().system) == null ? void 0 : _c2.profile) == null ? void 0 : _d2.age) ?? ""}`);
           set_text(text_4, `${$2 ?? ""}: ${((_f = (_e = actor().system) == null ? void 0 : _e.profile) == null ? void 0 : _f.height) ?? ""} cm (${$3 ?? ""} feet)`);
           set_text(text_5, `${$4 ?? ""}: ${((_h = (_g = actor().system) == null ? void 0 : _g.profile) == null ? void 0 : _h.weight) ?? ""} kg (${$5 ?? ""} stones)`);
@@ -3469,13 +3476,13 @@ function Dossier($$anchor, $$props) {
           () => localize(config().traits.age),
           () => localize(config().traits.height),
           () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
+            var _a3, _b2;
+            return multiply(((_b2 = (_a3 = actor().system) == null ? void 0 : _a3.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
           },
           () => localize(config().traits.weight),
           () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
+            var _a3, _b2;
+            return multiply(((_b2 = (_a3 = actor().system) == null ? void 0 : _a3.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
           },
           () => localize(config().sheet.viewbackground)
         ]
@@ -3490,37 +3497,37 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
 delegate(["click", "input"]);
-var root_1$4 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_3$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
+var root_1$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
 var root_4$1 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
-var root_2$2 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root$f = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root_2$3 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root$g = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$f();
+  var fragment = root$g();
   var h3 = first_child(fragment);
-  var text = child(h3);
+  var text2 = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
-      var h1 = root_1$4();
+      var h1 = root_1$5();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, get$1(baseTotal)));
       append($$anchor2, h1);
     };
     var alternate = ($$anchor2) => {
-      var div = root_2$2();
+      var div = root_2$3();
       var node_1 = child(div);
       {
         var consequent_1 = ($$anchor3) => {
-          var i = root_3$1();
+          var i = root_3$2();
           append($$anchor3, i);
         };
         if_block(node_1, ($$render) => {
@@ -3547,7 +3554,7 @@ function AttributeCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize($$props.config.attributes[$$props.key] || $$props.key)
   ]);
   append($$anchor, fragment);
@@ -5086,8 +5093,8 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-var root_1$3 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$e = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_1$4 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$f = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5109,7 +5116,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$e();
+  var fragment = root$f();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5117,13 +5124,13 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_1 = root_1$3();
+    var div_1 = root_1$4();
     var node_2 = child(div_1);
     AttributeCard(node_2, {
       get stat() {
@@ -5142,38 +5149,38 @@ function Attributes($$anchor, $$props) {
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
 }
-var root$d = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$e = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$e();
+  append($$anchor, div);
+}
+var root$d = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$d();
   append($$anchor, div);
 }
-var root$c = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$c();
-  append($$anchor, div);
-}
-var root$b = /* @__PURE__ */ template(`<div>Hello Component</div>`);
+var root$c = /* @__PURE__ */ template(`<div>Hello Component</div>`);
 function SkillsActive($$anchor) {
-  var div = root$b();
+  var div = root$c();
   append($$anchor, div);
 }
 var on_click$1 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$a = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$b = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   actor().skills || [];
-  var fragment = root$a();
+  var fragment = root$b();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5182,7 +5189,7 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
   button.__click = [on_click$1, activeTab];
@@ -5238,7 +5245,7 @@ function Skills($$anchor, $$props) {
   }
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       toggle_class(button, "active", get$1(activeTab) === "active");
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
@@ -5249,10 +5256,37 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$9 = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+var root$a = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  var fragment = root$a();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var h1 = child(div);
+  var text2 = child(h1);
+  var span = sibling(h1, 2);
+  var text_1 = child(span);
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+    },
+    [() => localize(config().health.health)]
+  );
+  append($$anchor, fragment);
+  pop();
+}
+var root$9 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+function Inventory($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
   var fragment = root$9();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5262,39 +5296,12 @@ function Health($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
-  var span = sibling(h1, 2);
-  var text_1 = child(span);
-  template_effect(
-    ($0) => {
-      set_text(text, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
-    },
-    [() => localize(config().health.health)]
-  );
-  append($$anchor, fragment);
-  pop();
-}
-var root$8 = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
-function Inventory($$anchor, $$props) {
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  var fragment = root$8();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var div = sibling(node, 2);
-  var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var span_1 = sibling(h1, 2);
   var text_1 = child(span_1);
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
@@ -5304,8 +5311,8 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$2 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$7 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root_1$3 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root$8 = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5358,9 +5365,9 @@ function CharacterSheetApp($$anchor, $$props) {
     }
   ];
   user_effect(async () => {
-    var _a;
+    var _a2;
     console.log("Actor ID " + $$props.actor.id);
-    if (!((_a = $$props.actor) == null ? void 0 : _a.id)) return;
+    if (!((_a2 = $$props.actor) == null ? void 0 : _a2.id)) return;
     const layout = await $$props.actor.getFlag("sr3e", "customLayout");
     const defaultLayout = defaultCardArray.map((c) => ({ id: c.props.id, span: c.props.span }));
     if (!Array.isArray(layout) || layout.length === 0) {
@@ -5415,12 +5422,12 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$7();
+  var div = root$8();
   var node = sibling(child(div), 4);
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
     let props = () => get$1($$item).props;
-    var div_1 = root_1$2();
+    var div_1 = root_1$3();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -5435,7 +5442,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$6 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5462,16 +5469,16 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  var div = root$6();
+  var div = root$7();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root$5 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root$5();
+  var div = root$6();
   append($$anchor, div);
 }
 const hooks = {
@@ -5490,7 +5497,7 @@ function toggleShoppingState(_, isShoppingState, actor) {
   shoppingState.set(get$1(isShoppingState));
   actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
 }
-var root$4 = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
+var root$5 = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5500,7 +5507,7 @@ function ShoppingCart($$anchor, $$props) {
     set(isShoppingState, proxy(current ?? true));
     if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
   })();
-  var div = root$4();
+  var div = root$5();
   var button = child(div);
   button.__click = [toggleShoppingState, isShoppingState, actor];
   template_effect(
@@ -5561,9 +5568,9 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     return windowContent;
   }
   _injectNeonName(header) {
-    var _a;
+    var _a2;
     let neonSlot = header == null ? void 0 : header.previousElementSibling;
-    if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
+    if (!((_a2 = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a2.contains("neon-name-position"))) {
       neonSlot = document.createElement("div");
       neonSlot.classList.add("neon-name-position");
       header.parentElement.insertBefore(neonSlot, header);
@@ -5648,7 +5655,9 @@ sr3e.common = {
   min: "sr3e.common.min",
   average: "sr3e.common.average",
   description: "sr3e.common.description",
-  priority: "sr3e.common.priority"
+  priority: "sr3e.common.priority",
+  other: "sr3e.common.other",
+  custom: "sr3e.common.custom"
 };
 sr3e.dicepools = {
   dicepools: "sr3e.dicepools.dicepools",
@@ -5686,8 +5695,9 @@ sr3e.traits = {
 sr3e.vision = {
   vision: "sr3e.vision.vision",
   type: "sr3e.vision.type",
-  description: "sr3e.vision.description",
-  rules: "sr3e.vision.rules"
+  normalvision: "sr3e.vision.normalvision",
+  thermographic: "sr3e.vision.thermographic",
+  lowlight: "sr3e.vision.lowlight"
 };
 sr3e.userconfig = {
   setPlayerName: "sr3e.userconfig.setPlayerName",
@@ -5701,8 +5711,33 @@ sr3e.userconfig = {
   saveSettings: "sr3e.userconfig.saveSettings",
   saveUserSettings: "sr3e.userconfig.saveUserSettings"
 };
+sr3e.magic = {
+  adept: "sr3e.magic.adept",
+  magician: "sr3e.magic.magician",
+  fullmage: "sr3e.magic.fullmage",
+  aspectedmage: "sr3e.magic.aspectedmage",
+  conjurer: "sr3e.magic.conjurer",
+  sorcerer: "sr3e.magic.sorcerer ",
+  elementalist: "sr3e.magic.elementalist",
+  hermetic: "sr3e.magic.hermetic",
+  shamanic: "sr3e.magic.shamanic",
+  adeptnote: "sr3e.magic.adeptnote",
+  shamannote: "sr3e.magic.shamannote",
+  type: "sr3e.magic.type",
+  magicianType: "sr3e.magic.magicianType",
+  tradition: "sr3e.magic.tradition",
+  aspect: "sr3e.magic.aspect",
+  canAstrallyProject: "sr3e.magic.canAstrallyProject",
+  usesPowers: "sr3e.magic.usesPowers",
+  focus: "sr3e.magic.focus",
+  resistanceAttribute: "sr3e.magic.resistanceAttribute",
+  totem: "sr3e.magic.totem",
+  priority: "sr3e.magic.priority",
+  spellPoints: "sr3e.magic.spellPoints",
+  powerPoints: "sr3e.magic.powerPoints"
+};
 function injectFooterIntoWindowApp(app, element, ctx, data) {
-  var _a;
+  var _a2;
   const typeSelectors = [
     { type: foundry.applications.sheets.ActorSheetV2, selector: ".actor-footer" },
     { type: foundry.applications.sheets.ItemSheetV2, selector: ".item-footer" }
@@ -5713,7 +5748,7 @@ function injectFooterIntoWindowApp(app, element, ctx, data) {
   const el = (element == null ? void 0 : element.nodeType) === 1 ? element : element == null ? void 0 : element[0];
   if (!el) return;
   if (el.querySelector(match.selector)) return;
-  const isNested = ((_a = el.parentElement) == null ? void 0 : _a.closest(".application")) !== null;
+  const isNested = ((_a2 = el.parentElement) == null ? void 0 : _a2.closest(".application")) !== null;
   if (isNested) return;
   const footer = document.createElement("div");
   footer.classList.add(match.selector.replace(".", ""));
@@ -5918,14 +5953,14 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
   }
 }
 function ok(_, visible, $$props, selected) {
-  var _a;
+  var _a2;
   set(visible, false);
-  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$1(selected));
+  (_a2 = $$props.onclose) == null ? void 0 : _a2.call($$props, get$1(selected));
 }
 function cancel(__1, visible, $$props) {
-  var _a;
+  var _a2;
   set(visible, false);
-  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, null);
+  (_a2 = $$props.onclose) == null ? void 0 : _a2.call($$props, null);
 }
 var on_input = (__2, showDropdown, selected) => {
   set(showDropdown, true);
@@ -5934,8 +5969,8 @@ var on_input = (__2, showDropdown, selected) => {
 var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
 var root_4 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
 var root_5 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
-var root_2$1 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
-var root_1$1 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+var root_2$2 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
+var root_1$2 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
   push($$props, true);
   let visible = state(true);
@@ -5948,7 +5983,7 @@ function JournalSearchModal($$anchor, $$props) {
   user_effect(() => {
     const journals = game.journal.contents;
     set(options, proxy(journals.flatMap((entry) => {
-      var _a;
+      var _a2;
       const items = [
         {
           value: entry.id,
@@ -5956,7 +5991,7 @@ function JournalSearchModal($$anchor, $$props) {
           label: entry.name
         }
       ];
-      for (const page of ((_a = entry.pages) == null ? void 0 : _a.contents) ?? []) {
+      for (const page of ((_a2 = entry.pages) == null ? void 0 : _a2.contents) ?? []) {
         items.push({
           value: page.id,
           type: "page",
@@ -5993,7 +6028,7 @@ function JournalSearchModal($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$1();
+      var div = root_1$2();
       var div_1 = child(div);
       var div_2 = child(div_1);
       var input = child(div_2);
@@ -6007,7 +6042,7 @@ function JournalSearchModal($$anchor, $$props) {
       var node_1 = sibling(div_1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var ul = root_2$1();
+          var ul = root_2$2();
           var node_2 = child(ul);
           {
             var consequent = ($$anchor4) => {
@@ -6017,10 +6052,10 @@ function JournalSearchModal($$anchor, $$props) {
                 var li = root_4();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text = sibling(child(div_4));
+                var text2 = sibling(child(div_4));
                 template_effect(() => {
                   set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                  set_text(text2, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -6065,10 +6100,10 @@ function JournalSearchModal($$anchor, $$props) {
 }
 delegate(["input", "click", "mousedown"]);
 function handleOpen(_, journalId) {
-  var _a;
+  var _a2;
   if (!get$1(journalId)) return;
   const entry = game.journal.get(get$1(journalId));
-  (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
+  (_a2 = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a2.render(true);
 }
 function handleSearch(__1, config, journalId, $$props) {
   const modal = mount(JournalSearchModal, {
@@ -6076,12 +6111,12 @@ function handleSearch(__1, config, journalId, $$props) {
     props: {
       config: config(),
       onclose: (result) => {
-        var _a;
+        var _a2;
         unmount(modal);
         if (result) {
           console.log("User clicked OK", { result });
           set(journalId, proxy(result.value));
-          (_a = $$props.onJournalContentSelected) == null ? void 0 : _a.call($$props, result);
+          (_a2 = $$props.onJournalContentSelected) == null ? void 0 : _a2.call($$props, result);
         } else {
           console.log("User clicked Cancel");
         }
@@ -6095,12 +6130,12 @@ var on_keydown = (e) => {
     e.currentTarget.blur();
   }
 };
-var root$3 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
   const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
-  var div = root$3();
+  var div = root$4();
   div.__click = [on_click];
   div.__keydown = [on_keydown];
   var button = child(div);
@@ -6111,7 +6146,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root$2 = /* @__PURE__ */ template(`<!> <div class="preview journal-content"><!></div>`, 1);
+var root$3 = /* @__PURE__ */ template(`<!> <div class="preview journal-content"><!></div>`, 1);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -6119,13 +6154,13 @@ function JournalViewer($$anchor, $$props) {
   let journalId = state(proxy(item2().system.journalId ?? null));
   let previewContent = state("");
   user_effect(async () => {
-    var _a, _b, _c;
+    var _a2, _b, _c;
     if (!get$1(journalId)) {
       set(previewContent, "");
       return;
     }
     const journal = game.journal.get(get$1(journalId));
-    const page = (_b = (_a = journal == null ? void 0 : journal.pages) == null ? void 0 : _a.contents) == null ? void 0 : _b[0];
+    const page = (_b = (_a2 = journal == null ? void 0 : journal.pages) == null ? void 0 : _a2.contents) == null ? void 0 : _b[0];
     const content = ((_c = page == null ? void 0 : page.text) == null ? void 0 : _c.content) || "";
     set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, { async: true, secrets: false, documents: true })));
   });
@@ -6134,7 +6169,7 @@ function JournalViewer($$anchor, $$props) {
     set(journalId, proxy(result.value));
     await item2().update({ "system.journalId": result.value });
   }
-  var fragment = root$2();
+  var fragment = root$3();
   var node = first_child(fragment);
   bind_this(
     JournalViewerToolbar(node, {
@@ -6155,32 +6190,33 @@ function JournalViewer($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_2 = /* @__PURE__ */ template(`<option> </option>`);
-var root_1 = /* @__PURE__ */ template(`<select></select>`);
-var root_3 = /* @__PURE__ */ template(`<input>`);
-var root$1 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4 class="no-margin"> </h4></div> <div class="stat-label"><!></div></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_1$1 = /* @__PURE__ */ template(`<div class="select-container"><select></select></div>`);
+var root_3$1 = /* @__PURE__ */ template(`<input>`);
+var root$2 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
-  let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
+  let item2 = prop($$props, "item", 7), type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
   function update(e) {
     let val = e.target.value;
     if (type() === "number") val = Number(val);
-    $$props.item.update({ [`${$$props.path}.${$$props.entry.key}`]: val });
+    item2(item2());
+    item2().update({ [`${$$props.path}.${$$props.entry.key}`]: val });
   }
-  var div = root$1();
+  var div = root$2();
   var div_1 = child(div);
   var h4 = child(div_1);
-  var text = child(h4);
-  var div_2 = sibling(div_1, 2);
-  var node = child(div_2);
+  var text2 = child(h4);
+  var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var select = root_1();
+      var div_2 = root_1$1();
+      var select = child(div_2);
       init_select(select, () => $$props.entry.value);
       var select_value;
       select.__change = update;
       each(select, 21, options, index, ($$anchor3, option) => {
-        var option_1 = root_2();
+        var option_1 = root_2$1();
         var option_1_value = {};
         var text_1 = child(option_1);
         template_effect(() => {
@@ -6197,10 +6233,10 @@ function StatCard($$anchor, $$props) {
           select.value = null == (select.__value = $$props.entry.value) ? "" : $$props.entry.value, select_option(select, $$props.entry.value);
         }
       });
-      append($$anchor2, select);
+      append($$anchor2, div_2);
     };
     var alternate = ($$anchor2) => {
-      var input = root_3();
+      var input = root_3$1();
       input.__change = update;
       template_effect(() => {
         set_attribute(input, "type", type());
@@ -6213,13 +6249,13 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(() => set_text(text, $$props.entry.label));
+  template_effect(() => set_text(text2, $$props.entry.label));
   append($$anchor, div);
   pop();
 }
 delegate(["change"]);
-var on_change = (e, item2) => item2().update({ name: e.target.value });
-var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div>`);
+var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
+var root$1 = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -6234,160 +6270,181 @@ function MetahumanApp($$anchor, $$props) {
     {
       key: "min",
       label: localize(common.min),
-      value: system.agerange.min
+      value: system.agerange.min,
+      type: "number"
     },
     {
       key: "average",
       label: localize(common.average),
-      value: system.agerange.average
+      value: system.agerange.average,
+      type: "number"
     },
     {
       key: "max",
       label: localize(common.max),
-      value: system.agerange.max
+      value: system.agerange.max,
+      type: "number"
     }
   ]);
   const height = /* @__PURE__ */ derived(() => [
     {
       key: "min",
       label: localize(common.min),
-      value: system.physical.height.min
+      value: system.physical.height.min,
+      type: "number"
     },
     {
       key: "average",
       label: localize(common.average),
-      value: system.physical.height.average
+      value: system.physical.height.average,
+      type: "number"
     },
     {
       key: "max",
       label: localize(common.max),
-      value: system.physical.height.max
+      value: system.physical.height.max,
+      type: "number"
     }
   ]);
   const weight = /* @__PURE__ */ derived(() => [
     {
       key: "min",
       label: localize(common.min),
-      value: system.physical.weight.min
+      value: system.physical.weight.min,
+      type: "number"
     },
     {
       key: "average",
       label: localize(common.average),
-      value: system.physical.weight.average
+      value: system.physical.weight.average,
+      type: "number"
     },
     {
       key: "max",
       label: localize(common.max),
-      value: system.physical.weight.max
+      value: system.physical.weight.max,
+      type: "number"
     }
   ]);
   const movement = /* @__PURE__ */ derived(() => [
     {
       key: "base",
       label: localize(movementConfig.walking),
-      value: system.movement.base
+      value: system.movement.base,
+      type: "number"
     },
     {
       key: "modifier",
       label: localize(movementConfig.runSpeedModifier),
-      value: system.movement.modifier
+      value: system.movement.modifier,
+      type: "number"
     }
   ]);
   const karma = /* @__PURE__ */ derived(() => [
     {
       key: "factor",
       label: localize(karmaConfig.advancementRatio),
-      value: system.karma.factor
+      value: system.karma.factor,
+      type: "number"
     }
   ]);
   const attributeModifiers = /* @__PURE__ */ derived(() => [
     {
       key: "strength",
       label: localize(attributes.strength),
-      value: system.modifiers.strength
+      value: system.modifiers.strength,
+      type: "number"
     },
     {
       key: "quickness",
       label: localize(attributes.quickness),
-      value: system.modifiers.quickness
+      value: system.modifiers.quickness,
+      type: "number"
     },
     {
       key: "body",
       label: localize(attributes.body),
-      value: system.modifiers.body
+      value: system.modifiers.body,
+      type: "number"
     },
     {
       key: "charisma",
       label: localize(attributes.charisma),
-      value: system.modifiers.charisma
+      value: system.modifiers.charisma,
+      type: "number"
     },
     {
       key: "intelligence",
       label: localize(attributes.intelligence),
-      value: system.modifiers.intelligence
+      value: system.modifiers.intelligence,
+      type: "number"
     },
     {
       key: "willpower",
       label: localize(attributes.willpower),
-      value: system.modifiers.willpower
+      value: system.modifiers.willpower,
+      type: "number"
     }
   ]);
   const attributeLimits = /* @__PURE__ */ derived(() => [
     {
       key: "strength",
       label: localize(attributes.strength),
-      value: system.attributeLimits.strength
+      value: system.attributeLimits.strength,
+      type: "number"
     },
     {
       key: "quickness",
       label: localize(attributes.quickness),
-      value: system.attributeLimits.quickness
+      value: system.attributeLimits.quickness,
+      type: "number"
     },
     {
       key: "body",
       label: localize(attributes.body),
-      value: system.attributeLimits.body
+      value: system.attributeLimits.body,
+      type: "number"
     },
     {
       key: "charisma",
       label: localize(attributes.charisma),
-      value: system.attributeLimits.charisma
+      value: system.attributeLimits.charisma,
+      type: "number"
     },
     {
       key: "intelligence",
       label: localize(attributes.intelligence),
-      value: system.attributeLimits.intelligence
+      value: system.attributeLimits.intelligence,
+      type: "number"
     },
     {
       key: "willpower",
       label: localize(attributes.willpower),
-      value: system.attributeLimits.willpower
+      value: system.attributeLimits.willpower,
+      type: "number"
     }
   ]);
   const vision = /* @__PURE__ */ derived(() => [
     {
       key: "type",
       label: localize(visionConfig.type),
-      value: system.vision.type
-    },
-    {
-      key: "description",
-      label: localize(visionConfig.description),
-      value: system.vision.description
-    },
-    {
-      key: "rules",
-      label: localize(visionConfig.rules),
-      value: system.vision.rules
+      value: system.vision.type,
+      type: "select"
     }
   ]);
   const priorityEntry = /* @__PURE__ */ derived(() => ({
     key: "priority",
     label: "Select Priority",
-    value: system.priority
+    value: system.priority,
+    type: "select"
   }));
+  const visionOptions = [
+    localize(visionConfig.normalvision),
+    localize(visionConfig.lowlight),
+    localize(visionConfig.thermographic)
+  ];
   const priorityOptions = ["C", "D", "E"];
-  var div = root();
+  var div = root$1();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -6395,11 +6452,11 @@ function MetahumanApp($$anchor, $$props) {
   var img = child(div_4);
   var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
   img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
+    var _a2;
+    (_a2 = get$1(event_handler)) == null ? void 0 : _a2.apply(this, $$args);
   };
   var input = sibling(div_4, 2);
-  input.__change = [on_change, item2];
+  input.__change = [on_change$1, item2];
   var node = sibling(input, 2);
   StatCard(node, {
     get item() {
@@ -6409,14 +6466,16 @@ function MetahumanApp($$anchor, $$props) {
       return get$1(priorityEntry);
     },
     path: "system",
-    type: "select",
+    get type() {
+      return get$1(priorityEntry).type;
+    },
     options: priorityOptions
   });
   var div_5 = sibling(div_1, 2);
   var div_6 = child(div_5);
   var div_7 = sibling(child(div_6), 2);
   var h3 = child(div_7);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_8 = sibling(h3, 2);
   each(div_8, 21, () => get$1(agerange), index, ($$anchor2, entry) => {
     StatCard($$anchor2, {
@@ -6427,7 +6486,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.agerange",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_9 = sibling(div_5, 2);
@@ -6445,7 +6506,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.physical.height",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_13 = sibling(div_9, 2);
@@ -6463,7 +6526,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.physical.weight",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_17 = sibling(div_13, 2);
@@ -6481,7 +6546,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.modifiers",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_21 = sibling(div_17, 2);
@@ -6499,7 +6566,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.attributeLimits",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_25 = sibling(div_21, 2);
@@ -6517,7 +6586,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.movement",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_29 = sibling(div_25, 2);
@@ -6535,7 +6606,9 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.karma",
-      type: "number"
+      get type() {
+        return get$1(entry).type;
+      }
     });
   });
   var div_33 = sibling(div_29, 2);
@@ -6543,8 +6616,8 @@ function MetahumanApp($$anchor, $$props) {
   var div_35 = sibling(child(div_34), 2);
   var h3_7 = child(div_35);
   var text_7 = child(h3_7);
-  var div_36 = sibling(h3_7, 2);
-  each(div_36, 21, () => get$1(vision), index, ($$anchor2, entry) => {
+  var node_1 = sibling(h3_7, 2);
+  each(node_1, 17, () => get$1(vision), index, ($$anchor2, entry) => {
     StatCard($$anchor2, {
       get item() {
         return item2();
@@ -6553,14 +6626,17 @@ function MetahumanApp($$anchor, $$props) {
         return get$1(entry);
       },
       path: "system.vision",
-      type: "text"
+      get type() {
+        return get$1(entry).type;
+      },
+      options: visionOptions
     });
   });
-  var div_37 = sibling(div_33, 2);
-  var div_38 = child(div_37);
-  var div_39 = sibling(child(div_38), 2);
-  var node_1 = child(div_39);
-  JournalViewer(node_1, {
+  var div_36 = sibling(div_34, 2);
+  var div_37 = child(div_36);
+  var div_38 = sibling(child(div_37), 2);
+  var node_2 = child(div_38);
+  JournalViewer(node_2, {
     get item() {
       return item2();
     },
@@ -6573,7 +6649,7 @@ function MetahumanApp($$anchor, $$props) {
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, $1);
       set_text(text_2, $2);
       set_text(text_3, $3);
@@ -6603,11 +6679,14 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     super(...arguments);
     __privateAdd(this, _metahuman);
   }
+  get title() {
+    return `${game.i18n.localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
+  }
   static get DEFAULT_OPTIONS() {
     return {
       ...super.DEFAULT_OPTIONS,
       id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
-      classes: ["sr3e", "sheet", "item", "magic"],
+      classes: ["sr3e", "sheet", "item", "metahuman"],
       template: null,
       position: { width: "auto", height: "auto" },
       window: {
@@ -6646,7 +6725,287 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metahuman = new WeakMap();
-class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+var on_change = (e, item2) => item2().update({ name: e.target.value });
+var root_2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div>`);
+var root_1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
+var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div>`);
+var root = /* @__PURE__ */ template(`<div class="meta-human-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div>`);
+function MagicApp($$anchor, $$props) {
+  push($$props, true);
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  const system = proxy(item2().system);
+  const awakened = system.awakened || {};
+  const magicianData = proxy(system.magicianData);
+  awakened.adeptData || {};
+  const labels = config().magic || {};
+  const priorityOptions = ["A", "B"];
+  const archetypeOptions = [
+    localize(config().magic.adept),
+    localize(config().magic.magician)
+  ];
+  const magicianTypeOptions = [
+    localize(config().magic.fullmage),
+    localize(config().magic.aspectedmage)
+  ];
+  const aspectsOptions = [
+    localize(config().magic.conjurer),
+    localize(config().magic.sorcerer),
+    localize(config().magic.elementalist),
+    localize(config().common.custom)
+  ];
+  const resistanceAttributeOptions = [
+    localize(config().attributes.willpower),
+    localize(config().attributes.charisma),
+    localize(config().attributes.intelligence)
+  ];
+  const traditionOptions = [
+    localize(config().magic.hermetic),
+    localize(config().magic.shamanic),
+    localize(config().common.other)
+  ];
+  let archetype = proxy(awakened.archetype);
+  const archetypeEntry = {
+    key: "archetype",
+    label: localize(labels.archetype),
+    value: archetype,
+    type: "select",
+    options: archetypeOptions
+  };
+  let priority = proxy(awakened.priority);
+  const priorityEntry = {
+    key: "priority",
+    label: localize(labels.priority),
+    value: priority,
+    type: "select",
+    options: priorityOptions
+  };
+  let magicianType = proxy(magicianData.magicianType);
+  let aspect = proxy(magicianData.aspect);
+  let tradition = proxy(magicianData.tradition);
+  let drainResistanceAttribute = proxy(magicianData.drainResistanceAttribute);
+  let canAstrallyProject = proxy(magicianData.canAstrallyProject);
+  let totem = proxy(magicianData.totem ?? localize(config().magic.shamannote));
+  const magicianFields = [
+    {
+      key: "tradition",
+      label: localize(labels.tradition),
+      value: tradition,
+      type: "select",
+      options: traditionOptions
+    },
+    {
+      key: "drainResistanceAttribute",
+      label: localize(labels.drainResistanceAttribute),
+      value: drainResistanceAttribute,
+      type: "select",
+      options: resistanceAttributeOptions
+    },
+    {
+      key: "canAstrallyProject",
+      label: localize(labels.canAstrallyProject),
+      value: canAstrallyProject,
+      type: "checkbox"
+    },
+    {
+      key: "totem",
+      label: localize(labels.totem),
+      value: totem,
+      type: "text"
+    }
+  ];
+  const adeptFields = [];
+  let isAspected = /* @__PURE__ */ derived(() => magicianType === localize(config().magic.aspectedmage));
+  user_effect(() => {
+    console.log({ magicianType });
+    console.log("isAspected:", get$1(isAspected));
+  });
+  var div = root();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = sibling(child(div_2), 2);
+  var div_4 = child(div_3);
+  var img = child(div_4);
+  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
+  img.__click = function(...$$args) {
+    var _a2;
+    (_a2 = get$1(event_handler)) == null ? void 0 : _a2.apply(this, $$args);
+  };
+  var input = sibling(div_4, 2);
+  input.__change = [on_change, item2];
+  var node = sibling(input, 2);
+  StatCard(node, {
+    get item() {
+      return item2();
+    },
+    entry: archetypeEntry,
+    path: "system.awakened",
+    type: "select",
+    options: archetypeOptions
+  });
+  var node_1 = sibling(node, 2);
+  StatCard(node_1, {
+    get item() {
+      return item2();
+    },
+    entry: priorityEntry,
+    path: "system.awakened",
+    type: "select",
+    options: priorityOptions
+  });
+  var node_2 = sibling(div_1, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var fragment = root_1();
+      var div_5 = first_child(fragment);
+      var div_6 = child(div_5);
+      var div_7 = sibling(child(div_6), 2);
+      var node_3 = child(div_7);
+      const expression = /* @__PURE__ */ derived(() => ({
+        key: "magicianType",
+        label: localize(labels.magicianType),
+        value: magicianType
+      }));
+      StatCard(node_3, {
+        get item() {
+          return item2();
+        },
+        get entry() {
+          return get$1(expression);
+        },
+        path: "system.magicianData",
+        type: "select",
+        options: magicianTypeOptions
+      });
+      var node_4 = sibling(div_5, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var div_8 = root_2();
+          var div_9 = child(div_8);
+          var div_10 = sibling(child(div_9), 2);
+          var node_5 = child(div_10);
+          const expression_1 = /* @__PURE__ */ derived(() => ({
+            key: "aspect",
+            label: localize(labels.aspect),
+            value: aspect
+          }));
+          StatCard(node_5, {
+            get item() {
+              return item2();
+            },
+            get entry() {
+              return get$1(expression_1);
+            },
+            path: "system.magicianData",
+            type: "select",
+            options: aspectsOptions
+          });
+          append($$anchor3, div_8);
+        };
+        if_block(node_4, ($$render) => {
+          if (!get$1(isAspected)) $$render(consequent);
+        });
+      }
+      var node_6 = sibling(node_4, 2);
+      each(node_6, 17, () => magicianFields, index, ($$anchor3, entry) => {
+        var div_11 = root_3();
+        var div_12 = child(div_11);
+        var div_13 = sibling(child(div_12), 2);
+        var h3 = child(div_13);
+        var text2 = child(h3);
+        var node_7 = sibling(h3, 2);
+        StatCard(node_7, {
+          get item() {
+            return item2();
+          },
+          get entry() {
+            return get$1(entry);
+          },
+          path: `system.magicianData`,
+          get type() {
+            return get$1(entry).type;
+          },
+          get options() {
+            return get$1(entry).options;
+          }
+        });
+        template_effect(() => set_text(text2, get$1(entry).label));
+        append($$anchor3, div_11);
+      });
+      append($$anchor2, fragment);
+    };
+    var alternate = ($$anchor2) => {
+      var fragment_1 = comment();
+      var node_8 = first_child(fragment_1);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var fragment_2 = comment();
+          var node_9 = first_child(fragment_2);
+          each(node_9, 17, () => adeptFields, index, ($$anchor4, entry) => {
+            var div_14 = root_6();
+            var div_15 = child(div_14);
+            var div_16 = sibling(child(div_15), 2);
+            var h3_1 = child(div_16);
+            var text_1 = child(h3_1);
+            var node_10 = sibling(h3_1, 2);
+            StatCard(node_10, {
+              get item() {
+                return item2();
+              },
+              get entry() {
+                return get$1(entry);
+              },
+              path: `system.awakened.adeptData`,
+              get type() {
+                return get$1(entry).type;
+              },
+              get options() {
+                return get$1(entry).options;
+              }
+            });
+            template_effect(() => set_text(text_1, get$1(entry).label));
+            append($$anchor4, div_14);
+          });
+          append($$anchor3, fragment_2);
+        };
+        if_block(
+          node_8,
+          ($$render) => {
+            if (awakened.archetype === archetypeOptions[0]) $$render(consequent_2);
+          },
+          true
+        );
+      }
+      append($$anchor2, fragment_1);
+    };
+    if_block(node_2, ($$render) => {
+      if (awakened.archetype === archetypeOptions[1]) $$render(consequent_1);
+      else $$render(alternate, false);
+    });
+  }
+  var div_17 = sibling(node_2, 2);
+  var div_18 = child(div_17);
+  var div_19 = sibling(child(div_18), 2);
+  var node_11 = child(div_19);
+  JournalViewer(node_11, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    }
+  });
+  template_effect(() => {
+    set_attribute(img, "src", item2().img);
+    set_attribute(img, "title", item2().name);
+    set_attribute(img, "alt", item2().name);
+  });
+  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "change"]);
+let MagicItemSheet$1 = (_a = class extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
     __privateAdd(this, _magic);
@@ -6657,9 +7016,9 @@ class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
       id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
       classes: ["sr3e", "sheet", "item", "magic"],
       template: null,
-      position: { width: 820, height: 820 },
+      position: { width: "auto", height: "auto" },
       window: {
-        resizable: true
+        resizable: false
       },
       tag: "form",
       submitOnChange: true,
@@ -6670,6 +7029,125 @@ class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     return null;
   }
   _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _magic)) {
+      unmount(__privateGet(this, _magic));
+      __privateSet(this, _magic, null);
+    }
+    __privateSet(this, _magic, mount(MagicApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}, _magic = new WeakMap(), _a);
+class MagicModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      // INFO: select [none, adept, magician] (selection and localization handled by svelte, this only stores result)
+      awakened: new foundry.data.fields.SchemaField({
+        archetype: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        priority: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        })
+      }),
+      magicianData: new foundry.data.fields.SchemaField({
+        // INFO: displays only if magicCategory is "magician"
+        // INFO: full or aspected (select)
+        magicianType: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        // INFO: (free text)
+        tradition: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        // INFO: free text, localized and validated in UI only
+        drainResistanceAttribute: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        // INFO: select, displays only if aspected is selected
+        aspect: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        // INFO: bool, displays only if magicianType is "full"
+        canAstrallyProject: new foundry.data.fields.BooleanField({
+          required: false,
+          initial: false
+        }),
+        // INFO: shows only if shaman is selected as tradition
+        totem: new foundry.data.fields.StringField({
+          required: false,
+          initial: ""
+        }),
+        // INFO: hidden from player, calculated on character creation?
+        spellPoints: new foundry.data.fields.NumberField({
+          required: false,
+          initial: 0
+        })
+      }),
+      adeptData: new foundry.data.fields.SchemaField({
+        // INFO: displays only if magicCategory is "adept"
+        powerPoints: new foundry.data.fields.NumberField({
+          required: false,
+          initial: 0
+        })
+      })
+    };
+  }
+}
+function WeaponApp($$anchor) {
+  var text$1 = text("Hello Weapon");
+  append($$anchor, text$1);
+}
+class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _magic2);
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "weapon"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _magic2)) {
+      unmount(__privateGet(this, _magic2));
+      __privateSet(this, _magic2, null);
+    }
+    __privateSet(this, _magic2, mount(WeaponApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
     return windowContent;
   }
   /** @override prevent submission, since Svelte is managing state */
@@ -6677,39 +7155,87 @@ class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     return;
   }
 }
-_magic = new WeakMap();
-class MagicModel extends foundry.abstract.TypeDataModel {
+_magic2 = new WeakMap();
+class CommodityModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      type: new foundry.data.fields.StringField({
-        required: false,
-        initial: ""
+      days: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
       }),
-      focus: new foundry.data.fields.StringField({
-        required: false,
-        initial: ""
+      cost: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
       }),
-      drainResistanceAttribute: new foundry.data.fields.StringField({
-        required: false,
-        initial: ""
+      streetIndex: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 1
       }),
-      totem: new foundry.data.fields.StringField({
-        required: false,
-        initial: ""
+      legality: new foundry.data.fields.SchemaField({
+        restrictionLevel: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0
+        }),
+        type: new foundry.data.fields.StringField({ required: false, initial: "" }),
+        category: new foundry.data.fields.StringField({ required: false, initial: "" })
       }),
-      priority: new foundry.data.fields.StringField({
+      isBroken: new foundry.data.fields.BooleanField({ initial: false }),
+      description: new foundry.data.fields.StringField({
         required: false,
-        initial: ""
+        initial: "Enter your description"
       })
+    };
+  }
+}
+class PortabilityModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      conceal: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      weight: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      })
+    };
+  }
+}
+class WeaponModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      damage: new foundry.data.fields.StringField({
+        required: true,
+        initial: "N/A"
+      }),
+      mode: new foundry.data.fields.StringField({
+        required: true,
+        initial: "semi-automatic"
+      }),
+      range: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true
+      }),
+      recoilComp: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      currentClipId: new foundry.data.fields.StringField({
+        required: false,
+        nullable: true
+      }),
+      ...PortabilityModel.defineSchema(),
+      ...CommodityModel.defineSchema()
     };
   }
 }
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
-    var _a;
+    var _a2;
     const docName = docClass.documentName;
-    (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
+    (_a2 = CONFIG[docName]).dataModels || (_a2.dataModels = {});
     CONFIG[docName].dataModels[type] = model;
     DocumentSheetConfig.registerSheet(
       docClass,
@@ -6725,6 +7251,26 @@ function configureProject() {
   CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
+  CONFIG.fontDefinitions["Neanderthaw"] = {
+    editor: true,
+    fonts: [
+      {
+        urls: ["systems/sr3e/fonts/Neonderthaw/Neonderthaw-Regular.ttf"],
+        weight: 400,
+        style: "normal"
+      }
+    ]
+  };
+  CONFIG.fontDefinitions["VT323"] = {
+    editor: true,
+    fonts: [
+      {
+        urls: ["systems/sr3e/fonts/VT323/VT323-Regular.ttf"],
+        weight: 400,
+        style: "normal"
+      }
+    ]
+  };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }
@@ -6745,8 +7291,8 @@ function configureThemes() {
   });
 }
 function wrapContent(root2) {
-  var _a;
-  if (!root2 || ((_a = root2.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component"))) return;
+  var _a2;
+  if (!root2 || ((_a2 = root2.firstElementChild) == null ? void 0 : _a2.classList.contains("sheet-component"))) return;
   const existing = Array.from(root2.children);
   const sheetComponent = document.createElement("div");
   sheetComponent.classList.add("sheet-component");
@@ -6763,8 +7309,8 @@ function wrapContent(root2) {
 }
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
-    var _a;
-    if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
+    var _a2;
+    if ((_a2 = element.firstElementChild) == null ? void 0 : _a2.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
       { type: foundry.applications.sheets.journal.JournalEntryPageSheet },
@@ -6798,7 +7344,8 @@ function registerHooks() {
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet }
+        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet$1 },
+        { docClass: Item, type: "weapon", model: WeaponModel, sheet: MagicItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

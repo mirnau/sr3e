@@ -27,7 +27,9 @@
       "min": "Minimum",
       "average": "Average",
       "description": "Description",
-      "priority": "Priority"
+      "priority": "Priority",
+      "custom": "Custom",
+      "other": "Other"
     },
     "dicepools": {
       "dicepools": "Dice Pools",
@@ -43,6 +45,32 @@
       "karmaPool": "Karma Pool",
       "advancementRatio": "Advancement Ratio"
     },
+    "magic": {
+      "adept": "Adept",
+      "magician": "Magician",
+      "fullmage": "Full",
+      "aspectedmage": "Aspected",
+      "conjurer": "Conjurer",
+      "sorcerer ": "sorcerer ",
+      "elementalist": "Elementalist",
+      "hermetic": "Hermetic",
+      "shamanic": "Shamanic",
+      "adeptnote": "Short note",
+      "shamannote": "Applies to Shamans",
+      "type": "Awakened Type",
+      "magicianType": "Magician Type",
+      "tradition": "Tradition",
+      "aspect": "Aspect",
+      "canAstrallyProject": "Can Astrally Project",
+      "usesPowers": "Uses Powers",
+      "focus": "Focus",
+      "resistanceAttribute": "Drain Resistance Attribute",
+      "totem": "Totem",
+      "priority": "Priority",
+      "spellPoints": "Spell Points",
+      "powerPoints": "Power Points"
+    },
+
     "movement": {
       "movement": "Movement",
       "walking": "Walking Speed",
@@ -77,8 +105,9 @@
     "vision": {
       "vision": "Vision",
       "type": "Type",
-      "description": "Description",
-      "rules": "Rules"
+      "normalvision": "Normal vision",
+      "thermographic": "Thermographic vision",
+      "lowlight": "Low-light vision"
     }
   }
 }

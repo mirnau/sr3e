@@ -15,13 +15,24 @@
     const traits = config.traits;
 
     const agerange = $derived([
-        { key: "min", label: localize(common.min), value: system.agerange.min },
+        {
+            key: "min",
+            label: localize(common.min),
+            value: system.agerange.min,
+            type: "number",
+        },
         {
             key: "average",
             label: localize(common.average),
             value: system.agerange.average,
+            type: "number",
         },
-        { key: "max", label: localize(common.max), value: system.agerange.max },
+        {
+            key: "max",
+            label: localize(common.max),
+            value: system.agerange.max,
+            type: "number",
+        },
     ]);
 
     const height = $derived([
@@ -29,16 +40,19 @@
             key: "min",
             label: localize(common.min),
             value: system.physical.height.min,
+            type: "number",
         },
         {
             key: "average",
             label: localize(common.average),
             value: system.physical.height.average,
+            type: "number",
         },
         {
             key: "max",
             label: localize(common.max),
             value: system.physical.height.max,
+            type: "number",
         },
     ]);
 
@@ -47,16 +61,19 @@
             key: "min",
             label: localize(common.min),
             value: system.physical.weight.min,
+            type: "number",
         },
         {
             key: "average",
             label: localize(common.average),
             value: system.physical.weight.average,
+            type: "number",
         },
         {
             key: "max",
             label: localize(common.max),
             value: system.physical.weight.max,
+            type: "number",
         },
     ]);
 
@@ -65,11 +82,13 @@
             key: "base",
             label: localize(movementConfig.walking),
             value: system.movement.base,
+            type: "number",
         },
         {
             key: "modifier",
             label: localize(movementConfig.runSpeedModifier),
             value: system.movement.modifier,
+            type: "number",
         },
     ]);
 
@@ -78,6 +97,7 @@
             key: "factor",
             label: localize(karmaConfig.advancementRatio),
             value: system.karma.factor,
+            type: "number",
         },
     ]);
 
@@ -86,31 +106,37 @@
             key: "strength",
             label: localize(attributes.strength),
             value: system.modifiers.strength,
+            type: "number",
         },
         {
             key: "quickness",
             label: localize(attributes.quickness),
             value: system.modifiers.quickness,
+            type: "number",
         },
         {
             key: "body",
             label: localize(attributes.body),
             value: system.modifiers.body,
+            type: "number",
         },
         {
             key: "charisma",
             label: localize(attributes.charisma),
             value: system.modifiers.charisma,
+            type: "number",
         },
         {
             key: "intelligence",
             label: localize(attributes.intelligence),
             value: system.modifiers.intelligence,
+            type: "number",
         },
         {
             key: "willpower",
             label: localize(attributes.willpower),
             value: system.modifiers.willpower,
+            type: "number",
         },
     ]);
 
@@ -119,31 +145,37 @@
             key: "strength",
             label: localize(attributes.strength),
             value: system.attributeLimits.strength,
+            type: "number",
         },
         {
             key: "quickness",
             label: localize(attributes.quickness),
             value: system.attributeLimits.quickness,
+            type: "number",
         },
         {
             key: "body",
             label: localize(attributes.body),
             value: system.attributeLimits.body,
+            type: "number",
         },
         {
             key: "charisma",
             label: localize(attributes.charisma),
             value: system.attributeLimits.charisma,
+            type: "number",
         },
         {
             key: "intelligence",
             label: localize(attributes.intelligence),
             value: system.attributeLimits.intelligence,
+            type: "number",
         },
         {
             key: "willpower",
             label: localize(attributes.willpower),
             value: system.attributeLimits.willpower,
+            type: "number",
         },
     ]);
 
@@ -152,16 +184,7 @@
             key: "type",
             label: localize(visionConfig.type),
             value: system.vision.type,
-        },
-        {
-            key: "description",
-            label: localize(visionConfig.description),
-            value: system.vision.description,
-        },
-        {
-            key: "rules",
-            label: localize(visionConfig.rules),
-            value: system.vision.rules,
+            type: "select",
         },
     ]);
 
@@ -169,7 +192,15 @@
         key: "priority",
         label: "Select Priority",
         value: system.priority,
+        type: "select",
     });
+
+    const visionOptions = [
+        localize(visionConfig.normalvision),
+        localize(visionConfig.lowlight),
+        localize(visionConfig.thermographic),
+    ];
+
     const priorityOptions = ["C", "D", "E"];
 </script>
 
@@ -200,7 +231,7 @@
                     {item}
                     entry={priorityEntry}
                     path="system"
-                    type="select"
+                    type={priorityEntry.type}
                     options={priorityOptions}
                 />
             </div>
@@ -219,7 +250,7 @@
                             {item}
                             {entry}
                             path="system.agerange"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -239,7 +270,7 @@
                             {item}
                             {entry}
                             path="system.physical.height"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -259,7 +290,7 @@
                             {item}
                             {entry}
                             path="system.physical.weight"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -279,7 +310,7 @@
                             {item}
                             {entry}
                             path="system.modifiers"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -299,7 +330,7 @@
                             {item}
                             {entry}
                             path="system.attributeLimits"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -319,7 +350,7 @@
                             {item}
                             {entry}
                             path="system.movement"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -339,7 +370,7 @@
                             {item}
                             {entry}
                             path="system.karma"
-                            type="number"
+                            type={entry.type}
                         />
                     {/each}
                 </div>
@@ -353,25 +384,24 @@
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(config.vision.vision)}</h3>
-                <div class="stat-grid one-column">
                     {#each vision as entry}
                         <StatCard
                             {item}
                             {entry}
                             path="system.vision"
-                            type="text"
+                            type={entry.type}
+                            options={visionOptions}
                         />
                     {/each}
-                </div>
             </div>
         </div>
-    </div>
 
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <JournalViewer item={item} config={config}/>
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <JournalViewer {item} {config} />
+                </div>
             </div>
         </div>
     </div>

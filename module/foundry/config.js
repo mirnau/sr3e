@@ -32,6 +32,8 @@ sr3e.common = {
     average: "sr3e.common.average",
     description: "sr3e.common.description",
     priority: "sr3e.common.priority",
+    other: "sr3e.common.other",
+    custom: "sr3e.common.custom",
 }
 
 sr3e.dicepools = {
@@ -74,8 +76,9 @@ sr3e.traits = {
 sr3e.vision = {
     vision: "sr3e.vision.vision",
     type: "sr3e.vision.type",
-    description: "sr3e.vision.description",
-    rules: "sr3e.vision.rules",
+    normalvision: "sr3e.vision.normalvision",
+    thermographic: "sr3e.vision.thermographic",
+    lowlight: "sr3e.vision.lowlight",
 }
 
 sr3e.userconfig = {
@@ -90,3 +93,29 @@ sr3e.userconfig = {
     saveSettings: "sr3e.userconfig.saveSettings",
     saveUserSettings: "sr3e.userconfig.saveUserSettings",
 }
+
+sr3e.magic = {
+  adept: "sr3e.magic.adept",
+  magician: "sr3e.magic.magician",
+  fullmage: "sr3e.magic.fullmage",
+  aspectedmage: "sr3e.magic.aspectedmage",
+  conjurer: "sr3e.magic.conjurer",
+  sorcerer : "sr3e.magic.sorcerer ",
+  elementalist: "sr3e.magic.elementalist",
+  hermetic: "sr3e.magic.hermetic",
+  shamanic: "sr3e.magic.shamanic",
+  adeptnote: "sr3e.magic.adeptnote",
+  shamannote: "sr3e.magic.shamannote",
+  type: "sr3e.magic.type",
+  magicianType: "sr3e.magic.magicianType",
+  tradition: "sr3e.magic.tradition",
+  aspect: "sr3e.magic.aspect",
+  canAstrallyProject: "sr3e.magic.canAstrallyProject",
+  usesPowers: "sr3e.magic.usesPowers",
+  focus: "sr3e.magic.focus",
+  resistanceAttribute: "sr3e.magic.resistanceAttribute",
+  totem: "sr3e.magic.totem",
+  priority: "sr3e.magic.priority",
+  spellPoints: "sr3e.magic.spellPoints",
+  powerPoints: "sr3e.magic.powerPoints"
+};

@@ -1,4 +1,4 @@
-import MagicApp from "../../svelte/apps/MagicApp.svelte";
+import WeaponApp from "../../svelte/apps/WeaponApp.svelte";
 import { mount, unmount } from "svelte";
 
 export default class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
@@ -9,7 +9,7 @@ export default class MagicItemSheet extends foundry.applications.sheets.ItemShee
         return {
             ...super.DEFAULT_OPTIONS,
             id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
-            classes: ["sr3e", "sheet", "item", "magic"],
+            classes: ["sr3e", "sheet", "item", "weapon"],
             template: null,
             position: { width: 'auto', height: 'auto' },
             window: {
@@ -31,7 +31,7 @@ export default class MagicItemSheet extends foundry.applications.sheets.ItemShee
             this.#magic = null;
         }
 
-        this.#magic = mount(MagicApp, {
+        this.#magic = mount(WeaponApp, {
             target: windowContent,
             props: {
                 item: this.document,

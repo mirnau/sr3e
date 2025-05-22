@@ -42,10 +42,13 @@
     @import "./styling/components/component-form-group.less";
     @import "./styling/components/sr3e-window-header.less";
     @import "./styling/components/sr3e-button.less";
-    @import "./styling/skinning/sr3e-img.less";
+    @import "./styling/components/sr3e-img.less";
+    @import "./styling/components/sr3e-select.less";
     @import "./styling/components/sr3e-scrollbar.less";
     @import "./styling/components/sr3e-input.less";
     @import "./styling/components/sr3e-window-content.less";
+
+    //Custom
     @import "./styling/custom-components/sr3e-folder-tab-structure.less";
     @import "./styling/custom-components/sr3e-journal-viewer.less";
 
@@ -63,4 +66,9 @@
 
     @import "./styling/skinning/sr3e-input-range.less";
     @import "./styling/layout-sheet-component.less";
+
+    section.body.flexcol.scrollable {
+        overflow-y: auto;
+        max-height: 20rem;
+    }
 }

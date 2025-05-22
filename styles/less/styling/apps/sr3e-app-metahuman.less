@@ -1,39 +1,73 @@
-  .meta-human-grid {
-      /* Set a fixed or max width and center it */
-      width: 40rem;
-      margin: 0 auto;
-      column-count: 2;
-      column-gap: 0.5rem;
+.sr3e.sheet.item {
+    .meta-human-grid {
+        width: 40rem;
+        margin: 0 auto;
+        column-count: 2;
+        column-gap: 0.5rem;
+
+        .item-sheet-component {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            break-inside: avoid;
+
+            .sr3e-inner-background-container {
+                .fake-shadow {
+                    .fake-shadow(@default-fake-shadow-color);
+                    .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
+                }
+
+                .sr3e-inner-background {
+                    display: grid;
+                    background-color: @default-fake-shadow-color;
+
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        inset: 1px;
+                        z-index: -1;
+                        background: @default-sr3e-inner-background-color;
+                        box-shadow: inset 0 0 30px #1d282c;
+                        pointer-events: none;
+                        .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
+                    }
+
+                    .stat-card {
+
+                        .select-container {
+                            width: 100%;
+                            display: block;
+                            padding: 0.25rem;
+
+                            select {
+                                .clipped-corners(0.25rem, 0.25rem, .75rem, 0.25rem);
+                            }
+                        }
 
 
-      .item-sheet-component {
-          display: inline-block;
-          width: 100%;
-          margin-bottom: 0.5rem;
-          break-inside: avoid;
-      }
+                        input {
+                            width: 100%;
+                            box-sizing: border-box;
+                            padding: 0.25rem;
+                            font: inherit;
+                            margin: 0;
+                            color: @h1-color;
+                            font-size: 1.5rem;
+                            text-indent: 0;
+                            .clipped-corners(0.25rem, 0.25rem, .75rem, 0.25rem);
+                        }
 
-      .inner-background-container {
+                        h4 {
+                            margin: 0;
+                        }
 
-          //.fake-shadow { background-color: magenta; }
-
-          .inner-background {
-              display: grid;
-              text-align: center;
-
-              .stat-card {
-                  background-color: @metahuman-stat-card-color;
-
-                  //.stat-value {}
-
-                  .stat-label {
-                      background-color: @metahuman-stat-card-label-color;
-                  }
-
-                  &:hover {
-                      z-index: 10;
-                  }
-              }
-          }
-      }
-  }
+                        padding: 0.25rem;
+                        text-align: center;
+                        text-indent: 0; // 'none' is invalid for text-indent
+                        background-color: @metahuman-stat-card-color;
+                    }
+                }
+            }
+        }
+    }
+}

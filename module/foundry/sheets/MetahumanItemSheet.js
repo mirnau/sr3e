@@ -5,11 +5,15 @@ export default class MetahumanItemSheet extends foundry.applications.sheets.Item
 
     #metahuman;
 
+    get title() {
+        return `${game.i18n.localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
+    }
+
     static get DEFAULT_OPTIONS() {
         return {
             ...super.DEFAULT_OPTIONS,
             id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
-            classes: ["sr3e", "sheet", "item", "magic"],
+            classes: ["sr3e", "sheet", "item", "metahuman"],
             template: null,
             position: { width: 'auto', height: 'auto' },
             window: {

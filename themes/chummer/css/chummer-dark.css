@@ -1,3 +1,8 @@
+* {
+  /* Define your scrollbar‐color variable */
+  --color-scrollbar: #ff009572;
+  /* fallback example */
+}
 /*
 @import "./styling/skinning/sr3e-button.less";
 @import "./styling/skinning/sr3e-input.less";

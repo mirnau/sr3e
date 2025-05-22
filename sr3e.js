@@ -9,6 +9,8 @@ import MetahumanModel from "./module/models/item/MetahumanModel.js";
 import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
 import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MagicModel from "./module/models/item/MagicModel.js";
+import WeaponItemSheet from "./module/foundry/sheets/WeaponItemSheet.js";
+import WeaponModel from "./module/models/item/WeaponModel.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -32,6 +34,29 @@ function configureProject() {
   CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
+  CONFIG.fontDefinitions["Neanderthaw"] = {
+    editor: true,
+    fonts: [
+      {
+        urls: ["systems/sr3e/fonts/Neonderthaw/Neonderthaw-Regular.ttf"],
+        weight: 400,
+        style: "normal"
+      }
+    ]
+  };
+
+  CONFIG.fontDefinitions["VT323"] = {
+    editor: true,
+    fonts: [
+      {
+        urls: ["systems/sr3e/fonts/VT323/VT323-Regular.ttf"],
+        weight: 400,
+        style: "normal"
+      }
+    ]
+  };
+
+
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }
@@ -109,7 +134,7 @@ function registerHooks() {
     if (typeDeselectors.some(entry => app instanceof entry.type)) return;
     if (!typeSelectors.some(entry => app instanceof entry.type)) return;
 
-     wrapContent(element);
+    wrapContent(element);
 
   });
 
@@ -123,7 +148,8 @@ function registerHooks() {
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet }
+        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
+        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet}
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");
