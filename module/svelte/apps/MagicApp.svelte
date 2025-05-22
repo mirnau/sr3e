@@ -98,10 +98,11 @@
 
   const adeptFields = [];
 
-  let isAspected = $derived(
-    magicianType === localize(config.magic.aspectedmage),
-  );
+  let isAspected = $state(false);
 
+  $effect(() => {
+    isAspected = magicianType === localize(config.magic.aspectedmage);
+  });
 </script>
 
 <div class="meta-human-grid">
@@ -168,7 +169,7 @@
     </div>
 
     <!-- aspect statcard -->
-    {#if !isAspected}
+    {#if isAspected}
       <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>

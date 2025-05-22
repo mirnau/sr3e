@@ -6815,10 +6815,9 @@ function MagicApp($$anchor, $$props) {
     }
   ];
   const adeptFields = [];
-  let isAspected = /* @__PURE__ */ derived(() => magicianType === localize(config().magic.aspectedmage));
+  let isAspected = state(false);
   user_effect(() => {
-    console.log({ magicianType });
-    console.log("isAspected:", get$1(isAspected));
+    set(isAspected, magicianType === localize(config().magic.aspectedmage));
   });
   var div = root();
   var div_1 = child(div);
@@ -6903,7 +6902,7 @@ function MagicApp($$anchor, $$props) {
           append($$anchor3, div_8);
         };
         if_block(node_4, ($$render) => {
-          if (!get$1(isAspected)) $$render(consequent);
+          if (get$1(isAspected)) $$render(consequent);
         });
       }
       var node_6 = sibling(node_4, 2);
