@@ -58,7 +58,7 @@ sr3e.movement = {
     runSpeedModifier: "sr3e.movement.runSpeedModifier",
 }
 
-sr3e.sheet = { 
+sr3e.sheet = {
     details: "sr3e.sheet.details",
     viewbackground: "sr3e.sheet.viewbackground",
     buyupgrades: "sr3e.sheet.buyupgrades",
@@ -95,27 +95,60 @@ sr3e.userconfig = {
 }
 
 sr3e.magic = {
-  adept: "sr3e.magic.adept",
-  magician: "sr3e.magic.magician",
-  fullmage: "sr3e.magic.fullmage",
-  aspectedmage: "sr3e.magic.aspectedmage",
-  conjurer: "sr3e.magic.conjurer",
-  sorcerer : "sr3e.magic.sorcerer ",
-  elementalist: "sr3e.magic.elementalist",
-  hermetic: "sr3e.magic.hermetic",
-  shamanic: "sr3e.magic.shamanic",
-  adeptnote: "sr3e.magic.adeptnote",
-  shamannote: "sr3e.magic.shamannote",
-  type: "sr3e.magic.type",
-  magicianType: "sr3e.magic.magicianType",
-  tradition: "sr3e.magic.tradition",
-  aspect: "sr3e.magic.aspect",
-  canAstrallyProject: "sr3e.magic.canAstrallyProject",
-  usesPowers: "sr3e.magic.usesPowers",
-  focus: "sr3e.magic.focus",
-  resistanceAttribute: "sr3e.magic.resistanceAttribute",
-  totem: "sr3e.magic.totem",
-  priority: "sr3e.magic.priority",
-  spellPoints: "sr3e.magic.spellPoints",
-  powerPoints: "sr3e.magic.powerPoints"
+    adept: "sr3e.magic.adept",
+    magician: "sr3e.magic.magician",
+    fullmage: "sr3e.magic.fullmage",
+    aspectedmage: "sr3e.magic.aspectedmage",
+    conjurer: "sr3e.magic.conjurer",
+    sorcerer: "sr3e.magic.sorcerer ",
+    elementalist: "sr3e.magic.elementalist",
+    hermetic: "sr3e.magic.hermetic",
+    shamanic: "sr3e.magic.shamanic",
+    adeptnote: "sr3e.magic.adeptnote",
+    shamannote: "sr3e.magic.shamannote",
+    type: "sr3e.magic.type",
+    magicianType: "sr3e.magic.magicianType",
+    tradition: "sr3e.magic.tradition",
+    aspect: "sr3e.magic.aspect",
+    canAstrallyProject: "sr3e.magic.canAstrallyProject",
+    usesPowers: "sr3e.magic.usesPowers",
+    focus: "sr3e.magic.focus",
+    resistanceAttribute: "sr3e.magic.resistanceAttribute",
+    totem: "sr3e.magic.totem",
+    priority: "sr3e.magic.priority",
+    spellPoints: "sr3e.magic.spellPoints",
+    powerPoints: "sr3e.magic.powerPoints"
 };
+
+sr3e.weapon = {
+    weapon: "sr3e.weapon.weapon",
+    weaponStats: "sr3e.weapon.weaponStats",
+    damage: "sr3e.weapon.damage",
+    mode: "sr3e.weapon.mode",
+    range: "sr3e.weapon.range",
+    recoilCompensation: "sr3e.weapon.recoilCompensation",
+    currentClip: "sr3e.weapon.currentClip",
+    manual: "sr3e.weapon.manual",
+    semiauto: "sr3e.weapon.semiauto",
+    fullauto: "sr3e.weapon.fullauto",
+    blade: "sr3e.weapon.blade",
+    explosive: "sr3e.weapon.explosive",
+    blunt: "sr3e.weapon.blunt",
+    energy: "sr3e.weapon.energy"
+}
+
+sr3e.commodity = {
+    commodity: "sr3e.commodity.commodity",
+    days: "sr3e.commodity.days",
+    cost: "sr3e.commodity.cost",
+    streetIndex: "sr3e.commodity.streetIndex",
+    restrictionLevel: "sr3e.commodity.restrictionLevel",
+    legalityType: "sr3e.commodity.legalityType",
+    legalityCategory: "sr3e.commodity.legalityCategory",
+    isBroken: "sr3e.commodity.isBroken",
+}
+
+sr3e.portability = {
+    concealability: "sr3e.portability.portability",
+    weight: "sr3e.portability.weight",
+}

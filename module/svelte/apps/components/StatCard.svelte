@@ -6,7 +6,7 @@
 		value,
 		path,
 		type = "text",
-		options = []
+		options = [],
 	} = $props();
 
 	function update(e) {
@@ -21,8 +21,8 @@
 		<h4>{label}</h4>
 	</div>
 	{#if type === "select"}
-		<div class="select-container">
-			<select value={value} onchange={update}>
+		<div class="select-container stat-card">
+			<select {value} onchange={update}>
 				{#each options as option}
 					<option value={option} selected={value === option}>
 						{option}
@@ -31,6 +31,8 @@
 			</select>
 		</div>
 	{:else}
-		<input {type} value={value} onchange={update} />
+		<div class="stat-card">
+			<input {type} {value} onchange={update} />
+		</div>
 	{/if}
 </div>

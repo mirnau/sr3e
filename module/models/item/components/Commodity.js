@@ -22,10 +22,6 @@ export default class CommodityModel extends foundry.abstract.TypeDataModel {
                 category: new foundry.data.fields.StringField({ required: false, initial: "" }),
             }),
             isBroken: new foundry.data.fields.BooleanField({ initial: false }),
-            description: new foundry.data.fields.StringField({
-                required: false,
-                initial: "Enter your description",
-            }),
         };
     }
 }

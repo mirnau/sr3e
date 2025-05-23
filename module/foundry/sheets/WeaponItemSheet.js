@@ -1,9 +1,13 @@
 import WeaponApp from "../../svelte/apps/WeaponApp.svelte";
 import { mount, unmount } from "svelte";
 
-export default class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+export default class WeaponItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 
     #magic
+
+        get title() {
+        return `${game.i18n.localize(CONFIG.sr3e.weapon.weapon)}: ${this.item.name}`;
+    }
 
     static get DEFAULT_OPTIONS() {
         return {

@@ -70,7 +70,6 @@
       "spellPoints": "Spell Points",
       "powerPoints": "Power Points"
     },
-
     "movement": {
       "movement": "Movement",
       "walking": "Walking Speed",
@@ -108,6 +107,36 @@
       "normalvision": "Normal vision",
       "thermographic": "Thermographic vision",
       "lowlight": "Low-light vision"
+    },
+    "weapon": {
+      "weapon": "Weapon",
+      "weaponStats": "Weapon Stats",
+      "damage": "Damage",
+      "mode": "Mode",
+      "range": "Range",
+      "recoilCompensation": "Recoil Compensation",
+      "currentClip": "Current Clip",
+      "manual": "Manual Firearm",
+      "semiauto": "Semi Automatic Firearm",
+      "fullauto": "Fully Automatic Firearm",
+      "blade": "Melee Weapon",
+      "explosive": "Explosive Weapon",
+      "blunt": "Blunt Weapon",
+      "energy": "Energy Weapon"
+    },
+    "commodity": {
+      "commodity": "Commodity Profile",
+      "days": "Days",
+      "cost": "Cost",
+      "streetIndex": "Street Index",
+      "restrictionLevel": "Restriction Level",
+      "legalityType": "Legality Type",
+      "legalityCategory": "Legality Category",
+      "isBroken": "Broken"
+    },
+    "portability": {
+      "concealability": "Conceal",
+      "weight": "Weight"
     }
   }
 }
