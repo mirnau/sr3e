@@ -16,54 +16,47 @@ export default class MagicModel extends foundry.abstract.TypeDataModel {
       }),
 
       magicianData: new foundry.data.fields.SchemaField({
-        // INFO: displays only if magicCategory is "magician"
 
-        // INFO: full or aspected (select)
         magicianType: new foundry.data.fields.StringField({
           required: false,
           initial: ""
         }),
 
-        // INFO: (free text)
         tradition: new foundry.data.fields.StringField({
           required: false,
           initial: ""
         }),
 
-        // INFO: free text, localized and validated in UI only
         drainResistanceAttribute: new foundry.data.fields.StringField({
           required: false,
           initial: ""
         }),
 
-        // INFO: select, displays only if aspected is selected
         aspect: new foundry.data.fields.StringField({
           required: false,
           initial: ""
         }),
 
-        // INFO: bool, displays only if magicianType is "full"
         canAstrallyProject: new foundry.data.fields.BooleanField({
           required: false,
           initial: false
         }),
 
-        // INFO: shows only if shaman is selected as tradition
         totem: new foundry.data.fields.StringField({
           required: false,
           initial: ""
         }),
 
-        // INFO: hidden from player, calculated on character creation?
+        //NOTE: Not exposed in the magic sheet
         spellPoints: new foundry.data.fields.NumberField({
           required: false,
           initial: 0
         })
       }),
-
+      
       adeptData: new foundry.data.fields.SchemaField({
-        // INFO: displays only if magicCategory is "adept"
-
+        
+        //NOTE: Not exposed in the magic sheet
         powerPoints: new foundry.data.fields.NumberField({
           required: false,
           initial: 0

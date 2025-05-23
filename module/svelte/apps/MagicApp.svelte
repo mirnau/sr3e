@@ -6,27 +6,25 @@
   let { item = {}, config = {} } = $props();
 
   const system = $state(item.system);
-  const awakened = system.awakened || {};
+  const awakened = $state(system.awakened);
   const magicianData = $state(system.magicianData);
-  const adeptData = awakened.adeptData || {};
-  const labels = config.magic || {};
-
-  const priorityOptions = ["A", "B"];
+  const adeptData = $state(awakened.adeptData);
+  const labels = config.magic;
 
   const archetypeOptions = [
-    localize(config.magic.adept),
-    localize(config.magic.magician),
+    localize(labels.adept),
+    localize(labels.magician),
   ];
 
   const magicianTypeOptions = [
-    localize(config.magic.fullmage),
-    localize(config.magic.aspectedmage),
+    localize(labels.fullmage),
+    localize(labels.aspectedmage),
   ];
 
   const aspectsOptions = [
-    localize(config.magic.conjurer),
-    localize(config.magic.sorcerer),
-    localize(config.magic.elementalist),
+    localize(labels.conjurer),
+    localize(labels.sorcerer),
+    localize(labels.elementalist),
     localize(config.common.custom),
   ];
 
@@ -37,71 +35,95 @@
   ];
 
   const traditionOptions = [
-    localize(config.magic.hermetic),
-    localize(config.magic.shamanic),
+    localize(labels.hermetic),
+    localize(labels.shamanic),
     localize(config.common.other),
   ];
 
-  let archetype = $state(awakened.archetype);
-  const archetypeEntry = {
+  const archetype = $derived({
+    item,
     key: "archetype",
     label: localize(labels.archetype),
-    value: archetype,
+    value: awakened.archetype,
+    path: "system.awakened",
     type: "select",
     options: archetypeOptions,
-  };
+  });
 
-  let priority = $state(awakened.priority);
-  const priorityEntry = {
+  const priority = $derived({
+    item,
     key: "priority",
     label: localize(labels.priority),
-    value: priority,
+    value: awakened.priority,
+    path: "system.awakened",
     type: "select",
-    options: priorityOptions,
-  };
+    options: ["A", "B"],
+  });
 
-  let magicianType = $state(magicianData.magicianType);
-  let aspect = $state(magicianData.aspect);
-  let tradition = $state(magicianData.tradition);
-  let drainResistanceAttribute = $state(magicianData.drainResistanceAttribute);
-  let canAstrallyProject = $state(magicianData.canAstrallyProject);
-  let totem = $state(magicianData.totem ?? localize(config.magic.shamannote));
+  const magicianType = $derived({
+    item,
+    key: "magicianType",
+    label: localize(labels.magicianType),
+    value: magicianData.magicianType,
+    path: "system.magicianData",
+    type: "select",
+    options: magicianTypeOptions,
+  });
 
-  const magicianFields = [
+  const aspect = $derived({
+    item,
+    key: "aspect",
+    label: localize(labels.aspect),
+    value: magicianData.aspect,
+    path: "system.magicianData",
+    type: "select",
+    options: aspectsOptions,
+  });
+
+  const magicianFields = $derived([
     {
+      item,
       key: "tradition",
       label: localize(labels.tradition),
-      value: tradition,
+      value: magicianData.tradition,
+      path: "system.magicianData",
       type: "select",
       options: traditionOptions,
     },
     {
+      item,
       key: "drainResistanceAttribute",
       label: localize(labels.drainResistanceAttribute),
-      value: drainResistanceAttribute,
+      value: magicianData.drainResistanceAttribute,
+      path: "system.magicianData",
       type: "select",
       options: resistanceAttributeOptions,
     },
     {
+      item,
       key: "canAstrallyProject",
       label: localize(labels.canAstrallyProject),
-      value: canAstrallyProject,
+      value: magicianData.canAstrallyProject,
+      path: "system.magicianData",
       type: "checkbox",
+      options: [],
     },
     {
+      item,
       key: "totem",
       label: localize(labels.totem),
-      value: totem,
+      value: magicianData.totem ?? localize(labels.shamannote),
+      path: "system.magicianData",
       type: "text",
+      options: [],
     },
-  ];
+  ]);
 
-  const adeptFields = [];
+  const adeptFields = $derived([]); // Extend later if needed
 
   let isAspected = $state(false);
-
   $effect(() => {
-    isAspected = magicianType === localize(config.magic.aspectedmage);
+    isAspected = magicianType.value === localize(labels.aspectedmage);
   });
 </script>
 
@@ -128,63 +150,29 @@
           bind:value={item.name}
           onchange={(e) => item.update({ name: e.target.value })}
         />
-        <StatCard
-          {item}
-          entry={archetypeEntry}
-          path="system.awakened"
-          type="select"
-          options={archetypeOptions}
-        />
-        <StatCard
-          {item}
-          entry={priorityEntry}
-          path="system.awakened"
-          type="select"
-          options={priorityOptions}
-        />
+        <StatCard {...archetype} />
+        <StatCard {...priority} />
       </div>
     </div>
   </div>
 
   <!-- Magician UI -->
-  {#if awakened.archetype === archetypeOptions[1]}
-    <!-- magicianType statcard -->
+  {#if awakened.archetype === archetype.options[1]}
     <div class="item-sheet-component">
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          <StatCard
-            {item}
-            entry={{
-              key: "magicianType",
-              label: localize(labels.magicianType),
-              value: magicianType,
-            }}
-            path="system.magicianData"
-            type="select"
-            options={magicianTypeOptions}
-          />
+          <StatCard {...magicianType} />
         </div>
       </div>
     </div>
 
-    <!-- aspect statcard -->
     {#if isAspected}
       <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <StatCard
-              {item}
-              entry={{
-                key: "aspect",
-                label: localize(labels.aspect),
-                value: aspect,
-              }}
-              path="system.magicianData"
-              type="select"
-              options={aspectsOptions}
-            />
+            <StatCard {...aspect} />
           </div>
         </div>
       </div>
@@ -195,34 +183,20 @@
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <h3 class="item">{entry.label}</h3>
-            <StatCard
-              {item}
-              {entry}
-              path={`system.magicianData`}
-              type={entry.type}
-              options={entry.options}
-            />
+            <StatCard {...entry} />
           </div>
         </div>
       </div>
     {/each}
 
-    <!-- Adept UI -->
-  {:else if awakened.archetype === archetypeOptions[0]}
+  <!-- Adept UI -->
+  {:else if awakened.archetype === archetype.options[0]}
     {#each adeptFields as entry}
       <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <h3 class="item">{entry.label}</h3>
-            <StatCard
-              {item}
-              {entry}
-              path={`system.awakened.adeptData`}
-              type={entry.type}
-              options={entry.options}
-            />
+            <StatCard {...entry} />
           </div>
         </div>
       </div>
