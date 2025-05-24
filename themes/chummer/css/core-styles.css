@@ -184,19 +184,19 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid {
   width: 40rem;
   margin: 0 auto;
   column-count: 2;
   column-gap: 0.5rem;
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component {
   display: inline-block;
   width: 100%;
   margin-bottom: 0.5rem;
   break-inside: avoid;
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .fake-shadow {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .fake-shadow {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
@@ -207,11 +207,11 @@
   filter: blur(20px);
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
   display: grid;
   background-color: #ff0095;
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
   content: '';
   position: absolute;
   inset: 1px;
@@ -221,22 +221,22 @@
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
   padding: 0.25rem;
   text-align: center;
   text-indent: 0;
   background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
   width: 100%;
   display: block;
   padding: 0.25rem;
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -247,7 +247,7 @@
   text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -258,7 +258,7 @@
   text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
   margin: 0;
 }
 .system-sr3e section.journal-entry-content.flexcol {
