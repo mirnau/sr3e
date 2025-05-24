@@ -1,2 +1,6 @@
 #Folders
 node_modules/
+build/bundle.js
+themes/chummer/css/chummer-dark.css
+themes/chummer/css/core-styles.css
+themes/chummer/css/chummer-dark.css
