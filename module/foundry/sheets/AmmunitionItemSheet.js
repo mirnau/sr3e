@@ -1,19 +1,19 @@
-import WeaponApp from "../../svelte/apps/WeaponApp.svelte";
+import AmmunitionApp from "../../svelte/apps/AmmunitionApp.svelte";
 import { mount, unmount } from "svelte";
 
-export default class WeaponItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+export default class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 
-    #weapon;
+    #ammunition
 
         get title() {
-        return `${game.i18n.localize(CONFIG.sr3e.weapon.weapon)}: ${this.item.name}`;
+        return `${game.i18n.localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
     }
 
     static get DEFAULT_OPTIONS() {
         return {
             ...super.DEFAULT_OPTIONS,
             id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
-            classes: ["sr3e", "sheet", "item", "weapon"],
+            classes: ["sr3e", "sheet", "item", "ammunition"],
             template: null,
             position: { width: 'auto', height: 'auto' },
             window: {
@@ -30,12 +30,12 @@ export default class WeaponItemSheet extends foundry.applications.sheets.ItemShe
     }
 
     _replaceHTML(_, windowContent) {
-        if (this.#weapon) {
-            unmount(this.#weapon);
-            this.#weapon = null;
+        if (this.#ammunition) {
+            unmount(this.#ammunition);
+            this.#ammunition = null;
         }
 
-        this.#weapon = mount(WeaponApp, {
+        this.#ammunition = mount(AmmunitionApp, {
             target: windowContent,
             props: {
                 item: this.document,

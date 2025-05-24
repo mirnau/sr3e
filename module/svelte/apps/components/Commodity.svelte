@@ -1,6 +1,6 @@
 <script>
     import StatCard from "./StatCard.svelte";
-    let { item, title, gridCss } = $props();
+    let { item, title, gridCss = "" } = $props();
     const system = $state(item.system);
     const commodity = system.commodity;
 

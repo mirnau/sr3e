@@ -1,5 +1,11 @@
 {
   "sr3e": {
+
+    "ammunition": {
+      "ammunition": "Ammunition",
+      "type": "Ammuntion Type"
+    },
+
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",

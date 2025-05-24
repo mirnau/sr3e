@@ -1,5 +1,11 @@
 export const sr3e = {};
 
+sr3e.ammunition = {
+    ammunition: "sr3e.ammunition.ammunition",
+    type: "sr3e.ammunition.type",
+    rounds: "sr3e.ammunition.rounds",
+}
+
 sr3e.attributes = {
     attributes: "sr3e.attributes.attributes",
     body: "sr3e.attributes.body",

@@ -11,6 +11,8 @@ import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MagicModel from "./module/models/item/MagicModel.js";
 import WeaponItemSheet from "./module/foundry/sheets/WeaponItemSheet.js";
 import WeaponModel from "./module/models/item/WeaponModel.js";
+import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
+import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -149,7 +151,8 @@ function registerHooks() {
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
         { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet}
+        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet},
+        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet}
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

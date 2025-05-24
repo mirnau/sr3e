@@ -277,7 +277,7 @@
         options: ["C", "D", "E"],
     });
 </script>
-<div class="meta-human-grid">
+<div class="sr3e-item-grid">
     <!-- Name and Priority -->
     <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">

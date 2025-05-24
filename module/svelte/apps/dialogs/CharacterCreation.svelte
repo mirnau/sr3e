@@ -88,7 +88,7 @@
     }
 </script>
 
-<div class="meta-human-grid">
+<div class="sr3e-item-grid">
     <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
