@@ -34,6 +34,7 @@ sr3e.common = {
     priority: "sr3e.common.priority",
     other: "sr3e.common.other",
     custom: "sr3e.common.custom",
+    details: "sr3e.common.details",
 }
 
 sr3e.dicepools = {

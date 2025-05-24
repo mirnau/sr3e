@@ -55,11 +55,11 @@
 }
 
 .window-resize-handle {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  z-index: 9999;
-  pointer-events: auto;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 9999;
+    pointer-events: auto;
 }
 
 dialog,
@@ -74,6 +74,11 @@ div#invitation-links,
         display: inline-grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 0.25rem;
+
+        &.single-column {
+            grid-template-columns: 1fr;
+            margin-bottom: 0.25rem;
+        }
 
         &.two-column {
             grid-template-columns: repeat(2, auto);
@@ -159,6 +164,12 @@ div#invitation-links,
         transition: transform 1.3s ease, width 1.3s ease, height 1.3s ease, background-color 1.3s ease;
         text-align: center;
         width: auto;
+
+        select.roll-type-select,
+        select {
+            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+        }
+
 
         h4.no-margin {
             max-width: 5rem;

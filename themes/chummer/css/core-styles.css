@@ -235,7 +235,8 @@
 .system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input {
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -245,6 +246,17 @@
   font-size: 1.5rem;
   text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.25rem;
+  font: inherit;
+  margin: 0;
+  color: #1df0ff;
+  font-size: 1.5rem;
+  text-indent: 0;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 .system-sr3e .sr3e.sheet.item .meta-human-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
   margin: 0;
@@ -726,12 +738,12 @@
   width: 20px;
   height: 20px;
   max-width: 20px;
-  border: 0;
-  border-radius: 4px;
   display: inline-block;
   position: relative;
   cursor: pointer;
   background-color: #1b1f24;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .system-sr3e input[type="checkbox"]:checked {
   background-color: #ff0095;
@@ -739,14 +751,15 @@
 .system-sr3e input[type="checkbox"]::after {
   content: "";
   position: absolute;
-  width: 10px;
-  height: 5px;
+  width: 8px;
+  height: 4px;
   border: solid white;
   border-width: 0 0 2px 2px;
   transform: rotate(-45deg);
-  top: 6px;
-  left: 5px;
+  top: 7px;
+  left: 6px;
   display: none;
+  box-sizing: border-box;
 }
 .system-sr3e input[type="checkbox"]:checked::after {
   display: block;
@@ -929,7 +942,6 @@
 .system-sr3e .sheet-component {
   box-sizing: border-box;
   min-width: 20rem;
-  margin-bottom: 5px;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -1427,6 +1439,16 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem;
 }
+.system-sr3e dialog .stat-grid.single-column,
+.system-sr3e form .stat-grid.single-column,
+.system-sr3e div#support-details .stat-grid.single-column,
+.system-sr3e div#invitation-links .stat-grid.single-column,
+.system-sr3e .application.category-browser .stat-grid.single-column,
+.system-sr3e .sr3e.sheet.item .stat-grid.single-column,
+.system-sr3e .sr3e.sheet.character .stat-grid.single-column {
+  grid-template-columns: 1fr;
+  margin-bottom: 0.25rem;
+}
 .system-sr3e dialog .stat-grid.two-column,
 .system-sr3e form .stat-grid.two-column,
 .system-sr3e div#support-details .stat-grid.two-column,
@@ -1596,6 +1618,22 @@
   text-align: center;
   width: auto;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
+}
+.system-sr3e dialog .stat-card select.roll-type-select,
+.system-sr3e form .stat-card select.roll-type-select,
+.system-sr3e div#support-details .stat-card select.roll-type-select,
+.system-sr3e div#invitation-links .stat-card select.roll-type-select,
+.system-sr3e .application.category-browser .stat-card select.roll-type-select,
+.system-sr3e .sr3e.sheet.item .stat-card select.roll-type-select,
+.system-sr3e .sr3e.sheet.character .stat-card select.roll-type-select,
+.system-sr3e dialog .stat-card select,
+.system-sr3e form .stat-card select,
+.system-sr3e div#support-details .stat-card select,
+.system-sr3e div#invitation-links .stat-card select,
+.system-sr3e .application.category-browser .stat-card select,
+.system-sr3e .sr3e.sheet.item .stat-card select,
+.system-sr3e .sr3e.sheet.character .stat-card select {
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 .system-sr3e dialog .stat-card h4.no-margin,
 .system-sr3e form .stat-card h4.no-margin,

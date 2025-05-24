@@ -10,7 +10,6 @@
     const weapon = system.weapon;
 
     const mode = {
-
         item,
         key: "mode",
         label: "Mode",
@@ -25,8 +24,8 @@
             localize(config.weapon.explosive),
             localize(config.weapon.energy),
             localize(config.weapon.blunt),
-        ]
-    }
+        ],
+    };
 
     const weaponEntries = [
         {
@@ -86,7 +85,20 @@
                     bind:value={item.name}
                     onchange={(e) => item.update({ name: e.target.value })}
                 />
-                <StatCard {... mode}/>
+            </div>
+        </div>
+    </div>
+
+    <div class="item-sheet-component">
+        <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+                <div class="details">
+                    <h3>{localize(config.common.details)}</h3>
+                </div>
+                <div class="stat-grid single-column">
+                    <StatCard {...mode} />
+                </div>
 
                 <div class="stat-grid two-column">
                     {#each weaponEntries as entry}

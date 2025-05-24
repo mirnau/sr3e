@@ -29,7 +29,8 @@
       "description": "Description",
       "priority": "Priority",
       "custom": "Custom",
-      "other": "Other"
+      "other": "Other",
+      "details": "Details"
     },
     "dicepools": {
       "dicepools": "Dice Pools",

@@ -60,15 +60,7 @@
             value: commodity.isBroken,
             path: "system.commodity",
             type: "checkbox",
-        },
-        {
-            item,
-            key: "description",
-            label: "Description",
-            value: commodity.description,
-            path: "system.commodity",
-            type: "text",
-        },
+        }
     ];
 </script>
 

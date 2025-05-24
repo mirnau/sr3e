@@ -45,7 +45,7 @@
                         }
 
 
-                        input {
+                        .input-base() {
                             width: 100%;
                             box-sizing: border-box;
                             padding: 0.25rem;
@@ -54,8 +54,19 @@
                             color: @h1-color;
                             font-size: 1.5rem;
                             text-indent: 0;
-                            .clipped-corners(0.25rem, 0.25rem, .75rem, 0.25rem);
                         }
+
+                        input[type="text"],
+                        input[type="number"] {
+                            .input-base();
+                            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+                        }
+
+                        input[type="checkbox"] {
+                            .input-base();
+                            .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+                        }
+
 
                         h4 {
                             margin: 0;
