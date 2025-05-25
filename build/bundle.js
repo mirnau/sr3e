@@ -141,7 +141,7 @@ class ComplexStat extends SimpleStat {
     };
   }
 }
-class AttributesModel extends foundry.abstract.TypeDataModel {
+let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       // Attributes using ComplexStat (with meta)
@@ -150,23 +150,10 @@ class AttributesModel extends foundry.abstract.TypeDataModel {
       strength: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      // Attributes using SimpleStat (without meta)
-      initiative: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      // Attributes using SimpleStat (formerly base, now value)
-      combat: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      astral: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      hacking: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      control: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      spell: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      walking: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      running: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+      willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema())
     };
   }
-}
+};
 class Creation extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
@@ -255,10 +242,31 @@ class HealthModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
+class DicePoolsModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      combat: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      astral: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      hacking: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      control: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      spell: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+    };
+  }
+}
+class AttributesModel2 extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      walking: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
+      running: new foundry.data.fields.SchemaField(ComplexStat.defineSchema())
+    };
+  }
+}
 class CharacterModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      attributes: new foundry.data.fields.SchemaField(AttributesModel.defineSchema()),
+      attributes: new foundry.data.fields.SchemaField(AttributesModel$1.defineSchema()),
+      dicePools: new foundry.data.fields.SchemaField(DicePoolsModel.defineSchema()),
+      movement: new foundry.data.fields.SchemaField(AttributesModel2.defineSchema()),
       profile: new foundry.data.fields.SchemaField(Profile.defineSchema()),
       creation: new foundry.data.fields.SchemaField(Creation.defineSchema()),
       karma: new foundry.data.fields.SchemaField(KarmaModel.defineSchema()),
@@ -3319,14 +3327,14 @@ var on_keydown$1 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$m = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$m();
+  var div = root$o();
   div.__click = [on_click$2];
   div.__keydown = [on_keydown$1];
   var button = child(div);
@@ -3357,11 +3365,11 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$7 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_1$9 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2$3 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$4 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$l = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$n = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3398,7 +3406,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$l();
+  var fragment = root$n();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3409,7 +3417,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$7();
+      var div_1 = root_1$9();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
@@ -3503,22 +3511,22 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root_1$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_1$8 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_3$3 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
 var root_4$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
 var root_2$2 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root$k = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
+var root$m = /* @__PURE__ */ template(`<h3> </h3> <!>`, 1);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var fragment = root$k();
+  var fragment = root$m();
   var h3 = first_child(fragment);
   var text = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
-      var h1 = root_1$6();
+      var h1 = root_1$8();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, get$1(baseTotal)));
       append($$anchor2, h1);
@@ -5094,8 +5102,8 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-var root_1$5 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$j = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_1$7 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$l = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5117,7 +5125,7 @@ function Attributes($$anchor, $$props) {
     });
     return cleanup;
   });
-  var fragment = root$j();
+  var fragment = root$l();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5131,7 +5139,7 @@ function Attributes($$anchor, $$props) {
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    var div_1 = root_1$5();
+    var div_1 = root_1$7();
     var node_2 = child(div_1);
     AttributeCard(node_2, {
       get stat() {
@@ -5152,6 +5160,118 @@ function Attributes($$anchor, $$props) {
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
     () => localize(config().attributes.attributes)
+  ]);
+  append($$anchor, fragment);
+  pop();
+}
+var root_1$6 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$k = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+function DicePools($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let dicePools = proxy(actor().system.dicePools);
+  let gridContainer;
+  const isShoppingState = false;
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$k();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var node_1 = sibling(child(div), 4);
+  each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
+    let key = () => get$1($$item)[0];
+    let stat = () => get$1($$item)[1];
+    var div_1 = root_1$6();
+    var node_2 = child(div_1);
+    AttributeCard(node_2, {
+      get stat() {
+        return stat();
+      },
+      get config() {
+        return config();
+      },
+      get key() {
+        return key();
+      },
+      isShoppingState
+    });
+    append($$anchor2, div_1);
+  });
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
+    () => localize(config().dicepools.dicepools)
+  ]);
+  append($$anchor, fragment);
+  pop();
+}
+var root_1$5 = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$j = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+function Movement($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let movement = proxy(actor().system.movement);
+  let gridContainer;
+  const isShoppingState = false;
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$j();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var node_1 = sibling(child(div), 4);
+  each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
+    let key = () => get$1($$item)[0];
+    let stat = () => get$1($$item)[1];
+    var div_1 = root_1$5();
+    var node_2 = child(div_1);
+    AttributeCard(node_2, {
+      get stat() {
+        return stat();
+      },
+      get config() {
+        return config();
+      },
+      get key() {
+        return key();
+      },
+      isShoppingState
+    });
+    append($$anchor2, div_1);
+  });
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
+    () => localize(config().movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5338,7 +5458,7 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Skills,
+      comp: DicePools,
       props: {
         actor: $$props.actor,
         config: $$props.config,
@@ -5347,7 +5467,7 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Health,
+      comp: Movement,
       props: {
         actor: $$props.actor,
         config: $$props.config,
@@ -5356,11 +5476,29 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Inventory,
+      comp: Skills,
       props: {
         actor: $$props.actor,
         config: $$props.config,
         id: 4,
+        span: 2
+      }
+    },
+    {
+      comp: Health,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 5,
+        span: 1
+      }
+    },
+    {
+      comp: Inventory,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 6,
         span: 1
       }
     }
