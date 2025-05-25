@@ -26,7 +26,8 @@
         "metahuman",
         "magic",
         "weapon",
-        "ammunition"
+        "ammunition",
+        "item"
         ],
     "documentTypes": {
         "Actor": {
@@ -36,7 +37,8 @@
             "metahuman": {},
             "magic": {},
             "weapon": {},
-            "ammunition": {}
+            "ammunition": {},
+            "item": {}
         }
     },
     "styles": [

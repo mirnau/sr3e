@@ -5,7 +5,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart, _metahuman, _magic, _weapon, _ammunition;
+var _app, _neon, _feed, _cart, _metahuman, _magic, _weapon, _ammunition, _weapon2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -1939,6 +1939,13 @@ function template(content, flags2) {
     return clone;
   };
 }
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1957,11 +1964,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -3444,7 +3451,7 @@ function Dossier($$anchor, $$props) {
     actor,
     actorStore
   ];
-  var text = sibling(child(div_4));
+  var text2 = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
@@ -3506,7 +3513,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -3522,7 +3529,7 @@ function AttributeCard($$anchor, $$props) {
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
   var fragment = root$m();
   var h3 = first_child(fragment);
-  var text = child(h3);
+  var text2 = child(h3);
   var node = sibling(h3, 2);
   {
     var consequent = ($$anchor2) => {
@@ -3563,7 +3570,7 @@ function AttributeCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize($$props.config.attributes[$$props.key] || $$props.key)
   ]);
   append($$anchor, fragment);
@@ -5133,7 +5140,7 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
@@ -5158,7 +5165,7 @@ function Attributes($$anchor, $$props) {
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
@@ -5191,7 +5198,7 @@ function DicePools($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
@@ -5214,7 +5221,7 @@ function DicePools($$anchor, $$props) {
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
@@ -5247,7 +5254,7 @@ function Movement($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
@@ -5270,7 +5277,7 @@ function Movement($$anchor, $$props) {
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().movement.movement)
   ]);
   append($$anchor, fragment);
@@ -5310,7 +5317,7 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
   button.__click = [on_click$1, activeTab];
@@ -5366,7 +5373,7 @@ function Skills($$anchor, $$props) {
   }
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       toggle_class(button, "active", get$1(activeTab) === "active");
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
@@ -5390,12 +5397,12 @@ function Health($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [() => localize(config().health.health)]
@@ -5417,12 +5424,12 @@ function Inventory($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var span_1 = sibling(h1, 2);
   var text_1 = child(span_1);
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
@@ -6227,10 +6234,10 @@ function JournalSearchModal($$anchor, $$props) {
                 var li = root_4$1();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text = sibling(child(div_4));
+                var text2 = sibling(child(div_4));
                 template_effect(() => {
                   set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                  set_text(text2, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -6387,7 +6394,7 @@ function StatCard($$anchor, $$props) {
   var div = root$6();
   var div_1 = child(div);
   var h4 = child(div_1);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
@@ -6450,7 +6457,7 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(() => set_text(text, $$props.label));
+  template_effect(() => set_text(text2, $$props.label));
   append($$anchor, div);
   pop();
 }
@@ -6746,12 +6753,12 @@ function MetahumanApp($$anchor, $$props) {
       var div_6 = child(div_5);
       var div_7 = sibling(child(div_6), 2);
       var h3 = child(div_7);
-      var text = child(h3);
+      var text2 = child(h3);
       var div_8 = sibling(h3, 2);
       each(div_8, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text, $0), [() => localize(traits.agerange)]);
+      template_effect(($0) => set_text(text2, $0), [() => localize(traits.agerange)]);
       append($$anchor2, div_5);
     };
     if_block(node_1, ($$render) => {
@@ -7319,13 +7326,13 @@ function Commodity($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(() => {
-    set_text(text, $$props.title);
+    set_text(text2, $$props.title);
     set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
   });
   append($$anchor, div);
@@ -7358,13 +7365,13 @@ function Portability($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(() => {
-    set_text(text, $$props.title);
+    set_text(text2, $$props.title);
     set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
   });
   append($$anchor, div);
@@ -7446,7 +7453,7 @@ function WeaponApp($$anchor, $$props) {
   var div_7 = sibling(child(div_6), 2);
   var div_8 = child(div_7);
   var h3 = child(div_8);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_9 = sibling(div_8, 2);
   var node = child(div_9);
   StatCard(node, spread_props(mode));
@@ -7493,7 +7500,7 @@ function WeaponApp($$anchor, $$props) {
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
-      set_text(text, $0);
+      set_text(text2, $0);
     },
     [
       () => localize(config().common.details)
@@ -7742,6 +7749,91 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
+class SR3EComponentModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      components: new foundry.data.fields.ArrayField(
+        new foundry.data.fields.SchemaField({
+          id: new foundry.data.fields.StringField({ required: true }),
+          name: new foundry.data.fields.StringField({ initial: "Untitled Component" }),
+          type: new foundry.data.fields.StringField({ initial: "custom" }),
+          collapsed: new foundry.data.fields.BooleanField({ initial: false }),
+          statCards: new foundry.data.fields.ArrayField(
+            new foundry.data.fields.SchemaField({
+              id: new foundry.data.fields.StringField({ required: true }),
+              name: new foundry.data.fields.StringField({ initial: "Untitled Stat" }),
+              type: new foundry.data.fields.StringField({
+                choices: ["text", "number", "boolean", "select", "textarea"],
+                initial: "text"
+              }),
+              value: new foundry.data.fields.JSONField({ initial: "" }),
+              options: new foundry.data.fields.ArrayField(
+                new foundry.data.fields.StringField(),
+                { initial: [] }
+              ),
+              description: new foundry.data.fields.StringField({ initial: "" }),
+              required: new foundry.data.fields.BooleanField({ initial: false })
+            })
+          ),
+          position: new foundry.data.fields.SchemaField({
+            x: new foundry.data.fields.NumberField({ initial: 0 }),
+            y: new foundry.data.fields.NumberField({ initial: 0 })
+          })
+        })
+      )
+    };
+  }
+}
+function SR3EGenericItemSheetApp($$anchor) {
+  var text$1 = text("Hello Component of Components");
+  append($$anchor, text$1);
+}
+class SR3EGenericItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _weapon2);
+  }
+  get title() {
+    return "Generic Item Sheet Prototype";
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "generic"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _weapon2)) {
+      unmount(__privateGet(this, _weapon2));
+      __privateSet(this, _weapon2, null);
+    }
+    __privateSet(this, _weapon2, mount(SR3EGenericItemSheetApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_weapon2 = new WeakMap();
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -7858,7 +7950,8 @@ function registerHooks() {
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
         { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
         { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet }
+        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
+        { docClass: Item, type: "item", model: SR3EComponentModel, sheet: SR3EGenericItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");
