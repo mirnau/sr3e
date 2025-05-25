@@ -159,25 +159,15 @@ div#invitation-links,
 
     // stat cards
     .stat-card {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         position: relative;
         background: @accent-cherry-blossom;
-        transition: transform 1.3s ease, width 1.3s ease, height 1.3s ease, background-color 1.3s ease;
+        transition: transform 1.3s ease, background-color 1.3s ease;
         text-align: center;
-        width: auto;
-
-        select.roll-type-select,
-        select {
-            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
-        }
-
-
-        h4.no-margin {
-            max-width: 5rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin: 0 0.5rem;
-        }
+        padding: 0.25rem; // reduce padding if needed
 
         .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
@@ -193,6 +183,19 @@ div#invitation-links,
             box-shadow: inset 0 0 30px @primary-color;
             pointer-events: none;
             .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+        }
+
+        select.roll-type-select,
+        select {
+            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+        }
+
+        h4.no-margin {
+            max-width: 5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin: 0 0.5rem;
         }
 
         .stat-value {

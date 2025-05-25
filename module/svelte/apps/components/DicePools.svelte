@@ -6,14 +6,10 @@
     import CardToolbar from "./CardToolbar.svelte";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
-    let attributes = $state(actor.system.attributes);
+    let dicePools = $state(actor.system.dicePools);
     let gridContainer;
-    let isShoppingState = $state(false);
+    const isShoppingState = false;
 
-    $effect(() => {
-        const unsubscribe = shoppingState.subscribe((v) => isShoppingState = v);
-        return unsubscribe;
-    });
 
     $effect(() => {
         const cleanup = setupMasonry({
@@ -28,14 +24,13 @@
 </script>
 
 <CardToolbar {id} />
-<h1>{localize(config.attributes.attributes)}</h1>
+<h1>{localize(config.dicepools.dicepools)}</h1>
 <div bind:this={gridContainer} class="attribute-masonry-grid">
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
-    {#each Object.entries(attributes) as [key, stat]}
+    {#each Object.entries(dicePools) as [key, stat]}
         <div class="stat-card">
             <AttributeCard {stat} {config} {key} {isShoppingState}/>
         </div>
     {/each}
 </div>
-
