@@ -56,10 +56,8 @@
 			</div>
 		</div>
 	</div>
-</div>
 
 <!-- Component Blocks -->
-<div class="sr3e-item-grid">
 	{#each components as component (component.id)}
 		<SR3ESheetComponentApp {item} {config} {component} />
 	{/each}

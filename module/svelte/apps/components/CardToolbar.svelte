@@ -3,6 +3,7 @@
   import {
     addStatCard,
     removeStatCard,
+    moveSheetComponent
   } from "../../../foundry/factories/componentFactory.js";
 
   const { id, doc } = $props();
@@ -43,14 +44,14 @@
   <button
     class="header-control icon sr3e-toolbar-button"
     aria-label="Move card up"
-    onclick={() => handleMove("up")}
+    onclick={async() => await moveSheetComponent(doc, id, "up")}
   >
     <i class="fa-solid fa-arrow-up"></i>
   </button>
   <button
     class="header-control icon sr3e-toolbar-button"
     aria-label="Move card down"
-    onclick={() => handleMove("down")}
+       onclick={async() => await moveSheetComponent(doc, id, "down")}
   >
     <i class="fa-solid fa-arrow-down"></i>
   </button>
@@ -65,7 +66,7 @@
     <button
       class="header-control icon sr3e-toolbar-button"
       aria-label="Delete card"
-      onclick={() => removeStatCard()}
+      onclick={async () => await removeStatCard(doc, id)}
     >
       <i class="fa-solid fa-trash-can"></i>
     </button>
