@@ -3284,15 +3284,12 @@ const shoppingState = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
-function openFilePicker(document2) {
+function openFilePicker(options = {}) {
   return new Promise((resolve) => {
-    new FilePicker({
+    new foundry.applications.apps.FilePicker({
       type: "image",
-      current: document2.img,
-      callback: (path) => {
-        document2.update({ img: path }, { render: true });
-        resolve(path);
-      }
+      ...options,
+      callback: resolve
     }).render(true);
   });
 }
@@ -3442,7 +3439,7 @@ function removeStatCard() {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$2 = (e) => e.stopPropagation();
+var on_click$3 = (e) => e.stopPropagation();
 var on_keydown$2 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -3463,7 +3460,7 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$r();
-  div.__click = [on_click$2];
+  div.__click = [on_click$3];
   div.__keydown = [on_keydown$2];
   var node = child(div);
   {
@@ -5441,7 +5438,7 @@ function SkillsActive($$anchor) {
   var div = root$j();
   append($$anchor, div);
 }
-var on_click$1 = (_, activeTab) => set(activeTab, "active");
+var on_click$2 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
 var root$i = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
@@ -5463,7 +5460,7 @@ function Skills($$anchor, $$props) {
   var text = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click$1, activeTab];
+  button.__click = [on_click$2, activeTab];
   var button_1 = sibling(button, 2);
   button_1.__click = [on_click_1, activeTab];
   var button_2 = sibling(button_1, 2);
@@ -6452,7 +6449,7 @@ function handleSearch(__1, config, journalId, $$props) {
     }
   });
 }
-var on_click = (e) => e.stopPropagation();
+var on_click$1 = (e) => e.stopPropagation();
 var on_keydown$1 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -6464,7 +6461,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
   var div = root$b();
-  div.__click = [on_click];
+  div.__click = [on_click$1];
   div.__keydown = [on_keydown$1];
   var button = child(div);
   button.__click = [handleOpen, journalId];
@@ -8224,6 +8221,10 @@ async function addComponent(_, item2) {
     "system.components": [...item2().system.components, newComponent]
   });
 }
+var on_click = async (__1, item2) => {
+  const path = await openFilePicker({ current: item2().img });
+  if (path) item2().update({ img: path });
+};
 var on_change = (e, item2) => item2().update({ name: e.target.value });
 var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <button> </button></div></div></div></div> <div class="sr3e-item-grid"></div>`, 1);
 function SR3EGenericItemSheetApp($$anchor, $$props) {
@@ -8237,11 +8238,7 @@ function SR3EGenericItemSheetApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
-  img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-  };
+  img.__click = [on_click, item2];
   var input = sibling(div_4, 2);
   input.__change = [on_change, item2];
   var button = sibling(input, 2);

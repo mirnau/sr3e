@@ -4,19 +4,15 @@ export function localize(key) {
   return game.i18n.localize(key);
 }
 
-export function openFilePicker(document) {
+export function openFilePicker(options = {}) {
   return new Promise((resolve) => {
-    new FilePicker({
+    new foundry.applications.apps.FilePicker({
       type: "image",
-      current: document.img,
-      callback: (path) => {
-        document.update({ img: path }, { render: true });
-        resolve(path);
-      },
+      ...options,
+      callback: resolve
     }).render(true);
   });
 }
-
 
 export function activateTextEditor({ target, content, owner, editable, callback }) {
   if (editable) {

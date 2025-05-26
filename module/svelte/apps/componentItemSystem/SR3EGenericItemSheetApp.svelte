@@ -35,7 +35,12 @@
 						data-edit="img"
 						title={item.name}
 						alt={item.name}
-						onclick={openFilePicker(item)}
+						onclick={async () => {
+							const path = await openFilePicker({
+								current: item.img,
+							});
+							if (path) item.update({ img: path });
+						}}
 					/>
 				</div>
 				<input
