@@ -1,7 +1,7 @@
 <script>
     import { localize, openFilePicker } from "../../svelteHelpers.js";
     import JournalViewer from "./components/JournalViewer.svelte";
-    import StatCard from "./components/StatCard.svelte";
+    import SheetComponent from "./components/StatCard.svelte";
     import Commodity from "./components/Commodity.svelte";
     import Portability from "./components/Portability.svelte";
 
@@ -64,7 +64,7 @@
 </script>
 
 <div class="sr3e-item-grid">
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
@@ -97,12 +97,12 @@
                     <h3>{localize(config.common.details)}</h3>
                 </div>
                 <div class="stat-grid single-column">
-                    <StatCard {...mode} />
+                    <SheetComponent {...mode} />
                 </div>
 
                 <div class="stat-grid two-column">
                     {#each weaponEntries as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -121,7 +121,7 @@
         gridCss="two-column"
     />
 
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">

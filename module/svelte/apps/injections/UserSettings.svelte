@@ -80,7 +80,7 @@ let user = null;  // Should be null (not an empty object)
 </script>
 
 <!-- User Settings -->
-<div class="item-sheet-component">
+<div class="sheet-component">
   <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
     <div class="sr3e-inner-background">
@@ -158,7 +158,7 @@ let user = null;  // Should be null (not an empty object)
 </div>
 
 <!-- Main Character selection (dropdown) -->
-<div class="item-sheet-component">
+<div class="sheet-component">
   <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
     <div class="sr3e-inner-background">
@@ -182,7 +182,7 @@ let user = null;  // Should be null (not an empty object)
 </div>
 
 <!-- Save Button -->
-<div class="item-sheet-component">
+<div class="sheet-component">
   <div class="sr3e-inner-background-container">
     <div class="fake-shadow"></div>
     <div class="sr3e-inner-background">

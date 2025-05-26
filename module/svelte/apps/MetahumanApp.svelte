@@ -1,7 +1,7 @@
 <script>
     import { localize, openFilePicker } from "../../svelteHelpers.js";
     import JournalViewer from "./components/JournalViewer.svelte";
-    import StatCard from "./components/StatCard.svelte";
+    import SheetComponent from "./components/StatCard.svelte";
 
     let { item = {}, config = {} } = $props();
 
@@ -279,7 +279,7 @@
 </script>
 <div class="sr3e-item-grid">
     <!-- Name and Priority -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
@@ -300,21 +300,21 @@
                     bind:value={item.name}
                     onchange={(e) => item.update({ name: e.target.value })}
                 />
-                <StatCard {...priorityEntry} />
+                <SheetComponent {...priorityEntry} />
             </div>
         </div>
     </div>
 
     <!-- Age Range -->
     {#if agerange}
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.agerange)}</h3>
                 <div class="stat-grid">
                     {#each agerange as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -324,14 +324,14 @@
 
     <!-- Height -->
     {#if height}
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.height)}</h3>
                 <div class="stat-grid">
                     {#each height as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -341,14 +341,14 @@
 
     <!-- Weight -->
     {#if weight}
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(traits.weight)}</h3>
                 <div class="stat-grid">
                     {#each weight as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -357,14 +357,14 @@
     {/if}
 
     <!-- Modifiers -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(attributes.modifiers)}</h3>
                 <div class="stat-grid">
                     {#each attributeModifiers as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -372,14 +372,14 @@
     </div>
 
     <!-- Attribute Limits -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(attributes.limits)}</h3>
                 <div class="stat-grid">
                     {#each attributeLimits as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -387,14 +387,14 @@
     </div>
 
     <!-- Movement -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container slim">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(config.movement.movement)}</h3>
                 <div class="stat-grid two-column">
                     {#each movement as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -402,14 +402,14 @@
     </div>
 
     <!-- Karma -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container slim">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background slim">
                 <h3 class="item">{localize(config.karma.karma)}</h3>
                 <div class="stat-grid one-column">
                     {#each karma as entry}
-                        <StatCard {...entry} />
+                        <SheetComponent {...entry} />
                     {/each}
                 </div>
             </div>
@@ -417,20 +417,20 @@
     </div>
 
     <!-- Vision -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">
                 <h3 class="item">{localize(config.vision.vision)}</h3>
                 {#each vision as entry}
-                    <StatCard {...entry} />
+                    <SheetComponent {...entry} />
                 {/each}
             </div>
         </div>
     </div>
 
     <!-- Journal Viewer -->
-    <div class="item-sheet-component">
+    <div class="sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>
             <div class="sr3e-inner-background">

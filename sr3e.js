@@ -38,6 +38,7 @@ function configureProject() {
   CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
+  CONFIG.SheetComponentypes = [];
   CONFIG.fontDefinitions["Neanderthaw"] = {
     editor: true,
     fonts: [
@@ -59,7 +60,6 @@ function configureProject() {
       }
     ]
   };
-
 
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
@@ -153,9 +153,9 @@ function registerHooks() {
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
         { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet},
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet},
-        { docClass: Item, type: "item", model: SR3EComponentModel, sheet: SR3EGenericItemSheet}
+        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
+        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
+        { docClass: Item, type: "item", model: SR3EComponentModel, sheet: SR3EGenericItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

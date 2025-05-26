@@ -159,3 +159,7 @@ sr3e.portability = {
     concealability: "sr3e.portability.portability",
     weight: "sr3e.portability.weight",
 }
+
+sr3e.component = {
+    component: "sr3e.component.component",
+}

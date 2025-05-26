@@ -3,7 +3,7 @@ import { mount, unmount } from "svelte";
 
 export default class SR3EGenericItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 
-    #weapon;
+    #app;
 
         get title() {
         return "Generic Item Sheet Prototype";
@@ -30,12 +30,12 @@ export default class SR3EGenericItemSheet extends foundry.applications.sheets.It
     }
 
     _replaceHTML(_, windowContent) {
-        if (this.#weapon) {
-            unmount(this.#weapon);
-            this.#weapon = null;
+        if (this.#app) {
+            unmount(this.#app);
+            this.#app = null;
         }
 
-        this.#weapon = mount(ItemSheetApp, {
+        this.#app = mount(ItemSheetApp, {
             target: windowContent,
             props: {
                 item: this.document,
@@ -43,6 +43,8 @@ export default class SR3EGenericItemSheet extends foundry.applications.sheets.It
             }
         });
 
+
+        console.log("SR3EGenericItemSheet: Mounted Svelte app", this.#app);
         return windowContent;
     }
 

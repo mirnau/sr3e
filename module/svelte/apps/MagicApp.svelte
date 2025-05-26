@@ -1,6 +1,6 @@
 <script>
   import { localize, openFilePicker } from "../../svelteHelpers.js";
-  import StatCard from "./components/StatCard.svelte";
+  import SheetComponent from "./components/StatCard.svelte";
   import JournalViewer from "./components/JournalViewer.svelte";
 
   let { item = {}, config = {} } = $props();
@@ -129,7 +129,7 @@
 
 <div class="sr3e-item-grid">
   <!-- Header -->
-  <div class="item-sheet-component">
+  <div class="sheet-component">
     <div class="sr3e-inner-background-container">
       <div class="fake-shadow"></div>
       <div class="sr3e-inner-background">
@@ -150,40 +150,40 @@
           bind:value={item.name}
           onchange={(e) => item.update({ name: e.target.value })}
         />
-        <StatCard {...archetype} />
-        <StatCard {...priority} />
+        <SheetComponent {...archetype} />
+        <SheetComponent {...priority} />
       </div>
     </div>
   </div>
 
   <!-- Magician UI -->
   {#if awakened.archetype === archetype.options[1]}
-    <div class="item-sheet-component">
+    <div class="sheet-component">
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          <StatCard {...magicianType} />
+          <SheetComponent {...magicianType} />
         </div>
       </div>
     </div>
 
     {#if isAspected}
-      <div class="item-sheet-component">
+      <div class="sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <StatCard {...aspect} />
+            <SheetComponent {...aspect} />
           </div>
         </div>
       </div>
     {/if}
 
     {#each magicianFields as entry}
-      <div class="item-sheet-component">
+      <div class="sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <StatCard {...entry} />
+            <SheetComponent {...entry} />
           </div>
         </div>
       </div>
@@ -192,11 +192,11 @@
   <!-- Adept UI -->
   {:else if awakened.archetype === archetype.options[0]}
     {#each adeptFields as entry}
-      <div class="item-sheet-component">
+      <div class="sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <StatCard {...entry} />
+            <SheetComponent {...entry} />
           </div>
         </div>
       </div>
@@ -204,7 +204,7 @@
   {/if}
 
   <!-- Journal -->
-  <div class="item-sheet-component">
+  <div class="sheet-component">
     <div class="sr3e-inner-background-container">
       <div class="fake-shadow"></div>
       <div class="sr3e-inner-background">

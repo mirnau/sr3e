@@ -1,7 +1,13 @@
 <script lang="ts">
   import { toggleCardSpanById, moveCardById } from "../../../svelteHelpers.js";
+  import {
+    addStatCard,
+    removeStatCard,
+  } from "../../../foundry/factories/componentFactory.js";
 
-  const { id } = $props();
+  const { id, doc } = $props();
+
+  const isItem = doc.type === "item";
 
   function handleMove(direction: "up" | "down") {
     console.log("handle move called");
@@ -24,6 +30,16 @@
     }
   }}
 >
+  {#if isItem}
+    <button
+      class="header-control icon sr3e-toolbar-button"
+      aria-label="Delete card"
+      onclick={() => addStatCard(doc, id)}
+    >
+      <i class="fa-solid fa-plus"></i>
+    </button>
+  {/if}
+
   <button
     class="header-control icon sr3e-toolbar-button"
     aria-label="Move card up"
@@ -45,4 +61,13 @@
   >
     <i class="fa-solid fa-arrows-spin"></i>
   </button>
+  {#if isItem}
+    <button
+      class="header-control icon sr3e-toolbar-button"
+      aria-label="Delete card"
+      onclick={() => removeStatCard()}
+    >
+      <i class="fa-solid fa-trash-can"></i>
+    </button>
+  {/if}
 </div>
