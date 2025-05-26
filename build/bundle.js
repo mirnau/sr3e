@@ -3406,7 +3406,7 @@ function getAddStatCardDialogConfig(item2, componentId) {
             id: foundry.utils.randomID(),
             name,
             type: type2,
-            value: statTypeConfig.default,
+            value: JSON.stringify(statTypeConfig.default),
             options: statTypeConfig.options || [],
             description: "",
             required: false
@@ -7912,7 +7912,7 @@ class SR3EComponentModel extends foundry.abstract.TypeDataModel {
                 choices: ["text", "number", "boolean", "select", "textarea"],
                 initial: "text"
               }),
-              value: new foundry.data.fields.JSONField({ initial: "" }),
+              value: new foundry.data.fields.JSONField({ initial: JSON.stringify("") }),
               options: new foundry.data.fields.ArrayField(
                 new foundry.data.fields.StringField(),
                 { initial: [] }
@@ -7975,38 +7975,31 @@ var root_3$1 = /* @__PURE__ */ template(`<select></select>`);
 var root_7 = /* @__PURE__ */ template(`<option> </option>`);
 var root_6 = /* @__PURE__ */ template(`<select multiple></select>`);
 var root_9 = /* @__PURE__ */ template(`<img> <input type="text">`, 1);
-var on_keydown = (e) => {
-  if (e.key === "Enter") e.preventDefault();
-};
+var on_keydown = (e) => e.key === "Enter" && e.preventDefault();
 var root_10 = /* @__PURE__ */ template(`<input>`);
 var root$2 = /* @__PURE__ */ template(`<div class="stat-card"><h4> </h4> <!></div>`);
 function SR3EGenericStatCard($$anchor, $$props) {
   push($$props, true);
   let type2 = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
   const [, , c, , s] = $$props.path.split(".");
-  let parsed = JSON.parse($$props.item.system.components[c].SheetComponents[s][$$props.key]);
-  let localValue = proxy(parsed);
-  console.log(localValue);
+  console.log("incomingValue:", $$props.value);
+  let parsedValue = state(proxy($$props.value));
   async function update(e) {
-    let val;
-    switch (type2()) {
-      case "boolean":
-        val = e.target.checked;
-        break;
-      case "number":
-        val = Number(e.target.value);
-        break;
-      case "multiselect":
-        val = Array.from(e.target.selectedOptions).map((o) => o.value);
-        break;
-      default:
-        val = e.target.value;
+    var _a;
+    let rawValue;
+    if (type2() === "boolean") rawValue = e.target.checked;
+    else if (type2() === "number") rawValue = Number(e.target.value);
+    else if (type2() === "multiselect") rawValue = Array.from(e.target.selectedOptions).map((o) => o.value);
+    else rawValue = e.target.value;
+    const components = foundry.utils.deepClone($$props.item.system.components);
+    const component2 = components[c];
+    if (!((_a = component2 == null ? void 0 : component2.SheetComponents) == null ? void 0 : _a[s])) {
+      console.error(`Invalid stat index [${s}] on component ${c}`);
+      return;
     }
-    const [, , c2, , s2] = $$props.path.split(".");
-    await $$props.item.update({
-      [`system.components.${c2}.SheetComponents.${s2}.${$$props.key}`]: val
-    });
-    parsed = val;
+    component2.SheetComponents[s][$$props.key] = JSON.stringify(rawValue);
+    await $$props.item.update({ "system.components": components });
+    set(parsedValue, proxy(rawValue));
   }
   var div = root$2();
   var h4 = child(div);
@@ -8016,7 +8009,7 @@ function SR3EGenericStatCard($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       var input = root_1();
       input.__change = update;
-      template_effect(() => set_checked(input, localValue));
+      template_effect(() => set_checked(input, get$1(parsedValue)));
       append($$anchor2, input);
     };
     var alternate_3 = ($$anchor2) => {
@@ -8025,7 +8018,7 @@ function SR3EGenericStatCard($$anchor, $$props) {
       {
         var consequent_1 = ($$anchor3) => {
           var select = root_3$1();
-          init_select(select, () => localValue);
+          init_select(select, () => get$1(parsedValue));
           var select_value;
           select.__change = update;
           each(select, 21, options, index, ($$anchor4, option) => {
@@ -8041,8 +8034,8 @@ function SR3EGenericStatCard($$anchor, $$props) {
             append($$anchor4, option_1);
           });
           template_effect(() => {
-            if (select_value !== (select_value = localValue)) {
-              select.value = null == (select.__value = localValue) ? "" : localValue, select_option(select, localValue);
+            if (select_value !== (select_value = get$1(parsedValue))) {
+              select.value = null == (select.__value = get$1(parsedValue)) ? "" : get$1(parsedValue), select_option(select, get$1(parsedValue));
             }
           });
           append($$anchor3, select);
@@ -8067,7 +8060,10 @@ function SR3EGenericStatCard($$anchor, $$props) {
                     set_text(text_2, get$1(option));
                   },
                   [
-                    () => localValue && localValue.includes(get$1(option))
+                    () => {
+                      var _a;
+                      return (_a = get$1(parsedValue)) == null ? void 0 : _a.includes(get$1(option));
+                    }
                   ]
                 );
                 append($$anchor5, option_2);
@@ -8084,9 +8080,9 @@ function SR3EGenericStatCard($$anchor, $$props) {
                   var input_1 = sibling(img, 2);
                   input_1.__change = update;
                   template_effect(() => {
-                    set_attribute(img, "src", localValue);
+                    set_attribute(img, "src", get$1(parsedValue));
                     set_attribute(img, "alt", $$props.label);
-                    set_value(input_1, localValue);
+                    set_value(input_1, get$1(parsedValue));
                   });
                   append($$anchor5, fragment_3);
                 };
@@ -8096,7 +8092,7 @@ function SR3EGenericStatCard($$anchor, $$props) {
                   input_2.__keydown = [on_keydown];
                   template_effect(() => {
                     set_attribute(input_2, "type", type2());
-                    set_value(input_2, localValue);
+                    set_value(input_2, get$1(parsedValue));
                   });
                   append($$anchor5, input_2);
                 };

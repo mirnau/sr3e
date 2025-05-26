@@ -4,53 +4,40 @@
 		path,
 		key,
 		label,
-		value,
+		value: incomingValue, // Confirmed t
 		type = "text",
 		options = [],
 	} = $props();
 
 	const [, , c, , s] = path.split(".");
 
-	let parsed = JSON.parse(item.system.components[c].SheetComponents[s][key]);
+	console.log("incomingValue:", incomingValue);
 
-	let localValue = $state(parsed);
-
-	console.log(localValue); //Returns 0 when I update to 5
-
-	function ensureValidStatCard(card) {
-		card.id ??= foundry.utils.randomID();
-		card.name ??= "Untitled Stat";
-		card.type ??= "text";
-		card.value ??= "";
-		card.options ??= [];
-		card.description ??= "";
-		card.required ??= false;
-		return card;
-	}
+	let parsedValue = $state(incomingValue);
 
 	async function update(e) {
-		let val;
+		let rawValue;
+		if (type === "boolean") rawValue = e.target.checked;
+		else if (type === "number") rawValue = Number(e.target.value);
+		else if (type === "multiselect")
+			rawValue = Array.from(e.target.selectedOptions).map((o) => o.value);
+		else rawValue = e.target.value;
 
-		switch (type) {
-			case "boolean":
-				val = e.target.checked;
-				break;
-			case "number":
-				val = Number(e.target.value);
-				break;
-			case "multiselect":
-				val = Array.from(e.target.selectedOptions).map((o) => o.value);
-				break;
-			default:
-				val = e.target.value;
+		const components = foundry.utils.deepClone(item.system.components);
+		const component = components[c];
+
+		if (!component?.SheetComponents?.[s]) {
+			console.error(`Invalid stat index [${s}] on component ${c}`);
+			return;
 		}
 
-		const [, , c, , s] = path.split(".");
+		component.SheetComponents[s][key] = JSON.stringify(rawValue);
+
 		await item.update({
-			[`system.components.${c}.SheetComponents.${s}.${key}`]: val,
+			"system.components": components,
 		});
 
-		parsed = val;
+		parsedValue = rawValue;
 	}
 </script>
 
@@ -58,9 +45,9 @@
 	<h4>{label}</h4>
 
 	{#if type === "boolean"}
-		<input type="checkbox" checked={localValue} onchange={update} />
+		<input type="checkbox" checked={parsedValue} onchange={update} />
 	{:else if type === "select"}
-		<select value={localValue} onchange={update}>
+		<select value={parsedValue} onchange={update}>
 			{#each options as option}
 				<option value={option}>{option}</option>
 			{/each}
@@ -68,24 +55,20 @@
 	{:else if type === "multiselect"}
 		<select multiple onchange={update}>
 			{#each options as option}
-				<option
-					value={option}
-					selected={localValue && localValue.includes(option)}
+				<option value={option} selected={parsedValue?.includes(option)}
 					>{option}</option
 				>
 			{/each}
 		</select>
 	{:else if type === "image"}
-		<img src={localValue} alt={label} />
-		<input type="text" value={localValue} onchange={update} />
+		<img src={parsedValue} alt={label} />
+		<input type="text" value={parsedValue} onchange={update} />
 	{:else}
 		<input
 			{type}
-			value={localValue}
+			value={parsedValue}
 			onchange={update}
-			onkeydown={(e) => {
-				if (e.key === "Enter") e.preventDefault();
-			}}
+			onkeydown={(e) => e.key === "Enter" && e.preventDefault()}
 		/>
 	{/if}
 </div>

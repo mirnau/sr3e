@@ -45,7 +45,7 @@ const statTypes = StatCardTypeRegistryService.SheetComponentTypes;
             id: foundry.utils.randomID(),
             name,
             type,
-            value: statTypeConfig.default,
+            value: JSON.stringify(statTypeConfig.default),
             options: statTypeConfig.options || [],
             description: "",
             required: false

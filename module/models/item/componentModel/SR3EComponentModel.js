@@ -17,7 +17,7 @@ export default class SR3EComponentModel extends foundry.abstract.TypeDataModel {
                                 choices: ["text", "number", "boolean", "select", "textarea"],
                                 initial: "text"
                             }),
-                            value: new foundry.data.fields.JSONField({ initial: "" }),
+                            value: new foundry.data.fields.JSONField({ initial: JSON.stringify("")  }),
                             options: new foundry.data.fields.ArrayField(
                                 new foundry.data.fields.StringField(),
                                 { initial: [] }
