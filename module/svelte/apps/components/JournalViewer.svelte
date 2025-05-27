@@ -46,13 +46,20 @@
     }
 </script>
 
-<JournalViewerToolbar
-    bind:this={toolbar}
-    onJournalContentSelected={handleJournalSelection}
-    {config}
-    id={journalId}
-/>
+<div class="item-sheet-component">
+    <div class="sr3e-inner-background-container">
+        <div class="fake-shadow"></div>
+        <div class="sr3e-inner-background">
+            <JournalViewerToolbar
+                bind:this={toolbar}
+                onJournalContentSelected={handleJournalSelection}
+                {config}
+                id={journalId}
+            />
 
-<div class="preview journal-content">
-    {@html previewContent}
+            <div class="preview journal-content">
+                {@html previewContent}
+            </div>
+        </div>
+    </div>
 </div>

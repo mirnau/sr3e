@@ -3281,9 +3281,9 @@ const shoppingState = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
-function openFilePicker(document2) {
+async function openFilePicker(document2) {
   return new Promise((resolve) => {
-    new FilePicker({
+    new foundry.applications.apps.FilePicker({
       type: "image",
       current: document2.img,
       callback: (path) => {
@@ -3319,7 +3319,7 @@ function toggleCardSpanById(id) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$2 = (e) => e.stopPropagation();
+var on_click$6 = (e) => e.stopPropagation();
 var on_keydown$1 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -3335,7 +3335,7 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$o();
-  div.__click = [on_click$2];
+  div.__click = [on_click$6];
   div.__keydown = [on_keydown$1];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
@@ -5291,7 +5291,7 @@ function SkillsActive($$anchor) {
   var div = root$g();
   append($$anchor, div);
 }
-var on_click$1 = (_, activeTab) => set(activeTab, "active");
+var on_click$5 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
 var root$f = /* @__PURE__ */ template(`<!> <div class="skills"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
@@ -5313,7 +5313,7 @@ function Skills($$anchor, $$props) {
   var text = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click$1, activeTab];
+  button.__click = [on_click$5, activeTab];
   var button_1 = sibling(button, 2);
   button_1.__click = [on_click_1, activeTab];
   var button_2 = sibling(button_1, 2);
@@ -5908,6 +5908,7 @@ sr3e.commodity = {
   isBroken: "sr3e.commodity.isBroken"
 };
 sr3e.portability = {
+  portability: "sr3e.portability.portability",
   concealability: "sr3e.portability.portability",
   weight: "sr3e.portability.weight"
 };
@@ -6299,7 +6300,7 @@ function handleSearch(__1, config, journalId, $$props) {
     }
   });
 }
-var on_click = (e) => e.stopPropagation();
+var on_click$4 = (e) => e.stopPropagation();
 var on_keydown = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -6311,7 +6312,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
   var div = root$8();
-  div.__click = [on_click];
+  div.__click = [on_click$4];
   div.__keydown = [on_keydown];
   var button = child(div);
   button.__click = [handleOpen, journalId];
@@ -6321,7 +6322,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root$7 = /* @__PURE__ */ template(`<!> <div class="preview journal-content"><!></div>`, 1);
+var root$7 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -6344,8 +6345,10 @@ function JournalViewer($$anchor, $$props) {
     set(journalId, proxy(result.value));
     await item2().update({ "system.journalId": result.value });
   }
-  var fragment = root$7();
-  var node = first_child(fragment);
+  var div = root$7();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var node = child(div_2);
   bind_this(
     JournalViewerToolbar(node, {
       onJournalContentSelected: handleJournalSelection,
@@ -6359,10 +6362,10 @@ function JournalViewer($$anchor, $$props) {
     ($$value) => toolbar = $$value,
     () => toolbar
   );
-  var div = sibling(node, 2);
-  var node_1 = child(div);
+  var div_3 = sibling(node, 2);
+  var node_1 = child(div_3);
   html(node_1, () => get$1(previewContent));
-  append($$anchor, fragment);
+  append($$anchor, div);
   pop();
 }
 var root_1$2 = /* @__PURE__ */ template(`<input type="checkbox">`);
@@ -6455,11 +6458,12 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
+var on_click$3 = async (_, item2) => openFilePicker(item2());
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root$5 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -6730,11 +6734,7 @@ function MetahumanApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
-  img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-  };
+  img.__click = [on_click$3, item2];
   var input = sibling(div_4, 2);
   input.__change = [on_change$3, item2];
   var node = sibling(input, 2);
@@ -6841,10 +6841,7 @@ function MetahumanApp($$anchor, $$props) {
   each(node_4, 17, () => get$1(vision), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var div_36 = sibling(div_33, 2);
-  var div_37 = child(div_36);
-  var div_38 = sibling(child(div_37), 2);
-  var node_5 = child(div_38);
+  var node_5 = sibling(div_33, 2);
   JournalViewer(node_5, {
     get item() {
       return item2();
@@ -6928,12 +6925,13 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metahuman = new WeakMap();
+var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root_2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
 var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$4 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -7051,11 +7049,7 @@ function MagicApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
-  img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-  };
+  img.__click = [on_click$2, item2];
   var input = sibling(div_4, 2);
   input.__change = [on_change$2, item2];
   var node = sibling(input, 2);
@@ -7128,10 +7122,7 @@ function MagicApp($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  var div_17 = sibling(node_2, 2);
-  var div_18 = child(div_17);
-  var div_19 = sibling(child(div_18), 2);
-  var node_11 = child(div_19);
+  var node_11 = sibling(node_2, 2);
   JournalViewer(node_11, {
     get item() {
       return item2();
@@ -7261,7 +7252,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "days",
-      label: "Days",
+      label: localize($$props.config.commodity.days),
       value: commodity.days,
       path: "system.commodity",
       type: "number"
@@ -7269,7 +7260,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "cost",
-      label: "Cost",
+      label: localize($$props.config.commodity.cost),
       value: commodity.cost,
       path: "system.commodity",
       type: "number"
@@ -7277,7 +7268,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "streetIndex",
-      label: "Street Index",
+      label: localize($$props.config.commodity.streetIndex),
       value: commodity.streetIndex,
       path: "system.commodity",
       type: "number"
@@ -7285,7 +7276,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "restrictionLevel",
-      label: "Restriction Level",
+      label: localize($$props.config.commodity.restrictionLevel),
       value: commodity.legality.restrictionLevel,
       path: "system.commodity.legality",
       type: "number"
@@ -7293,7 +7284,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "type",
-      label: "Legality Type",
+      label: localize($$props.config.commodity.legalityType),
       value: commodity.legality.type,
       path: "system.commodity.legality",
       type: "text"
@@ -7301,7 +7292,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "category",
-      label: "Legality Category",
+      label: localize($$props.config.commodity.legalityCategory),
       value: commodity.legality.category,
       path: "system.commodity.legality",
       type: "text"
@@ -7309,7 +7300,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "isBroken",
-      label: "Is Broken",
+      label: localize($$props.config.commodity.isBroken),
       value: commodity.isBroken,
       path: "system.commodity",
       type: "checkbox"
@@ -7324,10 +7315,15 @@ function Commodity($$anchor, $$props) {
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  template_effect(() => {
-    set_text(text, $$props.title);
-    set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
-  });
+  template_effect(
+    ($0) => {
+      set_text(text, $0);
+      set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
+    },
+    [
+      () => localize($$props.config.commodity.commodity)
+    ]
+  );
   append($$anchor, div);
   pop();
 }
@@ -7340,7 +7336,7 @@ function Portability($$anchor, $$props) {
     {
       item: $$props.item,
       key: "conceal",
-      label: "Concealability",
+      label: localize($$props.config.portability.concealability),
       value: portability.conceal,
       path: "system.portability",
       type: "number"
@@ -7348,7 +7344,7 @@ function Portability($$anchor, $$props) {
     {
       item: $$props.item,
       key: "weight",
-      label: "Weight",
+      label: localize($$props.config.portability.weight),
       value: portability.weight,
       path: "system.portability",
       type: "number"
@@ -7363,15 +7359,21 @@ function Portability($$anchor, $$props) {
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  template_effect(() => {
-    set_text(text, $$props.title);
-    set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
-  });
+  template_effect(
+    ($0) => {
+      set_text(text, $0);
+      set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
+    },
+    [
+      () => localize($$props.config.portability.portability)
+    ]
+  );
   append($$anchor, div);
   pop();
 }
+var on_click$1 = async (_, item2) => openFilePicker(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -7398,7 +7400,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "damage",
-      label: "Damage",
+      label: localize(config().weapon.damage),
       value: weapon.damage,
       path: "system.weapon",
       type: "text"
@@ -7406,7 +7408,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "range",
-      label: "Range",
+      label: localize(config().weapon.range),
       value: weapon.range,
       path: "system.weapon",
       type: "number"
@@ -7414,7 +7416,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "recoilComp",
-      label: "Recoil Compensation",
+      label: localize(config().weapon.recoilCompensation),
       value: weapon.recoilComp,
       path: "system.weapon",
       type: "number"
@@ -7422,7 +7424,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "currentClipId",
-      label: "Current Clip ID",
+      label: localize(config().weapon.currentClip),
       value: weapon.currentClipId,
       path: "system.weapon",
       type: "text"
@@ -7434,11 +7436,7 @@ function WeaponApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
-  img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-  };
+  img.__click = [on_click$1, item2];
   var input = sibling(div_4, 2);
   input.__change = [on_change$1, item2];
   var div_5 = sibling(div_1, 2);
@@ -7455,31 +7453,26 @@ function WeaponApp($$anchor, $$props) {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   var node_1 = sibling(div_5, 2);
-  const expression = /* @__PURE__ */ derived(() => localize(config().commodity.commodity));
   Commodity(node_1, {
     get item() {
       return item2();
     },
-    get title() {
-      return get$1(expression);
+    get config() {
+      return config();
     },
     gridCss: "two-column"
   });
   var node_2 = sibling(node_1, 2);
-  const expression_1 = /* @__PURE__ */ derived(() => localize(config().portability.portability));
   Portability(node_2, {
     get item() {
       return item2();
     },
-    get title() {
-      return get$1(expression_1);
+    get config() {
+      return config();
     },
     gridCss: "two-column"
   });
-  var div_11 = sibling(node_2, 2);
-  var div_12 = child(div_11);
-  var div_13 = sibling(child(div_12), 2);
-  var node_3 = child(div_13);
+  var node_3 = sibling(node_2, 2);
   JournalViewer(node_3, {
     get item() {
       return item2();
@@ -7553,40 +7546,44 @@ _weapon = new WeakMap();
 class CommodityModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      days: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0
-      }),
-      cost: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0
-      }),
-      streetIndex: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 1
-      }),
-      legality: new foundry.data.fields.SchemaField({
-        restrictionLevel: new foundry.data.fields.NumberField({
+      commodity: new foundry.data.fields.SchemaField({
+        days: new foundry.data.fields.NumberField({
           required: true,
           initial: 0
         }),
-        type: new foundry.data.fields.StringField({ required: false, initial: "" }),
-        category: new foundry.data.fields.StringField({ required: false, initial: "" })
-      }),
-      isBroken: new foundry.data.fields.BooleanField({ initial: false })
+        cost: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0
+        }),
+        streetIndex: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 1
+        }),
+        legality: new foundry.data.fields.SchemaField({
+          restrictionLevel: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0
+          }),
+          type: new foundry.data.fields.StringField({ required: false, initial: "" }),
+          category: new foundry.data.fields.StringField({ required: false, initial: "" })
+        }),
+        isBroken: new foundry.data.fields.BooleanField({ initial: false })
+      })
     };
   }
 }
 class PortabilityModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      conceal: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0
-      }),
-      weight: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0
+      portability: new foundry.data.fields.SchemaField({
+        conceal: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0
+        }),
+        weight: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0
+        })
       })
     };
   }
@@ -7617,12 +7614,8 @@ class WeaponModel extends foundry.abstract.TypeDataModel {
           nullable: true
         })
       }),
-      portability: new foundry.data.fields.SchemaField({
-        ...PortabilityModel.defineSchema()
-      }),
-      commodity: new foundry.data.fields.SchemaField({
-        ...CommodityModel.defineSchema()
-      })
+      ...PortabilityModel.defineSchema(),
+      ...CommodityModel.defineSchema()
     };
   }
 }
@@ -7646,45 +7639,72 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
+var on_click = async (_, item2) => openFilePicker(item2());
 var on_change = (e, item2) => item2().update({ name: e.target.value });
-var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <!> <!></div>`);
+var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  const ammunition = item2().system;
+  const ammoEntries = [
+    {
+      item: item2(),
+      key: "type",
+      label: localize(config().ammunition.type),
+      value: ammunition.type,
+      path: "system.ammunition",
+      type: "text"
+    },
+    {
+      item: item2(),
+      key: "rounds",
+      label: localize(config().ammunition.rounds),
+      value: ammunition.rounds,
+      path: "system.ammunition",
+      type: "number"
+    }
+  ];
   var div = root();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  var event_handler = /* @__PURE__ */ derived(() => openFilePicker(item2()));
-  img.__click = function(...$$args) {
-    var _a;
-    (_a = get$1(event_handler)) == null ? void 0 : _a.apply(this, $$args);
-  };
+  img.__click = [on_click, item2];
   var input = sibling(div_4, 2);
   input.__change = [on_change, item2];
+  var div_5 = sibling(input, 2);
+  each(div_5, 21, () => ammoEntries, index, ($$anchor2, entry) => {
+    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  });
   var node = sibling(div_1, 2);
-  const expression = /* @__PURE__ */ derived(() => localize(config().commodity.commodity));
   Commodity(node, {
     get item() {
       return item2();
     },
-    get title() {
-      return get$1(expression);
+    get config() {
+      return config();
     },
     gridCss: "two-column"
   });
   var node_1 = sibling(node, 2);
-  const expression_1 = /* @__PURE__ */ derived(() => localize(config().portability.portability));
   Portability(node_1, {
     get item() {
       return item2();
     },
-    get title() {
-      return get$1(expression_1);
+    get config() {
+      return config();
     },
     gridCss: "two-column"
+  });
+  var node_2 = sibling(node_1, 2);
+  JournalViewer(node_2, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    }
   });
   template_effect(() => {
     set_attribute(img, "src", item2().img);

@@ -109,24 +109,7 @@
         </div>
     </div>
 
-    <Commodity
-        {item}
-        {config}
-        gridCss="two-column"
-    />
-
-    <Portability
-        {item}
-        {config}
-        gridCss="two-column"
-    />
-
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <JournalViewer {item} {config} />
-            </div>
-        </div>
-    </div>
+    <Commodity {item} {config} gridCss="two-column" />
+    <Portability {item} {config} gridCss="two-column" />
+    <JournalViewer {item} {config} />
 </div>

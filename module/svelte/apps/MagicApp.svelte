@@ -11,10 +11,7 @@
   const adeptData = $state(awakened.adeptData);
   const labels = config.magic;
 
-  const archetypeOptions = [
-    localize(labels.adept),
-    localize(labels.magician),
-  ];
+  const archetypeOptions = [localize(labels.adept), localize(labels.magician)];
 
   const magicianTypeOptions = [
     localize(labels.fullmage),
@@ -189,7 +186,7 @@
       </div>
     {/each}
 
-  <!-- Adept UI -->
+    <!-- Adept UI -->
   {:else if awakened.archetype === archetype.options[0]}
     {#each adeptFields as entry}
       <div class="item-sheet-component">
@@ -203,13 +200,5 @@
     {/each}
   {/if}
 
-  <!-- Journal -->
-  <div class="item-sheet-component">
-    <div class="sr3e-inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="sr3e-inner-background">
-        <JournalViewer {item} {config} />
-      </div>
-    </div>
-  </div>
+  <JournalViewer {item} {config} />
 </div>
