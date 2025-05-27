@@ -1,11 +1,10 @@
 {
   "sr3e": {
-
     "ammunition": {
       "ammunition": "Ammunition",
-      "type": "Ammuntion Type"
+      "type": "Ammuntion Type",
+      "rounds": "Rounds"
     },
-
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",
@@ -19,14 +18,15 @@
       "modifiers": "Attribute Modifiers",
       "limits": "Attribute Limits"
     },
-    "health": {
-      "health": "Health"
-    },
-    "skills": {
-      "skills": "Skills"
-    },
-    "inventory": {
-      "inventory": "Inventory"
+    "commodity": {
+      "commodity": "Commodity Profile",
+      "days": "Days",
+      "cost": "Cost",
+      "streetIndex": "Street Index",
+      "restrictionLevel": "Restriction Level",
+      "legalityType": "Legality Type",
+      "legalityCategory": "Legality Category",
+      "isBroken": "Broken"
     },
     "common": {
       "max": "Maximum",
@@ -45,6 +45,12 @@
       "hacking": "Hacking Pool",
       "astral": "Astral Pool",
       "control": "Control Pool"
+    },
+    "health": {
+      "health": "Health"
+    },
+    "inventory": {
+      "inventory": "Inventory"
     },
     "karma": {
       "karma": "Karma",
@@ -83,11 +89,26 @@
       "running": "Running Speed",
       "runSpeedModifier": "Running Modifier"
     },
+    "portability": {
+      "portability": "Portability",
+      "concealability": "Conceal",
+      "weight": "Weight"
+    },
     "sheet": {
       "details": "Details",
       "viewbackground": "View Background",
       "buyupgrades": "Buy upgrades",
       "searchJournals": "Search Journals"
+    },
+    "skill": {
+      "skill": "Skill",
+      "speak": "Speak",
+      "read": "Read",
+      "write": "Write",
+      "active": "Active Skill",
+      "knowledge": "Knowledge Skill",
+      "language": "Language Skill",
+      "linkedAttribute": "Choose a Linked Attribute..."
     },
     "traits": {
       "age": "Age",
@@ -130,20 +151,6 @@
       "explosive": "Explosive Weapon",
       "blunt": "Blunt Weapon",
       "energy": "Energy Weapon"
-    },
-    "commodity": {
-      "commodity": "Commodity Profile",
-      "days": "Days",
-      "cost": "Cost",
-      "streetIndex": "Street Index",
-      "restrictionLevel": "Restriction Level",
-      "legalityType": "Legality Type",
-      "legalityCategory": "Legality Category",
-      "isBroken": "Broken"
-    },
-    "portability": {
-      "concealability": "Conceal",
-      "weight": "Weight"
     }
   }
 }

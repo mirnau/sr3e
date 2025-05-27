@@ -22,7 +22,7 @@
             value: system.agerange.min,
             path: "system.agerange",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -31,7 +31,7 @@
             value: system.agerange.average,
             path: "system.agerange",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -40,7 +40,7 @@
             value: system.agerange.max,
             path: "system.agerange",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -52,7 +52,7 @@
             value: system.physical.height.min,
             path: "system.physical.height",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -61,7 +61,7 @@
             value: system.physical.height.average,
             path: "system.physical.height",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -70,7 +70,7 @@
             value: system.physical.height.max,
             path: "system.physical.height",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -82,7 +82,7 @@
             value: system.physical.weight.min,
             path: "system.physical.weight",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -91,7 +91,7 @@
             value: system.physical.weight.average,
             path: "system.physical.weight",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -100,7 +100,7 @@
             value: system.physical.weight.max,
             path: "system.physical.weight",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -112,7 +112,7 @@
             value: system.movement.base,
             path: "system.movement",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -121,7 +121,7 @@
             value: system.movement.modifier,
             path: "system.movement",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -133,7 +133,7 @@
             value: system.karma.factor,
             path: "system.karma",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -145,7 +145,7 @@
             value: system.modifiers.strength,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -154,7 +154,7 @@
             value: system.modifiers.quickness,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -163,7 +163,7 @@
             value: system.modifiers.body,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -172,7 +172,7 @@
             value: system.modifiers.charisma,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -181,7 +181,7 @@
             value: system.modifiers.intelligence,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -190,7 +190,7 @@
             value: system.modifiers.willpower,
             path: "system.modifiers",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -202,7 +202,7 @@
             value: system.attributeLimits.strength,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -211,7 +211,7 @@
             value: system.attributeLimits.quickness,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -220,7 +220,7 @@
             value: system.attributeLimits.body,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -229,7 +229,7 @@
             value: system.attributeLimits.charisma,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -238,7 +238,7 @@
             value: system.attributeLimits.intelligence,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
         {
             item,
@@ -247,7 +247,7 @@
             value: system.attributeLimits.willpower,
             path: "system.attributeLimits",
             type: "number",
-            options: []
+            options: [],
         },
     ]);
 
@@ -277,6 +277,7 @@
         options: ["C", "D", "E"],
     });
 </script>
+
 <div class="sr3e-item-grid">
     <!-- Name and Priority -->
     <div class="item-sheet-component">
@@ -290,7 +291,7 @@
                         title={item.name}
                         role="presentation"
                         alt={item.name}
-                        onclick={openFilePicker(item)}
+                        onclick={async () => openFilePicker(item)}
                     />
                 </div>
                 <input
@@ -307,53 +308,53 @@
 
     <!-- Age Range -->
     {#if agerange}
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(traits.agerange)}</h3>
-                <div class="stat-grid">
-                    {#each agerange as entry}
-                        <StatCard {...entry} />
-                    {/each}
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <h3 class="item">{localize(traits.agerange)}</h3>
+                    <div class="stat-grid">
+                        {#each agerange as entry}
+                            <StatCard {...entry} />
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     {/if}
 
     <!-- Height -->
     {#if height}
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(traits.height)}</h3>
-                <div class="stat-grid">
-                    {#each height as entry}
-                        <StatCard {...entry} />
-                    {/each}
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <h3 class="item">{localize(traits.height)}</h3>
+                    <div class="stat-grid">
+                        {#each height as entry}
+                            <StatCard {...entry} />
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     {/if}
 
     <!-- Weight -->
     {#if weight}
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(traits.weight)}</h3>
-                <div class="stat-grid">
-                    {#each weight as entry}
-                        <StatCard {...entry} />
-                    {/each}
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <h3 class="item">{localize(traits.weight)}</h3>
+                    <div class="stat-grid">
+                        {#each weight as entry}
+                            <StatCard {...entry} />
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     {/if}
 
     <!-- Modifiers -->
@@ -430,12 +431,5 @@
     </div>
 
     <!-- Journal Viewer -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <JournalViewer {item} {config} />
-            </div>
-        </div>
-    </div>
+    <JournalViewer {item} {config} />
 </div>

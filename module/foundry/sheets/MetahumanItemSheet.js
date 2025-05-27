@@ -1,3 +1,4 @@
+import { localize } from "../../svelteHelpers.js";
 import MetaHumanApp from "../../svelte/apps/MetahumanApp.svelte";
 import { mount, unmount } from "svelte";
 
@@ -6,7 +7,7 @@ export default class MetahumanItemSheet extends foundry.applications.sheets.Item
     #metahuman;
 
     get title() {
-        return `${game.i18n.localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
+        return `${localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
     }
 
     static get DEFAULT_OPTIONS() {
