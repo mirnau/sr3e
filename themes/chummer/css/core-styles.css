@@ -184,11 +184,17 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
+.system-sr3e .sr3e.sheet.item {
+  width: fit-content;
+}
 .system-sr3e .sr3e.sheet.item .sr3e-item-grid {
-  width: 40rem;
-  margin: 0 auto;
-  column-count: 2;
+  columns: 18rem;
   column-gap: 0.5rem;
+  width: fit-content;
+  max-width: calc(18rem * 2 + 0.5rem);
+}
+.system-sr3e .sr3e.sheet.item .sr3e-item-grid > * {
+  break-inside: avoid;
 }
 .system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component {
   display: inline-block;

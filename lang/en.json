@@ -100,8 +100,15 @@
       "buyupgrades": "Buy upgrades",
       "searchJournals": "Search Journals"
     },
-    "skills": {
-      "skills": "Skills"
+    "skill": {
+      "skill": "Skill",
+      "speak": "Speak",
+      "read": "Read",
+      "write": "Write",
+      "active": "Active Skill",
+      "knowledge": "Knowledge Skill",
+      "language": "Language Skill",
+      "linkedAttribute": "Choose a Linked Attribute..."
     },
     "traits": {
       "age": "Age",

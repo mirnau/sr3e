@@ -4,6 +4,7 @@ import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
+import ActorDataService from "../services/ActorDataService";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
@@ -26,6 +27,17 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       closeOnSubmit: false
     };
   }
+
+  async getData() {
+    const ctx = super.getData();
+    const ownedItems = ctx.actor.items.contents;
+
+    ctx.skills = ActorDataService.prepareSkills(ownedItems);
+    ctx.languages = ActorDataService.prepareLanguages(ownedItems);
+
+    return ctx;
+  }
+
 
   _renderHTML() {
     return null;

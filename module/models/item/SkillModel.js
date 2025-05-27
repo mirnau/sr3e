@@ -1,46 +1,40 @@
-import SkillSpecializationModel from './components/SkillSpecialization.js';
+import SkillSpecialization from './components/SkillSpecialization.js';
 
 export default class SkillModel extends foundry.abstract.TypeDataModel {
     static defineSchema() {
-        const createSpecializationSchema = () => {
-            return new foundry.data.fields.ArrayField(
-                new foundry.data.fields.SchemaField(SkillSpecializationModel.defineSchema())
-            );
-        };
-
         return {
+
             skillType: new foundry.data.fields.StringField({
                 required: true,
-                default: "activeSkill"
+                initial: ""
             }),
 
             activeSkill: new foundry.data.fields.SchemaField({
                 value: new foundry.data.fields.NumberField({
                     required: true,
-                    default: 0,
+                    initial: 0,
                     integer: true
                 }),
                 linkedAttribute: new foundry.data.fields.StringField({
                     required: true,
-                    default: ""
+                    initial: ""
                 }),
-                specializations:
-                    createSpecializationSchema({ initial: [] })
 
+                ...SkillSpecialization.defineSchema()
             }),
 
             knowledgeSkill: new foundry.data.fields.SchemaField({
                 value: new foundry.data.fields.NumberField({
                     required: true,
-                    default: 0,
+                    initial: 0,
                     integer: true
                 }),
                 linkedAttribute: new foundry.data.fields.StringField({
                     required: true,
-                    default: "intelligence"
+                    initial: "intelligence"
                 }),
-                specializations:
-                    createSpecializationSchema({ initial: [] })
+
+                ...SkillSpecialization.defineSchema()
 
             }),
 
@@ -48,39 +42,31 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                 speak: new foundry.data.fields.SchemaField({
                     value: new foundry.data.fields.NumberField({
                         required: true,
-                        default: 0,
+                        initial: 0,
                         integer: true
                     }),
-                    specializations:
-                        createSpecializationSchema({ initial: [] })
 
+                    ...SkillSpecialization.defineSchema()
                 }),
                 read: new foundry.data.fields.SchemaField({
                     value: new foundry.data.fields.NumberField({
                         required: true,
-                        default: 0,
+                        initial: 0,
                         integer: true
                     }),
-                    specializations:
-                        createSpecializationSchema({ initial: [] })
 
+                    ...SkillSpecialization.defineSchema()
                 }),
                 write: new foundry.data.fields.SchemaField({
                     value: new foundry.data.fields.NumberField({
                         required: true,
-                        default: 0,
+                        initial: 0,
                         integer: true
                     }),
-                    specializations:
-                        createSpecializationSchema({ initial: [] })
 
+                    ...SkillSpecialization.defineSchema()
                 })
             }),
-
-            description: new foundry.data.fields.StringField({
-                required: false,
-                default: ""
-            })
         };
     }
 }

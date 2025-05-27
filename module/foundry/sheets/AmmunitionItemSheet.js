@@ -1,12 +1,13 @@
 import AmmunitionApp from "../../svelte/apps/AmmunitionApp.svelte";
 import { mount, unmount } from "svelte";
+import { localize } from "../../svelteHelpers.js";
 
 export default class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 
     #ammunition
 
         get title() {
-        return `${game.i18n.localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
+        return `${localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
     }
 
     static get DEFAULT_OPTIONS() {

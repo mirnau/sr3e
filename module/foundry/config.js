@@ -24,8 +24,15 @@ sr3e.health = {
     health: "sr3e.health.health",
 }
 
-sr3e.skills = {
-    skills: "sr3e.skills.skills"
+sr3e.skill = {
+    skill: "sr3e.skill.skill",
+    speak: "sr3e.skills.speak",
+    read: "sr3e.skills.read",
+    write: "sr3e.skills.write",
+    active: "sr3e.skill.active",
+    knowledge: "sr3e.skill.knowledge",
+    language: "sr3e.skill.language",
+    linkedAttribute: "sr3e.skill.linkedAttribute",
 }
 
 sr3e.inventory = {

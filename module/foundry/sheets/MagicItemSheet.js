@@ -6,7 +6,7 @@ export default class MagicItemSheet extends foundry.applications.sheets.ItemShee
     #magic
 
     get title() {
-        return `${game.i18n.localize(CONFIG.sr3e.magic.magician)}: ${this.item.name}`;
+        return `${localize(CONFIG.sr3e.magic.magician)}: ${this.item.name}`;
     }
 
     static get DEFAULT_OPTIONS() {

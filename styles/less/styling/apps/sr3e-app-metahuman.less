@@ -1,9 +1,15 @@
 .sr3e.sheet.item {
+    width: fit-content;
+
     .sr3e-item-grid {
-        width: 40rem;
-        margin: 0 auto;
-        column-count: 2;
-        column-gap: 0.5rem;
+        columns: 18rem;
+        column-gap: .5rem;
+        width: fit-content;
+        max-width: calc(18rem * 2 + 0.5rem);
+
+        >* {
+            break-inside: avoid;
+        }
 
         .item-sheet-component {
             display: inline-block;

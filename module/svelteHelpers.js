@@ -36,11 +36,6 @@ export function activateTextEditor({ target, content, owner, editable, callback 
   }
 }
 
-export function enrichText(content) {
-  return TextEditor.enrichHTML(content);
-}
-
-
 export function moveCardById(id, direction) {
   cardLayout.update(cards => {
     const index = cards.findIndex(c => c.id === id);
