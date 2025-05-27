@@ -46,4 +46,9 @@ export default class StatCardTypeRegistryService {
     static get(type) {
         return this.registry[type];
     }
+
+    // Helper method to get by type and name (useful for your current setup)
+    static getByTypeAndName(type, name) {
+        return this.SheetComponentTypes.find(t => t.type === type && t.name === name);
+    }
 }

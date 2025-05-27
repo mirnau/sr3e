@@ -3293,17 +3293,6 @@ function openFilePicker(options = {}) {
     }).render(true);
   });
 }
-function moveCardById(id, direction) {
-  cardLayout.update((cards) => {
-    const index2 = cards.findIndex((c) => c.id === id);
-    if (index2 === -1) return cards;
-    const newIndex = direction === "up" ? index2 - 1 : index2 + 1;
-    if (newIndex < 0 || newIndex >= cards.length) return cards;
-    const reordered = [...cards];
-    [reordered[index2], reordered[newIndex]] = [reordered[newIndex], reordered[index2]];
-    return reordered;
-  });
-}
 function toggleCardSpanById(id) {
   cardLayout.update((cards) => {
     return cards.map((card) => {
@@ -3325,6 +3314,10 @@ class StatCardTypeRegistryService {
   }
   static get(type2) {
     return this.registry[type2];
+  }
+  // Helper method to get by type and name (useful for your current setup)
+  static getByTypeAndName(type2, name) {
+    return this.SheetComponentTypes.find((t) => t.type === type2 && t.name === name);
   }
 }
 __publicField(StatCardTypeRegistryService, "SheetComponentTypes", [
@@ -3371,17 +3364,69 @@ function getAddStatCardDialogConfig(item2, componentId) {
     content: `
       <form>
         <div class="form-group">
-        <label for="stat-name">Stat Name</label>
+          <label for="stat-name">Stat Name</label>
           <input type="text" name="stat-name" placeholder="e.g. Coolness" />
-          </div>
+        </div>
         <div class="form-group">
           <label for="stat-type">Stat Type</label>
-          <select name="stat-type">
-          ${statTypes.map((t) => `<option value="${t.type}">${t.name}</option>`).join("")}
+          <select name="stat-type" id="stat-type-select">
+            ${statTypes.map((t) => `<option value="${t.type}" data-name="${t.name}">${t.name}</option>`).join("")}
           </select>
+        </div>
+        
+        <!-- Currency-specific fields (initially hidden) -->
+        <div id="currency-fields" class="form-group" style="display: none;">
+          <div class="form-group">
+            <label for="currency-value">Initial Value</label>
+            <input type="number" name="currency-value" placeholder="0" step="0.01" />
           </div>
+          <div class="form-group">
+            <label for="currency-symbol">Currency Symbol</label>
+            <input type="text" name="currency-symbol" placeholder="¥" maxlength="3" />
+          </div>
+          <div class="form-group">
+            <label for="exchange-rate">Nuyen Exchange Rate</label>
+            <input type="number" name="exchange-rate" placeholder="1" step="0.01" min="0" />
+          </div>
+        </div>
       </form>
     `,
+    render: (event2, dialog) => {
+      const statTypeSelect = dialog.element.querySelector("#stat-type-select");
+      const currencyFields = dialog.element.querySelector("#currency-fields");
+      const statNameInput = dialog.element.querySelector('input[name="stat-name"]');
+      const addButton = dialog.element.querySelector('[data-action="add"]');
+      function toggleCurrencyFields() {
+        const selectedOption = statTypeSelect.selectedOptions[0];
+        const selectedName = selectedOption.getAttribute("data-name");
+        if (selectedName === "Currency") {
+          currencyFields.style.display = "block";
+          const valueInput = currencyFields.querySelector('input[name="currency-value"]');
+          const symbolInput = currencyFields.querySelector('input[name="currency-symbol"]');
+          const exchangeInput = currencyFields.querySelector('input[name="exchange-rate"]');
+          if (!valueInput.value) valueInput.value = "0";
+          if (!symbolInput.value) symbolInput.value = "¥";
+          if (!exchangeInput.value) exchangeInput.value = "1";
+        } else {
+          currencyFields.style.display = "none";
+        }
+      }
+      function toggleAddButton() {
+        const statName = statNameInput.value.trim();
+        if (statName) {
+          addButton.disabled = false;
+          addButton.style.opacity = "1";
+        } else {
+          addButton.disabled = true;
+          addButton.style.opacity = "0.5";
+        }
+      }
+      toggleCurrencyFields();
+      toggleAddButton();
+      statTypeSelect.addEventListener("change", toggleCurrencyFields);
+      statNameInput.addEventListener("input", toggleAddButton);
+      statNameInput.addEventListener("keyup", toggleAddButton);
+    },
     buttons: [
       {
         action: "add",
@@ -3389,36 +3434,62 @@ function getAddStatCardDialogConfig(item2, componentId) {
         icon: "fa-solid fa-check",
         default: true,
         callback: async (event2, button, dialog) => {
-          var _a;
+          var _a, _b;
           const formData = new FormData(dialog.element.querySelector("form"));
           const name = (_a = formData.get("stat-name")) == null ? void 0 : _a.trim();
           const type2 = formData.get("stat-type");
-          if (!name) return;
-          const statTypeConfig = StatCardTypeRegistryService.SheetComponentTypes.find((t) => t.type === type2);
+          if (!name) {
+            ui.notifications.warn("Please enter a stat name.");
+            return;
+          }
+          const selectElement = dialog.element.querySelector("#stat-type-select");
+          const selectedOption = selectElement.selectedOptions[0];
+          const selectedName = selectedOption.getAttribute("data-name");
+          const statTypeConfig = StatCardTypeRegistryService.SheetComponentTypes.find(
+            (t) => t.type === type2 && t.name === selectedName
+          );
           if (!statTypeConfig) {
-            console.error("Stat type configuration not found:", type2);
+            console.error("Stat type configuration not found:", type2, selectedName);
+            ui.notifications.error("Invalid stat type selected.");
             return;
           }
           const newStat = {
             id: foundry.utils.randomID(),
             name,
             type: type2,
+            typeName: selectedName,
+            // Store the specific type name
             value: JSON.stringify(statTypeConfig.default),
             options: statTypeConfig.options || [],
             description: "",
             required: false
           };
+          if (selectedName === "Currency") {
+            const currencyValue = parseFloat(formData.get("currency-value")) || 0;
+            const currencySymbol = ((_b = formData.get("currency-symbol")) == null ? void 0 : _b.trim()) || statTypeConfig.defaultSymbol || "¥";
+            const exchangeRate = parseFloat(formData.get("exchange-rate")) || statTypeConfig.nuyenExchangeRate || 1;
+            newStat.value = JSON.stringify(currencyValue);
+            newStat.currencySymbol = currencySymbol;
+            newStat.nuyenExchangeRate = exchangeRate;
+          }
           const components = foundry.utils.deepClone(item2.system.components || []);
           const componentIndex = components.findIndex((c) => c.id === componentId);
           if (componentIndex === -1) {
             console.error("Component not found:", componentId);
+            ui.notifications.error("Component not found.");
             return;
           }
           if (!components[componentIndex].SheetComponents) {
             components[componentIndex].SheetComponents = [];
           }
           components[componentIndex].SheetComponents.push(newStat);
-          await item2.update({ "system.components": components });
+          try {
+            await item2.update({ "system.components": components });
+            ui.notifications.info(`Added stat: ${name}`);
+          } catch (error) {
+            console.error("Failed to update item:", error);
+            ui.notifications.error("Failed to add stat.");
+          }
         }
       },
       {
@@ -3429,12 +3500,52 @@ function getAddStatCardDialogConfig(item2, componentId) {
     ]
   };
 }
+function getConfirmDeleteConfig(name) {
+  return {
+    window: {
+      title: "Confirm Deletion",
+      classes: ["sr3e-dialog", "confirm-delete-dialog"]
+    },
+    content: `
+			<div class="confirm-delete-content">
+				<p>Are you sure you want to delete <strong>${name}</strong>?</p>
+			</div>
+		`,
+    buttons: [
+      {
+        action: "no",
+        label: "No",
+        icon: "fa-solid fa-xmark",
+        callback: () => false
+      }
+    ]
+  };
+}
 async function addStatCard(item2, componentId) {
   const config = getAddStatCardDialogConfig(item2, componentId);
   await foundry.applications.api.DialogV2.wait(config);
 }
-function removeStatCard() {
-  console.log("Removing a stat card");
+async function removeStatCard(item2, componentId) {
+  const component2 = item2.system.components.find((c) => c.id === componentId);
+  const result = await foundry.applications.api.DialogV2.prompt(getConfirmDeleteConfig(component2.name));
+  if (!result) return;
+  const components = foundry.utils.deepClone(item2.system.components ?? []);
+  const updated = components.filter((c) => c.id !== componentId);
+  await item2.update({
+    "system.components": updated
+  });
+  ui.notifications.info(`Component "${component2.name}" removed.`);
+}
+async function moveSheetComponent(item2, componentId, direction) {
+  const components = foundry.utils.deepClone(item2.system.components ?? []);
+  const index2 = components.findIndex((c) => c.id === componentId);
+  if (index2 === -1) return;
+  const targetIndex = direction === "up" ? index2 - 1 : index2 + 1;
+  if (targetIndex < 0 || targetIndex >= components.length) return;
+  const temp = components[targetIndex];
+  components[targetIndex] = components[index2];
+  components[index2] = temp;
+  await item2.update({ "system.components": components });
 }
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
@@ -3447,18 +3558,14 @@ var on_keydown$2 = (e) => {
 };
 var on_click_1$1 = (__1, $$props) => addStatCard($$props.doc, $$props.id);
 var root_1$b = /* @__PURE__ */ template(`<button class="header-control icon sr3e-toolbar-button" aria-label="Delete card"><i class="fa-solid fa-plus"></i></button>`);
-var on_click_2$1 = (__2, handleMove) => handleMove("up");
-var on_click_3 = (__3, handleMove) => handleMove("down");
-var on_click_4 = () => removeStatCard();
+var on_click_2$1 = async (__2, $$props) => await moveSheetComponent($$props.doc, $$props.id, "up");
+var on_click_3 = async (__3, $$props) => await moveSheetComponent($$props.doc, $$props.id, "down");
+var on_click_4 = async (__4, $$props) => await removeStatCard($$props.doc, $$props.id);
 var root_2$4 = /* @__PURE__ */ template(`<button class="header-control icon sr3e-toolbar-button" aria-label="Delete card"><i class="fa-solid fa-trash-can"></i></button>`);
 var root$r = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><!> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button> <!></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   const isItem = $$props.doc.type === "item";
-  function handleMove(direction) {
-    console.log("handle move called");
-    moveCardById($$props.id, direction);
-  }
   var div = root$r();
   div.__click = [on_click$3];
   div.__keydown = [on_keydown$2];
@@ -3474,16 +3581,16 @@ function CardToolbar($$anchor, $$props) {
     });
   }
   var button_1 = sibling(node, 2);
-  button_1.__click = [on_click_2$1, handleMove];
+  button_1.__click = [on_click_2$1, $$props];
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [on_click_3, handleMove];
+  button_2.__click = [on_click_3, $$props];
   var button_3 = sibling(button_2, 2);
   button_3.__click = [handleToggleSpan, $$props];
   var node_1 = sibling(button_3, 2);
   {
     var consequent_1 = ($$anchor2) => {
       var button_4 = root_2$4();
-      button_4.__click = [on_click_4];
+      button_4.__click = [on_click_4, $$props];
       append($$anchor2, button_4);
     };
     if_block(node_1, ($$render) => {
@@ -8226,13 +8333,12 @@ var on_click = async (__1, item2) => {
   if (path) item2().update({ img: path });
 };
 var on_change = (e, item2) => item2().update({ name: e.target.value });
-var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <button> </button></div></div></div></div> <div class="sr3e-item-grid"></div>`, 1);
+var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <button> </button></div></div></div> <!></div>`);
 function SR3EGenericItemSheetApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 7);
   const components = proxy(item2().system.components ?? []);
-  var fragment = root();
-  var div = first_child(fragment);
+  var div = root();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -8244,8 +8350,8 @@ function SR3EGenericItemSheetApp($$anchor, $$props) {
   var button = sibling(input, 2);
   button.__click = [addComponent, item2];
   var text = child(button);
-  var div_5 = sibling(div, 2);
-  each(div_5, 21, () => components, (component2) => component2.id, ($$anchor2, component2) => {
+  var node = sibling(div_1, 2);
+  each(node, 17, () => components, (component2) => component2.id, ($$anchor2, component2) => {
     SR3ESheetComponentApp($$anchor2, {
       get item() {
         return item2();
@@ -8270,7 +8376,7 @@ function SR3EGenericItemSheetApp($$anchor, $$props) {
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
-  append($$anchor, fragment);
+  append($$anchor, div);
   pop();
 }
 delegate(["click", "change"]);
