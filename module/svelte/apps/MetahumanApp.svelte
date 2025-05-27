@@ -290,7 +290,7 @@
                         title={item.name}
                         role="presentation"
                         alt={item.name}
-                        onclick={openFilePicker(item)}
+                        onclick={async () => openFilePicker(item)}
                     />
                 </div>
                 <input

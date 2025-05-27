@@ -4,9 +4,9 @@ export function localize(key) {
   return game.i18n.localize(key);
 }
 
-export function openFilePicker(document) {
+export async function openFilePicker(document) {
   return new Promise((resolve) => {
-    new FilePicker({
+    new foundry.applications.apps.FilePicker({
       type: "image",
       current: document.img,
       callback: (path) => {

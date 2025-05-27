@@ -75,7 +75,7 @@
                         data-edit="img"
                         title={item.name}
                         alt={item.name}
-                        onclick={openFilePicker(item)}
+                        onclick={async () => openFilePicker(item)}
                     />
                 </div>
                 <input

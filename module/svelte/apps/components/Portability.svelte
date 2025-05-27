@@ -5,6 +5,7 @@
     const system = $state(item.system);
     const portability = system.portability;
 
+
     const entries = [
         {
             item,
