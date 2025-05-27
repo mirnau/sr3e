@@ -1,6 +1,7 @@
 <script>
+    import { localize } from "../../../svelteHelpers.js";
     import StatCard from "./StatCard.svelte";
-    let { item, title,  gridCss } = $props();
+    let { item, config,  gridCss } = $props();
     const system = $state(item.system);
     const portability = system.portability;
 
@@ -8,7 +9,7 @@
         {
             item,
             key: "conceal",
-            label: "Concealability",
+            label: localize(config.portability.concealability),
             value: portability.conceal,
             path: "system.portability",
             type: "number",
@@ -16,7 +17,7 @@
         {
             item,
             key: "weight",
-            label: "Weight",
+            label: localize(config.portability.weight),
             value: portability.weight,
             path: "system.portability",
             type: "number",
@@ -28,7 +29,7 @@
     <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-            <h3>{title}</h3>
+            <h3>{localize(config.portability.portability)}</h3>
             <div class="stat-grid {gridCss}">
                 {#each entries as entry}
                     <StatCard {...entry} />

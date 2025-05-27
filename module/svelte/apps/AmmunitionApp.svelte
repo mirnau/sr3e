@@ -35,13 +35,13 @@
 
     <Commodity
         {item}
-        title={localize(config.commodity.commodity)}
+        {config}
         gridCss="two-column"
     />
 
     <Portability
         {item}
-        title={localize(config.portability.portability)}
+        {config}
         gridCss="two-column"
     />
 </div>

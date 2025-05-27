@@ -31,7 +31,7 @@
         {
             item,
             key: "damage",
-            label: "Damage",
+            label: localize(config.weapon.damage),
             value: weapon.damage,
             path: "system.weapon",
             type: "text",
@@ -39,7 +39,7 @@
         {
             item,
             key: "range",
-            label: "Range",
+            label: localize(config.weapon.range),
             value: weapon.range,
             path: "system.weapon",
             type: "number",
@@ -47,7 +47,7 @@
         {
             item,
             key: "recoilComp",
-            label: "Recoil Compensation",
+            label: localize(config.weapon.recoilCompensation),
             value: weapon.recoilComp,
             path: "system.weapon",
             type: "number",
@@ -55,7 +55,7 @@
         {
             item,
             key: "currentClipId",
-            label: "Current Clip ID",
+            label: localize(config.weapon.currentClip),
             value: weapon.currentClipId,
             path: "system.weapon",
             type: "text",
@@ -111,13 +111,13 @@
 
     <Commodity
         {item}
-        title={localize(config.commodity.commodity)}
+        {config}
         gridCss="two-column"
     />
 
     <Portability
         {item}
-        title={localize(config.portability.portability)}
+        {config}
         gridCss="two-column"
     />
 
