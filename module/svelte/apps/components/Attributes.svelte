@@ -33,9 +33,7 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
-        <div class="stat-card">
             <AttributeCard {stat} {config} {key} {isShoppingState}/>
-        </div>
     {/each}
 </div>
 

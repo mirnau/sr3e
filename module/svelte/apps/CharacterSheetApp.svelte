@@ -67,7 +67,7 @@
 
   $effect(async () => {
     await tick(); // Wait for DOM updates
-    container?.dispatchEvent(new CustomEvent("masonry-reflow"));
+    container.dispatchEvent(new CustomEvent("masonry-reflow"));
   });
 
   // Save layout to flag with debounce (runes-safe)
@@ -105,6 +105,7 @@
 
     return cleanup;
   });
+
 </script>
 
 <div bind:this={container} class="sheet-character-masonry-main">

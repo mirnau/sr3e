@@ -42,48 +42,56 @@
                         onclick={async () => openFilePicker(item)}
                     />
                 </div>
-                <input
-                    class="large"
-                    name="name"
-                    type="text"
-                    bind:value={item.name}
-                    onchange={(e) => item.update({ name: e.target.value })}
-                />
-
-                <div class="stat-card">
-                    <select
-                        bind:value
-                        onchange={(e) => updateSkillType(e.target.value)}
-                    >
-                        {#each selectOptions as option}
-                            <option value={option.value}>{option.label}</option>
-                        {/each}
-                    </select>
-                </div>
-                {#if value === "active"}
+                <div class="stat-grid single-column">
+                    <div class="stat-card">
+                        <input
+                            class="large"
+                            name="name"
+                            type="text"
+                            bind:value={item.name}
+                            onchange={(e) =>
+                                item.update({ name: e.target.value })}
+                        />
+                    </div>
                     <div class="stat-card">
                         <select
-                            bind:value={item.system.activeSkill.linkedAttribute}
-                            onchange={(e) =>
-                                item.update({
-                                    "system.activeSkill.linkedAttribute":
-                                        e.target.value,
-                                })}
+                            bind:value
+                            onchange={(e) => updateSkillType(e.target.value)}
                         >
-                            <option disabled value=""
-                                >{localize(
-                                    config.skill.linkedAttribute,
-                                )}</option
-                            >
-
-                            {#each attributeOptions as option}
+                            {#each selectOptions as option}
                                 <option value={option.value}
                                     >{option.label}</option
                                 >
                             {/each}
                         </select>
                     </div>
-                {:else if value === "knowledge"}{:else if value === "language"}{/if}
+                    {#if value === "active"}
+                        <div class="stat-card">
+                            <select
+                                bind:value={
+                                    item.system.activeSkill.linkedAttribute
+                                }
+                                onchange={(e) =>
+                                    item.update({
+                                        "system.activeSkill.linkedAttribute":
+                                            e.target.value,
+                                    })}
+                            >
+                                <option disabled value=""
+                                    >{localize(
+                                        config.skill.linkedAttribute,
+                                    )}</option
+                                >
+
+                                {#each attributeOptions as option}
+                                    <option value={option.value}
+                                        >{option.label}</option
+                                    >
+                                {/each}
+                            </select>
+                        </div>
+                    {:else if value === "knowledge"}{:else if value === "language"}{/if}
+                </div>
             </div>
         </div>
     </div>

@@ -6,9 +6,9 @@ export function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  onLayoutStateChange = () => {},
+  onLayoutStateChange = () => { },
 }) {
-  if (!container) return () => {};
+  if (!container) return () => { };
 
   const form = container.parentElement;
 
@@ -93,9 +93,11 @@ export function setupMasonry({
   });
 
   // Initial apply
-  applyWidths();
-  msnry.reloadItems();
-  msnry.layout();
+  setTimeout(() => {
+    applyWidths();
+    msnry.reloadItems();
+    msnry.layout();
+  }, 100);
 
   return () => {
     resizeObserver.disconnect();
