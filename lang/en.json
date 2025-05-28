@@ -8,15 +8,16 @@
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",
+      "charisma": "Charisma",
+      "essence": "Essence",
+      "initiative": "Initiative",
+      "intelligence": "Intelligence",
+      "limits": "Attribute Limits",
+      "magic": "Magic Pool",
+      "modifiers": "Attribute Modifiers",
       "quickness": "Quickness",
       "strength": "Strength",
-      "charisma": "Charisma",
-      "intelligence": "Intelligence",
-      "willpower": "Willpower",
-      "reaction": "Reaction",
-      "initiative": "Initiative",
-      "modifiers": "Attribute Modifiers",
-      "limits": "Attribute Limits"
+      "willpower": "Willpower"
     },
     "commodity": {
       "commodity": "Commodity Profile",
@@ -41,13 +42,20 @@
     "dicepools": {
       "dicepools": "Dice Pools",
       "combat": "Combat Pool",
-      "magic": "Magic Pool",
       "hacking": "Hacking Pool",
       "astral": "Astral Pool",
       "control": "Control Pool"
     },
     "health": {
       "health": "Health"
+    },
+    "initiative": {
+      "augmentedReaction": "Augmented Reaction",
+      "initiative": "Initiative",
+      "initiativeDice": "Initiative Dice",
+      "natuaralReaction": "Natural Reaction",
+      "reaction": "Reaction",
+      "reactionPenalty": "Reaction Penalty"
     },
     "inventory": {
       "inventory": "Inventory"
@@ -59,6 +67,7 @@
       "advancementRatio": "Advancement Ratio"
     },
     "magic": {
+      "magic": "Magic Tradition",
       "adept": "Adept",
       "magician": "Magician",
       "fullmage": "Full Mage",
@@ -95,6 +104,7 @@
       "weight": "Weight"
     },
     "sheet": {
+      "playercharacter": "Player Character",
       "details": "Details",
       "viewbackground": "View Background",
       "buyupgrades": "Buy upgrades",

@@ -9,19 +9,19 @@
 
 	let activeTab = $state("active");
 
-	let skills = actor.skills || [];
-	let activeSkills = $derived(skills.filter((s) => s.type === "active"));
+	let skill = actor.skill || [];
+	let activeSkills = $derived(skill.filter((s) => s.type === "active"));
 	let knowledgeSkills = $derived(
-		skills.filter((s) => s.type === "knowledge"),
+		skill.filter((s) => s.type === "knowledge"),
 	);
-	let languageSkills = $derived(skills.filter((s) => s.type === "language"));
+	let languageSkills = $derived(skill.filter((s) => s.type === "language"));
 </script>
 
 
 <CardToolbar id={id} />
 
-<div class="skills">
-	<h1>{localize(config.skills.skills)}</h1>
+<div class="skill">
+	<h1>{localize(config.skill.skill)}</h1>
 
 	<div class="sr3e-tabs">
 		<button
@@ -40,11 +40,11 @@
 
 	<div class="sr3e-inner-background">
 		{#if activeTab === "active"}
-			<SkillsActive skills={activeSkills} />
+			<SkillsActive skill={activeSkills} />
 		{:else if activeTab === "knowledge"}
-			<SkillsKnowledge skills={knowledgeSkills} />
+			<SkillsKnowledge skill={knowledgeSkills} />
 		{:else if activeTab === "language"}
-			<SkillsLanguage skills={languageSkills} />
+			<SkillsLanguage skill={languageSkills} />
 		{/if}
 	</div>
 </div>
