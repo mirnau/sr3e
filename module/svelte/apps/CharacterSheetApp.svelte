@@ -1,5 +1,6 @@
 <script>
   import Dossier from "./components/Dossier.svelte";
+  import Initiative from "./components/Initiative.svelte";
   import Attributes from "./components/Attributes.svelte";
   import DicePools from "./components/DicePools.svelte";
   import Movement from "./components/Movement.svelte";
@@ -15,12 +16,13 @@
 
   const defaultCardArray = [
     { comp: Dossier, props: { actor, config, id: 0, span: 1 } },
-    { comp: Attributes, props: { actor, config, id: 1, span: 1 } },
-    { comp: DicePools, props: { actor, config, id: 2, span: 1 } },
-    { comp: Movement, props: { actor, config, id: 3, span: 1 } },
-    { comp: Skills, props: { actor, config, id: 4, span: 2 } },
-    { comp: Health, props: { actor, config, id: 5, span: 1 } },
-    { comp: Inventory, props: { actor, config, id: 6, span: 1 } },
+    { comp: Initiative, props: { actor, config, id: 1, span: 1 } },
+    { comp: Attributes, props: { actor, config, id: 2, span: 1 } },
+    { comp: DicePools, props: { actor, config, id: 3, span: 1 } },
+    { comp: Movement, props: { actor, config, id: 4, span: 1 } },
+    { comp: Skills, props: { actor, config, id: 5, span: 2 } },
+    { comp: Health, props: { actor, config, id: 6, span: 1 } },
+    { comp: Inventory, props: { actor, config, id: 7, span: 1 } },
   ];
 
   $effect(async () => {

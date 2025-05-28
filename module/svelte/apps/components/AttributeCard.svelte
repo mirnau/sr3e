@@ -8,7 +8,7 @@
 </script>
 
 <div class="stat-card">
-<h3>{localize(config.attributes[key] || key)}</h3>
+<h3>{localize(config.attributes[key])}</h3>
     {#if stat.meta == null}
         <h1 class="stat-value">{baseTotal}</h1>
     {:else}

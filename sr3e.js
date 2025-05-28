@@ -4,6 +4,7 @@ import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js"
 import { sr3e } from "./module/foundry/config.js";
 import { hooks, flags } from "./module/foundry/services/commonConsts.js";
 import { injectFooterIntoWindowApp } from "./module/foundry/hooks/renderApplicationV2/injectFooterIntoWindowApp.js";
+import { localize } from "./module/svelteHelpers.js";
 import injectCssSelectors from "./module/foundry/hooks/renderApplicationV2/injectCssSelectors.js";
 import MetahumanModel from "./module/models/item/MetahumanModel.js";
 import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
@@ -58,6 +59,16 @@ function configureProject() {
         style: "normal"
       }
     ]
+  };
+  CONFIG.Actor.typeLabels = {
+    character: localize(CONFIG.sr3e.sheet.playercharacter),
+  };
+  CONFIG.Item.typeLabels = {
+    metahuman: localize(CONFIG.sr3e.traits.metahuman),
+    magic: localize(CONFIG.sr3e.magic.magic),
+    weapon: localize(CONFIG.sr3e.weapon.weapon),
+    ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
+    skill: localize(CONFIG.sr3e.skill.skill),
   };
 
 
@@ -153,9 +164,9 @@ function registerHooks() {
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
         { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet},
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet},
-        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet}
+        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
+        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
+        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

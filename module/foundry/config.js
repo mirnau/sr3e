@@ -14,10 +14,11 @@ sr3e.attributes = {
     charisma: "sr3e.attributes.charisma",
     intelligence: "sr3e.attributes.intelligence",
     willpower: "sr3e.attributes.willpower",
-    reaction: "sr3e.attributes.reaction",
+    magic: "sr3e.attributes.magic",
     initiative: "sr3e.attributes.initiative",
     modifiers: "sr3e.attributes.modifiers",
     limits: "sr3e.attributes.limits",
+    essence: "sr3e.attributes.essence",
 }
 
 sr3e.health = {
@@ -33,6 +34,15 @@ sr3e.skill = {
     knowledge: "sr3e.skill.knowledge",
     language: "sr3e.skill.language",
     linkedAttribute: "sr3e.skill.linkedAttribute",
+}
+
+sr3e.initiative = {
+    augmentedReaction: "sr3e.initiative.augmentedReaction",
+    initiative: "sr3e.initiative.initiative",
+    initiativeDice: "sr3e.initiative.initiativeDice",
+    natuaralReaction: "sr3e.initiative.naturalReaction",
+    reaction: "sr3e.initiative.reaction",
+    reactionPenalty: "sr3e.initiative.reactionPenalty",
 }
 
 sr3e.inventory = {
@@ -53,7 +63,6 @@ sr3e.common = {
 sr3e.dicepools = {
     dicepools: "sr3e.dicepools.dicepools",
     combat: "sr3e.dicepools.combat",
-    magic: "sr3e.dicepools.magic",
     hacking: "sr3e.dicepools.hacking",
     astral: "sr3e.dicepools.astral",
     control: "sr3e.dicepools.control",
@@ -73,6 +82,7 @@ sr3e.movement = {
 }
 
 sr3e.sheet = {
+    playercharacter: "sr3e.sheet.playercharacter",
     details: "sr3e.sheet.details",
     viewbackground: "sr3e.sheet.viewbackground",
     buyupgrades: "sr3e.sheet.buyupgrades",
@@ -109,6 +119,7 @@ sr3e.userconfig = {
 }
 
 sr3e.magic = {
+    magic: "sr3e.magic.magic",
     adept: "sr3e.magic.adept",
     magician: "sr3e.magic.magician",
     fullmage: "sr3e.magic.fullmage",

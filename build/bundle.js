@@ -150,7 +150,8 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       strength: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema())
+      willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
+      magic: new foundry.data.fields.SchemaField(ComplexStat.defineSchema())
     };
   }
 };
@@ -3356,14 +3357,14 @@ var on_keydown$1 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$p = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$q = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$p();
+  var div = root$q();
   div.__click = [on_click$7];
   div.__keydown = [on_keydown$1];
   var button = child(div);
@@ -3398,7 +3399,7 @@ var root_1$7 = /* @__PURE__ */ template(`<div class="version-one image-mask"><im
 var root_2$4 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$5 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$o = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$p = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
@@ -3435,7 +3436,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$o();
+  var fragment = root$p();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3540,64 +3541,6 @@ function Dossier($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input"]);
-var root_1$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_3$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
-var root_4$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
-var root_2$3 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root$n = /* @__PURE__ */ template(`<div class="stat-card"><h3> </h3> <!></div>`);
-function AttributeCard($$anchor, $$props) {
-  push($$props, true);
-  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
-  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var div = root$n();
-  var h3 = child(div);
-  var text = child(h3);
-  var node = sibling(h3, 2);
-  {
-    var consequent = ($$anchor2) => {
-      var h1 = root_1$6();
-      var text_1 = child(h1);
-      template_effect(() => set_text(text_1, get$1(baseTotal)));
-      append($$anchor2, h1);
-    };
-    var alternate = ($$anchor2) => {
-      var div_1 = root_2$3();
-      var node_1 = child(div_1);
-      {
-        var consequent_1 = ($$anchor3) => {
-          var i = root_3$4();
-          append($$anchor3, i);
-        };
-        if_block(node_1, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent_1);
-        });
-      }
-      var h1_1 = sibling(node_1, 2);
-      var text_2 = child(h1_1);
-      var node_2 = sibling(h1_1, 2);
-      {
-        var consequent_2 = ($$anchor3) => {
-          var i_1 = root_4$2();
-          append($$anchor3, i_1);
-        };
-        if_block(node_2, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent_2);
-        });
-      }
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, div_1);
-    };
-    if_block(node, ($$render) => {
-      if ($$props.stat.meta == null) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  template_effect(($0) => set_text(text, $0), [
-    () => localize$1($$props.config.attributes[$$props.key] || $$props.key)
-  ]);
-  append($$anchor, div);
-  pop();
-}
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -5133,6 +5076,128 @@ function setupMasonry({
     msnry.destroy();
   };
 }
+var root$o = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+function Initiative($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let gridContainer;
+  let attributes = proxy(actor().system.attributes);
+  let intelligenceBaseTotal = /* @__PURE__ */ derived(() => attributes.intelligence.value + attributes.intelligence.mod);
+  let intelligence = /* @__PURE__ */ derived(() => get$1(intelligenceBaseTotal) + (attributes.intelligence.meta ?? 0));
+  let quicknessBaseTotal = /* @__PURE__ */ derived(() => attributes.quickness.value + attributes.quickness.mod);
+  let quickness = /* @__PURE__ */ derived(() => get$1(quicknessBaseTotal) + (attributes.quickness.meta ?? 0));
+  let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness)) * 0.5);
+  let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
+  let initiativeDice = 1;
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var div = root$o();
+  var h1 = child(div);
+  var text = child(h1);
+  var div_1 = sibling(h1, 2);
+  var div_2 = sibling(child(div_1), 4);
+  var h4 = child(div_2);
+  var text_1 = child(h4);
+  var h1_1 = sibling(h4, 2);
+  h1_1.textContent = initiativeDice;
+  var div_3 = sibling(div_2, 2);
+  var h4_1 = child(div_3);
+  var text_2 = child(h4_1);
+  var h1_2 = sibling(h4_1, 2);
+  var text_3 = child(h1_2);
+  var div_4 = sibling(div_3, 2);
+  var h4_2 = child(div_4);
+  var text_4 = child(h4_2);
+  var h1_3 = sibling(h4_2, 2);
+  var text_5 = child(h1_3);
+  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(
+    ($0, $1, $2, $3) => {
+      set_text(text, $0);
+      set_text(text_1, $1);
+      set_text(text_2, $2);
+      set_text(text_3, get$1(reaction));
+      set_text(text_4, $3);
+      set_text(text_5, get$1(augmentedReaction));
+    },
+    [
+      () => localize$1(config().initiative.initiative),
+      () => localize$1(config().initiative.initiativeDice),
+      () => localize$1(config().initiative.reaction),
+      () => localize$1(config().initiative.augmentedReaction)
+    ]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root_1$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
+var root_4$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
+var root_2$3 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root$n = /* @__PURE__ */ template(`<div class="stat-card"><h3> </h3> <!></div>`);
+function AttributeCard($$anchor, $$props) {
+  push($$props, true);
+  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
+  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
+  var div = root$n();
+  var h3 = child(div);
+  var text = child(h3);
+  var node = sibling(h3, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var h1 = root_1$6();
+      var text_1 = child(h1);
+      template_effect(() => set_text(text_1, get$1(baseTotal)));
+      append($$anchor2, h1);
+    };
+    var alternate = ($$anchor2) => {
+      var div_1 = root_2$3();
+      var node_1 = child(div_1);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i = root_3$4();
+          append($$anchor3, i);
+        };
+        if_block(node_1, ($$render) => {
+          if ($$props.isShoppingState) $$render(consequent_1);
+        });
+      }
+      var h1_1 = sibling(node_1, 2);
+      var text_2 = child(h1_1);
+      var node_2 = sibling(h1_1, 2);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var i_1 = root_4$2();
+          append($$anchor3, i_1);
+        };
+        if_block(node_2, ($$render) => {
+          if ($$props.isShoppingState) $$render(consequent_2);
+        });
+      }
+      template_effect(() => set_text(text_2, get$1(total)));
+      append($$anchor2, div_1);
+    };
+    if_block(node, ($$render) => {
+      if ($$props.stat.meta == null) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(($0) => set_text(text, $0), [
+    () => localize$1($$props.config.attributes[$$props.key])
+  ]);
+  append($$anchor, div);
+  pop();
+}
 var root$m = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
@@ -5166,7 +5231,7 @@ function Attributes($$anchor, $$props) {
   var text = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
+  each(node_1, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
     AttributeCard($$anchor2, {
@@ -5483,7 +5548,7 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Attributes,
+      comp: Initiative,
       props: {
         actor: $$props.actor,
         config: $$props.config,
@@ -5492,7 +5557,7 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: DicePools,
+      comp: Attributes,
       props: {
         actor: $$props.actor,
         config: $$props.config,
@@ -5501,7 +5566,7 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Movement,
+      comp: DicePools,
       props: {
         actor: $$props.actor,
         config: $$props.config,
@@ -5510,11 +5575,20 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Skills,
+      comp: Movement,
       props: {
         actor: $$props.actor,
         config: $$props.config,
         id: 4,
+        span: 1
+      }
+    },
+    {
+      comp: Skills,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 5,
         span: 2
       }
     },
@@ -5523,7 +5597,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 5,
+        id: 6,
         span: 1
       }
     },
@@ -5532,7 +5606,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 6,
+        id: 7,
         span: 1
       }
     }
@@ -5760,7 +5834,8 @@ class ActorDataService {
       charisma: localize$1(CONFIG.sr3e.attributes.charisma),
       intelligence: localize$1(CONFIG.sr3e.attributes.intelligence),
       willpower: localize$1(CONFIG.sr3e.attributes.willpower),
-      reaction: localize$1(CONFIG.sr3e.attributes.reaction)
+      reaction: localize$1(CONFIG.sr3e.attributes.reaction),
+      magic: localize$1(CONFIG.sr3e.attributes.reaction)
     };
   }
 }
@@ -5889,10 +5964,11 @@ sr3e.attributes = {
   charisma: "sr3e.attributes.charisma",
   intelligence: "sr3e.attributes.intelligence",
   willpower: "sr3e.attributes.willpower",
-  reaction: "sr3e.attributes.reaction",
+  magic: "sr3e.attributes.magic",
   initiative: "sr3e.attributes.initiative",
   modifiers: "sr3e.attributes.modifiers",
-  limits: "sr3e.attributes.limits"
+  limits: "sr3e.attributes.limits",
+  essence: "sr3e.attributes.essence"
 };
 sr3e.health = {
   health: "sr3e.health.health"
@@ -5906,6 +5982,14 @@ sr3e.skill = {
   knowledge: "sr3e.skill.knowledge",
   language: "sr3e.skill.language",
   linkedAttribute: "sr3e.skill.linkedAttribute"
+};
+sr3e.initiative = {
+  augmentedReaction: "sr3e.initiative.augmentedReaction",
+  initiative: "sr3e.initiative.initiative",
+  initiativeDice: "sr3e.initiative.initiativeDice",
+  natuaralReaction: "sr3e.initiative.naturalReaction",
+  reaction: "sr3e.initiative.reaction",
+  reactionPenalty: "sr3e.initiative.reactionPenalty"
 };
 sr3e.inventory = {
   inventory: "sr3e.inventory.inventory"
@@ -5923,7 +6007,6 @@ sr3e.common = {
 sr3e.dicepools = {
   dicepools: "sr3e.dicepools.dicepools",
   combat: "sr3e.dicepools.combat",
-  magic: "sr3e.dicepools.magic",
   hacking: "sr3e.dicepools.hacking",
   astral: "sr3e.dicepools.astral",
   control: "sr3e.dicepools.control"
@@ -5941,6 +6024,7 @@ sr3e.movement = {
   runSpeedModifier: "sr3e.movement.runSpeedModifier"
 };
 sr3e.sheet = {
+  playercharacter: "sr3e.sheet.playercharacter",
   details: "sr3e.sheet.details",
   viewbackground: "sr3e.sheet.viewbackground",
   buyupgrades: "sr3e.sheet.buyupgrades",
@@ -5973,6 +6057,7 @@ sr3e.userconfig = {
   saveUserSettings: "sr3e.userconfig.saveUserSettings"
 };
 sr3e.magic = {
+  magic: "sr3e.magic.magic",
   adept: "sr3e.magic.adept",
   magician: "sr3e.magic.magician",
   fullmage: "sr3e.magic.fullmage",
@@ -8196,6 +8281,16 @@ function configureProject() {
         style: "normal"
       }
     ]
+  };
+  CONFIG.Actor.typeLabels = {
+    character: localize$1(CONFIG.sr3e.sheet.playercharacter)
+  };
+  CONFIG.Item.typeLabels = {
+    metahuman: localize$1(CONFIG.sr3e.traits.metahuman),
+    magic: localize$1(CONFIG.sr3e.magic.magic),
+    weapon: localize$1(CONFIG.sr3e.weapon.weapon),
+    ammunition: localize$1(CONFIG.sr3e.ammunition.ammunition),
+    skill: localize$1(CONFIG.sr3e.skill.skill)
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");

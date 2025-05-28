@@ -11,7 +11,9 @@
     let isShoppingState = $state(false);
 
     $effect(() => {
-        const unsubscribe = shoppingState.subscribe((v) => isShoppingState = v);
+        const unsubscribe = shoppingState.subscribe(
+            (v) => (isShoppingState = v),
+        );
         return unsubscribe;
     });
 
@@ -25,6 +27,8 @@
         });
         return cleanup;
     });
+
+
 </script>
 
 <CardToolbar {id} />
@@ -32,8 +36,8 @@
 <div bind:this={gridContainer} class="attribute-masonry-grid">
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
-    {#each Object.entries(attributes) as [key, stat]}
-            <AttributeCard {stat} {config} {key} {isShoppingState}/>
+    {#each Object.entries(attributes).slice(0, 6) as [key, stat]}
+        <AttributeCard {stat} {config} {key} {isShoppingState} />
     {/each}
-</div>
 
+</div>

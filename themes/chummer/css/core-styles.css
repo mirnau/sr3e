@@ -92,14 +92,10 @@
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
+  color: #5fd3ae;
   border: none;
-  text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
+  text-shadow: 0 0 6px #45d06b, 0 0 10px #e6ff8d;
   font-size: 1rem;
-}
-.system-sr3e label.no-margin,
-.system-sr3e span.no-margin,
-.system-sr3e h4.no-margin {
-  margin: 0;
 }
 .system-sr3e h5 {
   text-transform: uppercase;
@@ -125,6 +121,7 @@
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
+  color: #5fd3ae;
   border: none;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   font-size: 1rem;
@@ -1626,7 +1623,7 @@
   background: #ff1d9d;
   transition: transform 1.3s ease, background-color 1.3s ease;
   text-align: center;
-  padding: 0.25rem;
+  padding: 0.5rem;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .system-sr3e dialog .stat-card::before,
@@ -1664,18 +1661,19 @@
 .system-sr3e .sr3e.sheet.character .stat-card select {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e dialog .stat-card h4.no-margin,
-.system-sr3e form .stat-card h4.no-margin,
-.system-sr3e div#support-details .stat-card h4.no-margin,
-.system-sr3e div#invitation-links .stat-card h4.no-margin,
-.system-sr3e .application.category-browser .stat-card h4.no-margin,
-.system-sr3e .sr3e.sheet.item .stat-card h4.no-margin,
-.system-sr3e .sr3e.sheet.character .stat-card h4.no-margin {
-  max-width: 5rem;
+.system-sr3e dialog .stat-card .no-margin,
+.system-sr3e form .stat-card .no-margin,
+.system-sr3e div#support-details .stat-card .no-margin,
+.system-sr3e div#invitation-links .stat-card .no-margin,
+.system-sr3e .application.category-browser .stat-card .no-margin,
+.system-sr3e .sr3e.sheet.item .stat-card .no-margin,
+.system-sr3e .sr3e.sheet.character .stat-card .no-margin {
+  width: calc(100% + 0.5rem);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin: 0 0.5rem;
+  padding: 0.5rem;
+  margin: 0;
 }
 .system-sr3e dialog .stat-card .stat-value,
 .system-sr3e form .stat-card .stat-value,
@@ -1685,6 +1683,7 @@
 .system-sr3e .sr3e.sheet.item .stat-card .stat-value,
 .system-sr3e .sr3e.sheet.character .stat-card .stat-value {
   margin: 0;
+  margin-bottom: 0.25rem;
   text-align: center;
 }
 .system-sr3e dialog .core-skill .skill-name,
