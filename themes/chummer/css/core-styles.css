@@ -1623,7 +1623,7 @@
   background: #ff1d9d;
   transition: transform 1.3s ease, background-color 1.3s ease;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0rem 0.5rem 0.25rem 0.5rem;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .system-sr3e dialog .stat-card::before,
