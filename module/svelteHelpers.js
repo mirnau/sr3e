@@ -63,3 +63,7 @@ export function toggleCardSpanById(id) {
     });
   });
 }
+
+export function getRandomIntinRange(x, y) {
+    return Math.floor(Math.random() * (y - x + 1)) + x;
+}

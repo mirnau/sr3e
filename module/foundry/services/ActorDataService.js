@@ -74,4 +74,31 @@ export default class ActorDataService {
             magic: localize(CONFIG.sr3e.attributes.reaction),
         };
     }
+
+    static getCharacterCreationStats() {
+        return {
+            attributePointCollection: [
+                { priority: "A", points: 30 },
+                { priority: "B", points: 27 },
+                { priority: "C", points: 24 },
+                { priority: "D", points: 21 },
+                { priority: "E", points: 18 },
+            ],
+            skillPointCollection: [
+                { priority: "A", points: 50 },
+                { priority: "B", points: 40 },
+                { priority: "C", points: 34 },
+                { priority: "D", points: 30 },
+                { priority: "E", points: 27 },
+            ],
+            assets: [
+                { priority: "A", points: 1000000 },
+                { priority: "B", points: 400000 },
+                { priority: "C", points: 90000 },
+                { priority: "D", points: 20000 },
+                { priority: "E", points: 5000 },
+            ]
+        };
+    }
+
 }

@@ -62,16 +62,19 @@ sr3e.common = {
 
 sr3e.dicepools = {
     dicepools: "sr3e.dicepools.dicepools",
-    combat: "sr3e.dicepools.combat",
-    hacking: "sr3e.dicepools.hacking",
     astral: "sr3e.dicepools.astral",
+    combat: "sr3e.dicepools.combat",
     control: "sr3e.dicepools.control",
+    hacking: "sr3e.dicepools.hacking",
+    spell: "sr3e.dicepools.spell",
 }
 sr3e.karma = {
     karma: "sr3e.karma.karma",
     goodKarma: "sr3e.karma.goodKarma",
     karmaPool: "sr3e.karma.karmaPool",
     advancementRatio: "sr3e.karma.advancementRatio",
+    miraculousSurvival: "sr3e.karma.miraculousSurvival",
+    lifetimeKarma: "sr3e.karma.lifetimeKarma",
 }
 
 sr3e.movement = {
@@ -79,6 +82,11 @@ sr3e.movement = {
     walking: "sr3e.movement.walking",
     running: "sr3e.movement.running",
     runSpeedModifier: "sr3e.movement.runSpeedModifier",
+}
+
+sr3e.placeHolders = {
+    human: "sr3e.placeholders.human",
+    fullshaman: "sr3e.placeholders.fullshaman"
 }
 
 sr3e.sheet = {
@@ -94,7 +102,7 @@ sr3e.traits = {
     height: "sr3e.traits.height",
     weight: "sr3e.traits.weight",
     agerange: "sr3e.traits.agerange",
-    metahuman: "sr3e.traits.metahuman",
+    metahuman: "sr3e.traits.metahuman"
 }
 
 sr3e.vision = {

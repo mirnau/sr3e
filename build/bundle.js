@@ -1,11 +1,14 @@
+var __defProp = Object.defineProperty;
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart, _metahuman, _magic, _weapon, _ammunition, _skill;
+var _app, _neon, _feed, _cart, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3346,6 +3349,9 @@ function toggleCardSpanById(id) {
     });
   });
 }
+function getRandomIntinRange(x, y) {
+  return Math.floor(Math.random() * (y - x + 1)) + x;
+}
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
@@ -3357,14 +3363,14 @@ var on_keydown$1 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$q = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$s = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$q();
+  var div = root$s();
   div.__click = [on_click$7];
   div.__keydown = [on_keydown$1];
   var button = child(div);
@@ -3395,15 +3401,15 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$7 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2$4 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$5 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$p = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   var _a, _b, _c, _d;
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let actorStore = /* @__PURE__ */ derived(() => {
     var _a2, _b2;
@@ -3436,7 +3442,7 @@ function Dossier($$anchor, $$props) {
     set(fieldName, proxy(newName));
     (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$p();
+  var fragment = root$r();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3447,7 +3453,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$7();
+      var div_1 = root_1$8();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
@@ -3511,19 +3517,19 @@ function Dossier($$anchor, $$props) {
           set_text(text_6, $6);
         },
         [
-          () => localize$1(config().traits.metahuman),
-          () => localize$1(config().traits.age),
-          () => localize$1(config().traits.height),
+          () => localize$1(config2().traits.metahuman),
+          () => localize$1(config2().traits.age),
+          () => localize$1(config2().traits.height),
           () => {
             var _a2, _b2;
             return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
           },
-          () => localize$1(config().traits.weight),
+          () => localize$1(config2().traits.weight),
           () => {
             var _a2, _b2;
             return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
           },
-          () => localize$1(config().sheet.viewbackground)
+          () => localize$1(config2().sheet.viewbackground)
         ]
       );
       event("blur", input, saveActorName);
@@ -3536,7 +3542,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize$1(config().sheet.details)]);
+  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize$1(config2().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -5076,10 +5082,10 @@ function setupMasonry({
     msnry.destroy();
   };
 }
-var root$o = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+var root$q = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let gridContainer;
@@ -5101,7 +5107,7 @@ function Initiative($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$o();
+  var div = root$q();
   var h1 = child(div);
   var text = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5131,85 +5137,191 @@ function Initiative($$anchor, $$props) {
       set_text(text_5, get$1(augmentedReaction));
     },
     [
-      () => localize$1(config().initiative.initiative),
-      () => localize$1(config().initiative.initiativeDice),
-      () => localize$1(config().initiative.reaction),
-      () => localize$1(config().initiative.augmentedReaction)
+      () => localize$1(config2().initiative.initiative),
+      () => localize$1(config2().initiative.initiativeDice),
+      () => localize$1(config2().initiative.reaction),
+      () => localize$1(config2().initiative.augmentedReaction)
     ]
   );
   append($$anchor, div);
   pop();
 }
-var root_1$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_3$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down"></i>`);
-var root_4$2 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up"></i>`);
-var root_2$3 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root$n = /* @__PURE__ */ template(`<div class="stat-card"><h3> </h3> <!></div>`);
+var root_2$3 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute"></i>`);
+var root_3$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up increment-attribute"></i>`);
+var root_1$7 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_4$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$p = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
-  var div = root$n();
-  var h3 = child(div);
-  var text = child(h3);
-  var node = sibling(h3, 2);
+  var div = root$p();
+  var h4 = child(div);
+  var text = child(h4);
+  var node = sibling(h4, 2);
   {
-    var consequent = ($$anchor2) => {
-      var h1 = root_1$6();
-      var text_1 = child(h1);
-      template_effect(() => set_text(text_1, get$1(baseTotal)));
-      append($$anchor2, h1);
-    };
-    var alternate = ($$anchor2) => {
-      var div_1 = root_2$3();
+    var consequent_2 = ($$anchor2) => {
+      var div_1 = root_1$7();
       var node_1 = child(div_1);
       {
-        var consequent_1 = ($$anchor3) => {
-          var i = root_3$4();
+        var consequent = ($$anchor3) => {
+          var i = root_2$3();
           append($$anchor3, i);
         };
         if_block(node_1, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent_1);
+          if ($$props.isShoppingState) $$render(consequent);
         });
       }
-      var h1_1 = sibling(node_1, 2);
-      var text_2 = child(h1_1);
-      var node_2 = sibling(h1_1, 2);
+      var h1 = sibling(node_1, 2);
+      var text_1 = child(h1);
+      var node_2 = sibling(h1, 2);
       {
-        var consequent_2 = ($$anchor3) => {
-          var i_1 = root_4$2();
+        var consequent_1 = ($$anchor3) => {
+          var i_1 = root_3$4();
           append($$anchor3, i_1);
         };
         if_block(node_2, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent_2);
+          if ($$props.isShoppingState) $$render(consequent_1);
         });
       }
-      template_effect(() => set_text(text_2, get$1(total)));
+      template_effect(() => set_text(text_1, get$1(total)));
       append($$anchor2, div_1);
     };
+    var alternate = ($$anchor2) => {
+      var h1_1 = root_4$2();
+      var text_2 = child(h1_1);
+      template_effect(() => set_text(text_2, get$1(baseTotal)));
+      append($$anchor2, h1_1);
+    };
     if_block(node, ($$render) => {
-      if ($$props.stat.meta == null) $$render(consequent);
+      if ("meta" in $$props.stat) $$render(consequent_2);
       else $$render(alternate, false);
     });
   }
   template_effect(($0) => set_text(text, $0), [
-    () => localize$1($$props.config.attributes[$$props.key])
+    () => localize$1($$props.localization[$$props.key])
   ]);
   append($$anchor, div);
   pop();
 }
-var root$m = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let gridContainer;
   let isShoppingState = state(false);
+  let localization = config2().attributes;
   user_effect(() => {
     const unsubscribe = shoppingState.subscribe((v) => set(isShoppingState, proxy(v)));
     return unsubscribe;
   });
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$o();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var node_1 = sibling(child(div), 4);
+  each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
+    let key = () => get$1($$item)[0];
+    let stat = () => get$1($$item)[1];
+    AttributeCard($$anchor2, {
+      get stat() {
+        return stat();
+      },
+      localization,
+      get key() {
+        return key();
+      },
+      get isShoppingState() {
+        return get$1(isShoppingState);
+      }
+    });
+  });
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
+    () => localize$1(config2().attributes.attributes)
+  ]);
+  append($$anchor, fragment);
+  pop();
+}
+var root$n = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+function DicePools($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let dicePools = proxy(actor().system.dicePools);
+  console.log("Dice Pools", dicePools);
+  let localization = config2().dicepools;
+  let gridContainer;
+  const isShoppingState = false;
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$n();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var node_1 = sibling(child(div), 4);
+  each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
+    let key = () => get$1($$item)[0];
+    let stat = () => get$1($$item)[1];
+    AttributeCard($$anchor2, {
+      get stat() {
+        return stat();
+      },
+      localization,
+      get key() {
+        return key();
+      },
+      isShoppingState
+    });
+  });
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
+    () => localize$1(config2().dicepools.dicepools)
+  ]);
+  append($$anchor, fragment);
+  pop();
+}
+var root$m = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+function Movement($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let movement = proxy(actor().system.movement);
+  let localization = config2().movement;
+  let gridContainer;
+  const isShoppingState = false;
   user_effect(() => {
     const cleanup = setupMasonry({
       container: gridContainer,
@@ -5231,112 +5343,6 @@ function Attributes($$anchor, $$props) {
   var text = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor2, $$item) => {
-    let key = () => get$1($$item)[0];
-    let stat = () => get$1($$item)[1];
-    AttributeCard($$anchor2, {
-      get stat() {
-        return stat();
-      },
-      get config() {
-        return config();
-      },
-      get key() {
-        return key();
-      },
-      get isShoppingState() {
-        return get$1(isShoppingState);
-      }
-    });
-  });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().attributes.attributes)
-  ]);
-  append($$anchor, fragment);
-  pop();
-}
-var root$l = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
-function DicePools($$anchor, $$props) {
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let dicePools = proxy(actor().system.dicePools);
-  let gridContainer;
-  const isShoppingState = false;
-  user_effect(() => {
-    const cleanup = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
-    });
-    return cleanup;
-  });
-  var fragment = root$l();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
-    let key = () => get$1($$item)[0];
-    let stat = () => get$1($$item)[1];
-    AttributeCard($$anchor2, {
-      get stat() {
-        return stat();
-      },
-      get config() {
-        return config();
-      },
-      get key() {
-        return key();
-      },
-      isShoppingState
-    });
-  });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().dicepools.dicepools)
-  ]);
-  append($$anchor, fragment);
-  pop();
-}
-var root$k = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
-function Movement($$anchor, $$props) {
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let movement = proxy(actor().system.movement);
-  let gridContainer;
-  const isShoppingState = false;
-  user_effect(() => {
-    const cleanup = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
-    });
-    return cleanup;
-  });
-  var fragment = root$k();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
@@ -5344,9 +5350,7 @@ function Movement($$anchor, $$props) {
       get stat() {
         return stat();
       },
-      get config() {
-        return config();
-      },
+      localization,
       get key() {
         return key();
       },
@@ -5355,22 +5359,22 @@ function Movement($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().movement.movement)
+    () => localize$1(config2().movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
 }
-var root$j = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$l = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
-  var div = root$j();
+  var div = root$l();
   append($$anchor, div);
 }
-var root$i = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$k = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsKnowledge($$anchor) {
-  var div = root$i();
+  var div = root$k();
   append($$anchor, div);
 }
-var root$h = /* @__PURE__ */ template(`<div class="skill-card"></div>`);
+var root$j = /* @__PURE__ */ template(`<div class="skill-card"></div>`);
 function SkillsActive($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({}));
@@ -5381,22 +5385,22 @@ function SkillsActive($$anchor, $$props) {
     if (!((_a = actor()) == null ? void 0 : _a.id)) return;
     set(activeSkills, proxy(actor().system.skills.filter((skill) => skill.active)));
   });
-  var div = root$h();
+  var div = root$j();
   append($$anchor, div);
   pop();
 }
 var on_click$6 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$g = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$i = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   let skill = actor().skill || [];
   let activeSkills = /* @__PURE__ */ derived(() => skill.filter((s) => s.type === "active"));
-  var fragment = root$g();
+  var fragment = root$i();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5470,17 +5474,17 @@ function Skills($$anchor, $$props) {
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
     },
-    [() => localize$1(config().skill.skill)]
+    [() => localize$1(config2().skill.skill)]
   );
   append($$anchor, fragment);
   pop();
 }
 delegate(["click"]);
-var root$f = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+var root$h = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  var fragment = root$f();
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  var fragment = root$h();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5497,17 +5501,108 @@ function Health($$anchor, $$props) {
       set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
-    [() => localize$1(config().health.health)]
+    [() => localize$1(config2().health.health)]
   );
   append($$anchor, fragment);
   pop();
 }
-var root$e = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+var root_1$6 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root$g = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
+function Karma($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let karma = proxy(actor().system.karma);
+  let essence = proxy(actor().system.attributes.essence ?? 0);
+  let gridContainer;
+  let survivor = /* @__PURE__ */ derived(() => karma.miraculousSurvival);
+  user_effect(() => {
+    const cleanup = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".stat-card",
+      gridSizerSelector: ".attribute-grid-sizer",
+      gutterSizerSelector: ".attribute-gutter-sizer",
+      minItemWidth: 180
+    });
+    return cleanup;
+  });
+  var fragment = root$g();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text = child(h1);
+  var div = sibling(h1, 2);
+  var div_1 = sibling(child(div), 4);
+  var h4 = child(div_1);
+  var text_1 = child(h4);
+  var h1_1 = sibling(h4, 2);
+  var text_2 = child(h1_1);
+  var div_2 = sibling(div_1, 2);
+  var h4_1 = child(div_2);
+  var text_3 = child(h4_1);
+  var h1_2 = sibling(h4_1, 2);
+  var text_4 = child(h1_2);
+  var div_3 = sibling(div_2, 2);
+  var h4_2 = child(div_3);
+  var text_5 = child(h4_2);
+  var h1_3 = sibling(h4_2, 2);
+  var text_6 = child(h1_3);
+  var div_4 = sibling(div_3, 2);
+  var h4_3 = child(div_4);
+  var text_7 = child(h4_3);
+  var h1_4 = sibling(h4_3, 2);
+  var text_8 = child(h1_4);
+  var node_1 = sibling(div_4, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var div_5 = root_1$6();
+      var h4_4 = child(div_5);
+      var text_9 = child(h4_4);
+      template_effect(($0) => set_text(text_9, $0), [
+        () => localize$1(config2().karma.miraculousSurvival)
+      ]);
+      append($$anchor2, div_5);
+    };
+    var alternate = ($$anchor2) => {
+    };
+    if_block(node_1, ($$render) => {
+      if (!get$1(survivor)) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(
+    ($0, $1, $2, $3) => {
+      set_text(text, $0);
+      set_text(text_1, $1);
+      set_text(text_2, karma.goodKarma);
+      set_text(text_3, $2);
+      set_text(text_4, karma.karmaPool);
+      set_text(text_5, $2);
+      set_text(text_6, karma.lifetimeKarma);
+      set_text(text_7, $3);
+      set_text(text_8, essence);
+    },
+    [
+      () => localize$1(config2().karma.karma),
+      () => localize$1(config2().karma.goodKarma),
+      () => localize$1(config2().karma.lifetimeKarma),
+      () => localize$1(config2().attributes.essence)
+    ]
+  );
+  append($$anchor, fragment);
+  pop();
+}
+var root$f = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  var fragment = root$e();
+  var fragment = root$f();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5525,14 +5620,14 @@ function Inventory($$anchor, $$props) {
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
-      () => localize$1(config().inventory.inventory)
+      () => localize$1(config2().inventory.inventory)
     ]
   );
   append($$anchor, fragment);
   pop();
 }
 var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$d = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
+var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5584,11 +5679,20 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Skills,
+      comp: Karma,
       props: {
         actor: $$props.actor,
         config: $$props.config,
         id: 5,
+        span: 1
+      }
+    },
+    {
+      comp: Skills,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 6,
         span: 2
       }
     },
@@ -5597,7 +5701,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 6,
+        id: 7,
         span: 1
       }
     },
@@ -5606,7 +5710,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 7,
+        id: 8,
         span: 1
       }
     }
@@ -5669,7 +5773,7 @@ function CharacterSheetApp($$anchor, $$props) {
     });
     return cleanup;
   });
-  var div = root$d();
+  var div = root$e();
   var node = sibling(child(div), 4);
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
@@ -5689,7 +5793,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$c = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$d = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5716,19 +5820,21 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  var div = root$c();
+  var div = root$d();
   var node = child(div);
   html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
-var root$b = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+var root$c = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
 function NewsFeed($$anchor) {
-  var div = root$b();
+  var div = root$c();
   append($$anchor, div);
 }
 const hooks = {
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
   init: "init",
   renderApplicationV2: "renderApplicationV2"
 };
@@ -5744,17 +5850,17 @@ function toggleShoppingState(_, isShoppingState, actor) {
   shoppingState.set(get$1(isShoppingState));
   actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
 }
-var root$a = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
+var root$b = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   let isShoppingState = state(true);
   (async () => {
     const current = await actor().getFlag(flags.sr3e, flags.actor.isShoppingState);
     set(isShoppingState, proxy(current ?? true));
     if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
   })();
-  var div = root$a();
+  var div = root$b();
   var button = child(div);
   button.__click = [toggleShoppingState, isShoppingState, actor];
   template_effect(
@@ -5763,7 +5869,7 @@ function ShoppingCart($$anchor, $$props) {
       set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`);
     },
     [
-      () => localize$1(config().sheet.buyupgrades)
+      () => localize$1(config2().sheet.buyupgrades)
     ]
   );
   append($$anchor, div);
@@ -5836,6 +5942,31 @@ class ActorDataService {
       willpower: localize$1(CONFIG.sr3e.attributes.willpower),
       reaction: localize$1(CONFIG.sr3e.attributes.reaction),
       magic: localize$1(CONFIG.sr3e.attributes.reaction)
+    };
+  }
+  static getCharacterCreationStats() {
+    return {
+      attributePointCollection: [
+        { priority: "A", points: 30 },
+        { priority: "B", points: 27 },
+        { priority: "C", points: 24 },
+        { priority: "D", points: 21 },
+        { priority: "E", points: 18 }
+      ],
+      skillPointCollection: [
+        { priority: "A", points: 50 },
+        { priority: "B", points: 40 },
+        { priority: "C", points: 34 },
+        { priority: "D", points: 30 },
+        { priority: "E", points: 27 }
+      ],
+      assets: [
+        { priority: "A", points: 1e6 },
+        { priority: "B", points: 4e5 },
+        { priority: "C", points: 9e4 },
+        { priority: "D", points: 2e4 },
+        { priority: "E", points: 5e3 }
+      ]
     };
   }
 }
@@ -6006,22 +6137,29 @@ sr3e.common = {
 };
 sr3e.dicepools = {
   dicepools: "sr3e.dicepools.dicepools",
-  combat: "sr3e.dicepools.combat",
-  hacking: "sr3e.dicepools.hacking",
   astral: "sr3e.dicepools.astral",
-  control: "sr3e.dicepools.control"
+  combat: "sr3e.dicepools.combat",
+  control: "sr3e.dicepools.control",
+  hacking: "sr3e.dicepools.hacking",
+  spell: "sr3e.dicepools.spell"
 };
 sr3e.karma = {
   karma: "sr3e.karma.karma",
   goodKarma: "sr3e.karma.goodKarma",
   karmaPool: "sr3e.karma.karmaPool",
-  advancementRatio: "sr3e.karma.advancementRatio"
+  advancementRatio: "sr3e.karma.advancementRatio",
+  miraculousSurvival: "sr3e.karma.miraculousSurvival",
+  lifetimeKarma: "sr3e.karma.lifetimeKarma"
 };
 sr3e.movement = {
   movement: "sr3e.movement.movement",
   walking: "sr3e.movement.walking",
   running: "sr3e.movement.running",
   runSpeedModifier: "sr3e.movement.runSpeedModifier"
+};
+sr3e.placeHolders = {
+  human: "sr3e.placeholders.human",
+  fullshaman: "sr3e.placeholders.fullshaman"
 };
 sr3e.sheet = {
   playercharacter: "sr3e.sheet.playercharacter",
@@ -6482,11 +6620,11 @@ function handleOpen(_, journalId) {
   const entry = game.journal.get(get$1(journalId));
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
 }
-function handleSearch(__1, config, journalId, $$props) {
+function handleSearch(__1, config2, journalId, $$props) {
   const modal = mount(JournalSearchModal, {
     target: document.body,
     props: {
-      config: config(),
+      config: config2(),
       onclose: (result) => {
         var _a;
         unmount(modal);
@@ -6507,26 +6645,26 @@ var on_keydown = (e) => {
     e.currentTarget.blur();
   }
 };
-var root$9 = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
+var root$a = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
-  const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  const config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
-  var div = root$9();
+  var div = root$a();
   div.__click = [on_click$5];
   div.__keydown = [on_keydown];
   var button = child(div);
   button.__click = [handleOpen, journalId];
   var button_1 = sibling(button, 2);
-  button_1.__click = [handleSearch, config, journalId, $$props];
+  button_1.__click = [handleSearch, config2, journalId, $$props];
   append($$anchor, div);
   pop();
 }
 delegate(["click", "keydown"]);
-var root$8 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
+var root$9 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   let toolbar;
   let journalId = state(proxy(item2().system.journalId ?? null));
   let previewContent = state("");
@@ -6546,7 +6684,7 @@ function JournalViewer($$anchor, $$props) {
     set(journalId, proxy(result.value));
     await item2().update({ "system.journalId": result.value });
   }
-  var div = root$8();
+  var div = root$9();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var node = child(div_2);
@@ -6554,7 +6692,7 @@ function JournalViewer($$anchor, $$props) {
     JournalViewerToolbar(node, {
       onJournalContentSelected: handleJournalSelection,
       get config() {
-        return config();
+        return config2();
       },
       get id() {
         return get$1(journalId);
@@ -6573,7 +6711,7 @@ var root_1$3 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$3 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$1 = /* @__PURE__ */ template(`<input>`);
-var root$7 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4> </h4></div> <!></div>`);
+var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
   let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
@@ -6588,7 +6726,7 @@ function StatCard($$anchor, $$props) {
     $$props.item.update({ [`${$$props.path}.${$$props.key}`]: val });
     console.log(`Updated ${$$props.path}.${$$props.key} to`, val);
   }
-  var div = root$7();
+  var div = root$8();
   var div_1 = child(div);
   var h4 = child(div_1);
   var text = child(h4);
@@ -6664,17 +6802,17 @@ var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
-  const attributes = config().attributes;
-  const common = config().common;
-  const movementConfig = config().movement;
-  const karmaConfig = config().karma;
-  const visionConfig = config().vision;
-  const traits = config().traits;
+  const attributes = config2().attributes;
+  const common = config2().common;
+  const movementConfig = config2().movement;
+  const karmaConfig = config2().karma;
+  const visionConfig = config2().vision;
+  const traits = config2().traits;
   const agerange = /* @__PURE__ */ derived(() => [
     {
       item: item2(),
@@ -6929,7 +7067,7 @@ function MetahumanApp($$anchor, $$props) {
     type: "select",
     options: ["C", "D", "E"]
   }));
-  var div = root$6();
+  var div = root$7();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -7048,7 +7186,7 @@ function MetahumanApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     }
   });
   template_effect(
@@ -7065,9 +7203,9 @@ function MetahumanApp($$anchor, $$props) {
     [
       () => localize$1(attributes.modifiers),
       () => localize$1(attributes.limits),
-      () => localize$1(config().movement.movement),
-      () => localize$1(config().karma.karma),
-      () => localize$1(config().vision.vision)
+      () => localize$1(config2().movement.movement),
+      () => localize$1(config2().karma.karma),
+      () => localize$1(config2().vision.vision)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -7132,15 +7270,15 @@ var root_2$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div 
 var root_3$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_1$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
 var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$5 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const awakened = proxy(system.awakened);
   const magicianData = proxy(system.magicianData);
   proxy(awakened.adeptData);
-  const labels = config().magic;
+  const labels = config2().magic;
   const archetypeOptions = [
     localize$1(labels.adept),
     localize$1(labels.magician)
@@ -7153,17 +7291,17 @@ function MagicApp($$anchor, $$props) {
     localize$1(labels.conjurer),
     localize$1(labels.sorcerer),
     localize$1(labels.elementalist),
-    localize$1(config().common.custom)
+    localize$1(config2().common.custom)
   ];
   const resistanceAttributeOptions = [
-    localize$1(config().attributes.willpower),
-    localize$1(config().attributes.charisma),
-    localize$1(config().attributes.intelligence)
+    localize$1(config2().attributes.willpower),
+    localize$1(config2().attributes.charisma),
+    localize$1(config2().attributes.intelligence)
   ];
   const traditionOptions = [
     localize$1(labels.hermetic),
     localize$1(labels.shamanic),
-    localize$1(config().common.other)
+    localize$1(config2().common.other)
   ];
   const archetype = /* @__PURE__ */ derived(() => ({
     item: item2(),
@@ -7244,7 +7382,7 @@ function MagicApp($$anchor, $$props) {
   user_effect(() => {
     set(isAspected, get$1(magicianType).value === localize$1(labels.aspectedmage));
   });
-  var div = root$5();
+  var div = root$6();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -7329,7 +7467,7 @@ function MagicApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     }
   });
   template_effect(() => {
@@ -7443,7 +7581,7 @@ class MagicModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
 function Commodity($$anchor, $$props) {
   push($$props, true);
   let gridCss = prop($$props, "gridCss", 3, "");
@@ -7507,7 +7645,7 @@ function Commodity($$anchor, $$props) {
       type: "checkbox"
     }
   ];
-  var div = root$4();
+  var div = root$5();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
@@ -7528,7 +7666,7 @@ function Commodity($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
 function Portability($$anchor, $$props) {
   push($$props, true);
   const system = proxy($$props.item.system);
@@ -7551,7 +7689,7 @@ function Portability($$anchor, $$props) {
       type: "number"
     }
   ];
-  var div = root$3();
+  var div = root$4();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
@@ -7574,10 +7712,10 @@ function Portability($$anchor, $$props) {
 }
 var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root$2 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const weapon = system.weapon;
   const mode = {
@@ -7588,20 +7726,20 @@ function WeaponApp($$anchor, $$props) {
     path: "system.weapon",
     type: "select",
     options: [
-      localize$1(config().weapon.manual),
-      localize$1(config().weapon.semiauto),
-      localize$1(config().weapon.fullauto),
-      localize$1(config().weapon.blade),
-      localize$1(config().weapon.explosive),
-      localize$1(config().weapon.energy),
-      localize$1(config().weapon.blunt)
+      localize$1(config2().weapon.manual),
+      localize$1(config2().weapon.semiauto),
+      localize$1(config2().weapon.fullauto),
+      localize$1(config2().weapon.blade),
+      localize$1(config2().weapon.explosive),
+      localize$1(config2().weapon.energy),
+      localize$1(config2().weapon.blunt)
     ]
   };
   const weaponEntries = [
     {
       item: item2(),
       key: "damage",
-      label: localize$1(config().weapon.damage),
+      label: localize$1(config2().weapon.damage),
       value: weapon.damage,
       path: "system.weapon",
       type: "text"
@@ -7609,7 +7747,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "range",
-      label: localize$1(config().weapon.range),
+      label: localize$1(config2().weapon.range),
       value: weapon.range,
       path: "system.weapon",
       type: "number"
@@ -7617,7 +7755,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "recoilComp",
-      label: localize$1(config().weapon.recoilCompensation),
+      label: localize$1(config2().weapon.recoilCompensation),
       value: weapon.recoilComp,
       path: "system.weapon",
       type: "number"
@@ -7625,13 +7763,13 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "currentClipId",
-      label: localize$1(config().weapon.currentClip),
+      label: localize$1(config2().weapon.currentClip),
       value: weapon.currentClipId,
       path: "system.weapon",
       type: "text"
     }
   ];
-  var div = root$2();
+  var div = root$3();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -7659,7 +7797,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     },
     gridCss: "two-column"
   });
@@ -7669,7 +7807,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     },
     gridCss: "two-column"
   });
@@ -7679,7 +7817,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     }
   });
   template_effect(
@@ -7690,7 +7828,7 @@ function WeaponApp($$anchor, $$props) {
       set_text(text, $0);
     },
     [
-      () => localize$1(config().common.details)
+      () => localize$1(config2().common.details)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -7842,16 +7980,16 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
 }
 var on_click$1 = async (_, item2) => openFilePicker(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
   const ammunition = item2().system;
   const ammoEntries = [
     {
       item: item2(),
       key: "type",
-      label: localize$1(config().ammunition.type),
+      label: localize$1(config2().ammunition.type),
       value: ammunition.type,
       path: "system.ammunition",
       type: "text"
@@ -7859,13 +7997,13 @@ function AmmunitionApp($$anchor, $$props) {
     {
       item: item2(),
       key: "rounds",
-      label: localize$1(config().ammunition.rounds),
+      label: localize$1(config2().ammunition.rounds),
       value: ammunition.rounds,
       path: "system.ammunition",
       type: "number"
     }
   ];
-  var div = root$1();
+  var div = root$2();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -7884,7 +8022,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     },
     gridCss: "two-column"
   });
@@ -7894,7 +8032,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     },
     gridCss: "two-column"
   });
@@ -7904,7 +8042,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config();
+      return config2();
     }
   });
   template_effect(() => {
@@ -7972,7 +8110,7 @@ var on_change_2 = (e, item2) => item2().update({
 });
 var root_3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2 = /* @__PURE__ */ template(`<div class="stat-card"><select><option disabled> </option><!></select></div>`);
-var root = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 7);
@@ -7998,7 +8136,7 @@ function SkillApp($$anchor, $$props) {
     item2().update({ "system.skillType": newValue });
     $$props.onTitleChange(`${localize$1($$props.config.skill[newValue])}: ${item2().name}`);
   }
-  var div = root();
+  var div = root$1();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
@@ -8241,6 +8379,308 @@ class SkillModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
+class ItemDataService {
+  static async getMetahumanDropdownOptions() {
+    let metahumans = game.items.filter((i) => i.type === "metahuman") ?? [];
+    if (metahumans.length === 0) {
+      const human = await Item.create(this.getDefaultHumanItem(), { render: false });
+      metahumans = [human];
+    }
+    return metahumans.map((metahuman) => ({
+      id: metahuman.id,
+      name: metahuman.name
+    }));
+  }
+  static async getMagicDropdownOptions() {
+    let magics = game.items.filter((i) => i.type === "magic") ?? [];
+    if (magics.length === 0) {
+      const magic = await Item.create(this.getDefaultMagic(), { render: false });
+      magics = [magic];
+    }
+    return magics.map((magic) => ({
+      id: magic.id,
+      name: magic.name
+    }));
+  }
+  static getDefaultHumanItem() {
+    return {
+      name: localize$1(CONFIG.sr3e.traits.human),
+      type: "metahuman",
+      img: "systems/sr3e/textures/ai-generated/humans.webp",
+      system: {
+        lifespan: { min: 10, average: 30, max: 100 },
+        physical: {
+          height: { min: 150, average: 170, max: 200 },
+          weight: { min: 50, average: 70, max: 120 }
+        },
+        modifiers: {
+          strength: 0,
+          quickness: 0,
+          body: 0,
+          charisma: 0,
+          intelligence: 0,
+          willpower: 0
+        },
+        attributeLimits: {
+          strength: 6,
+          quickness: 6,
+          body: 6,
+          charisma: 6,
+          intelligence: 6,
+          willpower: 6
+        },
+        karmaAdvancementFraction: { value: 0.1 },
+        vision: {
+          type: "Normal",
+          description: "Standard human vision",
+          rules: { darknessPenaltyNegation: "" }
+        },
+        priority: "E",
+        description: "<p>Humans are the baseline metatype, versatile and adaptive.</p>"
+      }
+    };
+  }
+  static getDefaultMagic() {
+    return {
+      name: localize$1(config.placeholders.fullshaman),
+      type: "magic",
+      system: {
+        type: "Full",
+        priority: "A",
+        focus: "None",
+        drainResistanceAttribute: "Charisma",
+        totem: "Bear"
+      }
+    };
+  }
+}
+class CharacterGeneratorService {
+  static generatePriorityCombination({ metahumanOptions = [], magicOptions = [] } = {}) {
+    const priorities = [...this.VALID_PRIORITIES];
+    console.log(`sr3d | Randomizer | Initial Priorities: ${priorities.join(", ")}`);
+    const weights = {
+      metahuman: { E: 64, C: 18, D: 18 },
+      magic: { A: 2, B: 2, C: 32, D: 32, E: 32 }
+    };
+    const combination = {};
+    const isOnlyOneMeta = metahumanOptions.length === 1;
+    const isOnlyOneMagic = magicOptions.length === 1;
+    combination.metahuman = isOnlyOneMeta ? this._forcePriority(priorities, "E") : this._draw(priorities, weights.metahuman);
+    console.log(`sr3d | Randomizer | Metahuman Priority: ${combination.metahuman}`);
+    combination.magic = isOnlyOneMagic ? this._forcePriority(priorities, "A") : this._draw(priorities, weights.magic);
+    console.log(`sr3d | Randomizer | Magic Priority: ${combination.magic}`);
+    ["attribute", "skills", "resources"].forEach((type) => {
+      combination[type] = this._draw(priorities);
+    });
+    console.log("sr3d | Randomizer | Final Combination:", combination);
+    return combination;
+  }
+  static _draw(priorities, weightMap = null) {
+    if (!priorities.length) throw new Error("No valid priorities remaining.");
+    let choice;
+    if (weightMap) {
+      const pool = priorities.flatMap((p) => Array(weightMap[p] || 0).fill(p));
+      choice = pool[Math.floor(Math.random() * pool.length)];
+    } else {
+      choice = priorities[Math.floor(Math.random() * priorities.length)];
+    }
+    priorities.splice(priorities.indexOf(choice), 1);
+    return choice;
+  }
+  static _forcePriority(priorities, forced) {
+    const index2 = priorities.indexOf(forced);
+    if (index2 === -1) throw new Error(`Forced priority "${forced}" not available.`);
+    priorities.splice(index2, 1);
+    return forced;
+  }
+}
+__publicField(CharacterGeneratorService, "VALID_PRIORITIES", ["A", "B", "C", "D", "E"]);
+function handleCancel(_, $$props) {
+  var _a;
+  console.log("Character creation cancelled");
+  (_a = $$props.onCancel) == null ? void 0 : _a.call($$props);
+}
+var root = /* @__PURE__ */ template(`<form><label for="age-slider"> </label> <input id="age-slider" type="range" min="0" max="100" step="1"> <label for="weight-slider"> </label> <input id="age-slider" type="range" min="0" max="100" step="1"> <div class="form-group"><label for="character-name">Character Name</label> <input id="character-name" type="text" placeholder="Enter character name"></div> <p><strong>Actor ID:</strong> </p> <p><strong>Actor Type:</strong> </p> <div class="form-group"><button type="submit">Create Character</button> <button type="button">Cancel</button></div></form>`);
+function CharacterCreationDialogApp($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 7);
+  proxy(actor().system);
+  let characterName = state(proxy(actor().name));
+  let characterAge = state(25);
+  let characterWeight = state(75);
+  user_effect(() => {
+    if (actor() && get$1(characterName) !== actor().name) {
+      actor().name = get$1(characterName);
+      if (get$1(characterName).length > 0) {
+        actor().update({ name: get$1(characterName) });
+      }
+    }
+  });
+  console.log("The svelte component has been initiated");
+  let metahumans = ItemDataService.getMetahumanDropdownOptions();
+  let magics = ItemDataService.getMagicDropdownOptions();
+  ActorDataService.getCharacterCreationStats();
+  CharacterGeneratorService.generatePriorityCombination(metahumans[0], magics[0]);
+  metahumans[getRandomIntinRange(0, metahumans.length - 1)];
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  console.log($$props.config.traits.age);
+  function handleSubmit() {
+    var _a;
+    console.log("Character creation submitted:", get$1(characterName));
+    (_a = $$props.onSubmit) == null ? void 0 : _a.call($$props, true);
+  }
+  var form = root();
+  var label = child(form);
+  var text = child(label);
+  var input = sibling(label, 2);
+  var label_1 = sibling(input, 2);
+  var text_1 = child(label_1);
+  var input_1 = sibling(label_1, 2);
+  var div = sibling(input_1, 2);
+  var input_2 = sibling(child(div), 2);
+  var p = sibling(div, 2);
+  var text_2 = sibling(child(p));
+  var p_1 = sibling(p, 2);
+  var text_3 = sibling(child(p_1));
+  var div_1 = sibling(p_1, 2);
+  var button = sibling(child(div_1), 2);
+  button.__click = [handleCancel, $$props];
+  template_effect(
+    ($0, $1) => {
+      var _a, _b;
+      set_text(text, `${$0 ?? ""}: ${get$1(characterAge) ?? ""}`);
+      set_text(text_1, `${$1 ?? ""}: ${get$1(characterWeight) ?? ""}`);
+      set_text(text_2, ` ${((_a = actor()) == null ? void 0 : _a.id) || "N/A"}`);
+      set_text(text_3, ` ${((_b = actor()) == null ? void 0 : _b.type) || "N/A"}`);
+    },
+    [
+      () => localize$1($$props.config.traits.age),
+      () => localize$1($$props.config.traits.weight)
+    ]
+  );
+  event("submit", form, handleSubmit);
+  bind_value(input, () => get$1(characterAge), ($$value) => set(characterAge, $$value));
+  bind_value(input_1, () => get$1(characterWeight), ($$value) => set(characterWeight, $$value));
+  bind_value(input_2, () => get$1(characterName), ($$value) => set(characterName, $$value));
+  append($$anchor, form);
+  pop();
+}
+delegate(["click"]);
+class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
+  constructor(actor, options = {}) {
+    const mergedOptions = foundry.utils.mergeObject({
+      onSubmit: null,
+      onCancel: null
+    }, options);
+    super(mergedOptions);
+    __privateAdd(this, _actor);
+    __privateAdd(this, _onSubmit);
+    __privateAdd(this, _onCancel);
+    __privateAdd(this, _svelteApp);
+    __privateAdd(this, _wasSubmitted, false);
+    __privateSet(this, _actor, actor);
+    __privateSet(this, _onSubmit, mergedOptions.onSubmit);
+    __privateSet(this, _onCancel, mergedOptions.onCancel);
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _svelteApp)) unmount(__privateGet(this, _svelteApp));
+    __privateSet(this, _svelteApp, mount(CharacterCreationDialogApp, {
+      target: windowContent,
+      props: {
+        actor: __privateGet(this, _actor),
+        config: CONFIG.sr3e,
+        onSubmit: (result) => {
+          var _a;
+          __privateSet(this, _wasSubmitted, true);
+          (_a = __privateGet(this, _onSubmit)) == null ? void 0 : _a.call(this, result);
+          this.close();
+        },
+        onCancel: () => {
+          var _a;
+          (_a = __privateGet(this, _onCancel)) == null ? void 0 : _a.call(this);
+          this.close();
+        }
+      }
+    }));
+  }
+  async close(options = {}) {
+    var _a;
+    if (__privateGet(this, _svelteApp)) {
+      unmount(__privateGet(this, _svelteApp));
+      __privateSet(this, _svelteApp, null);
+    }
+    if (!__privateGet(this, _wasSubmitted)) {
+      (_a = __privateGet(this, _onCancel)) == null ? void 0 : _a.call(this);
+    }
+    return super.close(options);
+  }
+}
+_actor = new WeakMap();
+_onSubmit = new WeakMap();
+_onCancel = new WeakMap();
+_svelteApp = new WeakMap();
+_wasSubmitted = new WeakMap();
+__publicField(CharacterCreationApp, "DEFAULT_OPTIONS", {
+  id: "sr3e-character-creation",
+  tag: "form",
+  window: {
+    title: "Character Creation",
+    classes: ["sr3e", "sheet", "character-creation"],
+    resizable: false
+  },
+  position: {
+    width: 600,
+    height: "auto"
+  }
+});
+async function displayCreationDialog(actor, options, userId) {
+  if (actor.type !== "character") return true;
+  Log.info("Running Character Dialog", displayCreationDialog.name);
+  const dialogResult = await _runCharacterCreationDialog(actor);
+  if (!dialogResult) {
+    console.log(`Character creation canceled for actor: ${actor.name}. Deleting actor.`);
+    await actor.delete();
+    return false;
+  }
+  actor.sheet.render(true);
+  Log.success("Character Dialog Completed", displayCreationDialog.name);
+  return true;
+}
+async function _runCharacterCreationDialog(actor) {
+  return new Promise((resolve) => {
+    try {
+      const app = new CharacterCreationApp(
+        actor,
+        {
+          onSubmit: (result) => {
+            resolve(result);
+          },
+          onCancel: () => {
+            console.log("The character creation was canelled");
+            resolve(false);
+          }
+        }
+      );
+      app.render(true);
+    } catch (e) {
+      console.error("Failed to create character creation dialog:", e);
+      resolve(false);
+    }
+  });
+}
+async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, _userId) {
+  if (actor.type !== "character") return true;
+  options.renderSheet = false;
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -8356,6 +8796,8 @@ function registerHooks() {
     if (!typeSelectors.some((entry) => app instanceof entry.type)) return;
     wrapContent(element);
   });
+  Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
+  Hooks.on(hooks.createActor, displayCreationDialog);
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.once(hooks.init, () => {

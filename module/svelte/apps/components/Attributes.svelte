@@ -1,4 +1,5 @@
 <script>
+
     import AttributeCard from "./AttributeCard.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
@@ -9,6 +10,7 @@
     let attributes = $state(actor.system.attributes);
     let gridContainer;
     let isShoppingState = $state(false);
+    let localization = config.attributes;
 
     $effect(() => {
         const unsubscribe = shoppingState.subscribe(
@@ -28,7 +30,6 @@
         return cleanup;
     });
 
-
 </script>
 
 <CardToolbar {id} />
@@ -36,8 +37,7 @@
 <div bind:this={gridContainer} class="attribute-masonry-grid">
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
-    {#each Object.entries(attributes).slice(0, 6) as [key, stat]}
-        <AttributeCard {stat} {config} {key} {isShoppingState} />
+    {#each Object.entries(attributes) as [key, stat]}
+        <AttributeCard {stat} {localization} {key} {isShoppingState} />
     {/each}
-
 </div>

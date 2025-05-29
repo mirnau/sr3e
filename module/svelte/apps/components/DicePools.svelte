@@ -7,9 +7,11 @@
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let dicePools = $state(actor.system.dicePools);
+    console.log("Dice Pools", dicePools);
+    let localization = config.dicepools;
+   
     let gridContainer;
     const isShoppingState = false;
-
 
     $effect(() => {
         const cleanup = setupMasonry({
@@ -29,6 +31,6 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(dicePools) as [key, stat]}
-            <AttributeCard {stat} {config} {key} {isShoppingState}/>
+        <AttributeCard {stat} {localization} {key} {isShoppingState} />
     {/each}
 </div>

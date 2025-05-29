@@ -44,7 +44,8 @@
       "combat": "Combat Pool",
       "hacking": "Hacking Pool",
       "astral": "Astral Pool",
-      "control": "Control Pool"
+      "control": "Control Pool",
+      "spell": "Control Pool"
     },
     "health": {
       "health": "Health"
@@ -64,7 +65,9 @@
       "karma": "Karma",
       "goodKarma": "Good Karma",
       "karmaPool": "Karma Pool",
-      "advancementRatio": "Advancement Ratio"
+      "advancementRatio": "Advancement Ratio",
+      "miraculousSurvival": "Miraculous Survival",
+      "lifetimeKarma": "Lifetime Karma"
     },
     "magic": {
       "magic": "Magic Tradition",
@@ -98,6 +101,10 @@
       "running": "Running Speed",
       "runSpeedModifier": "Running Modifier"
     },
+    "placeholders": {
+      "human": "Human",
+      "fullshaman": "Full Mage Bear Schaman"
+    },
     "portability": {
       "portability": "Portability",
       "concealability": "Conceal",
@@ -122,10 +129,10 @@
     },
     "traits": {
       "age": "Age",
+      "agerange": "Playable Age Range",
       "height": "Height",
-      "weight": "Weight",
       "metahuman": "Metahuman",
-      "agerange": "Playable Age Range"
+      "weight": "Weight"
     },
     "userconfig": {
       "setPlayerName": "Player Name",
