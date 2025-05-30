@@ -99,7 +99,10 @@ sr3e.sheet = {
     cancel: "sr3e.sheet.cancel",
     randomize: "sr3e.sheet.randomize",
     clear: "sr3e.sheet.clear",
-    chooseanoption: "sr3e.sheet.chooseanoption"
+    chooseanoption: "sr3e.sheet.chooseanoption",
+    attributepoints: "sr3e.sheet.attributepoints",
+    skillpoints: "sr3e.sheet.skillpoints",
+    resources: "sr3e.sheet.resources"
 }
 
 sr3e.traits = {
@@ -108,13 +111,15 @@ sr3e.traits = {
     weight: "sr3e.traits.weight",
     agerange: "sr3e.traits.agerange",
     metahuman: "sr3e.traits.metahuman",
+    metahumanity: "sr3e.traits.metahumanity",
+    ancient: "sr3e.traits.metahumanity",
     child: "sr3e.traits.child",
     adolecent: "sr3e.traits.adolecent",
     youngadult: "sr3e.traits.youngadult",
     adult: "sr3e.traits.adult",
     middleage: "sr3e.traits.middleage",
     goldenyears: "sr3e.traits.goldenyears",
-    ancient: "sr3e.traits.ancient"
+    ancient: "sr3e.traits.ancient",
 }
 
 sr3e.vision = {

@@ -120,7 +120,10 @@
       "cancel": "Cancel",
       "randomize": "Randomize",
       "clear": "Clear",
-      "chooseanoption": "Choose an option... "
+      "chooseanoption": "Choose an option... ",
+      "attributepoints": "Attribute Points",
+      "skillpoints": "Skill Points",
+      "resources": "Resources"
     },
     "skill": {
       "skill": "Skill",
@@ -137,6 +140,7 @@
       "agerange": "Playable Age Range",
       "height": "Height",
       "metahuman": "Metahuman",
+      "metahumanity": "Metahumanity",
       "weight": "Weight",
       "child": "Child",
       "adolecent": "Adolecent",

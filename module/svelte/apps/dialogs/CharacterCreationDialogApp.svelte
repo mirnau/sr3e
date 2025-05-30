@@ -138,7 +138,7 @@
         ]);
 
         const magic = magics.find((m) => m.id === selectedMagic);
-        if (["A", "B"].includes(magicPriority)) {
+        if (["A", "B"].includes(selectedMagic.priority)) {
             const worldMagic = game.items.get(magic.id);
             await actor.createEmbeddedDocuments("Item", [
                 worldMagic.toObject(),
@@ -222,10 +222,6 @@
         metahumanItem = ItemDataService.getHumanItem();
     }
 
-    function handleCancel() {
-        console.log("Character creation cancelled");
-        onCancel?.();
-    }
 </script>
 
 <form onsubmit={handleSubmit}>
@@ -244,6 +240,12 @@
                             alt={metahumanItem.name}
                         />
                     </div>
+                    <input
+                        id="character-name"
+                        type="text"
+                        bind:value={characterName}
+                        placeholder="Enter character name"
+                    />
                 </div>
             </div>
         </div>
@@ -297,7 +299,7 @@
                 <div class="sr3e-inner-background">
                     <div>
                         <div class="creation-dropdwn">
-                            <h3>Mock</h3>
+                            <h3>{localize(config.traits.metahumanity)}</h3>
                             <select
                                 id="metahuman-select"
                                 bind:value={selectedMetahuman}
@@ -320,7 +322,7 @@
                             </select>
                         </div>
                         <div class="creation-dropdwn">
-                            <h3>Mock</h3>
+                            <h3>{localize(config.magic.tradition)}</h3>
                             <select
                                 id="magic-select"
                                 bind:value={selectedMagic}
@@ -342,7 +344,7 @@
                             </select>
                         </div>
                         <div class="creation-dropdwn">
-                            <h3>Mock</h3>
+                            <h3>{localize(config.sheet.attributepoints)}</h3>
                             <select
                                 id="attributes-select"
                                 bind:value={selectedAttribute}
@@ -364,7 +366,7 @@
                             </select>
                         </div>
                         <div class="creation-dropdwn">
-                            <h3>Mock</h3>
+                            <h3>{localize(config.sheet.skillpoints)}</h3>
                             <select
                                 id="skills-select"
                                 bind:value={selectedSkill}
@@ -384,7 +386,7 @@
                             </select>
                         </div>
                         <div class="creation-dropdwn">
-                            <h3>Mock</h3>
+                            <h3>{localize(config.sheet.resources)}</h3>
                             <select
                                 id="resource-select"
                                 bind:value={selectedResource}
@@ -414,34 +416,24 @@
             <div class="sr3e-inner-background-container">
                 <div class="fake-shadow"></div>
                 <div class="sr3e-inner-background">
-                    <div for="character-name">Character Name</div>
-                    <input
-                        id="character-name"
-                        type="text"
-                        bind:value={characterName}
-                        placeholder="Enter character name"
-                    />
-                </div>
-            </div>
-        </div>
-
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
                     <div class="character-creation-buttonpanel">
-                        <button type="button" onclick={handleRandomize}
-                            >{localize(config.sheet.randomize)}</button
-                        >
-                        <button type="button" onclick={handleClear}
-                            >{localize(config.sheet.clear)}</button
-                        >
-                        <button type="submit" disabled={!canCreate}
-                            >{localize(config.sheet.createCharacter)}</button
-                        >
-                        <button type="button" onclick={handleCancel}
-                            >{localize(config.sheet.cancel)}</button
-                        >
+                        <!-- Randomize -->
+                        <button type="button" onclick={handleRandomize}>
+                            <i class="fas fa-dice"></i>
+                            {localize(config.sheet.randomize)}
+                        </button>
+
+                        <!-- Clear -->
+                        <button type="button" onclick={handleClear}>
+                            <i class="fas fa-eraser"></i>
+                            {localize(config.sheet.clear)}
+                        </button>
+
+                        <!-- Create Character -->
+                        <button type="submit" disabled={!canCreate}>
+                            <i class="fas fa-check"></i>
+                            {localize(config.sheet.createCharacter)}
+                        </button>
                     </div>
                 </div>
             </div>
