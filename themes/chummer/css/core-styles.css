@@ -449,6 +449,7 @@
   border: none !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
 }
+.system-sr3e .sr3e.sheet.charactercreation .window-header,
 .system-sr3e .sr3e-item-header,
 .system-sr3e .sr3e-actor-header {
   background-color: transparent;

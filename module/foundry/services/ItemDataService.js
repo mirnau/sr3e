@@ -7,13 +7,18 @@ export default class ItemDataService {
     }
 
     static getAllMetaHumans(metahumans) {
-        return metahumans.map(metahuman => {
-            return {
+        return metahumans
+            .filter(m =>
+                m &&
+                typeof m.name === "string" &&
+                typeof m.id === "string" &&
+                m.system?.priority
+            )
+            .map(metahuman => ({
                 name: metahuman.name,
                 foundryitemid: metahuman.id,
                 priority: metahuman.system.priority,
-            };
-        });
+            }));
     }
 
     static getAllMagics(magics) {
@@ -42,7 +47,7 @@ export default class ItemDataService {
 
     static getHumanItem() {
         return game.items.find(
-                (i) => i.type === "metahuman" && i.name === "Human")
+            (i) => i.type === "metahuman" && i.name === "Human")
     }
 
     static getDefaultHumanItem() {

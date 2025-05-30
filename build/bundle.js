@@ -8441,13 +8441,16 @@ class ItemDataService {
     return game.items.filter((item2) => item2.type === name);
   }
   static getAllMetaHumans(metahumans) {
-    return metahumans.map((metahuman) => {
-      return {
-        name: metahuman.name,
-        foundryitemid: metahuman.id,
-        priority: metahuman.system.priority
-      };
-    });
+    return metahumans.filter(
+      (m) => {
+        var _a;
+        return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
+      }
+    ).map((metahuman) => ({
+      name: metahuman.name,
+      foundryitemid: metahuman.id,
+      priority: metahuman.system.priority
+    }));
   }
   static getAllMagics(magics) {
     return [
@@ -9023,7 +9026,7 @@ _svelteApp = new WeakMap();
 _wasSubmitted = new WeakMap();
 __publicField(CharacterCreationApp, "DEFAULT_OPTIONS", {
   id: "sr3e-character-creation",
-  classes: ["sr3e", "sheet"],
+  classes: ["sr3e", "sheet", "charactercreation"],
   tag: "form",
   window: {
     title: "Character Creation",
