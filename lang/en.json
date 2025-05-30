@@ -115,7 +115,12 @@
       "details": "Details",
       "viewbackground": "View Background",
       "buyupgrades": "Buy upgrades",
-      "searchJournals": "Search Journals"
+      "searchJournals": "Search Journals",
+      "createCharacter": "Create Character",
+      "cancel": "Cancel",
+      "randomize": "Randomize",
+      "clear": "Clear",
+      "chooseanoption": "Choose an option... "
     },
     "skill": {
       "skill": "Skill",

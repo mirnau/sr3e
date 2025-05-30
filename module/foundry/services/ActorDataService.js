@@ -77,21 +77,21 @@ export default class ActorDataService {
 
     static getCharacterCreationStats() {
         return {
-            attributePointCollection: [
+            attributes: [
                 { priority: "A", points: 30 },
                 { priority: "B", points: 27 },
                 { priority: "C", points: 24 },
                 { priority: "D", points: 21 },
                 { priority: "E", points: 18 },
             ],
-            skillPointCollection: [
+            skills: [
                 { priority: "A", points: 50 },
                 { priority: "B", points: 40 },
                 { priority: "C", points: 34 },
                 { priority: "D", points: 30 },
                 { priority: "E", points: 27 },
             ],
-            assets: [
+            resources: [
                 { priority: "A", points: 1000000 },
                 { priority: "B", points: 400000 },
                 { priority: "C", points: 90000 },

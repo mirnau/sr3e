@@ -95,6 +95,11 @@ sr3e.sheet = {
     viewbackground: "sr3e.sheet.viewbackground",
     buyupgrades: "sr3e.sheet.buyupgrades",
     searchJournals: "sr3e.sheet.searchJournals",
+    createCharacter: "sr3e.sheet.createCharacter",
+    cancel: "sr3e.sheet.cancel",
+    randomize: "sr3e.sheet.randomize",
+    clear: "sr3e.sheet.clear",
+    chooseanoption: "sr3e.sheet.chooseanoption"
 }
 
 sr3e.traits = {

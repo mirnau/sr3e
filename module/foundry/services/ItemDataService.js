@@ -2,32 +2,47 @@ import { localize } from "../../svelteHelpers.js";
 
 export default class ItemDataService {
 
-    static async getMetahumanDropdownOptions() {
-        let metahumans = game.items.filter(i => i.type === "metahuman") ?? [];
-
-        if (metahumans.length === 0) {
-            const human = await Item.create(this.getDefaultHumanItem(), { render: false });
-            metahumans = [human];
-        }
-
-        return metahumans.map(metahuman => ({
-            id: metahuman.id,
-            name: metahuman.name
-        }));
+    static getAllItemsOfType(name) {
+        return game.items.filter((item) => item.type === name);
     }
 
-    static async getMagicDropdownOptions() {
-        let magics = game.items.filter(i => i.type === "magic") ?? [];
+    static getAllMetaHumans(metahumans) {
+        return metahumans.map(metahuman => {
+            return {
+                name: metahuman.name,
+                foundryitemid: metahuman.id,
+                priority: metahuman.system.priority,
+            };
+        });
+    }
 
-        if (magics.length === 0) {
-            const magic = await Item.create(this.getDefaultMagic(), { render: false });
-            magics = [magic];
-        }
+    static getAllMagics(magics) {
+        return [
+            { priority: "E", name: "Unawakened", foundryitemid: "E-foundryItemId" },
+            { priority: "D", name: "Unawakened", foundryitemid: "D-foundryItemId" },
+            { priority: "C", name: "Unawakened", foundryitemid: "C-foundryItemId" },
+            ...magics.map(magic => {
 
-        return magics.map(magic => ({
-            id: magic.id,
-            name: magic.name
-        }));
+                return {
+                    priority: magic.system.awakened.priority,
+                    name: magic.name,
+                    foundryitemid: magic.id,
+                };
+            })
+        ];
+    }
+
+    static getPriorities() {
+        return {
+            attributes: { A: 30, B: 27, C: 24, D: 21, E: 18 },
+            skills: { A: 50, B: 40, C: 34, D: 30, E: 27 },
+            resources: { A: 1000000, B: 400000, C: 90000, D: 20000, E: 5000 }
+        };
+    }
+
+    static getHumanItem() {
+        return game.items.find(
+                (i) => i.type === "metahuman" && i.name === "Human")
     }
 
     static getDefaultHumanItem() {

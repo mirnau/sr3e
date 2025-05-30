@@ -67,3 +67,32 @@ export function toggleCardSpanById(id) {
 export function getRandomIntinRange(x, y) {
     return Math.floor(Math.random() * (y - x + 1)) + x;
 }
+
+export function getRandomBellCurveWithMode(min, max, mode) {
+    if (min >= max) {
+        throw new Error("The min value must be less than the max value.");
+    }
+    if (mode < min || mode > max) {
+        throw new Error("The mode value must be within the range of min and max.");
+    }
+
+    function randomNormal() {
+        let u = 0, v = 0;
+        while (u === 0) u = Math.random(); // Ensure u != 0
+        while (v === 0) v = Math.random(); // Ensure v != 0
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    // Calculate the mean based on mode
+    const mean = mode;
+    const stdDev = (max - min) / 6; // Approximate standard deviation for 99.7% coverage
+
+    let value;
+    do {
+        value = randomNormal() * stdDev + mean;
+    } while (value < min || value > max); // Ensure the value is within bounds
+
+    const int = Math.floor(value);
+
+    return int;
+}
