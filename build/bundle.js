@@ -1943,6 +1943,13 @@ function template(content, flags2) {
     return clone;
   };
 }
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1961,11 +1968,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -3423,7 +3430,7 @@ function toggleDetails(_, isDetailsOpen, actor, actorStore) {
 function handleFilePicker(__1, actor) {
   openFilePicker(actor());
 }
-var root_1$9 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
@@ -3475,7 +3482,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$9();
+      var div_1 = root_1$8();
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
@@ -3502,7 +3509,7 @@ function Dossier($$anchor, $$props) {
     actor,
     actorStore
   ];
-  var text = sibling(child(div_4));
+  var text2 = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
@@ -3564,7 +3571,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize$1(config2().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize$1(config2().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -5131,7 +5138,7 @@ function Initiative($$anchor, $$props) {
   });
   var div = root$q();
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var div_2 = sibling(child(div_1), 4);
   var h4 = child(div_2);
@@ -5151,7 +5158,7 @@ function Initiative($$anchor, $$props) {
   bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, $1);
       set_text(text_2, $2);
       set_text(text_3, get$1(reaction));
@@ -5170,7 +5177,7 @@ function Initiative($$anchor, $$props) {
 }
 var root_2$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute"></i>`);
 var root_3$5 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up increment-attribute"></i>`);
-var root_1$8 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_1$7 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$p = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCard($$anchor, $$props) {
@@ -5179,11 +5186,11 @@ function AttributeCard($$anchor, $$props) {
   let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
   var div = root$p();
   var h4 = child(div);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(h4, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$8();
+      var div_1 = root_1$7();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
@@ -5220,7 +5227,7 @@ function AttributeCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize$1($$props.localization[$$props.key])
   ]);
   append($$anchor, div);
@@ -5257,7 +5264,7 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
@@ -5277,7 +5284,7 @@ function Attributes($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize$1(config2().attributes.attributes)
   ]);
   append($$anchor, fragment);
@@ -5311,7 +5318,7 @@ function DicePools($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
@@ -5329,7 +5336,7 @@ function DicePools($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize$1(config2().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
@@ -5362,7 +5369,7 @@ function Movement($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
@@ -5380,7 +5387,7 @@ function Movement($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize$1(config2().movement.movement)
   ]);
   append($$anchor, fragment);
@@ -5431,7 +5438,7 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
   button.__click = [on_click$6, activeTab];
@@ -5491,7 +5498,7 @@ function Skills($$anchor, $$props) {
   }
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       toggle_class(button, "active", get$1(activeTab) === "active");
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
@@ -5515,12 +5522,12 @@ function Health($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [() => localize$1(config2().health.health)]
@@ -5528,7 +5535,7 @@ function Health($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$7 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_1$6 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
 var root$g = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
@@ -5556,7 +5563,7 @@ function Karma($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div = sibling(h1, 2);
   var div_1 = sibling(child(div), 4);
   var h4 = child(div_1);
@@ -5581,7 +5588,7 @@ function Karma($$anchor, $$props) {
   var node_1 = sibling(div_4, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$7();
+      var div_5 = root_1$6();
       var h4_4 = child(div_5);
       var text_9 = child(h4_4);
       template_effect(($0) => set_text(text_9, $0), [
@@ -5599,7 +5606,7 @@ function Karma($$anchor, $$props) {
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, $1);
       set_text(text_2, karma.goodKarma);
       set_text(text_3, $2);
@@ -5633,12 +5640,12 @@ function Inventory($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var span_1 = sibling(h1, 2);
   var text_1 = child(span_1);
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
@@ -5648,7 +5655,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$6 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5800,7 +5807,7 @@ function CharacterSheetApp($$anchor, $$props) {
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
     let props = () => get$1($$item).props;
-    var div_1 = root_1$6();
+    var div_1 = root_1$5();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -5990,6 +5997,17 @@ class ActorDataService {
         { priority: "E", points: 5e3 }
       ]
     };
+  }
+  static getPhaseTemplate() {
+    return [
+      { label: localize$1(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
+      { label: localize$1(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
+      { label: localize$1(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
+      { label: localize$1(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
+      { label: localize$1(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
+      { label: localize$1(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+      { label: localize$1(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
+    ];
   }
 }
 class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
@@ -6200,7 +6218,14 @@ sr3e.traits = {
   height: "sr3e.traits.height",
   weight: "sr3e.traits.weight",
   agerange: "sr3e.traits.agerange",
-  metahuman: "sr3e.traits.metahuman"
+  metahuman: "sr3e.traits.metahuman",
+  child: "sr3e.traits.child",
+  adolecent: "sr3e.traits.adolecent",
+  youngadult: "sr3e.traits.youngadult",
+  adult: "sr3e.traits.adult",
+  middleage: "sr3e.traits.middleage",
+  goldenyears: "sr3e.traits.goldenyears",
+  ancient: "sr3e.traits.ancient"
 };
 sr3e.vision = {
   vision: "sr3e.vision.vision",
@@ -6512,7 +6537,7 @@ var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
 var root_4$2 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
 var root_5$3 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
 var root_2$3 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
-var root_1$5 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+var root_1$4 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
   push($$props, true);
   let visible = state(true);
@@ -6570,7 +6595,7 @@ function JournalSearchModal($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$5();
+      var div = root_1$4();
       var div_1 = child(div);
       var div_2 = child(div_1);
       var input = child(div_2);
@@ -6594,10 +6619,10 @@ function JournalSearchModal($$anchor, $$props) {
                 var li = root_4$2();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text = sibling(child(div_4));
+                var text2 = sibling(child(div_4));
                 template_effect(() => {
                   set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                  set_text(text2, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -6734,7 +6759,7 @@ function JournalViewer($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$4 = /* @__PURE__ */ template(`<input type="checkbox">`);
+var root_1$3 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$4 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input>`);
@@ -6756,11 +6781,11 @@ function StatCard($$anchor, $$props) {
   var div = root$8();
   var div_1 = child(div);
   var h4 = child(div_1);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var input = root_1$4();
+      var input = root_1$3();
       input.__change = update;
       template_effect(() => set_checked(input, $$props.value));
       append($$anchor2, input);
@@ -6819,17 +6844,17 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(() => set_text(text, $$props.label));
+  template_effect(() => set_text(text2, $$props.label));
   append($$anchor, div);
   pop();
 }
 delegate(["change"]);
 var on_click$4 = async (_, item2) => openFilePicker(item2());
 var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
-var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
+var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root$7 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
@@ -7108,16 +7133,16 @@ function MetahumanApp($$anchor, $$props) {
   var node_1 = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$3();
+      var div_5 = root_1$2();
       var div_6 = child(div_5);
       var div_7 = sibling(child(div_6), 2);
       var h3 = child(div_7);
-      var text = child(h3);
+      var text2 = child(h3);
       var div_8 = sibling(h3, 2);
       each(div_8, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text, $0), [() => localize$1(traits.agerange)]);
+      template_effect(($0) => set_text(text2, $0), [() => localize$1(traits.agerange)]);
       append($$anchor2, div_5);
     };
     if_block(node_1, ($$render) => {
@@ -7295,9 +7320,9 @@ var on_click$3 = async (_, item2) => openFilePicker(item2());
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
-var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
+var root_1$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
+var root_6$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
@@ -7425,7 +7450,7 @@ function MagicApp($$anchor, $$props) {
   var node_2 = sibling(div_1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment = root_1$2();
+      var fragment = root_1$1();
       var div_5 = first_child(fragment);
       var div_6 = child(div_5);
       var div_7 = sibling(child(div_6), 2);
@@ -7464,7 +7489,7 @@ function MagicApp($$anchor, $$props) {
           var fragment_2 = comment();
           var node_9 = first_child(fragment_2);
           each(node_9, 17, () => get$1(adeptFields), index, ($$anchor4, entry) => {
-            var div_14 = root_6();
+            var div_14 = root_6$1();
             var div_15 = child(div_14);
             var div_16 = sibling(child(div_15), 2);
             var node_10 = child(div_16);
@@ -7676,14 +7701,14 @@ function Commodity($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
     },
     [
@@ -7720,14 +7745,14 @@ function Portability($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
     },
     [
@@ -7739,7 +7764,7 @@ function Portability($$anchor, $$props) {
 }
 var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root$3 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
@@ -7810,7 +7835,7 @@ function WeaponApp($$anchor, $$props) {
   var div_7 = sibling(child(div_6), 2);
   var div_8 = child(div_7);
   var h3 = child(div_8);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_9 = sibling(div_8, 2);
   var node = child(div_9);
   StatCard(node, spread_props(mode));
@@ -7852,7 +7877,7 @@ function WeaponApp($$anchor, $$props) {
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
-      set_text(text, $0);
+      set_text(text2, $0);
     },
     [
       () => localize$1(config2().common.details)
@@ -8007,7 +8032,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
 }
 var on_click$1 = async (_, item2) => openFilePicker(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
-var root$2 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
@@ -8131,13 +8156,13 @@ _ammunition = new WeakMap();
 var on_click = async (_, item2) => openFilePicker(item2());
 var on_change = (e, item2) => item2().update({ name: e.target.value });
 var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
-var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_1 = /* @__PURE__ */ template(`<option> </option>`);
 var on_change_2 = (e, item2) => item2().update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
 var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><select><option disabled> </option><!></select></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 7);
@@ -8178,14 +8203,14 @@ function SkillApp($$anchor, $$props) {
   var select = child(div_7);
   select.__change = [on_change_1, updateSkillType];
   each(select, 21, () => selectOptions, index, ($$anchor2, option) => {
-    var option_1 = root_1$1();
+    var option_1 = root_1();
     var option_1_value = {};
-    var text = child(option_1);
+    var text2 = child(option_1);
     template_effect(() => {
       if (option_1_value !== (option_1_value = get$1(option).value)) {
         option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
       }
-      set_text(text, get$1(option).label);
+      set_text(text2, get$1(option).label);
     });
     append($$anchor2, option_1);
   });
@@ -8539,23 +8564,35 @@ class CharacterGeneratorService {
 }
 __publicField(CharacterGeneratorService, "VALID_PRIORITIES", ["A", "B", "C", "D", "E"]);
 function onMetahumanValueChanged(e, metahumanItem) {
-  let id = e.target.value.foundryitemid;
-  set(metahumanItem, proxy(game.item.get(id)));
+  const id = e.target.value;
+  if (!id) {
+    set(metahumanItem, proxy(ItemDataService.getHumanItem()));
+    return;
+  }
+  set(metahumanItem, proxy(game.items.get(id)));
 }
-function handleClear() {
-  console.log("Randomize Not implemented");
+function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metahumanItem) {
+  set(selectedMetahuman, "");
+  set(selectedMagic, "");
+  set(selectedAttribute, "");
+  set(selectedSkill, "");
+  set(selectedResource, "");
+  set(characterAge, 25);
+  set(characterHeight, 175);
+  set(characterWeight, 75);
+  set(metahumanItem, proxy(ItemDataService.getHumanItem()));
 }
-function handleCancel(_, $$props) {
+function handleCancel(__1, $$props) {
   var _a;
   console.log("Character creation cancelled");
   (_a = $$props.onCancel) == null ? void 0 : _a.call($$props);
 }
-var root_1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<form><div class="sr3e-item-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><label for="age-slider"> </label> <input id="age-slider" type="range" step="1"> <label for="height-slider"> </label> <input id="height-slider" type="range" step="1"> <label for="weight-slider"> </label> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><select id="metahuman-select"><option disabled selected hidden></option><!></select> <select id="magic-select"><option disabled selected hidden></option><!></select> <select id="attributes-select"><option disabled selected hidden></option><!></select> <select id="skills-select"><option disabled selected hidden></option><!></select> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><label for="character-name">Character Name</label> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><label for="character-name">Character Name</label> <div class="form-group"><button type="button"> </button> <button type="button"> </button> <button type="submit"> </button> <button type="button"> </button></div></div></div></div></div></div></form>`);
+var root_6 = /* @__PURE__ */ template(`<option> </option>`);
+var root = /* @__PURE__ */ template(`<form><div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> <!></div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3>Mock</h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3>Mock</h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3>Mock</h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3>Mock</h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3>Mock</h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="character-name">Character Name</div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"> </button> <button type="button"> </button> <button type="submit"> </button> <button type="button"> </button></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 7);
@@ -8601,6 +8638,39 @@ function CharacterCreationDialogApp($$anchor, $$props) {
         actor().update({ name: get$1(characterName) });
       }
     }
+  });
+  let canCreate = /* @__PURE__ */ derived(() => get$1(selectedMetahuman) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
+  let ageMin = 0;
+  let ageMax = /* @__PURE__ */ derived(() => get$1(metahumanItem).system.agerange.max);
+  let lifespan = /* @__PURE__ */ derived(() => get$1(ageMax) - ageMin);
+  let phaseTemplate = ActorDataService.getPhaseTemplate();
+  let agePhases = /* @__PURE__ */ derived(() => phaseTemplate.map((p) => {
+    const from = ageMin + p.from * get$1(lifespan);
+    const to = ageMin + p.to * get$1(lifespan);
+    const midpoint = (from + to) / 2;
+    return {
+      div: p.div,
+      from,
+      to,
+      midpoint,
+      percent: (midpoint - ageMin) / get$1(lifespan) * 100
+    };
+  }));
+  let currentPhase = /* @__PURE__ */ derived(() => {
+    var _a;
+    return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.div) ?? "";
+  });
+  let usedPriorities = state(proxy([]));
+  user_effect(() => {
+    const arr = [];
+    const m = metahumanDropdownOptions.find((o) => o.foundryitemid === get$1(selectedMetahuman));
+    if (m) arr.push(m.priority);
+    const g = magicsDropdwonOptions.find((o) => o.foundryitemid === get$1(selectedMagic));
+    if (g) arr.push(g.priority);
+    if (get$1(selectedAttribute)) arr.push(get$1(selectedAttribute));
+    if (get$1(selectedSkill)) arr.push(get$1(selectedSkill));
+    if (get$1(selectedResource)) arr.push(get$1(selectedResource));
+    set(usedPriorities, proxy(arr));
   });
   async function handleSubmit(event2) {
     var _a;
@@ -8658,138 +8728,205 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
-  var label = child(div_3);
-  var text = child(label);
-  var input = sibling(label, 2);
-  var label_1 = sibling(input, 2);
-  var text_1 = child(label_1);
-  var input_1 = sibling(label_1, 2);
-  var label_2 = sibling(input_1, 2);
-  var text_2 = child(label_2);
-  var input_2 = sibling(label_2, 2);
-  var div_4 = sibling(div_1, 2);
-  var div_5 = child(div_4);
-  var div_6 = sibling(child(div_5), 2);
-  var select = child(div_6);
+  var div_4 = child(div_3);
+  var img = child(div_4);
+  var div_5 = sibling(div_1, 2);
+  var div_6 = child(div_5);
+  var div_7 = sibling(child(div_6), 2);
+  var div_8 = child(div_7);
+  var text$1 = child(div_8);
+  var node = sibling(text$1);
+  {
+    var consequent = ($$anchor2) => {
+      var text_1 = text();
+      template_effect(() => set_text(text_1, `(${get$1(currentPhase) ?? ""})`));
+      append($$anchor2, text_1);
+    };
+    if_block(node, ($$render) => {
+      if (get$1(currentPhase)) $$render(consequent);
+    });
+  }
+  var input = sibling(div_8, 2);
+  var div_9 = sibling(input, 2);
+  var text_2 = child(div_9);
+  var input_1 = sibling(div_9, 2);
+  var div_10 = sibling(input_1, 2);
+  var text_3 = child(div_10);
+  var input_2 = sibling(div_10, 2);
+  var div_11 = sibling(div_5, 2);
+  var div_12 = child(div_11);
+  var div_13 = sibling(child(div_12), 2);
+  var div_14 = child(div_13);
+  var div_15 = child(div_14);
+  var select = sibling(child(div_15), 2);
   select.__change = [onMetahumanValueChanged, metahumanItem];
   var option = child(select);
   option.value = null == (option.__value = "") ? "" : "";
   option.textContent = chooseAnOption;
-  var node = sibling(option);
-  each(node, 17, () => metahumanDropdownOptions, index, ($$anchor2, metahuman) => {
-    var option_1 = root_1();
+  var node_1 = sibling(option);
+  each(node_1, 17, () => metahumanDropdownOptions, index, ($$anchor2, metahuman) => {
+    var option_1 = root_2();
     var option_1_value = {};
-    var text_3 = child(option_1);
-    template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
-        option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
-      }
-      set_text(text_3, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
-    });
+    var text_4 = child(option_1);
+    template_effect(
+      ($0) => {
+        if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
+          option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
+        }
+        option_1.disabled = $0;
+        set_text(text_4, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
+      },
+      [
+        () => get$1(usedPriorities).includes(get$1(metahuman).priority) && get$1(metahuman).foundryitemid !== get$1(selectedMetahuman)
+      ]
+    );
     append($$anchor2, option_1);
   });
-  var select_1 = sibling(select, 2);
+  var div_16 = sibling(div_15, 2);
+  var select_1 = sibling(child(div_16), 2);
   var option_2 = child(select_1);
   option_2.value = null == (option_2.__value = "") ? "" : "";
   option_2.textContent = chooseAnOption;
-  var node_1 = sibling(option_2);
-  each(node_1, 17, () => magicsDropdwonOptions, index, ($$anchor2, magic) => {
-    var option_3 = root_2();
+  var node_2 = sibling(option_2);
+  each(node_2, 17, () => magicsDropdwonOptions, index, ($$anchor2, magic) => {
+    var option_3 = root_3();
     var option_3_value = {};
-    var text_4 = child(option_3);
-    template_effect(() => {
-      if (option_3_value !== (option_3_value = get$1(magic).foundryitemid)) {
-        option_3.value = null == (option_3.__value = get$1(magic).foundryitemid) ? "" : get$1(magic).foundryitemid;
-      }
-      set_text(text_4, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
-    });
+    var text_5 = child(option_3);
+    template_effect(
+      ($0) => {
+        if (option_3_value !== (option_3_value = get$1(magic).foundryitemid)) {
+          option_3.value = null == (option_3.__value = get$1(magic).foundryitemid) ? "" : get$1(magic).foundryitemid;
+        }
+        option_3.disabled = $0;
+        set_text(text_5, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
+      },
+      [
+        () => get$1(usedPriorities).includes(get$1(magic).priority) && get$1(magic).foundryitemid !== get$1(selectedMagic)
+      ]
+    );
     append($$anchor2, option_3);
   });
-  var select_2 = sibling(select_1, 2);
+  var div_17 = sibling(div_16, 2);
+  var select_2 = sibling(child(div_17), 2);
   var option_4 = child(select_2);
   option_4.value = null == (option_4.__value = "") ? "" : "";
   option_4.textContent = chooseAnOption;
-  var node_2 = sibling(option_4);
-  each(node_2, 17, () => attributPointDropdownOptions, index, ($$anchor2, attribute) => {
-    var option_5 = root_3();
+  var node_3 = sibling(option_4);
+  each(node_3, 17, () => attributPointDropdownOptions, index, ($$anchor2, attribute) => {
+    var option_5 = root_4();
     var option_5_value = {};
-    var text_5 = child(option_5);
-    template_effect(() => {
-      if (option_5_value !== (option_5_value = get$1(attribute).priority)) {
-        option_5.value = null == (option_5.__value = get$1(attribute).priority) ? "" : get$1(attribute).priority;
-      }
-      set_text(text_5, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
-    });
+    var text_6 = child(option_5);
+    template_effect(
+      ($0) => {
+        if (option_5_value !== (option_5_value = get$1(attribute).priority)) {
+          option_5.value = null == (option_5.__value = get$1(attribute).priority) ? "" : get$1(attribute).priority;
+        }
+        option_5.disabled = $0;
+        set_text(text_6, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
+      },
+      [
+        () => get$1(usedPriorities).includes(get$1(attribute).priority) && get$1(attribute).priority !== get$1(selectedAttribute)
+      ]
+    );
     append($$anchor2, option_5);
   });
-  var select_3 = sibling(select_2, 2);
+  var div_18 = sibling(div_17, 2);
+  var select_3 = sibling(child(div_18), 2);
   var option_6 = child(select_3);
   option_6.value = null == (option_6.__value = "") ? "" : "";
   option_6.textContent = chooseAnOption;
-  var node_3 = sibling(option_6);
-  each(node_3, 17, () => skillPointDropdwonOptions, index, ($$anchor2, skill) => {
-    var option_7 = root_4();
+  var node_4 = sibling(option_6);
+  each(node_4, 17, () => skillPointDropdwonOptions, index, ($$anchor2, skill) => {
+    var option_7 = root_5();
     var option_7_value = {};
-    var text_6 = child(option_7);
-    template_effect(() => {
-      if (option_7_value !== (option_7_value = get$1(skill).priority)) {
-        option_7.value = null == (option_7.__value = get$1(skill).priority) ? "" : get$1(skill).priority;
-      }
-      set_text(text_6, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
-    });
+    var text_7 = child(option_7);
+    template_effect(
+      ($0) => {
+        if (option_7_value !== (option_7_value = get$1(skill).priority)) {
+          option_7.value = null == (option_7.__value = get$1(skill).priority) ? "" : get$1(skill).priority;
+        }
+        option_7.disabled = $0;
+        set_text(text_7, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
+      },
+      [
+        () => get$1(usedPriorities).includes(get$1(skill).priority) && get$1(skill).priority !== get$1(selectedSkill)
+      ]
+    );
     append($$anchor2, option_7);
   });
-  var select_4 = sibling(select_3, 2);
+  var div_19 = sibling(div_18, 2);
+  var select_4 = sibling(child(div_19), 2);
   var option_8 = child(select_4);
   option_8.value = null == (option_8.__value = "") ? "" : "";
   option_8.textContent = chooseAnOption;
-  var node_4 = sibling(option_8);
-  each(node_4, 17, () => resourcesDropdownOptions, index, ($$anchor2, resource) => {
-    var option_9 = root_5();
+  var node_5 = sibling(option_8);
+  each(node_5, 17, () => resourcesDropdownOptions, index, ($$anchor2, resource) => {
+    var option_9 = root_6();
     var option_9_value = {};
-    var text_7 = child(option_9);
-    template_effect(() => {
-      if (option_9_value !== (option_9_value = get$1(resource).priority)) {
-        option_9.value = null == (option_9.__value = get$1(resource).priority) ? "" : get$1(resource).priority;
-      }
-      set_text(text_7, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
-    });
+    var text_8 = child(option_9);
+    template_effect(
+      ($0) => {
+        if (option_9_value !== (option_9_value = get$1(resource).priority)) {
+          option_9.value = null == (option_9.__value = get$1(resource).priority) ? "" : get$1(resource).priority;
+        }
+        option_9.disabled = $0;
+        set_text(text_8, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
+      },
+      [
+        () => get$1(usedPriorities).includes(get$1(resource).priority) && get$1(resource).priority !== get$1(selectedResource)
+      ]
+    );
     append($$anchor2, option_9);
   });
-  var div_7 = sibling(div_5, 2);
-  var div_8 = child(div_7);
-  var div_9 = sibling(child(div_8), 2);
-  var input_3 = sibling(child(div_9), 2);
-  var div_10 = sibling(div_7, 2);
-  var div_11 = child(div_10);
-  var div_12 = sibling(child(div_11), 2);
-  var div_13 = sibling(child(div_12), 2);
-  var button = child(div_13);
+  var div_20 = sibling(div_11, 2);
+  var div_21 = child(div_20);
+  var div_22 = sibling(child(div_21), 2);
+  var input_3 = sibling(child(div_22), 2);
+  var div_23 = sibling(div_20, 2);
+  var div_24 = child(div_23);
+  var div_25 = sibling(child(div_24), 2);
+  var div_26 = child(div_25);
+  var button = child(div_26);
   button.__click = handleRandomize;
-  var text_8 = child(button);
+  var text_9 = child(button);
   var button_1 = sibling(button, 2);
-  button_1.__click = [handleClear];
-  var text_9 = child(button_1);
+  button_1.__click = [
+    handleClear,
+    selectedMetahuman,
+    selectedMagic,
+    selectedAttribute,
+    selectedSkill,
+    selectedResource,
+    characterAge,
+    characterHeight,
+    characterWeight,
+    metahumanItem
+  ];
+  var text_10 = child(button_1);
   var button_2 = sibling(button_1, 2);
-  var text_10 = child(button_2);
+  var text_11 = child(button_2);
   var button_3 = sibling(button_2, 2);
   button_3.__click = [handleCancel, $$props];
-  var text_11 = child(button_3);
+  var text_12 = child(button_3);
   template_effect(
     ($0, $1, $2, $3, $4, $5, $6) => {
-      set_text(text, `${$0 ?? ""}: ${get$1(characterAge) ?? ""}`);
+      set_attribute(img, "src", get$1(metahumanItem).img);
+      set_attribute(img, "title", get$1(metahumanItem).name);
+      set_attribute(img, "alt", get$1(metahumanItem).name);
+      set_text(text$1, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} `);
       set_attribute(input, "min", get$1(metahumanItem).system.agerange.min ?? 0);
       set_attribute(input, "max", get$1(metahumanItem).system.agerange.max ?? 100);
-      set_text(text_1, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
+      set_text(text_2, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
       set_attribute(input_1, "min", get$1(metahumanItem).system.physical.height.min ?? 0);
       set_attribute(input_1, "max", get$1(metahumanItem).system.physical.height.max ?? 100);
-      set_text(text_2, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
+      set_text(text_3, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
       set_attribute(input_2, "min", get$1(metahumanItem).system.physical.weight.min ?? 0);
       set_attribute(input_2, "max", get$1(metahumanItem).system.physical.weight.max ?? 100);
-      set_text(text_8, $3);
-      set_text(text_9, $4);
-      set_text(text_10, $5);
-      set_text(text_11, $6);
+      set_text(text_9, $3);
+      set_text(text_10, $4);
+      button_2.disabled = !get$1(canCreate);
+      set_text(text_11, $5);
+      set_text(text_12, $6);
     },
     [
       () => localize$1($$props.config.traits.age),
@@ -8874,14 +9011,14 @@ _svelteApp = new WeakMap();
 _wasSubmitted = new WeakMap();
 __publicField(CharacterCreationApp, "DEFAULT_OPTIONS", {
   id: "sr3e-character-creation",
+  classes: ["sr3e", "sheet"],
   tag: "form",
   window: {
     title: "Character Creation",
-    classes: ["sr3e", "sheet", "character-creation"],
     resizable: false
   },
   position: {
-    width: 600,
+    width: "auto",
     height: "auto"
   }
 });

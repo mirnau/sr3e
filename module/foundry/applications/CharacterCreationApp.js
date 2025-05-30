@@ -22,15 +22,15 @@ export class CharacterCreationApp extends foundry.applications.api.ApplicationV2
 
     static DEFAULT_OPTIONS = {
         id: "sr3e-character-creation",
+        classes: ["sr3e", "sheet"],
         tag: "form",
         window: {
             title: "Character Creation",
-            classes: ["sr3e", "sheet", "character-creation"],
             resizable: false
         },
         position: {
-            width: 600,
-            height: "auto"
+            width: 'auto',  
+            height: 'auto'  
         }
     };
 

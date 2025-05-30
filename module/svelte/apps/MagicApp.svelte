@@ -124,7 +124,7 @@
   });
 </script>
 
-<div class="sr3e-item-grid">
+<div class="sr3e-general-grid">
   <!-- Header -->
   <div class="item-sheet-component">
     <div class="sr3e-inner-background-container">

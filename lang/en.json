@@ -137,7 +137,14 @@
       "agerange": "Playable Age Range",
       "height": "Height",
       "metahuman": "Metahuman",
-      "weight": "Weight"
+      "weight": "Weight",
+      "child": "Child",
+      "adolecent": "Adolecent",
+      "youngadult": "Young Adult",
+      "adult": "Adult",
+      "middleage": "Middle Aged",
+      "goldenyears": "Golden Oldie",
+      "ancient": "Very Old Indeed"
     },
     "userconfig": {
       "setPlayerName": "Player Name",

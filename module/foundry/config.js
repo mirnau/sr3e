@@ -107,7 +107,14 @@ sr3e.traits = {
     height: "sr3e.traits.height",
     weight: "sr3e.traits.weight",
     agerange: "sr3e.traits.agerange",
-    metahuman: "sr3e.traits.metahuman"
+    metahuman: "sr3e.traits.metahuman",
+    child: "sr3e.traits.child",
+    adolecent: "sr3e.traits.adolecent",
+    youngadult: "sr3e.traits.youngadult",
+    adult: "sr3e.traits.adult",
+    middleage: "sr3e.traits.middleage",
+    goldenyears: "sr3e.traits.goldenyears",
+    ancient: "sr3e.traits.ancient"
 }
 
 sr3e.vision = {
