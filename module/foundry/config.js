@@ -62,16 +62,19 @@ sr3e.common = {
 
 sr3e.dicepools = {
     dicepools: "sr3e.dicepools.dicepools",
-    combat: "sr3e.dicepools.combat",
-    hacking: "sr3e.dicepools.hacking",
     astral: "sr3e.dicepools.astral",
+    combat: "sr3e.dicepools.combat",
     control: "sr3e.dicepools.control",
+    hacking: "sr3e.dicepools.hacking",
+    spell: "sr3e.dicepools.spell",
 }
 sr3e.karma = {
     karma: "sr3e.karma.karma",
     goodKarma: "sr3e.karma.goodKarma",
     karmaPool: "sr3e.karma.karmaPool",
     advancementRatio: "sr3e.karma.advancementRatio",
+    miraculousSurvival: "sr3e.karma.miraculousSurvival",
+    lifetimeKarma: "sr3e.karma.lifetimeKarma",
 }
 
 sr3e.movement = {
@@ -81,12 +84,26 @@ sr3e.movement = {
     runSpeedModifier: "sr3e.movement.runSpeedModifier",
 }
 
+sr3e.placeHolders = {
+    human: "sr3e.placeholders.human",
+    fullshaman: "sr3e.placeholders.fullshaman"
+}
+
 sr3e.sheet = {
     playercharacter: "sr3e.sheet.playercharacter",
     details: "sr3e.sheet.details",
     viewbackground: "sr3e.sheet.viewbackground",
     buyupgrades: "sr3e.sheet.buyupgrades",
     searchJournals: "sr3e.sheet.searchJournals",
+    createCharacter: "sr3e.sheet.createCharacter",
+    cancel: "sr3e.sheet.cancel",
+    randomize: "sr3e.sheet.randomize",
+    clear: "sr3e.sheet.clear",
+    chooseanoption: "sr3e.sheet.chooseanoption",
+    attributepoints: "sr3e.sheet.attributepoints",
+    skillpoints: "sr3e.sheet.skillpoints",
+    resources: "sr3e.sheet.resources",
+    quote: "sr3e.sheet.quote"
 }
 
 sr3e.traits = {
@@ -95,6 +112,15 @@ sr3e.traits = {
     weight: "sr3e.traits.weight",
     agerange: "sr3e.traits.agerange",
     metahuman: "sr3e.traits.metahuman",
+    metahumanity: "sr3e.traits.metahumanity",
+    ancient: "sr3e.traits.metahumanity",
+    child: "sr3e.traits.child",
+    adolecent: "sr3e.traits.adolecent",
+    youngadult: "sr3e.traits.youngadult",
+    adult: "sr3e.traits.adult",
+    middleage: "sr3e.traits.middleage",
+    goldenyears: "sr3e.traits.goldenyears",
+    ancient: "sr3e.traits.ancient",
 }
 
 sr3e.vision = {

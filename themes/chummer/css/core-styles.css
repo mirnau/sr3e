@@ -181,25 +181,22 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
-.system-sr3e .sr3e.sheet.item {
-  width: fit-content;
-}
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid {
+.system-sr3e .sr3e-general-grid {
   columns: 18rem;
   column-gap: 0.5rem;
   width: fit-content;
   max-width: calc(18rem * 2 + 0.5rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid > * {
+.system-sr3e .sr3e-general-grid > * {
   break-inside: avoid;
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component {
+.system-sr3e .sr3e-general-grid .item-sheet-component {
   display: inline-block;
   width: 100%;
   margin-bottom: 0.5rem;
   break-inside: avoid;
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .fake-shadow {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .fake-shadow {
   position: absolute;
   top: 1.5rem;
   left: 1.5rem;
@@ -210,11 +207,11 @@
   filter: blur(20px);
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
   display: grid;
   background-color: #ff0095;
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
   content: '';
   position: absolute;
   inset: 1px;
@@ -224,22 +221,22 @@
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
   padding: 0.25rem;
   text-align: center;
   text-indent: 0;
   background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
   width: 100%;
   display: block;
   padding: 0.25rem;
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -250,7 +247,7 @@
   text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.25rem;
@@ -261,7 +258,7 @@
   text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e.sheet.item .sr3e-item-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
+.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
   margin: 0;
 }
 .system-sr3e section.journal-entry-content.flexcol {
@@ -431,6 +428,111 @@
   max-height: 30rem;
   overflow-y: auto;
 }
+.system-sr3e .creation-dropdwn {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.system-sr3e .character-creation-buttonpanel {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(4, auto);
+  row-gap: 0.25rem;
+}
+.system-sr3e .character-creation-buttonpanel button {
+  width: 100%;
+}
+.system-sr3e .editable-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+}
+.system-sr3e .editable-row .label-line-wrap {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  gap: 0.5rem;
+}
+.system-sr3e .editable-row .label-line-wrap .label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: cyan;
+  white-space: nowrap;
+}
+.system-sr3e .editable-row .label-line-wrap .dotted-line {
+  flex-grow: 1;
+  height: 2px;
+  background-image: repeating-linear-gradient(to right, cyan 0, cyan 2px, transparent 1px, transparent 5px);
+  opacity: 0.4;
+  margin-top: 0.25rem;
+}
+.system-sr3e .editable-row .value-unit {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+.system-sr3e .editable-row .value-unit .editable-field {
+  min-width: 2.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--color-border-light-primary);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: var(--color-bg-primary);
+  text-align: right;
+  color: white;
+}
+.system-sr3e .editable-row .value-unit .unit {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: cyan;
+}
+.system-sr3e .flavor-edit-block {
+  position: relative;
+  z-index: 0;
+  background: cyan;
+  padding: 0.5rem;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .flavor-edit-block::before {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 30px #1d282c;
+  pointer-events: none;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .flavor-edit-block.last-flavor-edit-block {
+  margin-top: 0.25rem;
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .flavor-edit-block.last-flavor-edit-block::before {
+  clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+}
+.system-sr3e .editable-quote {
+  margin-top: 0.25rem;
+  padding: 0.4rem;
+  border: 1px solid var(--color-border-light-primary);
+  background: var(--color-bg-primary);
+  border-radius: 4px;
+  min-height: 2rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+}
+.system-sr3e .editable-quote:empty::before {
+  content: attr(placeholder);
+  color: var(--color-text-light-tertiary);
+  pointer-events: none;
+}
+.system-sr3e .editable-quote:focus {
+  outline: 1px solid var(--color-border-highlight);
+}
 .system-sr3e .form-group {
   padding: 0.5rem;
 }
@@ -439,6 +541,7 @@
   border: none !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
 }
+.system-sr3e .sr3e.sheet.charactercreation .window-header,
 .system-sr3e .sr3e-item-header,
 .system-sr3e .sr3e-actor-header {
   background-color: transparent;
@@ -503,7 +606,7 @@
 .system-sr3e button.plain.active:hover,
 .system-sr3e button:hover {
   background-color: red;
-  transition: background-color 1.5s ease;
+  transition: background-color 0.5s ease;
 }
 .system-sr3e a.button:active,
 .system-sr3e button.plain:active,
@@ -515,7 +618,8 @@
 .system-sr3e button.plain:disabled,
 .system-sr3e button.plain.active:disabled,
 .system-sr3e button:disabled {
-  background-color: yellow;
+  background-color: grey;
+  color: grey;
 }
 .system-sr3e a.button .ui-control,
 .system-sr3e button.plain .ui-control,
@@ -566,7 +670,7 @@
   appearance: none;
   text-indent: 0.5rem;
   background: #1b1f24 !important;
-  color: #ff0095;
+  color: #ff80c8;
   width: 100%;
   border: none;
   border-radius: 0rem !important;
@@ -586,7 +690,6 @@
 }
 .system-sr3e select option {
   background-color: #1b1f24;
-  /* Attempts to override */
   color: #ff0095;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
@@ -903,7 +1006,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.33rem;
+  padding: 0;
+  margin: 0;
 }
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label input {
   margin: 0rem;
@@ -922,15 +1026,19 @@
   font-size: 0.8rem;
   color: #1df0ff;
   cursor: pointer;
+  transition: text-shadow 0.3s ease, filter 0.3s ease, transform 0.1s ease;
 }
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .decrement-attribute:hover,
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .increment-attribute:hover {
-  filter: brightness(1.15);
+  text-shadow: 0 0 10px #1df0ff;
+  filter: brightness(1.5);
+  transform: scale(1.3);
   z-index: 10;
 }
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .decrement-attribute:active,
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .increment-attribute:active {
-  filter: brightness(1);
+  transform: scale(1.1);
+  filter: brightness(1.2);
 }
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .decrement-attribute.disabled,
 .system-sr3e .attribute-masonry-grid .stat-card .stat-label .increment-attribute.disabled {
@@ -1623,7 +1731,7 @@
   background: #ff1d9d;
   transition: transform 1.3s ease, background-color 1.3s ease;
   text-align: center;
-  padding: 0.5rem;
+  padding: 0rem 0.5rem 0.25rem 0.5rem;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .system-sr3e dialog .stat-card::before,

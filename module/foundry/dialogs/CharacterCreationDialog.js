@@ -1,4 +1,4 @@
-import CharacterCreation from "../../svelte/apps/dialogs/CharacterCreation.svelte";
+import CharacterCreation from "../../svelte/apps/dialogs/CharacterCreationDialogApp.svelte";
 import { mount, unmount } from "svelte";
 
 export default class CharacterCreationDialog extends Dialog {

@@ -16,6 +16,10 @@ import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
 import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
 import SkillItemSheet from "./module/foundry/sheets/SkillItemSheet.js";
 import SkillModel from "./module/models/item/SkillModel.js";
+import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte"
+import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
+import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
+import SR3EActor from "./module/foundry/documents/SR3EActor.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -37,6 +41,7 @@ function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
+  CONFIG.Actor.documentClass = SR3EActor;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -153,6 +158,11 @@ function registerHooks() {
 
   });
 
+  //INFO: Character Creation Hooks
+  Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
+  Hooks.on(hooks.createActor, displayCreationDialog);
+
+  //INFO: Fancy Decorations
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
 

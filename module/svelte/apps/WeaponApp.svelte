@@ -63,7 +63,7 @@
     ];
 </script>
 
-<div class="sr3e-item-grid">
+<div class="sr3e-general-grid">
     <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
             <div class="fake-shadow"></div>

@@ -6,6 +6,7 @@
   import Movement from "./components/Movement.svelte";
   import Skills from "./components/Skills.svelte";
   import Health from "./components/Health.svelte";
+  import Karma from "./components/Karma.svelte";
   import Inventory from "./components/Inventory.svelte";
 
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
@@ -20,9 +21,10 @@
     { comp: Attributes, props: { actor, config, id: 2, span: 1 } },
     { comp: DicePools, props: { actor, config, id: 3, span: 1 } },
     { comp: Movement, props: { actor, config, id: 4, span: 1 } },
-    { comp: Skills, props: { actor, config, id: 5, span: 2 } },
-    { comp: Health, props: { actor, config, id: 6, span: 1 } },
-    { comp: Inventory, props: { actor, config, id: 7, span: 1 } },
+    { comp: Karma, props: { actor, config, id: 5, span: 1 } },
+    { comp: Skills, props: { actor, config, id: 6, span: 2 } },
+    { comp: Health, props: { actor, config, id: 7, span: 1 } },
+    { comp: Inventory, props: { actor, config, id: 8, span: 1 } },
   ];
 
   $effect(async () => {
@@ -30,7 +32,6 @@
     if (!actor?.id) return;
 
     const layout = await actor.getFlag("sr3e", "customLayout");
-
     const defaultLayout = defaultCardArray.map((c) => ({
       id: c.props.id,
       span: c.props.span,
@@ -44,15 +45,12 @@
     }
   });
 
-  // Rehydrated full card list based on stored ID list
   let cards = $state([]);
-
   $effect(() => {
     cards = $cardLayout
       .map(({ id, span }) => {
         const match = defaultCardArray.find((c) => c.props.id === id);
         if (!match) return null;
-
         return {
           ...match,
           props: {
@@ -64,15 +62,15 @@
       .filter(Boolean);
   });
 
-  // Re-trigger masonry layout after cards change
   let container = null;
 
+  // Re-trigger masonry after card updates
   $effect(async () => {
-    await tick(); // Wait for DOM updates
-    container.dispatchEvent(new CustomEvent("masonry-reflow"));
+    await tick();
+    container?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
 
-  // Save layout to flag with debounce (runes-safe)
+  // Save layout to flag with debounce
   let saveTimeout = null;
   $effect(() => {
     const layout = $cardLayout;
@@ -82,7 +80,6 @@
     }, 200);
   });
 
-  // Responsive layout container
   let layoutState = $state("small");
   const maxWidth = 1400;
 
@@ -107,10 +104,16 @@
 
     return cleanup;
   });
-
 </script>
 
-<div bind:this={container} class="sheet-character-masonry-main">
+<div
+  bind:this={container}
+  class="sheet-character-masonry-main"
+  onmasonry-reflow={() => {
+    console.log("Reflow triggered");
+    container?._masonry?.layout();
+  }}
+>
   <div class="layout-grid-sizer"></div>
   <div class="layout-gutter-sizer"></div>
 

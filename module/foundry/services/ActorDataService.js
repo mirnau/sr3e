@@ -74,4 +74,42 @@ export default class ActorDataService {
             magic: localize(CONFIG.sr3e.attributes.reaction),
         };
     }
+
+    static getCharacterCreationStats() {
+        return {
+            attributes: [
+                { priority: "A", points: 30 },
+                { priority: "B", points: 27 },
+                { priority: "C", points: 24 },
+                { priority: "D", points: 21 },
+                { priority: "E", points: 18 },
+            ],
+            skills: [
+                { priority: "A", points: 50 },
+                { priority: "B", points: 40 },
+                { priority: "C", points: 34 },
+                { priority: "D", points: 30 },
+                { priority: "E", points: 27 },
+            ],
+            resources: [
+                { priority: "A", points: 1000000 },
+                { priority: "B", points: 400000 },
+                { priority: "C", points: 90000 },
+                { priority: "D", points: 20000 },
+                { priority: "E", points: 5000 },
+            ]
+        };
+    }
+
+    static getPhaseTemplate() {
+        return [
+            { label: localize(CONFIG.sr3e.traits.child), from: 0.00, to: 0.15 },
+            { label: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.20 },
+            { label: localize(CONFIG.sr3e.traits.youngadult), from: 0.20, to: 0.40 },
+            { label: localize(CONFIG.sr3e.traits.adult), from: 0.40, to: 0.50 },
+            { label: localize(CONFIG.sr3e.traits.middleage), from: 0.50, to: 0.65 },
+            { label: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+            { label: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1.00 },
+        ];
+    }
 }

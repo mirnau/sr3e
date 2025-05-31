@@ -19,18 +19,6 @@ export default class Profile extends foundry.abstract.TypeDataModel {
         initial: "",
       }),
 
-      // Image
-      img: new foundry.data.fields.StringField({
-        required: false,
-        initial: "systems/sr3e/textures/ai-generated/humans.webp",
-      }),
-
-      // Pronouns
-      pronouns: new foundry.data.fields.StringField({
-        required: false,
-        initial: "Them/They",
-      }),
-
       // Age
       age: new foundry.data.fields.NumberField({
         required: false,

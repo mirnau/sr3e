@@ -7,7 +7,9 @@
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let movement = $state(actor.system.movement);
+    let localization = config.movement;
     let gridContainer;
+
     const isShoppingState = false;
 
     $effect(() => {
@@ -28,6 +30,6 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(movement) as [key, stat]}
-            <AttributeCard {stat} {config} {key} {isShoppingState}/>
+            <AttributeCard {stat} {localization} {key} {isShoppingState}/>
     {/each}
 </div>

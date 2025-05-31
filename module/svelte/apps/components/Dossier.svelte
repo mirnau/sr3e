@@ -6,23 +6,33 @@
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
+  let system = $state(actor.system);
   let actorStore = $derived(
-    actor?.id && actor?.name ? getActorStore(actor.id, actor.name) : null,
+    actor.id && actor.name ? getActorStore(actor.id, actor.name) : null,
   );
+  let actorName = $state(actor.name);
+  let isDetailsOpen = $state(actor.system.profile.isDetailsOpen);
+  let imgPath = $state("");
 
-  let fieldName = $state(actor?.name ?? "");
-  let isDetailsOpen = $state(actor?.system?.profile?.isDetailsOpen ?? false);
+  $effect(() => {
+    const metahuman = actor.items.find((i) => i.type === "metahuman");
+    imgPath = metahuman?.img ?? "";
+  });
 
   $effect(() => {
     if (!actorStore) return;
 
     const unsubscribe = actorStore.subscribe((store) => {
-      if (store?.name !== undefined) fieldName = store.name;
-      if (store?.isDetailsOpen !== undefined)
-        isDetailsOpen = store.isDetailsOpen;
+      if (store?.name !== undefined) actorName = store.name;
+      if (store?.isDetailsOpen !== undefined) isDetailsOpen = store.isDetailsOpen;
     });
     return () => unsubscribe();
   });
+
+  function triggerMasonryReflow() {
+    document.querySelector(".sheet-character-masonry-main")
+      ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
 
   function toggleDetails() {
     isDetailsOpen = !isDetailsOpen;
@@ -31,10 +41,7 @@
       { render: false },
     );
     actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
-  }
-
-  function handleFilePicker() {
-    openFilePicker(actor);
+    triggerMasonryReflow();
   }
 
   function saveActorName(event) {
@@ -52,7 +59,7 @@
   }
 
   function updateStoreName(newName) {
-    fieldName = newName;
+    actorName = newName;
     actorStore?.update?.((store) => ({ ...store, name: newName }));
   }
 </script>
@@ -62,7 +69,7 @@
 <div class="dossier">
   {#if isDetailsOpen}
     <div class="version-one image-mask">
-      <img alt="Metahuman Portrait" />
+      <img role="presentation" alt="metaTypeName" src={imgPath} />
     </div>
   {:else}
     <div class="version-two image-mask">
@@ -72,13 +79,20 @@
         alt={actor.name + "!"}
         title={actor.name}
         data-edit="img"
-        onclick={handleFilePicker}
+        onclick={() => openFilePicker(actor)}
       />
     </div>
   {/if}
 
   <div class="dossier-details">
-    <div class="details-foldout" onclick={toggleDetails}>
+    <div
+      class="details-foldout"
+      role="button"
+      tabindex="0"
+      onclick={toggleDetails}
+      onkeydown={(e) =>
+        ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails())}
+    >
       <span><i class="fa-solid fa-magnifying-glass"></i></span>
       {localize(config.sheet.details)}
     </div>
@@ -93,43 +107,102 @@
             type="text"
             id="actor-name"
             name="name"
-            value={fieldName}
+            value={actorName}
             oninput={(e) => updateStoreName(e.target.value)}
             onblur={saveActorName}
             onkeypress={(e) => e.key === "Enter" && saveActorName(e)}
           />
         </div>
+      </div>
 
-        <div>
-          <h3>
-            {localize(config.traits.metahuman)}:
-            <span>{actor.system?.profile?.metaHumanity ?? ""}</span>
-          </h3>
+      <div class="flavor-edit-block">
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.age)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  { "system.profile.age": Number(e.target.innerText.trim()) },
+                  { render: false },
+                )}
+            >
+              {system.profile.age}
+            </div>
+            <span class="unit">yrs</span>
+          </div>
         </div>
 
-        <div>
-          <h3>
-            {localize(config.traits.age)}: {actor.system?.profile?.age ?? ""}
-          </h3>
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.height)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  {
+                    "system.profile.height": Number(e.target.innerText.trim()),
+                  },
+                  { render: false },
+                )}
+            >
+              {system.profile.height}
+            </div>
+            <span class="unit">cm</span>
+          </div>
         </div>
 
-        <div>
-          <h3>
-            {localize(config.traits.height)}: {actor.system?.profile?.height ??
-              ""} cm ({multiply(actor.system?.profile?.height ?? 0, 0.0328084)} feet)
-          </h3>
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.weight)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  {
+                    "system.profile.weight": Number(e.target.innerText.trim()),
+                  },
+                  { render: false },
+                )}
+            >
+              {system.profile.weight}
+            </div>
+            <span class="unit">kg</span>
+          </div>
         </div>
+      </div>
 
-        <div>
-          <h3>
-            {localize(config.traits.weight)}: {actor.system?.profile?.weight ??
-              ""} kg ({multiply(actor.system?.profile?.weight ?? 0, 0.157473)} stones)
-          </h3>
+      <div class="flavor-edit-block last-flavor-edit-block">
+        <h4>{localize(config.sheet.quote)}</h4>
+        <div
+          class="editable-field quote"
+          contenteditable="true"
+          onblur={(e) =>
+            actor?.update?.(
+              { "system.profile.quote": e.target.innerText.trim() },
+              { render: false },
+            )}
+          onkeypress={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
+        >
+          {system.profile.quote}
         </div>
-
-        <a class="journal-entry-link">
-          <h3>{localize(config.sheet.viewbackground)}</h3>
-        </a>
       </div>
     {/if}
   </div>
