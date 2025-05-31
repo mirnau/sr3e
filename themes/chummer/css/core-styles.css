@@ -514,7 +514,7 @@
 .system-sr3e button.plain.active:hover,
 .system-sr3e button:hover {
   background-color: red;
-  transition: background-color 1.5s ease;
+  transition: background-color 0.5s ease;
 }
 .system-sr3e a.button:active,
 .system-sr3e button.plain:active,
@@ -526,7 +526,8 @@
 .system-sr3e button.plain:disabled,
 .system-sr3e button.plain.active:disabled,
 .system-sr3e button:disabled {
-  background-color: yellow;
+  background-color: grey;
+  color: grey;
 }
 .system-sr3e a.button .ui-control,
 .system-sr3e button.plain .ui-control,
@@ -577,7 +578,7 @@
   appearance: none;
   text-indent: 0.5rem;
   background: #1b1f24 !important;
-  color: #ff0095;
+  color: #ff80c8;
   width: 100%;
   border: none;
   border-radius: 0rem !important;
@@ -597,7 +598,6 @@
 }
 .system-sr3e select option {
   background-color: #1b1f24;
-  /* Attempts to override */
   color: #ff0095;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }

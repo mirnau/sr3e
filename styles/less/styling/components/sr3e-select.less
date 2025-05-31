@@ -4,7 +4,7 @@ select {
     appearance: none;
     text-indent: 0.5rem;
     background: @primary-color !important;
-    color: @accent-color;
+    color: @text-accent-color;
     width: 100%;
     border: none;
     border-radius: 0rem !important;
@@ -25,8 +25,9 @@ option {
     .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 }
 
+// NOTE: The background panel
 select option {
-    background-color: @primary-color; /* Attempts to override */
+    background-color: @primary-color; 
     color: @accent-color;
     .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 }
