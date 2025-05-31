@@ -107,8 +107,8 @@
 
     {#if isDetailsOpen}
       <div
-        in:slide={{ duration: 400, easing: cubicInOut }}
-        out:slide={{ duration: 300, easing: cubicInOut }}
+        in:slide={{ duration: 100, easing: cubicInOut }}
+        out:slide={{ duration: 50, easing: cubicInOut }}
         onintroend={triggerMasonryReflow}
         onoutroend={handleOutroEnd}
       >
@@ -198,6 +198,7 @@
         <h4>{localize(config.sheet.quote)}</h4>
         <div
           class="editable-field quote"
+          role="presentation"
           contenteditable="true"
           onblur={(e) =>
             actor?.update?.(

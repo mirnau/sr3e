@@ -3407,7 +3407,7 @@ var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$1 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" contenteditable="true"> </div></div>`, 1);
+var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3563,8 +3563,8 @@ function Dossier($$anchor, $$props) {
       event("outroend", div_5, handleOutroEnd);
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
-      transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
+      transition(1, div_5, () => slide, () => ({ duration: 100, easing: cubicInOut }));
+      transition(2, div_5, () => slide, () => ({ duration: 50, easing: cubicInOut }));
       event("blur", div_12, (e) => {
         var _a, _b;
         return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
