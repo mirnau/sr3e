@@ -109,7 +109,6 @@
 
     return cleanup;
   });
-
 </script>
 
 <div bind:this={container} class="sheet-character-masonry-main">
@@ -121,7 +120,13 @@
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          <Comp {...props} />
+          <div
+            onmasonry-reflow={() => {
+              container?.dispatchEvent(new CustomEvent("masonry-reflow"));
+            }}
+          >
+            <Comp {...props} />
+          </div>
         </div>
       </div>
     </div>

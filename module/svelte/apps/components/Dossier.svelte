@@ -3,27 +3,38 @@
   import { getActorStore } from "../../stores/actorStoreRegistry";
   import { openFilePicker, localize } from "../../../svelteHelpers.js";
   import CardToolbar from "./CardToolbar.svelte";
+  import { createEventDispatcher } from "svelte";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
+  let system = $state(actor.system);
   let actorStore = $derived(
-    actor?.id && actor?.name ? getActorStore(actor.id, actor.name) : null,
+    actor.id && actor.name ? getActorStore(actor.id, actor.name) : null,
   );
+  let actorName = $state(actor.name);
+  let isDetailsOpen = $state(actor.system.profile.isDetailsOpen);
+  let imgPath = $state("")
+  
 
-  let fieldName = $state(actor?.name ?? "");
-  let isDetailsOpen = $state(actor?.system?.profile?.isDetailsOpen ?? false);
+  $effect(() => {
+    const metahuman = actor.items.find((i) => i.type === "metahuman");
+    console.log("Metahuman", metahuman);
+    console.log("Metahuman src", metahuman.img);
+    imgPath = metahuman.img;
+  });
 
   $effect(() => {
     if (!actorStore) return;
 
     const unsubscribe = actorStore.subscribe((store) => {
-      if (store?.name !== undefined) fieldName = store.name;
+      if (store?.name !== undefined) actorName = store.name;
       if (store?.isDetailsOpen !== undefined)
         isDetailsOpen = store.isDetailsOpen;
     });
     return () => unsubscribe();
   });
 
+  const dispatch = createEventDispatcher();
   function toggleDetails() {
     isDetailsOpen = !isDetailsOpen;
     actor?.update?.(
@@ -31,10 +42,7 @@
       { render: false },
     );
     actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
-  }
-
-  function handleFilePicker() {
-    openFilePicker(actor);
+    dispatch("masonry-reflow");
   }
 
   function saveActorName(event) {
@@ -52,7 +60,7 @@
   }
 
   function updateStoreName(newName) {
-    fieldName = newName;
+    actorName = newName;
     actorStore?.update?.((store) => ({ ...store, name: newName }));
   }
 </script>
@@ -62,7 +70,7 @@
 <div class="dossier">
   {#if isDetailsOpen}
     <div class="version-one image-mask">
-      <img alt="Metahuman Portrait" />
+      <img role="presentation" alt={"metaTypeName"} src={imgPath} />
     </div>
   {:else}
     <div class="version-two image-mask">
@@ -72,13 +80,20 @@
         alt={actor.name + "!"}
         title={actor.name}
         data-edit="img"
-        onclick={handleFilePicker}
+        onclick={() => openFilePicker(actor)}
       />
     </div>
   {/if}
 
   <div class="dossier-details">
-    <div class="details-foldout" onclick={toggleDetails}>
+    <div
+      class="details-foldout"
+      role="button"
+      tabindex="0"
+      onclick={toggleDetails}
+      onkeydown={(e) =>
+        ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails())}
+    >
       <span><i class="fa-solid fa-magnifying-glass"></i></span>
       {localize(config.sheet.details)}
     </div>
@@ -93,43 +108,12 @@
             type="text"
             id="actor-name"
             name="name"
-            value={fieldName}
+            value={actorName}
             oninput={(e) => updateStoreName(e.target.value)}
             onblur={saveActorName}
             onkeypress={(e) => e.key === "Enter" && saveActorName(e)}
           />
         </div>
-
-        <div>
-          <h3>
-            {localize(config.traits.metahuman)}:
-            <span>{actor.system?.profile?.metaHumanity ?? ""}</span>
-          </h3>
-        </div>
-
-        <div>
-          <h3>
-            {localize(config.traits.age)}: {actor.system?.profile?.age ?? ""}
-          </h3>
-        </div>
-
-        <div>
-          <h3>
-            {localize(config.traits.height)}: {actor.system?.profile?.height ??
-              ""} cm ({multiply(actor.system?.profile?.height ?? 0, 0.0328084)} feet)
-          </h3>
-        </div>
-
-        <div>
-          <h3>
-            {localize(config.traits.weight)}: {actor.system?.profile?.weight ??
-              ""} kg ({multiply(actor.system?.profile?.weight ?? 0, 0.157473)} stones)
-          </h3>
-        </div>
-
-        <a class="journal-entry-link">
-          <h3>{localize(config.sheet.viewbackground)}</h3>
-        </a>
       </div>
     {/if}
   </div>

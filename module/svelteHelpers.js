@@ -1,4 +1,5 @@
 import { cardLayout } from "./svelteStore";
+import { tick } from 'svelte';
 
 export function localize(key) {
   return game.i18n.localize(key);

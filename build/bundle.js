@@ -69,16 +69,6 @@ class Profile extends foundry.abstract.TypeDataModel {
         required: false,
         initial: ""
       }),
-      // Image
-      img: new foundry.data.fields.StringField({
-        required: false,
-        initial: "systems/sr3e/textures/ai-generated/humans.webp"
-      }),
-      // Pronouns
-      pronouns: new foundry.data.fields.StringField({
-        required: false,
-        initial: "Them/They"
-      }),
       // Age
       age: new foundry.data.fields.NumberField({
         required: false,
@@ -1131,6 +1121,11 @@ function queue_micro_task(fn) {
 function flush_tasks() {
   if (is_micro_task_queued$1) {
     process_micro_tasks();
+  }
+}
+function lifecycle_outside_component(name) {
+  {
+    throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
   }
 }
 const FLUSH_MICROTASK = 0;
@@ -2971,6 +2966,39 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
+function create_custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
+  return new CustomEvent(type, { detail, bubbles, cancelable });
+}
+function createEventDispatcher() {
+  const active_component_context = component_context;
+  if (active_component_context === null) {
+    lifecycle_outside_component();
+  }
+  return (type, detail, options) => {
+    var _a;
+    const events = (
+      /** @type {Record<string, Function | Function[]>} */
+      (_a = active_component_context.s.$$events) == null ? void 0 : _a[
+        /** @type {any} */
+        type
+      ]
+    );
+    if (events) {
+      const callbacks = is_array(events) ? events.slice() : [events];
+      const event2 = create_custom_event(
+        /** @type {string} */
+        type,
+        detail,
+        options
+      );
+      for (const fn of callbacks) {
+        fn.call(active_component_context.x, event2);
+      }
+      return !event2.defaultPrevented;
+    }
+    return true;
+  };
+}
 function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
     run(void 0);
@@ -3384,8 +3412,8 @@ function getRandomBellCurveWithMode(min, max, mode) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$7 = (e) => e.stopPropagation();
-var on_keydown$1 = (e) => {
+var on_click$8 = (e) => e.stopPropagation();
+var on_keydown$2 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
@@ -3400,8 +3428,8 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$s();
-  div.__click = [on_click$7];
-  div.__keydown = [on_keydown$1];
+  div.__click = [on_click$8];
+  div.__keydown = [on_keydown$2];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3412,64 +3440,66 @@ function CardToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-function toggleDetails(_, isDetailsOpen, actor, actorStore) {
-  var _a, _b, _c, _d;
-  set(isDetailsOpen, !get$1(isDetailsOpen));
-  (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-    _a,
-    {
-      "system.profile.isDetailsOpen": get$1(isDetailsOpen)
-    },
-    { render: false }
-  );
-  (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({
-    ...store,
-    isDetailsOpen: get$1(isDetailsOpen)
-  }));
-}
-function handleFilePicker(__1, actor) {
-  openFilePicker(actor());
-}
-var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img alt="Metahuman Portrait"></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation"></div>`);
+var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var on_keydown$1 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div> <div><h3> <span> </span></h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <div><h3> </h3></div> <a class="journal-entry-link"><h3> </h3></a></div>`);
-var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div>`);
+var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
-  var _a, _b, _c, _d;
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let actorStore = /* @__PURE__ */ derived(() => {
-    var _a2, _b2;
-    return ((_a2 = actor()) == null ? void 0 : _a2.id) && ((_b2 = actor()) == null ? void 0 : _b2.name) ? getActorStore(actor().id, actor().name) : null;
+  proxy(actor().system);
+  let actorStore = /* @__PURE__ */ derived(() => actor().id && actor().name ? getActorStore(actor().id, actor().name) : null);
+  let actorName = state(proxy(actor().name));
+  let isDetailsOpen = state(proxy(actor().system.profile.isDetailsOpen));
+  let imgPath = state("");
+  user_effect(() => {
+    const metahuman = actor().items.find((i) => i.type === "metahuman");
+    console.log("Metahuman", metahuman);
+    console.log("Metahuman src", metahuman.img);
+    set(imgPath, proxy(metahuman.img));
   });
-  let fieldName = state(proxy(((_a = actor()) == null ? void 0 : _a.name) ?? ""));
-  let isDetailsOpen = state(proxy(((_d = (_c = (_b = actor()) == null ? void 0 : _b.system) == null ? void 0 : _c.profile) == null ? void 0 : _d.isDetailsOpen) ?? false));
   user_effect(() => {
     if (!get$1(actorStore)) return;
     const unsubscribe = get$1(actorStore).subscribe((store) => {
-      if ((store == null ? void 0 : store.name) !== void 0) set(fieldName, proxy(store.name));
+      if ((store == null ? void 0 : store.name) !== void 0) set(actorName, proxy(store.name));
       if ((store == null ? void 0 : store.isDetailsOpen) !== void 0) set(isDetailsOpen, proxy(store.isDetailsOpen));
     });
     return () => unsubscribe();
   });
-  function saveActorName(event2) {
-    var _a2, _b2, _c2, _d2;
-    const newName = event2.target.value;
-    (_b2 = (_a2 = actor()) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, { name: newName }, { render: true });
-    (_d2 = (_c2 = get$1(actorStore)) == null ? void 0 : _c2.update) == null ? void 0 : _d2.call(_c2, (store) => ({ ...store, name: newName }));
+  const dispatch = createEventDispatcher();
+  function toggleDetails() {
+    var _a, _b, _c, _d;
+    set(isDetailsOpen, !get$1(isDetailsOpen));
+    (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+      _a,
+      {
+        "system.profile.isDetailsOpen": get$1(isDetailsOpen)
+      },
+      { render: false }
+    );
+    (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({
+      ...store,
+      isDetailsOpen: get$1(isDetailsOpen)
+    }));
+    dispatch("masonry-reflow");
   }
-  function multiply(value, factor) {
-    return (value * factor).toFixed(2);
+  function saveActorName(event2) {
+    var _a, _b, _c, _d;
+    const newName = event2.target.value;
+    (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(_a, { name: newName }, { render: true });
+    (_d = (_c = get$1(actorStore)) == null ? void 0 : _c.update) == null ? void 0 : _d.call(_c, (store) => ({ ...store, name: newName }));
   }
   function cubicInOut(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
   function updateStoreName(newName) {
-    var _a2, _b2;
-    set(fieldName, proxy(newName));
-    (_b2 = (_a2 = get$1(actorStore)) == null ? void 0 : _a2.update) == null ? void 0 : _b2.call(_a2, (store) => ({ ...store, name: newName }));
+    var _a, _b;
+    set(actorName, proxy(newName));
+    (_b = (_a = get$1(actorStore)) == null ? void 0 : _a.update) == null ? void 0 : _b.call(_a, (store) => ({ ...store, name: newName }));
   }
   var fragment = root$r();
   var node = first_child(fragment);
@@ -3483,16 +3513,19 @@ function Dossier($$anchor, $$props) {
   {
     var consequent = ($$anchor2) => {
       var div_1 = root_1$8();
+      var img = child(div_1);
+      set_attribute(img, "alt", "metaTypeName");
+      template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
       var div_2 = root_2$5();
-      var img = child(div_2);
-      img.__click = [handleFilePicker, actor];
+      var img_1 = child(div_2);
+      img_1.__click = [on_click$7, actor];
       template_effect(() => {
-        set_attribute(img, "src", actor().img);
-        set_attribute(img, "alt", actor().name + "!");
-        set_attribute(img, "title", actor().name);
+        set_attribute(img_1, "src", actor().img);
+        set_attribute(img_1, "alt", actor().name + "!");
+        set_attribute(img_1, "title", actor().name);
       });
       append($$anchor2, div_2);
     };
@@ -3503,12 +3536,8 @@ function Dossier($$anchor, $$props) {
   }
   var div_3 = sibling(node_1, 2);
   var div_4 = child(div_3);
-  div_4.__click = [
-    toggleDetails,
-    isDetailsOpen,
-    actor,
-    actorStore
-  ];
+  div_4.__click = toggleDetails;
+  div_4.__keydown = [on_keydown$1, toggleDetails];
   var text2 = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
@@ -3517,50 +3546,7 @@ function Dossier($$anchor, $$props) {
       var div_6 = child(div_5);
       var input = child(div_6);
       input.__input = [on_input$1, updateStoreName];
-      var div_7 = sibling(div_6, 2);
-      var h3 = child(div_7);
-      var text_1 = child(h3);
-      var span_1 = sibling(text_1);
-      var text_2 = child(span_1);
-      var div_8 = sibling(div_7, 2);
-      var h3_1 = child(div_8);
-      var text_3 = child(h3_1);
-      var div_9 = sibling(div_8, 2);
-      var h3_2 = child(div_9);
-      var text_4 = child(h3_2);
-      var div_10 = sibling(div_9, 2);
-      var h3_3 = child(div_10);
-      var text_5 = child(h3_3);
-      var a = sibling(div_10, 2);
-      var h3_4 = child(a);
-      var text_6 = child(h3_4);
-      template_effect(
-        ($0, $1, $2, $3, $4, $5, $6) => {
-          var _a2, _b2, _c2, _d2, _e, _f, _g, _h;
-          set_value(input, get$1(fieldName));
-          set_text(text_1, `${$0 ?? ""}: `);
-          set_text(text_2, ((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.metaHumanity) ?? "");
-          set_text(text_3, `${$1 ?? ""}: ${((_d2 = (_c2 = actor().system) == null ? void 0 : _c2.profile) == null ? void 0 : _d2.age) ?? ""}`);
-          set_text(text_4, `${$2 ?? ""}: ${((_f = (_e = actor().system) == null ? void 0 : _e.profile) == null ? void 0 : _f.height) ?? ""} cm (${$3 ?? ""} feet)`);
-          set_text(text_5, `${$4 ?? ""}: ${((_h = (_g = actor().system) == null ? void 0 : _g.profile) == null ? void 0 : _h.weight) ?? ""} kg (${$5 ?? ""} stones)`);
-          set_text(text_6, $6);
-        },
-        [
-          () => localize$1(config2().traits.metahuman),
-          () => localize$1(config2().traits.age),
-          () => localize$1(config2().traits.height),
-          () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.height) ?? 0, 0.0328084);
-          },
-          () => localize$1(config2().traits.weight),
-          () => {
-            var _a2, _b2;
-            return multiply(((_b2 = (_a2 = actor().system) == null ? void 0 : _a2.profile) == null ? void 0 : _b2.weight) ?? 0, 0.157473);
-          },
-          () => localize$1(config2().sheet.viewbackground)
-        ]
-      );
+      template_effect(() => set_value(input, get$1(actorName)));
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
       transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
@@ -3575,7 +3561,7 @@ function Dossier($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-delegate(["click", "input"]);
+delegate(["click", "keydown", "input"]);
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -5655,7 +5641,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><!></div></div></div></div>`);
 var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5810,11 +5796,15 @@ function CharacterSheetApp($$anchor, $$props) {
     var div_1 = root_1$5();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
-    var node_1 = child(div_3);
+    var div_4 = child(div_3);
+    var node_1 = child(div_4);
     component(node_1, Comp, ($$anchor3, $$component) => {
       $$component($$anchor3, spread_props(props));
     });
     template_effect(() => set_class(div_1, "sheet-component span-" + (props().span ?? 1)));
+    event("masonry-reflow", div_4, () => {
+      container == null ? void 0 : container.dispatchEvent(new CustomEvent("masonry-reflow"));
+    });
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => container = $$value, () => container);
@@ -6033,13 +6023,6 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       closeOnSubmit: false
     };
   }
-  async getData() {
-    const ctx = super.getData();
-    const ownedItems = ctx.actor.items.contents;
-    ctx.skills = ActorDataService.prepareSkills(ownedItems);
-    ctx.languages = ActorDataService.prepareLanguages(ownedItems);
-    return ctx;
-  }
   _renderHTML() {
     return null;
   }
@@ -6115,6 +6098,30 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
   _onSubmit() {
     return false;
+  }
+  async _onDrop(event2) {
+    event2.preventDefault();
+    const data = await TextEditor.getDragEventData(event2);
+    if (data.type !== "Item") return;
+    const droppedItem = await Item.implementation.fromDropData(data);
+    if (droppedItem.type !== "metahuman") return;
+    const result = await this.actor.canAcceptMetahuman(droppedItem);
+    if (result === "accept") {
+      await this.actor.replaceMetahuman(droppedItem);
+    } else if (result === "goblinize") {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        title: "Goblinization",
+        content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
+        yes: () => true,
+        no: () => false,
+        defaultYes: false
+      });
+      if (confirmed) {
+        await this.actor.replaceMetahuman(droppedItem);
+      }
+    } else {
+      ui.notifications.info("Only one metahuman type allowed.");
+    }
   }
 }
 _app = new WeakMap();
@@ -9076,6 +9083,35 @@ async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, 
   if (actor.type !== "character") return true;
   options.renderSheet = false;
 }
+class SR3EActor extends Actor {
+  async canAcceptMetahuman(incomingItem) {
+    const existing = this.items.filter((i) => i.type === "metahuman");
+    if (existing.length > 1) {
+      const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
+      const toDelete = rest.map((i) => i.id);
+      await this.deleteEmbeddedDocuments("Item", toDelete);
+    }
+    const current = this.items.find((i) => i.type === "metahuman");
+    if (!current) return "accept";
+    const incomingName = incomingItem.name.toLowerCase();
+    const currentName = current.name.toLowerCase();
+    const isIncomingHuman = incomingName === "human";
+    const isCurrentHuman = currentName === "human";
+    if (isCurrentHuman && !isIncomingHuman) return "goblinize";
+    if (!isCurrentHuman && isIncomingHuman) return "reject";
+    if (incomingName === currentName) return "reject";
+    return "reject";
+  }
+  async replaceMetahuman(newItem) {
+    const current = this.items.find((i) => i.type === "metahuman");
+    if (current) await this.deleteEmbeddedDocuments("Item", [current.id]);
+    await this.createEmbeddedDocuments("Item", [newItem.toObject()]);
+    await this.update({
+      "system.profile.metaHumanity": newItem.name,
+      "system.profile.img": newItem.img
+    });
+  }
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -9095,6 +9131,7 @@ function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
+  CONFIG.Actor.documentClass = SR3EActor;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
