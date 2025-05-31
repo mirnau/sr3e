@@ -3,7 +3,6 @@
   import { getActorStore } from "../../stores/actorStoreRegistry";
   import { openFilePicker, localize } from "../../../svelteHelpers.js";
   import CardToolbar from "./CardToolbar.svelte";
-  import { createEventDispatcher } from "svelte";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
@@ -17,9 +16,7 @@
 
   $effect(() => {
     const metahuman = actor.items.find((i) => i.type === "metahuman");
-    console.log("Metahuman", metahuman);
-    console.log("Metahuman src", metahuman.img);
-    imgPath = metahuman.img;
+    imgPath = metahuman?.img ?? "";
   });
 
   $effect(() => {
@@ -27,13 +24,16 @@
 
     const unsubscribe = actorStore.subscribe((store) => {
       if (store?.name !== undefined) actorName = store.name;
-      if (store?.isDetailsOpen !== undefined)
-        isDetailsOpen = store.isDetailsOpen;
+      if (store?.isDetailsOpen !== undefined) isDetailsOpen = store.isDetailsOpen;
     });
     return () => unsubscribe();
   });
 
-  const dispatch = createEventDispatcher();
+  function triggerMasonryReflow() {
+    document.querySelector(".sheet-character-masonry-main")
+      ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
+
   function toggleDetails() {
     isDetailsOpen = !isDetailsOpen;
     actor?.update?.(
@@ -41,7 +41,7 @@
       { render: false },
     );
     actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
-    dispatch("masonry-reflow");
+    triggerMasonryReflow();
   }
 
   function saveActorName(event) {
@@ -69,7 +69,7 @@
 <div class="dossier">
   {#if isDetailsOpen}
     <div class="version-one image-mask">
-      <img role="presentation" alt={"metaTypeName"} src={imgPath} />
+      <img role="presentation" alt="metaTypeName" src={imgPath} />
     </div>
   {:else}
     <div class="version-two image-mask">
@@ -183,6 +183,7 @@
           </div>
         </div>
       </div>
+
       <div class="flavor-edit-block last-flavor-edit-block">
         <h4>{localize(config.sheet.quote)}</h4>
         <div

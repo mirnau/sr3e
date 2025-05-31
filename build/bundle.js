@@ -1123,11 +1123,6 @@ function flush_tasks() {
     process_micro_tasks();
   }
 }
-function lifecycle_outside_component(name) {
-  {
-    throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
-  }
-}
 const FLUSH_MICROTASK = 0;
 const FLUSH_SYNC = 1;
 let is_throwing_error = false;
@@ -2966,39 +2961,6 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
-function create_custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
-  return new CustomEvent(type, { detail, bubbles, cancelable });
-}
-function createEventDispatcher() {
-  const active_component_context = component_context;
-  if (active_component_context === null) {
-    lifecycle_outside_component();
-  }
-  return (type, detail, options) => {
-    var _a;
-    const events = (
-      /** @type {Record<string, Function | Function[]>} */
-      (_a = active_component_context.s.$$events) == null ? void 0 : _a[
-        /** @type {any} */
-        type
-      ]
-    );
-    if (events) {
-      const callbacks = is_array(events) ? events.slice() : [events];
-      const event2 = create_custom_event(
-        /** @type {string} */
-        type,
-        detail,
-        options
-      );
-      for (const fn of callbacks) {
-        fn.call(active_component_context.x, event2);
-      }
-      return !event2.defaultPrevented;
-    }
-    return true;
-  };
-}
 function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
     run(void 0);
@@ -3440,7 +3402,7 @@ function CardToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation"></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$1 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
@@ -3458,9 +3420,7 @@ function Dossier($$anchor, $$props) {
   let imgPath = state("");
   user_effect(() => {
     const metahuman = actor().items.find((i) => i.type === "metahuman");
-    console.log("Metahuman", metahuman);
-    console.log("Metahuman src", metahuman.img);
-    set(imgPath, proxy(metahuman.img));
+    set(imgPath, proxy((metahuman == null ? void 0 : metahuman.img) ?? ""));
   });
   user_effect(() => {
     if (!get$1(actorStore)) return;
@@ -3470,7 +3430,10 @@ function Dossier($$anchor, $$props) {
     });
     return () => unsubscribe();
   });
-  const dispatch = createEventDispatcher();
+  function triggerMasonryReflow() {
+    var _a;
+    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
   function toggleDetails() {
     var _a, _b, _c, _d;
     set(isDetailsOpen, !get$1(isDetailsOpen));
@@ -3485,7 +3448,7 @@ function Dossier($$anchor, $$props) {
       ...store,
       isDetailsOpen: get$1(isDetailsOpen)
     }));
-    dispatch("masonry-reflow");
+    triggerMasonryReflow();
   }
   function saveActorName(event2) {
     var _a, _b, _c, _d;
@@ -3514,7 +3477,6 @@ function Dossier($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       var div_1 = root_1$8();
       var img = child(div_1);
-      set_attribute(img, "alt", "metaTypeName");
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
     };
@@ -5733,7 +5695,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><!></div></div></div></div>`);
+var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5852,7 +5814,7 @@ function CharacterSheetApp($$anchor, $$props) {
   let container = null;
   user_effect(async () => {
     await tick();
-    container.dispatchEvent(new CustomEvent("masonry-reflow"));
+    container == null ? void 0 : container.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
   let saveTimeout = null;
   user_effect(() => {
@@ -5888,18 +5850,19 @@ function CharacterSheetApp($$anchor, $$props) {
     var div_1 = root_1$5();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
-    var div_4 = child(div_3);
-    var node_1 = child(div_4);
+    var node_1 = child(div_3);
     component(node_1, Comp, ($$anchor3, $$component) => {
       $$component($$anchor3, spread_props(props));
     });
     template_effect(() => set_class(div_1, "sheet-component span-" + (props().span ?? 1)));
-    event("masonry-reflow", div_4, () => {
-      container == null ? void 0 : container.dispatchEvent(new CustomEvent("masonry-reflow"));
-    });
     append($$anchor2, div_1);
   });
   bind_this(div, ($$value) => container = $$value, () => container);
+  event("masonry-reflow", div, () => {
+    var _a;
+    console.log("Reflow triggered");
+    (_a = container == null ? void 0 : container._masonry) == null ? void 0 : _a.layout();
+  });
   append($$anchor, div);
   pop();
   $$cleanup();

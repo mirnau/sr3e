@@ -32,7 +32,6 @@
     if (!actor?.id) return;
 
     const layout = await actor.getFlag("sr3e", "customLayout");
-
     const defaultLayout = defaultCardArray.map((c) => ({
       id: c.props.id,
       span: c.props.span,
@@ -46,15 +45,12 @@
     }
   });
 
-  // Rehydrated full card list based on stored ID list
   let cards = $state([]);
-
   $effect(() => {
     cards = $cardLayout
       .map(({ id, span }) => {
         const match = defaultCardArray.find((c) => c.props.id === id);
         if (!match) return null;
-
         return {
           ...match,
           props: {
@@ -66,15 +62,15 @@
       .filter(Boolean);
   });
 
-  // Re-trigger masonry layout after cards change
   let container = null;
 
+  // Re-trigger masonry after card updates
   $effect(async () => {
-    await tick(); // Wait for DOM updates
-    container.dispatchEvent(new CustomEvent("masonry-reflow"));
+    await tick();
+    container?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
 
-  // Save layout to flag with debounce (runes-safe)
+  // Save layout to flag with debounce
   let saveTimeout = null;
   $effect(() => {
     const layout = $cardLayout;
@@ -84,7 +80,6 @@
     }, 200);
   });
 
-  // Responsive layout container
   let layoutState = $state("small");
   const maxWidth = 1400;
 
@@ -111,7 +106,14 @@
   });
 </script>
 
-<div bind:this={container} class="sheet-character-masonry-main">
+<div
+  bind:this={container}
+  class="sheet-character-masonry-main"
+  onmasonry-reflow={() => {
+    console.log("Reflow triggered");
+    container?._masonry?.layout();
+  }}
+>
   <div class="layout-grid-sizer"></div>
   <div class="layout-gutter-sizer"></div>
 
@@ -120,13 +122,7 @@
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          <div
-            onmasonry-reflow={() => {
-              container?.dispatchEvent(new CustomEvent("masonry-reflow"));
-            }}
-          >
-            <Comp {...props} />
-          </div>
+          <Comp {...props} />
         </div>
       </div>
     </div>
