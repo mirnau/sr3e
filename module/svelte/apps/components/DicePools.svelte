@@ -14,14 +14,14 @@
     const isShoppingState = false;
 
     $effect(() => {
-        const cleanup = setupMasonry({
+        const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
             minItemWidth: 180,
         });
-        return cleanup;
+        return result.cleanup;
     });
 </script>
 

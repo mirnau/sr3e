@@ -99,9 +99,11 @@ export function setupMasonry({
     msnry.layout();
   }, 100);
 
-  return () => {
+  const cleanup = () => {
     resizeObserver.disconnect();
     itemObservers.forEach((obs) => obs.disconnect());
     msnry.destroy();
   };
+
+  return { masonryInstance: msnry, cleanup };
 }

@@ -3,6 +3,7 @@
   import { getActorStore } from "../../stores/actorStoreRegistry";
   import { openFilePicker, localize } from "../../../svelteHelpers.js";
   import CardToolbar from "./CardToolbar.svelte";
+  import { tick } from "svelte";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
@@ -24,13 +25,21 @@
 
     const unsubscribe = actorStore.subscribe((store) => {
       if (store?.name !== undefined) actorName = store.name;
-      if (store?.isDetailsOpen !== undefined) isDetailsOpen = store.isDetailsOpen;
+      if (store?.isDetailsOpen !== undefined)
+        isDetailsOpen = store.isDetailsOpen;
     });
     return () => unsubscribe();
   });
 
   function triggerMasonryReflow() {
-    document.querySelector(".sheet-character-masonry-main")
+    document
+      .querySelector(".sheet-character-masonry-main")
+      ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
+  async function handleOutroEnd() {
+    await tick(); // wait for Svelte to actually remove the node
+    document
+      .querySelector(".sheet-character-masonry-main")
       ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   }
 
@@ -41,7 +50,6 @@
       { render: false },
     );
     actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
-    triggerMasonryReflow();
   }
 
   function saveActorName(event) {
@@ -101,6 +109,8 @@
       <div
         in:slide={{ duration: 400, easing: cubicInOut }}
         out:slide={{ duration: 300, easing: cubicInOut }}
+        onintroend={triggerMasonryReflow}
+        onoutroend={handleOutroEnd}
       >
         <div>
           <input

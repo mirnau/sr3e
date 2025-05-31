@@ -3434,6 +3434,11 @@ function Dossier($$anchor, $$props) {
     var _a;
     (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   }
+  async function handleOutroEnd() {
+    var _a;
+    await tick();
+    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
   function toggleDetails() {
     var _a, _b, _c, _d;
     set(isDetailsOpen, !get$1(isDetailsOpen));
@@ -3448,7 +3453,6 @@ function Dossier($$anchor, $$props) {
       ...store,
       isDetailsOpen: get$1(isDetailsOpen)
     }));
-    triggerMasonryReflow();
   }
   function saveActorName(event2) {
     var _a, _b, _c, _d;
@@ -3555,6 +3559,8 @@ function Dossier($$anchor, $$props) {
           () => localize$1(config2().sheet.quote)
         ]
       );
+      event("introend", div_5, triggerMasonryReflow);
+      event("outroend", div_5, handleOutroEnd);
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
       transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
@@ -5145,11 +5151,12 @@ function setupMasonry({
     msnry.reloadItems();
     msnry.layout();
   }, 100);
-  return () => {
+  const cleanup = () => {
     resizeObserver.disconnect();
     itemObservers.forEach((obs) => obs.disconnect());
     msnry.destroy();
   };
+  return { masonryInstance: msnry, cleanup };
 }
 var root$q = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
@@ -5167,14 +5174,14 @@ function Initiative($$anchor, $$props) {
   let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
   let initiativeDice = 1;
   user_effect(() => {
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
       minItemWidth: 180
     });
-    return cleanup;
+    return result.cleanup;
   });
   var div = root$q();
   var h1 = child(div);
@@ -5287,14 +5294,14 @@ function Attributes($$anchor, $$props) {
     return unsubscribe;
   });
   user_effect(() => {
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
       minItemWidth: 180
     });
-    return cleanup;
+    return result.cleanup;
   });
   var fragment = root$o();
   var node = first_child(fragment);
@@ -5341,14 +5348,14 @@ function DicePools($$anchor, $$props) {
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
       minItemWidth: 180
     });
-    return cleanup;
+    return result.cleanup;
   });
   var fragment = root$n();
   var node = first_child(fragment);
@@ -5392,14 +5399,14 @@ function Movement($$anchor, $$props) {
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
       minItemWidth: 180
     });
-    return cleanup;
+    return result.cleanup;
   });
   var fragment = root$m();
   var node = first_child(fragment);
@@ -5586,14 +5593,14 @@ function Karma($$anchor, $$props) {
   let gridContainer;
   let survivor = /* @__PURE__ */ derived(() => karma.miraculousSurvival);
   user_effect(() => {
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
       minItemWidth: 180
     });
-    return cleanup;
+    return result.cleanup;
   });
   var fragment = root$g();
   var node = first_child(fragment);
@@ -5828,9 +5835,10 @@ function CharacterSheetApp($$anchor, $$props) {
     );
   });
   let layoutState = state("small");
+  let masonryInstance = null;
   user_effect(() => {
     if (!container) return;
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
@@ -5840,7 +5848,8 @@ function CharacterSheetApp($$anchor, $$props) {
         set(layoutState, proxy(state2));
       }
     });
-    return cleanup;
+    masonryInstance = result.masonryInstance;
+    return result.cleanup;
   });
   var div = root$e();
   var node = sibling(child(div), 4);
@@ -5859,9 +5868,8 @@ function CharacterSheetApp($$anchor, $$props) {
   });
   bind_this(div, ($$value) => container = $$value, () => container);
   event("masonry-reflow", div, () => {
-    var _a;
     console.log("Reflow triggered");
-    (_a = container == null ? void 0 : container._masonry) == null ? void 0 : _a.layout();
+    masonryInstance.layout();
   });
   append($$anchor, div);
   pop();

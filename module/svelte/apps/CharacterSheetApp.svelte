@@ -82,11 +82,12 @@
 
   let layoutState = $state("small");
   const maxWidth = 1400;
+  let masonryInstance = null;
 
   $effect(() => {
     if (!container) return;
 
-    const cleanup = setupMasonry({
+    const result = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
@@ -101,8 +102,10 @@
         layoutState = state;
       },
     });
+    
+    masonryInstance = result.masonryInstance
 
-    return cleanup;
+    return result.cleanup;
   });
 </script>
 
@@ -111,7 +114,7 @@
   class="sheet-character-masonry-main"
   onmasonry-reflow={() => {
     console.log("Reflow triggered");
-    container?._masonry?.layout();
+    masonryInstance.layout();
   }}
 >
   <div class="layout-grid-sizer"></div>
