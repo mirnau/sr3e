@@ -122,34 +122,33 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     return false;
   }
 
-async _onDrop(event) {
-  event.preventDefault();
-  const data = await TextEditor.getDragEventData(event);
+  async _onDrop(event) {
+    event.preventDefault();
+    const data = await TextEditor.getDragEventData(event);
 
-  if (data.type !== "Item") return;
+    if (data.type !== "Item") return;
 
-  const droppedItem = await Item.implementation.fromDropData(data);
-  if (droppedItem.type !== "metahuman") return;
+    const droppedItem = await Item.implementation.fromDropData(data);
+    if (droppedItem.type !== "metahuman") return;
 
-  const result = await this.actor.canAcceptMetahuman(droppedItem);
+    const result = await this.actor.canAcceptMetahuman(droppedItem);
 
-  if (result === "accept") {
-    await this.actor.replaceMetahuman(droppedItem);
-  } else if (result === "goblinize") {
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      title: "Goblinization",
-      content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
-      yes: () => true,
-      no: () => false,
-      defaultYes: false,
-    });
-
-    if (confirmed) {
+    if (result === "accept") {
       await this.actor.replaceMetahuman(droppedItem);
-    }
-  } else {
-    ui.notifications.info("Only one metahuman type allowed.");
-  }
-}
+    } else if (result === "goblinize") {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        title: "Goblinization",
+        content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
+        yes: () => true,
+        no: () => false,
+        defaultYes: false,
+      });
 
+      if (confirmed) {
+        await this.actor.replaceMetahuman(droppedItem);
+      }
+    } else {
+      ui.notifications.info("Only one metahuman type allowed.");
+    }
+  }
 }

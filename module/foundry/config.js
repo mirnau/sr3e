@@ -102,7 +102,8 @@ sr3e.sheet = {
     chooseanoption: "sr3e.sheet.chooseanoption",
     attributepoints: "sr3e.sheet.attributepoints",
     skillpoints: "sr3e.sheet.skillpoints",
-    resources: "sr3e.sheet.resources"
+    resources: "sr3e.sheet.resources",
+    quote: "sr3e.sheet.quote"
 }
 
 sr3e.traits = {

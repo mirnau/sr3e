@@ -3445,13 +3445,13 @@ var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$1 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div>`);
+var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" contenteditable="true"> </div></div>`, 1);
 var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  proxy(actor().system);
+  let system = proxy(actor().system);
   let actorStore = /* @__PURE__ */ derived(() => actor().id && actor().name ? getActorStore(actor().id, actor().name) : null);
   let actorName = state(proxy(actor().name));
   let isDetailsOpen = state(proxy(actor().system.profile.isDetailsOpen));
@@ -3542,16 +3542,108 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_5 = root_3$6();
+      var fragment_1 = root_3$6();
+      var div_5 = first_child(fragment_1);
       var div_6 = child(div_5);
       var input = child(div_6);
       input.__input = [on_input$1, updateStoreName];
-      template_effect(() => set_value(input, get$1(actorName)));
+      var div_7 = sibling(div_5, 2);
+      var div_8 = child(div_7);
+      var div_9 = child(div_8);
+      var div_10 = child(div_9);
+      var text_1 = child(div_10);
+      var div_11 = sibling(div_9, 2);
+      var div_12 = child(div_11);
+      var text_2 = child(div_12);
+      var div_13 = sibling(div_8, 2);
+      var div_14 = child(div_13);
+      var div_15 = child(div_14);
+      var text_3 = child(div_15);
+      var div_16 = sibling(div_14, 2);
+      var div_17 = child(div_16);
+      var text_4 = child(div_17);
+      var div_18 = sibling(div_13, 2);
+      var div_19 = child(div_18);
+      var div_20 = child(div_19);
+      var text_5 = child(div_20);
+      var div_21 = sibling(div_19, 2);
+      var div_22 = child(div_21);
+      var text_6 = child(div_22);
+      var div_23 = sibling(div_7, 2);
+      var h4 = child(div_23);
+      var text_7 = child(h4);
+      var div_24 = sibling(h4, 2);
+      var text_8 = child(div_24);
+      template_effect(
+        ($0, $1, $2, $3) => {
+          set_value(input, get$1(actorName));
+          set_text(text_1, $0);
+          set_text(text_2, system.profile.age);
+          set_text(text_3, $1);
+          set_text(text_4, system.profile.height);
+          set_text(text_5, $2);
+          set_text(text_6, system.profile.weight);
+          set_text(text_7, $3);
+          set_text(text_8, system.profile.quote);
+        },
+        [
+          () => localize$1(config2().traits.age),
+          () => localize$1(config2().traits.height),
+          () => localize$1(config2().traits.weight),
+          () => localize$1(config2().sheet.quote)
+        ]
+      );
       event("blur", input, saveActorName);
       event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
       transition(1, div_5, () => slide, () => ({ duration: 400, easing: cubicInOut }));
       transition(2, div_5, () => slide, () => ({ duration: 300, easing: cubicInOut }));
-      append($$anchor2, div_5);
+      event("blur", div_12, (e) => {
+        var _a, _b;
+        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+          _a,
+          {
+            "system.profile.age": Number(e.target.innerText.trim())
+          },
+          { render: false }
+        );
+      });
+      event("blur", div_17, (e) => {
+        var _a, _b;
+        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+          _a,
+          {
+            "system.profile.height": Number(e.target.innerText.trim())
+          },
+          { render: false }
+        );
+      });
+      event("blur", div_22, (e) => {
+        var _a, _b;
+        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+          _a,
+          {
+            "system.profile.weight": Number(e.target.innerText.trim())
+          },
+          { render: false }
+        );
+      });
+      event("blur", div_24, (e) => {
+        var _a, _b;
+        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
+          _a,
+          {
+            "system.profile.quote": e.target.innerText.trim()
+          },
+          { render: false }
+        );
+      });
+      event("keypress", div_24, (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      });
+      append($$anchor2, fragment_1);
     };
     if_block(node_2, ($$render) => {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
@@ -6221,7 +6313,8 @@ sr3e.sheet = {
   chooseanoption: "sr3e.sheet.chooseanoption",
   attributepoints: "sr3e.sheet.attributepoints",
   skillpoints: "sr3e.sheet.skillpoints",
-  resources: "sr3e.sheet.resources"
+  resources: "sr3e.sheet.resources",
+  quote: "sr3e.sheet.quote"
 };
 sr3e.traits = {
   age: "sr3e.traits.age",

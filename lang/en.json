@@ -123,7 +123,8 @@
       "chooseanoption": "Choose an option... ",
       "attributepoints": "Attribute Points",
       "skillpoints": "Skill Points",
-      "resources": "Resources"
+      "resources": "Resources",
+      "quote": "Quote"
     },
     "skill": {
       "skill": "Skill",

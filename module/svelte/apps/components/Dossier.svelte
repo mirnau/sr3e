@@ -13,8 +13,7 @@
   );
   let actorName = $state(actor.name);
   let isDetailsOpen = $state(actor.system.profile.isDetailsOpen);
-  let imgPath = $state("")
-  
+  let imgPath = $state("");
 
   $effect(() => {
     const metahuman = actor.items.find((i) => i.type === "metahuman");
@@ -113,6 +112,95 @@
             onblur={saveActorName}
             onkeypress={(e) => e.key === "Enter" && saveActorName(e)}
           />
+        </div>
+      </div>
+
+      <div class="flavor-edit-block">
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.age)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  { "system.profile.age": Number(e.target.innerText.trim()) },
+                  { render: false },
+                )}
+            >
+              {system.profile.age}
+            </div>
+            <span class="unit">yrs</span>
+          </div>
+        </div>
+
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.height)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  {
+                    "system.profile.height": Number(e.target.innerText.trim()),
+                  },
+                  { render: false },
+                )}
+            >
+              {system.profile.height}
+            </div>
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="editable-row">
+          <div class="label-line-wrap">
+            <div class="label">{localize(config.traits.weight)}</div>
+            <div class="dotted-line"></div>
+          </div>
+          <div class="value-unit">
+            <div
+              class="editable-field"
+              contenteditable="true"
+              onblur={(e) =>
+                actor?.update?.(
+                  {
+                    "system.profile.weight": Number(e.target.innerText.trim()),
+                  },
+                  { render: false },
+                )}
+            >
+              {system.profile.weight}
+            </div>
+            <span class="unit">kg</span>
+          </div>
+        </div>
+      </div>
+      <div class="flavor-edit-block last-flavor-edit-block">
+        <h4>{localize(config.sheet.quote)}</h4>
+        <div
+          class="editable-field quote"
+          contenteditable="true"
+          onblur={(e) =>
+            actor?.update?.(
+              { "system.profile.quote": e.target.innerText.trim() },
+              { render: false },
+            )}
+          onkeypress={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
+        >
+          {system.profile.quote}
         </div>
       </div>
     {/if}
