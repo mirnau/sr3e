@@ -1,16 +1,19 @@
 import CharacterSheetApp from "../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
+import CreationPoints from "../../svelte/apps/injections/CreationPoints.svelte";
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
 import ActorDataService from "../services/ActorDataService";
+import { flags } from "../services/commonConsts";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
   #neon;
   #feed;
   #cart;
+  #creation;
 
   static get DEFAULT_OPTIONS() {
     return {
@@ -53,10 +56,33 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
     this._injectNewsFeed(form, header);
 
+    const isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
+    console.log("IS CHARCTER CREATION", isCharacterCreation);
+
+    if(isCharacterCreation) {
+      this._injectCharachterCreationPointsApp(header);
+    }
 
     SR3DLog.success("Svelte mounted", this.constructor.name);
     return windowContent;
 
+  }
+
+    _injectCharachterCreationPointsApp(header) {
+    let anchor = header?.previousElementSibling;
+    if (!anchor?.classList?.contains("points-position")) {
+      anchor = document.createElement("div");
+      anchor.classList.add("points-position");
+      header.parentElement.insertBefore(anchor, header);
+
+      this.#creation = mount(CreationPoints, {
+        target: anchor,
+        props: { 
+          actor: this.document,
+          config: CONFIG.sr3e
+         }
+      });
+    }
   }
 
   _injectNeonName(header) {
@@ -114,6 +140,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     if (this.#app) await unmount(this.#app);
     if (this.#feed) await unmount(this.#feed);
     if (this.#cart) await unmount(this.#cart);
+    if (this.#creation) await unmount(this.#creation);
     this.#app = this.#neon = this.#feed = this.#cart = null;
     return super._tearDown();
   }

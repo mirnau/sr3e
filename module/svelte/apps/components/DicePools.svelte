@@ -7,7 +7,6 @@
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let dicePools = $state(actor.system.dicePools);
-    console.log("Dice Pools", dicePools);
     let localization = config.dicepools;
    
     let gridContainer;

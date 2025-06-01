@@ -8,7 +8,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
+var _app, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -144,7 +144,7 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      magic: new foundry.data.fields.SchemaField(ComplexStat.defineSchema())
+      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
     };
   }
 };
@@ -3320,7 +3320,7 @@ function getActorStore(actorId, actorName) {
 }
 const cardLayout = writable([]);
 const shoppingState = writable([]);
-function localize$1(key) {
+function localize(key) {
   return game.i18n.localize(key);
 }
 async function openFilePicker(document2) {
@@ -3394,14 +3394,14 @@ var on_keydown$3 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$s = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$r = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$s();
+  var div = root$r();
   div.__click = [on_click$8];
   div.__keydown = [on_keydown$3];
   var button = child(div);
@@ -3414,13 +3414,13 @@ function CardToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root_1$9 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
+var root_1$a = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$2 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$q = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -3480,7 +3480,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     (_b = (_a = get$1(actorStore)) == null ? void 0 : _a.update) == null ? void 0 : _b.call(_a, (store) => ({ ...store, name: newName }));
   }
-  var fragment = root$r();
+  var fragment = root$q();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3491,7 +3491,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$9();
+      var div_1 = root_1$a();
       var img = child(div_1);
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
@@ -3565,10 +3565,10 @@ function Dossier($$anchor, $$props) {
           set_text(text_8, system.profile.quote);
         },
         [
-          () => localize$1(config().traits.age),
-          () => localize$1(config().traits.height),
-          () => localize$1(config().traits.weight),
-          () => localize$1(config().sheet.quote)
+          () => localize(config().traits.age),
+          () => localize(config().traits.height),
+          () => localize(config().traits.weight),
+          () => localize(config().sheet.quote)
         ]
       );
       event("introend", div_5, triggerMasonryReflow);
@@ -3629,7 +3629,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize$1(config().sheet.details)]);
+  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -5170,7 +5170,7 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root$q = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+var root$p = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5195,7 +5195,7 @@ function Initiative($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$q();
+  var div = root$p();
   var h1 = child(div);
   var text = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5225,96 +5225,155 @@ function Initiative($$anchor, $$props) {
       set_text(text_5, get$1(augmentedReaction));
     },
     [
-      () => localize$1(config().initiative.initiative),
-      () => localize$1(config().initiative.initiativeDice),
-      () => localize$1(config().initiative.reaction),
-      () => localize$1(config().initiative.augmentedReaction)
+      () => localize(config().initiative.initiative),
+      () => localize(config().initiative.initiativeDice),
+      () => localize(config().initiative.reaction),
+      () => localize(config().initiative.augmentedReaction)
     ]
   );
   append($$anchor, div);
   pop();
 }
 var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
-var root_2$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute" role="button" tabindex="0"></i>`);
+var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
-var root_1$8 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up increment-attribute" role="button" tabindex="0"></i></div>`);
-var root_3$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$p = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
+var root_4$3 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$4 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_5$4 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_1$9 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
+var root_6$1 = /* @__PURE__ */ template(`<div class="stat-card loading"><div class="loading-placeholder"> </div></div>`);
 function AttributeCard($$anchor, $$props) {
+  var _a, _b;
   push($$props, true);
   let stat = prop($$props, "stat", 7);
-  let value = state(proxy(stat().value));
-  let mod = state(proxy(stat().mod));
-  user_effect(() => {
-    set(value, proxy(stat().value));
-    set(mod, proxy(stat().mod));
+  console.log("ACTOR", $$props.actor);
+  console.log("Component initialized for key:", $$props.key);
+  console.log("Stat structure:", stat());
+  console.log("Has meta:", "meta" in stat());
+  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
+  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
+  let total = /* @__PURE__ */ derived(() => {
+    var _a2;
+    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
   });
-  let baseTotal = /* @__PURE__ */ derived(() => get$1(value) + get$1(mod));
-  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + (stat().meta ?? 0));
-  let metaHuman = /* @__PURE__ */ derived(() => $$props.actor.items.find((i) => i.type === "metahuman"));
-  let attributeLimit = /* @__PURE__ */ derived(() => get$1(metaHuman).system.attributeLimits[$$props.key]);
+  let metaHuman = /* @__PURE__ */ derived(() => (() => {
+    var _a2;
+    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
+    return $$props.actor.items.find((i) => i.type === "metahuman");
+  })());
+  let attributeLimit = /* @__PURE__ */ derived(() => {
+    var _a2, _b2, _c;
+    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
+  });
+  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
   function add(change) {
-    console.log("Entered Add Method");
+    if (!$$props.actor || !stat()) return;
+    console.log("Entered Add Method for", $$props.key);
     stat().value += change;
     $$props.actor.update(
       {
         [`system.attributes.${$$props.key}.value`]: stat().value
       },
-      // Use stat.value instead of local value
       { render: false }
     );
     console.log("Exited Add Method");
   }
   const increment = () => {
-    console.log("Increment called, total:", get$1(total), "limit:", get$1(attributeLimit));
-    if (get$1(total) < get$1(attributeLimit)) add(1);
+    console.log("=== INCREMENT DEBUG ===");
+    console.log("attributeLimit:", get$1(attributeLimit));
+    console.log("total:", get$1(total));
+    console.log("!attributeLimit:", !get$1(attributeLimit));
+    console.log("total < attributeLimit:", get$1(total) < get$1(attributeLimit));
+    console.log("Final condition:", !get$1(attributeLimit) || get$1(total) < get$1(attributeLimit));
+    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
+      add(1);
+    } else {
+      console.log("BLOCKED: Increment prevented by limit check");
+    }
   };
   const decrement = () => {
+    if (get$1(isMinLimit)) return;
     console.log("Decrement called, total:", get$1(total));
     if (get$1(total) > 0) add(-1);
   };
-  var div = root$p();
-  var h4 = child(div);
-  var text = child(h4);
-  var node = sibling(h4, 2);
+  user_effect(() => {
+    if (stat()) {
+      set(value, proxy(stat().value));
+      set(mod, proxy(stat().mod));
+    }
+  });
+  var fragment = comment();
+  var node = first_child(fragment);
   {
-    var consequent_1 = ($$anchor2) => {
-      var div_1 = root_1$8();
-      var node_1 = child(div_1);
+    var consequent_3 = ($$anchor2) => {
+      var div = root_1$9();
+      var h4 = child(div);
+      var text = child(h4);
+      var node_1 = sibling(h4, 2);
       {
-        var consequent = ($$anchor3) => {
-          var i_1 = root_2$4();
-          i_1.__click = decrement;
-          i_1.__keydown = [on_keydown$1, decrement];
-          append($$anchor3, i_1);
+        var consequent_2 = ($$anchor3) => {
+          var div_1 = root_2$4();
+          var node_2 = child(div_1);
+          {
+            var consequent = ($$anchor4) => {
+              var i_1 = root_3$5();
+              i_1.__click = decrement;
+              i_1.__keydown = [on_keydown$1, decrement];
+              template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+              append($$anchor4, i_1);
+            };
+            if_block(node_2, ($$render) => {
+              if ($$props.isShoppingState && $$props.actor) $$render(consequent);
+            });
+          }
+          var h1 = sibling(node_2, 2);
+          var text_1 = child(h1);
+          var node_3 = sibling(h1, 2);
+          {
+            var consequent_1 = ($$anchor4) => {
+              var i_2 = root_4$3();
+              i_2.__click = increment;
+              i_2.__keydown = [on_keydown_1, increment];
+              template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) ? "disabled" : "") ?? ""}`));
+              append($$anchor4, i_2);
+            };
+            if_block(node_3, ($$render) => {
+              if ($$props.actor) $$render(consequent_1);
+            });
+          }
+          template_effect(() => set_text(text_1, get$1(total)));
+          append($$anchor3, div_1);
+        };
+        var alternate = ($$anchor3) => {
+          var h1_1 = root_5$4();
+          var text_2 = child(h1_1);
+          template_effect(() => set_text(text_2, get$1(total)));
+          append($$anchor3, h1_1);
         };
         if_block(node_1, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent);
+          if ("meta" in stat()) $$render(consequent_2);
+          else $$render(alternate, false);
         });
       }
-      var h1 = sibling(node_1, 2);
-      var text_1 = child(h1);
-      var i_2 = sibling(h1, 2);
-      i_2.__click = increment;
-      i_2.__keydown = [on_keydown_1, increment];
-      template_effect(() => set_text(text_1, get$1(total)));
-      append($$anchor2, div_1);
+      template_effect(($0) => set_text(text, $0), [
+        () => localize($$props.localization[$$props.key])
+      ]);
+      append($$anchor2, div);
     };
-    var alternate = ($$anchor2) => {
-      var h1_1 = root_3$5();
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(baseTotal)));
-      append($$anchor2, h1_1);
+    var alternate_1 = ($$anchor2) => {
+      var div_2 = root_6$1();
+      var div_3 = child(div_2);
+      var text_3 = child(div_3);
+      template_effect(() => set_text(text_3, `Loading ${$$props.key ?? ""}...`));
+      append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent_1);
-      else $$render(alternate, false);
+      if (stat() && $$props.localization) $$render(consequent_3);
+      else $$render(alternate_1, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
-    () => localize$1($$props.localization[$$props.key])
-  ]);
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
 }
 delegate(["click", "keydown"]);
@@ -5373,7 +5432,7 @@ function Attributes($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().attributes.attributes)
+    () => localize(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5384,7 +5443,6 @@ function DicePools($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let dicePools = proxy(actor().system.dicePools);
-  console.log("Dice Pools", dicePools);
   let localization = config().dicepools;
   let gridContainer;
   const isShoppingState = false;
@@ -5425,7 +5483,7 @@ function DicePools($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().dicepools.dicepools)
+    () => localize(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5476,7 +5534,7 @@ function Movement($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
-    () => localize$1(config().movement.movement)
+    () => localize(config().movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5591,7 +5649,7 @@ function Skills($$anchor, $$props) {
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
     },
-    [() => localize$1(config().skill.skill)]
+    [() => localize(config().skill.skill)]
   );
   append($$anchor, fragment);
   pop();
@@ -5618,12 +5676,12 @@ function Health($$anchor, $$props) {
       set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
-    [() => localize$1(config().health.health)]
+    [() => localize(config().health.health)]
   );
   append($$anchor, fragment);
   pop();
 }
-var root_1$7 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
 var root$g = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
@@ -5676,11 +5734,11 @@ function Karma($$anchor, $$props) {
   var node_1 = sibling(div_4, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$7();
+      var div_5 = root_1$8();
       var h4_4 = child(div_5);
       var text_9 = child(h4_4);
       template_effect(($0) => set_text(text_9, $0), [
-        () => localize$1(config().karma.miraculousSurvival)
+        () => localize(config().karma.miraculousSurvival)
       ]);
       append($$anchor2, div_5);
     };
@@ -5705,10 +5763,10 @@ function Karma($$anchor, $$props) {
       set_text(text_8, essence);
     },
     [
-      () => localize$1(config().karma.karma),
-      () => localize$1(config().karma.goodKarma),
-      () => localize$1(config().karma.lifetimeKarma),
-      () => localize$1(config().attributes.essence)
+      () => localize(config().karma.karma),
+      () => localize(config().karma.goodKarma),
+      () => localize(config().karma.lifetimeKarma),
+      () => localize(config().attributes.essence)
     ]
   );
   append($$anchor, fragment);
@@ -5737,13 +5795,13 @@ function Inventory($$anchor, $$props) {
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
-      () => localize$1(config().inventory.inventory)
+      () => localize(config().inventory.inventory)
     ]
   );
   append($$anchor, fragment);
   pop();
 }
-var root_1$6 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1$7 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5897,7 +5955,7 @@ function CharacterSheetApp($$anchor, $$props) {
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
     let props = () => get$1($$item).props;
-    var div_1 = root_1$6();
+    var div_1 = root_1$7();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -5909,7 +5967,6 @@ function CharacterSheetApp($$anchor, $$props) {
   });
   bind_this(div, ($$value) => container = $$value, () => container);
   event("masonry-reflow", div, () => {
-    console.log("Reflow triggered");
     masonryInstance.layout();
   });
   append($$anchor, div);
@@ -5965,9 +6022,68 @@ const flags = {
   sr3e: "sr3e",
   core: "core",
   actor: {
-    isShoppingState: "isShoppingState"
+    isCharacterCreation: "isCharacterCreation",
+    isShoppingState: "isShoppingState",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut"
   }
 };
+var root_1$6 = /* @__PURE__ */ template(`<div class="point-container"><h1> </h1> <div> </div></div>`);
+function CreationPoints($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let creation = proxy(actor().system.creation);
+  let attributePoints = proxy(creation.attributePoints);
+  let skillPoints = proxy(creation.activePoints);
+  let intelligence = proxy(actor().system.attributes.intelligence.total);
+  let knowledgePoints = /* @__PURE__ */ derived(() => intelligence * 5);
+  let languagePoints = /* @__PURE__ */ derived(() => Math.floor(intelligence * 1.5));
+  let attributePointsText = localize(config().attributes.attributes);
+  let activePointsText = localize(config().skill.active);
+  let knowledgePointsText = localize(config().skill.knowledge);
+  let languagePointsText = localize(config().skill.language);
+  let pointList = /* @__PURE__ */ derived(() => [
+    {
+      value: attributePoints,
+      text: attributePointsText
+    },
+    { value: skillPoints, text: activePointsText },
+    {
+      value: get$1(knowledgePoints),
+      text: knowledgePointsText
+    },
+    {
+      value: get$1(languagePoints),
+      text: languagePointsText
+    }
+  ]);
+  let remainingPoints = /* @__PURE__ */ derived(() => skillPoints + get$1(knowledgePoints) + get$1(languagePoints));
+  user_effect(() => {
+  });
+  user_effect(() => {
+    actor().update({ "system.creation": creation }, { render: false });
+  });
+  user_effect(() => {
+    if (get$1(remainingPoints) < 1) ;
+  });
+  var fragment = comment();
+  var node = first_child(fragment);
+  each(node, 17, () => get$1(pointList), index, ($$anchor2, point, i) => {
+    var div = root_1$6();
+    set_attribute(div, "style", `top: ${i * 8}rem`);
+    var h1 = child(div);
+    var text = child(h1);
+    var div_1 = sibling(h1, 2);
+    var text_1 = child(div_1);
+    template_effect(() => {
+      set_text(text, get$1(point).value);
+      set_text(text_1, get$1(point).text);
+    });
+    append($$anchor2, div);
+  });
+  append($$anchor, fragment);
+  pop();
+}
 function toggleShoppingState(_, isShoppingState, actor) {
   set(isShoppingState, !get$1(isShoppingState));
   shoppingState.set(get$1(isShoppingState));
@@ -5992,7 +6108,7 @@ function ShoppingCart($$anchor, $$props) {
       set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`);
     },
     [
-      () => localize$1(config().sheet.buyupgrades)
+      () => localize(config().sheet.buyupgrades)
     ]
   );
   append($$anchor, div);
@@ -6023,17 +6139,17 @@ class ActorDataService {
         name: item2.name,
         skills: [
           {
-            type: localize$1(CONFIG.sr3e.skill.speak),
+            type: localize(CONFIG.sr3e.skill.speak),
             value: (_a = item2.system.languageSkill.speak) == null ? void 0 : _a.value,
             specializations: item2.system.languageSkill.speak.specializations
           },
           {
-            type: localize$1(CONFIG.sr3e.skill.read),
+            type: localize(CONFIG.sr3e.skill.read),
             value: (_b = item2.system.languageSkill.read) == null ? void 0 : _b.value,
             specializations: item2.system.languageSkill.read.specializations
           },
           {
-            type: localize$1(CONFIG.sr3e.skill.write),
+            type: localize(CONFIG.sr3e.skill.write),
             value: (_c = item2.system.languageSkill.write) == null ? void 0 : _c.value,
             specializations: item2.system.languageSkill.write.specializations
           }
@@ -6057,14 +6173,14 @@ class ActorDataService {
   }
   static getLocalizedLinkingAttibutes() {
     return {
-      body: localize$1(CONFIG.sr3e.attributes.body),
-      quickness: localize$1(CONFIG.sr3e.attributes.quickness),
-      strength: localize$1(CONFIG.sr3e.attributes.strength),
-      charisma: localize$1(CONFIG.sr3e.attributes.charisma),
-      intelligence: localize$1(CONFIG.sr3e.attributes.intelligence),
-      willpower: localize$1(CONFIG.sr3e.attributes.willpower),
-      reaction: localize$1(CONFIG.sr3e.attributes.reaction),
-      magic: localize$1(CONFIG.sr3e.attributes.reaction)
+      body: localize(CONFIG.sr3e.attributes.body),
+      quickness: localize(CONFIG.sr3e.attributes.quickness),
+      strength: localize(CONFIG.sr3e.attributes.strength),
+      charisma: localize(CONFIG.sr3e.attributes.charisma),
+      intelligence: localize(CONFIG.sr3e.attributes.intelligence),
+      willpower: localize(CONFIG.sr3e.attributes.willpower),
+      reaction: localize(CONFIG.sr3e.attributes.reaction),
+      magic: localize(CONFIG.sr3e.attributes.reaction)
     };
   }
   static getCharacterCreationStats() {
@@ -6094,13 +6210,13 @@ class ActorDataService {
   }
   static getPhaseTemplate() {
     return [
-      { text: localize$1(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
-      { text: localize$1(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
-      { text: localize$1(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
-      { text: localize$1(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
-      { text: localize$1(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
-      { text: localize$1(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
-      { text: localize$1(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
+      { text: localize(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
+      { text: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
+      { text: localize(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
+      { text: localize(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
+      { text: localize(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
+      { text: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+      { text: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
     ];
   }
 }
@@ -6111,6 +6227,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     __privateAdd(this, _neon);
     __privateAdd(this, _feed);
     __privateAdd(this, _cart);
+    __privateAdd(this, _creation);
   }
   static get DEFAULT_OPTIONS() {
     return {
@@ -6145,8 +6262,29 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     this._injectNeonName(header);
     this._injectShoppingCart(header);
     this._injectNewsFeed(form, header);
+    const isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
+    console.log("IS CHARCTER CREATION", isCharacterCreation);
+    if (isCharacterCreation) {
+      this._injectCharachterCreationPointsApp(header);
+    }
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
+  }
+  _injectCharachterCreationPointsApp(header) {
+    var _a;
+    let anchor = header == null ? void 0 : header.previousElementSibling;
+    if (!((_a = anchor == null ? void 0 : anchor.classList) == null ? void 0 : _a.contains("points-position"))) {
+      anchor = document.createElement("div");
+      anchor.classList.add("points-position");
+      header.parentElement.insertBefore(anchor, header);
+      __privateSet(this, _creation, mount(CreationPoints, {
+        target: anchor,
+        props: {
+          actor: this.document,
+          config: CONFIG.sr3e
+        }
+      }));
+    }
   }
   _injectNeonName(header) {
     var _a;
@@ -6197,6 +6335,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     if (__privateGet(this, _app)) await unmount(__privateGet(this, _app));
     if (__privateGet(this, _feed)) await unmount(__privateGet(this, _feed));
     if (__privateGet(this, _cart)) await unmount(__privateGet(this, _cart));
+    if (__privateGet(this, _creation)) await unmount(__privateGet(this, _creation));
     __privateSet(this, _app, __privateSet(this, _neon, __privateSet(this, _feed, __privateSet(this, _cart, null))));
     return super._tearDown();
   }
@@ -6232,6 +6371,7 @@ _app = new WeakMap();
 _neon = new WeakMap();
 _feed = new WeakMap();
 _cart = new WeakMap();
+_creation = new WeakMap();
 const sr3e = {};
 sr3e.ammunition = {
   ammunition: "sr3e.ammunition.ammunition",
@@ -6756,7 +6896,7 @@ function JournalSearchModal($$anchor, $$props) {
           button.disabled = !get$1(selected);
         },
         [
-          () => localize$1($$props.config.sheet.searchJournals)
+          () => localize($$props.config.sheet.searchJournals)
         ]
       );
       event("focus", input, () => set(showDropdown, true));
@@ -6975,7 +7115,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "min",
-      label: localize$1(common.min),
+      label: localize(common.min),
       value: system.agerange.min,
       path: "system.agerange",
       type: "number",
@@ -6984,7 +7124,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "average",
-      label: localize$1(common.average),
+      label: localize(common.average),
       value: system.agerange.average,
       path: "system.agerange",
       type: "number",
@@ -6993,7 +7133,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "max",
-      label: localize$1(common.max),
+      label: localize(common.max),
       value: system.agerange.max,
       path: "system.agerange",
       type: "number",
@@ -7004,7 +7144,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "min",
-      label: localize$1(common.min),
+      label: localize(common.min),
       value: system.physical.height.min,
       path: "system.physical.height",
       type: "number",
@@ -7013,7 +7153,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "average",
-      label: localize$1(common.average),
+      label: localize(common.average),
       value: system.physical.height.average,
       path: "system.physical.height",
       type: "number",
@@ -7022,7 +7162,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "max",
-      label: localize$1(common.max),
+      label: localize(common.max),
       value: system.physical.height.max,
       path: "system.physical.height",
       type: "number",
@@ -7033,7 +7173,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "min",
-      label: localize$1(common.min),
+      label: localize(common.min),
       value: system.physical.weight.min,
       path: "system.physical.weight",
       type: "number",
@@ -7042,7 +7182,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "average",
-      label: localize$1(common.average),
+      label: localize(common.average),
       value: system.physical.weight.average,
       path: "system.physical.weight",
       type: "number",
@@ -7051,7 +7191,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "max",
-      label: localize$1(common.max),
+      label: localize(common.max),
       value: system.physical.weight.max,
       path: "system.physical.weight",
       type: "number",
@@ -7062,7 +7202,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "base",
-      label: localize$1(movementConfig.walking),
+      label: localize(movementConfig.walking),
       value: system.movement.base,
       path: "system.movement",
       type: "number",
@@ -7071,7 +7211,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "modifier",
-      label: localize$1(movementConfig.runSpeedModifier),
+      label: localize(movementConfig.runSpeedModifier),
       value: system.movement.modifier,
       path: "system.movement",
       type: "number",
@@ -7082,7 +7222,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "factor",
-      label: localize$1(karmaConfig.advancementRatio),
+      label: localize(karmaConfig.advancementRatio),
       value: system.karma.factor,
       path: "system.karma",
       type: "number",
@@ -7093,7 +7233,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "strength",
-      label: localize$1(attributes.strength),
+      label: localize(attributes.strength),
       value: system.modifiers.strength,
       path: "system.modifiers",
       type: "number",
@@ -7102,7 +7242,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "quickness",
-      label: localize$1(attributes.quickness),
+      label: localize(attributes.quickness),
       value: system.modifiers.quickness,
       path: "system.modifiers",
       type: "number",
@@ -7111,7 +7251,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "body",
-      label: localize$1(attributes.body),
+      label: localize(attributes.body),
       value: system.modifiers.body,
       path: "system.modifiers",
       type: "number",
@@ -7120,7 +7260,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "charisma",
-      label: localize$1(attributes.charisma),
+      label: localize(attributes.charisma),
       value: system.modifiers.charisma,
       path: "system.modifiers",
       type: "number",
@@ -7129,7 +7269,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "intelligence",
-      label: localize$1(attributes.intelligence),
+      label: localize(attributes.intelligence),
       value: system.modifiers.intelligence,
       path: "system.modifiers",
       type: "number",
@@ -7138,7 +7278,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "willpower",
-      label: localize$1(attributes.willpower),
+      label: localize(attributes.willpower),
       value: system.modifiers.willpower,
       path: "system.modifiers",
       type: "number",
@@ -7149,7 +7289,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "strength",
-      label: localize$1(attributes.strength),
+      label: localize(attributes.strength),
       value: system.attributeLimits.strength,
       path: "system.attributeLimits",
       type: "number",
@@ -7158,7 +7298,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "quickness",
-      label: localize$1(attributes.quickness),
+      label: localize(attributes.quickness),
       value: system.attributeLimits.quickness,
       path: "system.attributeLimits",
       type: "number",
@@ -7167,7 +7307,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "body",
-      label: localize$1(attributes.body),
+      label: localize(attributes.body),
       value: system.attributeLimits.body,
       path: "system.attributeLimits",
       type: "number",
@@ -7176,7 +7316,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "charisma",
-      label: localize$1(attributes.charisma),
+      label: localize(attributes.charisma),
       value: system.attributeLimits.charisma,
       path: "system.attributeLimits",
       type: "number",
@@ -7185,7 +7325,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "intelligence",
-      label: localize$1(attributes.intelligence),
+      label: localize(attributes.intelligence),
       value: system.attributeLimits.intelligence,
       path: "system.attributeLimits",
       type: "number",
@@ -7194,7 +7334,7 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "willpower",
-      label: localize$1(attributes.willpower),
+      label: localize(attributes.willpower),
       value: system.attributeLimits.willpower,
       path: "system.attributeLimits",
       type: "number",
@@ -7205,14 +7345,14 @@ function MetahumanApp($$anchor, $$props) {
     {
       item: item2(),
       key: "type",
-      label: localize$1(visionConfig.type),
+      label: localize(visionConfig.type),
       value: system.vision.type,
       path: "system.vision",
       type: "select",
       options: [
-        localize$1(visionConfig.normalvision),
-        localize$1(visionConfig.lowlight),
-        localize$1(visionConfig.thermographic)
+        localize(visionConfig.normalvision),
+        localize(visionConfig.lowlight),
+        localize(visionConfig.thermographic)
       ]
     }
   ]);
@@ -7248,7 +7388,7 @@ function MetahumanApp($$anchor, $$props) {
       each(div_8, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text, $0), [() => localize$1(traits.agerange)]);
+      template_effect(($0) => set_text(text, $0), [() => localize(traits.agerange)]);
       append($$anchor2, div_5);
     };
     if_block(node_1, ($$render) => {
@@ -7267,7 +7407,7 @@ function MetahumanApp($$anchor, $$props) {
       each(div_12, 21, () => get$1(height), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text_1, $0), [() => localize$1(traits.height)]);
+      template_effect(($0) => set_text(text_1, $0), [() => localize(traits.height)]);
       append($$anchor2, div_9);
     };
     if_block(node_2, ($$render) => {
@@ -7286,7 +7426,7 @@ function MetahumanApp($$anchor, $$props) {
       each(div_16, 21, () => get$1(weight), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text_2, $0), [() => localize$1(traits.weight)]);
+      template_effect(($0) => set_text(text_2, $0), [() => localize(traits.weight)]);
       append($$anchor2, div_13);
     };
     if_block(node_3, ($$render) => {
@@ -7359,11 +7499,11 @@ function MetahumanApp($$anchor, $$props) {
       set_text(text_7, $4);
     },
     [
-      () => localize$1(attributes.modifiers),
-      () => localize$1(attributes.limits),
-      () => localize$1(config().movement.movement),
-      () => localize$1(config().karma.karma),
-      () => localize$1(config().vision.vision)
+      () => localize(attributes.modifiers),
+      () => localize(attributes.limits),
+      () => localize(config().movement.movement),
+      () => localize(config().karma.karma),
+      () => localize(config().vision.vision)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -7377,7 +7517,7 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     __privateAdd(this, _metahuman);
   }
   get title() {
-    return `${localize$1(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
+    return `${localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
   }
   static get DEFAULT_OPTIONS() {
     return {
@@ -7438,33 +7578,33 @@ function MagicApp($$anchor, $$props) {
   proxy(awakened.adeptData);
   const labels = config().magic;
   const archetypeOptions = [
-    localize$1(labels.adept),
-    localize$1(labels.magician)
+    localize(labels.adept),
+    localize(labels.magician)
   ];
   const magicianTypeOptions = [
-    localize$1(labels.fullmage),
-    localize$1(labels.aspectedmage)
+    localize(labels.fullmage),
+    localize(labels.aspectedmage)
   ];
   const aspectsOptions = [
-    localize$1(labels.conjurer),
-    localize$1(labels.sorcerer),
-    localize$1(labels.elementalist),
-    localize$1(config().common.custom)
+    localize(labels.conjurer),
+    localize(labels.sorcerer),
+    localize(labels.elementalist),
+    localize(config().common.custom)
   ];
   const resistanceAttributeOptions = [
-    localize$1(config().attributes.willpower),
-    localize$1(config().attributes.charisma),
-    localize$1(config().attributes.intelligence)
+    localize(config().attributes.willpower),
+    localize(config().attributes.charisma),
+    localize(config().attributes.intelligence)
   ];
   const traditionOptions = [
-    localize$1(labels.hermetic),
-    localize$1(labels.shamanic),
-    localize$1(config().common.other)
+    localize(labels.hermetic),
+    localize(labels.shamanic),
+    localize(config().common.other)
   ];
   const archetype = /* @__PURE__ */ derived(() => ({
     item: item2(),
     key: "archetype",
-    label: localize$1(labels.archetype),
+    label: localize(labels.archetype),
     value: awakened.archetype,
     path: "system.awakened",
     type: "select",
@@ -7473,7 +7613,7 @@ function MagicApp($$anchor, $$props) {
   const priority = /* @__PURE__ */ derived(() => ({
     item: item2(),
     key: "priority",
-    label: localize$1(labels.priority),
+    label: localize(labels.priority),
     value: awakened.priority,
     path: "system.awakened",
     type: "select",
@@ -7482,7 +7622,7 @@ function MagicApp($$anchor, $$props) {
   const magicianType = /* @__PURE__ */ derived(() => ({
     item: item2(),
     key: "magicianType",
-    label: localize$1(labels.magicianType),
+    label: localize(labels.magicianType),
     value: magicianData.magicianType,
     path: "system.magicianData",
     type: "select",
@@ -7491,7 +7631,7 @@ function MagicApp($$anchor, $$props) {
   const aspect = /* @__PURE__ */ derived(() => ({
     item: item2(),
     key: "aspect",
-    label: localize$1(labels.aspect),
+    label: localize(labels.aspect),
     value: magicianData.aspect,
     path: "system.magicianData",
     type: "select",
@@ -7501,7 +7641,7 @@ function MagicApp($$anchor, $$props) {
     {
       item: item2(),
       key: "tradition",
-      label: localize$1(labels.tradition),
+      label: localize(labels.tradition),
       value: magicianData.tradition,
       path: "system.magicianData",
       type: "select",
@@ -7510,7 +7650,7 @@ function MagicApp($$anchor, $$props) {
     {
       item: item2(),
       key: "drainResistanceAttribute",
-      label: localize$1(labels.drainResistanceAttribute),
+      label: localize(labels.drainResistanceAttribute),
       value: magicianData.drainResistanceAttribute,
       path: "system.magicianData",
       type: "select",
@@ -7519,7 +7659,7 @@ function MagicApp($$anchor, $$props) {
     {
       item: item2(),
       key: "canAstrallyProject",
-      label: localize$1(labels.canAstrallyProject),
+      label: localize(labels.canAstrallyProject),
       value: magicianData.canAstrallyProject,
       path: "system.magicianData",
       type: "checkbox",
@@ -7528,8 +7668,8 @@ function MagicApp($$anchor, $$props) {
     {
       item: item2(),
       key: "totem",
-      label: localize$1(labels.totem),
-      value: magicianData.totem ?? localize$1(labels.shamannote),
+      label: localize(labels.totem),
+      value: magicianData.totem ?? localize(labels.shamannote),
       path: "system.magicianData",
       type: "text",
       options: []
@@ -7538,7 +7678,7 @@ function MagicApp($$anchor, $$props) {
   const adeptFields = /* @__PURE__ */ derived(() => []);
   let isAspected = state(false);
   user_effect(() => {
-    set(isAspected, get$1(magicianType).value === localize$1(labels.aspectedmage));
+    set(isAspected, get$1(magicianType).value === localize(labels.aspectedmage));
   });
   var div = root$6();
   var div_1 = child(div);
@@ -7749,7 +7889,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "days",
-      label: localize$1($$props.config.commodity.days),
+      label: localize($$props.config.commodity.days),
       value: commodity.days,
       path: "system.commodity",
       type: "number"
@@ -7757,7 +7897,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "cost",
-      label: localize$1($$props.config.commodity.cost),
+      label: localize($$props.config.commodity.cost),
       value: commodity.cost,
       path: "system.commodity",
       type: "number"
@@ -7765,7 +7905,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "streetIndex",
-      label: localize$1($$props.config.commodity.streetIndex),
+      label: localize($$props.config.commodity.streetIndex),
       value: commodity.streetIndex,
       path: "system.commodity",
       type: "number"
@@ -7773,7 +7913,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "restrictionLevel",
-      label: localize$1($$props.config.commodity.restrictionLevel),
+      label: localize($$props.config.commodity.restrictionLevel),
       value: commodity.legality.restrictionLevel,
       path: "system.commodity.legality",
       type: "number"
@@ -7781,7 +7921,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "type",
-      label: localize$1($$props.config.commodity.legalityType),
+      label: localize($$props.config.commodity.legalityType),
       value: commodity.legality.type,
       path: "system.commodity.legality",
       type: "text"
@@ -7789,7 +7929,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "category",
-      label: localize$1($$props.config.commodity.legalityCategory),
+      label: localize($$props.config.commodity.legalityCategory),
       value: commodity.legality.category,
       path: "system.commodity.legality",
       type: "text"
@@ -7797,7 +7937,7 @@ function Commodity($$anchor, $$props) {
     {
       item: $$props.item,
       key: "isBroken",
-      label: localize$1($$props.config.commodity.isBroken),
+      label: localize($$props.config.commodity.isBroken),
       value: commodity.isBroken,
       path: "system.commodity",
       type: "checkbox"
@@ -7818,7 +7958,7 @@ function Commodity($$anchor, $$props) {
       set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
     },
     [
-      () => localize$1($$props.config.commodity.commodity)
+      () => localize($$props.config.commodity.commodity)
     ]
   );
   append($$anchor, div);
@@ -7833,7 +7973,7 @@ function Portability($$anchor, $$props) {
     {
       item: $$props.item,
       key: "conceal",
-      label: localize$1($$props.config.portability.concealability),
+      label: localize($$props.config.portability.concealability),
       value: portability.conceal,
       path: "system.portability",
       type: "number"
@@ -7841,7 +7981,7 @@ function Portability($$anchor, $$props) {
     {
       item: $$props.item,
       key: "weight",
-      label: localize$1($$props.config.portability.weight),
+      label: localize($$props.config.portability.weight),
       value: portability.weight,
       path: "system.portability",
       type: "number"
@@ -7862,7 +8002,7 @@ function Portability($$anchor, $$props) {
       set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
     },
     [
-      () => localize$1($$props.config.portability.portability)
+      () => localize($$props.config.portability.portability)
     ]
   );
   append($$anchor, div);
@@ -7884,20 +8024,20 @@ function WeaponApp($$anchor, $$props) {
     path: "system.weapon",
     type: "select",
     options: [
-      localize$1(config().weapon.manual),
-      localize$1(config().weapon.semiauto),
-      localize$1(config().weapon.fullauto),
-      localize$1(config().weapon.blade),
-      localize$1(config().weapon.explosive),
-      localize$1(config().weapon.energy),
-      localize$1(config().weapon.blunt)
+      localize(config().weapon.manual),
+      localize(config().weapon.semiauto),
+      localize(config().weapon.fullauto),
+      localize(config().weapon.blade),
+      localize(config().weapon.explosive),
+      localize(config().weapon.energy),
+      localize(config().weapon.blunt)
     ]
   };
   const weaponEntries = [
     {
       item: item2(),
       key: "damage",
-      label: localize$1(config().weapon.damage),
+      label: localize(config().weapon.damage),
       value: weapon.damage,
       path: "system.weapon",
       type: "text"
@@ -7905,7 +8045,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "range",
-      label: localize$1(config().weapon.range),
+      label: localize(config().weapon.range),
       value: weapon.range,
       path: "system.weapon",
       type: "number"
@@ -7913,7 +8053,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "recoilComp",
-      label: localize$1(config().weapon.recoilCompensation),
+      label: localize(config().weapon.recoilCompensation),
       value: weapon.recoilComp,
       path: "system.weapon",
       type: "number"
@@ -7921,7 +8061,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "currentClipId",
-      label: localize$1(config().weapon.currentClip),
+      label: localize(config().weapon.currentClip),
       value: weapon.currentClipId,
       path: "system.weapon",
       type: "text"
@@ -7986,7 +8126,7 @@ function WeaponApp($$anchor, $$props) {
       set_text(text, $0);
     },
     [
-      () => localize$1(config().common.details)
+      () => localize(config().common.details)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -8000,7 +8140,7 @@ class WeaponItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     __privateAdd(this, _weapon);
   }
   get title() {
-    return `${localize$1(CONFIG.sr3e.weapon.weapon)}: ${this.item.name}`;
+    return `${localize(CONFIG.sr3e.weapon.weapon)}: ${this.item.name}`;
   }
   static get DEFAULT_OPTIONS() {
     return {
@@ -8147,7 +8287,7 @@ function AmmunitionApp($$anchor, $$props) {
     {
       item: item2(),
       key: "type",
-      label: localize$1(config().ammunition.type),
+      label: localize(config().ammunition.type),
       value: ammunition.type,
       path: "system.ammunition",
       type: "text"
@@ -8155,7 +8295,7 @@ function AmmunitionApp($$anchor, $$props) {
     {
       item: item2(),
       key: "rounds",
-      label: localize$1(config().ammunition.rounds),
+      label: localize(config().ammunition.rounds),
       value: ammunition.rounds,
       path: "system.ammunition",
       type: "number"
@@ -8219,7 +8359,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     __privateAdd(this, _ammunition);
   }
   get title() {
-    return `${localize$1(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
+    return `${localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
   }
   static get DEFAULT_OPTIONS() {
     return {
@@ -8276,15 +8416,15 @@ function SkillApp($$anchor, $$props) {
   const selectOptions = [
     {
       value: "active",
-      label: localize$1($$props.config.skill.active)
+      label: localize($$props.config.skill.active)
     },
     {
       value: "knowledge",
-      label: localize$1($$props.config.skill.knowledge)
+      label: localize($$props.config.skill.knowledge)
     },
     {
       value: "language",
-      label: localize$1($$props.config.skill.language)
+      label: localize($$props.config.skill.language)
     }
   ];
   const rawAttributes = ActorDataService.getLocalizedLinkingAttibutes();
@@ -8292,7 +8432,7 @@ function SkillApp($$anchor, $$props) {
   function updateSkillType(newValue) {
     set(value, proxy(newValue));
     item2().update({ "system.skillType": newValue });
-    $$props.onTitleChange(`${localize$1($$props.config.skill[newValue])}: ${item2().name}`);
+    $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${item2().name}`);
   }
   var div = root$1();
   var div_1 = child(div);
@@ -8343,7 +8483,7 @@ function SkillApp($$anchor, $$props) {
         append($$anchor3, option_3);
       });
       template_effect(($0) => set_text(text_1, $0), [
-        () => localize$1($$props.config.skill.linkedAttribute)
+        () => localize($$props.config.skill.linkedAttribute)
       ]);
       bind_select_value(select_1, () => item2().system.activeSkill.linkedAttribute, ($$value) => item2().system.activeSkill.linkedAttribute = $$value);
       append($$anchor2, div_8);
@@ -8413,7 +8553,7 @@ class SkillItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
   get title() {
     const type = this.item.system.skillType ?? "active";
-    const typeLabel = localize$1(CONFIG.sr3e.skill[type]);
+    const typeLabel = localize(CONFIG.sr3e.skill[type]);
     return `${typeLabel}: ${this.item.name}`;
   }
   static get DEFAULT_OPTIONS() {
@@ -8576,7 +8716,7 @@ class ItemDataService {
   }
   static getDefaultHumanItem() {
     return {
-      name: localize$1(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
+      name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
       type: "metahuman",
       img: "systems/sr3e/textures/ai-generated/humans.webp",
       system: {
@@ -8619,7 +8759,7 @@ class ItemDataService {
   }
   static getDefaultMagic() {
     return {
-      name: localize$1(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
+      name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
       type: "magic",
       system: {
         awakened: {
@@ -8713,7 +8853,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   let selectedAttribute = state("");
   let selectedSkill = state("");
   let selectedResource = state("");
-  let chooseAnOption = localize$1($$props.config.sheet.chooseanoption);
+  let chooseAnOption = localize($$props.config.sheet.chooseanoption);
   let metahumanItem = state(null);
   let metahumans = state(proxy([]));
   let magics = state(proxy([]));
@@ -8741,7 +8881,12 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   const attributPointDropdownOptions = priorities.attributes;
   const skillPointDropdownOptions = priorities.skills;
   const resourcesDropdownOptions = priorities.resources;
-  CharacterGeneratorService.generatePriorityCombination(get$1(metahumans)[0], get$1(magics)[0]);
+  CharacterGeneratorService.generatePriorityCombination(
+    // svelte-ignore state_referenced_locally
+    get$1(metahumans)[0],
+    // svelte-ignore state_referenced_locally
+    get$1(magics)[0]
+  );
   console.log("CHARACTER", actor());
   user_effect(() => {
     if (get$1(selectedMetahuman)) {
@@ -8803,20 +8948,30 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   async function handleSubmit(event2) {
     var _a;
     event2.preventDefault();
+    const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$1(selectedAttribute));
+    const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$1(selectedSkill));
     await actor().update({
       "system.profile.age": get$1(characterAge),
       "system.profile.height": get$1(characterHeight),
       "system.profile.weight": get$1(characterWeight),
-      "system.creation.attributePoints": get$1(selectedAttribute).points,
-      "system.creation.activePoints": get$1(selectedSkill).points
+      "system.creation.attributePoints": selectedAttributeObj.points - 18,
+      "system.creation.activePoints": selectedSkillObj.points,
+      "system.attributes.body.value": 3,
+      "system.attributes.quickness.value": 3,
+      "system.attributes.strength.value": 3,
+      "system.attributes.charisma.value": 3,
+      "system.attributes.intelligence.value": 3,
+      "system.attributes.willpower.value": 3
     });
     const metahuman = get$1(metahumans).find((m) => m.id === get$1(selectedMetahuman));
     const worldMetahuman = game.items.get(metahuman.id);
     await actor().createEmbeddedDocuments("Item", [worldMetahuman.toObject()]);
     const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
-    if (["A", "B"].includes(get$1(selectedMagic).priority)) {
+    if (["A", "B"].includes(magic.priority)) {
       const worldMagic = game.items.get(magic.id);
       await actor().createEmbeddedDocuments("Item", [worldMagic.toObject()]);
+      actor().setFlag(flags.sr3e, flags.actor.hasAwakened, true);
+      await actor().update({ "system.attributes.magic.value": 6 });
     }
     console.log("Character created:", {
       name: get$1(characterName),
@@ -9049,17 +9204,17 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       set_text(text_15, ` ${$10 ?? ""}`);
     },
     [
-      () => localize$1($$props.config.traits.age),
-      () => localize$1($$props.config.traits.height),
-      () => localize$1($$props.config.traits.weight),
-      () => localize$1($$props.config.traits.metahumanity),
-      () => localize$1($$props.config.magic.tradition),
-      () => localize$1($$props.config.sheet.attributepoints),
-      () => localize$1($$props.config.sheet.skillpoints),
-      () => localize$1($$props.config.sheet.resources),
-      () => localize$1($$props.config.sheet.randomize),
-      () => localize$1($$props.config.sheet.clear),
-      () => localize$1($$props.config.sheet.createCharacter)
+      () => localize($$props.config.traits.age),
+      () => localize($$props.config.traits.height),
+      () => localize($$props.config.traits.weight),
+      () => localize($$props.config.traits.metahumanity),
+      () => localize($$props.config.magic.tradition),
+      () => localize($$props.config.sheet.attributepoints),
+      () => localize($$props.config.sheet.skillpoints),
+      () => localize($$props.config.sheet.resources),
+      () => localize($$props.config.sheet.randomize),
+      () => localize($$props.config.sheet.clear),
+      () => localize($$props.config.sheet.createCharacter)
     ]
   );
   event("submit", form, handleSubmit);
@@ -9183,7 +9338,6 @@ async function _runCharacterCreationDialog(actor) {
 }
 async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, _userId) {
   if (actor.type !== "character") return true;
-  foundry.utils.setProperty(actor, "flags.sr3e.actor.isCharacterCreation", true);
   options.renderSheet = false;
 }
 class SR3EActor extends Actor {
@@ -9258,14 +9412,14 @@ function configureProject() {
     ]
   };
   CONFIG.Actor.typeLabels = {
-    character: localize$1(CONFIG.sr3e.sheet.playercharacter)
+    character: localize(CONFIG.sr3e.sheet.playercharacter)
   };
   CONFIG.Item.typeLabels = {
-    metahuman: localize$1(CONFIG.sr3e.traits.metahuman),
-    magic: localize$1(CONFIG.sr3e.magic.magic),
-    weapon: localize$1(CONFIG.sr3e.weapon.weapon),
-    ammunition: localize$1(CONFIG.sr3e.ammunition.ammunition),
-    skill: localize$1(CONFIG.sr3e.skill.skill)
+    metahuman: localize(CONFIG.sr3e.traits.metahuman),
+    magic: localize(CONFIG.sr3e.magic.magic),
+    weapon: localize(CONFIG.sr3e.weapon.weapon),
+    ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
+    skill: localize(CONFIG.sr3e.skill.skill)
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
@@ -9303,6 +9457,12 @@ function wrapContent(root2) {
   sheetComponent.append(innerContainer);
   root2.appendChild(sheetComponent);
 }
+function setFlagsOnCharacter(actor, options, userId) {
+  actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, true);
+  actor.setFlag(flags.sr3e, flags.actor.isCreationAttributes, true);
+  actor.setFlag(flags.sr3e, flags.actor.hasAwakened, false);
+  actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
+}
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
@@ -9331,6 +9491,7 @@ function registerHooks() {
     if (!typeSelectors.some((entry) => app instanceof entry.type)) return;
     wrapContent(element);
   });
+  Hooks.on(hooks.createActor, setFlagsOnCharacter);
   Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
   Hooks.on(hooks.createActor, displayCreationDialog);
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);

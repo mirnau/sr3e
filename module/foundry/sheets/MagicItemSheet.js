@@ -1,5 +1,6 @@
 import MagicApp from "../../svelte/apps/MagicApp.svelte";
 import { mount, unmount } from "svelte";
+import { localize } from "../../svelteHelpers.js";
 
 export default class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 

@@ -113,7 +113,6 @@
   bind:this={container}
   class="sheet-character-masonry-main"
   onmasonry-reflow={() => {
-    console.log("Reflow triggered");
     masonryInstance.layout();
   }}
 >

@@ -19,6 +19,8 @@ export const flags = {
   actor: {
     isCharacterCreation: "isCharacterCreation",
     isShoppingState: "isShoppingState",
-    isDossierDetailsOpen: "isDossierDetailsOpen"
+    isDossierDetailsOpen: "isDossierDetailsOpen",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut"
   }
 };

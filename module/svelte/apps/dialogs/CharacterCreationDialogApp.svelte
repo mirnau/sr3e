@@ -9,6 +9,7 @@
     import ActorDataService from "../../../foundry/services/ActorDataService.js";
     import ItemDataService from "../../../foundry/services/ItemDataService.js";
     import CharacterGeneratorService from "../../../foundry/services/CharacterGeneratorService.js";
+    import { flags } from "../../../foundry/services/commonConsts.js";
 
     let { actor, config, onSubmit, onCancel } = $props();
     let system = $state(actor.system);
@@ -64,13 +65,14 @@
     const resourcesDropdownOptions = priorities.resources;
 
     let priority = CharacterGeneratorService.generatePriorityCombination(
+        // svelte-ignore state_referenced_locally
         metahumans[0],
+        // svelte-ignore state_referenced_locally
         magics[0],
     );
 
     console.log("CHARACTER", actor);
 
-    // Step 3: Make metahumanItem reactive - update when selectedMetahuman changes
     $effect(() => {
         if (selectedMetahuman) {
             const foundItem = metahumans.find(
@@ -80,7 +82,6 @@
                 metahumanItem = foundItem;
             }
         } else {
-            // If no selection, fall back to default human item
             const fallback =
                 metahumans.find((m) => m.name === "Human") || metahumans[0];
             if (fallback) {
@@ -153,12 +154,25 @@
     async function handleSubmit(event) {
         event.preventDefault();
 
+        const selectedAttributeObj = attributPointDropdownOptions.find(
+            (attr) => attr.priority === selectedAttribute,
+        );
+        const selectedSkillObj = skillPointDropdownOptions.find(
+            (skill) => skill.priority === selectedSkill,
+        );
+
         await actor.update({
             "system.profile.age": characterAge,
             "system.profile.height": characterHeight,
             "system.profile.weight": characterWeight,
-            "system.creation.attributePoints": selectedAttribute.points,
-            "system.creation.activePoints": selectedSkill.points,
+            "system.creation.attributePoints": selectedAttributeObj.points - 18,
+            "system.creation.activePoints": selectedSkillObj.points,
+            "system.attributes.body.value": 3, 
+            "system.attributes.quickness.value": 3, 
+            "system.attributes.strength.value": 3, 
+            "system.attributes.charisma.value": 3, 
+            "system.attributes.intelligence.value": 3, 
+            "system.attributes.willpower.value": 3, 
         });
 
         const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
@@ -168,11 +182,15 @@
         ]);
 
         const magic = magics.find((m) => m.id === selectedMagic);
-        if (["A", "B"].includes(selectedMagic.priority)) {
+        if (["A", "B"].includes(magic.priority)) {
             const worldMagic = game.items.get(magic.id);
             await actor.createEmbeddedDocuments("Item", [
                 worldMagic.toObject(),
             ]);
+            
+            actor.setFlag(flags.sr3e, flags.actor.hasAwakened, true);
+
+            await actor.update({"system.attributes.magic.value": 6})
         }
 
         console.log("Character created:", {

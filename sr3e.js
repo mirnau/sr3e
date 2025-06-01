@@ -124,6 +124,13 @@ function wrapContent(root) {
   root.appendChild(sheetComponent);
 }
 
+function setFlagsOnCharacter(actor, options, userId) {
+  actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, true);
+  actor.setFlag(flags.sr3e, flags.actor.isCreationAttributes, true);
+  actor.setFlag(flags.sr3e, flags.actor.hasAwakened, false);
+  actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
+}
+
 function registerHooks() {
 
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
@@ -157,6 +164,8 @@ function registerHooks() {
     wrapContent(element);
 
   });
+
+  Hooks.on(hooks.createActor, setFlagsOnCharacter);
 
   //INFO: Character Creation Hooks
   Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
