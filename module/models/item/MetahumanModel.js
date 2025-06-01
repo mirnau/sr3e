@@ -147,7 +147,6 @@ export default class MetahumanModel extends foundry.abstract.TypeDataModel {
         factor: new foundry.data.fields.NumberField({
           required: true,
           initial: 0,
-          integer: true
         })
       }),
 
@@ -157,16 +156,6 @@ export default class MetahumanModel extends foundry.abstract.TypeDataModel {
           required: true,
           initial: ""
         }),
-        description: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
-        rules: new foundry.data.fields.SchemaField({
-          darknessPenaltyNegation: new foundry.data.fields.StringField({
-            required: true,
-            initial: ""
-          })
-        })
       }),
 
       // Priority

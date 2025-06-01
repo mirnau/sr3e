@@ -21,6 +21,7 @@
     let selectedAttribute = $state("");
     let selectedSkill = $state("");
     let selectedResource = $state("");
+    let metahumanItem = $state(null);
     let chooseAnOption = localize(config.sheet.chooseanoption);
 
     let metahumans = ItemDataService.getAllItemsOfType("metahuman");
@@ -36,15 +37,15 @@
     if (magics.length === 0) {
         const magicItem = ItemDataService.getDefaultMagic();
         Item.create(magicItem);
-        magics = getAllItemsOfType("magic");
+        magics = ItemDataService.getAllItemsOfType("magic");
     }
 
     const metahumanDropdownOptions =
         ItemDataService.getAllMetaHumans(metahumans);
-    const magicsDropdwonOptions = ItemDataService.getAllMagics(magics);
+    const magicsDropdownOptions = ItemDataService.getAllMagics(magics);
     const priorities = ActorDataService.getCharacterCreationStats();
     const attributPointDropdownOptions = priorities.attributes;
-    const skillPointDropdwonOptions = priorities.skills;
+    const skillPointDropdownOptions = priorities.skills;
     const resourcesDropdownOptions = priorities.resources;
 
     let priority = CharacterGeneratorService.generatePriorityCombination(
@@ -53,11 +54,7 @@
     );
 
     console.log("CHARACTER", actor);
-    let metahumanItem = $state(ItemDataService.getHumanItem());
-
-    $effect(() => {
-        metahumanItem ??= ItemDataService.getHumanItem();
-    });
+    metahumanItem = metahumans.find((i) => i.id === selectedMetahuman) ?? null;
 
     $effect(() => {
         if (actor && characterName !== actor.name) {
@@ -76,7 +73,7 @@
             selectedResource,
     );
 
-    let ageMin = 0; // Note: for his calculation
+    let ageMin = 0;
     let ageMax = $derived(metahumanItem.system.agerange.max);
 
     let lifespan = $derived(ageMax - ageMin);
@@ -178,7 +175,7 @@
             magicOpts[getRandomIntinRange(0, magicOpts.length - 1)]
                 .foundryitemid;
 
-        metahumanItem = game.items.get(selectedMetahuman);
+        metahumanItem = metahumans.find((i) => i.id === selectedMetahuman);
 
         const ageSrc =
             metahumanItem.system.agerange ?? metahumanItem.system.lifespan;
@@ -199,15 +196,6 @@
         selectedResource = combo.resources;
     }
 
-    function onMetahumanValueChanged(e) {
-        const id = e.target.value;
-        if (!id) {
-            metahumanItem = ItemDataService.getHumanItem();
-            return;
-        }
-        metahumanItem = game.items.get(id);
-    }
-
     function handleClear() {
         selectedMetahuman = "";
         selectedMagic = "";
@@ -221,7 +209,6 @@
 
         metahumanItem = ItemDataService.getHumanItem();
     }
-
 </script>
 
 <form onsubmit={handleSubmit}>
@@ -303,21 +290,14 @@
                             <select
                                 id="metahuman-select"
                                 bind:value={selectedMetahuman}
-                                onchange={onMetahumanValueChanged}
                             >
                                 <option value="" disabled selected hidden
                                     >{chooseAnOption}</option
                                 >
                                 {#each metahumanDropdownOptions as metahuman}
-                                    <option
-                                        value={metahuman.foundryitemid}
-                                        disabled={usedPriorities.includes(
-                                            metahuman.priority,
-                                        ) &&
-                                            metahuman.foundryitemid !==
-                                                selectedMetahuman}
-                                        >{metahuman.priority}: {metahuman.name}</option
-                                    >
+                                    <option value={metahuman.foundryitemid}>
+                                        {metahuman.priority}: {metahuman.name}
+                                    </option>
                                 {/each}
                             </select>
                         </div>
@@ -330,7 +310,7 @@
                                 <option value="" disabled selected hidden
                                     >{chooseAnOption}</option
                                 >
-                                {#each magicsDropdwonOptions as magic}
+                                {#each magicsDropdownOptions as magic}
                                     <option
                                         value={magic.foundryitemid}
                                         disabled={usedPriorities.includes(
@@ -374,7 +354,7 @@
                                 <option value="" disabled selected hidden
                                     >{chooseAnOption}</option
                                 >
-                                {#each skillPointDropdwonOptions as skill}
+                                {#each skillPointDropdownOptions as skill}
                                     <option
                                         value={skill.priority}
                                         disabled={usedPriorities.includes(

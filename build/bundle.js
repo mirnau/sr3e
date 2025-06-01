@@ -3375,7 +3375,7 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$8 = (e) => e.stopPropagation();
-var on_keydown$2 = (e) => {
+var on_keydown$3 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
@@ -3391,7 +3391,7 @@ function CardToolbar($$anchor, $$props) {
   }
   var div = root$s();
   div.__click = [on_click$8];
-  div.__keydown = [on_keydown$2];
+  div.__keydown = [on_keydown$3];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3405,13 +3405,13 @@ delegate(["click", "keydown"]);
 var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_keydown$1 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var on_keydown$2 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$r = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let system = proxy(actor().system);
   let actorStore = /* @__PURE__ */ derived(() => actor().id && actor().name ? getActorStore(actor().id, actor().name) : null);
@@ -3503,7 +3503,7 @@ function Dossier($$anchor, $$props) {
   var div_3 = sibling(node_1, 2);
   var div_4 = child(div_3);
   div_4.__click = toggleDetails;
-  div_4.__keydown = [on_keydown$1, toggleDetails];
+  div_4.__keydown = [on_keydown$2, toggleDetails];
   var text2 = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
@@ -3553,10 +3553,10 @@ function Dossier($$anchor, $$props) {
           set_text(text_8, system.profile.quote);
         },
         [
-          () => localize$1(config2().traits.age),
-          () => localize$1(config2().traits.height),
-          () => localize$1(config2().traits.weight),
-          () => localize$1(config2().sheet.quote)
+          () => localize$1(config().traits.age),
+          () => localize$1(config().traits.height),
+          () => localize$1(config().traits.weight),
+          () => localize$1(config().sheet.quote)
         ]
       );
       event("introend", div_5, triggerMasonryReflow);
@@ -3617,7 +3617,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize$1(config2().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize$1(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -5161,7 +5161,7 @@ function setupMasonry({
 var root$q = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let gridContainer;
@@ -5213,36 +5213,68 @@ function Initiative($$anchor, $$props) {
       set_text(text_5, get$1(augmentedReaction));
     },
     [
-      () => localize$1(config2().initiative.initiative),
-      () => localize$1(config2().initiative.initiativeDice),
-      () => localize$1(config2().initiative.reaction),
-      () => localize$1(config2().initiative.augmentedReaction)
+      () => localize$1(config().initiative.initiative),
+      () => localize$1(config().initiative.initiativeDice),
+      () => localize$1(config().initiative.reaction),
+      () => localize$1(config().initiative.augmentedReaction)
     ]
   );
   append($$anchor, div);
   pop();
 }
-var root_2$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute"></i>`);
-var root_3$5 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-up increment-attribute"></i>`);
-var root_1$7 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var root_2$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute" role="button" tabindex="0"></i>`);
+var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
+var root_1$7 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up increment-attribute" role="button" tabindex="0"></i></div>`);
+var root_3$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$p = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
-  let baseTotal = /* @__PURE__ */ derived(() => $$props.stat.value + $$props.stat.mod);
-  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + ($$props.stat.meta ?? 0));
+  let stat = prop($$props, "stat", 7);
+  let value = state(proxy(stat().value));
+  let mod = state(proxy(stat().mod));
+  user_effect(() => {
+    set(value, proxy(stat().value));
+    set(mod, proxy(stat().mod));
+  });
+  let baseTotal = /* @__PURE__ */ derived(() => get$1(value) + get$1(mod));
+  let total = /* @__PURE__ */ derived(() => get$1(baseTotal) + (stat().meta ?? 0));
+  let metaHuman = /* @__PURE__ */ derived(() => $$props.actor.items.find((i) => i.type === "metahuman"));
+  let attributeLimit = /* @__PURE__ */ derived(() => get$1(metaHuman).system.attributeLimits[$$props.key]);
+  function add(change) {
+    console.log("Entered Add Method");
+    stat().value += change;
+    $$props.actor.update(
+      {
+        [`system.attributes.${$$props.key}.value`]: stat().value
+      },
+      // Use stat.value instead of local value
+      { render: false }
+    );
+    console.log("Exited Add Method");
+  }
+  const increment = () => {
+    console.log("Increment called, total:", get$1(total), "limit:", get$1(attributeLimit));
+    if (get$1(total) < get$1(attributeLimit)) add(1);
+  };
+  const decrement = () => {
+    console.log("Decrement called, total:", get$1(total));
+    if (get$1(total) > 0) add(-1);
+  };
   var div = root$p();
   var h4 = child(div);
   var text2 = child(h4);
   var node = sibling(h4, 2);
   {
-    var consequent_2 = ($$anchor2) => {
+    var consequent_1 = ($$anchor2) => {
       var div_1 = root_1$7();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
-          var i = root_2$4();
-          append($$anchor3, i);
+          var i_1 = root_2$4();
+          i_1.__click = decrement;
+          i_1.__keydown = [on_keydown$1, decrement];
+          append($$anchor3, i_1);
         };
         if_block(node_1, ($$render) => {
           if ($$props.isShoppingState) $$render(consequent);
@@ -5250,27 +5282,20 @@ function AttributeCard($$anchor, $$props) {
       }
       var h1 = sibling(node_1, 2);
       var text_1 = child(h1);
-      var node_2 = sibling(h1, 2);
-      {
-        var consequent_1 = ($$anchor3) => {
-          var i_1 = root_3$5();
-          append($$anchor3, i_1);
-        };
-        if_block(node_2, ($$render) => {
-          if ($$props.isShoppingState) $$render(consequent_1);
-        });
-      }
+      var i_2 = sibling(h1, 2);
+      i_2.__click = increment;
+      i_2.__keydown = [on_keydown_1, increment];
       template_effect(() => set_text(text_1, get$1(total)));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var h1_1 = root_4$3();
+      var h1_1 = root_3$5();
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, get$1(baseTotal)));
       append($$anchor2, h1_1);
     };
     if_block(node, ($$render) => {
-      if ("meta" in $$props.stat) $$render(consequent_2);
+      if ("meta" in stat()) $$render(consequent_1);
       else $$render(alternate, false);
     });
   }
@@ -5280,15 +5305,16 @@ function AttributeCard($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
+delegate(["click", "keydown"]);
 var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let gridContainer;
   let isShoppingState = state(false);
-  let localization = config2().attributes;
+  let localization = config().attributes;
   user_effect(() => {
     const unsubscribe = shoppingState.subscribe((v) => set(isShoppingState, proxy(v)));
     return unsubscribe;
@@ -5318,6 +5344,9 @@ function Attributes($$anchor, $$props) {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
     AttributeCard($$anchor2, {
+      get actor() {
+        return actor();
+      },
       get stat() {
         return stat();
       },
@@ -5332,7 +5361,7 @@ function Attributes($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text2, $0), [
-    () => localize$1(config2().attributes.attributes)
+    () => localize$1(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5340,11 +5369,11 @@ function Attributes($$anchor, $$props) {
 var root$n = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let dicePools = proxy(actor().system.dicePools);
   console.log("Dice Pools", dicePools);
-  let localization = config2().dicepools;
+  let localization = config().dicepools;
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
@@ -5384,7 +5413,7 @@ function DicePools($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text2, $0), [
-    () => localize$1(config2().dicepools.dicepools)
+    () => localize$1(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5392,10 +5421,10 @@ function DicePools($$anchor, $$props) {
 var root$m = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let movement = proxy(actor().system.movement);
-  let localization = config2().movement;
+  let localization = config().movement;
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
@@ -5435,7 +5464,7 @@ function Movement($$anchor, $$props) {
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text2, $0), [
-    () => localize$1(config2().movement.movement)
+    () => localize$1(config().movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
@@ -5471,7 +5500,7 @@ var on_click_2 = (__2, activeTab) => set(activeTab, "language");
 var root$i = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
   let skill = actor().skill || [];
@@ -5550,7 +5579,7 @@ function Skills($$anchor, $$props) {
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
     },
-    [() => localize$1(config2().skill.skill)]
+    [() => localize$1(config().skill.skill)]
   );
   append($$anchor, fragment);
   pop();
@@ -5559,7 +5588,7 @@ delegate(["click"]);
 var root$h = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   var fragment = root$h();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5577,7 +5606,7 @@ function Health($$anchor, $$props) {
       set_text(text2, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
-    [() => localize$1(config2().health.health)]
+    [() => localize$1(config().health.health)]
   );
   append($$anchor, fragment);
   pop();
@@ -5586,7 +5615,7 @@ var root_1$6 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-ma
 var root$g = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let karma = proxy(actor().system.karma);
   let essence = proxy(actor().system.attributes.essence ?? 0);
@@ -5639,7 +5668,7 @@ function Karma($$anchor, $$props) {
       var h4_4 = child(div_5);
       var text_9 = child(h4_4);
       template_effect(($0) => set_text(text_9, $0), [
-        () => localize$1(config2().karma.miraculousSurvival)
+        () => localize$1(config().karma.miraculousSurvival)
       ]);
       append($$anchor2, div_5);
     };
@@ -5664,10 +5693,10 @@ function Karma($$anchor, $$props) {
       set_text(text_8, essence);
     },
     [
-      () => localize$1(config2().karma.karma),
-      () => localize$1(config2().karma.goodKarma),
-      () => localize$1(config2().karma.lifetimeKarma),
-      () => localize$1(config2().attributes.essence)
+      () => localize$1(config().karma.karma),
+      () => localize$1(config().karma.goodKarma),
+      () => localize$1(config().karma.lifetimeKarma),
+      () => localize$1(config().attributes.essence)
     ]
   );
   append($$anchor, fragment);
@@ -5676,7 +5705,7 @@ function Karma($$anchor, $$props) {
 var root$f = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   var fragment = root$f();
   var node = first_child(fragment);
@@ -5696,7 +5725,7 @@ function Inventory($$anchor, $$props) {
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
-      () => localize$1(config2().inventory.inventory)
+      () => localize$1(config().inventory.inventory)
     ]
   );
   append($$anchor, fragment);
@@ -5935,7 +5964,7 @@ function toggleShoppingState(_, isShoppingState, actor) {
 var root$b = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let isShoppingState = state(true);
   (async () => {
     const current = await actor().getFlag(flags.sr3e, flags.actor.isShoppingState);
@@ -5951,7 +5980,7 @@ function ShoppingCart($$anchor, $$props) {
       set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`);
     },
     [
-      () => localize$1(config2().sheet.buyupgrades)
+      () => localize$1(config().sheet.buyupgrades)
     ]
   );
   append($$anchor, div);
@@ -6267,7 +6296,7 @@ sr3e.movement = {
   running: "sr3e.movement.running",
   runSpeedModifier: "sr3e.movement.runSpeedModifier"
 };
-sr3e.placeHolders = {
+sr3e.placeholders = {
   human: "sr3e.placeholders.human",
   fullshaman: "sr3e.placeholders.fullshaman"
 };
@@ -6561,8 +6590,7 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
       karma: new foundry.data.fields.SchemaField({
         factor: new foundry.data.fields.NumberField({
           required: true,
-          initial: 0,
-          integer: true
+          initial: 0
         })
       }),
       // Vision
@@ -6570,16 +6598,6 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
         type: new foundry.data.fields.StringField({
           required: true,
           initial: ""
-        }),
-        description: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
-        rules: new foundry.data.fields.SchemaField({
-          darknessPenaltyNegation: new foundry.data.fields.StringField({
-            required: true,
-            initial: ""
-          })
         })
       }),
       // Priority
@@ -6748,11 +6766,11 @@ function handleOpen(_, journalId) {
   const entry = game.journal.get(get$1(journalId));
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
 }
-function handleSearch(__1, config2, journalId, $$props) {
+function handleSearch(__1, config, journalId, $$props) {
   const modal = mount(JournalSearchModal, {
     target: document.body,
     props: {
-      config: config2(),
+      config: config(),
       onclose: (result) => {
         var _a;
         unmount(modal);
@@ -6776,7 +6794,7 @@ var on_keydown = (e) => {
 var root$a = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
-  const config2 = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
   var div = root$a();
   div.__click = [on_click$5];
@@ -6784,7 +6802,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   var button = child(div);
   button.__click = [handleOpen, journalId];
   var button_1 = sibling(button, 2);
-  button_1.__click = [handleSearch, config2, journalId, $$props];
+  button_1.__click = [handleSearch, config, journalId, $$props];
   append($$anchor, div);
   pop();
 }
@@ -6792,7 +6810,7 @@ delegate(["click", "keydown"]);
 var root$9 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 19, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let toolbar;
   let journalId = state(proxy(item2().system.journalId ?? null));
   let previewContent = state("");
@@ -6820,7 +6838,7 @@ function JournalViewer($$anchor, $$props) {
     JournalViewerToolbar(node, {
       onJournalContentSelected: handleJournalSelection,
       get config() {
-        return config2();
+        return config();
       },
       get id() {
         return get$1(journalId);
@@ -6933,14 +6951,14 @@ var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div 
 var root$7 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
-  const attributes = config2().attributes;
-  const common = config2().common;
-  const movementConfig = config2().movement;
-  const karmaConfig = config2().karma;
-  const visionConfig = config2().vision;
-  const traits = config2().traits;
+  const attributes = config().attributes;
+  const common = config().common;
+  const movementConfig = config().movement;
+  const karmaConfig = config().karma;
+  const visionConfig = config().vision;
+  const traits = config().traits;
   const agerange = /* @__PURE__ */ derived(() => [
     {
       item: item2(),
@@ -7314,7 +7332,7 @@ function MetahumanApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     }
   });
   template_effect(
@@ -7331,9 +7349,9 @@ function MetahumanApp($$anchor, $$props) {
     [
       () => localize$1(attributes.modifiers),
       () => localize$1(attributes.limits),
-      () => localize$1(config2().movement.movement),
-      () => localize$1(config2().karma.karma),
-      () => localize$1(config2().vision.vision)
+      () => localize$1(config().movement.movement),
+      () => localize$1(config().karma.karma),
+      () => localize$1(config().vision.vision)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -7401,12 +7419,12 @@ var root_6$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div 
 var root$6 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const awakened = proxy(system.awakened);
   const magicianData = proxy(system.magicianData);
   proxy(awakened.adeptData);
-  const labels = config2().magic;
+  const labels = config().magic;
   const archetypeOptions = [
     localize$1(labels.adept),
     localize$1(labels.magician)
@@ -7419,17 +7437,17 @@ function MagicApp($$anchor, $$props) {
     localize$1(labels.conjurer),
     localize$1(labels.sorcerer),
     localize$1(labels.elementalist),
-    localize$1(config2().common.custom)
+    localize$1(config().common.custom)
   ];
   const resistanceAttributeOptions = [
-    localize$1(config2().attributes.willpower),
-    localize$1(config2().attributes.charisma),
-    localize$1(config2().attributes.intelligence)
+    localize$1(config().attributes.willpower),
+    localize$1(config().attributes.charisma),
+    localize$1(config().attributes.intelligence)
   ];
   const traditionOptions = [
     localize$1(labels.hermetic),
     localize$1(labels.shamanic),
-    localize$1(config2().common.other)
+    localize$1(config().common.other)
   ];
   const archetype = /* @__PURE__ */ derived(() => ({
     item: item2(),
@@ -7595,7 +7613,7 @@ function MagicApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     }
   });
   template_effect(() => {
@@ -7843,7 +7861,7 @@ var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root$3 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const weapon = system.weapon;
   const mode = {
@@ -7854,20 +7872,20 @@ function WeaponApp($$anchor, $$props) {
     path: "system.weapon",
     type: "select",
     options: [
-      localize$1(config2().weapon.manual),
-      localize$1(config2().weapon.semiauto),
-      localize$1(config2().weapon.fullauto),
-      localize$1(config2().weapon.blade),
-      localize$1(config2().weapon.explosive),
-      localize$1(config2().weapon.energy),
-      localize$1(config2().weapon.blunt)
+      localize$1(config().weapon.manual),
+      localize$1(config().weapon.semiauto),
+      localize$1(config().weapon.fullauto),
+      localize$1(config().weapon.blade),
+      localize$1(config().weapon.explosive),
+      localize$1(config().weapon.energy),
+      localize$1(config().weapon.blunt)
     ]
   };
   const weaponEntries = [
     {
       item: item2(),
       key: "damage",
-      label: localize$1(config2().weapon.damage),
+      label: localize$1(config().weapon.damage),
       value: weapon.damage,
       path: "system.weapon",
       type: "text"
@@ -7875,7 +7893,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "range",
-      label: localize$1(config2().weapon.range),
+      label: localize$1(config().weapon.range),
       value: weapon.range,
       path: "system.weapon",
       type: "number"
@@ -7883,7 +7901,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "recoilComp",
-      label: localize$1(config2().weapon.recoilCompensation),
+      label: localize$1(config().weapon.recoilCompensation),
       value: weapon.recoilComp,
       path: "system.weapon",
       type: "number"
@@ -7891,7 +7909,7 @@ function WeaponApp($$anchor, $$props) {
     {
       item: item2(),
       key: "currentClipId",
-      label: localize$1(config2().weapon.currentClip),
+      label: localize$1(config().weapon.currentClip),
       value: weapon.currentClipId,
       path: "system.weapon",
       type: "text"
@@ -7925,7 +7943,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     },
     gridCss: "two-column"
   });
@@ -7935,7 +7953,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     },
     gridCss: "two-column"
   });
@@ -7945,7 +7963,7 @@ function WeaponApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     }
   });
   template_effect(
@@ -7956,7 +7974,7 @@ function WeaponApp($$anchor, $$props) {
       set_text(text2, $0);
     },
     [
-      () => localize$1(config2().common.details)
+      () => localize$1(config().common.details)
     ]
   );
   bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -8111,13 +8129,13 @@ var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
 var root$2 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config2 = prop($$props, "config", 19, () => ({}));
+  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const ammunition = item2().system;
   const ammoEntries = [
     {
       item: item2(),
       key: "type",
-      label: localize$1(config2().ammunition.type),
+      label: localize$1(config().ammunition.type),
       value: ammunition.type,
       path: "system.ammunition",
       type: "text"
@@ -8125,7 +8143,7 @@ function AmmunitionApp($$anchor, $$props) {
     {
       item: item2(),
       key: "rounds",
-      label: localize$1(config2().ammunition.rounds),
+      label: localize$1(config().ammunition.rounds),
       value: ammunition.rounds,
       path: "system.ammunition",
       type: "number"
@@ -8150,7 +8168,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     },
     gridCss: "two-column"
   });
@@ -8160,7 +8178,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     },
     gridCss: "two-column"
   });
@@ -8170,7 +8188,7 @@ function AmmunitionApp($$anchor, $$props) {
       return item2();
     },
     get config() {
-      return config2();
+      return config();
     }
   });
   template_effect(() => {
@@ -8544,21 +8562,16 @@ class ItemDataService {
       resources: { A: 1e6, B: 4e5, C: 9e4, D: 2e4, E: 5e3 }
     };
   }
-  static getHumanItem() {
-    return game.items.find(
-      (i) => i.type === "metahuman" && i.name === "Human"
-    );
-  }
   static getDefaultHumanItem() {
     return {
-      name: localize$1(CONFIG.sr3e.traits.human),
+      name: localize$1(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
       type: "metahuman",
       img: "systems/sr3e/textures/ai-generated/humans.webp",
       system: {
-        lifespan: { min: 10, average: 30, max: 100 },
+        agerange: { min: 0, average: 30, max: 100 },
         physical: {
-          height: { min: 150, average: 170, max: 200 },
-          weight: { min: 50, average: 70, max: 120 }
+          height: { min: 150, average: 170, max: 220 },
+          weight: { min: 50, average: 70, max: 250 }
         },
         modifiers: {
           strength: 0,
@@ -8576,27 +8589,43 @@ class ItemDataService {
           intelligence: 6,
           willpower: 6
         },
-        karmaAdvancementFraction: { value: 0.1 },
+        movement: {
+          base: 5,
+          modifier: 0
+        },
+        karma: {
+          factor: 0.1
+        },
         vision: {
-          type: "Normal",
-          description: "Standard human vision",
-          rules: { darknessPenaltyNegation: "" }
+          type: ""
         },
         priority: "E",
-        description: "<p>Humans are the baseline metatype, versatile and adaptive.</p>"
+        journalId: ""
+        // Set to a real JournalEntry ID if needed
       }
     };
   }
   static getDefaultMagic() {
     return {
-      name: localize$1(config.placeholders.fullshaman),
+      name: localize$1(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
       type: "magic",
       system: {
-        type: "Full",
-        priority: "A",
-        focus: "None",
-        drainResistanceAttribute: "Charisma",
-        totem: "Bear"
+        awakened: {
+          archetype: "magician",
+          priority: "A"
+        },
+        magicianData: {
+          magicianType: "Full",
+          tradition: "Bear",
+          drainResistanceAttribute: "Charisma",
+          aspect: "",
+          canAstrallyProject: true,
+          totem: "Bear",
+          spellPoints: 25
+        },
+        adeptData: {
+          powerPoints: 0
+        }
       }
     };
   }
@@ -8642,14 +8671,6 @@ class CharacterGeneratorService {
   }
 }
 __publicField(CharacterGeneratorService, "VALID_PRIORITIES", ["A", "B", "C", "D", "E"]);
-function onMetahumanValueChanged(e, metahumanItem) {
-  const id = e.target.value;
-  if (!id) {
-    set(metahumanItem, proxy(ItemDataService.getHumanItem()));
-    return;
-  }
-  set(metahumanItem, proxy(game.items.get(id)));
-}
 function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metahumanItem) {
   set(selectedMetahuman, "");
   set(selectedMagic, "");
@@ -8680,6 +8701,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   let selectedAttribute = state("");
   let selectedSkill = state("");
   let selectedResource = state("");
+  let metahumanItem = state(null);
   let chooseAnOption = localize$1($$props.config.sheet.chooseanoption);
   let metahumans = ItemDataService.getAllItemsOfType("metahuman");
   if (metahumans.length === 0) {
@@ -8691,20 +8713,17 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   if (magics.length === 0) {
     const magicItem = ItemDataService.getDefaultMagic();
     Item.create(magicItem);
-    magics = getAllItemsOfType("magic");
+    magics = ItemDataService.getAllItemsOfType("magic");
   }
   const metahumanDropdownOptions = ItemDataService.getAllMetaHumans(metahumans);
-  const magicsDropdwonOptions = ItemDataService.getAllMagics(magics);
+  const magicsDropdownOptions = ItemDataService.getAllMagics(magics);
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
-  const skillPointDropdwonOptions = priorities.skills;
+  const skillPointDropdownOptions = priorities.skills;
   const resourcesDropdownOptions = priorities.resources;
   CharacterGeneratorService.generatePriorityCombination(metahumans[0], magics[0]);
   console.log("CHARACTER", actor());
-  let metahumanItem = state(proxy(ItemDataService.getHumanItem()));
-  user_effect(() => {
-    set(metahumanItem, proxy(get$1(metahumanItem) ?? ItemDataService.getHumanItem()));
-  });
+  set(metahumanItem, proxy(metahumans.find((i) => i.id === get$1(selectedMetahuman)) ?? null));
   user_effect(() => {
     if (actor() && get$1(characterName) !== actor().name) {
       actor().name = get$1(characterName);
@@ -8786,7 +8805,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     } while (!metaOpts.length || !magicOpts.length);
     set(selectedMetahuman, proxy(metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid));
     set(selectedMagic, proxy(magicOpts[getRandomIntinRange(0, magicOpts.length - 1)].foundryitemid));
-    set(metahumanItem, proxy(game.items.get(get$1(selectedMetahuman))));
+    set(metahumanItem, proxy(metahumans.find((i) => i.id === get$1(selectedMetahuman))));
     const ageSrc = get$1(metahumanItem).system.agerange ?? get$1(metahumanItem).system.lifespan;
     set(characterAge, proxy(getRandomBellCurveWithMode(ageSrc.min, ageSrc.max, ageSrc.average)));
     const h = get$1(metahumanItem).system.physical.height;
@@ -8836,7 +8855,6 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var h3 = child(div_15);
   var text_4 = child(h3);
   var select = sibling(h3, 2);
-  select.__change = [onMetahumanValueChanged, metahumanItem];
   var option = child(select);
   option.value = null == (option.__value = "") ? "" : "";
   option.textContent = chooseAnOption;
@@ -8845,18 +8863,12 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     var option_1 = root_2();
     var option_1_value = {};
     var text_5 = child(option_1);
-    template_effect(
-      ($0) => {
-        if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
-          option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
-        }
-        option_1.disabled = $0;
-        set_text(text_5, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
-      },
-      [
-        () => get$1(usedPriorities).includes(get$1(metahuman).priority) && get$1(metahuman).foundryitemid !== get$1(selectedMetahuman)
-      ]
-    );
+    template_effect(() => {
+      if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
+        option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
+      }
+      set_text(text_5, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
+    });
     append($$anchor2, option_1);
   });
   var div_16 = sibling(div_15, 2);
@@ -8867,7 +8879,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_2.value = null == (option_2.__value = "") ? "" : "";
   option_2.textContent = chooseAnOption;
   var node_2 = sibling(option_2);
-  each(node_2, 17, () => magicsDropdwonOptions, index, ($$anchor2, magic) => {
+  each(node_2, 17, () => magicsDropdownOptions, index, ($$anchor2, magic) => {
     var option_3 = root_3();
     var option_3_value = {};
     var text_7 = child(option_3);
@@ -8919,7 +8931,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_6.value = null == (option_6.__value = "") ? "" : "";
   option_6.textContent = chooseAnOption;
   var node_4 = sibling(option_6);
-  each(node_4, 17, () => skillPointDropdwonOptions, index, ($$anchor2, skill) => {
+  each(node_4, 17, () => skillPointDropdownOptions, index, ($$anchor2, skill) => {
     var option_7 = root_5();
     var option_7_value = {};
     var text_11 = child(option_7);
@@ -9037,7 +9049,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   append($$anchor, form);
   pop();
 }
-delegate(["change", "click"]);
+delegate(["click"]);
 class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
   constructor(actor, options = {}) {
     const mergedOptions = foundry.utils.mergeObject({
@@ -9145,6 +9157,7 @@ async function _runCharacterCreationDialog(actor) {
 }
 async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, _userId) {
   if (actor.type !== "character") return true;
+  foundry.utils.setProperty(actor, "flags.sr3e.actor.isCharacterCreation", true);
   options.renderSheet = false;
 }
 class SR3EActor extends Actor {

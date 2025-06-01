@@ -17,6 +17,7 @@ export const flags = {
   sr3e: "sr3e",
   core: "core",
   actor: {
+    isCharacterCreation: "isCharacterCreation",
     isShoppingState: "isShoppingState",
     isDossierDetailsOpen: "isDossierDetailsOpen"
   }

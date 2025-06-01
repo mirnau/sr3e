@@ -44,22 +44,17 @@ export default class ItemDataService {
             resources: { A: 1000000, B: 400000, C: 90000, D: 20000, E: 5000 }
         };
     }
-
-    static getHumanItem() {
-        return game.items.find(
-            (i) => i.type === "metahuman" && i.name === "Human")
-    }
-
+    
     static getDefaultHumanItem() {
         return {
-            name: localize(CONFIG.sr3e.traits.human),
+            name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
             type: "metahuman",
             img: "systems/sr3e/textures/ai-generated/humans.webp",
             system: {
-                lifespan: { min: 10, average: 30, max: 100 },
+                agerange: { min: 0, average: 30, max: 100 },
                 physical: {
-                    height: { min: 150, average: 170, max: 200 },
-                    weight: { min: 50, average: 70, max: 120 }
+                    height: { min: 150, average: 170, max: 220 },
+                    weight: { min: 50, average: 70, max: 250 }
                 },
                 modifiers: {
                     strength: 0,
@@ -77,29 +72,46 @@ export default class ItemDataService {
                     intelligence: 6,
                     willpower: 6
                 },
-                karmaAdvancementFraction: { value: 0.1 },
+                movement: {
+                    base: 5,
+                    modifier: 0
+                },
+                karma: {
+                    factor: 0.1
+                },
                 vision: {
-                    type: "Normal",
-                    description: "Standard human vision",
-                    rules: { darknessPenaltyNegation: "" }
+                    type: "",
                 },
                 priority: "E",
-                description: "<p>Humans are the baseline metatype, versatile and adaptive.</p>"
+                journalId: "" // Set to a real JournalEntry ID if needed
             }
         };
     }
 
+
     static getDefaultMagic() {
         return {
-            name: localize(config.placeholders.fullshaman),
+            name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
             type: "magic",
             system: {
-                type: "Full",
-                priority: "A",
-                focus: "None",
-                drainResistanceAttribute: "Charisma",
-                totem: "Bear"
+                awakened: {
+                    archetype: "magician",
+                    priority: "A"
+                },
+                magicianData: {
+                    magicianType: "Full",
+                    tradition: "Bear",
+                    drainResistanceAttribute: "Charisma",
+                    aspect: "",
+                    canAstrallyProject: true,
+                    totem: "Bear",
+                    spellPoints: 25
+                },
+                adeptData: {
+                    powerPoints: 0
+                }
             }
         };
     }
+
 }

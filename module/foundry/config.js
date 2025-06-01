@@ -84,7 +84,7 @@ sr3e.movement = {
     runSpeedModifier: "sr3e.movement.runSpeedModifier",
 }
 
-sr3e.placeHolders = {
+sr3e.placeholders = {
     human: "sr3e.placeholders.human",
     fullshaman: "sr3e.placeholders.fullshaman"
 }

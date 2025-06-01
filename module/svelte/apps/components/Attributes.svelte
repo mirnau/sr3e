@@ -38,6 +38,6 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
-        <AttributeCard {stat} {localization} {key} {isShoppingState} />
+        <AttributeCard {actor} {stat} {localization} {key} {isShoppingState} />
     {/each}
 </div>
