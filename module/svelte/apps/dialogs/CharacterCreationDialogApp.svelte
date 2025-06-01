@@ -21,28 +21,43 @@
     let selectedAttribute = $state("");
     let selectedSkill = $state("");
     let selectedResource = $state("");
-    let metahumanItem = $state(null);
     let chooseAnOption = localize(config.sheet.chooseanoption);
+    let metahumanItem = $state(null);
+    let metahumans = $state([]);
+    let magics = $state([]);
 
-    let metahumans = ItemDataService.getAllItemsOfType("metahuman");
-
-    if (metahumans.length === 0) {
-        const humanItem = ItemDataService.getDefaultHumanItem();
-        Item.create(humanItem);
+    onMount(async () => {
         metahumans = ItemDataService.getAllItemsOfType("metahuman");
-    }
 
-    let magics = ItemDataService.getAllItemsOfType("magic");
+        if (metahumans.length === 0) {
+            const humanItem = ItemDataService.getDefaultHumanItem();
+            await Item.create(humanItem);
+            metahumans = ItemDataService.getAllItemsOfType("metahuman");
+        }
 
-    if (magics.length === 0) {
-        const magicItem = ItemDataService.getDefaultMagic();
-        Item.create(magicItem);
         magics = ItemDataService.getAllItemsOfType("magic");
-    }
 
-    const metahumanDropdownOptions =
-        ItemDataService.getAllMetaHumans(metahumans);
-    const magicsDropdownOptions = ItemDataService.getAllMagics(magics);
+        if (magics.length === 0) {
+            const magicItem = ItemDataService.getDefaultMagic();
+            await Item.create(magicItem);
+            magics = ItemDataService.getAllItemsOfType("magic");
+        }
+
+        metahumanItem =
+            metahumans.find((m) => m.name === "Human") || metahumans[0];
+        console.log(
+            "Available metahumans:",
+            metahumans.map((m) => m.name),
+        );
+        console.log("Selected default metahuman:", metahumanItem?.name);
+    });
+
+    const metahumanDropdownOptions = $derived(
+        ItemDataService.getAllMetaHumans(metahumans),
+    );
+    const magicsDropdownOptions = $derived(
+        ItemDataService.getAllMagics(magics),
+    );
     const priorities = ActorDataService.getCharacterCreationStats();
     const attributPointDropdownOptions = priorities.attributes;
     const skillPointDropdownOptions = priorities.skills;
@@ -54,7 +69,25 @@
     );
 
     console.log("CHARACTER", actor);
-    metahumanItem = metahumans.find((i) => i.id === selectedMetahuman) ?? null;
+
+    // Step 3: Make metahumanItem reactive - update when selectedMetahuman changes
+    $effect(() => {
+        if (selectedMetahuman) {
+            const foundItem = metahumans.find(
+                (i) => i.id === selectedMetahuman,
+            );
+            if (foundItem) {
+                metahumanItem = foundItem;
+            }
+        } else {
+            // If no selection, fall back to default human item
+            const fallback =
+                metahumans.find((m) => m.name === "Human") || metahumans[0];
+            if (fallback) {
+                metahumanItem = fallback;
+            }
+        }
+    });
 
     $effect(() => {
         if (actor && characterName !== actor.name) {
@@ -74,7 +107,7 @@
     );
 
     let ageMin = 0;
-    let ageMax = $derived(metahumanItem.system.agerange.max);
+    let ageMax = $derived(metahumanItem?.system?.agerange?.max ?? 100);
 
     let lifespan = $derived(ageMax - ageMin);
     let phaseTemplate = ActorDataService.getPhaseTemplate();
@@ -85,7 +118,7 @@
             const to = ageMin + p.to * lifespan;
             const midpoint = (from + to) / 2;
             return {
-                div: p.div,
+                text: p.text,
                 from,
                 to,
                 midpoint,
@@ -96,7 +129,7 @@
 
     let currentPhase = $derived(
         agePhases.find((p) => characterAge >= p.from && characterAge <= p.to)
-            ?.div ?? "",
+            ?.text ?? "",
     );
 
     let usedPriorities = $state([]);
@@ -107,7 +140,7 @@
             (o) => o.foundryitemid === selectedMetahuman,
         );
         if (m) arr.push(m.priority);
-        const g = magicsDropdwonOptions.find(
+        const g = magicsDropdownOptions.find(
             (o) => o.foundryitemid === selectedMagic,
         );
         if (g) arr.push(g.priority);
@@ -159,12 +192,12 @@
         do {
             combo = CharacterGeneratorService.generatePriorityCombination({
                 metahumanOptions: metahumanDropdownOptions,
-                magicOptions: magicsDropdwonOptions,
+                magicOptions: magicsDropdownOptions,
             });
             metaOpts = metahumanDropdownOptions.filter(
                 (i) => i.priority === combo.metahuman,
             );
-            magicOpts = magicsDropdwonOptions.filter(
+            magicOpts = magicsDropdownOptions.filter(
                 (i) => i.priority === combo.magic,
             );
         } while (!metaOpts.length || !magicOpts.length);
@@ -207,7 +240,8 @@
         characterHeight = 175;
         characterWeight = 75;
 
-        metahumanItem = ItemDataService.getHumanItem();
+        metahumanItem =
+            metahumans.find((m) => m.name === "Human") || metahumans[0];
     }
 </script>
 
@@ -220,11 +254,11 @@
                 <div class="sr3e-inner-background">
                     <div class="image-mask">
                         <img
-                            src={metahumanItem.img}
+                            src={metahumanItem?.img ?? ""}
                             role="presentation"
                             data-edit="img"
-                            title={metahumanItem.name}
-                            alt={metahumanItem.name}
+                            title={metahumanItem?.name ?? ""}
+                            alt={metahumanItem?.name ?? ""}
                         />
                     </div>
                     <input
@@ -241,16 +275,14 @@
                 <div class="fake-shadow"></div>
                 <div class="sr3e-inner-background">
                     <div for="age-slider">
-                        {localize(config.traits.age)}: {characterAge}
-                        {#if currentPhase}
-                            ({currentPhase}){/if}
+                        {localize(config.traits.age)}: {characterAge} ({currentPhase})
                     </div>
 
                     <input
                         id="age-slider"
                         type="range"
-                        min={metahumanItem.system.agerange.min ?? 0}
-                        max={metahumanItem.system.agerange.max ?? 100}
+                        min={metahumanItem?.system?.agerange?.min ?? 0}
+                        max={metahumanItem?.system?.agerange?.max ?? 100}
                         step="1"
                         bind:value={characterAge}
                     />
@@ -261,8 +293,9 @@
                     <input
                         id="height-slider"
                         type="range"
-                        min={metahumanItem.system.physical.height.min ?? 0}
-                        max={metahumanItem.system.physical.height.max ?? 100}
+                        min={metahumanItem?.system?.physical?.height?.min ?? 0}
+                        max={metahumanItem?.system?.physical?.height?.max ??
+                            200}
                         step="1"
                         bind:value={characterHeight}
                     />
@@ -272,8 +305,9 @@
                     <input
                         id="weight-slider"
                         type="range"
-                        min={metahumanItem.system.physical.weight.min ?? 0}
-                        max={metahumanItem.system.physical.weight.max ?? 100}
+                        min={metahumanItem?.system?.physical?.weight?.min ?? 0}
+                        max={metahumanItem?.system?.physical?.weight?.max ??
+                            200}
                         step="1"
                         bind:value={characterWeight}
                     />

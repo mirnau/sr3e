@@ -103,13 +103,13 @@ export default class ActorDataService {
 
     static getPhaseTemplate() {
         return [
-            { label: localize(CONFIG.sr3e.traits.child), from: 0.00, to: 0.15 },
-            { label: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.20 },
-            { label: localize(CONFIG.sr3e.traits.youngadult), from: 0.20, to: 0.40 },
-            { label: localize(CONFIG.sr3e.traits.adult), from: 0.40, to: 0.50 },
-            { label: localize(CONFIG.sr3e.traits.middleage), from: 0.50, to: 0.65 },
-            { label: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
-            { label: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1.00 },
+            { text: localize(CONFIG.sr3e.traits.child), from: 0.00, to: 0.15 },
+            { text: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.20 },
+            { text: localize(CONFIG.sr3e.traits.youngadult), from: 0.20, to: 0.40 },
+            { text: localize(CONFIG.sr3e.traits.adult), from: 0.40, to: 0.50 },
+            { text: localize(CONFIG.sr3e.traits.middleage), from: 0.50, to: 0.65 },
+            { text: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+            { text: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1.00 },
         ];
     }
 }

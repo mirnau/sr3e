@@ -1123,6 +1123,11 @@ function flush_tasks() {
     process_micro_tasks();
   }
 }
+function lifecycle_outside_component(name) {
+  {
+    throw new Error(`https://svelte.dev/e/lifecycle_outside_component`);
+  }
+}
 const FLUSH_MICROTASK = 0;
 const FLUSH_SYNC = 1;
 let is_throwing_error = false;
@@ -1933,13 +1938,6 @@ function template(content, flags2) {
     return clone;
   };
 }
-function text(value = "") {
-  {
-    var t = create_text(value + "");
-    assign_nodes(t, t);
-    return t;
-  }
-}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1958,11 +1956,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text2, value) {
+function set_text(text, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
-    text2.__t = str;
-    text2.nodeValue = str == null ? "" : str + "";
+  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
+    text.__t = str;
+    text.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -2961,6 +2959,20 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
+function onMount(fn) {
+  if (component_context === null) {
+    lifecycle_outside_component();
+  }
+  {
+    user_effect(() => {
+      const cleanup = untrack(fn);
+      if (typeof cleanup === "function") return (
+        /** @type {() => void} */
+        cleanup
+      );
+    });
+  }
+}
 function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
     run(void 0);
@@ -3402,7 +3414,7 @@ function CardToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root_1$8 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
+var root_1$9 = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$2 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
@@ -3479,7 +3491,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$8();
+      var div_1 = root_1$9();
       var img = child(div_1);
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
@@ -3504,7 +3516,7 @@ function Dossier($$anchor, $$props) {
   var div_4 = child(div_3);
   div_4.__click = toggleDetails;
   div_4.__keydown = [on_keydown$2, toggleDetails];
-  var text2 = sibling(child(div_4));
+  var text = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
@@ -3617,7 +3629,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize$1(config().sheet.details)]);
+  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize$1(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
 }
@@ -5185,7 +5197,7 @@ function Initiative($$anchor, $$props) {
   });
   var div = root$q();
   var h1 = child(div);
-  var text2 = child(h1);
+  var text = child(h1);
   var div_1 = sibling(h1, 2);
   var div_2 = sibling(child(div_1), 4);
   var h4 = child(div_2);
@@ -5205,7 +5217,7 @@ function Initiative($$anchor, $$props) {
   bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, $1);
       set_text(text_2, $2);
       set_text(text_3, get$1(reaction));
@@ -5225,7 +5237,7 @@ function Initiative($$anchor, $$props) {
 var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var root_2$4 = /* @__PURE__ */ template(`<i class="fa-solid fa-circle-chevron-down decrement-attribute" role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
-var root_1$7 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up increment-attribute" role="button" tabindex="0"></i></div>`);
+var root_1$8 = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <i class="fa-solid fa-circle-chevron-up increment-attribute" role="button" tabindex="0"></i></div>`);
 var root_3$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$p = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCard($$anchor, $$props) {
@@ -5263,11 +5275,11 @@ function AttributeCard($$anchor, $$props) {
   };
   var div = root$p();
   var h4 = child(div);
-  var text2 = child(h4);
+  var text = child(h4);
   var node = sibling(h4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_1 = root_1$7();
+      var div_1 = root_1$8();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
@@ -5299,7 +5311,7 @@ function AttributeCard($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text2, $0), [
+  template_effect(($0) => set_text(text, $0), [
     () => localize$1($$props.localization[$$props.key])
   ]);
   append($$anchor, div);
@@ -5337,7 +5349,7 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text2 = child(h1);
+  var text = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
@@ -5360,7 +5372,7 @@ function Attributes($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text2, $0), [
+  template_effect(($0) => set_text(text, $0), [
     () => localize$1(config().attributes.attributes)
   ]);
   append($$anchor, fragment);
@@ -5394,7 +5406,7 @@ function DicePools($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text2 = child(h1);
+  var text = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
@@ -5412,7 +5424,7 @@ function DicePools($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text2, $0), [
+  template_effect(($0) => set_text(text, $0), [
     () => localize$1(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
@@ -5445,7 +5457,7 @@ function Movement($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text2 = child(h1);
+  var text = child(h1);
   var div = sibling(h1, 2);
   var node_1 = sibling(child(div), 4);
   each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
@@ -5463,7 +5475,7 @@ function Movement($$anchor, $$props) {
     });
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text2, $0), [
+  template_effect(($0) => set_text(text, $0), [
     () => localize$1(config().movement.movement)
   ]);
   append($$anchor, fragment);
@@ -5514,7 +5526,7 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text2 = child(h1);
+  var text = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
   button.__click = [on_click$6, activeTab];
@@ -5574,7 +5586,7 @@ function Skills($$anchor, $$props) {
   }
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       toggle_class(button, "active", get$1(activeTab) === "active");
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
@@ -5598,12 +5610,12 @@ function Health($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text2 = child(h1);
+  var text = child(h1);
   var span = sibling(h1, 2);
   var text_1 = child(span);
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [() => localize$1(config().health.health)]
@@ -5611,7 +5623,7 @@ function Health($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$6 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_1$7 = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
 var root$g = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
@@ -5639,7 +5651,7 @@ function Karma($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text2 = child(h1);
+  var text = child(h1);
   var div = sibling(h1, 2);
   var div_1 = sibling(child(div), 4);
   var h4 = child(div_1);
@@ -5664,7 +5676,7 @@ function Karma($$anchor, $$props) {
   var node_1 = sibling(div_4, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$6();
+      var div_5 = root_1$7();
       var h4_4 = child(div_5);
       var text_9 = child(h4_4);
       template_effect(($0) => set_text(text_9, $0), [
@@ -5682,7 +5694,7 @@ function Karma($$anchor, $$props) {
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, $1);
       set_text(text_2, karma.goodKarma);
       set_text(text_3, $2);
@@ -5716,12 +5728,12 @@ function Inventory($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text2 = child(h1);
+  var text = child(h1);
   var span_1 = sibling(h1, 2);
   var text_1 = child(span_1);
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
     },
     [
@@ -5731,7 +5743,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root_1$5 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1$6 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$e = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -5885,7 +5897,7 @@ function CharacterSheetApp($$anchor, $$props) {
   each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
     let Comp = () => get$1($$item).comp;
     let props = () => get$1($$item).props;
-    var div_1 = root_1$5();
+    var div_1 = root_1$6();
     var div_2 = child(div_1);
     var div_3 = sibling(child(div_2), 2);
     var node_1 = child(div_3);
@@ -6082,13 +6094,13 @@ class ActorDataService {
   }
   static getPhaseTemplate() {
     return [
-      { label: localize$1(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
-      { label: localize$1(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
-      { label: localize$1(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
-      { label: localize$1(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
-      { label: localize$1(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
-      { label: localize$1(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
-      { label: localize$1(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
+      { text: localize$1(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
+      { text: localize$1(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
+      { text: localize$1(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
+      { text: localize$1(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
+      { text: localize$1(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
+      { text: localize$1(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+      { text: localize$1(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
     ];
   }
 }
@@ -6631,7 +6643,7 @@ var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
 var root_4$2 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
 var root_5$3 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
 var root_2$3 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
-var root_1$4 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+var root_1$5 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
   push($$props, true);
   let visible = state(true);
@@ -6689,7 +6701,7 @@ function JournalSearchModal($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$4();
+      var div = root_1$5();
       var div_1 = child(div);
       var div_2 = child(div_1);
       var input = child(div_2);
@@ -6713,10 +6725,10 @@ function JournalSearchModal($$anchor, $$props) {
                 var li = root_4$2();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text2 = sibling(child(div_4));
+                var text = sibling(child(div_4));
                 template_effect(() => {
                   set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text2, ` ${get$1(option).label ?? ""}`);
+                  set_text(text, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -6853,7 +6865,7 @@ function JournalViewer($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$3 = /* @__PURE__ */ template(`<input type="checkbox">`);
+var root_1$4 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$4 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input>`);
@@ -6875,11 +6887,11 @@ function StatCard($$anchor, $$props) {
   var div = root$8();
   var div_1 = child(div);
   var h4 = child(div_1);
-  var text2 = child(h4);
+  var text = child(h4);
   var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var input = root_1$3();
+      var input = root_1$4();
       input.__change = update;
       template_effect(() => set_checked(input, $$props.value));
       append($$anchor2, input);
@@ -6938,14 +6950,14 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(() => set_text(text2, $$props.label));
+  template_effect(() => set_text(text, $$props.label));
   append($$anchor, div);
   pop();
 }
 delegate(["change"]);
 var on_click$4 = async (_, item2) => openFilePicker(item2());
 var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
-var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
+var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root$7 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
@@ -7227,16 +7239,16 @@ function MetahumanApp($$anchor, $$props) {
   var node_1 = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$2();
+      var div_5 = root_1$3();
       var div_6 = child(div_5);
       var div_7 = sibling(child(div_6), 2);
       var h3 = child(div_7);
-      var text2 = child(h3);
+      var text = child(h3);
       var div_8 = sibling(h3, 2);
       each(div_8, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text2, $0), [() => localize$1(traits.agerange)]);
+      template_effect(($0) => set_text(text, $0), [() => localize$1(traits.agerange)]);
       append($$anchor2, div_5);
     };
     if_block(node_1, ($$render) => {
@@ -7414,8 +7426,8 @@ var on_click$3 = async (_, item2) => openFilePicker(item2());
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root_1$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
-var root_6$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
+var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root$6 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
@@ -7544,7 +7556,7 @@ function MagicApp($$anchor, $$props) {
   var node_2 = sibling(div_1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment = root_1$1();
+      var fragment = root_1$2();
       var div_5 = first_child(fragment);
       var div_6 = child(div_5);
       var div_7 = sibling(child(div_6), 2);
@@ -7583,7 +7595,7 @@ function MagicApp($$anchor, $$props) {
           var fragment_2 = comment();
           var node_9 = first_child(fragment_2);
           each(node_9, 17, () => get$1(adeptFields), index, ($$anchor4, entry) => {
-            var div_14 = root_6$1();
+            var div_14 = root_6();
             var div_15 = child(div_14);
             var div_16 = sibling(child(div_15), 2);
             var node_10 = child(div_16);
@@ -7795,14 +7807,14 @@ function Commodity($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text2 = child(h3);
+  var text = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
     },
     [
@@ -7839,14 +7851,14 @@ function Portability($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text2 = child(h3);
+  var text = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text2, $0);
+      set_text(text, $0);
       set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
     },
     [
@@ -7929,7 +7941,7 @@ function WeaponApp($$anchor, $$props) {
   var div_7 = sibling(child(div_6), 2);
   var div_8 = child(div_7);
   var h3 = child(div_8);
-  var text2 = child(h3);
+  var text = child(h3);
   var div_9 = sibling(div_8, 2);
   var node = child(div_9);
   StatCard(node, spread_props(mode));
@@ -7971,7 +7983,7 @@ function WeaponApp($$anchor, $$props) {
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
-      set_text(text2, $0);
+      set_text(text, $0);
     },
     [
       () => localize$1(config().common.details)
@@ -8250,7 +8262,7 @@ _ammunition = new WeakMap();
 var on_click = async (_, item2) => openFilePicker(item2());
 var on_change = (e, item2) => item2().update({ name: e.target.value });
 var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
-var root_1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
 var on_change_2 = (e, item2) => item2().update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
@@ -8297,14 +8309,14 @@ function SkillApp($$anchor, $$props) {
   var select = child(div_7);
   select.__change = [on_change_1, updateSkillType];
   each(select, 21, () => selectOptions, index, ($$anchor2, option) => {
-    var option_1 = root_1();
+    var option_1 = root_1$1();
     var option_1_value = {};
-    var text2 = child(option_1);
+    var text = child(option_1);
     template_effect(() => {
       if (option_1_value !== (option_1_value = get$1(option).value)) {
         option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
       }
-      set_text(text2, get$1(option).label);
+      set_text(text, get$1(option).label);
     });
     append($$anchor2, option_1);
   });
@@ -8671,7 +8683,7 @@ class CharacterGeneratorService {
   }
 }
 __publicField(CharacterGeneratorService, "VALID_PRIORITIES", ["A", "B", "C", "D", "E"]);
-function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metahumanItem) {
+function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metahumanItem, metahumans) {
   set(selectedMetahuman, "");
   set(selectedMagic, "");
   set(selectedAttribute, "");
@@ -8680,14 +8692,14 @@ function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, sel
   set(characterAge, 25);
   set(characterHeight, 175);
   set(characterWeight, 75);
-  set(metahumanItem, proxy(ItemDataService.getHumanItem()));
+  set(metahumanItem, proxy(get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0]));
 }
+var root_1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root_6 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<form><div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> <!></div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></form>`);
+var root = /* @__PURE__ */ template(`<form><div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 7);
@@ -8701,29 +8713,49 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   let selectedAttribute = state("");
   let selectedSkill = state("");
   let selectedResource = state("");
-  let metahumanItem = state(null);
   let chooseAnOption = localize$1($$props.config.sheet.chooseanoption);
-  let metahumans = ItemDataService.getAllItemsOfType("metahuman");
-  if (metahumans.length === 0) {
-    const humanItem = ItemDataService.getDefaultHumanItem();
-    Item.create(humanItem);
-    metahumans = ItemDataService.getAllItemsOfType("metahuman");
-  }
-  let magics = ItemDataService.getAllItemsOfType("magic");
-  if (magics.length === 0) {
-    const magicItem = ItemDataService.getDefaultMagic();
-    Item.create(magicItem);
-    magics = ItemDataService.getAllItemsOfType("magic");
-  }
-  const metahumanDropdownOptions = ItemDataService.getAllMetaHumans(metahumans);
-  const magicsDropdownOptions = ItemDataService.getAllMagics(magics);
+  let metahumanItem = state(null);
+  let metahumans = state(proxy([]));
+  let magics = state(proxy([]));
+  onMount(async () => {
+    var _a;
+    set(metahumans, proxy(ItemDataService.getAllItemsOfType("metahuman")));
+    if (get$1(metahumans).length === 0) {
+      const humanItem = ItemDataService.getDefaultHumanItem();
+      await Item.create(humanItem);
+      set(metahumans, proxy(ItemDataService.getAllItemsOfType("metahuman")));
+    }
+    set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
+    if (get$1(magics).length === 0) {
+      const magicItem = ItemDataService.getDefaultMagic();
+      await Item.create(magicItem);
+      set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
+    }
+    set(metahumanItem, proxy(get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0]));
+    console.log("Available metahumans:", get$1(metahumans).map((m) => m.name));
+    console.log("Selected default metahuman:", (_a = get$1(metahumanItem)) == null ? void 0 : _a.name);
+  });
+  const metahumanDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMetaHumans(get$1(metahumans)));
+  const magicsDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMagics(get$1(magics)));
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
   const skillPointDropdownOptions = priorities.skills;
   const resourcesDropdownOptions = priorities.resources;
-  CharacterGeneratorService.generatePriorityCombination(metahumans[0], magics[0]);
+  CharacterGeneratorService.generatePriorityCombination(get$1(metahumans)[0], get$1(magics)[0]);
   console.log("CHARACTER", actor());
-  set(metahumanItem, proxy(metahumans.find((i) => i.id === get$1(selectedMetahuman)) ?? null));
+  user_effect(() => {
+    if (get$1(selectedMetahuman)) {
+      const foundItem = get$1(metahumans).find((i) => i.id === get$1(selectedMetahuman));
+      if (foundItem) {
+        set(metahumanItem, proxy(foundItem));
+      }
+    } else {
+      const fallback = get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0];
+      if (fallback) {
+        set(metahumanItem, proxy(fallback));
+      }
+    }
+  });
   user_effect(() => {
     if (actor() && get$1(characterName) !== actor().name) {
       actor().name = get$1(characterName);
@@ -8734,7 +8766,10 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   });
   let canCreate = /* @__PURE__ */ derived(() => get$1(selectedMetahuman) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
   let ageMin = 0;
-  let ageMax = /* @__PURE__ */ derived(() => get$1(metahumanItem).system.agerange.max);
+  let ageMax = /* @__PURE__ */ derived(() => {
+    var _a, _b, _c;
+    return ((_c = (_b = (_a = get$1(metahumanItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
+  });
   let lifespan = /* @__PURE__ */ derived(() => get$1(ageMax) - ageMin);
   let phaseTemplate = ActorDataService.getPhaseTemplate();
   let agePhases = /* @__PURE__ */ derived(() => phaseTemplate.map((p) => {
@@ -8742,7 +8777,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     const to = ageMin + p.to * get$1(lifespan);
     const midpoint = (from + to) / 2;
     return {
-      div: p.div,
+      text: p.text,
       from,
       to,
       midpoint,
@@ -8751,14 +8786,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   }));
   let currentPhase = /* @__PURE__ */ derived(() => {
     var _a;
-    return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.div) ?? "";
+    return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
   });
   let usedPriorities = state(proxy([]));
   user_effect(() => {
     const arr = [];
-    const m = metahumanDropdownOptions.find((o) => o.foundryitemid === get$1(selectedMetahuman));
+    const m = get$1(metahumanDropdownOptions).find((o) => o.foundryitemid === get$1(selectedMetahuman));
     if (m) arr.push(m.priority);
-    const g = magicsDropdwonOptions.find((o) => o.foundryitemid === get$1(selectedMagic));
+    const g = get$1(magicsDropdownOptions).find((o) => o.foundryitemid === get$1(selectedMagic));
     if (g) arr.push(g.priority);
     if (get$1(selectedAttribute)) arr.push(get$1(selectedAttribute));
     if (get$1(selectedSkill)) arr.push(get$1(selectedSkill));
@@ -8775,10 +8810,10 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.creation.attributePoints": get$1(selectedAttribute).points,
       "system.creation.activePoints": get$1(selectedSkill).points
     });
-    const metahuman = metahumans.find((m) => m.id === get$1(selectedMetahuman));
+    const metahuman = get$1(metahumans).find((m) => m.id === get$1(selectedMetahuman));
     const worldMetahuman = game.items.get(metahuman.id);
     await actor().createEmbeddedDocuments("Item", [worldMetahuman.toObject()]);
-    const magic = magics.find((m) => m.id === get$1(selectedMagic));
+    const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
     if (["A", "B"].includes(get$1(selectedMagic).priority)) {
       const worldMagic = game.items.get(magic.id);
       await actor().createEmbeddedDocuments("Item", [worldMagic.toObject()]);
@@ -8797,15 +8832,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     let combo, metaOpts, magicOpts;
     do {
       combo = CharacterGeneratorService.generatePriorityCombination({
-        metahumanOptions: metahumanDropdownOptions,
-        magicOptions: magicsDropdwonOptions
+        metahumanOptions: get$1(metahumanDropdownOptions),
+        magicOptions: get$1(magicsDropdownOptions)
       });
-      metaOpts = metahumanDropdownOptions.filter((i) => i.priority === combo.metahuman);
-      magicOpts = magicsDropdwonOptions.filter((i) => i.priority === combo.magic);
+      metaOpts = get$1(metahumanDropdownOptions).filter((i) => i.priority === combo.metahuman);
+      magicOpts = get$1(magicsDropdownOptions).filter((i) => i.priority === combo.magic);
     } while (!metaOpts.length || !magicOpts.length);
     set(selectedMetahuman, proxy(metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid));
     set(selectedMagic, proxy(magicOpts[getRandomIntinRange(0, magicOpts.length - 1)].foundryitemid));
-    set(metahumanItem, proxy(metahumans.find((i) => i.id === get$1(selectedMetahuman))));
+    set(metahumanItem, proxy(get$1(metahumans).find((i) => i.id === get$1(selectedMetahuman))));
     const ageSrc = get$1(metahumanItem).system.agerange ?? get$1(metahumanItem).system.lifespan;
     set(characterAge, proxy(getRandomBellCurveWithMode(ageSrc.min, ageSrc.max, ageSrc.average)));
     const h = get$1(metahumanItem).system.physical.height;
@@ -8828,24 +8863,13 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_6 = child(div_5);
   var div_7 = sibling(child(div_6), 2);
   var div_8 = child(div_7);
-  var text$1 = child(div_8);
-  var node = sibling(text$1);
-  {
-    var consequent = ($$anchor2) => {
-      var text_1 = text();
-      template_effect(() => set_text(text_1, `(${get$1(currentPhase) ?? ""})`));
-      append($$anchor2, text_1);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(currentPhase)) $$render(consequent);
-    });
-  }
+  var text = child(div_8);
   var input_1 = sibling(div_8, 2);
   var div_9 = sibling(input_1, 2);
-  var text_2 = child(div_9);
+  var text_1 = child(div_9);
   var input_2 = sibling(div_9, 2);
   var div_10 = sibling(input_2, 2);
-  var text_3 = child(div_10);
+  var text_2 = child(div_10);
   var input_3 = sibling(div_10, 2);
   var div_11 = sibling(div_5, 2);
   var div_12 = child(div_11);
@@ -8853,43 +8877,43 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_14 = child(div_13);
   var div_15 = child(div_14);
   var h3 = child(div_15);
-  var text_4 = child(h3);
+  var text_3 = child(h3);
   var select = sibling(h3, 2);
   var option = child(select);
   option.value = null == (option.__value = "") ? "" : "";
   option.textContent = chooseAnOption;
-  var node_1 = sibling(option);
-  each(node_1, 17, () => metahumanDropdownOptions, index, ($$anchor2, metahuman) => {
-    var option_1 = root_2();
+  var node = sibling(option);
+  each(node, 17, () => get$1(metahumanDropdownOptions), index, ($$anchor2, metahuman) => {
+    var option_1 = root_1();
     var option_1_value = {};
-    var text_5 = child(option_1);
+    var text_4 = child(option_1);
     template_effect(() => {
       if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
         option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
       }
-      set_text(text_5, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
+      set_text(text_4, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
     });
     append($$anchor2, option_1);
   });
   var div_16 = sibling(div_15, 2);
   var h3_1 = child(div_16);
-  var text_6 = child(h3_1);
+  var text_5 = child(h3_1);
   var select_1 = sibling(h3_1, 2);
   var option_2 = child(select_1);
   option_2.value = null == (option_2.__value = "") ? "" : "";
   option_2.textContent = chooseAnOption;
-  var node_2 = sibling(option_2);
-  each(node_2, 17, () => magicsDropdownOptions, index, ($$anchor2, magic) => {
-    var option_3 = root_3();
+  var node_1 = sibling(option_2);
+  each(node_1, 17, () => get$1(magicsDropdownOptions), index, ($$anchor2, magic) => {
+    var option_3 = root_2();
     var option_3_value = {};
-    var text_7 = child(option_3);
+    var text_6 = child(option_3);
     template_effect(
       ($0) => {
         if (option_3_value !== (option_3_value = get$1(magic).foundryitemid)) {
           option_3.value = null == (option_3.__value = get$1(magic).foundryitemid) ? "" : get$1(magic).foundryitemid;
         }
         option_3.disabled = $0;
-        set_text(text_7, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
+        set_text(text_6, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
       },
       [
         () => get$1(usedPriorities).includes(get$1(magic).priority) && get$1(magic).foundryitemid !== get$1(selectedMagic)
@@ -8899,23 +8923,23 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   });
   var div_17 = sibling(div_16, 2);
   var h3_2 = child(div_17);
-  var text_8 = child(h3_2);
+  var text_7 = child(h3_2);
   var select_2 = sibling(h3_2, 2);
   var option_4 = child(select_2);
   option_4.value = null == (option_4.__value = "") ? "" : "";
   option_4.textContent = chooseAnOption;
-  var node_3 = sibling(option_4);
-  each(node_3, 17, () => attributPointDropdownOptions, index, ($$anchor2, attribute) => {
-    var option_5 = root_4();
+  var node_2 = sibling(option_4);
+  each(node_2, 17, () => attributPointDropdownOptions, index, ($$anchor2, attribute) => {
+    var option_5 = root_3();
     var option_5_value = {};
-    var text_9 = child(option_5);
+    var text_8 = child(option_5);
     template_effect(
       ($0) => {
         if (option_5_value !== (option_5_value = get$1(attribute).priority)) {
           option_5.value = null == (option_5.__value = get$1(attribute).priority) ? "" : get$1(attribute).priority;
         }
         option_5.disabled = $0;
-        set_text(text_9, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
+        set_text(text_8, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
       },
       [
         () => get$1(usedPriorities).includes(get$1(attribute).priority) && get$1(attribute).priority !== get$1(selectedAttribute)
@@ -8925,23 +8949,23 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   });
   var div_18 = sibling(div_17, 2);
   var h3_3 = child(div_18);
-  var text_10 = child(h3_3);
+  var text_9 = child(h3_3);
   var select_3 = sibling(h3_3, 2);
   var option_6 = child(select_3);
   option_6.value = null == (option_6.__value = "") ? "" : "";
   option_6.textContent = chooseAnOption;
-  var node_4 = sibling(option_6);
-  each(node_4, 17, () => skillPointDropdownOptions, index, ($$anchor2, skill) => {
-    var option_7 = root_5();
+  var node_3 = sibling(option_6);
+  each(node_3, 17, () => skillPointDropdownOptions, index, ($$anchor2, skill) => {
+    var option_7 = root_4();
     var option_7_value = {};
-    var text_11 = child(option_7);
+    var text_10 = child(option_7);
     template_effect(
       ($0) => {
         if (option_7_value !== (option_7_value = get$1(skill).priority)) {
           option_7.value = null == (option_7.__value = get$1(skill).priority) ? "" : get$1(skill).priority;
         }
         option_7.disabled = $0;
-        set_text(text_11, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
+        set_text(text_10, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
       },
       [
         () => get$1(usedPriorities).includes(get$1(skill).priority) && get$1(skill).priority !== get$1(selectedSkill)
@@ -8951,23 +8975,23 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   });
   var div_19 = sibling(div_18, 2);
   var h3_4 = child(div_19);
-  var text_12 = child(h3_4);
+  var text_11 = child(h3_4);
   var select_4 = sibling(h3_4, 2);
   var option_8 = child(select_4);
   option_8.value = null == (option_8.__value = "") ? "" : "";
   option_8.textContent = chooseAnOption;
-  var node_5 = sibling(option_8);
-  each(node_5, 17, () => resourcesDropdownOptions, index, ($$anchor2, resource) => {
-    var option_9 = root_6();
+  var node_4 = sibling(option_8);
+  each(node_4, 17, () => resourcesDropdownOptions, index, ($$anchor2, resource) => {
+    var option_9 = root_5();
     var option_9_value = {};
-    var text_13 = child(option_9);
+    var text_12 = child(option_9);
     template_effect(
       ($0) => {
         if (option_9_value !== (option_9_value = get$1(resource).priority)) {
           option_9.value = null == (option_9.__value = get$1(resource).priority) ? "" : get$1(resource).priority;
         }
         option_9.disabled = $0;
-        set_text(text_13, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
+        set_text(text_12, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
       },
       [
         () => get$1(usedPriorities).includes(get$1(resource).priority) && get$1(resource).priority !== get$1(selectedResource)
@@ -8981,7 +9005,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_23 = child(div_22);
   var button = child(div_23);
   button.__click = handleRandomize;
-  var text_14 = sibling(child(button));
+  var text_13 = sibling(child(button));
   var button_1 = sibling(button, 2);
   button_1.__click = [
     handleClear,
@@ -8993,34 +9017,36 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     characterAge,
     characterHeight,
     characterWeight,
-    metahumanItem
+    metahumanItem,
+    metahumans
   ];
-  var text_15 = sibling(child(button_1));
+  var text_14 = sibling(child(button_1));
   var button_2 = sibling(button_1, 2);
-  var text_16 = sibling(child(button_2));
+  var text_15 = sibling(child(button_2));
   template_effect(
     ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
-      set_attribute(img, "src", get$1(metahumanItem).img);
-      set_attribute(img, "title", get$1(metahumanItem).name);
-      set_attribute(img, "alt", get$1(metahumanItem).name);
-      set_text(text$1, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} `);
-      set_attribute(input_1, "min", get$1(metahumanItem).system.agerange.min ?? 0);
-      set_attribute(input_1, "max", get$1(metahumanItem).system.agerange.max ?? 100);
-      set_text(text_2, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
-      set_attribute(input_2, "min", get$1(metahumanItem).system.physical.height.min ?? 0);
-      set_attribute(input_2, "max", get$1(metahumanItem).system.physical.height.max ?? 100);
-      set_text(text_3, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
-      set_attribute(input_3, "min", get$1(metahumanItem).system.physical.weight.min ?? 0);
-      set_attribute(input_3, "max", get$1(metahumanItem).system.physical.weight.max ?? 100);
-      set_text(text_4, $3);
-      set_text(text_6, $4);
-      set_text(text_8, $5);
-      set_text(text_10, $6);
-      set_text(text_12, $7);
-      set_text(text_14, ` ${$8 ?? ""}`);
-      set_text(text_15, ` ${$9 ?? ""}`);
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
+      set_attribute(img, "src", ((_a = get$1(metahumanItem)) == null ? void 0 : _a.img) ?? "");
+      set_attribute(img, "title", ((_b = get$1(metahumanItem)) == null ? void 0 : _b.name) ?? "");
+      set_attribute(img, "alt", ((_c = get$1(metahumanItem)) == null ? void 0 : _c.name) ?? "");
+      set_text(text, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} (${get$1(currentPhase) ?? ""})`);
+      set_attribute(input_1, "min", ((_f = (_e = (_d = get$1(metahumanItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
+      set_attribute(input_1, "max", ((_i = (_h = (_g = get$1(metahumanItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
+      set_text(text_1, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
+      set_attribute(input_2, "min", ((_m = (_l = (_k = (_j = get$1(metahumanItem)) == null ? void 0 : _j.system) == null ? void 0 : _k.physical) == null ? void 0 : _l.height) == null ? void 0 : _m.min) ?? 0);
+      set_attribute(input_2, "max", ((_q = (_p = (_o = (_n = get$1(metahumanItem)) == null ? void 0 : _n.system) == null ? void 0 : _o.physical) == null ? void 0 : _p.height) == null ? void 0 : _q.max) ?? 200);
+      set_text(text_2, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
+      set_attribute(input_3, "min", ((_u = (_t = (_s = (_r = get$1(metahumanItem)) == null ? void 0 : _r.system) == null ? void 0 : _s.physical) == null ? void 0 : _t.weight) == null ? void 0 : _u.min) ?? 0);
+      set_attribute(input_3, "max", ((_y = (_x = (_w = (_v = get$1(metahumanItem)) == null ? void 0 : _v.system) == null ? void 0 : _w.physical) == null ? void 0 : _x.weight) == null ? void 0 : _y.max) ?? 200);
+      set_text(text_3, $3);
+      set_text(text_5, $4);
+      set_text(text_7, $5);
+      set_text(text_9, $6);
+      set_text(text_11, $7);
+      set_text(text_13, ` ${$8 ?? ""}`);
+      set_text(text_14, ` ${$9 ?? ""}`);
       button_2.disabled = !get$1(canCreate);
-      set_text(text_16, ` ${$10 ?? ""}`);
+      set_text(text_15, ` ${$10 ?? ""}`);
     },
     [
       () => localize$1($$props.config.traits.age),
