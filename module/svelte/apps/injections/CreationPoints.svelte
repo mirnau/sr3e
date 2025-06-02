@@ -36,8 +36,6 @@
         500,
     );
 
-    let isCharacterCreation = $state(true);
-
     // Reactive intelligence value
     let intelligence = $state(0);
 
@@ -72,15 +70,39 @@
 
     // Update dependent values when intelligence changes
     $effect(() => {
-        console.log("Recalculating stuff ...", intelligence);
         knowledgePointStore.set(intelligence * 5);
         languagePointStore.set(Math.floor(intelligence * 1.5));
     });
 
-    // Handle character creation flag
     $effect(() => {
-        if (!isCharacterCreation) {
-            actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
+        if ($attributePointStore === 0) {
+            (async () => {
+                const confirmed =
+                    await foundry.applications.api.DialogV2.confirm(
+                        {},
+                        {
+                            title: "Finish Character Creation?",
+                            content:
+                                "You've used all your attribute points. Are you ready to continue with skill assignment?",
+                            yes: "Yes, finish",
+                            no: "Not yet",
+                            defaultYes: true,
+                        },
+                    );
+
+                if (confirmed) {
+                    actor.setFlag(
+                        flags.sr3e,
+                        flags.actor.isAssigningAttributes,
+                        false,
+                    );
+                    actor.setFlag(
+                        flags.sr3e,
+                        flags.actor.isAssigningSkills,
+                        true,
+                    );
+                }
+            })();
         }
     });
 </script>

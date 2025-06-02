@@ -1,6 +1,6 @@
 <script>
   import { localize } from "../../../svelteHelpers.js";
-  import { getActorStore, stores } from "../../stores/actorStores.js"
+  import { getActorStore, stores } from "../../stores/actorStores.js";
 
   let { actor, stat, localization, key, isShoppingState } = $props();
 
@@ -30,8 +30,11 @@
   let isMaxLimit = $derived(attributeLimit ? total >= attributeLimit : false);
 
   function add(change) {
+    const newPoints = $attributePointStore + change * -1;
+    if (newPoints < 0) return;
+
     stat.value += change;
-    $attributePointStore = $attributePointStore + change * -1;
+    $attributePointStore = newPoints;
 
     actor.update(
       {
@@ -83,7 +86,8 @@
       <h1 class="stat-value">{total}</h1>
 
       <i
-        class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit
+        class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit ||
+        $attributePointStore === 0
           ? 'disabled'
           : ''}"
         role="button"

@@ -126,10 +126,10 @@ function wrapContent(root) {
 
 function setFlagsOnCharacter(actor, options, userId) {
   actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, true);
-  actor.setFlag(flags.sr3e, flags.actor.isCreationAttributes, true);
   actor.setFlag(flags.sr3e, flags.actor.hasAwakened, false);
   actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
-  actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, false);
+  actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, false);
+  actor.setFlag(flags.sr3e, flags.actor.isAssigningSkills, false);
 }
 
 function registerHooks() {
