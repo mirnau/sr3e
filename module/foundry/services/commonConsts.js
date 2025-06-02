@@ -17,6 +17,7 @@ export const flags = {
   sr3e: "sr3e",
   core: "core",
   actor: {
+    attributeAssignmentLocked: "attributeAssignmentLocked",
     isCharacterCreation: "isCharacterCreation",
     isShoppingState: "isShoppingState",
     isDossierDetailsOpen: "isDossierDetailsOpen",

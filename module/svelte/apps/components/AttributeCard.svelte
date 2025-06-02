@@ -1,12 +1,8 @@
 <script>
   import { localize } from "../../../svelteHelpers.js";
+  import { attributePointStore } from "../../../svelteStore.js";
 
   let { actor, stat, localization, key, isShoppingState } = $props();
-
-  console.log("ACTOR", actor);
-  console.log("Component initialized for key:", key);
-  console.log("Stat structure:", stat);
-  console.log("Has meta:", "meta" in stat);
 
   let value = $state(stat?.value ?? 0);
   let mod = $state(stat?.mod ?? 0);
@@ -30,36 +26,27 @@
   let isMaxLimit = $derived(attributeLimit ? total >= attributeLimit : false);
 
   function add(change) {
-    if (!actor || !stat) return;
-
-    console.log("Entered Add Method for", key);
-
     stat.value += change;
+    $attributePointStore = $attributePointStore + change * -1;
+
     actor.update(
-      { [`system.attributes.${key}.value`]: stat.value },
+      {
+        [`system.attributes.${key}.value`]: stat.value,
+        "system.creation.attributePoints": $attributePointStore,
+      },
       { render: false },
     );
-
-    console.log("Exited Add Method");
   }
 
   const increment = () => {
-    console.log("=== INCREMENT DEBUG ===");
-    console.log("attributeLimit:", attributeLimit);
-    console.log("total:", total);
-    console.log("!attributeLimit:", !attributeLimit);
-    console.log("total < attributeLimit:", total < attributeLimit);
-    console.log("Final condition:", !attributeLimit || total < attributeLimit);
-
     if (!attributeLimit || total < attributeLimit) {
       add(1);
     } else {
-      console.log("BLOCKED: Increment prevented by limit check");
     }
   };
+
   const decrement = () => {
     if (isMinLimit) return;
-    console.log("Decrement called, total:", total);
     if (total > 0) add(-1);
   };
 
@@ -71,47 +58,35 @@
   });
 </script>
 
-<!-- Only render if we have the required data -->
-{#if stat && localization}
-  <div class="stat-card">
-    <h4 class="no-margin">{localize(localization[key])}</h4>
-    {#if "meta" in stat}
-      <!-- ComplexStat: Show increment/decrement controls -->
-      <div class="stat-label">
-        {#if isShoppingState && actor}
-          <i
-            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit
-              ? 'disabled'
-              : ''}"
-            role="button"
-            tabindex="0"
-            onclick={decrement}
-            onkeydown={(e) =>
-              (e.key === "ArrowDown" || e.key === "s") && decrement()}
-          ></i>
-        {/if}
-        <h1 class="stat-value">{total}</h1>
-        {#if actor}
-          <i
-            class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit
-              ? 'disabled'
-              : ''}"
-            role="button"
-            tabindex="0"
-            onclick={increment}
-            onkeydown={(e) =>
-              (e.key === "ArrowUp" || e.key === "w") && increment()}
-          ></i>
-        {/if}
-      </div>
-    {:else}
-      <!-- SimpleStat: Read-only display (like magic) -->
+<div class="stat-card">
+  <h4 class="no-margin">{localize(localization[key])}</h4>
+
+  {#if "meta" in stat}
+    <div class="stat-label">
+      <i
+        class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit
+          ? 'disabled'
+          : ''}"
+        role="button"
+        tabindex="0"
+        onclick={decrement}
+        onkeydown={(e) =>
+          (e.key === "ArrowDown" || e.key === "s") && decrement()}
+      ></i>
+
       <h1 class="stat-value">{total}</h1>
-    {/if}
-  </div>
-{:else}
-  <!-- Loading placeholder -->
-  <div class="stat-card loading">
-    <div class="loading-placeholder">Loading {key}...</div>
-  </div>
-{/if}
+
+      <i
+        class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit
+          ? 'disabled'
+          : ''}"
+        role="button"
+        tabindex="0"
+        onclick={increment}
+        onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+      ></i>
+    </div>
+  {:else}
+    <h1 class="stat-value">{total}</h1>
+  {/if}
+</div>

@@ -10,6 +10,7 @@
     import ItemDataService from "../../../foundry/services/ItemDataService.js";
     import CharacterGeneratorService from "../../../foundry/services/CharacterGeneratorService.js";
     import { flags } from "../../../foundry/services/commonConsts.js";
+    import { attributePointStore, skillPointStore } from "../../../svelteStore.js";
 
     let { actor, config, onSubmit, onCancel } = $props();
     let system = $state(actor.system);
@@ -154,6 +155,8 @@
     async function handleSubmit(event) {
         event.preventDefault();
 
+        console.log("Handle submit was entered");
+
         const selectedAttributeObj = attributPointDropdownOptions.find(
             (attr) => attr.priority === selectedAttribute,
         );
@@ -161,18 +164,21 @@
             (skill) => skill.priority === selectedSkill,
         );
 
+        $attributePointStore = selectedAttributeObj.points - 18;
+        $skillPointStore = selectedSkillObj.points;
+
         await actor.update({
             "system.profile.age": characterAge,
             "system.profile.height": characterHeight,
             "system.profile.weight": characterWeight,
-            "system.creation.attributePoints": selectedAttributeObj.points - 18,
-            "system.creation.activePoints": selectedSkillObj.points,
-            "system.attributes.body.value": 3, 
-            "system.attributes.quickness.value": 3, 
-            "system.attributes.strength.value": 3, 
-            "system.attributes.charisma.value": 3, 
-            "system.attributes.intelligence.value": 3, 
-            "system.attributes.willpower.value": 3, 
+            "system.creation.attributePoints":  $attributePointStore,
+            "system.creation.activePoints": $skillPointStore,
+            "system.attributes.body.value": 3,
+            "system.attributes.quickness.value": 3,
+            "system.attributes.strength.value": 3,
+            "system.attributes.charisma.value": 3,
+            "system.attributes.intelligence.value": 3,
+            "system.attributes.willpower.value": 3,
         });
 
         const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
@@ -182,27 +188,20 @@
         ]);
 
         const magic = magics.find((m) => m.id === selectedMagic);
-        if (["A", "B"].includes(magic.priority)) {
+        if (["A", "B"].includes(selectedMagic.priority)) {
             const worldMagic = game.items.get(magic.id);
             await actor.createEmbeddedDocuments("Item", [
                 worldMagic.toObject(),
             ]);
-            
+
             actor.setFlag(flags.sr3e, flags.actor.hasAwakened, true);
 
-            await actor.update({"system.attributes.magic.value": 6})
+            await actor.update({ "system.attributes.magic.value": 6 });
         }
 
-        console.log("Character created:", {
-            name: characterName,
-            metahuman: metahuman.name,
-            magic: magic?.name,
-            age: characterAge,
-            height: characterHeight,
-            weight: characterWeight,
-        });
-
         onSubmit?.(true);
+
+        console.log("Handle submit was exited");
     }
 
     function handleRandomize() {
