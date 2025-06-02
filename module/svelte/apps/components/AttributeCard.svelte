@@ -1,12 +1,16 @@
 <script>
   import { localize } from "../../../svelteHelpers.js";
-  import { attributePointStore } from "../../../svelteStore.js";
+  import { getActorStore, stores } from "../../stores/actorStores.js"
 
   let { actor, stat, localization, key, isShoppingState } = $props();
+
+  const attributePointStore = getActorStore(actor.id, stores.attributePoints);
 
   let value = $state(stat?.value ?? 0);
   let mod = $state(stat?.mod ?? 0);
   let total = $derived(value + mod + (stat?.meta ?? 0));
+
+  let intelligenceStore = getActorStore(actor.id, stores.intelligence);
 
   // Only calculate metaHuman and attributeLimit for ComplexStat attributes (not magic)
   let metaHuman = $derived(
@@ -36,6 +40,8 @@
       },
       { render: false },
     );
+
+    intelligenceStore.set(actor.system.attributes.intelligence.value);
   }
 
   const increment = () => {

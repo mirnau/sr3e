@@ -3042,13 +3042,13 @@ function get(store) {
 }
 let is_store_binding = false;
 let IS_UNMOUNTED = Symbol();
-function store_get(store, store_name, stores) {
-  const entry = stores[store_name] ?? (stores[store_name] = {
+function store_get(store, store_name, stores2) {
+  const entry = stores2[store_name] ?? (stores2[store_name] = {
     store: null,
     source: /* @__PURE__ */ mutable_source(void 0),
     unsubscribe: noop
   });
-  if (entry.store !== store && !(IS_UNMOUNTED in stores)) {
+  if (entry.store !== store && !(IS_UNMOUNTED in stores2)) {
     entry.unsubscribe();
     entry.store = store ?? null;
     if (store == null) {
@@ -3066,7 +3066,7 @@ function store_get(store, store_name, stores) {
       is_synchronous_callback = false;
     }
   }
-  if (store && IS_UNMOUNTED in stores) {
+  if (store && IS_UNMOUNTED in stores2) {
     return get(store);
   }
   return get$1(entry.source);
@@ -3076,20 +3076,20 @@ function store_set(store, value) {
   return value;
 }
 function setup_stores() {
-  const stores = {};
+  const stores2 = {};
   function cleanup() {
     teardown(() => {
-      for (var store_name in stores) {
-        const ref = stores[store_name];
+      for (var store_name in stores2) {
+        const ref = stores2[store_name];
         ref.unsubscribe();
       }
-      define_property(stores, IS_UNMOUNTED, {
+      define_property(stores2, IS_UNMOUNTED, {
         enumerable: false,
         value: true
       });
     });
   }
-  return [stores, cleanup];
+  return [stores2, cleanup];
 }
 function capture_store_binding(fn) {
   var previous_is_store_binding = is_store_binding;
@@ -3314,21 +3314,16 @@ function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y"
     css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};${primary_property}: ${t * primary_property_value}px;padding-${secondary_properties[0]}: ${t * padding_start_value}px;padding-${secondary_properties[1]}: ${t * padding_end_value}px;margin-${secondary_properties[0]}: ${t * margin_start_value}px;margin-${secondary_properties[1]}: ${t * margin_end_value}px;border-${secondary_properties[0]}-width: ${t * border_width_start_value}px;border-${secondary_properties[1]}-width: ${t * border_width_end_value}px;min-${primary_property}: 0`
   };
 }
-const actorStores = /* @__PURE__ */ new Map();
-function getActorStore(actorId, actorName) {
+const actorStores$1 = /* @__PURE__ */ new Map();
+function getActorStore$1(actorId, actorName) {
   let initialState = { name: actorName };
-  if (!actorStores.has(actorId)) {
-    actorStores.set(actorId, writable(initialState));
+  if (!actorStores$1.has(actorId)) {
+    actorStores$1.set(actorId, writable(initialState));
   }
-  return actorStores.get(actorId);
+  return actorStores$1.get(actorId);
 }
 const cardLayout = writable([]);
 const shoppingState = writable([]);
-const attributePointStore = writable(0);
-const skillPointStore = writable(0);
-const knowledgePointStore = writable(0);
-const languagePointStore = writable(0);
-const attributeAssignmentLocked = writable(false);
 function localize(key) {
   return game.i18n.localize(key);
 }
@@ -3435,7 +3430,7 @@ function Dossier($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let system = proxy(actor().system);
-  let actorStore = /* @__PURE__ */ derived(() => actor().id && actor().name ? getActorStore(actor().id, actor().name) : null);
+  let actorStore = /* @__PURE__ */ derived(() => actor().id && actor().name ? getActorStore$1(actor().id, actor().name) : null);
   let actorName = state(proxy(actor().name));
   let isDetailsOpen = state(proxy(actor().system.profile.isDetailsOpen));
   let imgPath = state("");
@@ -5243,6 +5238,25 @@ function Initiative($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
+const actorStores = {};
+const stores = {
+  intelligence: "intelligence",
+  attributePoints: "attributePoints",
+  activePoints: "activePoints",
+  knowledgePoints: "knowledgePoints",
+  languagePoints: "languagePoints"
+};
+function getActorStore(actorId, storeName, customValue = null) {
+  actorStores[actorId] ?? (actorStores[actorId] = {});
+  if (!actorStores[actorId][storeName]) {
+    let value = customValue;
+    if (value && typeof value === "object") {
+      value = Array.isArray(value) ? [...value] : { ...value };
+    }
+    actorStores[actorId][storeName] = writable(value);
+  }
+  return actorStores[actorId][storeName];
+}
 var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_1$9 = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
@@ -5254,12 +5268,14 @@ function AttributeCard($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   let stat = prop($$props, "stat", 7);
+  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
   let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
   let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
   let total = /* @__PURE__ */ derived(() => {
     var _a2;
     return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
   });
+  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence);
   let metaHuman = /* @__PURE__ */ derived(() => (() => {
     var _a2;
     if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
@@ -5281,6 +5297,7 @@ function AttributeCard($$anchor, $$props) {
       },
       { render: false }
     );
+    intelligenceStore.set($$props.actor.system.attributes.intelligence.value);
   }
   const increment = () => {
     if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
@@ -5432,6 +5449,9 @@ function DicePools($$anchor, $$props) {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
     AttributeCard($$anchor2, {
+      get actor() {
+        return actor();
+      },
       get stat() {
         return stat();
       },
@@ -5483,6 +5503,9 @@ function Movement($$anchor, $$props) {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
     AttributeCard($$anchor2, {
+      get actor() {
+        return actor();
+      },
       get stat() {
         return stat();
       },
@@ -5941,7 +5964,7 @@ function NeonName($$anchor, $$props) {
   const $actorStore = () => store_get(actorStore, "$actorStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({}));
   let malfunctioningIndexes = [];
-  const actorStore = getActorStore(actor().id, actor().name);
+  const actorStore = getActorStore$1(actor().id, actor().name);
   let name = /* @__PURE__ */ derived(() => $actorStore().name);
   let neonHTML = /* @__PURE__ */ derived(() => getNeonHtml(get$1(name)));
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -6000,16 +6023,17 @@ function CreationPoints($$anchor, $$props) {
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let system = proxy(actor().system);
-  store_set(attributePointStore, proxy(system.creation.attributePoints));
-  store_set(skillPointStore, proxy(system.creation.activePoints));
-  let intelligence = system.attributes.intelligence.value + system.attributes.intelligence.mod + (system.attributes.intelligence.meta ?? 0);
-  console.log("INTELLIGENCE", intelligence);
-  attributeAssignmentLocked.set(actor().getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked) ?? false);
+  let intelligenceStore = getActorStore(actor().id, stores.intelligence, system.attributes.intelligence.value + system.attributes.intelligence.mod + system.attributes.intelligence.meta);
+  let attributePointStore = getActorStore(actor().id, stores.attributePoints, system.creation.attributePoints);
+  let skillPointStore = getActorStore(actor().id, stores.activePoints, system.creation.activePoints);
+  let knowledgePointStore = getActorStore(actor().id, stores.knowledgePoints, 500);
+  let languagePointStore = getActorStore(actor().id, stores.languagePoints, 500);
+  let intelligence = state(0);
   let attributePointsText = localize(config().attributes.attributes);
   let activePointsText = localize(config().skill.active);
   let knowledgePointsText = localize(config().skill.knowledge);
   let languagePointsText = localize(config().skill.language);
-  let pointList = proxy([
+  let pointList = /* @__PURE__ */ derived(() => [
     {
       value: $attributePointStore(),
       text: attributePointsText
@@ -6028,15 +6052,23 @@ function CreationPoints($$anchor, $$props) {
     }
   ]);
   user_effect(() => {
-    console.log("Recalculating stuff ...", intelligence);
-    store_set(knowledgePointStore, intelligence * 5);
-    store_set(languagePointStore, proxy(Math.floor(intelligence * 1.5)));
+    const unsubscribe = intelligenceStore.subscribe((v) => {
+      if (typeof v === "number") {
+        set(intelligence, proxy(v));
+      }
+    });
+    return unsubscribe;
+  });
+  user_effect(() => {
+    console.log("Recalculating stuff ...", get$1(intelligence));
+    knowledgePointStore.set(get$1(intelligence) * 5);
+    languagePointStore.set(Math.floor(get$1(intelligence) * 1.5));
   });
   user_effect(() => {
   });
   var fragment = comment();
   var node = first_child(fragment);
-  each(node, 17, () => pointList, index, ($$anchor2, point, i) => {
+  each(node, 17, () => get$1(pointList), index, ($$anchor2, point, i) => {
     var div = root_1$6();
     set_attribute(div, "style", `top: ${i * 8}rem`);
     var h1 = child(div);
@@ -8811,9 +8843,6 @@ var root_5 = /* @__PURE__ */ template(`<option> </option>`);
 var root = /* @__PURE__ */ template(`<form><div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let actor = prop($$props, "actor", 7);
   proxy(actor().system);
   let characterName = state(proxy(actor().name));
@@ -8923,14 +8952,13 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     console.log("Handle submit was entered");
     const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$1(selectedAttribute));
     const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$1(selectedSkill));
-    store_set(attributePointStore, selectedAttributeObj.points - 18);
-    store_set(skillPointStore, proxy(selectedSkillObj.points));
+    let remainingPoints = selectedAttributeObj.points - 18;
     await actor().update({
       "system.profile.age": get$1(characterAge),
       "system.profile.height": get$1(characterHeight),
       "system.profile.weight": get$1(characterWeight),
-      "system.creation.attributePoints": $attributePointStore(),
-      "system.creation.activePoints": $skillPointStore(),
+      "system.creation.attributePoints": remainingPoints,
+      "system.creation.activePoints": selectedSkillObj.points,
       "system.attributes.body.value": 3,
       "system.attributes.quickness.value": 3,
       "system.attributes.strength.value": 3,
@@ -9197,7 +9225,6 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   bind_select_value(select_4, () => get$1(selectedResource), ($$value) => set(selectedResource, $$value));
   append($$anchor, form);
   pop();
-  $$cleanup();
 }
 delegate(["click"]);
 class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {

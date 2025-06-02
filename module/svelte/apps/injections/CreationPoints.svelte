@@ -1,60 +1,87 @@
 <script>
     import { localize } from "../../../svelteHelpers.js";
     import { flags } from "../../../foundry/services/commonConsts.js";
-    import {
-        attributePointStore,
-        skillPointStore,
-        knowledgePointStore,
-        languagePointStore,
-        attributeAssignmentLocked,
-    } from "../../../svelteStore.js";
+    import { getActorStore, stores } from "../../stores/actorStores.js";
 
     let { actor = {}, config = {} } = $props();
-
     let system = $state(actor.system);
-    $attributePointStore = system.creation.attributePoints;
-    $skillPointStore = system.creation.activePoints;
 
-    // Make intelligence reactive by using $derived instead of $state
-    let intelligence = $state(
+    // Store retrieval with lazy init
+    let intelligenceStore = getActorStore(
+        actor.id,
+        stores.intelligence,
         system.attributes.intelligence.value +
             system.attributes.intelligence.mod +
-            (system.attributes.intelligence.meta ?? 0),
+            system.attributes.intelligence.meta ?? 0,
     );
 
-
-    console.log("INTELLIGENCE", intelligence);
+    let attributePointStore = getActorStore(
+        actor.id,
+        stores.attributePoints,
+        system.creation.attributePoints,
+    );
+    let skillPointStore = getActorStore(
+        actor.id,
+        stores.activePoints,
+        system.creation.activePoints,
+    );
+    let knowledgePointStore = getActorStore(
+        actor.id,
+        stores.knowledgePoints,
+        500,
+    );
+    let languagePointStore = getActorStore(
+        actor.id,
+        stores.languagePoints,
+        500,
+    );
 
     let isCharacterCreation = $state(true);
 
+    // Reactive intelligence value
+    let intelligence = $state(0);
+
     // This is a one-time set (read-only from here)
-    attributeAssignmentLocked.set(
-        actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked) ??
-            false,
-    );
+    // Note: You need to define attributeAssignmentLocked somewhere
+    // attributeAssignmentLocked.set(
+    //     actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked) ?? false,
+    // );
 
     let attributePointsText = localize(config.attributes.attributes);
     let activePointsText = localize(config.skill.active);
     let knowledgePointsText = localize(config.skill.knowledge);
     let languagePointsText = localize(config.skill.language);
 
-    let pointList = $state([
+    // Make pointList reactive by using derived stores
+    let pointList = $derived([
         { value: $attributePointStore, text: attributePointsText },
         { value: $skillPointStore, text: activePointsText },
         { value: $knowledgePointStore, text: knowledgePointsText },
         { value: $languagePointStore, text: languagePointsText },
     ]);
 
-    // Update the effect to use the reactive intelligence value
+    // Subscribe to intelligence changes
     $effect(() => {
-        console.log("Recalculating stuff ...", intelligence);
-        $knowledgePointStore = intelligence * 5;
-        $languagePointStore = Math.floor(intelligence * 1.5);
+        const unsubscribe = intelligenceStore.subscribe((v) => {
+            if (typeof v === "number") {
+                intelligence = v;
+            }
+        });
+        return unsubscribe;
     });
 
+    // Update dependent values when intelligence changes
     $effect(() => {
-        if (!isCharacterCreation)
+        console.log("Recalculating stuff ...", intelligence);
+        knowledgePointStore.set(intelligence * 5);
+        languagePointStore.set(Math.floor(intelligence * 1.5));
+    });
+
+    // Handle character creation flag
+    $effect(() => {
+        if (!isCharacterCreation) {
             actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
+        }
     });
 </script>
 
