@@ -9,7 +9,8 @@ export const stores = {
     knowledgePoints:"knowledgePoints",
     languagePoints: "languagePoints",
     attributeAssignmentLocked: "attributeAssignmentLocked",
-    actorName: "actorName"
+    actorName: "actorName",
+    isShoppingState: "isShoppingState"
 }
 
 export function getActorStore(actorId, storeName, customValue = null) {

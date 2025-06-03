@@ -1,5 +1,5 @@
 <script>
-    import AttributeCard from "./AttributeCard.svelte";
+    import AttributeCard from "./AttributeCardKarmaState.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import { shoppingState } from "../../../svelteStore.js";

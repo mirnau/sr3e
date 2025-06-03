@@ -1,8 +1,15 @@
 <script>
+  import { flags } from "../../../foundry/services/commonConsts.js";
   import { localize } from "../../../svelteHelpers.js";
   import { getActorStore, stores } from "../../stores/actorStores.js";
 
-  let { actor, stat, localization, key, isShoppingState } = $props();
+  let { actor, stat, localization, key } = $props();
+
+  let isShoppingState = getActorStore(
+    actor.id,
+    stores.isShoppingState,
+    actor.getFlag(flags.sr3e, flags.isShoppingState),
+  );
 
   const attributePointStore = getActorStore(actor.id, stores.attributePoints);
 
@@ -46,8 +53,8 @@
 
     intelligenceStore.set(
       actor.system.attributes.intelligence.value +
-      actor.system.attributes.intelligence.mod +
-      actor.system.attributes.intelligence.meta ?? 0
+        actor.system.attributes.intelligence.mod +
+        actor.system.attributes.intelligence.meta ?? 0,
     );
   }
 
@@ -76,29 +83,33 @@
 
   {#if "meta" in stat}
     <div class="stat-label">
-      <i
-        class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit
-          ? 'disabled'
-          : ''}"
-        role="button"
-        tabindex="0"
-        onclick={decrement}
-        onkeydown={(e) =>
-          (e.key === "ArrowDown" || e.key === "s") && decrement()}
-      ></i>
+      {#if $isShoppingState}
+        <i
+          class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit
+            ? 'disabled'
+            : ''}"
+          role="button"
+          tabindex="0"
+          onclick={decrement}
+          onkeydown={(e) =>
+            (e.key === "ArrowDown" || e.key === "s") && decrement()}
+        ></i>
+      {/if}
 
       <h1 class="stat-value">{total}</h1>
-
-      <i
-        class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit ||
-        $attributePointStore === 0
-          ? 'disabled'
-          : ''}"
-        role="button"
-        tabindex="0"
-        onclick={increment}
-        onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-      ></i>
+      {#if $isShoppingState}
+        <i
+          class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit ||
+          $attributePointStore === 0
+            ? 'disabled'
+            : ''}"
+          role="button"
+          tabindex="0"
+          onclick={increment}
+          onkeydown={(e) =>
+            (e.key === "ArrowUp" || e.key === "w") && increment()}
+        ></i>
+      {/if}
     </div>
   {:else}
     <h1 class="stat-value">{total}</h1>

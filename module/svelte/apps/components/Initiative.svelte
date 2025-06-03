@@ -21,7 +21,7 @@
         quicknessBaseTotal + (attributes.quickness.meta ?? 0),
     );
 
-    let reaction = $derived(Math.floor(intelligence + quickness) * 0.5);
+    let reaction = $derived(Math.floor(intelligence + quickness * 0.5));
     let augmentedReaction = $derived(reaction);
 
     let initiativeDice = 1;

@@ -4,8 +4,14 @@
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import CreationPointList from "../../components/CreationPointList.svelte";
 
-    let { actor, config, isAssigningAttributes = $bindable(true) } = $props();
+    let { actor, config } = $props();
     let system = $state(actor.system);
+
+    let isAssigningAttributesStore = getActorStore(
+        actor.id,
+        stores.isAssigningAttributes,
+        actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes),
+    );
 
     // Store retrieval with lazy init
     let intelligenceStore = getActorStore(
@@ -146,7 +152,7 @@
                         flags.actor.isAssigningAttributes,
                         false,
                     );
-                    isAssigningAttributes = false;
+                    $isAssigningAttributesStore = false;
                 }
             })();
         }

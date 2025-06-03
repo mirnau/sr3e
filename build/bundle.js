@@ -3315,7 +3315,6 @@ function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y"
   };
 }
 const cardLayout = writable([]);
-const shoppingState = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
@@ -3383,23 +3382,23 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$8 = (e) => e.stopPropagation();
-var on_keydown$3 = (e) => {
+var on_keydown$4 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$t = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$u = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$t();
+  var div = root$u();
   div.__click = [on_click$8];
-  div.__keydown = [on_keydown$3];
+  div.__keydown = [on_keydown$4];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3417,7 +3416,8 @@ const stores = {
   activePoints: "activePoints",
   knowledgePoints: "knowledgePoints",
   languagePoints: "languagePoints",
-  actorName: "actorName"
+  actorName: "actorName",
+  isShoppingState: "isShoppingState"
 };
 function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
@@ -3430,13 +3430,13 @@ function getActorStore(actorId, storeName, customValue = null) {
   }
   return actorStores[actorId][storeName];
 }
-var root_1$b = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
+var root_1$c = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
-var root_2$5 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_keydown$2 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var root_2$6 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
+var on_keydown$3 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$5 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$s = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root$t = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3488,7 +3488,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     actorNameStore.set(newName);
   }
-  var fragment = root$s();
+  var fragment = root$t();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3499,13 +3499,13 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$b();
+      var div_1 = root_1$c();
       var img = child(div_1);
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$5();
+      var div_2 = root_2$6();
       var img_1 = child(div_2);
       img_1.__click = [on_click$7, actor];
       template_effect(() => {
@@ -3523,12 +3523,12 @@ function Dossier($$anchor, $$props) {
   var div_3 = sibling(node_1, 2);
   var div_4 = child(div_3);
   div_4.__click = toggleDetails;
-  div_4.__keydown = [on_keydown$2, toggleDetails];
+  div_4.__keydown = [on_keydown$3, toggleDetails];
   var text = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_1 = root_3$5();
+      var fragment_1 = root_3$6();
       var div_5 = first_child(fragment_1);
       var div_6 = child(div_5);
       var input = child(div_6);
@@ -5179,7 +5179,7 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root$r = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+var root$s = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5191,7 +5191,7 @@ function Initiative($$anchor, $$props) {
   let intelligence = /* @__PURE__ */ derived(() => get$1(intelligenceBaseTotal) + (attributes.intelligence.meta ?? 0));
   let quicknessBaseTotal = /* @__PURE__ */ derived(() => attributes.quickness.value + attributes.quickness.mod);
   let quickness = /* @__PURE__ */ derived(() => get$1(quicknessBaseTotal) + (attributes.quickness.meta ?? 0));
-  let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness)) * 0.5);
+  let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness) * 0.5));
   let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
   let initiativeDice = 1;
   user_effect(() => {
@@ -5204,7 +5204,7 @@ function Initiative($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$r();
+  var div = root$s();
   var h1 = child(div);
   var text = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5243,17 +5243,143 @@ function Initiative($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
+const hooks = {
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  renderApplicationV2: "renderApplicationV2"
+};
+const flags = {
+  sr3e: "sr3e",
+  core: "core",
+  actor: {
+    isCharacterCreation: "isCharacterCreation",
+    isShoppingState: "isShoppingState",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut",
+    isAssigningSkills: "isAssigningSkills",
+    isAssigningAttributes: "isAssigningAttributes"
+  }
+};
+var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
+var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
+var root_2$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$r = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
+function AttributeCardCreationState($$anchor, $$props) {
+  var _a, _b;
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isAssigningAttributesStore = () => store_get(isAssigningAttributesStore, "$isAssigningAttributesStore", $$stores);
+  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  let stat = prop($$props, "stat", 7);
+  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
+  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
+  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
+  let total = /* @__PURE__ */ derived(() => {
+    var _a2;
+    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
+  });
+  let isAssigningAttributesStore = getActorStore($$props.actor.id, stores.isAssigningAttributes, $$props.actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes));
+  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence);
+  let metaHuman = /* @__PURE__ */ derived(() => (() => {
+    var _a2;
+    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
+    return $$props.actor.items.find((i) => i.type === "metahuman");
+  })());
+  let attributeLimit = /* @__PURE__ */ derived(() => {
+    var _a2, _b2, _c;
+    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
+  });
+  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
+  function add(change) {
+    if ($isAssigningAttributesStore()) {
+      const newPoints = $attributePointStore() + change * -1;
+      if (newPoints < 0) return;
+      stat().value += change;
+      store_set(attributePointStore, newPoints);
+      $$props.actor.update(
+        {
+          [`system.attributes.${$$props.key}.value`]: stat().value,
+          "system.creation.attributePoints": $attributePointStore()
+        },
+        { render: false }
+      );
+      intelligenceStore.set($$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
+    }
+  }
+  const increment = () => {
+    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
+      add(1);
+    }
+  };
+  const decrement = () => {
+    if (get$1(isMinLimit)) return;
+    if (get$1(total) > 0) add(-1);
+  };
+  user_effect(() => {
+    if (stat()) {
+      set(value, proxy(stat().value));
+      set(mod, proxy(stat().mod));
+    }
+  });
+  var div = root$r();
+  var h4 = child(div);
+  var text = child(h4);
+  var node = sibling(h4, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var div_1 = root_1$b();
+      var i_1 = child(div_1);
+      i_1.__click = decrement;
+      i_1.__keydown = [on_keydown$2, decrement];
+      var h1 = sibling(i_1, 2);
+      var text_1 = child(h1);
+      var i_2 = sibling(h1, 2);
+      i_2.__click = increment;
+      i_2.__keydown = [on_keydown_1$1, increment];
+      template_effect(() => {
+        set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
+        set_text(text_1, get$1(total));
+        set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
+      });
+      append($$anchor2, div_1);
+    };
+    var alternate = ($$anchor2) => {
+      var h1_1 = root_2$5();
+      var text_2 = child(h1_1);
+      template_effect(() => set_text(text_2, get$1(total)));
+      append($$anchor2, h1_1);
+    };
+    if_block(node, ($$render) => {
+      if ("meta" in stat()) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(($0) => set_text(text, $0), [
+    () => localize($$props.localization[$$props.key])
+  ]);
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
 var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var root_2$4 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
-var root_1$a = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
-var root_2$4 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$a = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$q = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
-function AttributeCard($$anchor, $$props) {
+function AttributeCardKarmaState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let stat = prop($$props, "stat", 7);
+  let isShoppingState = getActorStore($$props.actor.id, stores.isShoppingState, $$props.actor.getFlag(flags.sr3e, flags.isShoppingState));
   const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
   let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
   let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
@@ -5307,31 +5433,47 @@ function AttributeCard($$anchor, $$props) {
   var text = child(h4);
   var node = sibling(h4, 2);
   {
-    var consequent = ($$anchor2) => {
+    var consequent_2 = ($$anchor2) => {
       var div_1 = root_1$a();
-      var i_1 = child(div_1);
-      i_1.__click = decrement;
-      i_1.__keydown = [on_keydown$1, decrement];
-      var h1 = sibling(i_1, 2);
+      var node_1 = child(div_1);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$4();
+          i_1.__click = decrement;
+          i_1.__keydown = [on_keydown$1, decrement];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ($isShoppingState()) $$render(consequent);
+        });
+      }
+      var h1 = sibling(node_1, 2);
       var text_1 = child(h1);
-      var i_2 = sibling(h1, 2);
-      i_2.__click = increment;
-      i_2.__keydown = [on_keydown_1, increment];
-      template_effect(() => {
-        set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
-        set_text(text_1, get$1(total));
-        set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
-      });
+      var node_2 = sibling(h1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i_2 = root_3$5();
+          i_2.__click = increment;
+          i_2.__keydown = [on_keydown_1, increment];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_2, ($$render) => {
+          if ($isShoppingState()) $$render(consequent_1);
+        });
+      }
+      template_effect(() => set_text(text_1, get$1(total)));
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var h1_1 = root_2$4();
+      var h1_1 = root_4$3();
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, get$1(total)));
       append($$anchor2, h1_1);
     };
     if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent);
+      if ("meta" in stat()) $$render(consequent_2);
       else $$render(alternate, false);
     });
   }
@@ -5346,16 +5488,14 @@ delegate(["click", "keydown"]);
 var root$p = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isAssigningAttributes = () => store_get(isAssigningAttributes, "$isAssigningAttributes", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let gridContainer;
-  let isShoppingState = state(false);
   let localization = config().attributes;
-  user_effect(() => {
-    const unsubscribe = shoppingState.subscribe((v) => set(isShoppingState, proxy(v)));
-    return unsubscribe;
-  });
+  let isAssigningAttributes = getActorStore(actor().id, stores.isAssigningAttributes, actor().getFlag(flags.sr3e, flags.isAssigningAttributes));
   user_effect(() => {
     const result = setupMasonry({
       container: gridContainer,
@@ -5380,21 +5520,43 @@ function Attributes($$anchor, $$props) {
   each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    AttributeCard($$anchor2, {
-      get actor() {
-        return actor();
-      },
-      get stat() {
-        return stat();
-      },
-      localization,
-      get key() {
-        return key();
-      },
-      get isShoppingState() {
-        return get$1(isShoppingState);
-      }
-    });
+    var fragment_1 = comment();
+    var node_2 = first_child(fragment_1);
+    {
+      var consequent = ($$anchor3) => {
+        AttributeCardCreationState($$anchor3, {
+          get actor() {
+            return actor();
+          },
+          get stat() {
+            return stat();
+          },
+          localization,
+          get key() {
+            return key();
+          }
+        });
+      };
+      var alternate = ($$anchor3) => {
+        AttributeCardKarmaState($$anchor3, {
+          get actor() {
+            return actor();
+          },
+          get stat() {
+            return stat();
+          },
+          localization,
+          get key() {
+            return key();
+          }
+        });
+      };
+      if_block(node_2, ($$render) => {
+        if ($isAssigningAttributes()) $$render(consequent);
+        else $$render(alternate, false);
+      });
+    }
+    append($$anchor2, fragment_1);
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
@@ -5402,6 +5564,7 @@ function Attributes($$anchor, $$props) {
   ]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
 var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function DicePools($$anchor, $$props) {
@@ -5436,7 +5599,7 @@ function DicePools($$anchor, $$props) {
   each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    AttributeCard($$anchor2, {
+    AttributeCardKarmaState($$anchor2, {
       get actor() {
         return actor();
       },
@@ -5490,7 +5653,7 @@ function Movement($$anchor, $$props) {
   each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
     let key = () => get$1($$item)[0];
     let stat = () => get$1($$item)[1];
-    AttributeCard($$anchor2, {
+    AttributeCardKarmaState($$anchor2, {
       get actor() {
         return actor();
       },
@@ -5984,24 +6147,6 @@ function NewsFeed($$anchor) {
   var div = root$d();
   append($$anchor, div);
 }
-const hooks = {
-  preCreateActor: "preCreateActor",
-  createActor: "createActor",
-  init: "init",
-  renderApplicationV2: "renderApplicationV2"
-};
-const flags = {
-  sr3e: "sr3e",
-  core: "core",
-  actor: {
-    isCharacterCreation: "isCharacterCreation",
-    isShoppingState: "isShoppingState",
-    hasAwakened: "hasAwakened",
-    burntOut: "burntOut",
-    isAssigningSkills: "isAssigningSkills",
-    isAssigningAttributes: "isAssigningAttributes"
-  }
-};
 var root_1$7 = /* @__PURE__ */ template(`<div class="point-container"><h1> </h1> <div> </div></div>`);
 var root$c = /* @__PURE__ */ template(`<div></div>`);
 function CreationPointList($$anchor, $$props) {
@@ -6030,8 +6175,8 @@ function AttributePointsState($$anchor, $$props) {
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
-  let isAssigningAttributes = prop($$props, "isAssigningAttributes", 15, true);
   let system = proxy($$props.actor.system);
+  let isAssigningAttributesStore = getActorStore($$props.actor.id, stores.isAssigningAttributes, $$props.actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes));
   let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, system.attributes.intelligence.value + system.attributes.intelligence.mod + system.attributes.intelligence.meta);
   let attributePointStore = getActorStore($$props.actor.id, stores.attributePoints, system.creation.attributePoints);
   let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, system.creation.activePoints);
@@ -6101,7 +6246,7 @@ function AttributePointsState($$anchor, $$props) {
         });
         if (confirmed) {
           $$props.actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, false);
-          isAssigningAttributes(false);
+          store_set(isAssigningAttributesStore, false);
         }
       })();
     }
@@ -6180,8 +6325,10 @@ function SkillPointsState($$anchor, $$props) {
 var root_1$6 = /* @__PURE__ */ template(`<div><!></div>`);
 function CharacterCreationManager($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isAssigningAttributesStore = () => store_get(isAssigningAttributesStore, "$isAssigningAttributesStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isAssigningAttributes = state(proxy(actor().getFlag(flags.sr3e, flags.actor.isAssigningAttributes)));
+  let isAssigningAttributesStore = getActorStore(actor().id, stores.isAssigningAttributes, actor().getFlag(flags.sr3e, flags.actor.isAssigningAttributes));
   let isCharacterCreation = state(proxy(actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation)));
   var fragment = comment();
   var node = first_child(fragment);
@@ -6197,12 +6344,6 @@ function CharacterCreationManager($$anchor, $$props) {
             },
             get config() {
               return config();
-            },
-            get isAssigningAttributes() {
-              return get$1(isAssigningAttributes);
-            },
-            set isAssigningAttributes($$value) {
-              set(isAssigningAttributes, proxy($$value));
             }
           });
         };
@@ -6223,7 +6364,7 @@ function CharacterCreationManager($$anchor, $$props) {
           });
         };
         if_block(node_1, ($$render) => {
-          if (get$1(isAssigningAttributes)) $$render(consequent);
+          if ($isAssigningAttributesStore()) $$render(consequent);
           else $$render(alternate, false);
         });
       }
@@ -6235,29 +6376,27 @@ function CharacterCreationManager($$anchor, $$props) {
   }
   append($$anchor, fragment);
   pop();
-}
-function toggleShoppingState(_, isShoppingState, actor) {
-  set(isShoppingState, !get$1(isShoppingState));
-  shoppingState.set(get$1(isShoppingState));
-  actor().setFlag(flags.sr3e, flags.actor.isShoppingState, get$1(isShoppingState));
+  $$cleanup();
 }
 var root$b = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
 function ShoppingCart($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = state(true);
-  (async () => {
-    const current = await actor().getFlag(flags.sr3e, flags.actor.isShoppingState);
-    set(isShoppingState, proxy(current ?? true));
-    if (current === null) actor().setFlag(flags.sr3e, flags.actor.isShoppingState, true);
-  })();
+  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  function toggleShoppingState() {
+    store_set(isShoppingState, !$isShoppingState());
+    actor().setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
+    console.log("shoppingState", $isShoppingState());
+  }
   var div = root$b();
   var button = child(div);
-  button.__click = [toggleShoppingState, isShoppingState, actor];
+  button.__click = toggleShoppingState;
   template_effect(
     ($0) => {
       set_attribute(button, "aria-label", $0);
-      set_class(button, `header-control icon fa-solid fa-cart-shopping ${get$1(isShoppingState) ? "pulsing-green-cart" : ""}`);
+      set_class(button, `header-control icon fa-solid fa-cart-shopping ${$isShoppingState() ? "pulsing-green-cart" : ""}`);
     },
     [
       () => localize(config().sheet.buyupgrades)
@@ -6265,6 +6404,7 @@ function ShoppingCart($$anchor, $$props) {
   );
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 delegate(["click"]);
 class ActorDataService {
