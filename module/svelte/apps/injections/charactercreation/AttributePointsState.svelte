@@ -1,9 +1,10 @@
 <script>
-    import { localize } from "../../../svelteHelpers.js";
-    import { flags } from "../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../stores/actorStores.js";
+    import { localize } from "../../../../svelteHelpers.js";
+    import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { getActorStore, stores } from "../../../stores/actorStores.js";
+    import CreationPointList from "../../components/CreationPointList.svelte";
 
-    let { actor = {}, config = {} } = $props();
+    let { actor, config, isAssigningAttributes = $bindable(true) } = $props();
     let system = $state(actor.system);
 
     // Store retrieval with lazy init
@@ -28,12 +29,12 @@
     let knowledgePointStore = getActorStore(
         actor.id,
         stores.knowledgePoints,
-        500,
+        system.creation.knowledgePoints,
     );
     let languagePointStore = getActorStore(
         actor.id,
         stores.languagePoints,
-        500,
+        system.creation.languagePoints,
     );
 
     // Reactive intelligence value
@@ -74,21 +75,70 @@
         languagePointStore.set(Math.floor(intelligence * 1.5));
     });
 
+    // Watch attributePointStore changes and update Foundry data
+    $effect(() => {
+        const value = $attributePointStore;
+        actor.update(
+            {
+                "system.creation.attributePoints": value,
+            },
+            { render: false },
+        );
+    });
+
+    // Watch skillPointStore changes and update Foundry data
+    $effect(() => {
+        const value = $skillPointStore;
+        actor.update(
+            {
+                "system.creation.activePoints": value,
+            },
+            { render: false },
+        );
+    });
+
+    // Watch knowledgePointStore changes and update Foundry data
+    $effect(() => {
+        const value = $knowledgePointStore;
+        actor.update(
+            {
+                "system.creation.knowledgePoints": value,
+            },
+            { render: false },
+        );
+    });
+
+    // Watch languagePointStore changes and update Foundry data
+    $effect(() => {
+        const value = $languagePointStore;
+        actor.update(
+            {
+                "system.creation.languagePoints": value,
+            },
+            { render: false },
+        );
+    });
+
     $effect(() => {
         if ($attributePointStore === 0) {
             (async () => {
                 const confirmed =
-                    await foundry.applications.api.DialogV2.confirm(
-                        {},
-                        {
-                            title: "Finish Character Creation?",
-                            content:
-                                "You've used all your attribute points. Are you ready to continue with skill assignment?",
-                            yes: "Yes, finish",
-                            no: "Not yet",
-                            defaultYes: true,
+                    await foundry.applications.api.DialogV2.confirm({
+                        window: {
+                            title: "Finish Attribute Point Assignement?",
                         },
-                    );
+                        content:
+                            "You've used all your attribute points. Are you ready to continue with skill assignment?",
+                        yes: {
+                            label: "Yes, finish",
+                            default: true,
+                        },
+                        no: {
+                            label: "Not yet",
+                        },
+                        modal: true,
+                        rejectClose: true,
+                    });
 
                 if (confirmed) {
                     actor.setFlag(
@@ -96,20 +146,14 @@
                         flags.actor.isAssigningAttributes,
                         false,
                     );
-                    actor.setFlag(
-                        flags.sr3e,
-                        flags.actor.isAssigningSkills,
-                        true,
-                    );
+                    isAssigningAttributes = false;
                 }
             })();
         }
     });
 </script>
 
-{#each pointList as point, i}
-    <div class="point-container" style="top: {i * 8}rem">
-        <h1>{point.value}</h1>
-        <div>{point.text}</div>
-    </div>
-{/each}
+<CreationPointList
+    points={pointList}
+    containerCSS={"attribute-point-assignment"}
+/>

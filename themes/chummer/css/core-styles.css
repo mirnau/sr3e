@@ -543,12 +543,10 @@
   left: -7.5rem;
   height: 7rem;
   width: 7rem;
-  background: rgba(0, 255, 255, 0.107);
   text-align: center;
   justify-content: center;
   padding: 0.5rem;
   gap: 1rem;
-  box-shadow: inset 0 0 30px cyan;
   /* horizontal */
   align-items: center;
   /* vertical */
@@ -559,6 +557,32 @@
 }
 .system-sr3e .points-position .point-container div {
   margin-bottom: 0;
+}
+.system-sr3e .attribute-point-assignment > .point-container:first-child {
+  box-shadow: inset 0 0 10px 1px cyan,
+        inset 0 0 30px cyan;
+}
+.system-sr3e .attribute-point-assignment > .point-container:first-child h1 {
+  color: cyan;
+}
+.system-sr3e .attribute-point-assignment > .point-container:not(:first-child) {
+  box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.5);
+}
+.system-sr3e .attribute-point-assignment > .point-container:not(:first-child) h1 {
+  color: rgba(0, 255, 255, 0.5);
+}
+.system-sr3e .skill-point-assignment > .point-container:first-child {
+  box-shadow: inset 0 0 30px rgba(0, 255, 255, 0.5);
+}
+.system-sr3e .skill-point-assignment > .point-container:first-child h1 {
+  color: rgba(0, 255, 255, 0.5);
+}
+.system-sr3e .skill-point-assignment > .point-container:not(:first-child) {
+  box-shadow: inset 0 0 10px 1px cyan,
+        inset 0 0 30px cyan;
+}
+.system-sr3e .skill-point-assignment > .point-container:not(:first-child) h1 {
+  color: cyan;
 }
 .system-sr3e .form-group {
   padding: 0.5rem;

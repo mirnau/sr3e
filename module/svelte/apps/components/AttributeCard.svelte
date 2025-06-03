@@ -44,7 +44,11 @@
       { render: false },
     );
 
-    intelligenceStore.set(actor.system.attributes.intelligence.value);
+    intelligenceStore.set(
+      actor.system.attributes.intelligence.value +
+      actor.system.attributes.intelligence.mod +
+      actor.system.attributes.intelligence.meta ?? 0
+    );
   }
 
   const increment = () => {

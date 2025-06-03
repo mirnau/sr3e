@@ -156,6 +156,9 @@
 
         console.log("Handle submit was entered");
 
+        const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
+        const worldMetahuman = game.items.get(metahuman.id);
+
         const selectedAttributeObj = attributPointDropdownOptions.find(
             (attr) => attr.priority === selectedAttribute,
         );
@@ -163,7 +166,19 @@
             (skill) => skill.priority === selectedSkill,
         );
 
-        let remainingPoints = selectedAttributeObj.points - 18;
+        let initBody = metahuman.system.modifiers.body < 0 ? (-metahuman.system.modifiers.body + 1) : 1;
+        let initStrength = metahuman.system.modifiers.strength < 0 ? (-metahuman.system.modifiers.strength + 1) : 1;
+        let initQuickness = metahuman.system.modifiers.quickness < 0 ? (-metahuman.system.modifiers.quickness + 1) : 1;
+        let initIntelligence = metahuman.system.modifiers.intelligence < 0 ? (-metahuman.system.modifiers.intelligence + 1) : 1;
+        let initWillpower = metahuman.system.modifiers.willpower < 0 ? (-metahuman.system.modifiers.willpower + 1) : 1;
+        let initCharisma = metahuman.system.modifiers.charisma < 0 ? (-metahuman.system.modifiers.charisma + 1) : 1;
+
+        let initTotal = initBody + initStrength + initQuickness + initIntelligence + initWillpower + initCharisma;
+
+        if (initTotal > selectedAttributeObj.points)
+            throw new Error ("The metahuman has excessive negative modifiers");
+
+        let remainingPoints = selectedAttributeObj.points - initTotal;
 
         await actor.update({
             "system.profile.age": characterAge,
@@ -171,16 +186,20 @@
             "system.profile.weight": characterWeight,
             "system.creation.attributePoints":  remainingPoints,
             "system.creation.activePoints": selectedSkillObj.points,
-            "system.attributes.body.value": 3,
-            "system.attributes.quickness.value": 3,
-            "system.attributes.strength.value": 3,
-            "system.attributes.charisma.value": 3,
-            "system.attributes.intelligence.value": 3,
-            "system.attributes.willpower.value": 3,
+            "system.attributes.body.value": initBody,
+            "system.attributes.quickness.value": initQuickness,
+            "system.attributes.strength.value": initStrength,
+            "system.attributes.charisma.value": initCharisma,
+            "system.attributes.intelligence.value": initIntelligence,
+            "system.attributes.willpower.value": initWillpower,
+            "system.attributes.body.meta": metahuman.system.modifiers.body,
+            "system.attributes.quickness.meta": metahuman.system.modifiers.quickness,
+            "system.attributes.strength.meta": metahuman.system.modifiers.strength,
+            "system.attributes.charisma.meta": metahuman.system.modifiers.charisma,
+            "system.attributes.intelligence.meta": metahuman.system.modifiers.intelligence,
+            "system.attributes.willpower.meta": metahuman.system.modifiers.willpower
         });
 
-        const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
-        const worldMetahuman = game.items.get(metahuman.id);
         await actor.createEmbeddedDocuments("Item", [
             worldMetahuman.toObject(),
         ]);

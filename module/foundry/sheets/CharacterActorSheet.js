@@ -1,12 +1,12 @@
 import CharacterSheetApp from "../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
-import CreationPoints from "../../svelte/apps/injections/CreationPoints.svelte";
+import CharacterCreationManager from "../../svelte/apps/injections/charactercreation/CharacterCreationManager.svelte";
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
-import ActorDataService from "../services/ActorDataService";
-import { flags } from "../services/commonConsts";
+import ActorDataService from "../services/ActorDataService.js";
+import { flags } from "../services/commonConsts.js";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
@@ -36,6 +36,28 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   }
 
   _replaceHTML(_, windowContent) {
+
+    if (this.#app) {
+      unmount(this.#app);
+      this.#app = null;
+    }
+    if (this.#neon) {
+      unmount(this.#neon);
+      this.#neon = null;
+    }
+    if (this.#feed) {
+      unmount(this.#feed);
+      this.#feed = null;
+    }
+    if (this.#cart) {
+      unmount(this.#cart);
+      this.#cart = null;
+    }
+    if (this.#creation) {
+      unmount(this.#creation);
+      this.#creation = null;
+    }
+
     windowContent.innerHTML = "";
     const form = windowContent.parentNode;
 
@@ -56,10 +78,9 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
     this._injectNewsFeed(form, header);
 
-    const isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
-    console.log("IS CHARCTER CREATION", isCharacterCreation);
 
-    if(isCharacterCreation) {
+    let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
+    if (isCharacterCreation) {
       this._injectCharachterCreationPointsApp(header);
     }
 
@@ -68,114 +89,114 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
   }
 
-    _injectCharachterCreationPointsApp(header) {
+  _injectCharachterCreationPointsApp(header) {
     let anchor = header?.previousElementSibling;
     if (!anchor?.classList?.contains("points-position")) {
       anchor = document.createElement("div");
       anchor.classList.add("points-position");
       header.parentElement.insertBefore(anchor, header);
 
-      this.#creation = mount(CreationPoints, {
+      this.#creation = mount(CharacterCreationManager, {
         target: anchor,
-        props: { 
+        props: {
           actor: this.document,
           config: CONFIG.sr3e
-         }
-      });
-    }
-  }
-
-  _injectNeonName(header) {
-    let neonSlot = header?.previousElementSibling;
-    if (!neonSlot?.classList?.contains("neon-name-position")) {
-      neonSlot = document.createElement("div");
-      neonSlot.classList.add("neon-name-position");
-      header.parentElement.insertBefore(neonSlot, header);
-
-      this.#neon = mount(NeonName, {
-        target: neonSlot,
-        props: { actor: this.document }
-      });
-    }
-  }
-
-  _injectShoppingCart(header) {
-    if (this.#cart) return;
-
-    let cartSlot = header.querySelector(".shopping-cart-slot");
-    if (!cartSlot) {
-      cartSlot = document.createElement("div");
-      cartSlot.classList.add("shopping-cart-slot");
-      header.insertBefore(cartSlot, header.firstChild);
-    }
-
-    this.#cart = mount(ShoppingCart, {
-      target: cartSlot,
-      props: {
-        actor: this.document,
-        config: CONFIG.sr3e
-      }
-    });
-  }
-
-  _injectNewsFeed(form, header) {
-    const title = form.querySelector(".window-title");
-    if (title) {
-      title.remove();
-      const newsfeedInjection = document.createElement("div");
-      header.prepend(newsfeedInjection);
-
-      this.#feed = mount(NewsFeed, {
-        target: header,
-        anchor: header.firstChild,
-        props: {
-          actor: this.document
         }
       });
     }
   }
 
-  async _tearDown() {
-    if (this.#neon) await unmount(this.#neon);
-    if (this.#app) await unmount(this.#app);
-    if (this.#feed) await unmount(this.#feed);
-    if (this.#cart) await unmount(this.#cart);
-    if (this.#creation) await unmount(this.#creation);
-    this.#app = this.#neon = this.#feed = this.#cart = null;
-    return super._tearDown();
+_injectNeonName(header) {
+  let neonSlot = header?.previousElementSibling;
+  if (!neonSlot?.classList?.contains("neon-name-position")) {
+    neonSlot = document.createElement("div");
+    neonSlot.classList.add("neon-name-position");
+    header.parentElement.insertBefore(neonSlot, header);
+
+    this.#neon = mount(NeonName, {
+      target: neonSlot,
+      props: { actor: this.document }
+    });
+  }
+}
+
+_injectShoppingCart(header) {
+  if (this.#cart) return;
+
+  let cartSlot = header.querySelector(".shopping-cart-slot");
+  if (!cartSlot) {
+    cartSlot = document.createElement("div");
+    cartSlot.classList.add("shopping-cart-slot");
+    header.insertBefore(cartSlot, header.firstChild);
   }
 
-  _onSubmit() {
-    return false;
+  this.#cart = mount(ShoppingCart, {
+    target: cartSlot,
+    props: {
+      actor: this.document,
+      config: CONFIG.sr3e
+    }
+  });
+}
+
+_injectNewsFeed(form, header) {
+  const title = form.querySelector(".window-title");
+  if (title) {
+    title.remove();
+    const newsfeedInjection = document.createElement("div");
+    header.prepend(newsfeedInjection);
+
+    this.#feed = mount(NewsFeed, {
+      target: header,
+      anchor: header.firstChild,
+      props: {
+        actor: this.document
+      }
+    });
   }
+}
+
+  async _tearDown() {
+  if (this.#neon) await unmount(this.#neon);
+  if (this.#app) await unmount(this.#app);
+  if (this.#feed) await unmount(this.#feed);
+  if (this.#cart) await unmount(this.#cart);
+  if (this.#creation) await unmount(this.#creation);
+  this.#app = this.#neon = this.#feed = this.#cart = null;
+  return super._tearDown();
+}
+
+_onSubmit() {
+  return false;
+}
 
   async _onDrop(event) {
-    event.preventDefault();
-    const data = await TextEditor.getDragEventData(event);
+  event.preventDefault();
+  const data = await TextEditor.getDragEventData(event);
 
-    if (data.type !== "Item") return;
+  if (data.type !== "Item") return;
 
-    const droppedItem = await Item.implementation.fromDropData(data);
-    if (droppedItem.type !== "metahuman") return;
+  const droppedItem = await Item.implementation.fromDropData(data);
+  if (droppedItem.type !== "metahuman") return;
 
-    const result = await this.actor.canAcceptMetahuman(droppedItem);
+  const result = await this.actor.canAcceptMetahuman(droppedItem);
 
-    if (result === "accept") {
+  if (result === "accept") {
+    await this.actor.replaceMetahuman(droppedItem);
+  } else if (result === "goblinize") {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      title: "Goblinization",
+      content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
+      yes: () => true,
+      no: () => false,
+      defaultYes: false,
+    });
+
+    if (confirmed) {
       await this.actor.replaceMetahuman(droppedItem);
-    } else if (result === "goblinize") {
-      const confirmed = await foundry.applications.api.DialogV2.confirm({
-        title: "Goblinization",
-        content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
-        yes: () => true,
-        no: () => false,
-        defaultYes: false,
-      });
-
-      if (confirmed) {
-        await this.actor.replaceMetahuman(droppedItem);
-      }
-    } else {
-      ui.notifications.info("Only one metahuman type allowed.");
     }
+  } else {
+    ui.notifications.info("Only one metahuman type allowed.");
   }
+}
 }
