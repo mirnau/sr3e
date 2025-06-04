@@ -1,24 +1,17 @@
 <script>
-	import { localize } from "../../../svelteHelpers.js";
-	import SkillsLanguage from "../components/SkillsLangauge.svelte";
-	import SkillsKnowledge from "../components/SkillsKnowledge.svelte";
-	import SkillsActive from "../components/SkillsActive.svelte";
-	import CardToolbar from "./CardToolbar.svelte";
+	import { localize } from "../../../../svelteHelpers.js";
+	import SkillsLanguage from "./SkillsLangauge.svelte";
+	import SkillsKnowledge from "./SkillsKnowledge.svelte";
+	import SkillsActive from "./SkillsActive.svelte";
+	import CardToolbar from "../CardToolbar.svelte";
 
 	let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
 	let activeTab = $state("active");
 
-	let skill = actor.skill || [];
-	let activeSkills = $derived(skill.filter((s) => s.type === "active"));
-	let knowledgeSkills = $derived(
-		skill.filter((s) => s.type === "knowledge"),
-	);
-	let languageSkills = $derived(skill.filter((s) => s.type === "language"));
 </script>
 
-
-<CardToolbar id={id} />
+<CardToolbar {id} />
 
 <div class="skill">
 	<h1>{localize(config.skill.skill)}</h1>
@@ -40,11 +33,11 @@
 
 	<div class="sr3e-inner-background">
 		{#if activeTab === "active"}
-			<SkillsActive skill={activeSkills} />
+			<SkillsActive {actor} {config} />
 		{:else if activeTab === "knowledge"}
-			<SkillsKnowledge skill={knowledgeSkills} />
+			<SkillsKnowledge {actor} {config} />
 		{:else if activeTab === "language"}
-			<SkillsLanguage skill={languageSkills} />
+			<SkillsLanguage {actor} {config} />
 		{/if}
 	</div>
 </div>

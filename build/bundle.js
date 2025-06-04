@@ -3430,7 +3430,7 @@ function getActorStore(actorId, storeName, customValue = null) {
   }
   return actorStores[actorId][storeName];
 }
-var root_1$c = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
+var root_1$d = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$7 = (_, actor) => openFilePicker(actor());
 var root_2$6 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$3 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
@@ -3499,7 +3499,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$c();
+      var div_1 = root_1$d();
       var img = child(div_1);
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
@@ -5263,7 +5263,7 @@ const flags = {
 };
 var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
-var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
+var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$r = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
@@ -5330,7 +5330,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   var node = sibling(h4, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$b();
+      var div_1 = root_1$c();
       var i_1 = child(div_1);
       i_1.__click = decrement;
       i_1.__keydown = [on_keydown$2, decrement];
@@ -5369,7 +5369,7 @@ var on_keydown$1 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") &&
 var root_2$4 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$a = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$q = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
@@ -5434,7 +5434,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   var node = sibling(h4, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$a();
+      var div_1 = root_1$b();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
@@ -5684,19 +5684,58 @@ function SkillsKnowledge($$anchor) {
   var div = root$l();
   append($$anchor, div);
 }
-var root$k = /* @__PURE__ */ template(`<div class="skill-card"></div>`);
-function SkillsActive($$anchor, $$props) {
+var root_1$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root$k = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <div class="core-skill"><h4 class="no-margin skill-name"> </h4> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
+function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({}));
+  let skill = prop($$props, "skill", 19, () => ({}));
   prop($$props, "config", 19, () => ({}));
-  let activeSkills = state(proxy([]));
-  user_effect(() => {
-    var _a;
-    if (!((_a = actor()) == null ? void 0 : _a.id)) return;
-    set(activeSkills, proxy(actor().system.skills.filter((skill) => skill.active)));
-  });
+  let activeSkill = proxy(skill().system.activeSkill);
+  let specializations = proxy(activeSkill.specializations);
   var div = root$k();
+  var div_1 = sibling(child(div), 2);
+  var h4 = child(div_1);
+  var text = child(h4);
+  var h1 = sibling(h4, 2);
+  var text_1 = child(h1);
+  var div_2 = sibling(div_1, 2);
+  each(div_2, 21, () => specializations, index, ($$anchor2, specialization) => {
+    var div_3 = root_1$a();
+    var div_4 = sibling(child(div_3), 2);
+    var text_2 = child(div_4);
+    var h1_1 = sibling(div_4, 2);
+    var text_3 = child(h1_1);
+    template_effect(() => {
+      set_text(text_2, get$1(specialization).name);
+      set_text(text_3, get$1(specialization).value);
+    });
+    append($$anchor2, div_3);
+  });
+  template_effect(() => {
+    set_text(text, skill().name);
+    set_text(text_1, activeSkill.value);
+  });
   append($$anchor, div);
+  pop();
+}
+function SkillsActive($$anchor, $$props) {
+  var _a;
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  const activeSkills = (_a = actor().items) == null ? void 0 : _a.filter((item2) => item2.type === "skill" && item2.system.skillType === "active");
+  var fragment = comment();
+  var node = first_child(fragment);
+  each(node, 17, () => activeSkills, index, ($$anchor2, skill) => {
+    ActiveSkillCard($$anchor2, {
+      get skill() {
+        return get$1(skill);
+      },
+      get config() {
+        return config();
+      }
+    });
+  });
+  append($$anchor, fragment);
   pop();
 }
 var on_click$6 = (_, activeTab) => set(activeTab, "active");
@@ -5708,8 +5747,6 @@ function Skills($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
-  let skill = actor().skill || [];
-  let activeSkills = /* @__PURE__ */ derived(() => skill.filter((s) => s.type === "active"));
   var fragment = root$j();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5732,8 +5769,11 @@ function Skills($$anchor, $$props) {
   {
     var consequent = ($$anchor2) => {
       SkillsActive($$anchor2, {
-        get skill() {
-          return get$1(activeSkills);
+        get actor() {
+          return actor();
+        },
+        get config() {
+          return config();
         }
       });
     };
@@ -6463,7 +6503,7 @@ class ActorDataService {
   static _sortSkillsByName(skills) {
     return skills.sort((a, b) => a.name.localeCompare(b.name));
   }
-  static getLocalizedLinkingAttibutes() {
+  static getLocalizedLinkingAttributes() {
     return {
       body: localize(CONFIG.sr3e.attributes.body),
       quickness: localize(CONFIG.sr3e.attributes.quickness),
@@ -6655,10 +6695,12 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
   async _onDrop(event2) {
     event2.preventDefault();
-    const data = await TextEditor.getDragEventData(event2);
-    if (data.type !== "Item") return;
+    const data = await foundry.applications.ux.TextEditor.getDragEventData(event2);
+    if (data.type !== "Item") return super._onDrop(event2);
     const droppedItem = await Item.implementation.fromDropData(data);
-    if (droppedItem.type !== "metahuman") return;
+    if (droppedItem.type !== "metahuman") {
+      return super._onDrop(event2);
+    }
     const result = await this.actor.canAcceptMetahuman(droppedItem);
     if (result === "accept") {
       await this.actor.replaceMetahuman(droppedItem);
@@ -8710,11 +8752,11 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_click = async (_, item2) => openFilePicker(item2());
-var on_change = (e, item2) => item2().update({ name: e.target.value });
+var on_click = async (_, $$props) => openFilePicker($$props.item);
+var on_change = (e, $$props) => $$props.item.update({ name: e.target.value });
 var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
-var on_change_2 = (e, item2) => item2().update({
+var on_change_2 = (e, $$props) => $$props.item.update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
 var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
@@ -8722,8 +8764,7 @@ var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><select><option 
 var root$1 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 7);
-  let value = state(proxy(item2().system.skillType || "active"));
+  let value = state(proxy($$props.item.system.skillType || "active"));
   const selectOptions = [
     {
       value: "active",
@@ -8738,12 +8779,12 @@ function SkillApp($$anchor, $$props) {
       label: localize($$props.config.skill.language)
     }
   ];
-  const rawAttributes = ActorDataService.getLocalizedLinkingAttibutes();
+  const rawAttributes = ActorDataService.getLocalizedLinkingAttributes();
   const attributeOptions = Object.entries(rawAttributes).map(([key, label]) => ({ value: key, label }));
   function updateSkillType(newValue) {
     set(value, proxy(newValue));
-    item2().update({ "system.skillType": newValue });
-    $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${item2().name}`);
+    $$props.item.update({ "system.skillType": newValue });
+    $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${$$props.item.name}`);
   }
   var div = root$1();
   var div_1 = child(div);
@@ -8751,13 +8792,15 @@ function SkillApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  img.__click = [on_click, item2];
+  img.__click = [on_click, $$props];
   var div_5 = sibling(div_4, 2);
   var div_6 = child(div_5);
   var input = child(div_6);
-  input.__change = [on_change, item2];
+  input.__change = [on_change, $$props];
   var div_7 = sibling(div_6, 2);
   var select = child(div_7);
+  init_select(select, () => get$1(value));
+  var select_value;
   select.__change = [on_change_1, updateSkillType];
   each(select, 21, () => selectOptions, index, ($$anchor2, option) => {
     var option_1 = root_1$1();
@@ -8776,7 +8819,9 @@ function SkillApp($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       var div_8 = root_2$1();
       var select_1 = child(div_8);
-      select_1.__change = [on_change_2, item2];
+      init_select(select_1, () => $$props.item.system.activeSkill.linkedAttribute);
+      var select_1_value;
+      select_1.__change = [on_change_2, $$props];
       var option_2 = child(select_1);
       option_2.value = null == (option_2.__value = "") ? "" : "";
       var text_1 = child(option_2);
@@ -8793,66 +8838,41 @@ function SkillApp($$anchor, $$props) {
         });
         append($$anchor3, option_3);
       });
-      template_effect(($0) => set_text(text_1, $0), [
-        () => localize($$props.config.skill.linkedAttribute)
-      ]);
-      bind_select_value(select_1, () => item2().system.activeSkill.linkedAttribute, ($$value) => item2().system.activeSkill.linkedAttribute = $$value);
-      append($$anchor2, div_8);
-    };
-    var alternate_1 = ($$anchor2) => {
-      var fragment = comment();
-      var node_2 = first_child(fragment);
-      {
-        var consequent_1 = ($$anchor3) => {
-        };
-        var alternate = ($$anchor3) => {
-          var fragment_1 = comment();
-          var node_3 = first_child(fragment_1);
-          {
-            var consequent_2 = ($$anchor4) => {
-            };
-            if_block(
-              node_3,
-              ($$render) => {
-                if (get$1(value) === "language") $$render(consequent_2);
-              },
-              true
-            );
+      template_effect(
+        ($0) => {
+          if (select_1_value !== (select_1_value = $$props.item.system.activeSkill.linkedAttribute)) {
+            select_1.value = null == (select_1.__value = $$props.item.system.activeSkill.linkedAttribute) ? "" : $$props.item.system.activeSkill.linkedAttribute, select_option(select_1, $$props.item.system.activeSkill.linkedAttribute);
           }
-          append($$anchor3, fragment_1);
-        };
-        if_block(
-          node_2,
-          ($$render) => {
-            if (get$1(value) === "knowledge") $$render(consequent_1);
-            else $$render(alternate, false);
-          },
-          true
-        );
-      }
-      append($$anchor2, fragment);
+          set_text(text_1, $0);
+        },
+        [
+          () => localize($$props.config.skill.linkedAttribute)
+        ]
+      );
+      append($$anchor2, div_8);
     };
     if_block(node, ($$render) => {
       if (get$1(value) === "active") $$render(consequent);
-      else $$render(alternate_1, false);
     });
   }
-  var node_4 = sibling(div_1, 2);
-  JournalViewer(node_4, {
+  var node_2 = sibling(div_1, 2);
+  JournalViewer(node_2, {
     get item() {
-      return item2();
+      return $$props.item;
     },
     get config() {
       return $$props.config;
     }
   });
   template_effect(() => {
-    set_attribute(img, "src", item2().img);
-    set_attribute(img, "title", item2().name);
-    set_attribute(img, "alt", item2().name);
+    set_attribute(img, "src", $$props.item.img);
+    set_attribute(img, "title", $$props.item.name);
+    set_attribute(img, "alt", $$props.item.name);
+    set_value(input, $$props.item.name);
+    if (select_value !== (select_value = get$1(value))) {
+      select.value = null == (select.__value = get$1(value)) ? "" : get$1(value), select_option(select, get$1(value));
+    }
   });
-  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
-  bind_select_value(select, () => get$1(value), ($$value) => set(value, $$value));
   append($$anchor, div);
   pop();
 }
@@ -8914,16 +8934,14 @@ _skill = new WeakMap();
 class SkillSpecialization extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      specialziation: new foundry.data.fields.SchemaField({
-        name: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
-        value: new foundry.data.fields.NumberField({
-          required: true,
-          integer: true,
-          initial: 0
-        })
+      name: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
+      }),
+      value: new foundry.data.fields.NumberField({
+        required: true,
+        integer: true,
+        initial: 0
       })
     };
   }
@@ -8945,7 +8963,18 @@ class SkillModel extends foundry.abstract.TypeDataModel {
           required: true,
           initial: ""
         }),
-        ...SkillSpecialization.defineSchema()
+        specializations: new foundry.data.fields.ArrayField(
+          new foundry.data.fields.SchemaField({
+            ...SkillSpecialization.defineSchema()
+          }),
+          {
+            initial: [
+              { name: "hello", value: 1 },
+              { name: "hello Again", value: 88 },
+              { name: "hello Again Again", value: 3 }
+            ]
+          }
+        )
       }),
       knowledgeSkill: new foundry.data.fields.SchemaField({
         value: new foundry.data.fields.NumberField({
@@ -8957,7 +8986,14 @@ class SkillModel extends foundry.abstract.TypeDataModel {
           required: true,
           initial: "intelligence"
         }),
-        ...SkillSpecialization.defineSchema()
+        specializations: new foundry.data.fields.ArrayField(
+          new foundry.data.fields.SchemaField({
+            ...SkillSpecialization.defineSchema()
+          }),
+          {
+            initial: []
+          }
+        )
       }),
       languageSkill: new foundry.data.fields.SchemaField({
         speak: new foundry.data.fields.SchemaField({
@@ -8966,7 +9002,14 @@ class SkillModel extends foundry.abstract.TypeDataModel {
             initial: 0,
             integer: true
           }),
-          ...SkillSpecialization.defineSchema()
+          specializations: new foundry.data.fields.ArrayField(
+            new foundry.data.fields.SchemaField({
+              ...SkillSpecialization.defineSchema()
+            }),
+            {
+              initial: []
+            }
+          )
         }),
         read: new foundry.data.fields.SchemaField({
           value: new foundry.data.fields.NumberField({
@@ -8974,7 +9017,14 @@ class SkillModel extends foundry.abstract.TypeDataModel {
             initial: 0,
             integer: true
           }),
-          ...SkillSpecialization.defineSchema()
+          specializations: new foundry.data.fields.ArrayField(
+            new foundry.data.fields.SchemaField({
+              ...SkillSpecialization.defineSchema()
+            }),
+            {
+              initial: []
+            }
+          )
         }),
         write: new foundry.data.fields.SchemaField({
           value: new foundry.data.fields.NumberField({
@@ -8982,7 +9032,14 @@ class SkillModel extends foundry.abstract.TypeDataModel {
             initial: 0,
             integer: true
           }),
-          ...SkillSpecialization.defineSchema()
+          specializations: new foundry.data.fields.ArrayField(
+            new foundry.data.fields.SchemaField({
+              ...SkillSpecialization.defineSchema()
+            }),
+            {
+              initial: []
+            }
+          )
         })
       })
     };
@@ -9689,6 +9746,62 @@ class SR3EActor extends Actor {
     });
   }
 }
+function attachLightEffect(html2, activeTheme) {
+  function rgb(r, g, b) {
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+  const colors = {
+    light: {
+      silver: rgb(200, 200, 200),
+      lightGray: rgb(235, 235, 235),
+      darkGray: rgb(150, 150, 150),
+      highlight: rgb(255, 192, 203)
+      // soft cherry blossom
+    },
+    dark: {
+      silver: rgb(130, 130, 130),
+      lightGray: rgb(92, 92, 92),
+      darkGray: rgb(41, 41, 41),
+      highlight: rgb(255, 192, 203)
+    }
+  };
+  const isDark = activeTheme.toLowerCase().includes("dark");
+  const themeColors = isDark ? colors.dark : colors.light;
+  const brushedBase = `repeating-linear-gradient(
+    33deg,
+    ${themeColors.darkGray} 0px,
+    ${themeColors.silver} 0.15px,
+    ${themeColors.lightGray} 0.75px,
+    ${themeColors.darkGray} 1.5px
+  )`;
+  const windowContent = html2.querySelector(".window-content");
+  if (!windowContent) return;
+  windowContent.addEventListener("mousemove", (event2) => {
+    const globalX = event2.clientX;
+    const globalY = event2.clientY;
+    const selectors = [".stat-card", ".skill-background-layer"];
+    const targetElements = html2.querySelectorAll(selectors.join(", "));
+    targetElements.forEach((element) => {
+      const rect = element.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = globalX - centerX;
+      const dy = globalY - centerY;
+      const distance = Math.sqrt(dx ** 2 + dy ** 2);
+      const maxDistance = Math.max(rect.width, rect.height) * 6.5;
+      const intensity = Math.max(0, 1 - distance / maxDistance);
+      const radialGradient = `radial-gradient(
+        circle at ${globalX - rect.left}px ${globalY - rect.top}px,
+        ${themeColors.highlight} 0%,
+        ${themeColors.highlight} ${Math.round(intensity * 40)}%,
+        rgba(255, 192, 203, 0.15) 75%,
+        transparent 100%
+      )`;
+      element.style.background = `${radialGradient}, ${brushedBase}`;
+      element.style.backgroundBlendMode = "screen";
+    });
+  });
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -9744,6 +9857,15 @@ function configureProject() {
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }
+function setupMouseLightSourceEffect(includedThemes) {
+  Hooks.on(hooks.renderApplicationV2, (app, html2) => {
+    const activeTheme = game.settings.get("sr3e", "theme");
+    console.log("active theme", activeTheme);
+    if (includedThemes.includes(activeTheme)) {
+      attachLightEffect(html2, activeTheme);
+    }
+  });
+}
 function configureThemes() {
   game.settings.register("sr3e", "theme", {
     name: "Theme",
@@ -9751,14 +9873,15 @@ function configureThemes() {
     scope: "world",
     config: true,
     type: String,
-    choices: { chummer: "Chummer", steel: "Steel" },
-    default: "chummer"
+    choices: { defaultDark: "Chummer Dark", defaultLight: "Chummer Light" },
+    default: "defaultDark"
   });
   Hooks.on("ready", () => {
     const theme = game.settings.get("sr3e", "theme");
     document.body.classList.remove("theme-chummer", "theme-steel");
     document.body.classList.add(`theme-${theme}`);
   });
+  setupMouseLightSourceEffect(["defaultDark", "defaultLight"]);
 }
 function wrapContent(root2) {
   var _a;

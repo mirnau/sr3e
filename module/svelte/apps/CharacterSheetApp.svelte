@@ -4,7 +4,7 @@
   import Attributes from "./components/Attributes.svelte";
   import DicePools from "./components/DicePools.svelte";
   import Movement from "./components/Movement.svelte";
-  import Skills from "./components/Skills.svelte";
+  import Skills from "./components/skills/Skills.svelte";
   import Health from "./components/Health.svelte";
   import Karma from "./components/Karma.svelte";
   import Inventory from "./components/Inventory.svelte";

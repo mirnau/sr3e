@@ -20,6 +20,7 @@ import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCr
 import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
 import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 import SR3EActor from "./module/foundry/documents/SR3EActor.js";
+import { attachLightEffect } from "./module/foundry/hooks/renderApplicationV2/attachLightEffect.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -81,6 +82,17 @@ function configureProject() {
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }
 
+function setupMouseLightSourceEffect(includedThemes) {
+
+  Hooks.on(hooks.renderApplicationV2, (app, html) => {
+    const activeTheme = game.settings.get("sr3e", "theme");
+    console.log("active theme", activeTheme);
+    if (includedThemes.includes(activeTheme)) {
+      attachLightEffect(html, activeTheme);
+    }
+  });
+}
+
 function configureThemes() {
   game.settings.register("sr3e", "theme", {
     name: "Theme",
@@ -88,14 +100,16 @@ function configureThemes() {
     scope: "world",
     config: true,
     type: String,
-    choices: { chummer: "Chummer", steel: "Steel" },
-    default: "chummer"
+    choices: { defaultDark: "Chummer Dark", defaultLight: "Chummer Light" },
+    default: "defaultDark"
   });
   Hooks.on("ready", () => {
     const theme = game.settings.get("sr3e", "theme");
     document.body.classList.remove("theme-chummer", "theme-steel");
     document.body.classList.add(`theme-${theme}`);
   });
+
+  setupMouseLightSourceEffect(["defaultDark", "defaultLight"]);
 }
 
 function wrapContent(root) {
@@ -194,3 +208,5 @@ function registerHooks() {
 }
 
 registerHooks();
+
+

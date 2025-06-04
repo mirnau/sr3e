@@ -62,7 +62,7 @@ export default class ActorDataService {
         return skills.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    static getLocalizedLinkingAttibutes() {
+    static getLocalizedLinkingAttributes() {
         return {
             body: localize(CONFIG.sr3e.attributes.body),
             quickness: localize(CONFIG.sr3e.attributes.quickness),

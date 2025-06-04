@@ -5,7 +5,9 @@ button {
     
     position: relative;
     background-color: hotpink;
-    color: cyan;
+    color: @highlight-color-primary;
+
+;
     border: none;
     cursor: pointer;
     margin: 0rem;
@@ -16,7 +18,9 @@ button {
     &::after {
         content: "";
         z-index: -1;
-        color: cyan;
+        color: @highlight-color-primary;
+
+;
         position: absolute;
         background: rgb(59, 59, 59);
         top: 1px;
@@ -58,7 +62,9 @@ button {
 
     .ui-control {
         background-color: hotpink;
-        color: cyan;
+        color: @highlight-color-primary;
+
+;
     }
 }
 

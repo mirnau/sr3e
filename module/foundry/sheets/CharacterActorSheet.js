@@ -106,97 +106,100 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     }
   }
 
-_injectNeonName(header) {
-  let neonSlot = header?.previousElementSibling;
-  if (!neonSlot?.classList?.contains("neon-name-position")) {
-    neonSlot = document.createElement("div");
-    neonSlot.classList.add("neon-name-position");
-    header.parentElement.insertBefore(neonSlot, header);
+  _injectNeonName(header) {
+    let neonSlot = header?.previousElementSibling;
+    if (!neonSlot?.classList?.contains("neon-name-position")) {
+      neonSlot = document.createElement("div");
+      neonSlot.classList.add("neon-name-position");
+      header.parentElement.insertBefore(neonSlot, header);
 
-    this.#neon = mount(NeonName, {
-      target: neonSlot,
-      props: { actor: this.document }
-    });
-  }
-}
-
-_injectShoppingCart(header) {
-  if (this.#cart) return;
-
-  let cartSlot = header.querySelector(".shopping-cart-slot");
-  if (!cartSlot) {
-    cartSlot = document.createElement("div");
-    cartSlot.classList.add("shopping-cart-slot");
-    header.insertBefore(cartSlot, header.firstChild);
-  }
-
-  this.#cart = mount(ShoppingCart, {
-    target: cartSlot,
-    props: {
-      actor: this.document,
-      config: CONFIG.sr3e
+      this.#neon = mount(NeonName, {
+        target: neonSlot,
+        props: { actor: this.document }
+      });
     }
-  });
-}
+  }
 
-_injectNewsFeed(form, header) {
-  const title = form.querySelector(".window-title");
-  if (title) {
-    title.remove();
-    const newsfeedInjection = document.createElement("div");
-    header.prepend(newsfeedInjection);
+  _injectShoppingCart(header) {
+    if (this.#cart) return;
 
-    this.#feed = mount(NewsFeed, {
-      target: header,
-      anchor: header.firstChild,
+    let cartSlot = header.querySelector(".shopping-cart-slot");
+    if (!cartSlot) {
+      cartSlot = document.createElement("div");
+      cartSlot.classList.add("shopping-cart-slot");
+      header.insertBefore(cartSlot, header.firstChild);
+    }
+
+    this.#cart = mount(ShoppingCart, {
+      target: cartSlot,
       props: {
-        actor: this.document
+        actor: this.document,
+        config: CONFIG.sr3e
       }
     });
   }
-}
+
+  _injectNewsFeed(form, header) {
+    const title = form.querySelector(".window-title");
+    if (title) {
+      title.remove();
+      const newsfeedInjection = document.createElement("div");
+      header.prepend(newsfeedInjection);
+
+      this.#feed = mount(NewsFeed, {
+        target: header,
+        anchor: header.firstChild,
+        props: {
+          actor: this.document
+        }
+      });
+    }
+  }
 
   async _tearDown() {
-  if (this.#neon) await unmount(this.#neon);
-  if (this.#app) await unmount(this.#app);
-  if (this.#feed) await unmount(this.#feed);
-  if (this.#cart) await unmount(this.#cart);
-  if (this.#creation) await unmount(this.#creation);
-  this.#app = this.#neon = this.#feed = this.#cart = null;
-  return super._tearDown();
-}
+    if (this.#neon) await unmount(this.#neon);
+    if (this.#app) await unmount(this.#app);
+    if (this.#feed) await unmount(this.#feed);
+    if (this.#cart) await unmount(this.#cart);
+    if (this.#creation) await unmount(this.#creation);
+    this.#app = this.#neon = this.#feed = this.#cart = null;
+    return super._tearDown();
+  }
 
-_onSubmit() {
-  return false;
-}
+  _onSubmit() {
+    return false;
+  }
 
   async _onDrop(event) {
-  event.preventDefault();
-  const data = await TextEditor.getDragEventData(event);
+    event.preventDefault();
+    const data = await foundry.applications.ux.TextEditor.getDragEventData(event);
 
-  if (data.type !== "Item") return;
+    if (data.type !== "Item") return super._onDrop(event);
 
-  const droppedItem = await Item.implementation.fromDropData(data);
-  if (droppedItem.type !== "metahuman") return;
+    const droppedItem = await Item.implementation.fromDropData(data);
 
-  const result = await this.actor.canAcceptMetahuman(droppedItem);
-
-  if (result === "accept") {
-    await this.actor.replaceMetahuman(droppedItem);
-  } else if (result === "goblinize") {
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      title: "Goblinization",
-      content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
-      yes: () => true,
-      no: () => false,
-      defaultYes: false,
-    });
-
-    if (confirmed) {
-      await this.actor.replaceMetahuman(droppedItem);
+    if (droppedItem.type !== "metahuman") {
+      return super._onDrop(event);
     }
-  } else {
-    ui.notifications.info("Only one metahuman type allowed.");
+
+    const result = await this.actor.canAcceptMetahuman(droppedItem);
+
+    if (result === "accept") {
+      await this.actor.replaceMetahuman(droppedItem);
+    } else if (result === "goblinize") {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+        title: "Goblinization",
+        content: `<h1>Goblinize this character?<br>This action is <strong>irreversible</strong>!</h1>`,
+        yes: () => true,
+        no: () => false,
+        defaultYes: false,
+      });
+
+      if (confirmed) {
+        await this.actor.replaceMetahuman(droppedItem);
+      }
+    } else {
+      ui.notifications.info("Only one metahuman type allowed.");
+    }
   }
-}
 }
