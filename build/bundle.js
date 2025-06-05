@@ -5727,7 +5727,7 @@ function ActiveSkillCard($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$l = /* @__PURE__ */ template(`<div class="skill-category-container"><div class="skill-masonry-background-layer"></div> <h1> </h1> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+var root$l = /* @__PURE__ */ template(`<div class="skill-category-container"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
   let skills = prop($$props, "skills", 19, () => []), config = prop($$props, "config", 19, () => ({}));
@@ -5744,10 +5744,11 @@ function SkillCategory($$anchor, $$props) {
     return result.cleanup;
   });
   var div = root$l();
-  var h1 = sibling(child(div), 2);
+  var div_1 = sibling(child(div), 2);
+  var h1 = child(div_1);
   var text = child(h1);
-  var div_1 = sibling(h1, 2);
-  var node = sibling(child(div_1), 4);
+  var div_2 = sibling(div_1, 2);
+  var node = sibling(child(div_2), 4);
   each(node, 17, skills, index, ($$anchor2, skill) => {
     ActiveSkillCard($$anchor2, {
       get skill() {
@@ -5758,7 +5759,7 @@ function SkillCategory($$anchor, $$props) {
       }
     });
   });
-  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
+  bind_this(div_2, ($$value) => gridContainer = $$value, () => gridContainer);
   template_effect(($0) => set_text(text, $0), [
     () => localize(config().attributes[$$props.attribute])
   ]);

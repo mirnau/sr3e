@@ -26,7 +26,9 @@
 
 <div class="skill-category-container">
     <div class="skill-masonry-background-layer"></div>
-    <h1>{localize(config.attributes[attribute])}</h1>
+    <div class="skill-container-header">
+        <h1>{localize(config.attributes[attribute])}</h1>
+    </div>
     <div bind:this={gridContainer} class="skill-masonry-grid">
         <div class="skill-grid-sizer"></div>
         <div class="skill-gutter-sizer"></div>

@@ -1,12 +1,12 @@
 .skill-masonry-grid {
     margin: 0 auto;
-    padding: 0.5rem;
-    background-color: @background-color;
+    background-color: transparent;
+    margin-bottom: -0.25rem;
     .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
     .skill-card,
     .skill-grid-sizer {
-        min-width: 4.5rem;
+        min-width: 6.5rem;
     }
 
     .skill-gutter-sizer {
@@ -14,7 +14,9 @@
     }
 
     .skill-card {
-        flex-direction: column;
+        display: inline-block;
+        vertical-align: top;
+        box-sizing: border-box;
         position: relative;
         margin-bottom: 0.25rem;
         background: @accent-cherry-blossom;
@@ -29,7 +31,7 @@
             left: 1px;
             width: calc(100% - 2px);
             height: calc(100% - 2px);
-            background: @secondary-color;
+            background: @background-color;
             box-shadow: inset 0 0 30px @primary-color;
             pointer-events: none;
             .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);

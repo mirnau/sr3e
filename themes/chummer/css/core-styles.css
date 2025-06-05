@@ -577,19 +577,21 @@
 }
 .system-sr3e .skill-masonry-grid {
   margin: 0 auto;
-  padding: 0.5rem;
-  background-color: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  background-color: transparent;
+  margin-bottom: -0.25rem;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
 .system-sr3e .skill-masonry-grid .skill-card,
 .system-sr3e .skill-masonry-grid .skill-grid-sizer {
-  min-width: 4.5rem;
+  min-width: 6.5rem;
 }
 .system-sr3e .skill-masonry-grid .skill-gutter-sizer {
   width: 0.25rem;
 }
 .system-sr3e .skill-masonry-grid .skill-card {
-  flex-direction: column;
+  display: inline-block;
+  vertical-align: top;
+  box-sizing: border-box;
   position: relative;
   margin-bottom: 0.25rem;
   background: #ff1d9d;
@@ -604,7 +606,7 @@
   left: 1px;
   width: calc(100% - 2px);
   height: calc(100% - 2px);
-  background: #003856;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
   box-shadow: inset 0 0 30px #1b1f24;
   pointer-events: none;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
@@ -740,7 +742,6 @@
   z-index: 1;
   margin-top: 0.25rem;
   padding: 0.5rem;
-  text-align: center;
   background: #ff1d9d;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
@@ -753,9 +754,12 @@
   height: calc(100% - 2px);
   z-index: -1;
   pointer-events: none;
-  background: #003856;
+  background: #1b1f24;
   box-shadow: inset 0 0 30px #1b1f24;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
+}
+.system-sr3e .skill-container-masonry-grid .skill-category-container .skill-container-header {
+  padding: 0.5rem 1rem 1rem 1rem;
 }
 .system-sr3e .skill-container-masonry-grid .skill-category-container .skill-label {
   display: flex;
