@@ -30,6 +30,7 @@
     <div class="attribute-gutter-sizer"></div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.goodKarma)}</h4>
         <h1 class="stat-value">
             {karma.goodKarma}
@@ -37,6 +38,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
         <h1 class="stat-value">
             {karma.karmaPool}
@@ -44,6 +46,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
         <h1 class="stat-value">
             {karma.lifetimeKarma}
@@ -51,6 +54,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.attributes.essence)}</h4>
         <h1 class="stat-value">
             {essence}
@@ -59,6 +63,7 @@
 
     {#if !survivor}
         <div class="stat-card">
+            <div class="stat-card-background"></div>
             <h4 class="no-margin">
                 {localize(config.karma.miraculousSurvival)}
             </h4>

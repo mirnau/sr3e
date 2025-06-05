@@ -44,17 +44,23 @@
         <div class="attribute-grid-sizer"></div>
         <div class="attribute-gutter-sizer"></div>
         <div class="stat-card">
-            <h4 class="no-margin">{localize(config.initiative.initiativeDice)}</h4>
-                <h1 class="stat-value">{initiativeDice}</h1>
+            <div class="stat-card-background"></div>
+            <h4 class="no-margin">
+                {localize(config.initiative.initiativeDice)}
+            </h4>
+            <h1 class="stat-value">{initiativeDice}</h1>
         </div>
         <div class="stat-card">
+            <div class="stat-card-background"></div>
             <h4 class="no-margin">{localize(config.initiative.reaction)}</h4>
             <h1 class="stat-value">{reaction}</h1>
         </div>
         <div class="stat-card">
-            <h4 class="no-margin">{localize(config.initiative.augmentedReaction)}</h4>
+            <div class="stat-card-background"></div>
+            <h4 class="no-margin">
+                {localize(config.initiative.augmentedReaction)}
+            </h4>
             <h1 class="stat-value">{augmentedReaction}</h1>
         </div>
-        
     </div>
 </div>

@@ -84,6 +84,7 @@
 
 <div class="stat-card">
   <h4 class="no-margin">{localize(localization[key])}</h4>
+  <div class="stat-card-background"></div>
 
   {#if "meta" in stat}
     <div class="stat-label">

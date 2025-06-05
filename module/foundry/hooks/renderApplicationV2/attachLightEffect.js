@@ -37,18 +37,18 @@ export function attachLightEffect(html, activeTheme) {
     const globalX = event.clientX;
     const globalY = event.clientY;
 
-    const selectors = [".stat-card", ".skill-background-layer"];
+    const selectors = [".stat-card-background", ".skill-background-layer"];
     const targetElements = html.querySelectorAll(selectors.join(", "));
 
     targetElements.forEach((element) => {
       const rect = element.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      const centerX = (rect.left + rect.width) * 0.5;
+      const centerY = (rect.top + rect.height) * 0.5;
 
       const dx = globalX - centerX;
       const dy = globalY - centerY;
       const distance = Math.sqrt(dx ** 2 + dy ** 2);
-      const maxDistance = Math.max(rect.width, rect.height) * 6.5;
+      const maxDistance = Math.max(rect.width, rect.height) * 3.5;
       const intensity = Math.max(0, 1 - distance / maxDistance);
 
       const radialGradient = `radial-gradient(

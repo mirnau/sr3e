@@ -67,7 +67,9 @@
   // Re-trigger masonry after card updates
   $effect(async () => {
     await tick();
-    container?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+    container?.dispatchEvent(
+      new CustomEvent("masonry-reflow", { bubbles: true }),
+    );
   });
 
   // Save layout to flag with debounce
@@ -102,8 +104,8 @@
         layoutState = state;
       },
     });
-    
-    masonryInstance = result.masonryInstance
+
+    masonryInstance = result.masonryInstance;
 
     return result.cleanup;
   });
