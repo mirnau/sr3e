@@ -8,6 +8,7 @@
   import Health from "./components/Health.svelte";
   import Karma from "./components/Karma.svelte";
   import Inventory from "./components/Inventory.svelte";
+  import { masonryMinWidthFallbackValue } from "../../foundry/services/commonConsts.js";
 
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
@@ -89,12 +90,14 @@
   $effect(() => {
     if (!container) return;
 
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
     const result = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
       gutterSizerSelector: ".layout-gutter-sizer",
-      minItemWidth: 220,
+      minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
       stateMachineThresholds: {
         small: 0,
         medium: 0.5 * maxWidth,

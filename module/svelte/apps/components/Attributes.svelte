@@ -5,7 +5,7 @@
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import CardToolbar from "./CardToolbar.svelte";
     import { getActorStore, stores } from "../../stores/actorStores.js";
-    import { flags } from "../../../foundry/services/commonConsts.js";
+    import { flags, masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let attributes = $state(actor.system.attributes);
@@ -19,12 +19,15 @@
     );
 
     $effect(() => {
+        const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
         const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
         });
         return result.cleanup;
     });
@@ -37,19 +40,9 @@
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
         {#if $isAssigningAttributes}
-            <AttributeCardCreationState
-                {actor}
-                {stat}
-                {localization}
-                {key}
-            />
+            <AttributeCardCreationState {actor} {stat} {localization} {key} />
         {:else}
-            <AttributeCardKarmaState
-                {actor}
-                {stat}
-                {localization}
-                {key}
-            />
+            <AttributeCardKarmaState {actor} {stat} {localization} {key} />
         {/if}
     {/each}
 </div>

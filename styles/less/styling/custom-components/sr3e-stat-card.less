@@ -1,6 +1,15 @@
 .attribute-masonry-grid {
-    display: grid;
     margin: 0 auto;
+    
+    .attribute-gutter-sizer {
+        width: 0.25rem;
+    }
+
+    //NOTE: the width is to account for double digits
+    .attribute-grid-sizer,
+    .stat-card {
+        min-width: 6.5rem;
+    }
 
     h1,
     h4 {
@@ -17,16 +26,6 @@
         &:hover {
             color: @primary-color;
         }
-    }
-
-    .attribute-gutter-sizer {
-        width: 0.25rem;
-    }
-
-    //NOTE: the width is to account for double digits
-    .attribute-grid-sizer,
-    .stat-card {
-        min-width: 6.5rem;
     }
 
     .stat-card {

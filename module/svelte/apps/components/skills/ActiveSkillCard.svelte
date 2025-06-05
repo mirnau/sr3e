@@ -6,17 +6,17 @@
 </script>
 
 <div class="skill-card">
-	<!-- Main background layer replaces ::before -->
 	<div class="skill-background-layer"></div>
 	
 	<div class="core-skill">
-		<h4 class="no-margin skill-name">
-			{skill.name}
-		</h4>
 
-		<h1 class="skill-value">
-			{activeSkill.value}
-		</h1>
+			<h6 class="no-margin skill-name">
+				{skill.name}
+			</h6>
+			
+			<h1 class="skill-value">
+				{activeSkill.value}
+			</h1>
 	</div>
 
 	<div class="specialization-container">

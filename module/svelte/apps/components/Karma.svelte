@@ -4,6 +4,7 @@
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import { shoppingState } from "../../../svelteStore.js";
     import CardToolbar from "./CardToolbar.svelte";
+    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let karma = $state(actor.system.karma);
@@ -12,12 +13,15 @@
     let survivor = $derived(karma.miraculousSurvival);
 
     $effect(() => {
+        const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
         const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
         });
         return result.cleanup;
     });

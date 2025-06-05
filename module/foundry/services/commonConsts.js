@@ -27,3 +27,11 @@ export const flags = {
     isAssigningAttributes: "isAssigningAttributes"
   }
 };
+
+export const masonryMinWidthFallbackValue = {
+  characterSheet: 12,
+  attributeGrid: 13,
+  skillCategoryGrid: 10,
+  skillGrid: 4.5,
+
+}

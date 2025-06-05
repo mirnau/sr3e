@@ -1,6 +1,7 @@
 <script>
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let gridContainer;
@@ -27,12 +28,16 @@
     let initiativeDice = 1;
 
     $effect(() => {
+        const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
+
         const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid* rem,
         });
         return result.cleanup;
     });

@@ -3389,14 +3389,14 @@ var on_keydown$4 = (e) => {
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$v = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$w = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$v();
+  var div = root$w();
   div.__click = [on_click$8];
   div.__keydown = [on_keydown$4];
   var button = child(div);
@@ -3436,7 +3436,7 @@ var root_2$6 = /* @__PURE__ */ template(`<div class="version-two image-mask"><im
 var on_keydown$3 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$u = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$v = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3488,7 +3488,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     actorNameStore.set(newName);
   }
-  var fragment = root$u();
+  var fragment = root$v();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5179,7 +5179,30 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root$t = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+const hooks = {
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  renderApplicationV2: "renderApplicationV2"
+};
+const flags = {
+  sr3e: "sr3e",
+  core: "core",
+  actor: {
+    isCharacterCreation: "isCharacterCreation",
+    isShoppingState: "isShoppingState",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut",
+    isAssigningSkills: "isAssigningSkills",
+    isAssigningAttributes: "isAssigningAttributes"
+  }
+};
+const masonryMinWidthFallbackValue = {
+  attributeGrid: 13,
+  skillCategoryGrid: 10,
+  skillGrid: 4.5
+};
+var root$u = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5195,16 +5218,17 @@ function Initiative($$anchor, $$props) {
   let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
   let initiativeDice = 1;
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
+      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
     });
     return result.cleanup;
   });
-  var div = root$t();
+  var div = root$u();
   var h1 = child(div);
   var text = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5243,29 +5267,11 @@ function Initiative($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-const hooks = {
-  preCreateActor: "preCreateActor",
-  createActor: "createActor",
-  init: "init",
-  renderApplicationV2: "renderApplicationV2"
-};
-const flags = {
-  sr3e: "sr3e",
-  core: "core",
-  actor: {
-    isCharacterCreation: "isCharacterCreation",
-    isShoppingState: "isShoppingState",
-    hasAwakened: "hasAwakened",
-    burntOut: "burntOut",
-    isAssigningSkills: "isAssigningSkills",
-    isAssigningAttributes: "isAssigningAttributes"
-  }
-};
 var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$5 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$s = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
+var root$t = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5324,7 +5330,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$s();
+  var div = root$t();
   var h4 = child(div);
   var text = child(h4);
   var node = sibling(h4, 4);
@@ -5371,7 +5377,7 @@ var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && i
 var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$r = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
+var root$s = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5428,7 +5434,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$r();
+  var div = root$s();
   var h4 = sibling(child(div), 2);
   var text = child(h4);
   var node = sibling(h4, 2);
@@ -5485,7 +5491,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var root$q = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$r = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5497,16 +5503,17 @@ function Attributes($$anchor, $$props) {
   let localization = config().attributes;
   let isAssigningAttributes = getActorStore(actor().id, stores.isAssigningAttributes, actor().getFlag(flags.sr3e, flags.isAssigningAttributes));
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
+      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
     });
     return result.cleanup;
   });
-  var fragment = root$q();
+  var fragment = root$r();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5566,7 +5573,7 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$p = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$q = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5576,16 +5583,17 @@ function DicePools($$anchor, $$props) {
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
+      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
     });
     return result.cleanup;
   });
-  var fragment = root$p();
+  var fragment = root$q();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5620,7 +5628,7 @@ function DicePools($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$p = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5630,16 +5638,17 @@ function Movement($$anchor, $$props) {
   let gridContainer;
   const isShoppingState = false;
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
+      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
     });
     return result.cleanup;
   });
-  var fragment = root$o();
+  var fragment = root$p();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5674,29 +5683,29 @@ function Movement($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$n = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$o = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$o();
+  append($$anchor, div);
+}
+var root$n = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$n();
   append($$anchor, div);
 }
-var root$m = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
-  var div = root$m();
-  append($$anchor, div);
-}
 var root_1$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$l = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <div class="core-skill"><h4 class="no-margin skill-name"> </h4> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
+var root$m = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <div class="core-skill"><h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   let skill = prop($$props, "skill", 19, () => ({}));
   prop($$props, "config", 19, () => ({}));
   let activeSkill = proxy(skill().system.activeSkill);
   let specializations = proxy(activeSkill.specializations);
-  var div = root$l();
+  var div = root$m();
   var div_1 = sibling(child(div), 2);
-  var h4 = child(div_1);
-  var text = child(h4);
-  var h1 = sibling(h4, 2);
+  var h6 = child(div_1);
+  var text = child(h6);
+  var h1 = sibling(h6, 2);
   var text_1 = child(h1);
   var div_2 = sibling(div_1, 2);
   each(div_2, 21, () => specializations, index, ($$anchor2, specialization) => {
@@ -5718,26 +5727,28 @@ function ActiveSkillCard($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$k = /* @__PURE__ */ template(`<div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div>`);
-function SkillsActive($$anchor, $$props) {
-  var _a;
+var root$l = /* @__PURE__ */ template(`<div class="skill-category-container"><div class="skill-masonry-background-layer"></div> <h1> </h1> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+function SkillCategory($$anchor, $$props) {
   push($$props, true);
+  let skills = prop($$props, "skills", 19, () => []), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  const activeSkills = (_a = actor().items) == null ? void 0 : _a.filter((item2) => item2.type === "skill" && item2.system.skillType === "active");
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".skill-card",
       gridSizerSelector: ".skill-grid-sizer",
       gutterSizerSelector: ".skill-gutter-sizer",
-      minItemWidth: 120
+      minItemWidth: masonryMinWidthFallbackValue.skillGrid * rem
     });
     return result.cleanup;
   });
-  var div = root$k();
-  var node = sibling(child(div), 4);
-  each(node, 17, () => activeSkills, index, ($$anchor2, skill) => {
+  var div = root$l();
+  var h1 = sibling(child(div), 2);
+  var text = child(h1);
+  var div_1 = sibling(h1, 2);
+  var node = sibling(child(div_1), 4);
+  each(node, 17, skills, index, ($$anchor2, skill) => {
     ActiveSkillCard($$anchor2, {
       get skill() {
         return get$1(skill);
@@ -5746,6 +5757,51 @@ function SkillsActive($$anchor, $$props) {
         return config();
       }
     });
+  });
+  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(($0) => set_text(text, $0), [
+    () => localize(config().attributes[$$props.attribute])
+  ]);
+  append($$anchor, div);
+  pop();
+}
+var root$k = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><div class="skill-container-grid-sizer"></div> <div class="skill-container-gutter-sizer"></div> <!></div>`);
+function SkillsActive($$anchor, $$props) {
+  var _a;
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let gridContainer;
+  const activeSkills = (_a = actor().items) == null ? void 0 : _a.filter((item2) => item2.type === "skill" && item2.system.skillType === "active");
+  let attributeSortedSkills = /* @__PURE__ */ derived(() => [
+    "body",
+    "quickness",
+    "strength",
+    "charisma",
+    "intelligence",
+    "willpower"
+  ].map((attribute) => ({
+    attribute,
+    skills: activeSkills.filter((skill) => skill.system.activeSkill.linkedAttribute === attribute)
+  })));
+  user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const result = setupMasonry({
+      container: gridContainer,
+      itemSelector: ".skill-category-container",
+      gridSizerSelector: ".skill-container-grid-sizer",
+      gutterSizerSelector: ".skill-container-gutter-sizer",
+      minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem
+    });
+    return result.cleanup;
+  });
+  var div = root$k();
+  var node = sibling(child(div), 4);
+  each(node, 17, () => get$1(attributeSortedSkills), index, ($$anchor2, category) => {
+    SkillCategory($$anchor2, spread_props(() => get$1(category), {
+      get config() {
+        return config();
+      }
+    }));
   });
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   append($$anchor, div);
@@ -5880,12 +5936,13 @@ function Karma($$anchor, $$props) {
   let gridContainer;
   let survivor = /* @__PURE__ */ derived(() => karma.miraculousSurvival);
   user_effect(() => {
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
       itemSelector: ".stat-card",
       gridSizerSelector: ".attribute-grid-sizer",
       gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: 180
+      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
     });
     return result.cleanup;
   });
@@ -6125,12 +6182,13 @@ function CharacterSheetApp($$anchor, $$props) {
   let masonryInstance = null;
   user_effect(() => {
     if (!container) return;
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
       gutterSizerSelector: ".layout-gutter-sizer",
-      minItemWidth: 220,
+      minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
       onLayoutStateChange: (state2) => {
         set(layoutState, proxy(state2));
       }
