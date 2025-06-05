@@ -1314,6 +1314,15 @@
   z-index: 1;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
+.system-sr3e .sheet-component.span-1 {
+  min-width: calc(24rem);
+}
+.system-sr3e .sheet-component.span-2 {
+  min-width: calc(24rem * 2);
+}
+.system-sr3e .sheet-component.span-3 {
+  min-width: calc(24rem * 3);
+}
 .system-sr3e .toolbar {
   display: flex;
   flex-direction: row;

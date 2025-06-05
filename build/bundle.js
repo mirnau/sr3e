@@ -5111,15 +5111,12 @@ function setupMasonry({
     return "small";
   };
   const applySpanWidths = (columnCount, itemWidth, gutterPx) => {
-    const twoSpan = container.querySelectorAll(".two-span-selectable");
-    const threeSpan = container.querySelectorAll(".three-span-selectable");
-    const twoSpanWidth = columnCount >= 2 ? itemWidth * 2 + gutterPx : itemWidth;
-    const threeSpanWidth = columnCount >= 3 ? itemWidth * 3 + gutterPx * 2 : itemWidth;
-    twoSpan.forEach((el) => {
-      el.style.width = `${twoSpanWidth}px`;
-    });
-    threeSpan.forEach((el) => {
-      el.style.width = `${threeSpanWidth}px`;
+    const items = container.querySelectorAll(itemSelector);
+    items.forEach((el) => {
+      const spanMatch = el.className.match(/span-(\d)/);
+      const span = spanMatch ? parseInt(spanMatch[1]) : 1;
+      const spanWidth = itemWidth * span + gutterPx * (span - 1);
+      el.style.width = `${spanWidth}px`;
     });
     const state2 = getLayoutState(columnCount);
     onLayoutStateChange(state2);
@@ -5135,9 +5132,6 @@ function setupMasonry({
     const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
     const totalGutter = gutterPx * (columnCount - 1);
     const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
-    container.querySelectorAll(itemSelector).forEach((item2) => {
-      item2.style.width = `${itemWidth}px`;
-    });
     const sizer = container.querySelector(gridSizerSelector);
     if (sizer) sizer.style.width = `${itemWidth}px`;
     applySpanWidths(columnCount, itemWidth, gutterPx);
@@ -5194,7 +5188,8 @@ const flags = {
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
     isAssigningSkills: "isAssigningSkills",
-    isAssigningAttributes: "isAssigningAttributes"
+    isAssigningAttributes: "isAssigningAttributes",
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
   }
 };
 const masonryMinWidthFallbackValue = {
@@ -9978,6 +9973,7 @@ function setFlagsOnCharacter(actor, options, userId) {
   actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
   actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, true);
   actor.setFlag(flags.sr3e, flags.actor.isAssigningSkills, false);
+  actor.setFlag(flags.sr3e, flags.actor.persistanceBlobCharacterSheetSize, {});
 }
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {

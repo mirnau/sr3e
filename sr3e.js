@@ -144,6 +144,7 @@ function setFlagsOnCharacter(actor, options, userId) {
   actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
   actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, true);
   actor.setFlag(flags.sr3e, flags.actor.isAssigningSkills, false);
+  actor.setFlag(flags.sr3e, flags.actor.persistanceBlobCharacterSheetSize, {});
 }
 
 function registerHooks() {

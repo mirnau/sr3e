@@ -31,6 +31,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     };
   }
 
+
   _renderHTML() {
     return null;
   }

@@ -24,7 +24,8 @@ export const flags = {
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
     isAssigningSkills: "isAssigningSkills",
-    isAssigningAttributes: "isAssigningAttributes"
+    isAssigningAttributes: "isAssigningAttributes",
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
   }
 };
 
