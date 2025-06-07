@@ -579,18 +579,30 @@
   margin: 0 auto;
   background-color: transparent;
   margin-bottom: -0.25rem;
-  clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
-.system-sr3e .skill-masonry-grid .skill-card,
+.system-sr3e .skill-masonry-grid .skill-card-container,
 .system-sr3e .skill-masonry-grid .skill-grid-sizer {
   min-width: 6.5rem;
 }
 .system-sr3e .skill-masonry-grid .skill-gutter-sizer {
   width: 0.25rem;
 }
-.system-sr3e .skill-masonry-grid .skill-card {
+.system-sr3e .skill-masonry-grid .skill-card-container {
   display: inline-block;
   vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  margin-bottom: 0.25rem;
+  overflow: visible;
+}
+.system-sr3e .skill-masonry-grid .skill-card-container .fa-pen-to-square {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  color: lime;
+  z-index: 1;
+}
+.system-sr3e .skill-masonry-grid .skill-card-container .skill-card {
   box-sizing: border-box;
   position: relative;
   margin-bottom: 0.25rem;
@@ -599,7 +611,7 @@
   padding: 0.5rem;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
-.system-sr3e .skill-masonry-grid .skill-card .skill-background-layer {
+.system-sr3e .skill-masonry-grid .skill-card-container .skill-card .skill-background-layer {
   position: absolute;
   z-index: -1;
   top: 1px;
@@ -611,11 +623,11 @@
   pointer-events: none;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
-.system-sr3e .skill-masonry-grid .skill-card select.roll-type-select,
-.system-sr3e .skill-masonry-grid .skill-card select {
+.system-sr3e .skill-masonry-grid .skill-card-container .skill-card select.roll-type-select,
+.system-sr3e .skill-masonry-grid .skill-card-container .skill-card select {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .skill-masonry-grid .core-skill {
+.system-sr3e .skill-masonry-grid .skill-card-container .core-skill {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -623,14 +635,14 @@
   gap: 0.5rem;
   padding: 0.25rem;
 }
-.system-sr3e .skill-masonry-grid .core-skill .skill-name {
+.system-sr3e .skill-masonry-grid .skill-card-container .core-skill .skill-name {
   flex: 1;
   text-indent: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
-.system-sr3e .skill-masonry-grid .core-skill .skill-value {
+.system-sr3e .skill-masonry-grid .skill-card-container .core-skill .skill-value {
   position: relative;
   min-width: 2rem;
   text-align: center;
@@ -639,7 +651,7 @@
   margin: 0;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .core-skill .skill-value::before {
+.system-sr3e .skill-masonry-grid .skill-card-container .core-skill .skill-value::before {
   content: '';
   position: absolute;
   z-index: -1;
@@ -652,7 +664,7 @@
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .specialization-container {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -660,7 +672,7 @@
   background: transparent;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .specialization-container .skill-specialization-card {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container .skill-specialization-card {
   width: 100%;
   position: relative;
   display: flex;
@@ -670,7 +682,7 @@
   padding: 0.25rem 0.25rem 0.25rem 0.5rem;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .specialization-container .skill-specialization-card::before {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container .skill-specialization-card::before {
   content: '';
   position: absolute;
   z-index: -1;
@@ -683,13 +695,13 @@
   pointer-events: none;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .specialization-container .skill-specialization-card .specialization-name {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container .skill-specialization-card .specialization-name {
   margin-right: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.system-sr3e .skill-masonry-grid .specialization-container .skill-specialization-card .specialization-value {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container .skill-specialization-card .specialization-value {
   position: relative;
   min-width: 2rem;
   text-align: center;
@@ -698,7 +710,7 @@
   margin: 0;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
 }
-.system-sr3e .skill-masonry-grid .specialization-container .skill-specialization-card .specialization-value::before {
+.system-sr3e .skill-masonry-grid .skill-card-container .specialization-container .skill-specialization-card .specialization-value::before {
   content: '';
   position: absolute;
   z-index: -1;

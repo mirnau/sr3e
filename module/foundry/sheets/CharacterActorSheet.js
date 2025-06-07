@@ -144,17 +144,17 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     const title = form.querySelector(".window-title");
     if (title) {
       title.remove();
-      const newsfeedInjection = document.createElement("div");
-      header.prepend(newsfeedInjection);
-
-      this.#feed = mount(NewsFeed, {
-        target: header,
-        anchor: header.firstChild,
-        props: {
-          actor: this.document
-        }
-      });
     }
+    const newsfeedInjection = document.createElement("div");
+    header.prepend(newsfeedInjection);
+
+    this.#feed = mount(NewsFeed, {
+      target: header,
+      anchor: header.firstChild,
+      props: {
+        actor: this.document
+      }
+    });
   }
 
   async _tearDown() {

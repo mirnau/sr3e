@@ -47,6 +47,6 @@
     <div class="skill-container-grid-sizer"></div>
     <div class="skill-container-gutter-sizer"></div>
     {#each attributeSortedSkills as category}
-        <SkillCategory {...category} {config} />
+        <SkillCategory {...category} {actor} {config} />
     {/each}
 </div>

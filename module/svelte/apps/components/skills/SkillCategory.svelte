@@ -4,7 +4,7 @@
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
     import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
 
-    let { attribute, skills = [], config = {} } = $props();
+    let { attribute, skills = [], actor = {}, config = {} } = $props();
     let gridContainer;
 
     $effect(() => {
@@ -14,7 +14,7 @@
 
         const result = setupMasonry({
             container: gridContainer,
-            itemSelector: ".skill-card",
+            itemSelector: ".skill-card-container",
             gridSizerSelector: ".skill-grid-sizer",
             gutterSizerSelector: ".skill-gutter-sizer",
             minItemWidth: masonryMinWidthFallbackValue.skillGrid * rem,
@@ -34,7 +34,7 @@
         <div class="skill-gutter-sizer"></div>
 
         {#each skills as skill}
-            <ActiveSkillCard {skill} {config} />
+            <ActiveSkillCard {skill} {actor} {config} />
         {/each}
     </div>
 </div>
