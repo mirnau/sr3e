@@ -33,14 +33,17 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 		this.config = config;
 	}
 
-	static get defaultOptions() {
-		return foundry.utils.mergeObject(super.defaultOptions, {
-			classes: ["sr3e", "sheet", "actor", "active-skill-editor"],
-			position: { width: 500, height: "auto" },
+	static DEFAULT_OPTIONS = {
+		classes: ["sr3e", "sheet", "item"],
+		window: {
 			title: "Edit Skill",
-			resizable: true,
-		});
-	}
+			resizable: false
+		},
+		position: { 
+			width: "auto",
+			height: "auto" 
+		}
+	};
 
 	// REQUIRED for ApplicationV2
 	_renderHTML() {

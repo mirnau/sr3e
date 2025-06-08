@@ -34,5 +34,4 @@ export const masonryMinWidthFallbackValue = {
   attributeGrid: 13,
   skillCategoryGrid: 10,
   skillGrid: 4.5,
-
 }

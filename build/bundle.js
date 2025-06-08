@@ -3318,7 +3318,7 @@ const cardLayout = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
-async function openFilePicker$1(document2) {
+async function openFilePicker(document2) {
   return new Promise((resolve) => {
     new foundry.applications.apps.FilePicker({
       type: "image",
@@ -3382,7 +3382,7 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$9 = (e) => e.stopPropagation();
-var on_keydown$6 = (e) => {
+var on_keydown$5 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
@@ -3398,7 +3398,7 @@ function CardToolbar($$anchor, $$props) {
   }
   var div = root$x();
   div.__click = [on_click$9];
-  div.__keydown = [on_keydown$6];
+  div.__keydown = [on_keydown$5];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3431,9 +3431,9 @@ function getActorStore(actorId, storeName, customValue = null) {
   return actorStores[actorId][storeName];
 }
 var root_1$d = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
-var on_click$8 = (_, actor) => openFilePicker$1(actor());
+var on_click$8 = (_, actor) => openFilePicker(actor());
 var root_2$7 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_keydown$5 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var on_keydown$4 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$w = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
@@ -3523,7 +3523,7 @@ function Dossier($$anchor, $$props) {
   var div_3 = sibling(node_1, 2);
   var div_4 = child(div_3);
   div_4.__click = toggleDetails;
-  div_4.__keydown = [on_keydown$5, toggleDetails];
+  div_4.__keydown = [on_keydown$4, toggleDetails];
   var text = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
@@ -5262,7 +5262,7 @@ function Initiative($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_keydown$4 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var on_keydown$3 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
@@ -5334,7 +5334,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       var div_1 = root_1$c();
       var i_1 = child(div_1);
       i_1.__click = decrement;
-      i_1.__keydown = [on_keydown$4, decrement];
+      i_1.__keydown = [on_keydown$3, decrement];
       var h1 = sibling(i_1, 2);
       var text_1 = child(h1);
       var i_2 = sibling(h1, 2);
@@ -5366,7 +5366,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$3 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var root_2$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
@@ -5441,7 +5441,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var i_1 = root_2$5();
           i_1.__click = decrement;
-          i_1.__keydown = [on_keydown$3, decrement];
+          i_1.__keydown = [on_keydown$2, decrement];
           template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_1);
         };
@@ -5689,13 +5689,8 @@ function SkillsKnowledge($$anchor) {
   append($$anchor, div);
 }
 var on_click$7 = async (_, skill) => openFilePicker(skill());
-var on_keydown$2 = (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.target.blur();
-  }
-};
-var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><h1 class="large" contenteditable="true"> </h1></div></div></div></div></div></div>`);
+var on_change$5 = (e, skill) => skill().update({ name: e.target.value });
+var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   let skill = prop($$props, "skill", 19, () => ({}));
@@ -5710,20 +5705,18 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   img.__click = [on_click$7, skill];
   var div_5 = sibling(div_4, 2);
   var div_6 = child(div_5);
-  var h1 = child(div_6);
-  h1.__keydown = [on_keydown$2];
-  var text = child(h1);
+  var input = sibling(child(div_6), 2);
+  input.__change = [on_change$5, skill];
   template_effect(() => {
     set_attribute(img, "src", skill().img);
     set_attribute(img, "title", skill().name);
     set_attribute(img, "alt", skill().name);
-    set_text(text, skill().name);
+    set_value(input, skill().name);
   });
-  event("blur", h1, (e) => skill().update({ name: e.target.innerText }));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "keydown"]);
+delegate(["click", "change"]);
 const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.applications.api.ApplicationV2 {
   constructor(actor, skill, config) {
     const appId = _ActiveSkillEditorSheet.getAppIdFor(actor.id, skill._id);
@@ -5750,14 +5743,6 @@ const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.ap
     sheet.render(true);
     return sheet;
   }
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["sr3e", "sheet", "actor", "active-skill-editor"],
-      position: { width: 500, height: "auto" },
-      title: "Edit Skill",
-      resizable: true
-    });
-  }
   // REQUIRED for ApplicationV2
   _renderHTML() {
     return null;
@@ -5782,6 +5767,17 @@ const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.ap
   }
 };
 _app = new WeakMap();
+__publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
+  classes: ["sr3e", "sheet", "item"],
+  window: {
+    title: "Edit Skill",
+    resizable: false
+  },
+  position: {
+    width: "auto",
+    height: "auto"
+  }
+});
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$1 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$a = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
@@ -7556,7 +7552,7 @@ var root_1$4 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$4 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input>`);
-var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div><h4> </h4></div> <!></div>`);
+var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div><h4> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
   let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
@@ -7572,7 +7568,7 @@ function StatCard($$anchor, $$props) {
     console.log(`Updated ${$$props.path}.${$$props.key} to`, val);
   }
   var div = root$8();
-  var div_1 = child(div);
+  var div_1 = sibling(child(div), 2);
   var h4 = child(div_1);
   var text = child(h4);
   var node = sibling(div_1, 2);
@@ -7642,7 +7638,7 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-var on_click$4 = async (_, item2) => openFilePicker$1(item2());
+var on_click$4 = async (_, item2) => openFilePicker(item2());
 var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
@@ -8109,7 +8105,7 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metahuman = new WeakMap();
-var on_click$3 = async (_, item2) => openFilePicker$1(item2());
+var on_click$3 = async (_, item2) => openFilePicker(item2());
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
@@ -8555,7 +8551,7 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_click$2 = async (_, item2) => openFilePicker$1(item2());
+var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root$3 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
@@ -8823,7 +8819,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_click$1 = async (_, item2) => openFilePicker$1(item2());
+var on_click$1 = async (_, item2) => openFilePicker(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
 var root$2 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
@@ -8946,7 +8942,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_click = async (_, $$props) => openFilePicker$1($$props.item);
+var on_click = async (_, $$props) => openFilePicker($$props.item);
 var on_change = (e, $$props) => $$props.item.update({ name: e.target.value });
 var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
@@ -8954,8 +8950,8 @@ var on_change_2 = (e, $$props) => $$props.item.update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
 var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><select><option disabled> </option><!></select></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><input class="large" name="name" type="text"></div> <div class="stat-card"><select></select></div> <!></div></div></div></div> <!></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <select><option disabled> </option><!></select></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let value = state(proxy($$props.item.system.skillType || "active"));
@@ -8989,10 +8985,10 @@ function SkillApp($$anchor, $$props) {
   img.__click = [on_click, $$props];
   var div_5 = sibling(div_4, 2);
   var div_6 = child(div_5);
-  var input = child(div_6);
+  var input = sibling(child(div_6), 2);
   input.__change = [on_change, $$props];
   var div_7 = sibling(div_6, 2);
-  var select = child(div_7);
+  var select = sibling(child(div_7), 2);
   init_select(select, () => get$1(value));
   var select_value;
   select.__change = [on_change_1, updateSkillType];
@@ -9012,7 +9008,7 @@ function SkillApp($$anchor, $$props) {
   {
     var consequent = ($$anchor2) => {
       var div_8 = root_2$1();
-      var select_1 = child(div_8);
+      var select_1 = sibling(child(div_8), 2);
       init_select(select_1, () => $$props.item.system.activeSkill.linkedAttribute);
       var select_1_value;
       select_1.__change = [on_change_2, $$props];

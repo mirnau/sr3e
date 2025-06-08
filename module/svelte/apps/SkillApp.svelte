@@ -42,6 +42,7 @@
 				</div>
 				<div class="stat-grid single-column">
 					<div class="stat-card">
+						<div class="stat-card-background"></div>
 						<input
 							class="large"
 							name="name"
@@ -52,6 +53,7 @@
 					</div>
 
 					<div class="stat-card">
+						<div class="stat-card-background"></div>
 						<select
 							value={value}
 							onchange={(e) => updateSkillType(e.target.value)}
@@ -64,6 +66,7 @@
 
 					{#if value === "active"}
 						<div class="stat-card">
+							<div class="stat-card-background"></div>
 							<select
 								value={item.system.activeSkill.linkedAttribute}
 								onchange={(e) =>

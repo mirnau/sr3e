@@ -24,17 +24,6 @@
                 display: grid;
                 background-color: @default-fake-shadow-color;
 
-                &::before {
-                    content: '';
-                    position: absolute;
-                    inset: 1px;
-                    z-index: -1;
-                    background: @default-sr3e-inner-background-color;
-                    box-shadow: inset 0 0 30px #1d282c;
-                    pointer-events: none;
-                    .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
-                }
-
                 .stat-card {
 
                     .select-container {

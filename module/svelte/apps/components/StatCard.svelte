@@ -23,6 +23,7 @@
 </script>
 
 <div class="stat-card">
+	<div class="stat-card-background"></div>
 	<div>
 		<h4>{label}</h4>
 	</div>

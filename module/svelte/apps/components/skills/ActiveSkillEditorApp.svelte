@@ -1,4 +1,5 @@
 <script>
+    import { openFilePicker, localize } from "../../../../svelteHelpers.js";
     let { skill = {}, actor = {}, config = {} } = $props();
 </script>
 
@@ -19,20 +20,15 @@
                 </div>
                 <div class="stat-grid single-column">
                     <div class="stat-card">
-                        <h1
+                        <div class="stat-card-background"></div>
+                        <input
                             class="large"
-                            contenteditable="true"
-                            onkeydown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault();
-                                    e.target.blur();
-                                }
-                            }}
-                            onblur={(e) =>
-                                skill.update({ name: e.target.innerText })}
-                        >
-                            {skill.name}
-                        </h1>
+                            name="name"
+                            type="text"
+                            value={skill.name}
+                            onchange={(e) =>
+                                skill.update({ name: e.target.value })}
+                        />
                     </div>
                 </div>
             </div>

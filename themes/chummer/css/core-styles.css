@@ -204,16 +204,6 @@
   display: grid;
   background-color: #ff0095;
 }
-.system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background::before {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
-  box-shadow: inset 0 0 30px #1d282c;
-  pointer-events: none;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
-}
 .system-sr3e .sr3e-general-grid .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
   padding: 0.25rem;
   text-align: center;
@@ -802,6 +792,7 @@
   border: none !important;
   clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
 }
+.system-sr3e .sr3e.sheet.item .window-header,
 .system-sr3e .sr3e.sheet.charactercreation .window-header,
 .system-sr3e .sr3e-item-header,
 .system-sr3e .sr3e-actor-header {
@@ -1818,6 +1809,7 @@
   display: inline-grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.25rem;
+  margin-top: 0.25rem;
 }
 .system-sr3e dialog .stat-grid.single-column,
 .system-sr3e form .stat-grid.single-column,
