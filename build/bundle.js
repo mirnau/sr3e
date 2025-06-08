@@ -8,7 +8,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
+var _app, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3318,7 +3318,7 @@ const cardLayout = writable([]);
 function localize(key) {
   return game.i18n.localize(key);
 }
-async function openFilePicker(document2) {
+async function openFilePicker$1(document2) {
   return new Promise((resolve) => {
     new foundry.applications.apps.FilePicker({
       type: "image",
@@ -3381,24 +3381,24 @@ function getRandomBellCurveWithMode(min, max, mode) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$8 = (e) => e.stopPropagation();
-var on_keydown$5 = (e) => {
+var on_click$9 = (e) => e.stopPropagation();
+var on_keydown$6 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
 var on_click_1$1 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$w = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$x = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$w();
-  div.__click = [on_click$8];
-  div.__keydown = [on_keydown$5];
+  var div = root$x();
+  div.__click = [on_click$9];
+  div.__keydown = [on_keydown$6];
   var button = child(div);
   button.__click = [on_click_1$1, handleMove];
   var button_1 = sibling(button, 2);
@@ -3431,12 +3431,12 @@ function getActorStore(actorId, storeName, customValue = null) {
   return actorStores[actorId][storeName];
 }
 var root_1$d = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
-var on_click$7 = (_, actor) => openFilePicker(actor());
+var on_click$8 = (_, actor) => openFilePicker$1(actor());
 var root_2$7 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_keydown$4 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var on_keydown$5 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$v = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$w = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3488,7 +3488,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     actorNameStore.set(newName);
   }
-  var fragment = root$v();
+  var fragment = root$w();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3507,7 +3507,7 @@ function Dossier($$anchor, $$props) {
     var alternate = ($$anchor2) => {
       var div_2 = root_2$7();
       var img_1 = child(div_2);
-      img_1.__click = [on_click$7, actor];
+      img_1.__click = [on_click$8, actor];
       template_effect(() => {
         set_attribute(img_1, "src", actor().img);
         set_attribute(img_1, "alt", actor().name + "!");
@@ -3523,7 +3523,7 @@ function Dossier($$anchor, $$props) {
   var div_3 = sibling(node_1, 2);
   var div_4 = child(div_3);
   div_4.__click = toggleDetails;
-  div_4.__keydown = [on_keydown$4, toggleDetails];
+  div_4.__keydown = [on_keydown$5, toggleDetails];
   var text = sibling(child(div_4));
   var node_2 = sibling(div_4, 2);
   {
@@ -5197,7 +5197,7 @@ const masonryMinWidthFallbackValue = {
   skillCategoryGrid: 10,
   skillGrid: 4.5
 };
-var root$u = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
+var root$v = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
 function Initiative($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5223,7 +5223,7 @@ function Initiative($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$u();
+  var div = root$v();
   var h1 = child(div);
   var text = child(h1);
   var div_1 = sibling(h1, 2);
@@ -5262,11 +5262,11 @@ function Initiative($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_keydown$3 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var on_keydown$4 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$t = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
+var root$u = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5325,7 +5325,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$t();
+  var div = root$u();
   var h4 = child(div);
   var text = child(h4);
   var node = sibling(h4, 4);
@@ -5334,7 +5334,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       var div_1 = root_1$c();
       var i_1 = child(div_1);
       i_1.__click = decrement;
-      i_1.__keydown = [on_keydown$3, decrement];
+      i_1.__keydown = [on_keydown$4, decrement];
       var h1 = sibling(i_1, 2);
       var text_1 = child(h1);
       var i_2 = sibling(h1, 2);
@@ -5366,13 +5366,13 @@ function AttributeCardCreationState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
+var on_keydown$3 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var root_2$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$s = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
+var root$t = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5429,7 +5429,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$s();
+  var div = root$t();
   var h4 = sibling(child(div), 2);
   var text = child(h4);
   var node = sibling(h4, 2);
@@ -5441,7 +5441,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var i_1 = root_2$5();
           i_1.__click = decrement;
-          i_1.__keydown = [on_keydown$2, decrement];
+          i_1.__keydown = [on_keydown$3, decrement];
           template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_1);
         };
@@ -5486,7 +5486,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var root$r = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$s = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5508,7 +5508,7 @@ function Attributes($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var fragment = root$r();
+  var fragment = root$s();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5568,7 +5568,7 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$q = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$r = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5588,7 +5588,7 @@ function DicePools($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var fragment = root$q();
+  var fragment = root$r();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5623,7 +5623,7 @@ function DicePools($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$p = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$q = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -5643,7 +5643,7 @@ function Movement($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var fragment = root$p();
+  var fragment = root$q();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5678,16 +5678,111 @@ function Movement($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-var root$o = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+var root$p = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
 function SkillsLangauge($$anchor) {
+  var div = root$p();
+  append($$anchor, div);
+}
+var root$o = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
+function SkillsKnowledge($$anchor) {
   var div = root$o();
   append($$anchor, div);
 }
-var root$n = /* @__PURE__ */ template(`<div>Hello Derived Attribute</div>`);
-function SkillsKnowledge($$anchor) {
+var on_click$7 = async (_, skill) => openFilePicker(skill());
+var on_keydown$2 = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    e.target.blur();
+  }
+};
+var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><h1 class="large" contenteditable="true"> </h1></div></div></div></div></div></div>`);
+function ActiveSkillEditorApp($$anchor, $$props) {
+  push($$props, true);
+  let skill = prop($$props, "skill", 19, () => ({}));
+  prop($$props, "actor", 19, () => ({}));
+  prop($$props, "config", 19, () => ({}));
   var div = root$n();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = sibling(child(div_2), 2);
+  var div_4 = child(div_3);
+  var img = child(div_4);
+  img.__click = [on_click$7, skill];
+  var div_5 = sibling(div_4, 2);
+  var div_6 = child(div_5);
+  var h1 = child(div_6);
+  h1.__keydown = [on_keydown$2];
+  var text = child(h1);
+  template_effect(() => {
+    set_attribute(img, "src", skill().img);
+    set_attribute(img, "title", skill().name);
+    set_attribute(img, "alt", skill().name);
+    set_text(text, skill().name);
+  });
+  event("blur", h1, (e) => skill().update({ name: e.target.innerText }));
   append($$anchor, div);
+  pop();
 }
+delegate(["click", "keydown"]);
+const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.applications.api.ApplicationV2 {
+  constructor(actor, skill, config) {
+    const appId = _ActiveSkillEditorSheet.getAppIdFor(actor.id, skill._id);
+    super({ id: appId });
+    __privateAdd(this, _app);
+    this.actor = actor;
+    this.skill = skill;
+    this.config = config;
+  }
+  static getAppIdFor(actorId, skillId) {
+    return `sr3e-active-skill-editor-${actorId}-${skillId}`;
+  }
+  static getExisting(actorId, skillId) {
+    const appId = this.getAppIdFor(actorId, skillId);
+    return Object.values(ui.windows).find((app) => app.id === appId);
+  }
+  static launch(actor, skill, config) {
+    const existing = this.getExisting(actor.id, skill._id);
+    if (existing) {
+      existing.bringToTop();
+      return existing;
+    }
+    const sheet = new this(actor, skill, config);
+    sheet.render(true);
+    return sheet;
+  }
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      classes: ["sr3e", "sheet", "actor", "active-skill-editor"],
+      position: { width: 500, height: "auto" },
+      title: "Edit Skill",
+      resizable: true
+    });
+  }
+  // REQUIRED for ApplicationV2
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, element) {
+    __privateSet(this, _app, mount(ActiveSkillEditorApp, {
+      target: element,
+      props: {
+        actor: this.actor,
+        skill: this.skill,
+        config: this.config
+      }
+    }));
+    return element;
+  }
+  async close(options) {
+    if (__privateGet(this, _app)) {
+      await unmount(__privateGet(this, _app));
+      __privateSet(this, _app, null);
+    }
+    return super.close(options);
+  }
+};
+_app = new WeakMap();
+let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$1 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$a = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
@@ -5701,7 +5796,7 @@ function ActiveSkillCard($$anchor, $$props) {
   let specializations = proxy(activeSkill.specializations);
   let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
   function openSkill() {
-    console.log("Opening Skill Edit Panel");
+    ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
   var div = root$m();
   var node = child(div);
@@ -5751,7 +5846,7 @@ delegate(["click", "keydown"]);
 var root$l = /* @__PURE__ */ template(`<div class="skill-category-container"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
-  let skills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let categoryOfSkills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
   user_effect(() => {
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -5770,7 +5865,7 @@ function SkillCategory($$anchor, $$props) {
   var text = child(h1);
   var div_2 = sibling(div_1, 2);
   var node = sibling(child(div_2), 4);
-  each(node, 17, skills, index, ($$anchor2, skill) => {
+  each(node, 17, categoryOfSkills, index, ($$anchor2, skill) => {
     ActiveSkillCard($$anchor2, {
       get skill() {
         return get$1(skill);
@@ -6523,7 +6618,7 @@ function ShoppingCart($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.actor.isShoppingState));
   function toggleShoppingState() {
     store_set(isShoppingState, !$isShoppingState());
     actor().setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
@@ -6654,7 +6749,7 @@ class ActorDataService {
 class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
     super(...arguments);
-    __privateAdd(this, _app);
+    __privateAdd(this, _app2);
     __privateAdd(this, _neon);
     __privateAdd(this, _feed);
     __privateAdd(this, _cart);
@@ -6679,9 +6774,9 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     return null;
   }
   _replaceHTML(_, windowContent) {
-    if (__privateGet(this, _app)) {
-      unmount(__privateGet(this, _app));
-      __privateSet(this, _app, null);
+    if (__privateGet(this, _app2)) {
+      unmount(__privateGet(this, _app2));
+      __privateSet(this, _app2, null);
     }
     if (__privateGet(this, _neon)) {
       unmount(__privateGet(this, _neon));
@@ -6701,7 +6796,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     }
     windowContent.innerHTML = "";
     const form = windowContent.parentNode;
-    __privateSet(this, _app, mount(CharacterSheetApp, {
+    __privateSet(this, _app2, mount(CharacterSheetApp, {
       target: windowContent,
       props: {
         actor: this.document,
@@ -6782,11 +6877,11 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
   async _tearDown() {
     if (__privateGet(this, _neon)) await unmount(__privateGet(this, _neon));
-    if (__privateGet(this, _app)) await unmount(__privateGet(this, _app));
+    if (__privateGet(this, _app2)) await unmount(__privateGet(this, _app2));
     if (__privateGet(this, _feed)) await unmount(__privateGet(this, _feed));
     if (__privateGet(this, _cart)) await unmount(__privateGet(this, _cart));
     if (__privateGet(this, _creation)) await unmount(__privateGet(this, _creation));
-    __privateSet(this, _app, __privateSet(this, _neon, __privateSet(this, _feed, __privateSet(this, _cart, null))));
+    __privateSet(this, _app2, __privateSet(this, _neon, __privateSet(this, _feed, __privateSet(this, _cart, null))));
     return super._tearDown();
   }
   _onSubmit() {
@@ -6819,7 +6914,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     }
   }
 }
-_app = new WeakMap();
+_app2 = new WeakMap();
 _neon = new WeakMap();
 _feed = new WeakMap();
 _cart = new WeakMap();
@@ -7547,7 +7642,7 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-var on_click$4 = async (_, item2) => openFilePicker(item2());
+var on_click$4 = async (_, item2) => openFilePicker$1(item2());
 var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
@@ -8014,7 +8109,7 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metahuman = new WeakMap();
-var on_click$3 = async (_, item2) => openFilePicker(item2());
+var on_click$3 = async (_, item2) => openFilePicker$1(item2());
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
@@ -8460,7 +8555,7 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_click$2 = async (_, item2) => openFilePicker(item2());
+var on_click$2 = async (_, item2) => openFilePicker$1(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root$3 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
@@ -8728,7 +8823,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_click$1 = async (_, item2) => openFilePicker(item2());
+var on_click$1 = async (_, item2) => openFilePicker$1(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
 var root$2 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
@@ -8851,7 +8946,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_click = async (_, $$props) => openFilePicker($$props.item);
+var on_click = async (_, $$props) => openFilePicker$1($$props.item);
 var on_change = (e, $$props) => $$props.item.update({ name: e.target.value });
 var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
@@ -10006,6 +10101,7 @@ function setFlagsOnCharacter(actor, options, userId) {
   actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, true);
   actor.setFlag(flags.sr3e, flags.actor.isAssigningSkills, false);
   actor.setFlag(flags.sr3e, flags.actor.persistanceBlobCharacterSheetSize, {});
+  actor.setFlag(flags.sr3e, flags.actor.isShoppingState, true);
 }
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {

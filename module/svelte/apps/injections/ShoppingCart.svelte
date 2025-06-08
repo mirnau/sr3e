@@ -9,7 +9,7 @@
 	let isShoppingState = getActorStore(
 		actor.id,
 		stores.isShoppingState,
-		actor.getFlag(flags.sr3e, flags.isShoppingState),
+		actor.getFlag(flags.sr3e, flags.actor.isShoppingState),
 	);
 
 	function toggleShoppingState() {

@@ -3,6 +3,9 @@
 	import { getActorStore, stores } from "../../../stores/actorStores.js";
 	import { localize } from "../../../../svelteHelpers.js";
 	import { flags } from "../../../../foundry/services/commonConsts.js";
+	import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
+	import { mount } from "svelte";
+
 	let { skill = {}, actor = {}, config = {} } = $props();
 
 	let activeSkill = $state(skill.system.activeSkill);
@@ -14,8 +17,10 @@
 		actor.getFlag(flags.sr3e, flags.isShoppingState),
 	);
 
+	let skillEditorInstance = null;
+
 	function openSkill() {
-		console.log("Opening Skill Edit Panel");
+		ActiveSkillEditorSheet.launch(actor, skill, config);
 	}
 </script>
 
