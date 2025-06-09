@@ -30,12 +30,6 @@
   font-style: normal;
   font-display: swap;
 }
-.system-sr3e {
-  font-family: 'VT323', monospace;
-  margin: 0.33rem 0;
-  line-height: 1rem;
-  color: #1df0ff;
-}
 .system-sr3e form.p.hint,
 .system-sr3e p.hint {
   color: #ff0095;
@@ -44,37 +38,51 @@
   color: #1df0ff;
 }
 .system-sr3e h1 {
-  text-transform: uppercase;
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
+  border: none;
   color: #1df0ff;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
-  border: none;
   margin-bottom: 0.7rem;
   font-size: 1.4rem;
 }
+.system-sr3e h1.uppercase {
+  text-transform: uppercase;
+}
+.system-sr3e h1.no-margin {
+  margin: 0;
+}
 .system-sr3e summary,
 .system-sr3e h2 {
-  text-transform: uppercase;
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
-  color: #ff0095;
   border: none;
+  color: #ff0095;
   font-size: 1.2rem;
 }
-.system-sr3e h3 {
+.system-sr3e summary.uppercase,
+.system-sr3e h2.uppercase {
   text-transform: uppercase;
+}
+.system-sr3e summary.no-margin,
+.system-sr3e h2.no-margin {
+  margin: 0;
+}
+.system-sr3e h3 {
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
-  color: #5fd3ae;
   border: none;
+  color: #5fd3ae;
   text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   font-size: 1.1rem;
+}
+.system-sr3e h3.uppercase {
+  text-transform: uppercase;
 }
 .system-sr3e h3.no-margin {
   margin: 0;
@@ -82,33 +90,54 @@
 .system-sr3e label,
 .system-sr3e span,
 .system-sr3e h4 {
-  text-transform: uppercase;
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
-  color: #5fd3ae;
   border: none;
+  color: #5fd3ae;
   text-shadow: 0 0 6px #45d06b, 0 0 10px #e6ff8d;
   font-size: 1rem;
 }
-.system-sr3e h5 {
+.system-sr3e label.uppercase,
+.system-sr3e span.uppercase,
+.system-sr3e h4.uppercase {
   text-transform: uppercase;
+}
+.system-sr3e label.no-margin,
+.system-sr3e span.no-margin,
+.system-sr3e h4.no-margin {
+  margin: 0;
+}
+.system-sr3e h5 {
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
+  border: none;
   font-size: 1.1rem;
   color: #5fd3ae;
   text-shadow: 0 0 6px #45d06b, 0 0 10px #e6ff8d;
 }
-.system-sr3e h6 {
+.system-sr3e h5.uppercase {
   text-transform: uppercase;
+}
+.system-sr3e h5.no-margin {
+  margin: 0;
+}
+.system-sr3e h6 {
   font-family: 'VT323', monospace;
   margin: 0.33rem 0;
   line-height: 1rem;
   color: #1df0ff;
+  border: none;
   color: #5fd3ae;
+}
+.system-sr3e h6.uppercase {
+  text-transform: uppercase;
+}
+.system-sr3e h6.no-margin {
+  margin: 0;
 }
 .system-sr3e span {
   font-family: 'VT323', monospace;
@@ -886,6 +915,12 @@
 .system-sr3e footer.form-footer button:last-of-type::after {
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
+.system-sr3e .buttons-vertcal-distribution {
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
 .system-sr3e img {
   margin: 0rem;
   background-color: transparent;
@@ -1369,7 +1404,7 @@
 }
 .system-sr3e .sr3e.sheet.character .neon-name-position {
   position: absolute;
-  top: -3.3rem;
+  top: -5.3rem;
   left: 1rem;
   z-index: 100;
 }

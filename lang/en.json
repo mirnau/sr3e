@@ -127,14 +127,16 @@
       "quote": "Quote"
     },
     "skill": {
-      "skill": "Skill",
-      "speak": "Speak",
-      "read": "Read",
-      "write": "Write",
       "active": "Active Skill",
       "knowledge": "Knowledge Skill",
       "language": "Language Skill",
-      "linkedAttribute": "Choose a Linked Attribute..."
+      "linkedAttribute": "Choose a Linked Attribute...",
+      "read": "Read",
+      "skill": "Skill",
+      "speak": "Speak",
+      "specializations": "Specializations",
+      "write": "Write"
+
     },
     "traits": {
       "age": "Age",

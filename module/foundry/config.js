@@ -34,6 +34,7 @@ sr3e.skill = {
     knowledge: "sr3e.skill.knowledge",
     language: "sr3e.skill.language",
     linkedAttribute: "sr3e.skill.linkedAttribute",
+    specializations: "sr3e.skill.specializations",
 }
 
 sr3e.initiative = {

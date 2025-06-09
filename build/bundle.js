@@ -3282,8 +3282,8 @@ function prop(props, key, flags2, fallback) {
   };
 }
 function cubic_out(t) {
-  const f = t - 1;
-  return f * f * f + 1;
+  const f2 = t - 1;
+  return f2 * f2 * f2 + 1;
 }
 function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y" } = {}) {
   const style = getComputedStyle(node);
@@ -3430,7 +3430,7 @@ function getActorStore(actorId, storeName, customValue = null) {
   }
   return actorStores[actorId][storeName];
 }
-var root_1$d = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
+var root_1$e = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
 var on_click$8 = (_, actor) => openFilePicker(actor());
 var root_2$7 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$4 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
@@ -3499,7 +3499,7 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$d();
+      var div_1 = root_1$e();
       var img = child(div_1);
       template_effect(() => set_attribute(img, "src", get$1(imgPath)));
       append($$anchor2, div_1);
@@ -5264,7 +5264,7 @@ function Initiative($$anchor, $$props) {
 }
 var on_keydown$3 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") && decrement();
 var on_keydown_1$1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
-var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
+var root_1$d = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$u = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
@@ -5331,7 +5331,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   var node = sibling(h4, 4);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$c();
+      var div_1 = root_1$d();
       var i_1 = child(div_1);
       i_1.__click = decrement;
       i_1.__keydown = [on_keydown$3, decrement];
@@ -5370,7 +5370,7 @@ var on_keydown$2 = (e, decrement) => (e.key === "ArrowDown" || e.key === "s") &&
 var root_2$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment) => (e.key === "ArrowUp" || e.key === "w") && increment();
 var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$b = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_1$c = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$t = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
@@ -5435,7 +5435,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   var node = sibling(h4, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$b();
+      var div_1 = root_1$c();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
@@ -5688,35 +5688,68 @@ function SkillsKnowledge($$anchor) {
   var div = root$o();
   append($$anchor, div);
 }
-var on_click$7 = async (_, skill) => openFilePicker(skill());
-var on_change$5 = (e, skill) => skill().update({ name: e.target.value });
-var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div></div></div></div></div></div>`);
+function test() {
+  console.log("TEST");
+}
+var on_click$7 = async (_, value) => openFilePicker(value);
+var root_1$b = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
+var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="buttons-vertcal-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <!></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   let skill = prop($$props, "skill", 19, () => ({}));
   prop($$props, "actor", 19, () => ({}));
-  prop($$props, "config", 19, () => ({}));
+  let config = prop($$props, "config", 19, () => ({}));
+  let specializations = proxy(skill().system.specializations);
+  let value = proxy(skill().system.activeSkill.value);
+  console.log("SKILL0", value);
   var div = root$n();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  img.__click = [on_click$7, skill];
+  img.__click = [on_click$7, value];
   var div_5 = sibling(div_4, 2);
   var div_6 = child(div_5);
-  var input = sibling(child(div_6), 2);
-  input.__change = [on_change$5, skill];
-  template_effect(() => {
-    set_attribute(img, "src", skill().img);
-    set_attribute(img, "title", skill().name);
-    set_attribute(img, "alt", skill().name);
-    set_value(input, skill().name);
+  var h1 = sibling(child(div_6), 2);
+  var text = child(h1);
+  var div_7 = sibling(div_5, 2);
+  var h1_1 = sibling(child(div_7), 2);
+  var text_1 = child(h1_1);
+  var div_8 = sibling(div_7, 2);
+  var button = child(div_8);
+  button.__click = [test];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [test];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [test];
+  var div_9 = sibling(div_1, 2);
+  var div_10 = child(div_9);
+  var div_11 = sibling(child(div_10), 2);
+  var h1_2 = child(div_11);
+  var text_2 = child(h1_2);
+  var node = sibling(h1_2, 2);
+  each(node, 17, () => specializations, index, ($$anchor2, specialization) => {
+    var div_12 = root_1$b();
+    append($$anchor2, div_12);
   });
+  template_effect(
+    ($0) => {
+      set_attribute(img, "src", skill().img);
+      set_attribute(img, "title", skill().name);
+      set_attribute(img, "alt", skill().name);
+      set_text(text, skill().name);
+      set_text(text_1, value);
+      set_text(text_2, $0);
+    },
+    [
+      () => localize(config().skill.specializations)
+    ]
+  );
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["click"]);
 const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.applications.api.ApplicationV2 {
   constructor(actor, skill, config) {
     const appId = _ActiveSkillEditorSheet.getAppIdFor(actor.id, skill._id);
@@ -5747,28 +5780,31 @@ const _ActiveSkillEditorSheet = class _ActiveSkillEditorSheet extends foundry.ap
   _renderHTML() {
     return null;
   }
-  _replaceHTML(_, element) {
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _app)) {
+      f;
+      unmount(__privateGet(this, _app));
+    }
     __privateSet(this, _app, mount(ActiveSkillEditorApp, {
-      target: element,
+      target: windowContent,
       props: {
         actor: this.actor,
         skill: this.skill,
         config: this.config
       }
     }));
-    return element;
+    windowContent.parentElement.querySelector("header.window-header");
+    return windowContent;
   }
-  async close(options) {
-    if (__privateGet(this, _app)) {
-      await unmount(__privateGet(this, _app));
-      __privateSet(this, _app, null);
-    }
-    return super.close(options);
+  async _tearDown() {
+    if (__privateGet(this, _app)) await unmount(__privateGet(this, _app));
+    __privateSet(this, _app, null);
+    return super._tearDown();
   }
 };
 _app = new WeakMap();
 __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
-  classes: ["sr3e", "sheet", "item"],
+  classes: ["sr3e", "sheet", "item", "active-skill-editor"],
   window: {
     title: "Edit Skill",
     resizable: false
@@ -6946,7 +6982,8 @@ sr3e.skill = {
   active: "sr3e.skill.active",
   knowledge: "sr3e.skill.knowledge",
   language: "sr3e.skill.language",
-  linkedAttribute: "sr3e.skill.linkedAttribute"
+  linkedAttribute: "sr3e.skill.linkedAttribute",
+  specializations: "sr3e.skill.specializations"
 };
 sr3e.initiative = {
   augmentedReaction: "sr3e.initiative.augmentedReaction",

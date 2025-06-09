@@ -157,6 +157,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     });
   }
 
+  
+
   async _tearDown() {
     if (this.#neon) await unmount(this.#neon);
     if (this.#app) await unmount(this.#app);

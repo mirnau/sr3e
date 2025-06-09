@@ -34,15 +34,15 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 	}
 
 	static DEFAULT_OPTIONS = {
-		classes: ["sr3e", "sheet", "item"],
+		classes: ["sr3e", "sheet", "item", "active-skill-editor"],
 		window: {
 			title: "Edit Skill",
 			resizable: false
 		},
-		position: { 
+		position: {
 			width: "auto",
-			height: "auto" 
-		}
+			height: "auto"
+		},
 	};
 
 	// REQUIRED for ApplicationV2
@@ -50,23 +50,30 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 		return null;
 	}
 
-	_replaceHTML(_, element) {
+	_replaceHTML(_, windowContent) {
+
+		if (this.#app) {f
+			unmount(this.#app);
+		}
+
 		this.#app = mount(ActiveSkillEditorApp, {
-			target: element,
+			target: windowContent,
 			props: {
 				actor: this.actor,
 				skill: this.skill,
 				config: this.config
 			}
 		});
-		return element;
+
+		const header = windowContent.parentElement.querySelector("header.window-header");
+
+		return windowContent;
 	}
 
-	async close(options) {
-		if (this.#app) {
-			await unmount(this.#app);
-			this.#app = null;
-		}
-		return super.close(options);
+	async _tearDown() {
+
+		if (this.#app) await unmount(this.#app);
+		this.#app = null;
+		return super._tearDown();
 	}
 }
