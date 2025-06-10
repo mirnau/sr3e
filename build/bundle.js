@@ -5105,22 +5105,6 @@ function setupMasonry({
   if (!container) return () => {
   };
   const form = container.parentElement;
-  const getLayoutState = (columnCount) => {
-    if (columnCount >= 3) return "wide";
-    if (columnCount === 2) return "medium";
-    return "small";
-  };
-  const applySpanWidths = (columnCount, itemWidth, gutterPx) => {
-    const items = container.querySelectorAll(itemSelector);
-    items.forEach((el) => {
-      const spanMatch = el.className.match(/span-(\d)/);
-      const span = spanMatch ? parseInt(spanMatch[1]) : 1;
-      const spanWidth = itemWidth * span + gutterPx * (span - 1);
-      el.style.width = `${spanWidth}px`;
-    });
-    const state2 = getLayoutState(columnCount);
-    onLayoutStateChange(state2);
-  };
   const applyWidths = () => {
     const style = getComputedStyle(form);
     const parentPadding = parseFloat(style.paddingLeft) || 0;
@@ -5130,11 +5114,22 @@ function setupMasonry({
     const firstItem = container.querySelector(itemSelector);
     const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
     const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
-    const totalGutter = gutterPx * (columnCount - 1);
-    const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
+    const oneColPX = Math.floor((parentWidth - gutterPx * (columnCount - 1)) / columnCount);
     const sizer = container.querySelector(gridSizerSelector);
-    if (sizer) sizer.style.width = `${itemWidth}px`;
-    applySpanWidths(columnCount, itemWidth, gutterPx);
+    const containerPX = oneColPX * columnCount + gutterPx * (columnCount - 1);
+    if (sizer) {
+      const sizerPct = oneColPX / containerPX * 100;
+      sizer.style.width = `${sizerPct}%`;
+    }
+    container.querySelectorAll(itemSelector).forEach((el) => {
+      const m = el.className.match(/span-(\d)/);
+      const span = m ? +m[1] : 1;
+      const spanPX = oneColPX * span + gutterPx * (span - 1);
+      const spanPct = spanPX / containerPX * 100;
+      el.style.width = `min(${spanPct}%, 100%)`;
+    });
+    const state2 = columnCount >= 3 ? "wide" : columnCount === 2 ? "medium" : "small";
+    onLayoutStateChange(state2);
   };
   const msnry = new Masonry(container, {
     itemSelector,
@@ -5693,7 +5688,7 @@ function test() {
 }
 var on_click$7 = async (_, value) => openFilePicker(value);
 var root_1$b = /* @__PURE__ */ template(`<div class="stat-card"><!></div>`);
-var root$n = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="buttons-vertcal-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <!></div></div></div></div>`);
+var root$n = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span">Add Test Button</button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <!></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   let skill = prop($$props, "skill", 19, () => ({}));
@@ -5701,40 +5696,56 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   let config = prop($$props, "config", 19, () => ({}));
   let specializations = proxy(skill().system.specializations);
   let value = proxy(skill().system.activeSkill.value);
+  let mode = state("single");
+  let wrapper;
+  const ro = new ResizeObserver(() => {
+    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
+  });
+  user_effect(() => {
+    if (!wrapper) return;
+    ro.observe(wrapper);
+    return () => ro.disconnect();
+  });
   console.log("SKILL0", value);
   var div = root$n();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
   img.__click = [on_click$7, value];
-  var div_5 = sibling(div_4, 2);
-  var div_6 = child(div_5);
-  var h1 = sibling(child(div_6), 2);
+  var div_6 = sibling(div_5, 2);
+  var div_7 = child(div_6);
+  var h1 = sibling(child(div_7), 2);
   var text = child(h1);
-  var div_7 = sibling(div_5, 2);
-  var h1_1 = sibling(child(div_7), 2);
-  var text_1 = child(h1_1);
   var div_8 = sibling(div_7, 2);
-  var button = child(div_8);
+  var h1_1 = sibling(child(div_8), 2);
+  var text_1 = child(h1_1);
+  var div_9 = sibling(div_8, 2);
+  var div_10 = child(div_9);
+  var button = child(div_10);
   button.__click = [test];
   var button_1 = sibling(button, 2);
   button_1.__click = [test];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [test];
-  var div_9 = sibling(div_1, 2);
-  var div_10 = child(div_9);
-  var div_11 = sibling(child(div_10), 2);
-  var h1_2 = child(div_11);
+  var button_3 = sibling(button_2, 2);
+  button_3.__click = [test];
+  var div_11 = sibling(div_2, 2);
+  var div_12 = child(div_11);
+  var div_13 = sibling(child(div_12), 2);
+  var h1_2 = child(div_13);
   var text_2 = child(h1_2);
   var node = sibling(h1_2, 2);
   each(node, 17, () => specializations, index, ($$anchor2, specialization) => {
-    var div_12 = root_1$b();
-    append($$anchor2, div_12);
+    var div_14 = root_1$b();
+    append($$anchor2, div_14);
   });
+  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(
     ($0) => {
+      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
       set_attribute(img, "src", skill().img);
       set_attribute(img, "title", skill().name);
       set_attribute(img, "alt", skill().name);
@@ -7680,7 +7691,7 @@ var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root$7 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div></div>`);
 function MetahumanApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -7691,6 +7702,16 @@ function MetahumanApp($$anchor, $$props) {
   const karmaConfig = config().karma;
   const visionConfig = config().vision;
   const traits = config().traits;
+  let mode = state("single");
+  let wrapper;
+  const ro = new ResizeObserver(() => {
+    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
+  });
+  user_effect(() => {
+    if (!wrapper) return;
+    ro.observe(wrapper);
+    return () => ro.disconnect();
+  });
   const agerange = /* @__PURE__ */ derived(() => [
     {
       item: item2(),
@@ -7948,28 +7969,29 @@ function MetahumanApp($$anchor, $$props) {
   var div = root$7();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
   img.__click = [on_click$4, item2];
-  var input = sibling(div_4, 2);
+  var input = sibling(div_5, 2);
   input.__change = [on_change$4, item2];
   var node = sibling(input, 2);
   StatCard(node, spread_props(() => get$1(priorityEntry)));
-  var node_1 = sibling(div_1, 2);
+  var node_1 = sibling(div_2, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_1$3();
-      var div_6 = child(div_5);
-      var div_7 = sibling(child(div_6), 2);
-      var h3 = child(div_7);
+      var div_6 = root_1$3();
+      var div_7 = child(div_6);
+      var div_8 = sibling(child(div_7), 2);
+      var h3 = child(div_8);
       var text = child(h3);
-      var div_8 = sibling(h3, 2);
-      each(div_8, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
+      var div_9 = sibling(h3, 2);
+      each(div_9, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text, $0), [() => localize(traits.agerange)]);
-      append($$anchor2, div_5);
+      append($$anchor2, div_6);
     };
     if_block(node_1, ($$render) => {
       if (get$1(agerange)) $$render(consequent);
@@ -7978,17 +8000,17 @@ function MetahumanApp($$anchor, $$props) {
   var node_2 = sibling(node_1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_9 = root_3$3();
-      var div_10 = child(div_9);
-      var div_11 = sibling(child(div_10), 2);
-      var h3_1 = child(div_11);
+      var div_10 = root_3$3();
+      var div_11 = child(div_10);
+      var div_12 = sibling(child(div_11), 2);
+      var h3_1 = child(div_12);
       var text_1 = child(h3_1);
-      var div_12 = sibling(h3_1, 2);
-      each(div_12, 21, () => get$1(height), index, ($$anchor3, entry) => {
+      var div_13 = sibling(h3_1, 2);
+      each(div_13, 21, () => get$1(height), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text_1, $0), [() => localize(traits.height)]);
-      append($$anchor2, div_9);
+      append($$anchor2, div_10);
     };
     if_block(node_2, ($$render) => {
       if (get$1(height)) $$render(consequent_1);
@@ -7997,68 +8019,68 @@ function MetahumanApp($$anchor, $$props) {
   var node_3 = sibling(node_2, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_13 = root_5$1();
-      var div_14 = child(div_13);
-      var div_15 = sibling(child(div_14), 2);
-      var h3_2 = child(div_15);
+      var div_14 = root_5$1();
+      var div_15 = child(div_14);
+      var div_16 = sibling(child(div_15), 2);
+      var h3_2 = child(div_16);
       var text_2 = child(h3_2);
-      var div_16 = sibling(h3_2, 2);
-      each(div_16, 21, () => get$1(weight), index, ($$anchor3, entry) => {
+      var div_17 = sibling(h3_2, 2);
+      each(div_17, 21, () => get$1(weight), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text_2, $0), [() => localize(traits.weight)]);
-      append($$anchor2, div_13);
+      append($$anchor2, div_14);
     };
     if_block(node_3, ($$render) => {
       if (get$1(weight)) $$render(consequent_2);
     });
   }
-  var div_17 = sibling(node_3, 2);
-  var div_18 = child(div_17);
-  var div_19 = sibling(child(div_18), 2);
-  var h3_3 = child(div_19);
+  var div_18 = sibling(node_3, 2);
+  var div_19 = child(div_18);
+  var div_20 = sibling(child(div_19), 2);
+  var h3_3 = child(div_20);
   var text_3 = child(h3_3);
-  var div_20 = sibling(h3_3, 2);
-  each(div_20, 21, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
+  var div_21 = sibling(h3_3, 2);
+  each(div_21, 21, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var div_21 = sibling(div_17, 2);
-  var div_22 = child(div_21);
-  var div_23 = sibling(child(div_22), 2);
-  var h3_4 = child(div_23);
+  var div_22 = sibling(div_18, 2);
+  var div_23 = child(div_22);
+  var div_24 = sibling(child(div_23), 2);
+  var h3_4 = child(div_24);
   var text_4 = child(h3_4);
-  var div_24 = sibling(h3_4, 2);
-  each(div_24, 21, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
+  var div_25 = sibling(h3_4, 2);
+  each(div_25, 21, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var div_25 = sibling(div_21, 2);
-  var div_26 = child(div_25);
-  var div_27 = sibling(child(div_26), 2);
-  var h3_5 = child(div_27);
+  var div_26 = sibling(div_22, 2);
+  var div_27 = child(div_26);
+  var div_28 = sibling(child(div_27), 2);
+  var h3_5 = child(div_28);
   var text_5 = child(h3_5);
-  var div_28 = sibling(h3_5, 2);
-  each(div_28, 21, () => get$1(movement), index, ($$anchor2, entry) => {
+  var div_29 = sibling(h3_5, 2);
+  each(div_29, 21, () => get$1(movement), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var div_29 = sibling(div_25, 2);
-  var div_30 = child(div_29);
-  var div_31 = sibling(child(div_30), 2);
-  var h3_6 = child(div_31);
+  var div_30 = sibling(div_26, 2);
+  var div_31 = child(div_30);
+  var div_32 = sibling(child(div_31), 2);
+  var h3_6 = child(div_32);
   var text_6 = child(h3_6);
-  var div_32 = sibling(h3_6, 2);
-  each(div_32, 21, () => get$1(karma), index, ($$anchor2, entry) => {
+  var div_33 = sibling(h3_6, 2);
+  each(div_33, 21, () => get$1(karma), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var div_33 = sibling(div_29, 2);
-  var div_34 = child(div_33);
-  var div_35 = sibling(child(div_34), 2);
-  var h3_7 = child(div_35);
+  var div_34 = sibling(div_30, 2);
+  var div_35 = child(div_34);
+  var div_36 = sibling(child(div_35), 2);
+  var h3_7 = child(div_36);
   var text_7 = child(h3_7);
   var node_4 = sibling(h3_7, 2);
   each(node_4, 17, () => get$1(vision), index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var node_5 = sibling(div_33, 2);
+  var node_5 = sibling(div_34, 2);
   JournalViewer(node_5, {
     get item() {
       return item2();
@@ -8067,8 +8089,10 @@ function MetahumanApp($$anchor, $$props) {
       return config();
     }
   });
+  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(
     ($0, $1, $2, $3, $4) => {
+      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
@@ -8148,7 +8172,7 @@ var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div 
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
 var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8590,7 +8614,7 @@ function Portability($$anchor, $$props) {
 }
 var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root$3 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8858,7 +8882,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
 }
 var on_click$1 = async (_, item2) => openFilePicker(item2());
 var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
-var root$2 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8988,10 +9012,20 @@ var on_change_2 = (e, $$props) => $$props.item.update({
 });
 var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <select><option disabled> </option><!></select></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let value = state(proxy($$props.item.system.skillType || "active"));
+  let mode = state("single");
+  let wrapper;
+  const ro = new ResizeObserver(() => {
+    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
+  });
+  user_effect(() => {
+    if (!wrapper) return;
+    ro.observe(wrapper);
+    return () => ro.disconnect();
+  });
   const selectOptions = [
     {
       value: "active",
@@ -9016,16 +9050,17 @@ function SkillApp($$anchor, $$props) {
   var div = root$1();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
   img.__click = [on_click, $$props];
-  var div_5 = sibling(div_4, 2);
-  var div_6 = child(div_5);
-  var input = sibling(child(div_6), 2);
+  var div_6 = sibling(div_5, 2);
+  var div_7 = child(div_6);
+  var input = sibling(child(div_7), 2);
   input.__change = [on_change, $$props];
-  var div_7 = sibling(div_6, 2);
-  var select = sibling(child(div_7), 2);
+  var div_8 = sibling(div_7, 2);
+  var select = sibling(child(div_8), 2);
   init_select(select, () => get$1(value));
   var select_value;
   select.__change = [on_change_1, updateSkillType];
@@ -9041,11 +9076,11 @@ function SkillApp($$anchor, $$props) {
     });
     append($$anchor2, option_1);
   });
-  var node = sibling(div_7, 2);
+  var node = sibling(div_8, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_8 = root_2$1();
-      var select_1 = sibling(child(div_8), 2);
+      var div_9 = root_2$1();
+      var select_1 = sibling(child(div_9), 2);
       init_select(select_1, () => $$props.item.system.activeSkill.linkedAttribute);
       var select_1_value;
       select_1.__change = [on_change_2, $$props];
@@ -9076,13 +9111,13 @@ function SkillApp($$anchor, $$props) {
           () => localize($$props.config.skill.linkedAttribute)
         ]
       );
-      append($$anchor2, div_8);
+      append($$anchor2, div_9);
     };
     if_block(node, ($$render) => {
       if (get$1(value) === "active") $$render(consequent);
     });
   }
-  var node_2 = sibling(div_1, 2);
+  var node_2 = sibling(div_2, 2);
   JournalViewer(node_2, {
     get item() {
       return $$props.item;
@@ -9091,7 +9126,9 @@ function SkillApp($$anchor, $$props) {
       return $$props.config;
     }
   });
+  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(() => {
+    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
     set_attribute(img, "src", $$props.item.img);
     set_attribute(img, "title", $$props.item.name);
     set_attribute(img, "alt", $$props.item.name);
@@ -9434,7 +9471,7 @@ var root_2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<form><div class="sr3e-general-grid"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></form>`);
+var root = /* @__PURE__ */ template(`<form><div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 7);

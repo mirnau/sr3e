@@ -280,7 +280,7 @@
 </script>
 
 <form onsubmit={handleSubmit}>
-    <div class="sr3e-general-grid">
+    <div class="sr3e-waterfall">
         <!-- Header -->
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">

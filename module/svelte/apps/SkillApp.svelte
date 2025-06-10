@@ -6,6 +6,19 @@
 	let { item, config, onTitleChange } = $props();
 	let value = $state(item.system.skillType || "active");
 
+	let mode = $state("single");
+	let wrapper;
+
+	const ro = new ResizeObserver(() => {
+		mode = wrapper.scrollHeight > 500 ? "double" : "single";
+	});
+
+	$effect(() => {
+		if (!wrapper) return;
+		ro.observe(wrapper);
+		return () => ro.disconnect();
+	});
+
 	const selectOptions = [
 		{ value: "active", label: localize(config.skill.active) },
 		{ value: "knowledge", label: localize(config.skill.knowledge) },
@@ -13,10 +26,12 @@
 	];
 
 	const rawAttributes = ActorDataService.getLocalizedLinkingAttributes();
-	const attributeOptions = Object.entries(rawAttributes).map(([key, label]) => ({
-		value: key,
-		label,
-	}));
+	const attributeOptions = Object.entries(rawAttributes).map(
+		([key, label]) => ({
+			value: key,
+			label,
+		}),
+	);
 
 	function updateSkillType(newValue) {
 		value = newValue;
@@ -25,68 +40,77 @@
 	}
 </script>
 
-<div class="sr3e-general-grid">
-	<div class="item-sheet-component">
-		<div class="sr3e-inner-background-container">
-			<div class="fake-shadow"></div>
-			<div class="sr3e-inner-background">
-				<div class="image-mask">
-					<img
-						src={item.img}
-						role="presentation"
-						data-edit="img"
-						title={item.name}
-						alt={item.name}
-						onclick={async () => openFilePicker(item)}
-					/>
-				</div>
-				<div class="stat-grid single-column">
-					<div class="stat-card">
-						<div class="stat-card-background"></div>
-						<input
-							class="large"
-							name="name"
-							type="text"
-							value={item.name}
-							onchange={(e) => item.update({ name: e.target.value })}
+<div bind:this={wrapper} class="sr3e-waterfall-wrapper">
+	<div class={`sr3e-waterfall sr3e-waterfall--${mode}`}>
+		<div class="item-sheet-component">
+			<div class="sr3e-inner-background-container">
+				<div class="fake-shadow"></div>
+				<div class="sr3e-inner-background">
+					<div class="image-mask">
+						<img
+							src={item.img}
+							role="presentation"
+							data-edit="img"
+							title={item.name}
+							alt={item.name}
+							onclick={async () => openFilePicker(item)}
 						/>
 					</div>
+					<div class="stat-grid single-column">
+						<div class="stat-card">
+							<div class="stat-card-background"></div>
+							<input
+								class="large"
+								name="name"
+								type="text"
+								value={item.name}
+								onchange={(e) =>
+									item.update({ name: e.target.value })}
+							/>
+						</div>
 
-					<div class="stat-card">
-						<div class="stat-card-background"></div>
-						<select
-							value={value}
-							onchange={(e) => updateSkillType(e.target.value)}
-						>
-							{#each selectOptions as option}
-								<option value={option.value}>{option.label}</option>
-							{/each}
-						</select>
-					</div>
-
-					{#if value === "active"}
 						<div class="stat-card">
 							<div class="stat-card-background"></div>
 							<select
-								value={item.system.activeSkill.linkedAttribute}
+								{value}
 								onchange={(e) =>
-									item.update({
-										"system.activeSkill.linkedAttribute": e.target.value,
-									})
-								}
+									updateSkillType(e.target.value)}
 							>
-								<option disabled value="">
-									{localize(config.skill.linkedAttribute)}
-								</option>
-								{#each attributeOptions as option}
-									<option value={option.value}>{option.label}</option>
+								{#each selectOptions as option}
+									<option value={option.value}
+										>{option.label}</option
+									>
 								{/each}
 							</select>
 						</div>
-					{/if}
+
+						{#if value === "active"}
+							<div class="stat-card">
+								<div class="stat-card-background"></div>
+								<select
+									value={item.system.activeSkill
+										.linkedAttribute}
+									onchange={(e) =>
+										item.update({
+											"system.activeSkill.linkedAttribute":
+												e.target.value,
+										})}
+								>
+									<option disabled value="">
+										{localize(config.skill.linkedAttribute)}
+									</option>
+									{#each attributeOptions as option}
+										<option value={option.value}
+											>{option.label}</option
+										>
+									{/each}
+								</select>
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 		</div>
+		<JournalViewer {item} {config} />
 	</div>
-	<JournalViewer {item} {config} />
 </div>

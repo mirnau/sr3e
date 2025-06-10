@@ -6,9 +6,9 @@ export function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  onLayoutStateChange = () => {},
+  onLayoutStateChange = () => { },
 }) {
-  if (!container) return () => {};
+  if (!container) return () => { };
 
   const form = container.parentElement;
 
@@ -41,16 +41,31 @@ export function setupMasonry({
     const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
 
     const firstItem = container.querySelector(itemSelector);
-    const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
+    const minItem = firstItem
+      ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth
+      : minItemWidth;
 
     const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
-    const totalGutter = gutterPx * (columnCount - 1);
-    const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
+    const oneColPX = Math.floor((parentWidth - gutterPx * (columnCount - 1)) / columnCount);
 
     const sizer = container.querySelector(gridSizerSelector);
-    if (sizer) sizer.style.width = `${itemWidth}px`;
+    const containerPX = oneColPX * columnCount + gutterPx * (columnCount - 1);
 
-    applySpanWidths(columnCount, itemWidth, gutterPx);
+    if (sizer) {
+      const sizerPct = (oneColPX / containerPX) * 100;
+      sizer.style.width = `${sizerPct}%`;
+    }
+
+    container.querySelectorAll(itemSelector).forEach(el => {
+      const m = el.className.match(/span-(\d)/);
+      const span = m ? +m[1] : 1;
+      const spanPX = oneColPX * span + gutterPx * (span - 1);
+      const spanPct = (spanPX / containerPX) * 100;
+      el.style.width = `min(${spanPct}%, 100%)`;
+    });
+
+    const state = columnCount >= 3 ? 'wide' : columnCount === 2 ? 'medium' : 'small';
+    onLayoutStateChange(state);
   };
 
   const msnry = new Masonry(container, {

@@ -1,6 +1,6 @@
 .sheet-component {
     box-sizing: border-box;
-    min-width: @component-unit;
+    min-width: var(--component-width);
 
     display: flex;
     flex-direction: column;
@@ -17,15 +17,5 @@
     }
 
 
-    &.span-1 {
-        min-width: calc(@component-unit);
-    }
 
-    &.span-2 {
-        min-width: calc(@component-unit * 2);
-    }
-
-    &.span-3 {
-        min-width: calc(@component-unit * 3);
-    }
 }

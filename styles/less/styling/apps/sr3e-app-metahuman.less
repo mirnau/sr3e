@@ -1,74 +1,105 @@
-.sr3e-general-grid{
-    columns: 18rem;
-    column-gap: .5rem;
-    width: fit-content;
-    max-width: calc(18rem * 2 + 0.5rem);
+/* sr3e-waterfall.less — static‑class version
+ *  Use .sr3e-waterfall--single for 1 column, .sr3e-waterfall--double for 2 columns.
+ *  A tiny Svelte helper (ResizeObserver) can toggle the modifier class. */
 
-    >* {
-        break-inside: avoid;
+/** ------------------------------------------------------------------
+ *  Wrapper: flex‑friendly, lets the grid grow in both axes
+ *  ------------------------------------------------------------------ */
+.sr3e-waterfall-wrapper {
+  flex: 0 0 auto;      /* don’t collapse in Foundry’s flex column */
+  align-self: flex-start;
+  overflow: visible;   /* no scrollbar; window grows instead */
+  width: max-content;  /* widen with the inner grid */
+  box-sizing: border-box;
+}
+
+/** -----------------------------------------------
+ *  Shared waterfall masonry rules
+ *  ----------------------------------------------- */
+.sr3e-waterfall {
+  /* Masonry columns */
+  column-width: 19rem;   /* preferred track width */
+  column-gap: 0.5rem;
+
+  /* Let layout dictate width, modifier caps it */
+  width: max-content;
+
+  > * {
+    break-inside: avoid;
+  }
+}
+
+/* -------------------------------------------------
+   Modifier classes: choose *one* at runtime
+   ------------------------------------------------- */
+.sr3e-waterfall--single {
+  column-count: 1;
+  max-width: 19rem;
+}
+
+.sr3e-waterfall--double {
+  column-count: 2;
+  max-width: calc(19rem * 2 + 0.5rem); /* gap included */
+}
+
+/* ------------------------------------------------------------------
+   Item styling – unchanged
+   ------------------------------------------------------------------ */
+.sr3e-waterfall .item-sheet-component {
+  display: inline-block;   /* needed for column layout */
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+  width: 100%;
+
+  .sr3e-inner-background-container {
+    .fake-shadow {
+      .fake-shadow(@default-fake-shadow-color);
+      .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
     }
 
-    .item-sheet-component {
-        display: inline-block;
-        width: 100%;
-        margin-bottom: 0.5rem;
-        break-inside: avoid;
+    .sr3e-inner-background {
+      display: grid;
+      background-color: @default-fake-shadow-color;
 
-        .sr3e-inner-background-container {
-            .fake-shadow {
-                .fake-shadow(@default-fake-shadow-color);
-                .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
-            }
+      .stat-card {
+        .select-container {
+          width: 100%;
+          display: block;
+          padding: 0.25rem;
 
-            .sr3e-inner-background {
-                display: grid;
-                background-color: @default-fake-shadow-color;
-
-                .stat-card {
-
-                    .select-container {
-                        width: 100%;
-                        display: block;
-                        padding: 0.25rem;
-
-                        select {
-                            .clipped-corners(0.25rem, 0.25rem, .75rem, 0.25rem);
-                        }
-                    }
-
-                    .input-base() {
-                        width: 100%;
-                        box-sizing: border-box;
-                        padding: 0.25rem;
-                        font: inherit;
-                        margin: 0;
-                        color: @h1-color;
-                        font-size: 1.5rem;
-                        text-indent: 0;
-                    }
-
-                    input[type="text"],
-                    input[type="number"] {
-                        .input-base();
-                        .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
-                    }
-
-                    input[type="checkbox"] {
-                        .input-base();
-                        .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
-                    }
-
-
-                    h4 {
-                        margin: 0;
-                    }
-
-                    padding: 0.25rem;
-                    text-align: center;
-                    text-indent: 0; // 'none' is invalid for text-indent
-                    background-color: @metahuman-stat-card-color;
-                }
-            }
+          select {
+            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+          }
         }
+
+        .input-base() {
+          width: 100%;
+          box-sizing: border-box;
+          padding: 0.25rem;
+          font: inherit;
+          margin: 0;
+          color: @h1-color;
+          font-size: 1.5rem;
+          text-indent: 0;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+          .input-base();
+          .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+        }
+
+        input[type="checkbox"] {
+          .input-base();
+          .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+        }
+
+        h4 { margin: 0; }
+
+        padding: 0.25rem;
+        text-align: center;
+        background-color: @metahuman-stat-card-color;
+      }
     }
+  }
 }

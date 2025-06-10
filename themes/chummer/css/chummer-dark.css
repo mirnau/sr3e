@@ -1,3 +1,8 @@
+/* globals.less */
+:root {
+  --component-width: 17rem;
+  --component-grid-gap: 0.25rem;
+}
 * {
   /* Define your scrollbar‐color variable */
   --color-scrollbar: #ff009572;

@@ -1,5 +1,5 @@
 .sr3e.sheet.character {
-    min-width: calc(@component-unit + @component-distance * 3);
+    min-width: calc(var(--component-width) + var(--component-grid-gap) * 4);
 
     .sheet-character-masonry-main {
         overflow-y: auto;
@@ -13,11 +13,11 @@
         background: transparent;
 
         .layout-gutter-sizer {
-            width: @component-distance;
+            width: var(--component-grid-gap);
         }
 
         .layout-grid-sizer {
-            min-width: @component-unit;
+            min-width:  var(--component-width);
         }
     }
 }
