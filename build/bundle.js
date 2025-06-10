@@ -9019,7 +9019,14 @@ function SkillApp($$anchor, $$props) {
   let mode = state("single");
   let wrapper;
   const ro = new ResizeObserver(() => {
-    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
+    requestAnimationFrame(() => {
+      if (!wrapper) return;
+      const items = wrapper.querySelectorAll(".item-sheet-component");
+      const totalHeight = Array.from(items).reduce((sum, item2) => sum + item2.offsetHeight, 0);
+      const averageItemHeight = totalHeight / items.length;
+      const newMode = totalHeight > 400 && items.length > 1 && totalHeight > averageItemHeight * 3 ? "double" : "single";
+      if (get$1(mode) !== newMode) set(mode, proxy(newMode));
+    });
   });
   user_effect(() => {
     if (!wrapper) return;

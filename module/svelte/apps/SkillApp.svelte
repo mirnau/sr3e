@@ -8,9 +8,28 @@
 
 	let mode = $state("single");
 	let wrapper;
-
+	
 	const ro = new ResizeObserver(() => {
-		mode = wrapper.scrollHeight > 500 ? "double" : "single";
+		requestAnimationFrame(() => {
+			if (!wrapper) return;
+
+			// Check if content actually needs two columns
+			const items = wrapper.querySelectorAll(".item-sheet-component");
+			const totalHeight = Array.from(items).reduce(
+				(sum, item) => sum + item.offsetHeight,
+				0,
+			);
+			const averageItemHeight = totalHeight / items.length;
+
+			// Only switch to double if we have enough content to justify it
+			const newMode =
+				totalHeight > 400 &&
+				items.length > 1 &&
+				totalHeight > averageItemHeight * 3
+					? "double"
+					: "single";
+			if (mode !== newMode) mode = newMode;
+		});
 	});
 
 	$effect(() => {

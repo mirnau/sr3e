@@ -1,4 +1,4 @@
-/* globals.less */
+/* globals.less measurements are in rem*/
 :root {
   --component-width: 17rem;
   --component-grid-gap: 0.25rem;
