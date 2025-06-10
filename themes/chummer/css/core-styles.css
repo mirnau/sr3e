@@ -192,13 +192,7 @@
   min-width: var(--component-width);
 }
 .system-sr3e {
-  /* size the wrapper to whatever the grid actually needs */
   /* base grid */
-  /* one column */
-  /* two columns */
-  /* ------------------------------------------------------------------
-   Item styling – unchanged
-   ------------------------------------------------------------------ */
   /* Firefox (Gecko) */
   /* WebKit browsers (Chrome, Edge, Safari) */
   /* Attempt to hide arrows (may not work in all browsers) */
@@ -231,12 +225,10 @@
   column-count: 2;
   column-width: var(--component-width);
   width: fit-content;
-  /* Change this line */
   max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
 }
 .system-sr3e .sr3e-waterfall .item-sheet-component {
   display: inline-block;
-  /* needed for column layout */
   break-inside: avoid;
   margin-bottom: 0.5rem;
   width: 100%;
@@ -839,9 +831,19 @@
   padding: 0.5rem;
 }
 .system-sr3e header.window-header {
-  text-shadow: #006eff 0 0 12px;
-  border: none !important;
-  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0.5rem);
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+}
+.system-sr3e header.window-header h1.window-title {
+  max-width: 10rem;
+  min-width: 0;
+  flex: 0 1 auto;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: auto;
 }
 .system-sr3e .sr3e.sheet.item .window-header,
 .system-sr3e .sr3e.sheet.charactercreation .window-header,

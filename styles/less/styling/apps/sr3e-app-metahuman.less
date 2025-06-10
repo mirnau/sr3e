@@ -1,4 +1,3 @@
-/* size the wrapper to whatever the grid actually needs */
 .sr3e-waterfall-wrapper { width: fit-content; }
 
 /* base grid */
@@ -6,7 +5,7 @@
   column-gap: var(--component-grid-gap);
 }
 
-/* one column */
+//INFO: one column
 .sr3e-waterfall--single {
   column-count: 1;
   column-width: auto;
@@ -14,20 +13,17 @@
   column-gap: 0;
 }
 
-/* two columns */
+//INFO: two columns
 .sr3e-waterfall--double {
   column-count: 2;
   column-width: var(--component-width);
-  width: fit-content; /* Change this line */
+  width: fit-content;
   max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
 }
 
 
-/* ------------------------------------------------------------------
-   Item styling – unchanged
-   ------------------------------------------------------------------ */
 .sr3e-waterfall .item-sheet-component {
-  display: inline-block;   /* needed for column layout */
+  display: inline-block;
   break-inside: avoid;
   margin-bottom: 0.5rem;
   width: 100%;
