@@ -12,6 +12,7 @@
     import { flags } from "../../../foundry/services/commonConsts.js";
 
     let { actor, config, onSubmit, onCancel } = $props();
+    let layoutMode = $state("double");
     let system = $state(actor.system);
     let characterName = $state(actor.name);
     let characterAge = $state(25);
@@ -166,17 +167,41 @@
             (skill) => skill.priority === selectedSkill,
         );
 
-        let initBody = metahuman.system.modifiers.body < 0 ? (-metahuman.system.modifiers.body + 1) : 1;
-        let initStrength = metahuman.system.modifiers.strength < 0 ? (-metahuman.system.modifiers.strength + 1) : 1;
-        let initQuickness = metahuman.system.modifiers.quickness < 0 ? (-metahuman.system.modifiers.quickness + 1) : 1;
-        let initIntelligence = metahuman.system.modifiers.intelligence < 0 ? (-metahuman.system.modifiers.intelligence + 1) : 1;
-        let initWillpower = metahuman.system.modifiers.willpower < 0 ? (-metahuman.system.modifiers.willpower + 1) : 1;
-        let initCharisma = metahuman.system.modifiers.charisma < 0 ? (-metahuman.system.modifiers.charisma + 1) : 1;
+        let initBody =
+            metahuman.system.modifiers.body < 0
+                ? -metahuman.system.modifiers.body + 1
+                : 1;
+        let initStrength =
+            metahuman.system.modifiers.strength < 0
+                ? -metahuman.system.modifiers.strength + 1
+                : 1;
+        let initQuickness =
+            metahuman.system.modifiers.quickness < 0
+                ? -metahuman.system.modifiers.quickness + 1
+                : 1;
+        let initIntelligence =
+            metahuman.system.modifiers.intelligence < 0
+                ? -metahuman.system.modifiers.intelligence + 1
+                : 1;
+        let initWillpower =
+            metahuman.system.modifiers.willpower < 0
+                ? -metahuman.system.modifiers.willpower + 1
+                : 1;
+        let initCharisma =
+            metahuman.system.modifiers.charisma < 0
+                ? -metahuman.system.modifiers.charisma + 1
+                : 1;
 
-        let initTotal = initBody + initStrength + initQuickness + initIntelligence + initWillpower + initCharisma;
+        let initTotal =
+            initBody +
+            initStrength +
+            initQuickness +
+            initIntelligence +
+            initWillpower +
+            initCharisma;
 
         if (initTotal > selectedAttributeObj.points)
-            throw new Error ("The metahuman has excessive negative modifiers");
+            throw new Error("The metahuman has excessive negative modifiers");
 
         let remainingPoints = selectedAttributeObj.points - initTotal;
 
@@ -184,7 +209,7 @@
             "system.profile.age": characterAge,
             "system.profile.height": characterHeight,
             "system.profile.weight": characterWeight,
-            "system.creation.attributePoints":  remainingPoints,
+            "system.creation.attributePoints": remainingPoints,
             "system.creation.activePoints": selectedSkillObj.points,
             "system.attributes.body.value": initBody,
             "system.attributes.quickness.value": initQuickness,
@@ -193,11 +218,16 @@
             "system.attributes.intelligence.value": initIntelligence,
             "system.attributes.willpower.value": initWillpower,
             "system.attributes.body.meta": metahuman.system.modifiers.body,
-            "system.attributes.quickness.meta": metahuman.system.modifiers.quickness,
-            "system.attributes.strength.meta": metahuman.system.modifiers.strength,
-            "system.attributes.charisma.meta": metahuman.system.modifiers.charisma,
-            "system.attributes.intelligence.meta": metahuman.system.modifiers.intelligence,
-            "system.attributes.willpower.meta": metahuman.system.modifiers.willpower
+            "system.attributes.quickness.meta":
+                metahuman.system.modifiers.quickness,
+            "system.attributes.strength.meta":
+                metahuman.system.modifiers.strength,
+            "system.attributes.charisma.meta":
+                metahuman.system.modifiers.charisma,
+            "system.attributes.intelligence.meta":
+                metahuman.system.modifiers.intelligence,
+            "system.attributes.willpower.meta":
+                metahuman.system.modifiers.willpower,
         });
 
         await actor.createEmbeddedDocuments("Item", [
@@ -280,208 +310,216 @@
 </script>
 
 <form onsubmit={handleSubmit}>
-    <div class="sr3e-waterfall">
-        <!-- Header -->
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="image-mask">
-                        <img
-                            src={metahumanItem?.img ?? ""}
-                            role="presentation"
-                            data-edit="img"
-                            title={metahumanItem?.name ?? ""}
-                            alt={metahumanItem?.name ?? ""}
+    <div class="sr3e-waterfall-wrapper">
+        <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+            <!-- Header -->
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div class="image-mask">
+                            <img
+                                src={metahumanItem?.img ?? ""}
+                                role="presentation"
+                                data-edit="img"
+                                title={metahumanItem?.name ?? ""}
+                                alt={metahumanItem?.name ?? ""}
+                            />
+                        </div>
+                        <input
+                            id="character-name"
+                            type="text"
+                            bind:value={characterName}
+                            placeholder="Enter character name"
                         />
                     </div>
-                    <input
-                        id="character-name"
-                        type="text"
-                        bind:value={characterName}
-                        placeholder="Enter character name"
-                    />
                 </div>
             </div>
-        </div>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div for="age-slider">
-                        {localize(config.traits.age)}: {characterAge} ({currentPhase})
-                    </div>
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div for="age-slider">
+                            {localize(config.traits.age)}: {characterAge} ({currentPhase})
+                        </div>
 
-                    <input
-                        id="age-slider"
-                        type="range"
-                        min={metahumanItem?.system?.agerange?.min ?? 0}
-                        max={metahumanItem?.system?.agerange?.max ?? 100}
-                        step="1"
-                        bind:value={characterAge}
-                    />
+                        <input
+                            id="age-slider"
+                            type="range"
+                            min={metahumanItem?.system?.agerange?.min ?? 0}
+                            max={metahumanItem?.system?.agerange?.max ?? 100}
+                            step="1"
+                            bind:value={characterAge}
+                        />
 
-                    <div for="height-slider">
-                        {localize(config.traits.height)}: {characterHeight}
-                    </div>
-                    <input
-                        id="height-slider"
-                        type="range"
-                        min={metahumanItem?.system?.physical?.height?.min ?? 0}
-                        max={metahumanItem?.system?.physical?.height?.max ??
-                            200}
-                        step="1"
-                        bind:value={characterHeight}
-                    />
-                    <div for="weight-slider">
-                        {localize(config.traits.weight)}: {characterWeight}
-                    </div>
-                    <input
-                        id="weight-slider"
-                        type="range"
-                        min={metahumanItem?.system?.physical?.weight?.min ?? 0}
-                        max={metahumanItem?.system?.physical?.weight?.max ??
-                            200}
-                        step="1"
-                        bind:value={characterWeight}
-                    />
-                </div>
-            </div>
-        </div>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.traits.metahumanity)}</h3>
-                            <select
-                                id="metahuman-select"
-                                bind:value={selectedMetahuman}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
-                                >
-                                {#each metahumanDropdownOptions as metahuman}
-                                    <option value={metahuman.foundryitemid}>
-                                        {metahuman.priority}: {metahuman.name}
-                                    </option>
-                                {/each}
-                            </select>
+                        <div for="height-slider">
+                            {localize(config.traits.height)}: {characterHeight}
                         </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.magic.tradition)}</h3>
-                            <select
-                                id="magic-select"
-                                bind:value={selectedMagic}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
-                                >
-                                {#each magicsDropdownOptions as magic}
-                                    <option
-                                        value={magic.foundryitemid}
-                                        disabled={usedPriorities.includes(
-                                            magic.priority,
-                                        ) &&
-                                            magic.foundryitemid !==
-                                                selectedMagic}
-                                        >{magic.priority}: {magic.name}</option
-                                    >
-                                {/each}
-                            </select>
+                        <input
+                            id="height-slider"
+                            type="range"
+                            min={metahumanItem?.system?.physical?.height?.min ??
+                                0}
+                            max={metahumanItem?.system?.physical?.height?.max ??
+                                200}
+                            step="1"
+                            bind:value={characterHeight}
+                        />
+                        <div for="weight-slider">
+                            {localize(config.traits.weight)}: {characterWeight}
                         </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.attributepoints)}</h3>
-                            <select
-                                id="attributes-select"
-                                bind:value={selectedAttribute}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
-                                >
-                                {#each attributPointDropdownOptions as attribute}
-                                    <option
-                                        value={attribute.priority}
-                                        disabled={usedPriorities.includes(
-                                            attribute.priority,
-                                        ) &&
-                                            attribute.priority !==
-                                                selectedAttribute}
-                                        >{attribute.priority}: {attribute.points}</option
-                                    >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.skillpoints)}</h3>
-                            <select
-                                id="skills-select"
-                                bind:value={selectedSkill}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
-                                >
-                                {#each skillPointDropdownOptions as skill}
-                                    <option
-                                        value={skill.priority}
-                                        disabled={usedPriorities.includes(
-                                            skill.priority,
-                                        ) && skill.priority !== selectedSkill}
-                                        >{skill.priority}: {skill.points}</option
-                                    >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.resources)}</h3>
-                            <select
-                                id="resource-select"
-                                bind:value={selectedResource}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
-                                >
-                                {#each resourcesDropdownOptions as resource}
-                                    <option
-                                        value={resource.priority}
-                                        disabled={usedPriorities.includes(
-                                            resource.priority,
-                                        ) &&
-                                            resource.priority !==
-                                                selectedResource}
-                                        >{resource.priority}: {resource.points}</option
-                                    >
-                                {/each}
-                            </select>
-                        </div>
+                        <input
+                            id="weight-slider"
+                            type="range"
+                            min={metahumanItem?.system?.physical?.weight?.min ??
+                                0}
+                            max={metahumanItem?.system?.physical?.weight?.max ??
+                                200}
+                            step="1"
+                            bind:value={characterWeight}
+                        />
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.traits.metahumanity)}</h3>
+                                <select
+                                    id="metahuman-select"
+                                    bind:value={selectedMetahuman}
+                                >
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
+                                    >
+                                    {#each metahumanDropdownOptions as metahuman}
+                                        <option value={metahuman.foundryitemid}>
+                                            {metahuman.priority}: {metahuman.name}
+                                        </option>
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.magic.tradition)}</h3>
+                                <select
+                                    id="magic-select"
+                                    bind:value={selectedMagic}
+                                >
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
+                                    >
+                                    {#each magicsDropdownOptions as magic}
+                                        <option
+                                            value={magic.foundryitemid}
+                                            disabled={usedPriorities.includes(
+                                                magic.priority,
+                                            ) &&
+                                                magic.foundryitemid !==
+                                                    selectedMagic}
+                                            >{magic.priority}: {magic.name}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>
+                                    {localize(config.sheet.attributepoints)}
+                                </h3>
+                                <select
+                                    id="attributes-select"
+                                    bind:value={selectedAttribute}
+                                >
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
+                                    >
+                                    {#each attributPointDropdownOptions as attribute}
+                                        <option
+                                            value={attribute.priority}
+                                            disabled={usedPriorities.includes(
+                                                attribute.priority,
+                                            ) &&
+                                                attribute.priority !==
+                                                    selectedAttribute}
+                                            >{attribute.priority}: {attribute.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.sheet.skillpoints)}</h3>
+                                <select
+                                    id="skills-select"
+                                    bind:value={selectedSkill}
+                                >
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
+                                    >
+                                    {#each skillPointDropdownOptions as skill}
+                                        <option
+                                            value={skill.priority}
+                                            disabled={usedPriorities.includes(
+                                                skill.priority,
+                                            ) &&
+                                                skill.priority !==
+                                                    selectedSkill}
+                                            >{skill.priority}: {skill.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.sheet.resources)}</h3>
+                                <select
+                                    id="resource-select"
+                                    bind:value={selectedResource}
+                                >
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
+                                    >
+                                    {#each resourcesDropdownOptions as resource}
+                                        <option
+                                            value={resource.priority}
+                                            disabled={usedPriorities.includes(
+                                                resource.priority,
+                                            ) &&
+                                                resource.priority !==
+                                                    selectedResource}
+                                            >{resource.priority}: {resource.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="character-creation-buttonpanel">
-                        <!-- Randomize -->
-                        <button type="button" onclick={handleRandomize}>
-                            <i class="fas fa-dice"></i>
-                            {localize(config.sheet.randomize)}
-                        </button>
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div class="character-creation-buttonpanel">
+                            <!-- Randomize -->
+                            <button type="button" onclick={handleRandomize}>
+                                <i class="fas fa-dice"></i>
+                                {localize(config.sheet.randomize)}
+                            </button>
 
-                        <!-- Clear -->
-                        <button type="button" onclick={handleClear}>
-                            <i class="fas fa-eraser"></i>
-                            {localize(config.sheet.clear)}
-                        </button>
+                            <!-- Clear -->
+                            <button type="button" onclick={handleClear}>
+                                <i class="fas fa-eraser"></i>
+                                {localize(config.sheet.clear)}
+                            </button>
 
-                        <!-- Create Character -->
-                        <button type="submit" disabled={!canCreate}>
-                            <i class="fas fa-check"></i>
-                            {localize(config.sheet.createCharacter)}
-                        </button>
+                            <!-- Create Character -->
+                            <button type="submit" disabled={!canCreate}>
+                                <i class="fas fa-check"></i>
+                                {localize(config.sheet.createCharacter)}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

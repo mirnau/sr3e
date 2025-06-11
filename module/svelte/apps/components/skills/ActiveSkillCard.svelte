@@ -17,6 +17,8 @@
 		actor.getFlag(flags.sr3e, flags.isShoppingState),
 	);
 
+	let value = getActorStore(actor.id, skill.id, activeSkill.value);
+
 	let skillEditorInstance = null;
 
 	function openSkill() {
@@ -39,7 +41,7 @@
 		<div class="core-skill">
 			<div class="skill-background-layer"></div>
 			<h6 class="no-margin skill-name">{skill.name}</h6>
-			<h1 class="skill-value">{activeSkill.value}</h1>
+			<h1 class="skill-value">{$value}</h1>
 		</div>
 
 		<div class="specialization-container">

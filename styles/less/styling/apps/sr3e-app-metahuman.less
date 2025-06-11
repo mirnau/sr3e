@@ -1,8 +1,8 @@
 .sr3e-waterfall>* {
-  display: inline-block; // ✅ not block, not flex
-  break-inside: avoid; // ✅ don’t break across columns
-  width: 100%; // or a set width if needed
-  vertical-align: top; // optional but usually cleaner
+  display: inline-block; 
+  break-inside: avoid; 
+  width: 100%; 
+  vertical-align: top;
 }
 
 
@@ -24,7 +24,7 @@
   column-count: 2;
   column-width: var(--component-width);
   column-gap: var(--component-grid-gap);
-  width: max-content; // ✅ allows column flow to take full width
+  width: max-content; 
   max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
 }
 

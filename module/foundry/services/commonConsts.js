@@ -23,7 +23,7 @@ export const flags = {
     isDossierDetailsOpen: "isDossierDetailsOpen",
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
-    isAssigningSkills: "isAssigningSkills",
+    attributeAssignmentLocked: "attributeAssignmentLocked",
     isAssigningAttributes: "isAssigningAttributes",
     persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
   }

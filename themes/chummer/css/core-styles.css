@@ -665,7 +665,6 @@
   position: absolute;
   top: -0.25rem;
   right: -0.25rem;
-  color: lime;
   z-index: 1;
 }
 .system-sr3e .skill-masonry-grid .skill-card-container .skill-card {
@@ -979,7 +978,6 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0.25rem;
-  background: lime;
   padding: 0.25rem;
   width: fit-content;
   max-width: max-content;
@@ -1437,6 +1435,10 @@
 }
 .system-sr3e .toolbar .sr3e-toolbar-button {
   margin-left: 0.25rem;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .system-sr3e .pulsing-green-cart {
   color: inherit;

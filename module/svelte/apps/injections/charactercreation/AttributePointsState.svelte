@@ -46,12 +46,6 @@
     // Reactive intelligence value
     let intelligence = $state(0);
 
-    // This is a one-time set (read-only from here)
-    // Note: You need to define attributeAssignmentLocked somewhere
-    // attributeAssignmentLocked.set(
-    //     actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked) ?? false,
-    // );
-
     let attributePointsText = localize(config.attributes.attributes);
     let activePointsText = localize(config.skill.active);
     let knowledgePointsText = localize(config.skill.knowledge);
@@ -149,7 +143,7 @@
                 if (confirmed) {
                     actor.setFlag(
                         flags.sr3e,
-                        flags.actor.isAssigningAttributes,
+                        flags.actor.attributeAssignmentLocked,
                         false,
                     );
                     $isAssigningAttributesStore = false;

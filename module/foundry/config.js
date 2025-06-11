@@ -26,6 +26,7 @@ sr3e.health = {
 }
 
 sr3e.skill = {
+    addspecialization: "sr3e.skill.addspecialization",
     skill: "sr3e.skill.skill",
     speak: "sr3e.skills.speak",
     read: "sr3e.skills.read",
@@ -34,7 +35,7 @@ sr3e.skill = {
     knowledge: "sr3e.skill.knowledge",
     language: "sr3e.skill.language",
     linkedAttribute: "sr3e.skill.linkedAttribute",
-    specializations: "sr3e.skill.specializations",
+    specializations: "sr3e.skill.specializations"
 }
 
 sr3e.initiative = {
