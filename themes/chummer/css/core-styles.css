@@ -297,28 +297,27 @@
 }
 .system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
 .system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.25rem;
-  font: inherit;
-  margin: 0;
-  color: #1df0ff;
+  text-indent: none;
+  margin-bottom: 0;
   font-size: 1.5rem;
-  text-indent: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
 .system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.25rem;
-  font: inherit;
-  margin: 0;
-  color: #1df0ff;
   font-size: 1.5rem;
-  text-indent: 0;
+  text-indent: none;
+  margin-bottom: 0;
   clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
 }
-.system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card h4 {
+.system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.system-sr3e .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container h4 {
+  width: 80%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   margin: 0;
 }
 .system-sr3e section.journal-entry-content.flexcol {
@@ -1903,7 +1902,7 @@
 .system-sr3e .sr3e.sheet.item .stat-grid,
 .system-sr3e .sr3e.sheet.character .stat-grid {
   display: inline-grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, calc(33.333% - 0.167rem));
   gap: 0.25rem;
   margin-top: 0.25rem;
 }
@@ -1914,7 +1913,7 @@
 .system-sr3e .application.category-browser .stat-grid.single-column,
 .system-sr3e .sr3e.sheet.item .stat-grid.single-column,
 .system-sr3e .sr3e.sheet.character .stat-grid.single-column {
-  grid-template-columns: 1fr;
+  grid-template-columns: 100%;
   margin-bottom: 0.25rem;
 }
 .system-sr3e dialog .stat-grid.two-column,
@@ -1924,7 +1923,7 @@
 .system-sr3e .application.category-browser .stat-grid.two-column,
 .system-sr3e .sr3e.sheet.item .stat-grid.two-column,
 .system-sr3e .sr3e.sheet.character .stat-grid.two-column {
-  grid-template-columns: repeat(2, auto);
+  grid-template-columns: repeat(2, calc(50% - 0.125rem));
 }
 .system-sr3e dialog .stat-grid.three-column,
 .system-sr3e form .stat-grid.three-column,
@@ -1933,7 +1932,7 @@
 .system-sr3e .application.category-browser .stat-grid.three-column,
 .system-sr3e .sr3e.sheet.item .stat-grid.three-column,
 .system-sr3e .sr3e.sheet.character .stat-grid.three-column {
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: repeat(3, calc(33.333% - 0.167rem));
 }
 .system-sr3e dialog .details-foldout,
 .system-sr3e form .details-foldout,

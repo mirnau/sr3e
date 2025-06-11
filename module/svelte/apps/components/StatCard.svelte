@@ -24,18 +24,20 @@
 
 <div class="stat-card">
 	<div class="stat-card-background"></div>
-	<div>
+	<div class="title-container">
 		<h4>{label}</h4>
 	</div>
 	{#if type === "checkbox"}
 		<input type="checkbox" checked={value} onchange={update} />
 	{:else if type === "select"}
-		<select value={value} onchange={update}>
+		<select {value} onchange={update}>
 			{#each options as option}
-				<option value={option} selected={value === option}>{option}</option>
+				<option value={option} selected={value === option}
+					>{option}</option
+				>
 			{/each}
 		</select>
 	{:else}
-		<input {type} value={value} onchange={update} />
+		<input {type} {value} onchange={update} />
 	{/if}
 </div>

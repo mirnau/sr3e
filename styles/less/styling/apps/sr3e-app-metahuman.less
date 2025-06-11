@@ -1,8 +1,8 @@
-.sr3e-waterfall > * {
-  display: inline-block;         // ✅ not block, not flex
-  break-inside: avoid;           // ✅ don’t break across columns
-  width: 100%;                   // or a set width if needed
-  vertical-align: top;           // optional but usually cleaner
+.sr3e-waterfall>* {
+  display: inline-block; // ✅ not block, not flex
+  break-inside: avoid; // ✅ don’t break across columns
+  width: 100%; // or a set width if needed
+  vertical-align: top; // optional but usually cleaner
 }
 
 
@@ -46,6 +46,7 @@
       background-color: @default-fake-shadow-color;
 
       .stat-card {
+
         .select-container {
           width: 100%;
           display: block;
@@ -56,29 +57,34 @@
           }
         }
 
-        .input-base() {
-          width: 100%;
-          box-sizing: border-box;
-          padding: 0.25rem;
-          font: inherit;
-          margin: 0;
-          color: @h1-color;
-          font-size: 1.5rem;
-          text-indent: 0;
-        }
-
         input[type="text"],
         input[type="number"] {
-          .input-base();
+          text-indent: none;
+          margin-bottom: 0;
+          font-size: 1.5rem;
           .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
         }
 
         input[type="checkbox"] {
-          .input-base();
+          font-size: 1.5rem;
+          text-indent: none;
+          margin-bottom: 0;
           .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
         }
 
-        h4 { margin: 0; }
+        .title-container {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+
+          h4 {
+            width: 80%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin: 0;
+          }
+        }
 
         padding: 0.25rem;
         text-align: center;

@@ -68,7 +68,7 @@
     ];
 </script>
 
-<div class="sr3e-waterfall-wrapper">
+<div bind:this={wrapper} class="sr3e-waterfall-wrapper">
     <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">

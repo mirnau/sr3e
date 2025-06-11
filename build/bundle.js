@@ -5697,13 +5697,13 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   let specializations = proxy(skill().system.specializations);
   let value = proxy(skill().system.activeSkill.value);
   let mode = state("single");
-  let wrapper;
+  let wrapper2;
   const ro = new ResizeObserver(() => {
-    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
+    set(mode, proxy(wrapper2.scrollHeight > 500 ? "double" : "single"));
   });
   user_effect(() => {
-    if (!wrapper) return;
-    ro.observe(wrapper);
+    if (!wrapper2) return;
+    ro.observe(wrapper2);
     return () => ro.disconnect();
   });
   console.log("SKILL0", value);
@@ -5743,7 +5743,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     var div_14 = root_1$b();
     append($$anchor2, div_14);
   });
-  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
+  bind_this(div, ($$value) => wrapper2 = $$value, () => wrapper2);
   template_effect(
     ($0) => {
       set_attribute(img, "src", skill().img);
@@ -7604,7 +7604,7 @@ var root_1$4 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$4 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input>`);
-var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div><h4> </h4></div> <!></div>`);
+var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
   let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
@@ -8721,6 +8721,7 @@ function WeaponApp($$anchor, $$props) {
       return config();
     }
   });
+  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(
     ($0) => {
       set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode2}`);
