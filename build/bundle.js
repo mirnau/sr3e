@@ -5880,6 +5880,7 @@ async function deleteThis(__3, $$props, $specializations, specializations, $valu
     if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
+        await tick();
         store_set(value, $value() + 1);
       }
       let refund = 0;
@@ -5891,7 +5892,9 @@ async function deleteThis(__3, $$props, $specializations, specializations, $valu
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
     }
-    await $$props.actor.deleteEmbeddedDocuments("Item", [$$props.skill.id]);
+    if ($$props.skill) {
+      await $$props.actor.deleteEmbeddedDocuments("Item", [$$props.skill.id]);
+    }
     $$props.app.close();
   }
 }

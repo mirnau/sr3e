@@ -1,9 +1,10 @@
 <script>
     import { openFilePicker, localize } from "../../../../svelteHelpers.js";
     import SpecializationCard from "./SpecializationCard.svelte";
-    import { onDestroy } from "svelte";
+    import { onDestroy, tick } from "svelte";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { flags } from "../../../../foundry/services/commonConsts.js";
+
     let { skill, actor, config, app } = $props();
 
     let specializations = getActorStore(
@@ -169,6 +170,7 @@
             if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
                 if ($specializations.length > 0) {
                     $specializations = [];
+                    await tick(); // import { tick } from "svelte";
                     $value += 1;
                 }
 
@@ -186,7 +188,10 @@
                 );
             }
 
-            await actor.deleteEmbeddedDocuments("Item", [skill.id]);
+            if (skill) {
+                await actor.deleteEmbeddedDocuments("Item", [skill.id]);
+            }
+
             app.close();
         }
     }
