@@ -27,7 +27,7 @@
 </script>
 
 <div bind:this={wrapper} class="sr3e-waterfall-wrapper">
-    <div class={`sr3e-waterfall sr3e-waterfall--${mode}`}>
+    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">
                 <div class="fake-shadow"></div>

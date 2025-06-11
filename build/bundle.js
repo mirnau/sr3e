@@ -5709,6 +5709,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   console.log("SKILL0", value);
   var div = root$n();
   var div_1 = child(div);
+  set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
@@ -5745,7 +5746,6 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(
     ($0) => {
-      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
       set_attribute(img, "src", skill().img);
       set_attribute(img, "title", skill().name);
       set_attribute(img, "alt", skill().name);
@@ -7566,7 +7566,11 @@ function JournalViewer($$anchor, $$props) {
     const journal = game.journal.get(get$1(journalId));
     const page = (_b = (_a = journal == null ? void 0 : journal.pages) == null ? void 0 : _a.contents) == null ? void 0 : _b[0];
     const content = ((_c = page == null ? void 0 : page.text) == null ? void 0 : _c.content) || "";
-    set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, { async: true, secrets: false, documents: true })));
+    set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, {
+      async: true,
+      secrets: false,
+      documents: false
+    })));
   });
   async function handleJournalSelection(result) {
     if (!result) return;
@@ -7702,16 +7706,7 @@ function MetahumanApp($$anchor, $$props) {
   const karmaConfig = config().karma;
   const visionConfig = config().vision;
   const traits = config().traits;
-  let mode = state("single");
-  let wrapper;
-  const ro = new ResizeObserver(() => {
-    set(mode, proxy(wrapper.scrollHeight > 500 ? "double" : "single"));
-  });
-  user_effect(() => {
-    if (!wrapper) return;
-    ro.observe(wrapper);
-    return () => ro.disconnect();
-  });
+  let layoutMode2 = "double";
   const agerange = /* @__PURE__ */ derived(() => [
     {
       item: item2(),
@@ -8089,10 +8084,9 @@ function MetahumanApp($$anchor, $$props) {
       return config();
     }
   });
-  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(
     ($0, $1, $2, $3, $4) => {
-      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
+      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode2}`);
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
@@ -8172,7 +8166,7 @@ var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div 
 var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
 var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8181,6 +8175,7 @@ function MagicApp($$anchor, $$props) {
   const magicianData = proxy(system.magicianData);
   proxy(awakened.adeptData);
   const labels = config().magic;
+  let layoutMode2 = "double";
   const archetypeOptions = [
     localize(labels.adept),
     localize(labels.magician)
@@ -8287,34 +8282,35 @@ function MagicApp($$anchor, $$props) {
   var div = root$6();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
   img.__click = [on_click$3, item2];
-  var input = sibling(div_4, 2);
+  var input = sibling(div_5, 2);
   input.__change = [on_change$3, item2];
   var node = sibling(input, 2);
   StatCard(node, spread_props(() => get$1(archetype)));
   var node_1 = sibling(node, 2);
   StatCard(node_1, spread_props(() => get$1(priority)));
-  var node_2 = sibling(div_1, 2);
+  var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
       var fragment = root_1$2();
-      var div_5 = first_child(fragment);
-      var div_6 = child(div_5);
-      var div_7 = sibling(child(div_6), 2);
-      var node_3 = child(div_7);
+      var div_6 = first_child(fragment);
+      var div_7 = child(div_6);
+      var div_8 = sibling(child(div_7), 2);
+      var node_3 = child(div_8);
       StatCard(node_3, spread_props(() => get$1(magicianType)));
-      var node_4 = sibling(div_5, 2);
+      var node_4 = sibling(div_6, 2);
       {
         var consequent = ($$anchor3) => {
-          var div_8 = root_2$2();
-          var div_9 = child(div_8);
-          var div_10 = sibling(child(div_9), 2);
-          var node_5 = child(div_10);
+          var div_9 = root_2$2();
+          var div_10 = child(div_9);
+          var div_11 = sibling(child(div_10), 2);
+          var node_5 = child(div_11);
           StatCard(node_5, spread_props(() => get$1(aspect)));
-          append($$anchor3, div_8);
+          append($$anchor3, div_9);
         };
         if_block(node_4, ($$render) => {
           if (get$1(isAspected)) $$render(consequent);
@@ -8322,12 +8318,12 @@ function MagicApp($$anchor, $$props) {
       }
       var node_6 = sibling(node_4, 2);
       each(node_6, 17, () => get$1(magicianFields), index, ($$anchor3, entry) => {
-        var div_11 = root_3$2();
-        var div_12 = child(div_11);
-        var div_13 = sibling(child(div_12), 2);
-        var node_7 = child(div_13);
+        var div_12 = root_3$2();
+        var div_13 = child(div_12);
+        var div_14 = sibling(child(div_13), 2);
+        var node_7 = child(div_14);
         StatCard(node_7, spread_props(() => get$1(entry)));
-        append($$anchor3, div_11);
+        append($$anchor3, div_12);
       });
       append($$anchor2, fragment);
     };
@@ -8339,12 +8335,12 @@ function MagicApp($$anchor, $$props) {
           var fragment_2 = comment();
           var node_9 = first_child(fragment_2);
           each(node_9, 17, () => get$1(adeptFields), index, ($$anchor4, entry) => {
-            var div_14 = root_6();
-            var div_15 = child(div_14);
-            var div_16 = sibling(child(div_15), 2);
-            var node_10 = child(div_16);
+            var div_15 = root_6();
+            var div_16 = child(div_15);
+            var div_17 = sibling(child(div_16), 2);
+            var node_10 = child(div_17);
             StatCard(node_10, spread_props(() => get$1(entry)));
-            append($$anchor4, div_14);
+            append($$anchor4, div_15);
           });
           append($$anchor3, fragment_2);
         };
@@ -8373,6 +8369,7 @@ function MagicApp($$anchor, $$props) {
     }
   });
   template_effect(() => {
+    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode2}`);
     set_attribute(img, "src", item2().img);
     set_attribute(img, "title", item2().name);
     set_attribute(img, "alt", item2().name);
@@ -8614,13 +8611,14 @@ function Portability($$anchor, $$props) {
 }
 var on_click$2 = async (_, item2) => openFilePicker(item2());
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root$3 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
+  let layoutMode2 = "double";
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const weapon = system.weapon;
-  const mode = {
+  const weaponMode = {
     item: item2(),
     key: "mode",
     label: "Mode",
@@ -8674,26 +8672,27 @@ function WeaponApp($$anchor, $$props) {
   var div = root$3();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
   img.__click = [on_click$2, item2];
-  var input = sibling(div_4, 2);
+  var input = sibling(div_5, 2);
   input.__change = [on_change$2, item2];
-  var div_5 = sibling(div_1, 2);
-  var div_6 = child(div_5);
-  var div_7 = sibling(child(div_6), 2);
-  var div_8 = child(div_7);
-  var h3 = child(div_8);
+  var div_6 = sibling(div_2, 2);
+  var div_7 = child(div_6);
+  var div_8 = sibling(child(div_7), 2);
+  var div_9 = child(div_8);
+  var h3 = child(div_9);
   var text = child(h3);
-  var div_9 = sibling(div_8, 2);
-  var node = child(div_9);
-  StatCard(node, spread_props(mode));
   var div_10 = sibling(div_9, 2);
-  each(div_10, 21, () => weaponEntries, index, ($$anchor2, entry) => {
+  var node = child(div_10);
+  StatCard(node, spread_props(weaponMode));
+  var div_11 = sibling(div_10, 2);
+  each(div_11, 21, () => weaponEntries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
-  var node_1 = sibling(div_5, 2);
+  var node_1 = sibling(div_6, 2);
   Commodity(node_1, {
     get item() {
       return item2();
@@ -8724,6 +8723,7 @@ function WeaponApp($$anchor, $$props) {
   });
   template_effect(
     ($0) => {
+      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode2}`);
       set_attribute(img, "src", item2().img);
       set_attribute(img, "title", item2().name);
       set_attribute(img, "alt", item2().name);
@@ -9015,24 +9015,8 @@ var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat
 var root$1 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
+  let layoutMode2 = "single";
   let value = state(proxy($$props.item.system.skillType || "active"));
-  let mode = state("single");
-  let wrapper;
-  const ro = new ResizeObserver(() => {
-    requestAnimationFrame(() => {
-      if (!wrapper) return;
-      const items = wrapper.querySelectorAll(".item-sheet-component");
-      const totalHeight = Array.from(items).reduce((sum, item2) => sum + item2.offsetHeight, 0);
-      const averageItemHeight = totalHeight / items.length;
-      const newMode = totalHeight > 400 && items.length > 1 && totalHeight > averageItemHeight * 3 ? "double" : "single";
-      if (get$1(mode) !== newMode) set(mode, proxy(newMode));
-    });
-  });
-  user_effect(() => {
-    if (!wrapper) return;
-    ro.observe(wrapper);
-    return () => ro.disconnect();
-  });
   const selectOptions = [
     {
       value: "active",
@@ -9133,9 +9117,8 @@ function SkillApp($$anchor, $$props) {
       return $$props.config;
     }
   });
-  bind_this(div, ($$value) => wrapper = $$value, () => wrapper);
   template_effect(() => {
-    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${get$1(mode)}`);
+    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode2}`);
     set_attribute(img, "src", $$props.item.img);
     set_attribute(img, "title", $$props.item.name);
     set_attribute(img, "alt", $$props.item.name);
@@ -9312,6 +9295,10 @@ class SkillModel extends foundry.abstract.TypeDataModel {
             }
           )
         })
+      }),
+      journalId: new foundry.data.fields.StringField({
+        required: true,
+        initial: ""
       })
     };
   }

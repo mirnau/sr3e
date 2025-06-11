@@ -1,15 +1,20 @@
 <script>
-    import { localize, openFilePicker } from "../../svelteHelpers.js";
+    import {
+        localize,
+        openFilePicker
+    } from "../../svelteHelpers.js";
     import JournalViewer from "./components/JournalViewer.svelte";
     import StatCard from "./components/StatCard.svelte";
     import Commodity from "./components/Commodity.svelte";
     import Portability from "./components/Portability.svelte";
+    import { onMount } from "svelte";
 
+    let layoutMode = $state("double");
     let { item = {}, config = {} } = $props();
     const system = $state(item.system);
     const weapon = system.weapon;
 
-    const mode = {
+    const weaponMode = {
         item,
         key: "mode",
         label: "Mode",
@@ -63,53 +68,55 @@
     ];
 </script>
 
-<div class="sr3e-waterfall">
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <div class="image-mask">
-                    <img
-                        src={item.img}
-                        role="presentation"
-                        data-edit="img"
-                        title={item.name}
-                        alt={item.name}
-                        onclick={async () => openFilePicker(item)}
+<div class="sr3e-waterfall-wrapper">
+    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <div class="image-mask">
+                        <img
+                            src={item.img}
+                            role="presentation"
+                            data-edit="img"
+                            title={item.name}
+                            alt={item.name}
+                            onclick={async () => openFilePicker(item)}
+                        />
+                    </div>
+                    <input
+                        class="large"
+                        name="name"
+                        type="text"
+                        bind:value={item.name}
+                        onchange={(e) => item.update({ name: e.target.value })}
                     />
                 </div>
-                <input
-                    class="large"
-                    name="name"
-                    type="text"
-                    bind:value={item.name}
-                    onchange={(e) => item.update({ name: e.target.value })}
-                />
             </div>
         </div>
-    </div>
 
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <div class="details">
-                    <h3>{localize(config.common.details)}</h3>
-                </div>
-                <div class="stat-grid single-column">
-                    <StatCard {...mode} />
-                </div>
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <div class="details">
+                        <h3>{localize(config.common.details)}</h3>
+                    </div>
+                    <div class="stat-grid single-column">
+                        <StatCard {...weaponMode} />
+                    </div>
 
-                <div class="stat-grid two-column">
-                    {#each weaponEntries as entry}
-                        <StatCard {...entry} />
-                    {/each}
+                    <div class="stat-grid two-column">
+                        {#each weaponEntries as entry}
+                            <StatCard {...entry} />
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <Commodity {item} {config} gridCss="two-column" />
-    <Portability {item} {config} gridCss="two-column" />
-    <JournalViewer {item} {config} />
+        <Commodity {item} {config} gridCss="two-column" />
+        <Portability {item} {config} gridCss="two-column" />
+        <JournalViewer {item} {config} />
+    </div>
 </div>

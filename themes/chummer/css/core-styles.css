@@ -209,8 +209,11 @@
   backdrop-filter: blur(8px);
   clip-path: polygon(0rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0rem);
 }
-.system-sr3e .sr3e-waterfall-wrapper {
-  width: fit-content;
+.system-sr3e .sr3e-waterfall > * {
+  display: inline-block;
+  break-inside: avoid;
+  width: 100%;
+  vertical-align: top;
 }
 .system-sr3e .sr3e-waterfall {
   column-gap: var(--component-grid-gap);
@@ -224,7 +227,8 @@
 .system-sr3e .sr3e-waterfall--double {
   column-count: 2;
   column-width: var(--component-width);
-  width: fit-content;
+  column-gap: var(--component-grid-gap);
+  width: max-content;
   max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
 }
 .system-sr3e .sr3e-waterfall .item-sheet-component {

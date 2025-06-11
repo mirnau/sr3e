@@ -1,42 +1,16 @@
 <script>
-	import { localize, openFilePicker } from "../../svelteHelpers.js";
+	import {
+		localize,
+		openFilePicker
+	} from "../../svelteHelpers.js";
 	import ActorDataService from "../../foundry/services/ActorDataService.js";
 	import JournalViewer from "./components/JournalViewer.svelte";
+	import { onMount } from "svelte";
+
+	let layoutMode = $state("single");
 
 	let { item, config, onTitleChange } = $props();
 	let value = $state(item.system.skillType || "active");
-
-	let mode = $state("single");
-	let wrapper;
-	
-	const ro = new ResizeObserver(() => {
-		requestAnimationFrame(() => {
-			if (!wrapper) return;
-
-			// Check if content actually needs two columns
-			const items = wrapper.querySelectorAll(".item-sheet-component");
-			const totalHeight = Array.from(items).reduce(
-				(sum, item) => sum + item.offsetHeight,
-				0,
-			);
-			const averageItemHeight = totalHeight / items.length;
-
-			// Only switch to double if we have enough content to justify it
-			const newMode =
-				totalHeight > 400 &&
-				items.length > 1 &&
-				totalHeight > averageItemHeight * 3
-					? "double"
-					: "single";
-			if (mode !== newMode) mode = newMode;
-		});
-	});
-
-	$effect(() => {
-		if (!wrapper) return;
-		ro.observe(wrapper);
-		return () => ro.disconnect();
-	});
 
 	const selectOptions = [
 		{ value: "active", label: localize(config.skill.active) },
@@ -59,8 +33,8 @@
 	}
 </script>
 
-<div bind:this={wrapper} class="sr3e-waterfall-wrapper">
-	<div class={`sr3e-waterfall sr3e-waterfall--${mode}`}>
+<div class="sr3e-waterfall-wrapper">
+	<div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
 		<div class="item-sheet-component">
 			<div class="sr3e-inner-background-container">
 				<div class="fake-shadow"></div>

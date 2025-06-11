@@ -13,19 +13,7 @@
     const karmaConfig = config.karma;
     const visionConfig = config.vision;
     const traits = config.traits;
-
-    let mode = $state("single");
-    let wrapper;
-
-    const ro = new ResizeObserver(() => {
-        mode = wrapper.scrollHeight > 500 ? "double" : "single";
-    });
-
-    $effect(() => {
-        if (!wrapper) return;
-        ro.observe(wrapper);
-        return () => ro.disconnect();
-    });
+    let layoutMode = $state("double");
 
     const agerange = $derived([
         {
@@ -290,9 +278,8 @@
         options: ["C", "D", "E"],
     });
 </script>
-
-<div bind:this={wrapper} class="sr3e-waterfall-wrapper">
-    <div class={`sr3e-waterfall sr3e-waterfall--${mode}`}>
+<div class="sr3e-waterfall-wrapper">
+    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
         <!-- Name and Priority -->
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">

@@ -25,9 +25,9 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                     }),
                     {
                         initial: [
-                            {name: "hello", value: 1},
-                            {name: "hello Again", value: 88},
-                            {name: "hello Again Again", value: 3},
+                            { name: "hello", value: 1 },
+                            { name: "hello Again", value: 88 },
+                            { name: "hello Again Again", value: 3 },
                         ]
                     }
                 )
@@ -105,6 +105,11 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                     )
                 })
             }),
+
+            journalId: new foundry.data.fields.StringField({
+                required: true,
+                initial: ""
+            })
         };
     }
 }
