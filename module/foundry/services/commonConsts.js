@@ -17,14 +17,12 @@ export const flags = {
   sr3e: "sr3e",
   core: "core",
   actor: {
-    isAssigningAttributes: "attributeAssignmentLocked",
     isCharacterCreation: "isCharacterCreation",
     isShoppingState: "isShoppingState",
     isDossierDetailsOpen: "isDossierDetailsOpen",
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
     attributeAssignmentLocked: "attributeAssignmentLocked",
-    isAssigningAttributes: "isAssigningAttributes",
     persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
   }
 };

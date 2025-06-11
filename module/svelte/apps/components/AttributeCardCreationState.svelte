@@ -11,10 +11,10 @@
   let mod = $state(stat?.mod ?? 0);
   let total = $derived(value + mod + (stat?.meta ?? 0));
 
-  let isAssigningAttributesStore = getActorStore(
+  let attributeAssignmentLocked = getActorStore(
     actor.id,
-    stores.isAssigningAttributes,
-    actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes),
+    stores.attributeAssignmentLocked,
+    actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
   );
 
   let intelligenceStore = getActorStore(actor.id, stores.intelligence);
@@ -37,7 +37,7 @@
   let isMaxLimit = $derived(attributeLimit ? total >= attributeLimit : false);
 
   function add(change) {
-    if ($isAssigningAttributesStore) {
+    if (!$attributeAssignmentLocked) {
       const newPoints = $attributePointStore + change * -1;
       if (newPoints < 0) return;
 
@@ -58,7 +58,7 @@
           actor.system.attributes.intelligence.meta ?? 0,
       );
     } else {
-      //TODO:Karma implementation
+      console.warn("There is an error in charactercreation")
     }
   }
 

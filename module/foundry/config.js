@@ -26,16 +26,19 @@ sr3e.health = {
 }
 
 sr3e.skill = {
-    addspecialization: "sr3e.skill.addspecialization",
-    skill: "sr3e.skill.skill",
-    speak: "sr3e.skills.speak",
-    read: "sr3e.skills.read",
-    write: "sr3e.skills.write",
     active: "sr3e.skill.active",
+    addspecialization: "sr3e.skill.addspecialization",
     knowledge: "sr3e.skill.knowledge",
     language: "sr3e.skill.language",
     linkedAttribute: "sr3e.skill.linkedAttribute",
-    specializations: "sr3e.skill.specializations"
+    newspecialization: "sr3e.skill.newspecialization",
+    onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
+    read: "sr3e.skills.read",
+    skill: "sr3e.skill.skill",
+    skillpointsrestored: "sr3e.skills.skillpointsrestored",
+    speak: "sr3e.skills.speak",
+    specializations: "sr3e.skill.specializations",
+    write: "sr3e.skills.write"
 }
 
 sr3e.initiative = {

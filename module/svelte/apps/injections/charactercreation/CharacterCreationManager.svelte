@@ -6,11 +6,12 @@
 
     let { actor = {}, config = {} } = $props();
 
-    let isAssigningAttributesStore = getActorStore(
+    let attributeAssignmentLocked = getActorStore(
         actor.id,
-        stores.isAssigningAttributes,
-        actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes),
+        stores.attributeAssignmentLocked,
+        actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
     );
+    console.log("attributeAssignmentLocked", $attributeAssignmentLocked);
 
     let isCharacterCreation = $state(
         actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
@@ -19,10 +20,10 @@
 
 {#if isCharacterCreation}
     <div>
-        {#if $isAssigningAttributesStore}
-            <AttributePointsState {actor} {config} />
-        {:else}
+        {#if $attributeAssignmentLocked}
             <SkillPointsState {actor} {config} bind:isCharacterCreation />
+        {:else}
+            <AttributePointsState {actor} {config} />
         {/if}
     </div>
 {/if}

@@ -66,7 +66,7 @@ function configureProject() {
       }
     ]
   };
-  
+
   CONFIG.Actor.typeLabels = {
     character: localize(CONFIG.sr3e.sheet.playercharacter),
   };
@@ -139,15 +139,38 @@ function wrapContent(root) {
   root.appendChild(sheetComponent);
 }
 
-function setFlagsOnCharacter(actor, options, userId) {
-  actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, true);
-  actor.setFlag(flags.sr3e, flags.actor.hasAwakened, false);
-  actor.setFlag(flags.sr3e, flags.actor.burntOut, false);
-  actor.setFlag(flags.sr3e, flags.actor.isAssigningAttributes, true);
-  actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, false);
-  actor.setFlag(flags.sr3e, flags.actor.persistanceBlobCharacterSheetSize, {});
-  actor.setFlag(flags.sr3e, flags.actor.isShoppingState, true);
+function setFlagsOnCharacterPreCreate(document, data, options, userId) {
+  // Define your flags array
+  const flagsToSet = [
+    { namespace: flags.sr3e, flag: flags.actor.isCharacterCreation, value: true },
+    { namespace: flags.sr3e, flag: flags.actor.hasAwakened, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.burntOut, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.attributeAssignmentLocked, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.persistanceBlobCharacterSheetSize, value: {} },
+    { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
+  ];
+
+  // Build the update object by looping through the array
+  const updateData = {};
+  flagsToSet.forEach(({ namespace, flag, value }) => {
+    updateData[`flags.${namespace}.${flag}`] = value;
+  });
+
+  // Apply all flags at once
+  document.updateSource(updateData);
 }
+
+function debugFlagsOnActor(actor, options, userId) {
+  const actorFlags = actor.flags?.[flags.sr3e];
+  if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
+
+  console.groupCollapsed(`Flags for actor "${actor.name}"`);
+  for (const [key, value] of Object.entries(actorFlags)) {
+    console.log(`→ ${key}:`, value);
+  }
+  console.groupEnd();
+}
+
 
 function registerHooks() {
 
@@ -183,7 +206,8 @@ function registerHooks() {
 
   });
 
-  Hooks.on(hooks.createActor, setFlagsOnCharacter);
+  Hooks.on(hooks.preCreateActor, setFlagsOnCharacterPreCreate);
+  Hooks.on(hooks.createActor, debugFlagsOnActor);
 
   //INFO: Character Creation Hooks
   Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);

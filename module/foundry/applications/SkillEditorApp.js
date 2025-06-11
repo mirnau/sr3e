@@ -61,7 +61,8 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 			props: {
 				actor: this.actor,
 				skill: this.skill,
-				config: this.config
+				config: this.config,
+				app: this
 			}
 		});
 

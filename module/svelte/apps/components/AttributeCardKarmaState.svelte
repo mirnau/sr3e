@@ -37,6 +37,9 @@
   let isMaxLimit = $derived(attributeLimit ? total >= attributeLimit : false);
 
   function add(change) {
+
+    console.warn("TODO: Implement karma shopping");
+    return;
     const newPoints = $attributePointStore + change * -1;
     if (newPoints < 0) return;
 

@@ -12,10 +12,10 @@
     let gridContainer;
     let localization = config.attributes;
 
-    let isAssigningAttributes = getActorStore(
+    let attributeAssignmentLocked = getActorStore(
         actor.id,
-        stores.isAssigningAttributes,
-        actor.getFlag(flags.sr3e, flags.isAssigningAttributes),
+        stores.attributeAssignmentLocked,
+        actor.getFlag(flags.sr3e, flags.attributeAssignmentLocked),
     );
 
     $effect(() => {
@@ -39,7 +39,7 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
-        {#if $isAssigningAttributes}
+        {#if !$attributeAssignmentLocked}
             <AttributeCardCreationState {actor} {stat} {localization} {key} />
         {:else}
             <AttributeCardKarmaState {actor} {stat} {localization} {key} />

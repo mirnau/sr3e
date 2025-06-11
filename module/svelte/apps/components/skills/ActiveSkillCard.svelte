@@ -9,7 +9,11 @@
 	let { skill = {}, actor = {}, config = {} } = $props();
 
 	let activeSkill = $state(skill.system.activeSkill);
-	let specializations = $state(activeSkill.specializations);
+	let specializations = getActorStore(
+		skill.id,
+		actor.id,
+		skill.system.activeSkill.specializations,
+	);
 
 	let isShoppingState = getActorStore(
 		actor.id,
@@ -45,7 +49,7 @@
 		</div>
 
 		<div class="specialization-container">
-			{#each specializations as specialization}
+			{#each $specializations as specialization}
 				<div class="skill-specialization-card">
 					<div class="specialization-background"></div>
 					<div class="specialization-name">{specialization.name}</div>

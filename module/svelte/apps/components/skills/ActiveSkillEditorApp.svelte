@@ -4,28 +4,46 @@
     import { onDestroy } from "svelte";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { flags } from "../../../../foundry/services/commonConsts.js";
-    let { skill = {}, actor = {}, config = {} } = $props();
+    let { skill, actor, config, app } = $props();
 
-    let specializations = $state(skill.system.specializations);
+    let specializations = getActorStore(
+        skill.id,
+        actor.id,
+        skill.system.activeSkill.specializations,
+    );
+
+    let disableValueControls = $derived($specializations.length > 0);
+
+    $effect(() => {
+        skill.update(
+            { "system.activeSkill.specializations": $specializations },
+            { render: false },
+        );
+    });
+
+    let layoutMode = $state("single");
 
     let value = getActorStore(
         actor.id,
         skill.id,
         skill.system.activeSkill.value,
     );
-    let linkedAttribute = skill.system.linkedAttribute;
+
+    let linkedAttribute = skill.system.activeSkill.linkedAttribute;
     let linkedAttributeRating = $state(
-        foundry.utils.getProperty(
-            actor,
-            `system.attribute.${linkedAttribute}.$value`,
-        ) +
+        Number(
             foundry.utils.getProperty(
                 actor,
-                `system.attribute.${linkedAttribute}.mod`,
+                `system.attributes.${linkedAttribute}.value`,
+            ),
+        ) +
+            Number(
+                foundry.utils.getProperty(
+                    actor,
+                    `system.attributes.${linkedAttribute}.mod`,
+                ),
             ),
     );
-
-    let layoutMode = $state("single");
 
     let skillPointStore = getActorStore(
         actor.id,
@@ -39,26 +57,49 @@
         actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
     );
 
-    $effect(() => {});
+    async function addNewSpecialization() {
+        if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+            if ($specializations.length > 0) {
+                ui.notifications.info(
+                    localize(config.skill.onlyonespecializationatcreation),
+                );
+                return;
+            }
+        }
 
-    function addNewSpecialization() {}
+        let newSkill = {
+            name: localize(config.skill.newspecialization),
+            value: 0,
+        };
+
+        $specializations.push(newSkill);
+        $specializations = [...$specializations];
+
+        await skill.update(
+            {
+                "system.activeSkill.specializations": $specializations,
+            },
+            { render: false },
+        );
+    }
 
     async function increment() {
-        if ($attributeAssignmentLocked)
-            if ($skillPointStore > 0 && $value < 6) {
+        if ($attributeAssignmentLocked) {
+            if ($value < 6) {
+                let costForNextLevel;
+
                 if ($value < linkedAttributeRating) {
-                    $value += 1;
-                    $skillPointStore -= 1;
-                } else if ($skillPointStore > 1) {
-                    $value += 2;
-                    $skillPointStore -= 2;
+                    costForNextLevel = 1;
                 } else {
-                    //nothing to do
+                    costForNextLevel = 2;
                 }
-            } else {
-                //nothing to do
+
+                if ($skillPointStore >= costForNextLevel) {
+                    $value += 1;
+                    $skillPointStore -= costForNextLevel;
+                }
             }
-        else {
+        } else {
             assignFirstMessage();
         }
         silentUpdate();
@@ -67,13 +108,16 @@
     async function decrement() {
         if ($attributeAssignmentLocked) {
             if ($value > 0) {
-                if ($value <= linkedAttributeRating) {
-                    $value -= 1;
-                    $skillPointStore += 1;
+                let refundForCurrentLevel;
+
+                if ($value > linkedAttributeRating) {
+                    refundForCurrentLevel = 2;
                 } else {
-                    $value -= 1;
-                    $skillPointStore += 2;
+                    refundForCurrentLevel = 1;
                 }
+
+                $value -= 1;
+                $skillPointStore += refundForCurrentLevel;
             }
         } else {
             assignFirstMessage();
@@ -104,16 +148,53 @@
         console.log("VALUE CHANGED", $value);
     });
 
-    function deleteThis() {
-        console.log("TEST");
+    async function deleteThis() {
+        const confirmed = await foundry.applications.api.DialogV2.confirm({
+            window: {
+                title: "Delete This Skill?",
+            },
+            content: "Do you want to delete this skill?",
+            yes: {
+                label: "Yes!",
+                default: true,
+            },
+            no: {
+                label: "Nope!",
+            },
+            modal: true,
+            rejectClose: true,
+        });
+
+        if (confirmed) {
+            if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+                if ($specializations.length > 0) {
+                    $specializations = [];
+                    $value += 1;
+                }
+
+                let refund = 0;
+                for (let i = 1; i <= $value; i++) {
+                    if (i <= linkedAttributeRating) refund += 1;
+                    else refund += 2;
+                }
+
+                $skillPointStore += refund;
+                $value = 0;
+
+                ui.notifications.info(
+                    localize(config.skill.skillpointsrestored),
+                );
+            }
+
+            await actor.deleteEmbeddedDocuments("Item", [skill.id]);
+            app.close();
+        }
     }
 
-    onDestroy(async () => {
-        await skill.update({ "system.activeSkill.$value": $value });
-        await actor.update({
-            "system.creation.activePoints": $skillPointStore,
-        });
-    });
+    function deleteSpecialization(event) {
+        const toDelete = event.detail.specialization;
+        $specializations = $specializations.filter((s) => s !== toDelete);
+    }
 </script>
 
 <div class="sr3e-waterfall-wrapper">
@@ -148,6 +229,7 @@
                                     class="header-control icon sr3e-toolbar-button"
                                     aria-label="Toggle card span"
                                     onclick={increment}
+                                    disabled={disableValueControls}
                                 >
                                     <i class="fa-solid fa-plus"></i>
                                 </button>
@@ -155,9 +237,11 @@
                                     class="header-control icon sr3e-toolbar-button"
                                     aria-label="Toggle card span"
                                     onclick={decrement}
+                                    disabled={disableValueControls}
                                 >
                                     <i class="fa-solid fa-minus"></i>
                                 </button>
+
                                 <button
                                     class="header-control icon sr3e-toolbar-button"
                                     aria-label="Toggle card span"
@@ -185,11 +269,20 @@
                     <h1 class="uppercase">
                         {localize(config.skill.specializations)}
                     </h1>
-                    {#each specializations as specialization}
-                        <div class="stat-card">
-                            <SpecializationCard />
-                        </div>
-                    {/each}
+                    <div class="stat-grid single-column">
+                        {#each $specializations as specialization, i}
+                            <SpecializationCard
+                                bind:specialization={$specializations[i]}
+                                {actor}
+                                {skill}
+                                on:arrayChanged={() => {
+                                    $specializations = [...$specializations];
+                                    console.log("array was reassigned");
+                                }}
+                                on:delete={deleteSpecialization}
+                            />
+                        {/each}
+                    </div>
                 </div>
             </div>
         </div>

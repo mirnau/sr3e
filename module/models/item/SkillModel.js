@@ -24,11 +24,7 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                         ...SkillSpecialization.defineSchema()
                     }),
                     {
-                        initial: [
-                            { name: "hello", value: 1 },
-                            { name: "hello Again", value: 88 },
-                            { name: "hello Again Again", value: 3 },
-                        ]
+                        initial: []
                     }
                 )
             }),

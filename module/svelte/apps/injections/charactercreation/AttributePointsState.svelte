@@ -7,10 +7,10 @@
     let { actor, config } = $props();
     let system = $state(actor.system);
 
-    let isAssigningAttributesStore = getActorStore(
+    let attributeAssignmentLocked = getActorStore(
         actor.id,
-        stores.isAssigningAttributes,
-        actor.getFlag(flags.sr3e, flags.actor.isAssigningAttributes),
+        stores.attributeAssignmentLocked,
+        actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
     );
 
     // Store retrieval with lazy init
@@ -120,7 +120,7 @@
     });
 
     $effect(() => {
-        if ($attributePointStore === 0) {
+        if ($attributePointStore === 0 && $attributeAssignmentLocked === false) {
             (async () => {
                 const confirmed =
                     await foundry.applications.api.DialogV2.confirm({
@@ -144,9 +144,9 @@
                     actor.setFlag(
                         flags.sr3e,
                         flags.actor.attributeAssignmentLocked,
-                        false,
+                        true,
                     );
-                    $isAssigningAttributesStore = false;
+                    $attributeAssignmentLocked = true;
                 }
             })();
         }
