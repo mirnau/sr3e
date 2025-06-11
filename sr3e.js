@@ -66,6 +66,7 @@ function configureProject() {
       }
     ]
   };
+  
   CONFIG.Actor.typeLabels = {
     character: localize(CONFIG.sr3e.sheet.playercharacter),
   };

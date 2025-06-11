@@ -14,6 +14,10 @@
     font-display: swap;
 }
 
+:root {
+    font-family: 'VT323', monospace;
+}
+
 .VTT323-header() {
     .VTT323();
     border: none;
@@ -100,6 +104,7 @@
         }
     }
 
+    a,
     p,
     span,
     select,
@@ -108,6 +113,31 @@
 
         &::placeholder {
             color: @text-color;
+        }
+    }
+
+    button {
+        .VTT323();
+
+        /* Restore FA icon font for any button that is or becomes an icon */
+        &.fa,
+        &.fas,
+        &.far,
+        &.fal,
+        &.fad,
+        &.fab {
+            font: var(--fa-font-solid) !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Also fix nested icons and pseudo-elements in other buttons */
+        i,
+        i::before,
+        i::after,
+        &::before,
+        &::after {
+            font: var(--fa-font-solid) !important;
+            -webkit-font-smoothing: antialiased;
         }
     }
 }

@@ -35,6 +35,9 @@
   font-style: normal;
   font-display: swap;
 }
+:root {
+  font-family: 'VT323', monospace;
+}
 .system-sr3e form.p.hint,
 .system-sr3e p.hint {
   color: #ff0095;
@@ -157,6 +160,7 @@
 .system-sr3e span.no-margin {
   margin: 0;
 }
+.system-sr3e a,
 .system-sr3e p,
 .system-sr3e span,
 .system-sr3e select,
@@ -166,11 +170,37 @@
   line-height: 1rem;
   color: #1df0ff;
 }
+.system-sr3e a::placeholder,
 .system-sr3e p::placeholder,
 .system-sr3e span::placeholder,
 .system-sr3e select::placeholder,
 .system-sr3e input::placeholder {
   color: #1df0ff;
+}
+.system-sr3e button {
+  font-family: 'VT323', monospace;
+  margin: 0.33rem 0;
+  line-height: 1rem;
+  color: #1df0ff;
+  /* Restore FA icon font for any button that is or becomes an icon */
+  /* Also fix nested icons and pseudo-elements in other buttons */
+}
+.system-sr3e button.fa,
+.system-sr3e button.fas,
+.system-sr3e button.far,
+.system-sr3e button.fal,
+.system-sr3e button.fad,
+.system-sr3e button.fab {
+  font: var(--fa-font-solid) !important;
+  -webkit-font-smoothing: antialiased;
+}
+.system-sr3e button i,
+.system-sr3e button i::before,
+.system-sr3e button i::after,
+.system-sr3e button::before,
+.system-sr3e button::after {
+  font: var(--fa-font-solid) !important;
+  -webkit-font-smoothing: antialiased;
 }
 .sr3e.sheet.character {
   min-width: calc(var(--component-width) + var(--component-grid-gap) * 4);
