@@ -7051,7 +7051,7 @@ class ActorDataService {
       intelligence: localize(CONFIG.sr3e.attributes.intelligence),
       willpower: localize(CONFIG.sr3e.attributes.willpower),
       reaction: localize(CONFIG.sr3e.attributes.reaction),
-      magic: localize(CONFIG.sr3e.attributes.reaction)
+      magic: localize(CONFIG.sr3e.attributes.magic)
     };
   }
   static getCharacterCreationStats() {
@@ -7237,9 +7237,25 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     const data = await foundry.applications.ux.TextEditor.getDragEventData(event2);
     if (data.type !== "Item") return super._onDrop(event2);
     const droppedItem = await Item.implementation.fromDropData(data);
-    if (droppedItem.type !== "metahuman") {
+    if (droppedItem.type === "skill") {
+      this.handleSkill(droppedItem);
       return super._onDrop(event2);
     }
+    if (droppedItem.type === "metahuman") {
+      this.handleMetahuman(droppedItem);
+      return super._onDrop(event2);
+    }
+    return super._onDrop(event2);
+  }
+  async handleSkill(droppedItem) {
+    console.log("FLUFFY FLYFFY", droppedItem);
+    const skillType = droppedItem.system.skillType;
+    const linkedAttribute = droppedItem.system.activeSkill.linkedAttribute;
+    if (skillType === "active" && !linkedAttribute) {
+      ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
+    }
+  }
+  async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);
     if (result === "accept") {
       await this.actor.replaceMetahuman(droppedItem);
@@ -9322,7 +9338,7 @@ var root$1 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div>
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let layoutMode = "single";
-  let value = state(proxy($$props.item.system.skillType || "active"));
+  let value = /* @__PURE__ */ derived(() => $$props.item.system.skillType);
   const selectOptions = [
     {
       value: "active",
@@ -9340,7 +9356,6 @@ function SkillApp($$anchor, $$props) {
   const rawAttributes = ActorDataService.getLocalizedLinkingAttributes();
   const attributeOptions = Object.entries(rawAttributes).map(([key, label]) => ({ value: key, label }));
   function updateSkillType(newValue) {
-    set(value, proxy(newValue));
     $$props.item.update({ "system.skillType": newValue });
     $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${$$props.item.name}`);
   }
@@ -9511,7 +9526,7 @@ class SkillModel extends foundry.abstract.TypeDataModel {
     return {
       skillType: new foundry.data.fields.StringField({
         required: true,
-        initial: ""
+        initial: "active"
       }),
       activeSkill: new foundry.data.fields.SchemaField({
         value: new foundry.data.fields.NumberField({

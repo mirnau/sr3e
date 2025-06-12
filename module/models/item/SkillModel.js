@@ -6,7 +6,7 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
 
             skillType: new foundry.data.fields.StringField({
                 required: true,
-                initial: ""
+                initial: "active"
             }),
 
             activeSkill: new foundry.data.fields.SchemaField({

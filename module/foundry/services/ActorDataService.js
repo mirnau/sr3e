@@ -71,7 +71,7 @@ export default class ActorDataService {
             intelligence: localize(CONFIG.sr3e.attributes.intelligence),
             willpower: localize(CONFIG.sr3e.attributes.willpower),
             reaction: localize(CONFIG.sr3e.attributes.reaction),
-            magic: localize(CONFIG.sr3e.attributes.reaction),
+            magic: localize(CONFIG.sr3e.attributes.magic),
         };
     }
 

@@ -10,7 +10,9 @@
 	let layoutMode = $state("single");
 
 	let { item, config, onTitleChange } = $props();
-	let value = $state(item.system.skillType || "active");
+	
+	// Make value truly reactive to item.system.skillType changes
+	let value = $derived(item.system.skillType);
 
 	const selectOptions = [
 		{ value: "active", label: localize(config.skill.active) },
@@ -27,7 +29,6 @@
 	);
 
 	function updateSkillType(newValue) {
-		value = newValue;
 		item.update({ "system.skillType": newValue });
 		onTitleChange(`${localize(config.skill[newValue])}: ${item.name}`);
 	}

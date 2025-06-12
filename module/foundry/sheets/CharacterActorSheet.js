@@ -157,7 +157,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     });
   }
 
-  
+
 
   async _tearDown() {
     if (this.#neon) await unmount(this.#neon);
@@ -181,10 +181,32 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
     const droppedItem = await Item.implementation.fromDropData(data);
 
-    if (droppedItem.type !== "metahuman") {
+    if (droppedItem.type === "skill") {
+      this.handleSkill(droppedItem);
       return super._onDrop(event);
     }
 
+    if (droppedItem.type === "metahuman") {
+      this.handleMetahuman(droppedItem);
+      return super._onDrop(event);
+    }
+
+    return super._onDrop(event);
+  }
+
+  async handleSkill(droppedItem) {
+
+    console.log("FLUFFY FLYFFY",droppedItem)
+
+    const skillType = droppedItem.system.skillType;
+    const linkedAttribute = droppedItem.system.activeSkill.linkedAttribute;
+
+    if (skillType === "active" && !linkedAttribute) {
+      ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
+    }
+  }
+
+  async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);
 
     if (result === "accept") {
@@ -205,4 +227,5 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       ui.notifications.info("Only one metahuman type allowed.");
     }
   }
+
 }
