@@ -278,6 +278,7 @@
                                     class="header-control icon sr3e-toolbar-button"
                                     aria-label="Toggle card span"
                                     onclick={addNewSpecialization}
+                                    disabled={$value <= 1}
                                 >
                                     {localize(config.skill.addspecialization)}
                                 </button>

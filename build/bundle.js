@@ -6083,6 +6083,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
       set_text(text_1, $value());
       button.disabled = get$1(disableValueControls);
       button_1.disabled = get$1(disableValueControls);
+      button_3.disabled = $value() <= 1;
       set_text(text_2, $0);
       set_text(text_3, $1);
     },
