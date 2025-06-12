@@ -5927,13 +5927,17 @@ async function deleteThis(__3, $$props, $specializations, specializations, $valu
       ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
     }
     if ($$props.skill) {
-      await $$props.actor.deleteEmbeddedDocuments("Item", [$$props.skill.id]);
+      const id = $$props.skill.id;
+      await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
+      const store = getActorStore($$props.actor.id, stores.activeSkillsIds);
+      const current = get(store);
+      store.set(current.filter((sid) => sid !== id));
     }
     $$props.app.close();
   }
 }
 var on_click$7 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$n = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$n = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution">AC <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5942,6 +5946,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
+  getActorStore($$props.actor.id, stores.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
   let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
@@ -5993,7 +5998,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   var text_1 = child(h1_1);
   var div_9 = sibling(div_8, 2);
   var div_10 = sibling(child(div_9), 2);
-  var button = child(div_10);
+  var button = sibling(child(div_10));
   button.__click = [
     increment,
     $attributeAssignmentLocked,

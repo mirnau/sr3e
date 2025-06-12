@@ -4,6 +4,7 @@
     import { onDestroy, tick } from "svelte";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { get, set } from "svelte/store";
 
     let { skill, actor, config, app } = $props();
 
@@ -11,6 +12,17 @@
         skill.id,
         actor.id,
         skill.system.activeSkill.specializations,
+    );
+
+    const activeSkillsIdArrayStore = getActorStore(
+        actor.id,
+        stores.activeSkillsIds,
+        actor.items
+            .filter(
+                (item) =>
+                    item.type === "skill" && item.system.skillType === "active",
+            )
+            .map((item) => item.id),
     );
 
     let disableValueControls = $derived($specializations.length > 0);
@@ -189,7 +201,14 @@
             }
 
             if (skill) {
-                await actor.deleteEmbeddedDocuments("Item", [skill.id]);
+                const id = skill.id;
+                await actor.deleteEmbeddedDocuments("Item", [id], {
+                    render: false,
+                });
+
+                const store = getActorStore(actor.id, stores.activeSkillsIds);
+                const current = get(store);
+                store.set(current.filter((sid) => sid !== id));
             }
 
             app.close();
@@ -230,6 +249,7 @@
                         <div class="stat-card">
                             <div class="stat-card-background"></div>
                             <div class="buttons-vertical-distribution">
+                                AC
                                 <button
                                     class="header-control icon sr3e-toolbar-button"
                                     aria-label="Toggle card span"
