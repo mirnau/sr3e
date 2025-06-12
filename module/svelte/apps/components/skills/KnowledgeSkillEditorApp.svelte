@@ -11,16 +11,16 @@
     let specializations = getActorStore(
         skill.id,
         actor.id,
-        skill.system.activeSkill.specializations,
+        skill.system.knowledgeSkill.specializations,
     );
 
-    const activeSkillsIdArrayStore = getActorStore(
+    const knowledgeSkillsIdArrayStore = getActorStore(
         actor.id,
-        stores.activeSkillsIds,
+        stores.knowledgeSkillsIds,
         actor.items
             .filter(
                 (item) =>
-                    item.type === "skill" && item.system.skillType === "active",
+                    item.type === "skill" && item.system.skillType === "knowledge",
             )
             .map((item) => item.id),
     );
@@ -29,7 +29,7 @@
 
     $effect(() => {
         skill.update(
-            { "system.activeSkill.specializations": $specializations },
+            { "system.knowledgeSkill.specializations": $specializations },
             { render: false },
         );
     });
@@ -39,10 +39,10 @@
     let value = getActorStore(
         actor.id,
         skill.id,
-        skill.system.activeSkill.value,
+        skill.system.knowledgeSkill.value,
     );
 
-    let linkedAttribute = skill.system.activeSkill.linkedAttribute;
+    let linkedAttribute = skill.system.knowledgeSkill.linkedAttribute;
     let linkedAttributeRating = $state(
         Number(
             foundry.utils.getProperty(
@@ -60,8 +60,8 @@
 
     let skillPointStore = getActorStore(
         actor.id,
-        stores.activePoints,
-        actor.system.creation.activePoints,
+        stores.knowledgePoints,
+        actor.system.creation.knowledgePoints,
     );
 
     let attributeAssignmentLocked = getActorStore(
@@ -90,7 +90,7 @@
 
         await skill.update(
             {
-                "system.activeSkill.specializations": $specializations,
+                "system.knowledgeSkill.specializations": $specializations,
             },
             { render: false },
         );
@@ -141,12 +141,12 @@
 
     async function silentUpdate() {
         await skill.update(
-            { "system.activeSkill.value": $value },
+            { "system.knowledgeSkill.value": $value },
             { render: false },
         );
 
         await actor.update(
-            { "system.creation.activePoints": $skillPointStore },
+            { "system.creation.knowledgePoints": $skillPointStore },
             { render: false },
         );
     }
@@ -156,10 +156,6 @@
             "You need to assign all attributes before assigning skills",
         );
     }
-
-    $effect(() => {
-        console.log("VALUE CHANGED", $value);
-    });
 
     async function deleteThis() {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -206,7 +202,7 @@
                     render: false,
                 });
 
-                const store = getActorStore(actor.id, stores.activeSkillsIds);
+                const store = getActorStore(actor.id, stores.knowledgeSkillsIds);
                 const current = get(store);
                 store.set(current.filter((sid) => sid !== id));
             }

@@ -1,4 +1,5 @@
 import ActiveSkillEditorApp from "../../svelte/apps/components/skills/ActiveSkillEditorApp.svelte";
+import KnowledgeSkillEditorApp from "../../svelte/apps/components/skills/KnowledgeSkillEditorApp.svelte";
 import { mount, unmount } from "svelte";
 
 export default class ActiveSkillEditorSheet extends foundry.applications.api.ApplicationV2 {
@@ -52,19 +53,33 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 
 	_replaceHTML(_, windowContent) {
 
-		if (this.#app) {f
+		if (this.#app) {
+			f
 			unmount(this.#app);
 		}
 
-		this.#app = mount(ActiveSkillEditorApp, {
-			target: windowContent,
-			props: {
-				actor: this.actor,
-				skill: this.skill,
-				config: this.config,
-				app: this
-			}
-		});
+		if (this.skill.system.skillType === "active") {
+			this.#app = mount(ActiveSkillEditorApp, {
+				target: windowContent,
+				props: {
+					actor: this.actor,
+					skill: this.skill,
+					config: this.config,
+					app: this
+				}
+			});
+		}
+		else if (this.skill.system.skillType === "knowledge") {
+			this.#app = mount(KnowledgeSkillEditorApp, {
+				target: windowContent,
+				props: {
+					actor: this.actor,
+					skill: this.skill,
+					config: this.config,
+					app: this
+				}
+			});
+		}
 
 		const header = windowContent.parentElement.querySelector("header.window-header");
 

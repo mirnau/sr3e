@@ -823,6 +823,9 @@
   background: #ff1d9d;
   clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
 }
+.system-sr3e .skill-container-masonry-grid .skill-category-container.static-full-width {
+  width: 100%;
+}
 .system-sr3e .skill-container-masonry-grid .skill-category-container::before {
   content: '';
   position: absolute;
