@@ -2,12 +2,22 @@
     import SkillCategory from "./SkillCategory.svelte";
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
     import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
+    import { getActorStore, stores } from "../../../stores/actorStores.js";
+    import { tick } from "svelte";
 
     let { actor = {}, config = {} } = $props();
     let gridContainer;
+    let masonryInstance = null;
 
-    const activeSkills = actor.items?.filter(
-        (item) => item.type === "skill" && item.system.skillType === "active",
+    const activeSkillsIdArrayStore = getActorStore(
+        actor.id,
+        stores.activeSkillsIds,
+        actor.items
+            .filter(
+                (item) =>
+                    item.type === "skill" && item.system.skillType === "active",
+            )
+            .map((item) => item.id),
     );
 
     let attributeSortedSkills = $derived(
@@ -18,16 +28,20 @@
             "charisma",
             "intelligence",
             "willpower",
+            "reaction",
         ].map((attribute) => ({
             attribute,
-            skills: activeSkills.filter(
-                (skill) =>
-                    skill.system.activeSkill.linkedAttribute === attribute,
+            skills: actor.items.filter(
+                (item) =>
+                    $activeSkillsIdArrayStore.includes(item.id) &&
+                    item.system.activeSkill.linkedAttribute === attribute,
             ),
         })),
     );
 
     $effect(() => {
+        if (masonryInstance) return;
+
         const rem = parseFloat(
             getComputedStyle(document.documentElement).fontSize,
         );
@@ -39,8 +53,13 @@
             gutterSizerSelector: ".skill-container-gutter-sizer",
             minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem,
         });
+
+        masonryInstance = result.masonryInstance;
+
         return result.cleanup;
     });
+
+
 </script>
 
 <div bind:this={gridContainer} class="skill-container-masonry-grid">

@@ -11,7 +11,6 @@
 
 	let { item, config, onTitleChange } = $props();
 	
-	// Make value truly reactive to item.system.skillType changes
 	let value = $derived(item.system.skillType);
 
 	const selectOptions = [

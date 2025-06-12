@@ -10,7 +10,8 @@ export const stores = {
     languagePoints: "languagePoints",
     attributeAssignmentLocked: "attributeAssignmentLocked",
     actorName: "actorName",
-    isShoppingState: "isShoppingState"
+    isShoppingState: "isShoppingState",
+    activeSkillsIds: "activeSkillsIds"
 }
 
 export function getActorStore(actorId, storeName, customValue = null) {

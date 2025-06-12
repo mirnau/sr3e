@@ -7,6 +7,7 @@ import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
 import ActorDataService from "../services/ActorDataService.js";
 import { flags } from "../services/commonConsts.js";
+import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
@@ -157,8 +158,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     });
   }
 
-
-
   async _tearDown() {
     if (this.#neon) await unmount(this.#neon);
     if (this.#app) await unmount(this.#app);
@@ -183,7 +182,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
     if (droppedItem.type === "skill") {
       this.handleSkill(droppedItem);
-      return super._onDrop(event);
+      return;
     }
 
     if (droppedItem.type === "metahuman") {
@@ -195,16 +194,25 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
   }
 
   async handleSkill(droppedItem) {
-
-    console.log("FLUFFY FLYFFY",droppedItem)
-
     const skillType = droppedItem.system.skillType;
     const linkedAttribute = droppedItem.system.activeSkill.linkedAttribute;
 
     if (skillType === "active" && !linkedAttribute) {
       ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
+      return;
     }
+
+    const itemData = droppedItem.toObject();
+    const before = new Set(this.actor.items.map(i => i.id));
+    await this.actor.createEmbeddedDocuments("Item", [itemData], { render: false });
+
+    let createdItem = null;
+    createdItem = this.actor.items.find(i => !before.has(i.id) && i.type === "skill");
+
+    const activeSkillsIdArrayStore = getActorStore(this.document.id, stores.activeSkillsIds);
+    activeSkillsIdArrayStore.update(currentArray => [...currentArray, createdItem.id]);
   }
+
 
   async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);
@@ -227,5 +235,4 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       ui.notifications.info("Only one metahuman type allowed.");
     }
   }
-
 }

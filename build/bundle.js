@@ -3471,7 +3471,8 @@ const stores = {
   languagePoints: "languagePoints",
   attributeAssignmentLocked: "attributeAssignmentLocked",
   actorName: "actorName",
-  isShoppingState: "isShoppingState"
+  isShoppingState: "isShoppingState",
+  activeSkillsIds: "activeSkillsIds"
 };
 function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
@@ -5210,6 +5211,38 @@ function setupMasonry({
     obs.observe(item2);
     itemObservers.push(obs);
   });
+  const mutationObserver = new MutationObserver((mutationsList) => {
+    let shouldRelayout = false;
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE && node.matches(itemSelector)) {
+            const obs = new ResizeObserver(() => {
+              requestAnimationFrame(() => {
+                msnry.reloadItems();
+                msnry.layout();
+              });
+            });
+            obs.observe(node);
+            itemObservers.push(obs);
+            shouldRelayout = true;
+          }
+        });
+      }
+    }
+    if (shouldRelayout) {
+      requestAnimationFrame(() => {
+        applyWidths();
+        msnry.reloadItems();
+        msnry.layout();
+      });
+    }
+  });
+  mutationObserver.observe(container, {
+    childList: true,
+    subtree: false
+    // Adjust to true if item containers are nested
+  });
   setTimeout(() => {
     applyWidths();
     msnry.reloadItems();
@@ -5218,6 +5251,7 @@ function setupMasonry({
   const cleanup = () => {
     resizeObserver.disconnect();
     itemObservers.forEach((obs) => obs.disconnect());
+    mutationObserver.disconnect();
     msnry.destroy();
   };
   return { masonryInstance: msnry, cleanup };
@@ -6230,23 +6264,27 @@ function SkillCategory($$anchor, $$props) {
 }
 var root$k = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><div class="skill-container-grid-sizer"></div> <div class="skill-container-gutter-sizer"></div> <!></div>`);
 function SkillsActive($$anchor, $$props) {
-  var _a;
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $activeSkillsIdArrayStore = () => store_get(activeSkillsIdArrayStore, "$activeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  const activeSkills = (_a = actor().items) == null ? void 0 : _a.filter((item2) => item2.type === "skill" && item2.system.skillType === "active");
+  let masonryInstance = null;
+  const activeSkillsIdArrayStore = getActorStore(actor().id, stores.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
   let attributeSortedSkills = /* @__PURE__ */ derived(() => [
     "body",
     "quickness",
     "strength",
     "charisma",
     "intelligence",
-    "willpower"
+    "willpower",
+    "reaction"
   ].map((attribute) => ({
     attribute,
-    skills: activeSkills.filter((skill) => skill.system.activeSkill.linkedAttribute === attribute)
+    skills: actor().items.filter((item2) => $activeSkillsIdArrayStore().includes(item2.id) && item2.system.activeSkill.linkedAttribute === attribute)
   })));
   user_effect(() => {
+    if (masonryInstance) return;
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
     const result = setupMasonry({
       container: gridContainer,
@@ -6255,6 +6293,7 @@ function SkillsActive($$anchor, $$props) {
       gutterSizerSelector: ".skill-container-gutter-sizer",
       minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem
     });
+    masonryInstance = result.masonryInstance;
     return result.cleanup;
   });
   var div = root$k();
@@ -6272,6 +6311,7 @@ function SkillsActive($$anchor, $$props) {
   bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 var on_click$6 = (_, activeTab) => set(activeTab, "active");
 var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
@@ -7239,7 +7279,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     const droppedItem = await Item.implementation.fromDropData(data);
     if (droppedItem.type === "skill") {
       this.handleSkill(droppedItem);
-      return super._onDrop(event2);
+      return;
     }
     if (droppedItem.type === "metahuman") {
       this.handleMetahuman(droppedItem);
@@ -7248,12 +7288,19 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     return super._onDrop(event2);
   }
   async handleSkill(droppedItem) {
-    console.log("FLUFFY FLYFFY", droppedItem);
     const skillType = droppedItem.system.skillType;
     const linkedAttribute = droppedItem.system.activeSkill.linkedAttribute;
     if (skillType === "active" && !linkedAttribute) {
       ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
+      return;
     }
+    const itemData = droppedItem.toObject();
+    const before = new Set(this.actor.items.map((i) => i.id));
+    await this.actor.createEmbeddedDocuments("Item", [itemData], { render: false });
+    let createdItem = null;
+    createdItem = this.actor.items.find((i) => !before.has(i.id) && i.type === "skill");
+    const activeSkillsIdArrayStore = getActorStore(this.document.id, stores.activeSkillsIds);
+    activeSkillsIdArrayStore.update((currentArray) => [...currentArray, createdItem.id]);
   }
   async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);

@@ -6,9 +6,9 @@ export function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  onLayoutStateChange = () => { },
+  onLayoutStateChange = () => {},
 }) {
-  if (!container) return () => { };
+  if (!container) return () => {};
 
   const form = container.parentElement;
 
@@ -97,6 +97,41 @@ export function setupMasonry({
     itemObservers.push(obs);
   });
 
+  const mutationObserver = new MutationObserver((mutationsList) => {
+    let shouldRelayout = false;
+
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE && node.matches(itemSelector)) {
+            const obs = new ResizeObserver(() => {
+              requestAnimationFrame(() => {
+                msnry.reloadItems();
+                msnry.layout();
+              });
+            });
+            obs.observe(node);
+            itemObservers.push(obs);
+            shouldRelayout = true;
+          }
+        });
+      }
+    }
+
+    if (shouldRelayout) {
+      requestAnimationFrame(() => {
+        applyWidths();
+        msnry.reloadItems();
+        msnry.layout();
+      });
+    }
+  });
+
+  mutationObserver.observe(container, {
+    childList: true,
+    subtree: false, // Adjust to true if item containers are nested
+  });
+
   setTimeout(() => {
     applyWidths();
     msnry.reloadItems();
@@ -106,6 +141,7 @@ export function setupMasonry({
   const cleanup = () => {
     resizeObserver.disconnect();
     itemObservers.forEach((obs) => obs.disconnect());
+    mutationObserver.disconnect();
     msnry.destroy();
   };
 
