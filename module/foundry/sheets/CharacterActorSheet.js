@@ -1,16 +1,20 @@
 import CharacterSheetApp from "../../svelte/apps/CharacterSheetApp.svelte";
 import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
+import CharacterCreationManager from "../../svelte/apps/injections/charactercreation/CharacterCreationManager.svelte";
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
-import ActorDataService from "../services/ActorDataService";
+import ActorDataService from "../services/ActorDataService.js";
+import { flags } from "../services/commonConsts.js";
+import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   #app;
   #neon;
   #feed;
   #cart;
+  #creation;
 
   static get DEFAULT_OPTIONS() {
     return {
@@ -28,11 +32,34 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     };
   }
 
+
   _renderHTML() {
     return null;
   }
 
   _replaceHTML(_, windowContent) {
+
+    if (this.#app) {
+      unmount(this.#app);
+      this.#app = null;
+    }
+    if (this.#neon) {
+      unmount(this.#neon);
+      this.#neon = null;
+    }
+    if (this.#feed) {
+      unmount(this.#feed);
+      this.#feed = null;
+    }
+    if (this.#cart) {
+      unmount(this.#cart);
+      this.#cart = null;
+    }
+    if (this.#creation) {
+      unmount(this.#creation);
+      this.#creation = null;
+    }
+
     windowContent.innerHTML = "";
     const form = windowContent.parentNode;
 
@@ -54,9 +81,31 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     this._injectNewsFeed(form, header);
 
 
+    let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
+    if (isCharacterCreation) {
+      this._injectCharachterCreationPointsApp(header);
+    }
+
     SR3DLog.success("Svelte mounted", this.constructor.name);
     return windowContent;
 
+  }
+
+  _injectCharachterCreationPointsApp(header) {
+    let anchor = header?.previousElementSibling;
+    if (!anchor?.classList?.contains("points-position")) {
+      anchor = document.createElement("div");
+      anchor.classList.add("points-position");
+      header.parentElement.insertBefore(anchor, header);
+
+      this.#creation = mount(CharacterCreationManager, {
+        target: anchor,
+        props: {
+          actor: this.document,
+          config: CONFIG.sr3e
+        }
+      });
+    }
   }
 
   _injectNeonName(header) {
@@ -96,17 +145,17 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     const title = form.querySelector(".window-title");
     if (title) {
       title.remove();
-      const newsfeedInjection = document.createElement("div");
-      header.prepend(newsfeedInjection);
-
-      this.#feed = mount(NewsFeed, {
-        target: header,
-        anchor: header.firstChild,
-        props: {
-          actor: this.document
-        }
-      });
     }
+    const newsfeedInjection = document.createElement("div");
+    header.prepend(newsfeedInjection);
+
+    this.#feed = mount(NewsFeed, {
+      target: header,
+      anchor: header.firstChild,
+      props: {
+        actor: this.document
+      }
+    });
   }
 
   async _tearDown() {
@@ -114,6 +163,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     if (this.#app) await unmount(this.#app);
     if (this.#feed) await unmount(this.#feed);
     if (this.#cart) await unmount(this.#cart);
+    if (this.#creation) await unmount(this.#creation);
     this.#app = this.#neon = this.#feed = this.#cart = null;
     return super._tearDown();
   }
@@ -124,13 +174,61 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
   async _onDrop(event) {
     event.preventDefault();
-    const data = await TextEditor.getDragEventData(event);
+    const data = await foundry.applications.ux.TextEditor.getDragEventData(event);
 
-    if (data.type !== "Item") return;
+    if (data.type !== "Item") return super._onDrop(event);
 
     const droppedItem = await Item.implementation.fromDropData(data);
-    if (droppedItem.type !== "metahuman") return;
 
+    if (droppedItem.type === "skill") {
+      this.handleSkill(droppedItem);
+      return;
+    }
+
+    if (droppedItem.type === "metahuman") {
+      this.handleMetahuman(droppedItem);
+      return super._onDrop(event);
+    }
+
+    return super._onDrop(event);
+  }
+
+  async handleSkill(droppedItem) {
+    const skillType = droppedItem.system.skillType;
+    const itemData = droppedItem.toObject();
+
+    if (skillType === "active" && !droppedItem.system.activeSkill?.linkedAttribute) {
+      ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
+      return;
+    }
+
+    const storeKeyByType = {
+      active: stores.activeSkillsIds,
+      knowledge: stores.knowledgeSkillsIds,
+      language: stores.languageSkillsIds,
+    };
+
+    const storeKey = storeKeyByType[skillType];
+    if (!storeKey) {
+      console.warn("Unsupported skillType dropped:", skillType);
+      return;
+    }
+
+    const created = await this.document.createEmbeddedDocuments("Item", [itemData], {
+      render: false,
+    });
+
+    const createdItem = created?.[0];
+    if (!createdItem) {
+      console.warn("Skill creation failed or returned no result.");
+      return;
+    }
+
+    const targetStore = getActorStore(this.document.id, storeKey, []);
+    targetStore.update(current => [...current, createdItem.id]);
+  }
+
+  async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);
 
     if (result === "accept") {

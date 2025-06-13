@@ -1,17 +1,19 @@
 <script>
   import { slide } from "svelte/transition";
-  import { getActorStore } from "../../stores/actorStoreRegistry";
   import { openFilePicker, localize } from "../../../svelteHelpers.js";
   import CardToolbar from "./CardToolbar.svelte";
-
+  import { tick } from "svelte";
+  import { getActorStore, stores } from "../../stores/actorStores.js";
+  
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
   let system = $state(actor.system);
-  let actorStore = $derived(
-    actor.id && actor.name ? getActorStore(actor.id, actor.name) : null,
-  );
-  let actorName = $state(actor.name);
-  let isDetailsOpen = $state(actor.system.profile.isDetailsOpen);
+
+  let actorNameStore = getActorStore(actor.id, stores.actorName, actor.name);
+  let isDetailsOpenStore = getActorStore(actor.id, "isDetailsOpen", actor.system.profile.isDetailsOpen ?? false);
+
+  let actorName = $state($actorNameStore);
+  let isDetailsOpen = $state($isDetailsOpenStore);
   let imgPath = $state("");
 
   $effect(() => {
@@ -19,18 +21,16 @@
     imgPath = metahuman?.img ?? "";
   });
 
-  $effect(() => {
-    if (!actorStore) return;
-
-    const unsubscribe = actorStore.subscribe((store) => {
-      if (store?.name !== undefined) actorName = store.name;
-      if (store?.isDetailsOpen !== undefined) isDetailsOpen = store.isDetailsOpen;
-    });
-    return () => unsubscribe();
-  });
-
   function triggerMasonryReflow() {
-    document.querySelector(".sheet-character-masonry-main")
+    document
+      .querySelector(".sheet-character-masonry-main")
+      ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  }
+
+  async function handleOutroEnd() {
+    await tick(); // wait for Svelte to actually remove the node
+    document
+      .querySelector(".sheet-character-masonry-main")
       ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   }
 
@@ -40,14 +40,13 @@
       { "system.profile.isDetailsOpen": isDetailsOpen },
       { render: false },
     );
-    actorStore?.update?.((store) => ({ ...store, isDetailsOpen }));
-    triggerMasonryReflow();
+    isDetailsOpenStore.set(isDetailsOpen);
   }
 
   function saveActorName(event) {
     const newName = event.target.value;
     actor?.update?.({ name: newName }, { render: true });
-    actorStore?.update?.((store) => ({ ...store, name: newName }));
+    actorNameStore.set(newName);
   }
 
   function multiply(value, factor) {
@@ -60,9 +59,10 @@
 
   function updateStoreName(newName) {
     actorName = newName;
-    actorStore?.update?.((store) => ({ ...store, name: newName }));
+    actorNameStore.set(newName);
   }
 </script>
+
 
 <CardToolbar {id} />
 
@@ -99,8 +99,10 @@
 
     {#if isDetailsOpen}
       <div
-        in:slide={{ duration: 400, easing: cubicInOut }}
-        out:slide={{ duration: 300, easing: cubicInOut }}
+        in:slide={{ duration: 100, easing: cubicInOut }}
+        out:slide={{ duration: 50, easing: cubicInOut }}
+        onintroend={triggerMasonryReflow}
+        onoutroend={handleOutroEnd}
       >
         <div>
           <input
@@ -188,6 +190,7 @@
         <h4>{localize(config.sheet.quote)}</h4>
         <div
           class="editable-field quote"
+          role="presentation"
           contenteditable="true"
           onblur={(e) =>
             actor?.update?.(

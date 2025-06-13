@@ -4,10 +4,11 @@
   import Attributes from "./components/Attributes.svelte";
   import DicePools from "./components/DicePools.svelte";
   import Movement from "./components/Movement.svelte";
-  import Skills from "./components/Skills.svelte";
+  import Skills from "./components/skills/Skills.svelte";
   import Health from "./components/Health.svelte";
   import Karma from "./components/Karma.svelte";
   import Inventory from "./components/Inventory.svelte";
+  import { masonryMinWidthFallbackValue } from "../../foundry/services/commonConsts.js";
 
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
@@ -67,7 +68,9 @@
   // Re-trigger masonry after card updates
   $effect(async () => {
     await tick();
-    container?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+    container?.dispatchEvent(
+      new CustomEvent("masonry-reflow", { bubbles: true }),
+    );
   });
 
   // Save layout to flag with debounce
@@ -82,16 +85,19 @@
 
   let layoutState = $state("small");
   const maxWidth = 1400;
+  let masonryInstance = null;
 
   $effect(() => {
     if (!container) return;
 
-    const cleanup = setupMasonry({
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+    const result = setupMasonry({
       container,
       itemSelector: ".sheet-component",
       gridSizerSelector: ".layout-grid-sizer",
       gutterSizerSelector: ".layout-gutter-sizer",
-      minItemWidth: 220,
+      minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
       stateMachineThresholds: {
         small: 0,
         medium: 0.5 * maxWidth,
@@ -102,7 +108,9 @@
       },
     });
 
-    return cleanup;
+    masonryInstance = result.masonryInstance;
+
+    return result.cleanup;
   });
 </script>
 
@@ -110,8 +118,7 @@
   bind:this={container}
   class="sheet-character-masonry-main"
   onmasonry-reflow={() => {
-    console.log("Reflow triggered");
-    container?._masonry?.layout();
+    masonryInstance.layout();
   }}
 >
   <div class="layout-grid-sizer"></div>

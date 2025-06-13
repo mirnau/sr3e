@@ -5,7 +5,9 @@ button {
     
     position: relative;
     background-color: hotpink;
-    color: cyan;
+    color: @highlight-color-primary;
+
+;
     border: none;
     cursor: pointer;
     margin: 0rem;
@@ -16,7 +18,9 @@ button {
     &::after {
         content: "";
         z-index: -1;
-        color: cyan;
+        color: @highlight-color-primary;
+
+;
         position: absolute;
         background: rgb(59, 59, 59);
         top: 1px;
@@ -58,7 +62,9 @@ button {
 
     .ui-control {
         background-color: hotpink;
-        color: cyan;
+        color: @highlight-color-primary;
+
+;
     }
 }
 
@@ -68,4 +74,24 @@ footer.form-footer button:last-of-type {
   &::after {
     .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
   }
+}
+
+.buttons-vertical-distribution {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
+
+    padding: 0.25rem;
+    width: fit-content;
+    max-width: max-content;
+    align-self: flex-start;
+}
+
+.buttons-vertical-distribution > button {
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
 }

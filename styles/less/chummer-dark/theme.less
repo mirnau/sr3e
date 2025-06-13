@@ -1,9 +1,12 @@
 // Units and sizing
 
-@component-unit: 20rem;
-@component-distance: 0.25rem;
-@base-font-size: 14px; //1rem
 @line-height: 1rem;
+
+/* globals.less measurements are in rem*/
+:root {
+  --component-width: 17rem;
+  --component-grid-gap: 0.25rem;
+}
 
 
 @background-color: linear-gradient(35deg,
@@ -131,7 +134,9 @@
 
 //Shopping-Cart Pulse Colors
 @shopping-cart-primary: #00FC00C0;
-@shopping-cart-secondary: cyan;
+@shopping-cart-secondary: @highlight-color-primary;
+
+;
 
 //Fake Bloom
 @shopping-cart-bloom-primary: #45d06b;
@@ -141,6 +146,8 @@
 @h3-color-bloom-primary: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
 
 @h4-color-bloom-primary: 0 0 6px @shopping-cart-bloom-primary, 0 0 10px @shopping-cart-bloom-secondary;
+
+@h5-color-bloom-primary: 00 0 6px @shopping-cart-bloom-primary, 0 0 10px @shopping-cart-bloom-secondary;
 
 
 
@@ -155,7 +162,6 @@
 
 // Accent Colors
 @blue: #7AA2F7; // Vibrant blue
-@cyan: #2AC3DE; // Cyan
 @purple-light: #9D7CD8; // Light purple
 @purple-lavender: #BB9AF7; // Lavender
 @red: #F7768E; // Bright red
@@ -181,11 +187,6 @@
 @blue-light: #425fa6;
 @blue-bright: #7399eb;
 @blue-soft: #79a4f4;
-
-// Cyan Tones
-@cyan-dark: #7ec9fc;
-@cyan-medium: #83d1fe;
-@cyan-light: #b1f3fa;
 
 // Purple Tones
 @purple-light: #b293ed;

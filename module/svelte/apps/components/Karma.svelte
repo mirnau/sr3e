@@ -1,9 +1,10 @@
 <script>
-    import AttributeCard from "./AttributeCard.svelte";
+    import AttributeCard from "./AttributeCardKarmaState.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import { shoppingState } from "../../../svelteStore.js";
     import CardToolbar from "./CardToolbar.svelte";
+    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let karma = $state(actor.system.karma);
@@ -12,14 +13,17 @@
     let survivor = $derived(karma.miraculousSurvival);
 
     $effect(() => {
-        const cleanup = setupMasonry({
+        const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
+        const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
         });
-        return cleanup;
+        return result.cleanup;
     });
 </script>
 
@@ -30,6 +34,7 @@
     <div class="attribute-gutter-sizer"></div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.goodKarma)}</h4>
         <h1 class="stat-value">
             {karma.goodKarma}
@@ -37,6 +42,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
         <h1 class="stat-value">
             {karma.karmaPool}
@@ -44,6 +50,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
         <h1 class="stat-value">
             {karma.lifetimeKarma}
@@ -51,6 +58,7 @@
     </div>
 
     <div class="stat-card">
+        <div class="stat-card-background"></div>
         <h4 class="no-margin">{localize(config.attributes.essence)}</h4>
         <h1 class="stat-value">
             {essence}
@@ -59,6 +67,7 @@
 
     {#if !survivor}
         <div class="stat-card">
+            <div class="stat-card-background"></div>
             <h4 class="no-margin">
                 {localize(config.karma.miraculousSurvival)}
             </h4>

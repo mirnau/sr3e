@@ -1,27 +1,30 @@
 <script>
-    import AttributeCard from "./AttributeCard.svelte";
+    import AttributeCard from "./AttributeCardKarmaState.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import { shoppingState } from "../../../svelteStore.js";
     import CardToolbar from "./CardToolbar.svelte";
+    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let dicePools = $state(actor.system.dicePools);
-    console.log("Dice Pools", dicePools);
     let localization = config.dicepools;
    
     let gridContainer;
     const isShoppingState = false;
 
     $effect(() => {
-        const cleanup = setupMasonry({
+                const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
+        const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
         });
-        return cleanup;
+        return result.cleanup;
     });
 </script>
 
@@ -31,6 +34,6 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(dicePools) as [key, stat]}
-        <AttributeCard {stat} {localization} {key} {isShoppingState} />
+        <AttributeCard {actor} {stat} {localization} {key} {isShoppingState} />
     {/each}
 </div>

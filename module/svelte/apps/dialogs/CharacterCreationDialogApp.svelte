@@ -9,8 +9,10 @@
     import ActorDataService from "../../../foundry/services/ActorDataService.js";
     import ItemDataService from "../../../foundry/services/ItemDataService.js";
     import CharacterGeneratorService from "../../../foundry/services/CharacterGeneratorService.js";
+    import { flags } from "../../../foundry/services/commonConsts.js";
 
     let { actor, config, onSubmit, onCancel } = $props();
+    let layoutMode = $state("double");
     let system = $state(actor.system);
     let characterName = $state(actor.name);
     let characterAge = $state(25);
@@ -22,41 +24,71 @@
     let selectedSkill = $state("");
     let selectedResource = $state("");
     let chooseAnOption = localize(config.sheet.chooseanoption);
+    let metahumanItem = $state(null);
+    let metahumans = $state([]);
+    let magics = $state([]);
 
-    let metahumans = ItemDataService.getAllItemsOfType("metahuman");
-
-    if (metahumans.length === 0) {
-        const humanItem = ItemDataService.getDefaultHumanItem();
-        Item.create(humanItem);
+    onMount(async () => {
         metahumans = ItemDataService.getAllItemsOfType("metahuman");
-    }
 
-    let magics = ItemDataService.getAllItemsOfType("magic");
+        if (metahumans.length === 0) {
+            const humanItem = ItemDataService.getDefaultHumanItem();
+            await Item.create(humanItem);
+            metahumans = ItemDataService.getAllItemsOfType("metahuman");
+        }
 
-    if (magics.length === 0) {
-        const magicItem = ItemDataService.getDefaultMagic();
-        Item.create(magicItem);
-        magics = getAllItemsOfType("magic");
-    }
+        magics = ItemDataService.getAllItemsOfType("magic");
 
-    const metahumanDropdownOptions =
-        ItemDataService.getAllMetaHumans(metahumans);
-    const magicsDropdwonOptions = ItemDataService.getAllMagics(magics);
+        if (magics.length === 0) {
+            const magicItem = ItemDataService.getDefaultMagic();
+            await Item.create(magicItem);
+            magics = ItemDataService.getAllItemsOfType("magic");
+        }
+
+        metahumanItem =
+            metahumans.find((m) => m.name === "Human") || metahumans[0];
+        console.log(
+            "Available metahumans:",
+            metahumans.map((m) => m.name),
+        );
+        console.log("Selected default metahuman:", metahumanItem?.name);
+    });
+
+    const metahumanDropdownOptions = $derived(
+        ItemDataService.getAllMetaHumans(metahumans),
+    );
+    const magicsDropdownOptions = $derived(
+        ItemDataService.getAllMagics(magics),
+    );
     const priorities = ActorDataService.getCharacterCreationStats();
     const attributPointDropdownOptions = priorities.attributes;
-    const skillPointDropdwonOptions = priorities.skills;
+    const skillPointDropdownOptions = priorities.skills;
     const resourcesDropdownOptions = priorities.resources;
 
     let priority = CharacterGeneratorService.generatePriorityCombination(
+        // svelte-ignore state_referenced_locally
         metahumans[0],
+        // svelte-ignore state_referenced_locally
         magics[0],
     );
 
     console.log("CHARACTER", actor);
-    let metahumanItem = $state(ItemDataService.getHumanItem());
 
     $effect(() => {
-        metahumanItem ??= ItemDataService.getHumanItem();
+        if (selectedMetahuman) {
+            const foundItem = metahumans.find(
+                (i) => i.id === selectedMetahuman,
+            );
+            if (foundItem) {
+                metahumanItem = foundItem;
+            }
+        } else {
+            const fallback =
+                metahumans.find((m) => m.name === "Human") || metahumans[0];
+            if (fallback) {
+                metahumanItem = fallback;
+            }
+        }
     });
 
     $effect(() => {
@@ -76,8 +108,8 @@
             selectedResource,
     );
 
-    let ageMin = 0; // Note: for his calculation
-    let ageMax = $derived(metahumanItem.system.agerange.max);
+    let ageMin = 0;
+    let ageMax = $derived(metahumanItem?.system?.agerange?.max ?? 100);
 
     let lifespan = $derived(ageMax - ageMin);
     let phaseTemplate = ActorDataService.getPhaseTemplate();
@@ -88,7 +120,7 @@
             const to = ageMin + p.to * lifespan;
             const midpoint = (from + to) / 2;
             return {
-                div: p.div,
+                text: p.text,
                 from,
                 to,
                 midpoint,
@@ -99,7 +131,7 @@
 
     let currentPhase = $derived(
         agePhases.find((p) => characterAge >= p.from && characterAge <= p.to)
-            ?.div ?? "",
+            ?.text ?? "",
     );
 
     let usedPriorities = $state([]);
@@ -110,7 +142,7 @@
             (o) => o.foundryitemid === selectedMetahuman,
         );
         if (m) arr.push(m.priority);
-        const g = magicsDropdwonOptions.find(
+        const g = magicsDropdownOptions.find(
             (o) => o.foundryitemid === selectedMagic,
         );
         if (g) arr.push(g.priority);
@@ -123,16 +155,81 @@
     async function handleSubmit(event) {
         event.preventDefault();
 
+        console.log("Handle submit was entered");
+
+        const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
+        const worldMetahuman = game.items.get(metahuman.id);
+
+        const selectedAttributeObj = attributPointDropdownOptions.find(
+            (attr) => attr.priority === selectedAttribute,
+        );
+        const selectedSkillObj = skillPointDropdownOptions.find(
+            (skill) => skill.priority === selectedSkill,
+        );
+
+        let initBody =
+            metahuman.system.modifiers.body < 0
+                ? -metahuman.system.modifiers.body + 1
+                : 1;
+        let initStrength =
+            metahuman.system.modifiers.strength < 0
+                ? -metahuman.system.modifiers.strength + 1
+                : 1;
+        let initQuickness =
+            metahuman.system.modifiers.quickness < 0
+                ? -metahuman.system.modifiers.quickness + 1
+                : 1;
+        let initIntelligence =
+            metahuman.system.modifiers.intelligence < 0
+                ? -metahuman.system.modifiers.intelligence + 1
+                : 1;
+        let initWillpower =
+            metahuman.system.modifiers.willpower < 0
+                ? -metahuman.system.modifiers.willpower + 1
+                : 1;
+        let initCharisma =
+            metahuman.system.modifiers.charisma < 0
+                ? -metahuman.system.modifiers.charisma + 1
+                : 1;
+
+        let initTotal =
+            initBody +
+            initStrength +
+            initQuickness +
+            initIntelligence +
+            initWillpower +
+            initCharisma;
+
+        if (initTotal > selectedAttributeObj.points)
+            throw new Error("The metahuman has excessive negative modifiers");
+
+        let remainingPoints = selectedAttributeObj.points - initTotal;
+
         await actor.update({
             "system.profile.age": characterAge,
             "system.profile.height": characterHeight,
             "system.profile.weight": characterWeight,
-            "system.creation.attributePoints": selectedAttribute.points,
-            "system.creation.activePoints": selectedSkill.points,
+            "system.creation.attributePoints": remainingPoints,
+            "system.creation.activePoints": selectedSkillObj.points,
+            "system.attributes.body.value": initBody,
+            "system.attributes.quickness.value": initQuickness,
+            "system.attributes.strength.value": initStrength,
+            "system.attributes.charisma.value": initCharisma,
+            "system.attributes.intelligence.value": initIntelligence,
+            "system.attributes.willpower.value": initWillpower,
+            "system.attributes.body.meta": metahuman.system.modifiers.body,
+            "system.attributes.quickness.meta":
+                metahuman.system.modifiers.quickness,
+            "system.attributes.strength.meta":
+                metahuman.system.modifiers.strength,
+            "system.attributes.charisma.meta":
+                metahuman.system.modifiers.charisma,
+            "system.attributes.intelligence.meta":
+                metahuman.system.modifiers.intelligence,
+            "system.attributes.willpower.meta":
+                metahuman.system.modifiers.willpower,
         });
 
-        const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
-        const worldMetahuman = game.items.get(metahuman.id);
         await actor.createEmbeddedDocuments("Item", [
             worldMetahuman.toObject(),
         ]);
@@ -143,18 +240,15 @@
             await actor.createEmbeddedDocuments("Item", [
                 worldMagic.toObject(),
             ]);
+
+            actor.setFlag(flags.sr3e, flags.actor.hasAwakened, true);
+
+            await actor.update({ "system.attributes.magic.value": 6 });
         }
 
-        console.log("Character created:", {
-            name: characterName,
-            metahuman: metahuman.name,
-            magic: magic?.name,
-            age: characterAge,
-            height: characterHeight,
-            weight: characterWeight,
-        });
-
         onSubmit?.(true);
+
+        console.log("Handle submit was exited");
     }
 
     function handleRandomize() {
@@ -162,12 +256,12 @@
         do {
             combo = CharacterGeneratorService.generatePriorityCombination({
                 metahumanOptions: metahumanDropdownOptions,
-                magicOptions: magicsDropdwonOptions,
+                magicOptions: magicsDropdownOptions,
             });
             metaOpts = metahumanDropdownOptions.filter(
                 (i) => i.priority === combo.metahuman,
             );
-            magicOpts = magicsDropdwonOptions.filter(
+            magicOpts = magicsDropdownOptions.filter(
                 (i) => i.priority === combo.magic,
             );
         } while (!metaOpts.length || !magicOpts.length);
@@ -178,7 +272,7 @@
             magicOpts[getRandomIntinRange(0, magicOpts.length - 1)]
                 .foundryitemid;
 
-        metahumanItem = game.items.get(selectedMetahuman);
+        metahumanItem = metahumans.find((i) => i.id === selectedMetahuman);
 
         const ageSrc =
             metahumanItem.system.agerange ?? metahumanItem.system.lifespan;
@@ -199,15 +293,6 @@
         selectedResource = combo.resources;
     }
 
-    function onMetahumanValueChanged(e) {
-        const id = e.target.value;
-        if (!id) {
-            metahumanItem = ItemDataService.getHumanItem();
-            return;
-        }
-        metahumanItem = game.items.get(id);
-    }
-
     function handleClear() {
         selectedMetahuman = "";
         selectedMagic = "";
@@ -219,221 +304,222 @@
         characterHeight = 175;
         characterWeight = 75;
 
-        metahumanItem = ItemDataService.getHumanItem();
+        metahumanItem =
+            metahumans.find((m) => m.name === "Human") || metahumans[0];
     }
-
 </script>
 
 <form onsubmit={handleSubmit}>
-    <div class="sr3e-general-grid">
-        <!-- Header -->
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="image-mask">
-                        <img
-                            src={metahumanItem.img}
-                            role="presentation"
-                            data-edit="img"
-                            title={metahumanItem.name}
-                            alt={metahumanItem.name}
+    <div class="sr3e-waterfall-wrapper">
+        <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+            <!-- Header -->
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div class="image-mask">
+                            <img
+                                src={metahumanItem?.img ?? ""}
+                                role="presentation"
+                                data-edit="img"
+                                title={metahumanItem?.name ?? ""}
+                                alt={metahumanItem?.name ?? ""}
+                            />
+                        </div>
+                        <input
+                            id="character-name"
+                            type="text"
+                            bind:value={characterName}
+                            placeholder="Enter character name"
                         />
                     </div>
-                    <input
-                        id="character-name"
-                        type="text"
-                        bind:value={characterName}
-                        placeholder="Enter character name"
-                    />
                 </div>
             </div>
-        </div>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div for="age-slider">
-                        {localize(config.traits.age)}: {characterAge}
-                        {#if currentPhase}
-                            ({currentPhase}){/if}
-                    </div>
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div for="age-slider">
+                            {localize(config.traits.age)}: {characterAge} ({currentPhase})
+                        </div>
 
-                    <input
-                        id="age-slider"
-                        type="range"
-                        min={metahumanItem.system.agerange.min ?? 0}
-                        max={metahumanItem.system.agerange.max ?? 100}
-                        step="1"
-                        bind:value={characterAge}
-                    />
+                        <input
+                            id="age-slider"
+                            type="range"
+                            min={metahumanItem?.system?.agerange?.min ?? 0}
+                            max={metahumanItem?.system?.agerange?.max ?? 100}
+                            step="1"
+                            bind:value={characterAge}
+                        />
 
-                    <div for="height-slider">
-                        {localize(config.traits.height)}: {characterHeight}
+                        <div for="height-slider">
+                            {localize(config.traits.height)}: {characterHeight}
+                        </div>
+                        <input
+                            id="height-slider"
+                            type="range"
+                            min={metahumanItem?.system?.physical?.height?.min ??
+                                0}
+                            max={metahumanItem?.system?.physical?.height?.max ??
+                                200}
+                            step="1"
+                            bind:value={characterHeight}
+                        />
+                        <div for="weight-slider">
+                            {localize(config.traits.weight)}: {characterWeight}
+                        </div>
+                        <input
+                            id="weight-slider"
+                            type="range"
+                            min={metahumanItem?.system?.physical?.weight?.min ??
+                                0}
+                            max={metahumanItem?.system?.physical?.weight?.max ??
+                                200}
+                            step="1"
+                            bind:value={characterWeight}
+                        />
                     </div>
-                    <input
-                        id="height-slider"
-                        type="range"
-                        min={metahumanItem.system.physical.height.min ?? 0}
-                        max={metahumanItem.system.physical.height.max ?? 100}
-                        step="1"
-                        bind:value={characterHeight}
-                    />
-                    <div for="weight-slider">
-                        {localize(config.traits.weight)}: {characterWeight}
-                    </div>
-                    <input
-                        id="weight-slider"
-                        type="range"
-                        min={metahumanItem.system.physical.weight.min ?? 0}
-                        max={metahumanItem.system.physical.weight.max ?? 100}
-                        step="1"
-                        bind:value={characterWeight}
-                    />
                 </div>
             </div>
-        </div>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.traits.metahumanity)}</h3>
-                            <select
-                                id="metahuman-select"
-                                bind:value={selectedMetahuman}
-                                onchange={onMetahumanValueChanged}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.traits.metahumanity)}</h3>
+                                <select
+                                    id="metahuman-select"
+                                    bind:value={selectedMetahuman}
                                 >
-                                {#each metahumanDropdownOptions as metahuman}
-                                    <option
-                                        value={metahuman.foundryitemid}
-                                        disabled={usedPriorities.includes(
-                                            metahuman.priority,
-                                        ) &&
-                                            metahuman.foundryitemid !==
-                                                selectedMetahuman}
-                                        >{metahuman.priority}: {metahuman.name}</option
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
                                     >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.magic.tradition)}</h3>
-                            <select
-                                id="magic-select"
-                                bind:value={selectedMagic}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
+                                    {#each metahumanDropdownOptions as metahuman}
+                                        <option value={metahuman.foundryitemid}>
+                                            {metahuman.priority}: {metahuman.name}
+                                        </option>
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.magic.tradition)}</h3>
+                                <select
+                                    id="magic-select"
+                                    bind:value={selectedMagic}
                                 >
-                                {#each magicsDropdwonOptions as magic}
-                                    <option
-                                        value={magic.foundryitemid}
-                                        disabled={usedPriorities.includes(
-                                            magic.priority,
-                                        ) &&
-                                            magic.foundryitemid !==
-                                                selectedMagic}
-                                        >{magic.priority}: {magic.name}</option
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
                                     >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.attributepoints)}</h3>
-                            <select
-                                id="attributes-select"
-                                bind:value={selectedAttribute}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
+                                    {#each magicsDropdownOptions as magic}
+                                        <option
+                                            value={magic.foundryitemid}
+                                            disabled={usedPriorities.includes(
+                                                magic.priority,
+                                            ) &&
+                                                magic.foundryitemid !==
+                                                    selectedMagic}
+                                            >{magic.priority}: {magic.name}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>
+                                    {localize(config.sheet.attributepoints)}
+                                </h3>
+                                <select
+                                    id="attributes-select"
+                                    bind:value={selectedAttribute}
                                 >
-                                {#each attributPointDropdownOptions as attribute}
-                                    <option
-                                        value={attribute.priority}
-                                        disabled={usedPriorities.includes(
-                                            attribute.priority,
-                                        ) &&
-                                            attribute.priority !==
-                                                selectedAttribute}
-                                        >{attribute.priority}: {attribute.points}</option
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
                                     >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.skillpoints)}</h3>
-                            <select
-                                id="skills-select"
-                                bind:value={selectedSkill}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
+                                    {#each attributPointDropdownOptions as attribute}
+                                        <option
+                                            value={attribute.priority}
+                                            disabled={usedPriorities.includes(
+                                                attribute.priority,
+                                            ) &&
+                                                attribute.priority !==
+                                                    selectedAttribute}
+                                            >{attribute.priority}: {attribute.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.sheet.skillpoints)}</h3>
+                                <select
+                                    id="skills-select"
+                                    bind:value={selectedSkill}
                                 >
-                                {#each skillPointDropdwonOptions as skill}
-                                    <option
-                                        value={skill.priority}
-                                        disabled={usedPriorities.includes(
-                                            skill.priority,
-                                        ) && skill.priority !== selectedSkill}
-                                        >{skill.priority}: {skill.points}</option
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
                                     >
-                                {/each}
-                            </select>
-                        </div>
-                        <div class="creation-dropdwn">
-                            <h3>{localize(config.sheet.resources)}</h3>
-                            <select
-                                id="resource-select"
-                                bind:value={selectedResource}
-                            >
-                                <option value="" disabled selected hidden
-                                    >{chooseAnOption}</option
+                                    {#each skillPointDropdownOptions as skill}
+                                        <option
+                                            value={skill.priority}
+                                            disabled={usedPriorities.includes(
+                                                skill.priority,
+                                            ) &&
+                                                skill.priority !==
+                                                    selectedSkill}
+                                            >{skill.priority}: {skill.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
+                            <div class="creation-dropdwn">
+                                <h3>{localize(config.sheet.resources)}</h3>
+                                <select
+                                    id="resource-select"
+                                    bind:value={selectedResource}
                                 >
-                                {#each resourcesDropdownOptions as resource}
-                                    <option
-                                        value={resource.priority}
-                                        disabled={usedPriorities.includes(
-                                            resource.priority,
-                                        ) &&
-                                            resource.priority !==
-                                                selectedResource}
-                                        >{resource.priority}: {resource.points}</option
+                                    <option value="" disabled selected hidden
+                                        >{chooseAnOption}</option
                                     >
-                                {/each}
-                            </select>
+                                    {#each resourcesDropdownOptions as resource}
+                                        <option
+                                            value={resource.priority}
+                                            disabled={usedPriorities.includes(
+                                                resource.priority,
+                                            ) &&
+                                                resource.priority !==
+                                                    selectedResource}
+                                            >{resource.priority}: {resource.points}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="character-creation-buttonpanel">
-                        <!-- Randomize -->
-                        <button type="button" onclick={handleRandomize}>
-                            <i class="fas fa-dice"></i>
-                            {localize(config.sheet.randomize)}
-                        </button>
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <div class="character-creation-buttonpanel">
+                            <!-- Randomize -->
+                            <button type="button" onclick={handleRandomize}>
+                                <i class="fas fa-dice"></i>
+                                {localize(config.sheet.randomize)}
+                            </button>
 
-                        <!-- Clear -->
-                        <button type="button" onclick={handleClear}>
-                            <i class="fas fa-eraser"></i>
-                            {localize(config.sheet.clear)}
-                        </button>
+                            <!-- Clear -->
+                            <button type="button" onclick={handleClear}>
+                                <i class="fas fa-eraser"></i>
+                                {localize(config.sheet.clear)}
+                            </button>
 
-                        <!-- Create Character -->
-                        <button type="submit" disabled={!canCreate}>
-                            <i class="fas fa-check"></i>
-                            {localize(config.sheet.createCharacter)}
-                        </button>
+                            <!-- Create Character -->
+                            <button type="submit" disabled={!canCreate}>
+                                <i class="fas fa-check"></i>
+                                {localize(config.sheet.createCharacter)}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

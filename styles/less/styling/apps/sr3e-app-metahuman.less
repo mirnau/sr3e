@@ -1,85 +1,95 @@
-.sr3e-general-grid{
-    columns: 18rem;
-    column-gap: .5rem;
-    width: fit-content;
-    max-width: calc(18rem * 2 + 0.5rem);
+.sr3e-waterfall>* {
+  display: inline-block; 
+  break-inside: avoid; 
+  width: 100%; 
+  vertical-align: top;
+}
 
-    >* {
-        break-inside: avoid;
+
+/* base grid */
+.sr3e-waterfall {
+  column-gap: var(--component-grid-gap);
+}
+
+//INFO: one column
+.sr3e-waterfall--single {
+  column-count: 1;
+  column-width: auto;
+  width: var(--component-width);
+  column-gap: 0;
+}
+
+//INFO: two columns
+.sr3e-waterfall--double {
+  column-count: 2;
+  column-width: var(--component-width);
+  column-gap: var(--component-grid-gap);
+  width: max-content; 
+  max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
+}
+
+
+.sr3e-waterfall .item-sheet-component {
+  display: inline-block;
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+  width: 100%;
+
+  .sr3e-inner-background-container {
+    .fake-shadow {
+      .fake-shadow(@default-fake-shadow-color);
+      .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
     }
 
-    .item-sheet-component {
-        display: inline-block;
-        width: 100%;
-        margin-bottom: 0.5rem;
-        break-inside: avoid;
+    .sr3e-inner-background {
+      display: grid;
+      background-color: @default-fake-shadow-color;
 
-        .sr3e-inner-background-container {
-            .fake-shadow {
-                .fake-shadow(@default-fake-shadow-color);
-                .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
-            }
+      .stat-card {
 
-            .sr3e-inner-background {
-                display: grid;
-                background-color: @default-fake-shadow-color;
+        .select-container {
+          width: 100%;
+          display: block;
+          padding: 0.25rem;
 
-                &::before {
-                    content: '';
-                    position: absolute;
-                    inset: 1px;
-                    z-index: -1;
-                    background: @default-sr3e-inner-background-color;
-                    box-shadow: inset 0 0 30px #1d282c;
-                    pointer-events: none;
-                    .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
-                }
-
-                .stat-card {
-
-                    .select-container {
-                        width: 100%;
-                        display: block;
-                        padding: 0.25rem;
-
-                        select {
-                            .clipped-corners(0.25rem, 0.25rem, .75rem, 0.25rem);
-                        }
-                    }
-
-                    .input-base() {
-                        width: 100%;
-                        box-sizing: border-box;
-                        padding: 0.25rem;
-                        font: inherit;
-                        margin: 0;
-                        color: @h1-color;
-                        font-size: 1.5rem;
-                        text-indent: 0;
-                    }
-
-                    input[type="text"],
-                    input[type="number"] {
-                        .input-base();
-                        .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
-                    }
-
-                    input[type="checkbox"] {
-                        .input-base();
-                        .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
-                    }
-
-
-                    h4 {
-                        margin: 0;
-                    }
-
-                    padding: 0.25rem;
-                    text-align: center;
-                    text-indent: 0; // 'none' is invalid for text-indent
-                    background-color: @metahuman-stat-card-color;
-                }
-            }
+          select {
+            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+          }
         }
+
+        input[type="text"],
+        input[type="number"] {
+          text-indent: none;
+          margin-bottom: 0;
+          font-size: 1.5rem;
+          .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+        }
+
+        input[type="checkbox"] {
+          font-size: 1.5rem;
+          text-indent: none;
+          margin-bottom: 0;
+          .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+        }
+
+        .title-container {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+
+          h4 {
+            width: 80%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin: 0;
+          }
+        }
+
+        padding: 0.25rem;
+        text-align: center;
+        background-color: @metahuman-stat-card-color;
+      }
     }
+  }
 }

@@ -1,35 +1,36 @@
 <script>
-
-    import AttributeCard from "./AttributeCard.svelte";
+    import AttributeCardCreationState from "./AttributeCardCreationState.svelte";
+    import AttributeCardKarmaState from "./AttributeCardKarmaState.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
-    import { shoppingState } from "../../../svelteStore.js";
     import CardToolbar from "./CardToolbar.svelte";
+    import { getActorStore, stores } from "../../stores/actorStores.js";
+    import { flags, masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
 
     let { actor = {}, config = {}, id = {}, span = {} } = $props();
     let attributes = $state(actor.system.attributes);
     let gridContainer;
-    let isShoppingState = $state(false);
     let localization = config.attributes;
 
-    $effect(() => {
-        const unsubscribe = shoppingState.subscribe(
-            (v) => (isShoppingState = v),
-        );
-        return unsubscribe;
-    });
+    let attributeAssignmentLocked = getActorStore(
+        actor.id,
+        stores.attributeAssignmentLocked,
+        actor.getFlag(flags.sr3e, flags.attributeAssignmentLocked),
+    );
 
     $effect(() => {
-        const cleanup = setupMasonry({
+        const rem = parseFloat(
+            getComputedStyle(document.documentElement).fontSize,
+        );
+        const result = setupMasonry({
             container: gridContainer,
             itemSelector: ".stat-card",
             gridSizerSelector: ".attribute-grid-sizer",
             gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: 180,
+            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
         });
-        return cleanup;
+        return result.cleanup;
     });
-
 </script>
 
 <CardToolbar {id} />
@@ -38,6 +39,10 @@
     <div class="attribute-grid-sizer"></div>
     <div class="attribute-gutter-sizer"></div>
     {#each Object.entries(attributes) as [key, stat]}
-        <AttributeCard {stat} {localization} {key} {isShoppingState} />
+        {#if !$attributeAssignmentLocked}
+            <AttributeCardCreationState {actor} {stat} {localization} {key} />
+        {:else}
+            <AttributeCardKarmaState {actor} {stat} {localization} {key} />
+        {/if}
     {/each}
 </div>

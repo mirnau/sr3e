@@ -1,13 +1,13 @@
 <script>
-    import { getActorStore } from "../../stores/actorStoreRegistry";
+    import { getActorStore, stores } from "../../stores/actorStores.js";
 
     let { actor = {} } = $props();
 
     let malfunctioningIndexes = [];
 
-    const actorStore = getActorStore(actor.id, actor.name);
+    const actorName = getActorStore(actor.id, stores.actorName, actor.name);
 
-    let name = $derived($actorStore.name);
+    let name = $derived($actorName);
     let neonHTML = $derived(getNeonHtml(name));
 
     const randomInRange = (min, max) =>

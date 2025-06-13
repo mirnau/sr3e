@@ -10,6 +10,7 @@
   const magicianData = $state(system.magicianData);
   const adeptData = $state(awakened.adeptData);
   const labels = config.magic;
+  let layoutMode = $state("double");
 
   const archetypeOptions = [localize(labels.adept), localize(labels.magician)];
 
@@ -124,81 +125,83 @@
   });
 </script>
 
-<div class="sr3e-general-grid">
-  <!-- Header -->
-  <div class="item-sheet-component">
-    <div class="sr3e-inner-background-container">
-      <div class="fake-shadow"></div>
-      <div class="sr3e-inner-background">
-        <div class="image-mask">
-          <img
-            src={item.img}
-            role="presentation"
-            data-edit="img"
-            title={item.name}
-            alt={item.name}
-            onclick={async () => openFilePicker(item)}
-          />
-        </div>
-        <input
-          class="large"
-          name="name"
-          type="text"
-          bind:value={item.name}
-          onchange={(e) => item.update({ name: e.target.value })}
-        />
-        <StatCard {...archetype} />
-        <StatCard {...priority} />
-      </div>
-    </div>
-  </div>
-
-  <!-- Magician UI -->
-  {#if awakened.archetype === archetype.options[1]}
+<div class="sr3e-waterfall-wrapper">
+  <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+    <!-- Header -->
     <div class="item-sheet-component">
       <div class="sr3e-inner-background-container">
         <div class="fake-shadow"></div>
         <div class="sr3e-inner-background">
-          <StatCard {...magicianType} />
+          <div class="image-mask">
+            <img
+              src={item.img}
+              role="presentation"
+              data-edit="img"
+              title={item.name}
+              alt={item.name}
+              onclick={async () => openFilePicker(item)}
+            />
+          </div>
+          <input
+            class="large"
+            name="name"
+            type="text"
+            bind:value={item.name}
+            onchange={(e) => item.update({ name: e.target.value })}
+          />
+          <StatCard {...archetype} />
+          <StatCard {...priority} />
         </div>
       </div>
     </div>
 
-    {#if isAspected}
+    <!-- Magician UI -->
+    {#if awakened.archetype === archetype.options[1]}
       <div class="item-sheet-component">
         <div class="sr3e-inner-background-container">
           <div class="fake-shadow"></div>
           <div class="sr3e-inner-background">
-            <StatCard {...aspect} />
+            <StatCard {...magicianType} />
           </div>
         </div>
       </div>
+
+      {#if isAspected}
+        <div class="item-sheet-component">
+          <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+              <StatCard {...aspect} />
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      {#each magicianFields as entry}
+        <div class="item-sheet-component">
+          <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+              <StatCard {...entry} />
+            </div>
+          </div>
+        </div>
+      {/each}
+
+      <!-- Adept UI -->
+    {:else if awakened.archetype === archetype.options[0]}
+      {#each adeptFields as entry}
+        <div class="item-sheet-component">
+          <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+              <StatCard {...entry} />
+            </div>
+          </div>
+        </div>
+      {/each}
     {/if}
 
-    {#each magicianFields as entry}
-      <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-          <div class="fake-shadow"></div>
-          <div class="sr3e-inner-background">
-            <StatCard {...entry} />
-          </div>
-        </div>
-      </div>
-    {/each}
-
-    <!-- Adept UI -->
-  {:else if awakened.archetype === archetype.options[0]}
-    {#each adeptFields as entry}
-      <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-          <div class="fake-shadow"></div>
-          <div class="sr3e-inner-background">
-            <StatCard {...entry} />
-          </div>
-        </div>
-      </div>
-    {/each}
-  {/if}
-
-  <JournalViewer {item} {config} />
+    <JournalViewer {item} {config} />
+  </div>
 </div>

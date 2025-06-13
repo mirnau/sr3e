@@ -30,7 +30,7 @@
             {
                 async: true,
                 secrets: false,
-                documents: true,
+                documents: false,
             },
         );
     });

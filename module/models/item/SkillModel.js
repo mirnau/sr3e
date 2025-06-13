@@ -6,7 +6,7 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
 
             skillType: new foundry.data.fields.StringField({
                 required: true,
-                initial: ""
+                initial: "active"
             }),
 
             activeSkill: new foundry.data.fields.SchemaField({
@@ -19,8 +19,14 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                     required: true,
                     initial: ""
                 }),
-
-                ...SkillSpecialization.defineSchema()
+                specializations: new foundry.data.fields.ArrayField(
+                    new foundry.data.fields.SchemaField({
+                        ...SkillSpecialization.defineSchema()
+                    }),
+                    {
+                        initial: []
+                    }
+                )
             }),
 
             knowledgeSkill: new foundry.data.fields.SchemaField({
@@ -34,7 +40,14 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                     initial: "intelligence"
                 }),
 
-                ...SkillSpecialization.defineSchema()
+                specializations: new foundry.data.fields.ArrayField(
+                    new foundry.data.fields.SchemaField({
+                        ...SkillSpecialization.defineSchema()
+                    }),
+                    {
+                        initial: []
+                    }
+                )
 
             }),
 
@@ -45,8 +58,19 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                         initial: 0,
                         integer: true
                     }),
+                    linkedAttribute: new foundry.data.fields.StringField({
+                        required: true,
+                        initial: "intelligence"
+                    }),
 
-                    ...SkillSpecialization.defineSchema()
+                    specializations: new foundry.data.fields.ArrayField(
+                        new foundry.data.fields.SchemaField({
+                            ...SkillSpecialization.defineSchema()
+                        }),
+                        {
+                            initial: []
+                        }
+                    )
                 }),
                 read: new foundry.data.fields.SchemaField({
                     value: new foundry.data.fields.NumberField({
@@ -55,7 +79,14 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                         integer: true
                     }),
 
-                    ...SkillSpecialization.defineSchema()
+                    specializations: new foundry.data.fields.ArrayField(
+                        new foundry.data.fields.SchemaField({
+                            ...SkillSpecialization.defineSchema()
+                        }),
+                        {
+                            initial: []
+                        }
+                    )
                 }),
                 write: new foundry.data.fields.SchemaField({
                     value: new foundry.data.fields.NumberField({
@@ -64,9 +95,21 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                         integer: true
                     }),
 
-                    ...SkillSpecialization.defineSchema()
+                    specializations: new foundry.data.fields.ArrayField(
+                        new foundry.data.fields.SchemaField({
+                            ...SkillSpecialization.defineSchema()
+                        }),
+                        {
+                            initial: []
+                        }
+                    )
                 })
             }),
+
+            journalId: new foundry.data.fields.StringField({
+                required: true,
+                initial: ""
+            })
         };
     }
 }

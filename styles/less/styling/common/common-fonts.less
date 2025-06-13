@@ -14,20 +14,31 @@
     font-display: swap;
 }
 
+:root {
+    font-family: 'VT323', monospace;
+}
+
 .VTT323-header() {
-    text-transform: uppercase;
+    .VTT323();
+    border: none;
+
+    &.uppercase {
+        text-transform: uppercase;
+    }
+
+    &.no-margin {
+        margin: 0;
+    }
 }
 
 .VTT323() {
     font-family: 'VT323', monospace;
-    font-size: 14px;
     margin: 0.33rem 0;
     line-height: @line-height;
     color: @h1-color;
 }
 
 .system-sr3e {
-    .VTT323();
 
     form.p.hint,
     p.hint {
@@ -40,10 +51,8 @@
 
     h1 {
         .VTT323-header();
-        .VTT323();
         color: @h1-color;
         text-shadow: @h1-color-bloom-primary;
-        border: none;
         margin-bottom: 0.7rem;
         font-size: 1.4rem;
     }
@@ -51,45 +60,35 @@
     summary,
     h2 {
         .VTT323-header();
-        .VTT323();
         color: @h2-color;
-        border: none;
         font-size: 1.2rem;
     }
 
     h3 {
         .VTT323-header();
-        .VTT323();
         color: @h3-color;
-        border: none;
         text-shadow: @h3-color-bloom-primary;
         font-size: 1.1rem;
-
-        &.no-margin {
-            margin: 0;
-        }
     }
 
     label,
     span,
     h4 {
         .VTT323-header();
-        .VTT323();
         color: @h4-color;
-        border: none;
         text-shadow: @h4-color-bloom-primary;
         font-size: 1.0rem;
     }
 
     h5 {
         .VTT323-header();
-        .VTT323();
+        font-size: 1.1rem;
         color: @h5-color;
+        text-shadow: @h5-color-bloom-primary;
     }
 
     h6 {
         .VTT323-header();
-        .VTT323();
         color: @h6-color;
     }
 
@@ -105,6 +104,7 @@
         }
     }
 
+    a,
     p,
     span,
     select,
@@ -115,4 +115,30 @@
             color: @text-color;
         }
     }
+
+    button {
+        .VTT323();
+
+        /* Restore FA icon font for any button that is or becomes an icon */
+        &.fa,
+        &.fas,
+        &.far,
+        &.fal,
+        &.fad,
+        &.fab {
+            font: var(--fa-font-solid) !important;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Also fix nested icons and pseudo-elements in other buttons */
+        i,
+        i::before,
+        i::after,
+        &::before,
+        &::after {
+            font: var(--fa-font-solid) !important;
+            -webkit-font-smoothing: antialiased;
+        }
+    }
+
 }

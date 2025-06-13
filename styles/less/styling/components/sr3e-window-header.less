@@ -1,10 +1,22 @@
 header.window-header {
-    text-shadow: #006eff 0 0 12px;
-    border: none !important;
-    .clipped-corners(0.5rem, 0.5rem, 0rem, 0rem);
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
 
+  h1.window-title {
+    max-width: 10rem;
+    min-width: 0;
+    flex: 0 1 auto;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: auto;
+  }
 }
 
+
+.sr3e.sheet.item .window-header,
 .sr3e.sheet.charactercreation .window-header,
 .sr3e-item-header,
 .sr3e-actor-header {

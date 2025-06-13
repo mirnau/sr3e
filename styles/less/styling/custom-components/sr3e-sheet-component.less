@@ -1,6 +1,6 @@
 .sheet-component {
     box-sizing: border-box;
-    min-width: @component-unit;
+    min-width: var(--component-width);
 
     display: flex;
     flex-direction: column;
@@ -15,4 +15,7 @@
         z-index: 1;
         .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
     }
+
+
+
 }

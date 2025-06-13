@@ -20,6 +20,7 @@ import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCr
 import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
 import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 import SR3EActor from "./module/foundry/documents/SR3EActor.js";
+import { attachLightEffect } from "./module/foundry/hooks/renderApplicationV2/attachLightEffect.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -65,6 +66,7 @@ function configureProject() {
       }
     ]
   };
+
   CONFIG.Actor.typeLabels = {
     character: localize(CONFIG.sr3e.sheet.playercharacter),
   };
@@ -81,6 +83,17 @@ function configureProject() {
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }
 
+function setupMouseLightSourceEffect(includedThemes) {
+
+  Hooks.on(hooks.renderApplicationV2, (app, html) => {
+    const activeTheme = game.settings.get("sr3e", "theme");
+    console.log("active theme", activeTheme);
+    if (includedThemes.includes(activeTheme)) {
+      attachLightEffect(html, activeTheme);
+    }
+  });
+}
+
 function configureThemes() {
   game.settings.register("sr3e", "theme", {
     name: "Theme",
@@ -88,14 +101,16 @@ function configureThemes() {
     scope: "world",
     config: true,
     type: String,
-    choices: { chummer: "Chummer", steel: "Steel" },
-    default: "chummer"
+    choices: { defaultDark: "Chummer Dark", defaultLight: "Chummer Light" },
+    default: "defaultDark"
   });
   Hooks.on("ready", () => {
     const theme = game.settings.get("sr3e", "theme");
     document.body.classList.remove("theme-chummer", "theme-steel");
     document.body.classList.add(`theme-${theme}`);
   });
+
+  setupMouseLightSourceEffect(["defaultDark", "defaultLight"]);
 }
 
 function wrapContent(root) {
@@ -123,6 +138,39 @@ function wrapContent(root) {
 
   root.appendChild(sheetComponent);
 }
+
+function setFlagsOnCharacterPreCreate(document, data, options, userId) {
+  // Define your flags array
+  const flagsToSet = [
+    { namespace: flags.sr3e, flag: flags.actor.isCharacterCreation, value: true },
+    { namespace: flags.sr3e, flag: flags.actor.hasAwakened, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.burntOut, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.attributeAssignmentLocked, value: false },
+    { namespace: flags.sr3e, flag: flags.actor.persistanceBlobCharacterSheetSize, value: {} },
+    { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
+  ];
+
+  // Build the update object by looping through the array
+  const updateData = {};
+  flagsToSet.forEach(({ namespace, flag, value }) => {
+    updateData[`flags.${namespace}.${flag}`] = value;
+  });
+
+  // Apply all flags at once
+  document.updateSource(updateData);
+}
+
+function debugFlagsOnActor(actor, options, userId) {
+  const actorFlags = actor.flags?.[flags.sr3e];
+  if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
+
+  console.groupCollapsed(`Flags for actor "${actor.name}"`);
+  for (const [key, value] of Object.entries(actorFlags)) {
+    console.log(`→ ${key}:`, value);
+  }
+  console.groupEnd();
+}
+
 
 function registerHooks() {
 
@@ -158,6 +206,9 @@ function registerHooks() {
 
   });
 
+  Hooks.on(hooks.preCreateActor, setFlagsOnCharacterPreCreate);
+  Hooks.on(hooks.createActor, debugFlagsOnActor);
+
   //INFO: Character Creation Hooks
   Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
   Hooks.on(hooks.createActor, displayCreationDialog);
@@ -184,3 +235,5 @@ function registerHooks() {
 }
 
 registerHooks();
+
+

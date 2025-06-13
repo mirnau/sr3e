@@ -13,6 +13,7 @@
     const karmaConfig = config.karma;
     const visionConfig = config.vision;
     const traits = config.traits;
+    let layoutMode = $state("double");
 
     const agerange = $derived([
         {
@@ -277,159 +278,160 @@
         options: ["C", "D", "E"],
     });
 </script>
-
-<div class="sr3e-general-grid">
-    <!-- Name and Priority -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <div class="image-mask">
-                    <img
-                        src={item.img}
-                        data-edit="img"
-                        title={item.name}
-                        role="presentation"
-                        alt={item.name}
-                        onclick={async () => openFilePicker(item)}
+<div class="sr3e-waterfall-wrapper">
+    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+        <!-- Name and Priority -->
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <div class="image-mask">
+                        <img
+                            src={item.img}
+                            data-edit="img"
+                            title={item.name}
+                            role="presentation"
+                            alt={item.name}
+                            onclick={async () => openFilePicker(item)}
+                        />
+                    </div>
+                    <input
+                        class="large"
+                        name="name"
+                        type="text"
+                        bind:value={item.name}
+                        onchange={(e) => item.update({ name: e.target.value })}
                     />
+                    <StatCard {...priorityEntry} />
                 </div>
-                <input
-                    class="large"
-                    name="name"
-                    type="text"
-                    bind:value={item.name}
-                    onchange={(e) => item.update({ name: e.target.value })}
-                />
-                <StatCard {...priorityEntry} />
             </div>
         </div>
-    </div>
 
-    <!-- Age Range -->
-    {#if agerange}
+        <!-- Age Range -->
+        {#if agerange}
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <h3 class="item">{localize(traits.agerange)}</h3>
+                        <div class="stat-grid">
+                            {#each agerange as entry}
+                                <StatCard {...entry} />
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <!-- Height -->
+        {#if height}
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <h3 class="item">{localize(traits.height)}</h3>
+                        <div class="stat-grid">
+                            {#each height as entry}
+                                <StatCard {...entry} />
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <!-- Weight -->
+        {#if weight}
+            <div class="item-sheet-component">
+                <div class="sr3e-inner-background-container">
+                    <div class="fake-shadow"></div>
+                    <div class="sr3e-inner-background">
+                        <h3 class="item">{localize(traits.weight)}</h3>
+                        <div class="stat-grid">
+                            {#each weight as entry}
+                                <StatCard {...entry} />
+                            {/each}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/if}
+
+        <!-- Modifiers -->
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">
                 <div class="fake-shadow"></div>
                 <div class="sr3e-inner-background">
-                    <h3 class="item">{localize(traits.agerange)}</h3>
+                    <h3 class="item">{localize(attributes.modifiers)}</h3>
                     <div class="stat-grid">
-                        {#each agerange as entry}
+                        {#each attributeModifiers as entry}
                             <StatCard {...entry} />
                         {/each}
                     </div>
                 </div>
             </div>
         </div>
-    {/if}
 
-    <!-- Height -->
-    {#if height}
+        <!-- Attribute Limits -->
         <div class="item-sheet-component">
             <div class="sr3e-inner-background-container">
                 <div class="fake-shadow"></div>
                 <div class="sr3e-inner-background">
-                    <h3 class="item">{localize(traits.height)}</h3>
+                    <h3 class="item">{localize(attributes.limits)}</h3>
                     <div class="stat-grid">
-                        {#each height as entry}
+                        {#each attributeLimits as entry}
                             <StatCard {...entry} />
                         {/each}
                     </div>
                 </div>
             </div>
         </div>
-    {/if}
 
-    <!-- Weight -->
-    {#if weight}
+        <!-- Movement -->
         <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
+            <div class="sr3e-inner-background-container slim">
                 <div class="fake-shadow"></div>
                 <div class="sr3e-inner-background">
-                    <h3 class="item">{localize(traits.weight)}</h3>
-                    <div class="stat-grid">
-                        {#each weight as entry}
+                    <h3 class="item">{localize(config.movement.movement)}</h3>
+                    <div class="stat-grid two-column">
+                        {#each movement as entry}
                             <StatCard {...entry} />
                         {/each}
                     </div>
                 </div>
             </div>
         </div>
-    {/if}
 
-    <!-- Modifiers -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(attributes.modifiers)}</h3>
-                <div class="stat-grid">
-                    {#each attributeModifiers as entry}
+        <!-- Karma -->
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container slim">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background slim">
+                    <h3 class="item">{localize(config.karma.karma)}</h3>
+                    <div class="stat-grid one-column">
+                        {#each karma as entry}
+                            <StatCard {...entry} />
+                        {/each}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vision -->
+        <div class="item-sheet-component">
+            <div class="sr3e-inner-background-container">
+                <div class="fake-shadow"></div>
+                <div class="sr3e-inner-background">
+                    <h3 class="item">{localize(config.vision.vision)}</h3>
+                    {#each vision as entry}
                         <StatCard {...entry} />
                     {/each}
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Attribute Limits -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(attributes.limits)}</h3>
-                <div class="stat-grid">
-                    {#each attributeLimits as entry}
-                        <StatCard {...entry} />
-                    {/each}
-                </div>
-            </div>
-        </div>
+        <!-- Journal Viewer -->
+        <JournalViewer {item} {config} />
     </div>
-
-    <!-- Movement -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container slim">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(config.movement.movement)}</h3>
-                <div class="stat-grid two-column">
-                    {#each movement as entry}
-                        <StatCard {...entry} />
-                    {/each}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Karma -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container slim">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background slim">
-                <h3 class="item">{localize(config.karma.karma)}</h3>
-                <div class="stat-grid one-column">
-                    {#each karma as entry}
-                        <StatCard {...entry} />
-                    {/each}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vision -->
-    <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-                <h3 class="item">{localize(config.vision.vision)}</h3>
-                {#each vision as entry}
-                    <StatCard {...entry} />
-                {/each}
-            </div>
-        </div>
-    </div>
-
-    <!-- Journal Viewer -->
-    <JournalViewer {item} {config} />
 </div>

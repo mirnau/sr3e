@@ -103,7 +103,7 @@
     },
     "placeholders": {
       "human": "Human",
-      "fullshaman": "Full Mage Bear Schaman"
+      "fullshaman": "Full Mage Bear Shaman"
     },
     "portability": {
       "portability": "Portability",
@@ -127,14 +127,20 @@
       "quote": "Quote"
     },
     "skill": {
-      "skill": "Skill",
-      "speak": "Speak",
-      "read": "Read",
-      "write": "Write",
       "active": "Active Skill",
+      "addspecialization": "Add Specialization",
       "knowledge": "Knowledge Skill",
       "language": "Language Skill",
-      "linkedAttribute": "Choose a Linked Attribute..."
+      "linkedAttribute": "Choose a Linked Attribute...",
+      "newspecialization": "New Specialization",
+      "onlyonespecializationatcreation": "Only one specialization can be taken at character creation!",
+      "read": "Read",
+      "skill": "Skill",
+      "skillpointsrestored": "Your skillpoints have been restored!",
+      "speak": "Speak",
+      "specializations": "Specializations",
+      "write": "Write"
+
     },
     "traits": {
       "age": "Age",

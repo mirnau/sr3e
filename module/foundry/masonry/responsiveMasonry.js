@@ -6,9 +6,9 @@ export function setupMasonry({
   gridSizerSelector,
   gutterSizerSelector,
   minItemWidth = 220,
-  onLayoutStateChange = () => { },
+  onLayoutStateChange = () => {},
 }) {
-  if (!container) return () => { };
+  if (!container) return () => {};
 
   const form = container.parentElement;
 
@@ -19,19 +19,13 @@ export function setupMasonry({
   };
 
   const applySpanWidths = (columnCount, itemWidth, gutterPx) => {
-    const twoSpan = container.querySelectorAll(".two-span-selectable");
-    const threeSpan = container.querySelectorAll(".three-span-selectable");
+    const items = container.querySelectorAll(itemSelector);
 
-    // Compute true span widths in px
-    const twoSpanWidth = columnCount >= 2 ? itemWidth * 2 + gutterPx : itemWidth;
-    const threeSpanWidth = columnCount >= 3 ? itemWidth * 3 + gutterPx * 2 : itemWidth;
-
-    twoSpan.forEach((el) => {
-      el.style.width = `${twoSpanWidth}px`;
-    });
-
-    threeSpan.forEach((el) => {
-      el.style.width = `${threeSpanWidth}px`;
+    items.forEach((el) => {
+      const spanMatch = el.className.match(/span-(\d)/);
+      const span = spanMatch ? parseInt(spanMatch[1]) : 1;
+      const spanWidth = itemWidth * span + gutterPx * (span - 1);
+      el.style.width = `${spanWidth}px`;
     });
 
     const state = getLayoutState(columnCount);
@@ -47,20 +41,31 @@ export function setupMasonry({
     const gutterPx = gutterEl ? parseFloat(getComputedStyle(gutterEl).width) : 20;
 
     const firstItem = container.querySelector(itemSelector);
-    const minItem = firstItem ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth : minItemWidth;
+    const minItem = firstItem
+      ? parseFloat(getComputedStyle(firstItem).minWidth) || minItemWidth
+      : minItemWidth;
 
     const columnCount = Math.max(Math.floor((parentWidth + gutterPx) / (minItem + gutterPx)), 1);
-    const totalGutter = gutterPx * (columnCount - 1);
-    const itemWidth = Math.floor((parentWidth - totalGutter) / columnCount);
-
-    container.querySelectorAll(itemSelector).forEach((item) => {
-      item.style.width = `${itemWidth}px`;
-    });
+    const oneColPX = Math.floor((parentWidth - gutterPx * (columnCount - 1)) / columnCount);
 
     const sizer = container.querySelector(gridSizerSelector);
-    if (sizer) sizer.style.width = `${itemWidth}px`;
+    const containerPX = oneColPX * columnCount + gutterPx * (columnCount - 1);
 
-    applySpanWidths(columnCount, itemWidth, gutterPx);
+    if (sizer) {
+      const sizerPct = (oneColPX / containerPX) * 100;
+      sizer.style.width = `${sizerPct}%`;
+    }
+
+    container.querySelectorAll(itemSelector).forEach(el => {
+      const m = el.className.match(/span-(\d)/);
+      const span = m ? +m[1] : 1;
+      const spanPX = oneColPX * span + gutterPx * (span - 1);
+      const spanPct = (spanPX / containerPX) * 100;
+      el.style.width = `min(${spanPct}%, 100%)`;
+    });
+
+    const state = columnCount >= 3 ? 'wide' : columnCount === 2 ? 'medium' : 'small';
+    onLayoutStateChange(state);
   };
 
   const msnry = new Masonry(container, {
@@ -92,16 +97,53 @@ export function setupMasonry({
     itemObservers.push(obs);
   });
 
-  // Initial apply
+  const mutationObserver = new MutationObserver((mutationsList) => {
+    let shouldRelayout = false;
+
+    for (const mutation of mutationsList) {
+      if (mutation.type === "childList") {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE && node.matches(itemSelector)) {
+            const obs = new ResizeObserver(() => {
+              requestAnimationFrame(() => {
+                msnry.reloadItems();
+                msnry.layout();
+              });
+            });
+            obs.observe(node);
+            itemObservers.push(obs);
+            shouldRelayout = true;
+          }
+        });
+      }
+    }
+
+    if (shouldRelayout) {
+      requestAnimationFrame(() => {
+        applyWidths();
+        msnry.reloadItems();
+        msnry.layout();
+      });
+    }
+  });
+
+  mutationObserver.observe(container, {
+    childList: true,
+    subtree: false, // Adjust to true if item containers are nested
+  });
+
   setTimeout(() => {
     applyWidths();
     msnry.reloadItems();
     msnry.layout();
   }, 100);
 
-  return () => {
+  const cleanup = () => {
     resizeObserver.disconnect();
     itemObservers.forEach((obs) => obs.disconnect());
+    mutationObserver.disconnect();
     msnry.destroy();
   };
+
+  return { masonryInstance: msnry, cleanup };
 }
