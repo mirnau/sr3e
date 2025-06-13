@@ -195,24 +195,38 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
   async handleSkill(droppedItem) {
     const skillType = droppedItem.system.skillType;
-    const linkedAttribute = droppedItem.system.activeSkill.linkedAttribute;
+    const itemData = droppedItem.toObject();
 
-    if (skillType === "active" && !linkedAttribute) {
+    if (skillType === "active" && !droppedItem.system.activeSkill?.linkedAttribute) {
       ui.notifications.warn("Cannot drop an active skill without a linked attribute.");
       return;
     }
 
-    const itemData = droppedItem.toObject();
-    const before = new Set(this.actor.items.map(i => i.id));
-    await this.actor.createEmbeddedDocuments("Item", [itemData], { render: false });
+    const storeKeyByType = {
+      active: stores.activeSkillsIds,
+      knowledge: stores.knowledgeSkillsIds,
+      language: stores.languageSkillsIds,
+    };
 
-    let createdItem = null;
-    createdItem = this.actor.items.find(i => !before.has(i.id) && i.type === "skill");
+    const storeKey = storeKeyByType[skillType];
+    if (!storeKey) {
+      console.warn("Unsupported skillType dropped:", skillType);
+      return;
+    }
 
-    const activeSkillsIdArrayStore = getActorStore(this.document.id, stores.activeSkillsIds);
-    activeSkillsIdArrayStore.update(currentArray => [...currentArray, createdItem.id]);
+    const created = await this.document.createEmbeddedDocuments("Item", [itemData], {
+      render: false,
+    });
+
+    const createdItem = created?.[0];
+    if (!createdItem) {
+      console.warn("Skill creation failed or returned no result.");
+      return;
+    }
+
+    const targetStore = getActorStore(this.document.id, storeKey, []);
+    targetStore.update(current => [...current, createdItem.id]);
   }
-
 
   async handleMetahuman(droppedItem) {
     const result = await this.actor.canAcceptMetahuman(droppedItem);

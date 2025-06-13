@@ -1,8 +1,5 @@
 <script>
-	import {
-		localize,
-		openFilePicker
-	} from "../../svelteHelpers.js";
+	import { localize, openFilePicker } from "../../svelteHelpers.js";
 	import ActorDataService from "../../foundry/services/ActorDataService.js";
 	import JournalViewer from "./components/JournalViewer.svelte";
 	import { onMount } from "svelte";
@@ -10,7 +7,7 @@
 	let layoutMode = $state("single");
 
 	let { item, config, onTitleChange } = $props();
-	
+
 	let value = $derived(item.system.skillType);
 
 	const selectOptions = [
@@ -27,9 +24,14 @@
 		}),
 	);
 
-	function updateSkillType(newValue) {
-		item.update({ "system.skillType": newValue });
+	async function updateSkillType(newValue) {
+		await item.update({ "system.skillType": newValue });
 		onTitleChange(`${localize(config.skill[newValue])}: ${item.name}`);
+
+		// Force the document to re-resolve its schema
+		await item._preloadData(); // Optional: depending on your system
+
+		console.log("🔍 Skill created:", duplicate(item.toObject()));
 	}
 </script>
 

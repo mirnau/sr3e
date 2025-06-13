@@ -1,5 +1,6 @@
 import ActiveSkillEditorApp from "../../svelte/apps/components/skills/ActiveSkillEditorApp.svelte";
 import KnowledgeSkillEditorApp from "../../svelte/apps/components/skills/KnowledgeSkillEditorApp.svelte";
+import LanguageSkillEditorApp from "../../svelte/apps/components/skills/LanguageSkillEditorApp.svelte";
 import { mount, unmount } from "svelte";
 
 export default class ActiveSkillEditorSheet extends foundry.applications.api.ApplicationV2 {
@@ -54,7 +55,6 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 	_replaceHTML(_, windowContent) {
 
 		if (this.#app) {
-			f
 			unmount(this.#app);
 		}
 
@@ -71,6 +71,17 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 		}
 		else if (this.skill.system.skillType === "knowledge") {
 			this.#app = mount(KnowledgeSkillEditorApp, {
+				target: windowContent,
+				props: {
+					actor: this.actor,
+					skill: this.skill,
+					config: this.config,
+					app: this
+				}
+			});
+		}
+		else if (this.skill.system.skillType === "language") {
+			this.#app = mount(LanguageSkillEditorApp, {
 				target: windowContent,
 				props: {
 					actor: this.actor,

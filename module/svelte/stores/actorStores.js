@@ -6,13 +6,16 @@ export const stores = {
     intelligence: "intelligence",
     attributePoints: "attributePoints",
     activePoints: "activePoints",
-    knowledgePoints:"knowledgePoints",
+    knowledgePoints: "knowledgePoints",
     languagePoints: "languagePoints",
     attributeAssignmentLocked: "attributeAssignmentLocked",
     actorName: "actorName",
     isShoppingState: "isShoppingState",
-    activeSkillsIds: "activeSkillsIds"
+    activeSkillsIds: "activeSkillsIds",
+    knowledgeSkillsIds: "knowledgeSkillsIds",
+    languageSkillsIds: "languageSkillsIds"
 }
+
 
 export function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ??= {};

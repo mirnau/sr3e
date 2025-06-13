@@ -1,6 +1,6 @@
 <script>
 	import { localize } from "../../../../svelteHelpers.js";
-	import SkillsLanguage from "./SkillsLangauge.svelte";
+	import SkillsLanguage from "./SkillsLanguage.svelte";
 	import SkillsKnowledge from "./SkillsKnowledge.svelte";
 	import SkillsActive from "./SkillsActive.svelte";
 	import CardToolbar from "../CardToolbar.svelte";
