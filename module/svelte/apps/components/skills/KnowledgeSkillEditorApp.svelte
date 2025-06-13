@@ -182,10 +182,9 @@
                     $value += 1;
                 }
 
-                let refund = 0;
+                 let refund = 0;
                 for (let i = 1; i <= $value; i++) {
-                    if (i <= linkedAttributeRating) refund += 1;
-                    else refund += 2;
+                    refund += i <= linkedAttributeRating ? 1 : 2;
                 }
 
                 $skillPointStore += refund;
@@ -195,6 +194,8 @@
                     localize(config.skill.skillpointsrestored),
                 );
             }
+
+            await tick();
 
             if (skill) {
                 const id = skill.id;

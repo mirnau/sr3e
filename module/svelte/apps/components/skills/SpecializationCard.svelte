@@ -18,8 +18,6 @@
         skill.system.activeSkill.value,
     );
 
-   
-
 
     $effect(() => {
         if (isCharacterCreation) {

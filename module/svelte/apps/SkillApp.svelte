@@ -27,11 +27,7 @@
 	async function updateSkillType(newValue) {
 		await item.update({ "system.skillType": newValue });
 		onTitleChange(`${localize(config.skill[newValue])}: ${item.name}`);
-
-		// Force the document to re-resolve its schema
-		await item._preloadData(); // Optional: depending on your system
-
-		console.log("🔍 Skill created:", duplicate(item.toObject()));
+		console.log("🔍 Skill created:", foundry.utils.duplicate(item.toObject()));
 	}
 </script>
 

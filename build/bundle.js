@@ -3473,7 +3473,7 @@ const stores = {
   actorName: "actorName",
   isShoppingState: "isShoppingState",
   activeSkillsIds: "activeSkillsIds",
-  knowledgeSkillsIds: "activeSkillsIds",
+  knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds"
 };
 function getActorStore(actorId, storeName, customValue = null) {
@@ -3492,7 +3492,7 @@ var on_click$a = (_, actor) => openFilePicker(actor());
 var root_2$9 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$6 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$7 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$6 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$B = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3585,7 +3585,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_4, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_1 = root_3$7();
+      var fragment_1 = root_3$6();
       var div_5 = first_child(fragment_1);
       var div_6 = child(div_5);
       var input = child(div_6);
@@ -5455,7 +5455,7 @@ delegate(["click", "keydown"]);
 var on_keydown$4 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var root_2$7 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$6 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_3$5 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$e = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$y = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
@@ -5530,7 +5530,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       var node_2 = sibling(h1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$6();
+          var i_2 = root_3$5();
           i_2.__click = increment2;
           i_2.__keydown = [on_keydown_1, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
@@ -5911,13 +5911,13 @@ async function deleteThis$2(__3, $$props, $specializations, specializations, $va
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
+        refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
     }
+    await tick();
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
@@ -6163,13 +6163,13 @@ async function deleteThis$1(__3, $$props, $specializations, specializations, $va
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
+        refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
     }
+    await tick();
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
@@ -6338,18 +6338,24 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addNewSpecialization(_, $$props, $specializations, specializations) {
+async function addNewSpecialization(_, $specializations, specializations, $$props, $value, value) {
+  if (!$specializations()) throw new Error("Cannot add lingo: specialization store is null");
   if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
     if ($specializations().length > 0) {
       ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
       return;
     }
+    $specializations().push({
+      name: localize($$props.config.skill.newspecialization),
+      value: $value() + 1
+    });
+    store_set(value, $value() - 1);
+  } else {
+    $specializations().push({
+      name: localize($$props.config.skill.newspecialization),
+      value: 0
+    });
   }
-  let newSkill = {
-    name: localize($$props.config.skill.newspecialization),
-    value: 0
-  };
-  $specializations().push(newSkill);
   store_set(specializations, proxy([...$specializations()]));
   await $$props.skill.update(
     {
@@ -6358,41 +6364,27 @@ async function addNewSpecialization(_, $$props, $specializations, specialization
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
-      }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, silentUpdate, assignFirstMessage) {
+  if ($attributeAssignmentLocked() && $value() < 6) {
+    const cost = $value() < linkedAttributeRating ? 1 : 2;
+    if ($skillPointStore() >= cost) {
+      store_set(value, $value() + 1);
+      store_set(skillPointStore, $skillPointStore() - cost);
+      await silentUpdate();
     }
-  } else {
+  } else if (!$attributeAssignmentLocked()) {
     assignFirstMessage();
   }
-  silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
-      }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
-    }
-  } else {
+async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, silentUpdate, assignFirstMessage) {
+  if ($attributeAssignmentLocked() && $value() > 1) {
+    const refund = $value() > linkedAttributeRating ? 2 : 1;
+    store_set(value, $value() - 1);
+    store_set(skillPointStore, $skillPointStore() + refund);
+    await silentUpdate();
+  } else if (!$attributeAssignmentLocked()) {
     assignFirstMessage();
   }
-  silentUpdate();
 }
 async function deleteThis(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -6412,35 +6404,43 @@ async function deleteThis(__3, $$props, $specializations, specializations, $valu
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
+        refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
     }
-    if ($$props.skill) {
-      const id = $$props.skill.id;
-      await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.languageSkillsIds);
-      const current = get(store);
-      store.set(current.filter((sid) => sid !== id));
-    }
+    await tick();
+    const id = $$props.skill.id;
+    await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
+    const store = getActorStore($$props.actor.id, stores.languageSkillsIds);
+    store.set(get(store).filter((sid) => sid !== id));
     $$props.app.close();
   }
 }
 var on_click$7 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$r = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$r = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="specialization-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $value = () => store_get(value, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations);
+  console.log("skill", $$props.skill);
+  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
   getActorStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
+  let layoutMode = "single";
+  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
+  let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
+  let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
+  let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
+  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let readWrite = /* @__PURE__ */ derived(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
+  let disableValueControls = /* @__PURE__ */ derived(() => {
+    var _a;
+    return ((_a = $specializations()) == null ? void 0 : _a.length) > 0;
+  });
   user_effect(() => {
     $$props.skill.update(
       {
@@ -6448,15 +6448,21 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       },
       { render: false }
     );
+    $$props.skill.update(
+      {
+        "system.languageSkill.readwrite.value": get$1(readWrite)
+      },
+      { render: false }
+    );
   });
-  let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
-  let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
-  let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   async function silentUpdate() {
-    await $$props.skill.update({ "system.languageSkill.value": $value() }, { render: false });
+    await $$props.skill.update(
+      {
+        "system.languageSkill.value": $value(),
+        "system.languageSkill.readwrite.value": get$1(readWrite)
+      },
+      { render: false }
+    );
     await $$props.actor.update(
       {
         "system.creation.languagePoints": $skillPointStore()
@@ -6470,6 +6476,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
+    store_set(value, $value() + 1);
   }
   var div = root$r();
   var div_1 = child(div);
@@ -6488,7 +6495,13 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var text_1 = child(h1_1);
   var div_9 = sibling(div_8, 2);
   var div_10 = sibling(child(div_9), 2);
-  var button = child(div_10);
+  var h6 = sibling(child(div_10), 2);
+  var text_2 = child(h6);
+  var h1_2 = sibling(h6, 2);
+  var text_3 = child(h1_2);
+  var div_11 = sibling(div_9, 2);
+  var div_12 = sibling(child(div_11), 2);
+  var button = child(div_12);
   button.__click = [
     increment,
     $attributeAssignmentLocked,
@@ -6498,8 +6511,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
-    silentUpdate
+    silentUpdate,
+    assignFirstMessage
   ];
   var button_1 = sibling(button, 2);
   button_1.__click = [
@@ -6511,8 +6524,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
-    silentUpdate
+    silentUpdate,
+    assignFirstMessage
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
@@ -6529,18 +6542,20 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
     addNewSpecialization,
-    $$props,
     $specializations,
-    specializations
+    specializations,
+    $$props,
+    $value,
+    value
   ];
-  var text_2 = child(button_3);
-  var div_11 = sibling(div_2, 2);
-  var div_12 = child(div_11);
-  var div_13 = sibling(child(div_12), 2);
-  var h1_2 = child(div_13);
-  var text_3 = child(h1_2);
-  var div_14 = sibling(h1_2, 2);
-  each(div_14, 5, $specializations, index, ($$anchor2, specialization, i) => {
+  var text_4 = child(button_3);
+  var div_13 = sibling(div_2, 2);
+  var div_14 = child(div_13);
+  var div_15 = sibling(child(div_14), 2);
+  var h1_3 = child(div_15);
+  var text_5 = child(h1_3);
+  var div_16 = sibling(h1_3, 2);
+  each(div_16, 5, $specializations, index, ($$anchor2, specialization, i) => {
     SpecializationCard($$anchor2, {
       get actor() {
         return $$props.actor;
@@ -6557,29 +6572,31 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       $$events: {
         arrayChanged: () => {
           store_set(specializations, proxy([...$specializations()]));
-          console.log("array was reassigned");
         },
         delete: deleteSpecialization
       }
     });
   });
   template_effect(
-    ($0, $1) => {
+    ($0, $1, $2) => {
       set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
       set_text(text, $$props.skill.name);
       set_text(text_1, $value());
+      set_text(text_2, `${$0 ?? ""}:`);
+      set_text(text_3, get$1(readWrite));
       button.disabled = get$1(disableValueControls);
       button_1.disabled = get$1(disableValueControls);
       button_3.disabled = $value() <= 1;
-      set_text(text_2, $0);
-      set_text(text_3, $1);
+      set_text(text_4, $1);
+      set_text(text_5, $2);
     },
     [
-      () => localize($$props.config.skill.addspecialization),
-      () => localize($$props.config.skill.specializations)
+      () => localize($$props.config.skill.readwrite),
+      () => localize($$props.config.skill.addlingo),
+      () => localize($$props.config.skill.lingos)
     ]
   );
   append($$anchor, div);
@@ -6801,31 +6818,22 @@ function KnowledgeSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$1 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$b = /* @__PURE__ */ template(`<i class="header-control icon fa-solid fa-pen-to-square pulsing-green-cart" tabindex="0" role="button"></i>`);
-var root_3$5 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root_2$4 = /* @__PURE__ */ template(`<div class="language-mode-block"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
-var root$o = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card language-skill"></div></div>`);
+var root_1$b = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $speakValue = () => store_get(speakValue, "$speakValue", $$stores);
-  const $speakSpecs = () => store_get(speakSpecs, "$speakSpecs", $$stores);
-  const $readValue = () => store_get(readValue, "$readValue", $$stores);
-  const $readSpecs = () => store_get(readSpecs, "$readSpecs", $$stores);
-  const $writeValue = () => store_get(writeValue, "$writeValue", $$stores);
-  const $writeSpecs = () => store_get(writeSpecs, "$writeSpecs", $$stores);
+  const $value = () => store_get(value, "$value", $$stores);
+  const $readWriteValue = () => store_get(readWriteValue, "$readWriteValue", $$stores);
+  const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
   let languageSkill = proxy(skill().system.languageSkill);
-  getActorStore(actor().id, skill().id, languageSkill.value);
-  getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
-  let speakValue = getActorStore(actor().id, skill().id, languageSkill.speak.value);
-  let readValue = getActorStore(actor().id, skill().id, languageSkill.read.value);
-  let writeValue = getActorStore(actor().id, skill().id, languageSkill.write.value);
-  let speakSpecs = getActorStore(skill().id, actor().id, languageSkill.speak.specializations);
-  let readSpecs = getActorStore(skill().id, actor().id, languageSkill.read.specializations);
-  let writeSpecs = getActorStore(skill().id, actor().id, languageSkill.write.specializations);
+  let specializations = getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
+  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let value = getActorStore(actor().id, skill().id, languageSkill.value);
+  let readWriteValue = getActorStore(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -6834,6 +6842,7 @@ function LanguageSkillCard($$anchor, $$props) {
   {
     var consequent = ($$anchor2) => {
       var i = root_1$b();
+      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$1, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
@@ -6846,57 +6855,33 @@ function LanguageSkillCard($$anchor, $$props) {
     });
   }
   var div_1 = sibling(node, 2);
-  each(
-    div_1,
-    5,
-    () => [
-      {
-        key: "speak",
-        label: "Speak",
-        value: $speakValue(),
-        specs: $speakSpecs()
-      },
-      {
-        key: "read",
-        label: "Read",
-        value: $readValue(),
-        specs: $readSpecs()
-      },
-      {
-        key: "write",
-        label: "Write",
-        value: $writeValue(),
-        specs: $writeSpecs()
-      }
-    ],
-    index,
-    ($$anchor2, mode) => {
-      var div_2 = root_2$4();
-      var div_3 = child(div_2);
-      var h6 = sibling(child(div_3), 2);
-      var text = child(h6);
-      var h1 = sibling(h6, 2);
-      var text_1 = child(h1);
-      var div_4 = sibling(div_3, 2);
-      each(div_4, 21, () => get$1(mode).specs, index, ($$anchor3, specialization) => {
-        var div_5 = root_3$5();
-        var div_6 = sibling(child(div_5), 2);
-        var text_2 = child(div_6);
-        var h1_1 = sibling(div_6, 2);
-        var text_3 = child(h1_1);
-        template_effect(() => {
-          set_text(text_2, get$1(specialization).name);
-          set_text(text_3, get$1(specialization).value);
-        });
-        append($$anchor3, div_5);
-      });
-      template_effect(() => {
-        set_text(text, get$1(mode).label);
-        set_text(text_1, get$1(mode).value);
-      });
-      append($$anchor2, div_2);
-    }
-  );
+  var div_2 = child(div_1);
+  var h6 = sibling(child(div_2), 2);
+  var text = child(h6);
+  var h1 = sibling(h6, 2);
+  var text_1 = child(h1);
+  var div_3 = sibling(div_2, 2);
+  var div_4 = child(div_3);
+  var h1_1 = sibling(child(div_4), 4);
+  var text_2 = child(h1_1);
+  var div_5 = sibling(div_3, 2);
+  each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
+    var div_6 = root_2$4();
+    var div_7 = sibling(child(div_6), 2);
+    var text_3 = child(div_7);
+    var h1_2 = sibling(div_7, 2);
+    var text_4 = child(h1_2);
+    template_effect(() => {
+      set_text(text_3, get$1(specialization).name);
+      set_text(text_4, get$1(specialization).value);
+    });
+    append($$anchor2, div_6);
+  });
+  template_effect(() => {
+    set_text(text, skill().name);
+    set_text(text_1, $value());
+    set_text(text_2, $readWriteValue());
+  });
   append($$anchor, div);
   pop();
   $$cleanup();
@@ -8195,18 +8180,18 @@ sr3e.health = {
 };
 sr3e.skill = {
   active: "sr3e.skill.active",
+  addlingo: "sr3e.skill.addlingo",
   addspecialization: "sr3e.skill.addspecialization",
   knowledge: "sr3e.skill.knowledge",
   language: "sr3e.skill.language",
+  lingos: "sr3e.skill.lingos",
   linkedAttribute: "sr3e.skill.linkedAttribute",
   newspecialization: "sr3e.skill.newspecialization",
   onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
-  read: "sr3e.skills.read",
+  readwrite: "sr3e.skill.readwrite",
   skill: "sr3e.skill.skill",
   skillpointsrestored: "sr3e.skills.skillpointsrestored",
-  speak: "sr3e.skills.speak",
-  specializations: "sr3e.skill.specializations",
-  write: "sr3e.skills.write"
+  specializations: "sr3e.skill.specializations"
 };
 sr3e.initiative = {
   augmentedReaction: "sr3e.initiative.augmentedReaction",
@@ -10248,8 +10233,7 @@ function SkillApp($$anchor, $$props) {
   async function updateSkillType(newValue) {
     await $$props.item.update({ "system.skillType": newValue });
     $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${$$props.item.name}`);
-    await $$props.item._preloadData();
-    console.log("🔍 Skill created:", duplicate($$props.item.toObject()));
+    console.log("🔍 Skill created:", foundry.utils.duplicate($$props.item.toObject()));
   }
   var div = root$1();
   var div_1 = child(div);
@@ -10459,59 +10443,35 @@ class SkillModel extends foundry.abstract.TypeDataModel {
         )
       }),
       languageSkill: new foundry.data.fields.SchemaField({
-        speak: new foundry.data.fields.SchemaField({
-          value: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          linkedAttribute: new foundry.data.fields.StringField({
-            required: true,
-            initial: "intelligence"
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+        value: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
         }),
-        read: new foundry.data.fields.SchemaField({
-          value: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+        linkedAttribute: new foundry.data.fields.StringField({
+          required: true,
+          initial: "intelligence"
         }),
-        write: new foundry.data.fields.SchemaField({
+        //lingos
+        specializations: new foundry.data.fields.ArrayField(
+          new foundry.data.fields.SchemaField({
+            ...SkillSpecialization.defineSchema()
+          }),
+          {
+            initial: []
+          }
+        ),
+        readwrite: new foundry.data.fields.SchemaField({
           value: new foundry.data.fields.NumberField({
             required: true,
             initial: 0,
             integer: true
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+          })
+        }),
+        journalId: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
         })
-      }),
-      journalId: new foundry.data.fields.StringField({
-        required: true,
-        initial: ""
       })
     };
   }

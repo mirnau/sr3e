@@ -128,19 +128,18 @@
     },
     "skill": {
       "active": "Active Skill",
+      "addlingo": "Add Lingo",
       "addspecialization": "Add Specialization",
       "knowledge": "Knowledge Skill",
       "language": "Language Skill",
+      "lingos": "lingos",
       "linkedAttribute": "Choose a Linked Attribute...",
       "newspecialization": "New Specialization",
       "onlyonespecializationatcreation": "Only one specialization can be taken at character creation!",
-      "read": "Read",
+      "readwrite": "Read/Write",
       "skill": "Skill",
       "skillpointsrestored": "Your skillpoints have been restored!",
-      "speak": "Speak",
-      "specializations": "Specializations",
-      "write": "Write"
-
+      "specializations": "Specializations"
     },
     "traits": {
       "age": "Age",
