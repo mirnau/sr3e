@@ -70,7 +70,9 @@
     );
 
     let readWrite = $derived($value <= 1 ? 0 : Math.floor($value / 2));
-    let disableValueControls = $derived($specializations?.length > 0);
+    let disableValueControls = $derived(
+        $isCharacterCreation && $specializations.length > 0,
+    );
 
     $effect(() => {
         skill.update(

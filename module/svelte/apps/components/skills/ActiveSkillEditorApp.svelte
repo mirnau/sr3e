@@ -31,7 +31,7 @@
             .map((item) => item.id),
     );
 
-    let disableValueControls = $derived($specializations.length > 0);
+    let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
 
     $effect(() => {
         skill.update(
@@ -191,7 +191,7 @@
         });
 
         if (confirmed) {
-            if (actor.getFlag($isCharacterCreation)) {
+            if ($isCharacterCreation) {
                 if ($specializations.length > 0) {
                     $specializations = [];
 
@@ -208,7 +208,7 @@
                 $skillPointStore += refund;
                 $value = 0;
 
-                ui.notifications.info(localize(config.skill.skillpointsrefund));
+                ui.notifications.info(localize(config.notifications.skillpointsrefund));
             }
 
             await tick();

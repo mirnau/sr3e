@@ -32,7 +32,9 @@
             .map((item) => item.id),
     );
 
-    let disableValueControls = $derived($specializations.length > 0);
+    let disableValueControls = $derived(
+        $isCharacterCreation && $specializations.length > 0,
+    );
 
     $effect(() => {
         skill.update(
@@ -169,7 +171,7 @@
             { render: false },
         );
     }
- 
+
     async function deleteThis() {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
             window: {

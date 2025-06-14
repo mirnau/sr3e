@@ -187,8 +187,8 @@ sr3e.magic = {
 };
 
 sr3e.notifications = {
-    assignattributesfirst: "sr3e.notificatioins.assignattributesfirst",
-    skillpointsrefund: "sr3e.skills.skillpointsrefund"
+    assignattributesfirst: "sr3e.notifications.assignattributesfirst",
+    skillpointsrefund: "sr3e.notifications.skillpointsrefund"
 }
 
 sr3e.weapon = {

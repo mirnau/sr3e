@@ -5367,7 +5367,7 @@ function AttributeCardCreationState($$anchor, $$props) {
     return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
   });
   let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence);
+  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, $$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
   let metaHuman = /* @__PURE__ */ derived(() => (() => {
     var _a2;
     if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
@@ -5392,7 +5392,7 @@ function AttributeCardCreationState($$anchor, $$props) {
         },
         { render: false }
       );
-      intelligenceStore.set($$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
+      if ($$props.key === "intelligence") store_set(intelligenceStore, proxy(stat().value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta));
     } else {
       console.warn("There is an error in charactercreation");
     }
@@ -5919,7 +5919,7 @@ async function deleteThis$2(__3, $$props, $isCharacterCreation, isCharacterCreat
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag($isCharacterCreation())) {
+    if ($isCharacterCreation()) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
@@ -5931,7 +5931,7 @@ async function deleteThis$2(__3, $$props, $isCharacterCreation, isCharacterCreat
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
+      ui.notifications.info(localize($$props.config.notifications.skillpointsrefund));
     }
     await tick();
     if ($$props.skill) {
@@ -5949,15 +5949,15 @@ var root$t = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div>
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
   let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
+  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -6221,15 +6221,15 @@ var root$s = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div>
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
   let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
+  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -6494,9 +6494,9 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $value = () => store_get(value, "$value", $$stores);
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   console.log("skill", $$props.skill);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
@@ -6509,10 +6509,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
   let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let readWrite = /* @__PURE__ */ derived(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
-  let disableValueControls = /* @__PURE__ */ derived(() => {
-    var _a;
-    return ((_a = $specializations()) == null ? void 0 : _a.length) > 0;
-  });
+  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -7681,15 +7678,15 @@ function AttributePointsState($$anchor, $$props) {
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
+  const $intelligenceStore = () => store_get(intelligenceStore, "$intelligenceStore", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   let system = proxy($$props.actor.system);
   let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, system.attributes.intelligence.value + system.attributes.intelligence.mod + system.attributes.intelligence.meta);
+  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, $$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
   let attributePointStore = getActorStore($$props.actor.id, stores.attributePoints, system.creation.attributePoints);
   let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, system.creation.activePoints);
   let knowledgePointStore = getActorStore($$props.actor.id, stores.knowledgePoints, system.creation.knowledgePoints);
   let languagePointStore = getActorStore($$props.actor.id, stores.languagePoints, system.creation.languagePoints);
-  let intelligence = state(0);
   let attributePointsText = localize($$props.config.attributes.attributes);
   let activePointsText = localize($$props.config.skill.active);
   let knowledgePointsText = localize($$props.config.skill.knowledge);
@@ -7713,16 +7710,8 @@ function AttributePointsState($$anchor, $$props) {
     }
   ]);
   user_effect(() => {
-    const unsubscribe = intelligenceStore.subscribe((v) => {
-      if (typeof v === "number") {
-        set(intelligence, proxy(v));
-      }
-    });
-    return unsubscribe;
-  });
-  user_effect(() => {
-    knowledgePointStore.set(get$1(intelligence) * 5);
-    languagePointStore.set(Math.floor(get$1(intelligence) * 1.5));
+    knowledgePointStore.set($intelligenceStore() * 5);
+    languagePointStore.set(Math.floor($intelligenceStore() * 1.5));
   });
   user_effect(() => {
     const value = $attributePointStore();
@@ -8412,8 +8401,8 @@ sr3e.magic = {
   powerPoints: "sr3e.magic.powerPoints"
 };
 sr3e.notifications = {
-  assignattributesfirst: "sr3e.notificatioins.assignattributesfirst",
-  skillpointsrefund: "sr3e.skills.skillpointsrefund"
+  assignattributesfirst: "sr3e.notifications.assignattributesfirst",
+  skillpointsrefund: "sr3e.notifications.skillpointsrefund"
 };
 sr3e.weapon = {
   weapon: "sr3e.weapon.weapon",

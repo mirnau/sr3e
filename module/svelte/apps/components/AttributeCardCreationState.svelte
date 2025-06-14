@@ -17,7 +17,13 @@
     actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
   );
 
-  let intelligenceStore = getActorStore(actor.id, stores.intelligence);
+  let intelligenceStore = getActorStore(
+    actor.id,
+    stores.intelligence,
+    actor.system.attributes.intelligence.value +
+      actor.system.attributes.intelligence.mod +
+      actor.system.attributes.intelligence.meta ?? 0,
+  );
 
   // Only calculate metaHuman and attributeLimit for ComplexStat attributes (not magic)
   let metaHuman = $derived(
@@ -51,14 +57,14 @@
         },
         { render: false },
       );
-
-      intelligenceStore.set(
-        actor.system.attributes.intelligence.value +
-          actor.system.attributes.intelligence.mod +
-          actor.system.attributes.intelligence.meta ?? 0,
-      );
+      
+      if (key === "intelligence")
+        $intelligenceStore =
+          stat.value +
+            actor.system.attributes.intelligence.mod +
+            actor.system.attributes.intelligence.meta ?? 0;
     } else {
-      console.warn("There is an error in charactercreation")
+      console.warn("There is an error in charactercreation");
     }
   }
 

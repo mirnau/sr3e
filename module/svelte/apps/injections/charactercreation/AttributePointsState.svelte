@@ -17,9 +17,9 @@
     let intelligenceStore = getActorStore(
         actor.id,
         stores.intelligence,
-        system.attributes.intelligence.value +
-            system.attributes.intelligence.mod +
-            system.attributes.intelligence.meta ?? 0,
+        actor.system.attributes.intelligence.value +
+            actor.system.attributes.intelligence.mod +
+            actor.system.attributes.intelligence.meta ?? 0,
     );
 
     let attributePointStore = getActorStore(
@@ -43,9 +43,6 @@
         system.creation.languagePoints,
     );
 
-    // Reactive intelligence value
-    let intelligence = $state(0);
-
     let attributePointsText = localize(config.attributes.attributes);
     let activePointsText = localize(config.skill.active);
     let knowledgePointsText = localize(config.skill.knowledge);
@@ -59,20 +56,10 @@
         { value: $languagePointStore, text: languagePointsText },
     ]);
 
-    // Subscribe to intelligence changes
-    $effect(() => {
-        const unsubscribe = intelligenceStore.subscribe((v) => {
-            if (typeof v === "number") {
-                intelligence = v;
-            }
-        });
-        return unsubscribe;
-    });
-
     // Update dependent values when intelligence changes
     $effect(() => {
-        knowledgePointStore.set(intelligence * 5);
-        languagePointStore.set(Math.floor(intelligence * 1.5));
+        knowledgePointStore.set($intelligenceStore * 5);
+        languagePointStore.set(Math.floor($intelligenceStore * 1.5));
     });
 
     // Watch attributePointStore changes and update Foundry data
