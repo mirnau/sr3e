@@ -98,7 +98,9 @@
     "modal": {
       "confirm": "Yes",
       "decline": "No",
+      "exitattributesassignment": "You've used all your attribute points. Are you ready to continue with skill assignment?",
       "exitcreationmode": "You've used all your skill points. Exit character creation?",
+      "exitattributesassignmenttitle":"Finish Attribute Point Assignement?",
       "exitcreationmodetitle": "Exit skill assignment?"
     },
     "movement": {

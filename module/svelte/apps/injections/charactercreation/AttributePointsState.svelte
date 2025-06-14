@@ -120,21 +120,27 @@
     });
 
     $effect(() => {
-        if ($attributePointStore === 0 && $attributeAssignmentLocked === false) {
+        if (
+            $attributePointStore === 0 &&
+            $attributeAssignmentLocked === false
+        ) {
             (async () => {
                 const confirmed =
                     await foundry.applications.api.DialogV2.confirm({
                         window: {
-                            title: "Finish Attribute Point Assignement?",
+                            title: localize(
+                                config.modal.exitattributesassignment,
+                            ),
                         },
-                        content:
-                            "You've used all your attribute points. Are you ready to continue with skill assignment?",
+                        content: localize(
+                            config.modal.exitattributesassignment,
+                        ),
                         yes: {
-                            label: "Yes, finish",
+                            label: localize(config.modal.confirm),
                             default: true,
                         },
                         no: {
-                            label: "Not yet",
+                            label: localize(config.modal.decline),
                         },
                         modal: true,
                         rejectClose: true,

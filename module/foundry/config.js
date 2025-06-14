@@ -28,7 +28,9 @@ sr3e.health = {
 sr3e.modal = {
     confirm: "sr3e.modal.confirm",
     decline: "sr3e.modal.decline",
+    exitattributesassignment: "sr3e.modal.exitattributesassignment",
     exitcreationmode:"sr3e.modal.exitcreationmode",
+    exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
     exitcreationmodetitle:"sr3e.modal.exitcreationmodetitle"
 }
 

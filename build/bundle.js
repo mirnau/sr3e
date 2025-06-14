@@ -7670,10 +7670,17 @@ function AttributePointsState($$anchor, $$props) {
     if ($attributePointStore() === 0 && $attributeAssignmentLocked() === false) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: "Finish Attribute Point Assignement?" },
-          content: "You've used all your attribute points. Are you ready to continue with skill assignment?",
-          yes: { label: "Yes, finish", default: true },
-          no: { label: "Not yet" },
+          window: {
+            title: localize($$props.config.modal.exitattributesassignment)
+          },
+          content: localize($$props.config.modal.exitattributesassignment),
+          yes: {
+            label: localize($$props.config.modal.confirm),
+            default: true
+          },
+          no: {
+            label: localize($$props.config.modal.decline)
+          },
           modal: true,
           rejectClose: true
         });
@@ -8185,7 +8192,9 @@ sr3e.health = {
 sr3e.modal = {
   confirm: "sr3e.modal.confirm",
   decline: "sr3e.modal.decline",
+  exitattributesassignment: "sr3e.modal.exitattributesassignment",
   exitcreationmode: "sr3e.modal.exitcreationmode",
+  exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
   exitcreationmodetitle: "sr3e.modal.exitcreationmodetitle"
 };
 sr3e.skill = {
