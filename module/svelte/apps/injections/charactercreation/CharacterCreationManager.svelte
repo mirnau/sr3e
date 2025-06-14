@@ -13,15 +13,17 @@
     );
     console.log("attributeAssignmentLocked", $attributeAssignmentLocked);
 
-    let isCharacterCreation = $state(
+    let isCharacterCreation = getActorStore(
+        actor.id,
+        stores.isCharacterCreation,
         actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
     );
 </script>
 
-{#if isCharacterCreation}
+{#if $isCharacterCreation}
     <div>
         {#if $attributeAssignmentLocked}
-            <SkillPointsState {actor} {config} bind:isCharacterCreation />
+            <SkillPointsState {actor} {config} />
         {:else}
             <AttributePointsState {actor} {config} />
         {/if}

@@ -25,6 +25,13 @@ sr3e.health = {
     health: "sr3e.health.health",
 }
 
+sr3e.modal = {
+    confirm: "sr3e.modal.confirm",
+    decline: "sr3e.modal.decline",
+    exitcreationmode:"sr3e.modal.exitcreationmode",
+    exitcreationmodetitle:"sr3e.modal.exitcreationmodetitle"
+}
+
 sr3e.skill = {
     active: "sr3e.skill.active",
     addlingo: "sr3e.skill.addlingo",

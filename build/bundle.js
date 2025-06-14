@@ -3474,7 +3474,8 @@ const stores = {
   isShoppingState: "isShoppingState",
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
-  languageSkillsIds: "languageSkillsIds"
+  languageSkillsIds: "languageSkillsIds",
+  isCharacterCreation: "isCharacterCreation"
 };
 function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
@@ -7699,12 +7700,13 @@ function SkillPointsState($$anchor, $$props) {
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), isCharacterCreation = prop($$props, "isCharacterCreation", 15, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let system = proxy(actor().system);
   let attributePointStore = getActorStore(actor().id, stores.attributePoints, system.creation.attributePoints);
   let skillPointStore = getActorStore(actor().id, stores.activePoints, system.creation.activePoints);
   let knowledgePointStore = getActorStore(actor().id, stores.knowledgePoints, system.creation.knowledgePoints);
   let languagePointStore = getActorStore(actor().id, stores.languagePoints, system.creation.languagePoints);
+  let isCharacterCreation = getActorStore(actor().id, stores.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   let attributePointsText = localize(config().attributes.attributes);
   let activePointsText = localize(config().skill.active);
   let knowledgePointsText = localize(config().skill.knowledge);
@@ -7731,16 +7733,23 @@ function SkillPointsState($$anchor, $$props) {
     if ($skillPointStore() === 0 && $knowledgePointStore() === 0 && $languagePointStore() === 0) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: "Finish Character Creation?" },
-          content: "You've used all your skill points. Done Creating?",
-          yes: { label: "Yes, finish", default: true },
-          no: { label: "Not yet" },
+          window: {
+            title: localize(config().modal.exitcreationmodetitle)
+          },
+          content: localize(config().modal.exitcreationmode),
+          yes: {
+            label: localize(config().modal.confirm),
+            default: true
+          },
+          no: {
+            label: localize(config().modal.decline)
+          },
           modal: true,
           rejectClose: true
         });
         if (confirmed) {
           actor().setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
-          isCharacterCreation(false);
+          store_set(isCharacterCreation, false);
         }
       })();
     }
@@ -7759,10 +7768,11 @@ function CharacterCreationManager($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   console.log("attributeAssignmentLocked", $attributeAssignmentLocked());
-  let isCharacterCreation = state(proxy(actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation)));
+  let isCharacterCreation = getActorStore(actor().id, stores.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   var fragment = comment();
   var node = first_child(fragment);
   {
@@ -7777,12 +7787,6 @@ function CharacterCreationManager($$anchor, $$props) {
             },
             get config() {
               return config();
-            },
-            get isCharacterCreation() {
-              return get$1(isCharacterCreation);
-            },
-            set isCharacterCreation($$value) {
-              set(isCharacterCreation, proxy($$value));
             }
           });
         };
@@ -7804,7 +7808,7 @@ function CharacterCreationManager($$anchor, $$props) {
       append($$anchor2, div);
     };
     if_block(node, ($$render) => {
-      if (get$1(isCharacterCreation)) $$render(consequent_1);
+      if ($isCharacterCreation()) $$render(consequent_1);
     });
   }
   append($$anchor, fragment);
@@ -8177,6 +8181,12 @@ sr3e.attributes = {
 };
 sr3e.health = {
   health: "sr3e.health.health"
+};
+sr3e.modal = {
+  confirm: "sr3e.modal.confirm",
+  decline: "sr3e.modal.decline",
+  exitcreationmode: "sr3e.modal.exitcreationmode",
+  exitcreationmodetitle: "sr3e.modal.exitcreationmodetitle"
 };
 sr3e.skill = {
   active: "sr3e.skill.active",

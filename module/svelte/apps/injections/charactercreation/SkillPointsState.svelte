@@ -4,12 +4,8 @@
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import CreationPointList from "../../components/CreationPointList.svelte";
 
-    let {
-        actor = {},
-        config = {},
-        isCharacterCreation = $bindable(true),
-    } = $props();
-    
+    let { actor = {}, config = {} } = $props();
+
     let system = $state(actor.system);
 
     let attributePointStore = getActorStore(
@@ -31,6 +27,12 @@
         actor.id,
         stores.languagePoints,
         system.creation.languagePoints,
+    );
+
+    let isCharacterCreation = getActorStore(
+        actor.id,
+        stores.isCharacterCreation,
+        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
     );
 
     let attributePointsText = localize(config.attributes.attributes);
@@ -56,16 +58,16 @@
                 const confirmed =
                     await foundry.applications.api.DialogV2.confirm({
                         window: {
-                            title: "Finish Character Creation?",
+                            title: localize(config.modal.exitcreationmodetitle),
                         },
                         content:
-                            "You've used all your skill points. Done Creating?",
+                            localize(config.modal.exitcreationmode),
                         yes: {
-                            label: "Yes, finish",
+                            label: localize(config.modal.confirm),
                             default: true,
                         },
                         no: {
-                            label: "Not yet",
+                            label: localize(config.modal.decline),
                         },
                         modal: true,
                         rejectClose: true,
@@ -77,7 +79,7 @@
                         flags.actor.isCharacterCreation,
                         false,
                     );
-                    isCharacterCreation = false;
+                    $isCharacterCreation = false;
                 }
             })();
         }

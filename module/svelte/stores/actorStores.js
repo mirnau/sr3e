@@ -13,7 +13,8 @@ export const stores = {
   isShoppingState: "isShoppingState",
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
-  languageSkillsIds: "languageSkillsIds"
+  languageSkillsIds: "languageSkillsIds",
+  isCharacterCreation: "isCharacterCreation"
 }
 
 

@@ -95,6 +95,12 @@
       "spellPoints": "Spell Points",
       "powerPoints": "Power Points"
     },
+    "modal": {
+      "confirm": "Yes",
+      "decline": "No",
+      "exitcreationmode": "You've used all your skill points. Exit character creation?",
+      "exitcreationmodetitle": "Exit skill assignment?"
+    },
     "movement": {
       "movement": "Movement",
       "walking": "Walking Speed",
