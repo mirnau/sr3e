@@ -16,6 +16,12 @@
         skill.system.languageSkill.specializations ?? [],
     );
 
+    let isCharacterCreation = getActorStore(
+        actor.id,
+        stores.isCharacterCreation,
+        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
+    );
+
     const languageSkillsIdArrayStore = getActorStore(
         actor.id,
         stores.languageSkillsIds,
@@ -107,27 +113,58 @@
     }
 
     async function increment() {
-        if ($attributeAssignmentLocked && $value < 6) {
-            const cost = $value < linkedAttributeRating ? 1 : 2;
-            if ($skillPointStore >= cost) {
-                $value += 1;
-                $skillPointStore -= cost;
-                await silentUpdate();
+        if ($attributeAssignmentLocked) {
+            if ($isCharacterCreation) {
+                if ($value < 6) {
+                    let costForNextLevel;
+
+                    if ($value < linkedAttributeRating) {
+                        costForNextLevel = 1;
+                    } else {
+                        costForNextLevel = 2;
+                    }
+
+                    if ($skillPointStore >= costForNextLevel) {
+                        $value += 1;
+                        $skillPointStore -= costForNextLevel;
+                    }
+                }
+            } else {
+                console.log("TODO: implement karma based shopping");
             }
-        } else if (!$attributeAssignmentLocked) {
-            assignFirstMessage();
+        } else {
+            ui.notifications.warn(
+                localize(config.notifications.assignattributesfirst),
+            );
         }
+        silentUpdate();
     }
 
     async function decrement() {
-        if ($attributeAssignmentLocked && $value > 1) {
-            const refund = $value > linkedAttributeRating ? 2 : 1;
-            $value -= 1;
-            $skillPointStore += refund;
-            await silentUpdate();
-        } else if (!$attributeAssignmentLocked) {
-            assignFirstMessage();
+        if ($attributeAssignmentLocked) {
+            if ($isCharacterCreation) {
+                if ($value > 0) {
+                    let refundForCurrentLevel;
+
+                    if ($value > linkedAttributeRating) {
+                        refundForCurrentLevel = 2;
+                    } else {
+                        refundForCurrentLevel = 1;
+                    }
+
+                    $value -= 1;
+                    $skillPointStore += refundForCurrentLevel;
+                }
+            } else {
+                console.log("TODO: implement karma based shopping");
+            }
+        } else {
+            ui.notifications.warn(
+                localize(config.notifications.assignattributesfirst),
+            );
         }
+
+        await silentUpdate();
     }
 
     async function silentUpdate() {
@@ -145,28 +182,29 @@
         );
     }
 
-    function assignFirstMessage() {
-        ui.notifications.warn(
-            "You need to assign all attributes before assigning skills",
-        );
-    }
-
     async function deleteThis() {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: { title: "Delete This Skill?" },
-            content: "Do you want to delete this skill?",
-            yes: { label: "Yes!", default: true },
-            no: { label: "Nope!" },
+            window: {
+                title: localize(config.modal.deleteskilltitle),
+            },
+            content: localize(config.modal.deleteskill),
+            yes: {
+                label: localize(config.modal.confirm),
+                default: true,
+            },
+            no: {
+                label: localize(config.modal.decline),
+            },
             modal: true,
             rejectClose: true,
         });
 
         if (confirmed) {
-            if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+            if ($isCharacterCreation) {
                 if ($specializations.length > 0) {
                     $specializations = [];
-                    await tick(); 
-                    $value += 1; 
+                    await tick();
+                    $value += 1;
                 }
 
                 let refund = 0;
@@ -177,9 +215,7 @@
                 $skillPointStore += refund;
                 $value = 0;
 
-                ui.notifications.info(
-                    localize(config.skill.skillpointsrestored),
-                );
+                ui.notifications.info(localize(config.skill.skillpointsrefund));
             }
 
             await tick();

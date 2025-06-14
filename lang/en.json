@@ -98,9 +98,11 @@
     "modal": {
       "confirm": "Yes",
       "decline": "No",
+      "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
+      "deleteskilltitle": "Delete Skill?",
       "exitattributesassignment": "You've used all your attribute points. Are you ready to continue with skill assignment?",
       "exitcreationmode": "You've used all your skill points. Exit character creation?",
-      "exitattributesassignmenttitle":"Finish Attribute Point Assignement?",
+      "exitattributesassignmenttitle": "Finish Attribute Point Assignement?",
       "exitcreationmodetitle": "Exit skill assignment?"
     },
     "movement": {
@@ -108,6 +110,10 @@
       "walking": "Walking Speed",
       "running": "Running Speed",
       "runSpeedModifier": "Running Modifier"
+    },
+    "notifications": {
+      "assignattributesfirst": "You need to assign all attributes before assigning skills",
+      "skillpointsrefund": "Your skillpoints have been refunded!"
     },
     "placeholders": {
       "human": "Human",
@@ -146,7 +152,6 @@
       "onlyonespecializationatcreation": "Only one specialization can be taken at character creation!",
       "readwrite": "Read/Write",
       "skill": "Skill",
-      "skillpointsrestored": "Your skillpoints have been restored!",
       "specializations": "Specializations"
     },
     "traits": {

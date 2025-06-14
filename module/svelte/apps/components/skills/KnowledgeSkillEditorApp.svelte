@@ -14,13 +14,20 @@
         skill.system.knowledgeSkill.specializations,
     );
 
+    let isCharacterCreation = getActorStore(
+        actor.id,
+        stores.isCharacterCreation,
+        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
+    );
+
     const knowledgeSkillsIdArrayStore = getActorStore(
         actor.id,
         stores.knowledgeSkillsIds,
         actor.items
             .filter(
                 (item) =>
-                    item.type === "skill" && item.system.skillType === "knowledge",
+                    item.type === "skill" &&
+                    item.system.skillType === "knowledge",
             )
             .map((item) => item.id),
     );
@@ -98,42 +105,54 @@
 
     async function increment() {
         if ($attributeAssignmentLocked) {
-            if ($value < 6) {
-                let costForNextLevel;
+            if ($isCharacterCreation) {
+                if ($value < 6) {
+                    let costForNextLevel;
 
-                if ($value < linkedAttributeRating) {
-                    costForNextLevel = 1;
-                } else {
-                    costForNextLevel = 2;
-                }
+                    if ($value < linkedAttributeRating) {
+                        costForNextLevel = 1;
+                    } else {
+                        costForNextLevel = 2;
+                    }
 
-                if ($skillPointStore >= costForNextLevel) {
-                    $value += 1;
-                    $skillPointStore -= costForNextLevel;
+                    if ($skillPointStore >= costForNextLevel) {
+                        $value += 1;
+                        $skillPointStore -= costForNextLevel;
+                    }
                 }
+            } else {
+                console.log("TODO: implement karma based shopping");
             }
         } else {
-            assignFirstMessage();
+            ui.notifications.warn(
+                localize(config.notifications.assignattributesfirst),
+            );
         }
         silentUpdate();
     }
 
     async function decrement() {
         if ($attributeAssignmentLocked) {
-            if ($value > 0) {
-                let refundForCurrentLevel;
+            if ($isCharacterCreation) {
+                if ($value > 0) {
+                    let refundForCurrentLevel;
 
-                if ($value > linkedAttributeRating) {
-                    refundForCurrentLevel = 2;
-                } else {
-                    refundForCurrentLevel = 1;
+                    if ($value > linkedAttributeRating) {
+                        refundForCurrentLevel = 2;
+                    } else {
+                        refundForCurrentLevel = 1;
+                    }
+
+                    $value -= 1;
+                    $skillPointStore += refundForCurrentLevel;
                 }
-
-                $value -= 1;
-                $skillPointStore += refundForCurrentLevel;
+            } else {
+                console.log("TODO: implement karma based shopping");
             }
         } else {
-            assignFirstMessage();
+            ui.notifications.warn(
+                localize(config.notifications.assignattributesfirst),
+            );
         }
 
         silentUpdate();
@@ -150,39 +169,33 @@
             { render: false },
         );
     }
-
-    function assignFirstMessage() {
-        ui.notifications.warn(
-            "You need to assign all attributes before assigning skills",
-        );
-    }
-
+ 
     async function deleteThis() {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
             window: {
-                title: "Delete This Skill?",
+                title: localize(config.modal.deleteskilltitle),
             },
-            content: "Do you want to delete this skill?",
+            content: localize(config.modal.deleteskill),
             yes: {
-                label: "Yes!",
+                label: localize(config.modal.confirm),
                 default: true,
             },
             no: {
-                label: "Nope!",
+                label: localize(config.modal.decline),
             },
             modal: true,
             rejectClose: true,
         });
 
         if (confirmed) {
-            if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+            if ($isCharacterCreation) {
                 if ($specializations.length > 0) {
                     $specializations = [];
                     await tick(); // import { tick } from "svelte";
                     $value += 1;
                 }
 
-                 let refund = 0;
+                let refund = 0;
                 for (let i = 1; i <= $value; i++) {
                     refund += i <= linkedAttributeRating ? 1 : 2;
                 }
@@ -190,9 +203,7 @@
                 $skillPointStore += refund;
                 $value = 0;
 
-                ui.notifications.info(
-                    localize(config.skill.skillpointsrestored),
-                );
+                ui.notifications.info(localize(config.skill.skillpointsrefund));
             }
 
             await tick();
@@ -203,7 +214,10 @@
                     render: false,
                 });
 
-                const store = getActorStore(actor.id, stores.knowledgeSkillsIds);
+                const store = getActorStore(
+                    actor.id,
+                    stores.knowledgeSkillsIds,
+                );
                 const current = get(store);
                 store.set(current.filter((sid) => sid !== id));
             }

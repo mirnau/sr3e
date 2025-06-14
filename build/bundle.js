@@ -5858,53 +5858,68 @@ async function addNewSpecialization$2(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function increment$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
+async function increment$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
+    if ($isCharacterCreation()) {
+      if ($value() < 6) {
+        let costForNextLevel;
+        if ($value() < linkedAttributeRating) {
+          costForNextLevel = 1;
+        } else {
+          costForNextLevel = 2;
+        }
+        if ($skillPointStore() >= costForNextLevel) {
+          store_set(value, $value() + 1);
+          store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+        }
       }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
   silentUpdate();
 }
-async function decrement$2(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
+async function decrement$2(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
+    if ($isCharacterCreation()) {
+      if ($value() > 0) {
+        let refundForCurrentLevel;
+        if ($value() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(value, $value() - 1);
+        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
       }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
-  silentUpdate();
+  await silentUpdate();
 }
-async function deleteThis$2(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$2(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
     modal: true,
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+    if ($$props.actor.getFlag($isCharacterCreation())) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
@@ -5916,7 +5931,7 @@ async function deleteThis$2(__3, $$props, $specializations, specializations, $va
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
+      ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
     if ($$props.skill) {
@@ -5936,9 +5951,11 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
+  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
   let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
   user_effect(() => {
@@ -5963,9 +5980,6 @@ function ActiveSkillEditorApp($$anchor, $$props) {
       },
       { render: false }
     );
-  }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
   }
   user_effect(() => {
     console.log("VALUE CHANGED", $value());
@@ -5996,12 +6010,14 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     increment$2,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
+    $$props,
     silentUpdate
   ];
   var button_1 = sibling(button, 2);
@@ -6009,18 +6025,22 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     decrement$2,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
+    $$props,
     silentUpdate
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
     deleteThis$2,
     $$props,
+    $isCharacterCreation,
+    isCharacterCreation,
     $specializations,
     specializations,
     $value,
@@ -6110,53 +6130,68 @@ async function addNewSpecialization$1(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
+async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
+    if ($isCharacterCreation()) {
+      if ($value() < 6) {
+        let costForNextLevel;
+        if ($value() < linkedAttributeRating) {
+          costForNextLevel = 1;
+        } else {
+          costForNextLevel = 2;
+        }
+        if ($skillPointStore() >= costForNextLevel) {
+          store_set(value, $value() + 1);
+          store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+        }
       }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
   silentUpdate();
 }
-async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
+async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
+    if ($isCharacterCreation()) {
+      if ($value() > 0) {
+        let refundForCurrentLevel;
+        if ($value() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(value, $value() - 1);
+        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
       }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
   silentUpdate();
 }
-async function deleteThis$1(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
     modal: true,
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+    if ($isCharacterCreation()) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
@@ -6168,7 +6203,7 @@ async function deleteThis$1(__3, $$props, $specializations, specializations, $va
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
+      ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
     if ($$props.skill) {
@@ -6188,9 +6223,11 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
+  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
   let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
   user_effect(() => {
@@ -6215,9 +6252,6 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
       },
       { render: false }
     );
-  }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
   }
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
@@ -6245,12 +6279,14 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     increment$1,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
+    $$props,
     silentUpdate
   ];
   var button_1 = sibling(button, 2);
@@ -6258,18 +6294,22 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     decrement$1,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    assignFirstMessage,
+    $$props,
     silentUpdate
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
     deleteThis$1,
     $$props,
+    $isCharacterCreation,
+    isCharacterCreation,
     $specializations,
     specializations,
     $value,
@@ -6365,39 +6405,68 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, silentUpdate, assignFirstMessage) {
-  if ($attributeAssignmentLocked() && $value() < 6) {
-    const cost = $value() < linkedAttributeRating ? 1 : 2;
-    if ($skillPointStore() >= cost) {
-      store_set(value, $value() + 1);
-      store_set(skillPointStore, $skillPointStore() - cost);
-      await silentUpdate();
+async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLocked()) {
+    if ($isCharacterCreation()) {
+      if ($value() < 6) {
+        let costForNextLevel;
+        if ($value() < linkedAttributeRating) {
+          costForNextLevel = 1;
+        } else {
+          costForNextLevel = 2;
+        }
+        if ($skillPointStore() >= costForNextLevel) {
+          store_set(value, $value() + 1);
+          store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+        }
+      }
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
-  } else if (!$attributeAssignmentLocked()) {
-    assignFirstMessage();
+  } else {
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
+  silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, silentUpdate, assignFirstMessage) {
-  if ($attributeAssignmentLocked() && $value() > 1) {
-    const refund = $value() > linkedAttributeRating ? 2 : 1;
-    store_set(value, $value() - 1);
-    store_set(skillPointStore, $skillPointStore() + refund);
-    await silentUpdate();
-  } else if (!$attributeAssignmentLocked()) {
-    assignFirstMessage();
+async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLocked()) {
+    if ($isCharacterCreation()) {
+      if ($value() > 0) {
+        let refundForCurrentLevel;
+        if ($value() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(value, $value() - 1);
+        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+      }
+    } else {
+      console.log("TODO: implement karma based shopping");
+    }
+  } else {
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
+  await silentUpdate();
 }
-async function deleteThis(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
     modal: true,
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+    if ($isCharacterCreation()) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
@@ -6409,7 +6478,7 @@ async function deleteThis(__3, $$props, $specializations, specializations, $valu
       }
       store_set(skillPointStore, $skillPointStore() + refund);
       store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
+      ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
     const id = $$props.skill.id;
@@ -6427,9 +6496,11 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   const $value = () => store_get(value, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   console.log("skill", $$props.skill);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
+  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
   let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
@@ -6471,9 +6542,6 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       { render: false }
     );
   }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
-  }
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
@@ -6507,31 +6575,37 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     increment,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    silentUpdate,
-    assignFirstMessage
+    $$props,
+    silentUpdate
   ];
   var button_1 = sibling(button, 2);
   button_1.__click = [
     decrement,
     $attributeAssignmentLocked,
     attributeAssignmentLocked,
+    $isCharacterCreation,
+    isCharacterCreation,
     $value,
     value,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
-    silentUpdate,
-    assignFirstMessage
+    $$props,
+    silentUpdate
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
     deleteThis,
     $$props,
+    $isCharacterCreation,
+    isCharacterCreation,
     $specializations,
     specializations,
     $value,
@@ -8192,6 +8266,8 @@ sr3e.health = {
 sr3e.modal = {
   confirm: "sr3e.modal.confirm",
   decline: "sr3e.modal.decline",
+  deleteskill: "sr3e.modal.deleteskill",
+  deleteskill: "sr3e.modal.deleteskilltitle",
   exitattributesassignment: "sr3e.modal.exitattributesassignment",
   exitcreationmode: "sr3e.modal.exitcreationmode",
   exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
@@ -8209,7 +8285,6 @@ sr3e.skill = {
   onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
   readwrite: "sr3e.skill.readwrite",
   skill: "sr3e.skill.skill",
-  skillpointsrestored: "sr3e.skills.skillpointsrestored",
   specializations: "sr3e.skill.specializations"
 };
 sr3e.initiative = {
@@ -8335,6 +8410,10 @@ sr3e.magic = {
   priority: "sr3e.magic.priority",
   spellPoints: "sr3e.magic.spellPoints",
   powerPoints: "sr3e.magic.powerPoints"
+};
+sr3e.notifications = {
+  assignattributesfirst: "sr3e.notificatioins.assignattributesfirst",
+  skillpointsrefund: "sr3e.skills.skillpointsrefund"
 };
 sr3e.weapon = {
   weapon: "sr3e.weapon.weapon",

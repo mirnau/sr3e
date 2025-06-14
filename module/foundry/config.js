@@ -28,6 +28,8 @@ sr3e.health = {
 sr3e.modal = {
     confirm: "sr3e.modal.confirm",
     decline: "sr3e.modal.decline",
+    deleteskill: "sr3e.modal.deleteskill",
+    deleteskill: "sr3e.modal.deleteskilltitle",
     exitattributesassignment: "sr3e.modal.exitattributesassignment",
     exitcreationmode:"sr3e.modal.exitcreationmode",
     exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
@@ -46,7 +48,6 @@ sr3e.skill = {
     onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
     readwrite: "sr3e.skill.readwrite",
     skill: "sr3e.skill.skill",
-    skillpointsrestored: "sr3e.skills.skillpointsrestored",
     specializations: "sr3e.skill.specializations",
 }
 
@@ -184,6 +185,11 @@ sr3e.magic = {
     spellPoints: "sr3e.magic.spellPoints",
     powerPoints: "sr3e.magic.powerPoints"
 };
+
+sr3e.notifications = {
+    assignattributesfirst: "sr3e.notificatioins.assignattributesfirst",
+    skillpointsrefund: "sr3e.skills.skillpointsrefund"
+}
 
 sr3e.weapon = {
     weapon: "sr3e.weapon.weapon",
