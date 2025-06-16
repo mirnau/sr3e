@@ -154,6 +154,17 @@
       "skill": "Skill",
       "specializations": "Specializations"
     },
+    "storytellerscreen": {
+      "storytellerscreen": "Storyteller's Screen"
+    },
+    "time": {
+      "year": "Year",
+      "month": "Month",
+      "day": "Day",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "seconds": "Seconds"
+    },
     "traits": {
       "age": "Age",
       "agerange": "Playable Age Range",

@@ -21,6 +21,7 @@
     ],
     "actorTypes": [
         "character",
+        "storytellerscreen",
         "broadcaster"
     ],
     "itemTypes": [
@@ -28,18 +29,21 @@
         "magic",
         "weapon",
         "ammunition",
-        "skill"
+        "skill",
+        "karma"
         ],
     "documentTypes": {
         "Actor": {
-            "character": {}
+            "character": {},
+            "storytellerscreen": {}
         },
         "Item": {
             "metahuman": {},
             "magic": {},
             "weapon": {},
             "ammunition": {},
-            "skill": {}
+            "skill": {},
+            "karma": {}
         }
     },
     "styles": [

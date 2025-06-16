@@ -5,8 +5,21 @@
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { flags } from "../../../../foundry/services/commonConsts.js";
     import { get, set } from "svelte/store";
+    import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
+    import Karma from "../Karma.svelte";
+    import { onMount } from "svelte";
 
     let { skill, actor, config, app } = $props();
+
+    let karmaShoppingService = null;
+
+    onMount(() => {
+        karmaShoppingService ??= new KarmaShoppingService(skill);
+    });
+
+    onDestroy(() => {
+        karmaShoppingService = null;
+    });
 
     let specializations = getActorStore(
         skill.id,
@@ -31,7 +44,9 @@
             .map((item) => item.id),
     );
 
-    let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
+    let disableValueControls = $derived(
+        $isCharacterCreation && $specializations.length > 0,
+    );
 
     $effect(() => {
         skill.update(
@@ -120,6 +135,8 @@
                     }
                 }
             } else {
+                karmaShoppingService = new KarmaShoppingService(skill);
+
                 console.log("TODO: implement karma based shopping");
             }
         } else {
@@ -208,7 +225,9 @@
                 $skillPointStore += refund;
                 $value = 0;
 
-                ui.notifications.info(localize(config.notifications.skillpointsrefund));
+                ui.notifications.info(
+                    localize(config.notifications.skillpointsrefund),
+                );
             }
 
             await tick();

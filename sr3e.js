@@ -16,11 +16,15 @@ import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
 import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
 import SkillItemSheet from "./module/foundry/sheets/SkillItemSheet.js";
 import SkillModel from "./module/models/item/SkillModel.js";
+import KarmaModel from "./module/models/item/KarmaModel.js";
 import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte"
 import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
 import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 import SR3EActor from "./module/foundry/documents/SR3EActor.js";
 import { attachLightEffect } from "./module/foundry/hooks/renderApplicationV2/attachLightEffect.js";
+import KarmaItemSheet from "./module/foundry/sheets/KarmaItemSheet.js";
+import StorytellerScreenModel from "./module/models/actor/StorytellerScreenModel.js";
+import StorytellerScreenActorSheet from "./module/foundry/sheets/StorytellerScreenActorSheet.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -76,6 +80,8 @@ function configureProject() {
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
+    karma: localize(CONFIG.sr3e.karma.karma),
+    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
   };
 
 
@@ -177,21 +183,63 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     if (element.firstElementChild?.classList.contains("sheet-component")) return;
 
+    //Note: to find classes, just walk the namespace
+
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
+      { type: foundry.applications.api.CategoryBrowser },
+      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.api.CategoryBrowser },
       { type: foundry.applications.sheets.journal.JournalEntryPageSheet },
+      { type: foundry.applications.sheets.ActiveEffectConfig },
+      { type: foundry.applications.sheets.AdventureImporterV2 },
+      { type: foundry.applications.sheets.AmbientLightConfig },
+      { type: foundry.applications.sheets.AmbientSoundConfig },
+      { type: foundry.applications.sheets.CardConfig },
+      { type: foundry.applications.sheets.CardDeckConfig },
+      { type: foundry.applications.sheets.CardHandConfig },
+      { type: foundry.applications.sheets.CardPileConfig },
+      { type: foundry.applications.sheets.CardsConfig },
+      { type: foundry.applications.sheets.CombatantConfig },
+      { type: foundry.applications.sheets.DrawingConfig },
+      { type: foundry.applications.sheets.FolderConfig },
+      { type: foundry.applications.sheets.MacroConfig },
+      { type: foundry.applications.sheets.MeasuredTemplateConfig },
+      { type: foundry.applications.sheets.NoteConfig },
+      { type: foundry.applications.sheets.PlaylistConfig },
+      { type: foundry.applications.sheets.PlaylistSoundConfig },
+      { type: foundry.applications.sheets.PrototypeTokenConfig },
+      { type: foundry.applications.sheets.RegionBehaviorConfig },
+      { type: foundry.applications.sheets.RegionConfig },
+      { type: foundry.applications.sheets.RollTableSheet },
+      { type: foundry.applications.sheets.SceneConfig },
+      { type: foundry.applications.sheets.TableResultConfig },
+      { type: foundry.applications.sheets.TileConfig },
+      { type: foundry.applications.sheets.TokenConfig },
+      { type: foundry.applications.sheets.UserConfig },
+      { type: foundry.applications.sheets.WallConfig },
       { type: foundry.applications.apps.CombatTrackerConfig },
+      { type: foundry.applications.apps.FilePicker },
+      { type: foundry.applications.apps.PermissionConfig },
+      { type: foundry.applications.apps.ImagePopout },
+      { type: foundry.applications.apps.DocumentOwnershipConfig },
+      { type: foundry.applications.apps.CombatTrackerConfig },
+      { type: foundry.applications.apps.CompendiumArtConfig },
+      { type: foundry.applications.apps.DocumentSheetConfig },
+      { type: foundry.applications.apps.GridConfig },
+      { type: foundry.applications.apps.av.CameraPopout },
+      { type: foundry.applications.apps.av.CameraViews },
       { type: foundry.applications.sidebar.apps.ControlsConfig },
       { type: foundry.applications.sidebar.apps.ModuleManagement },
       { type: foundry.applications.sidebar.apps.WorldConfig },
       { type: foundry.applications.sidebar.apps.ToursManagement },
       { type: foundry.applications.sidebar.apps.SupportDetails },
       { type: foundry.applications.sidebar.apps.InvitationLinks },
-      { type: foundry.applications.sheets.FolderConfig },
+      { type: foundry.applications.sidebar.apps.FolderExport },
       { type: foundry.applications.settings.SettingsConfig },
-      { type: foundry.applications.sheets.UserConfig },
-      { type: foundry.applications.api.DocumentSheetV2 },
-      { type: foundry.applications.apps.FilePicker }
+
+
+
     ];
 
     const typeDeselectors = [
@@ -223,11 +271,13 @@ function registerHooks() {
     registerDocumentTypes({
       args: [
         { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
+        { docClass: Actor, type: "storytellerscreen", model: StorytellerScreenModel, sheet: StorytellerScreenActorSheet },
         { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
         { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
         { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
         { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
-        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet }
+        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
+        { docClass: Item, type: "karma", model: KarmaModel, sheet: KarmaItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");
@@ -235,5 +285,3 @@ function registerHooks() {
 }
 
 registerHooks();
-
-

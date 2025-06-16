@@ -159,6 +159,10 @@ sr3e.userconfig = {
     saveUserSettings: "sr3e.userconfig.saveUserSettings",
 }
 
+sr3e.storytellerscreen = {
+    storytellerscreen: "sr3e.storytellerscreen.storytellerscreen"
+}
+
 sr3e.magic = {
     magic: "sr3e.magic.magic",
     adept: "sr3e.magic.adept",
@@ -189,6 +193,15 @@ sr3e.magic = {
 sr3e.notifications = {
     assignattributesfirst: "sr3e.notifications.assignattributesfirst",
     skillpointsrefund: "sr3e.notifications.skillpointsrefund"
+}
+
+sr3e.time = {
+    year: "sr3e.time.year",
+    month: "sr3e.time.month",
+    day: "sr3e.time.day",
+    hours: "sr3e.time.hours",
+    minutes: "sr3e.time.minutes",
+    seconds: "sr3e.time.seconds"
 }
 
 sr3e.weapon = {

@@ -11,6 +11,7 @@ export default class KarmaModel extends foundry.abstract.TypeDataModel {
           initial: 1,
           integer: true,
         }),
+        //NOTE: Used to calculate the current karma pool, not exposed to the player
         lifetimeKarma: new foundry.data.fields.NumberField({
           required: true,
           initial: 0,

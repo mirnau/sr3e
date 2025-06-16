@@ -43,17 +43,9 @@
 
     <div class="stat-card">
         <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
+        <h4 class="no-margin">{localize(config.karma.karmaPool)}</h4>
         <h1 class="stat-value">
             {karma.karmaPool}
-        </h1>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
-        <h1 class="stat-value">
-            {karma.lifetimeKarma}
         </h1>
     </div>
 

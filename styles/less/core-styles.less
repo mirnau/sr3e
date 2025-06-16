@@ -53,6 +53,7 @@
     @import "./styling/components/sr3e-scrollbar.less";
     @import "./styling/components/sr3e-input.less";
     @import "./styling/components/sr3e-window-content.less";
+    @import "./styling/components/sr3e-menu-controls-dropdown.less";
 
     //Custom
     @import "./styling/custom-components/sr3e-folder-tab-structure.less";
@@ -68,6 +69,10 @@
     @import "./styling/injections/neoname.less";
     @import "./styling/injections/newsfeed.less";
 
+    // Temporary Solutions (hoping for foundry updates to fix this in the future)
+    @import "./styling/skinning/tempfixes/sr3e-category-browser-temp-overrides.less";
+
+
     // Not yet refactored:
 
     @import "./styling/skinning/sr3e-input-range.less";
@@ -76,8 +81,43 @@
     section.body.flexcol.scrollable {
         overflow-y: auto;
         max-height: 20rem;
-
     }
 
-    
+    .counter-bar {
+        display: flex;
+        flex-direction: column; // <- or row, depending on layout goals
+        gap: 1rem;
+        
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .text-display {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .time-editor {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+
+        }
+
+        .time-editor-component {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            margin: 0;
+
+            .time-display {
+                font-size: 1.5rem;
+            }
+        }
+    }
 }
