@@ -18,11 +18,7 @@ export default class TransactionModel extends foundry.abstract.TypeDataModel {
         choices: ["Asset", "Expense", "Debt"],
         initial: "Expense",
       }),
-      description: new foundry.data.fields.StringField({
-        required: true,
-        initial: "",
-      }),
-      creditorID: new foundry.data.fields.StringField({
+      creditorId: new foundry.data.fields.StringField({
         required: false,
         initial: "",
       }),
@@ -33,6 +29,10 @@ export default class TransactionModel extends foundry.abstract.TypeDataModel {
       interestPerMonth: new foundry.data.fields.NumberField({
         required: true,
         initial: 0.0,
+      }),
+      journalId: new foundry.data.fields.StringField({
+        required: true,
+        initial: "",
       }),
     };
   }

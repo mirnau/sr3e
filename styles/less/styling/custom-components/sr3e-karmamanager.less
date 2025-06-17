@@ -3,25 +3,19 @@
   flex-direction: column;
   gap: 0.5rem;
 
-  .points-container {
-    // optional top bar
+  .player-handler {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-  .player.handler {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    .actor-search {
-      .search-box {
-        // search field goes here
-      }
-    }
-
-    .typeOfCharacter {
-      width: fit-content;
-      padding: 0.25rem 0.5rem;
-    }
+  .player-handler > * {
+    flex: 1;
+    max-width: 100%;
+    height: 2rem;
+    margin: 0;
   }
 
   .list-box {

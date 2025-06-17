@@ -188,6 +188,9 @@
       "goldenyears": "Golden Oldie",
       "ancient": "Very Old Indeed"
     },
+    "transaction": {
+      "transaction": "Transaction"
+    },
     "userconfig": {
       "setPlayerName": "Player Name",
       "playerName": "The Players Name",

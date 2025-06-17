@@ -104,10 +104,7 @@
     <div class="sr3e-inner-background">
       <div class="karma-manager">
         <div class="points-container"></div>
-        <div class="player handler">
-          <div class="actor-search">
-            <div class="search-box"></div>
-          </div>
+        <div class="player-handler">
           <select
             name="typeOfCharacter"
             class="typeOfCharacter"
@@ -118,15 +115,15 @@
             {/each}
           </select>
           <input type="text" bind:value={delimiter} />
-          <button onclick={commitSelected} disabled={!anyReady}>
-            {localize(config.karma.commitselected)}
-          </button>
 
+          <button onclick={selectAll}>
+            {localize(config.karma.selectall)}
+          </button>
           <button onclick={deselectAll}>
             {localize(config.karma.deselectall)}
           </button>
-          <button onclick={selectAll}>
-            {localize(config.karma.selectall)}
+          <button onclick={commitSelected} disabled={!anyReady}>
+            {localize(config.karma.commitselected)}
           </button>
         </div>
         <div class="list-box">

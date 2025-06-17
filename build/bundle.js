@@ -8506,6 +8506,9 @@ sr3e.time = {
   minutes: "sr3e.time.minutes",
   seconds: "sr3e.time.seconds"
 };
+sr3e.transaction = {
+  transaction: "sr3e.transaction.transaction"
+};
 sr3e.weapon = {
   weapon: "sr3e.weapon.weapon",
   weaponStats: "sr3e.weapon.weaponStats",
@@ -11755,7 +11758,7 @@ var on_change = async (e, actor, forceRefresh) => {
 var root_3 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td class=""><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
 var root_2 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player handler"><div class="actor-search"><div class="search-box"></div></div> <select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function KarmaManager($$anchor, $$props) {
   push($$props, true);
   let delimiter = state("");
@@ -11818,7 +11821,7 @@ function KarmaManager($$anchor, $$props) {
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
-  var select = sibling(child(div_4), 2);
+  var select = child(div_4);
   each(select, 21, () => options, index, ($$anchor2, $$item) => {
     let value = () => get$1($$item).value;
     let label = () => get$1($$item).label;
@@ -11835,13 +11838,13 @@ function KarmaManager($$anchor, $$props) {
   });
   var input = sibling(select, 2);
   var button = sibling(input, 2);
-  button.__click = [commitSelected, listboxContent, deselectAll];
+  button.__click = [selectAll, listboxContent, forceRefresh];
   var text_1 = child(button);
   var button_1 = sibling(button, 2);
   button_1.__click = deselectAll;
   var text_2 = child(button_1);
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [selectAll, listboxContent, forceRefresh];
+  button_2.__click = [commitSelected, listboxContent, deselectAll];
   var text_3 = child(button_2);
   var div_5 = sibling(div_4, 2);
   var node = child(div_5);
@@ -11921,15 +11924,15 @@ function KarmaManager($$anchor, $$props) {
   }
   template_effect(
     ($0, $1, $2) => {
-      button.disabled = !get$1(anyReady);
       set_text(text_1, $0);
       set_text(text_2, $1);
+      button_2.disabled = !get$1(anyReady);
       set_text(text_3, $2);
     },
     [
-      () => localize($$props.config.karma.commitselected),
+      () => localize($$props.config.karma.selectall),
       () => localize($$props.config.karma.deselectall),
-      () => localize($$props.config.karma.selectall)
+      () => localize($$props.config.karma.commitselected)
     ]
   );
   bind_select_value(select, () => get$1(filter), ($$value) => set(filter, $$value));
@@ -12054,7 +12057,8 @@ function configureProject() {
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
     karma: localize(CONFIG.sr3e.karma.karma),
-    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen)
+    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+    transaction: localize(CONFIG.sr3e.transaction.transaction)
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");

@@ -82,8 +82,8 @@ function configureProject() {
     skill: localize(CONFIG.sr3e.skill.skill),
     karma: localize(CONFIG.sr3e.karma.karma),
     storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+    transaction: localize(CONFIG.sr3e.transaction.transaction),
   };
-
 
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
@@ -277,6 +277,7 @@ function registerHooks() {
         { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
         { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
         { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
+        { docClass: Item, type: "karma", model: KarmaModel, sheet: KarmaItemSheet }
         { docClass: Item, type: "karma", model: KarmaModel, sheet: KarmaItemSheet }
       ]
     });

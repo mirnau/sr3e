@@ -213,6 +213,10 @@ sr3e.time = {
     seconds: "sr3e.time.seconds"
 }
 
+sr3e.transaction ={
+    transaction: "sr3e.transaction.transaction",
+}
+
 sr3e.weapon = {
     weapon: "sr3e.weapon.weapon",
     weaponStats: "sr3e.weapon.weaponStats",
