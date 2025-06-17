@@ -16,15 +16,15 @@ import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
 import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
 import SkillItemSheet from "./module/foundry/sheets/SkillItemSheet.js";
 import SkillModel from "./module/models/item/SkillModel.js";
-import KarmaModel from "./module/models/item/KarmaModel.js";
 import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte"
 import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
 import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 import SR3EActor from "./module/foundry/documents/SR3EActor.js";
 import { attachLightEffect } from "./module/foundry/hooks/renderApplicationV2/attachLightEffect.js";
-import KarmaItemSheet from "./module/foundry/sheets/KarmaItemSheet.js";
 import StorytellerScreenModel from "./module/models/actor/StorytellerScreenModel.js";
 import StorytellerScreenActorSheet from "./module/foundry/sheets/StorytellerScreenActorSheet.js";
+import TransactionModel from "./module/models/item/TransactionModel.js";
+import TransactionItemSheet from "./module/foundry/sheets/TransactionItemSheet.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -80,7 +80,6 @@ function configureProject() {
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
-    karma: localize(CONFIG.sr3e.karma.karma),
     storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
     transaction: localize(CONFIG.sr3e.transaction.transaction),
   };
@@ -277,8 +276,7 @@ function registerHooks() {
         { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
         { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
         { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
-        { docClass: Item, type: "karma", model: KarmaModel, sheet: KarmaItemSheet }
-        { docClass: Item, type: "karma", model: KarmaModel, sheet: KarmaItemSheet }
+        { docClass: Item, type: "transaction", model: TransactionModel, sheet: TransactionItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

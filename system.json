@@ -30,7 +30,6 @@
         "weapon",
         "ammunition",
         "skill",
-        "karma",
         "transaction"
         ],
     "documentTypes": {
@@ -44,7 +43,6 @@
             "weapon": {},
             "ammunition": {},
             "skill": {},
-            "karma": {},
             "transaction": {}
         }
     },

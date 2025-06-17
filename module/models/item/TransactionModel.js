@@ -1,36 +1,31 @@
 export default class TransactionModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      amount: new foundry.data.fields.NumberField({
+      amount: new foundry.data.fields.NumberField({ // Exposed already
         required: true,
         initial: 0.0,
       }),
-      recurrent: new foundry.data.fields.BooleanField({
+      recurrent: new foundry.data.fields.BooleanField({ //Expose
         required: true,
         initial: false,
       }),
-      isCreditStick: new foundry.data.fields.BooleanField({
+      isCreditStick: new foundry.data.fields.BooleanField({ //Expose
         required: true,
         initial: false,
       }),
-      type: new foundry.data.fields.StringField({
+      type: new foundry.data.fields.StringField({ //Expose, is a select with Asset, Debt, Expense as options will be localized later
         required: true,
-        choices: ["Asset", "Expense", "Debt"],
-        initial: "Expense",
+        initial: "",
       }),
-      creditorId: new foundry.data.fields.StringField({
+      creditorId: new foundry.data.fields.StringField({ // If it is a debt, who is owed to, not exposed
         required: false,
         initial: "",
       }),
-      creditorName: new foundry.data.fields.StringField({
-        required: false,
-        initial: "",
-      }),
-      interestPerMonth: new foundry.data.fields.NumberField({
+      interestPerMonth: new foundry.data.fields.NumberField({ //Expose
         required: true,
         initial: 0.0,
       }),
-      journalId: new foundry.data.fields.StringField({
+      journalId: new foundry.data.fields.StringField({ //Exposed already
         required: true,
         initial: "",
       }),

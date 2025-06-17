@@ -2,13 +2,13 @@ var __defProp = Object.defineProperty;
 var __typeError = (msg) => {
   throw TypeError(msg);
 };
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+var __defNormalProp = (obj, key, value2) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value: value2 }) : obj[key] = value2;
+var __publicField = (obj, key, value2) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value2);
 var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
-var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
-var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _karma, _app3;
+var __privateAdd = (obj, member, value2) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value2);
+var __privateSet = (obj, member, value2, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value2) : member.set(obj, value2), value2);
+var _app, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -174,7 +174,7 @@ class Creation extends foundry.abstract.TypeDataModel {
     };
   }
 }
-let KarmaModel$1 = class KarmaModel extends foundry.abstract.TypeDataModel {
+class KarmaModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       goodKarma: new foundry.data.fields.NumberField({
@@ -213,7 +213,7 @@ let KarmaModel$1 = class KarmaModel extends foundry.abstract.TypeDataModel {
       })
     };
   }
-};
+}
 class HealthModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
@@ -278,7 +278,7 @@ class CharacterModel extends foundry.abstract.TypeDataModel {
       movement: new foundry.data.fields.SchemaField(AttributesModel2.defineSchema()),
       profile: new foundry.data.fields.SchemaField(Profile.defineSchema()),
       creation: new foundry.data.fields.SchemaField(Creation.defineSchema()),
-      karma: new foundry.data.fields.SchemaField(KarmaModel$1.defineSchema()),
+      karma: new foundry.data.fields.SchemaField(KarmaModel.defineSchema()),
       health: new foundry.data.fields.SchemaField(HealthModel.defineSchema()),
       journalEntryUuid: new foundry.data.fields.StringField({
         required: false,
@@ -350,14 +350,14 @@ const EFFECT_HAS_DERIVED = 1 << 20;
 const STATE_SYMBOL = Symbol("$state");
 const LEGACY_PROPS = Symbol("legacy props");
 const LOADING_ATTR_SYMBOL = Symbol("");
-function equals(value) {
-  return value === this.v;
+function equals(value2) {
+  return value2 === this.v;
 }
 function safe_not_equal(a, b) {
   return a != a ? b == b : a !== b || a !== null && typeof a === "object" || typeof a === "function";
 }
-function safe_equals(value) {
-  return !safe_not_equal(value, this.v);
+function safe_equals(value2) {
+  return !safe_not_equal(value2, this.v);
 }
 function effect_in_teardown(rune) {
   {
@@ -439,18 +439,18 @@ function push_derived_source(source2) {
   }
   return source2;
 }
-function set(source2, value) {
+function set(source2, value2) {
   if (active_reaction !== null && !untracking && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && // If the source was created locally within the current derived, then
   // we allow the mutation.
   (derived_sources === null || !derived_sources.includes(source2))) {
     state_unsafe_mutation();
   }
-  return internal_set(source2, value);
+  return internal_set(source2, value2);
 }
-function internal_set(source2, value) {
-  if (!source2.equals(value)) {
+function internal_set(source2, value2) {
+  if (!source2.equals(value2)) {
     source2.v;
-    source2.v = value;
+    source2.v = value2;
     source2.wv = increment_write_version();
     mark_reactions(source2, DIRTY);
     if (active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
@@ -461,7 +461,7 @@ function internal_set(source2, value) {
       }
     }
   }
-  return value;
+  return value2;
 }
 function mark_reactions(signal, status) {
   var reactions = signal.reactions;
@@ -489,27 +489,27 @@ function mark_reactions(signal, status) {
   }
 }
 let hydrating = false;
-function proxy(value, parent = null, prev) {
-  if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
-    return value;
+function proxy(value2, parent = null, prev) {
+  if (typeof value2 !== "object" || value2 === null || STATE_SYMBOL in value2) {
+    return value2;
   }
-  const prototype = get_prototype_of(value);
+  const prototype = get_prototype_of(value2);
   if (prototype !== object_prototype && prototype !== array_prototype) {
-    return value;
+    return value2;
   }
   var sources = /* @__PURE__ */ new Map();
-  var is_proxied_array = is_array(value);
+  var is_proxied_array = is_array(value2);
   var version = source(0);
   if (is_proxied_array) {
     sources.set("length", source(
       /** @type {any[]} */
-      value.length
+      value2.length
     ));
   }
   var metadata;
   return new Proxy(
     /** @type {any} */
-    value,
+    value2,
     {
       defineProperty(_, prop2, descriptor) {
         if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
@@ -549,7 +549,7 @@ function proxy(value, parent = null, prev) {
       get(target, prop2, receiver) {
         var _a;
         if (prop2 === STATE_SYMBOL) {
-          return value;
+          return value2;
         }
         var s = sources.get(prop2);
         var exists = prop2 in target;
@@ -570,12 +570,12 @@ function proxy(value, parent = null, prev) {
           if (s) descriptor.value = get$1(s);
         } else if (descriptor === void 0) {
           var source2 = sources.get(prop2);
-          var value2 = source2 == null ? void 0 : source2.v;
-          if (source2 !== void 0 && value2 !== UNINITIALIZED) {
+          var value3 = source2 == null ? void 0 : source2.v;
+          if (source2 !== void 0 && value3 !== UNINITIALIZED) {
             return {
               enumerable: true,
               configurable: true,
-              value: value2,
+              value: value3,
               writable: true
             };
           }
@@ -594,19 +594,19 @@ function proxy(value, parent = null, prev) {
             s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
             sources.set(prop2, s);
           }
-          var value2 = get$1(s);
-          if (value2 === UNINITIALIZED) {
+          var value3 = get$1(s);
+          if (value3 === UNINITIALIZED) {
             return false;
           }
         }
         return has;
       },
-      set(target, prop2, value2, receiver) {
+      set(target, prop2, value3, receiver) {
         var _a;
         var s = sources.get(prop2);
         var has = prop2 in target;
         if (is_proxied_array && prop2 === "length") {
-          for (var i = value2; i < /** @type {Source<number>} */
+          for (var i = value3; i < /** @type {Source<number>} */
           s.v; i += 1) {
             var other_s = sources.get(i + "");
             if (other_s !== void 0) {
@@ -620,16 +620,16 @@ function proxy(value, parent = null, prev) {
         if (s === void 0) {
           if (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable)) {
             s = source(void 0);
-            set(s, proxy(value2, metadata));
+            set(s, proxy(value3, metadata));
             sources.set(prop2, s);
           }
         } else {
           has = s.v !== UNINITIALIZED;
-          set(s, proxy(value2, metadata));
+          set(s, proxy(value3, metadata));
         }
         var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
         if (descriptor == null ? void 0 : descriptor.set) {
-          descriptor.set.call(receiver, value2);
+          descriptor.set.call(receiver, value3);
         }
         if (!has) {
           if (is_proxied_array && typeof prop2 === "string") {
@@ -668,11 +668,11 @@ function proxy(value, parent = null, prev) {
 function update_version(signal, d = 1) {
   set(signal, signal.v + d);
 }
-function get_proxied_value(value) {
-  if (value !== null && typeof value === "object" && STATE_SYMBOL in value) {
-    return value[STATE_SYMBOL];
+function get_proxied_value(value2) {
+  if (value2 !== null && typeof value2 === "object" && STATE_SYMBOL in value2) {
+    return value2[STATE_SYMBOL];
   }
-  return value;
+  return value2;
 }
 function is(a, b) {
   return Object.is(get_proxied_value(a), get_proxied_value(b));
@@ -696,8 +696,8 @@ function init_operations() {
   element_prototype.__e = void 0;
   Text.prototype.__t = void 0;
 }
-function create_text(value = "") {
-  return document.createTextNode(value);
+function create_text(value2 = "") {
+  return document.createTextNode(value2);
 }
 // @__NO_SIDE_EFFECTS__
 function get_first_child(node) {
@@ -811,25 +811,25 @@ function get_derived_parent_effect(derived2) {
   return null;
 }
 function execute_derived(derived2) {
-  var value;
+  var value2;
   var prev_active_effect = active_effect;
   set_active_effect(get_derived_parent_effect(derived2));
   {
     try {
       destroy_derived_children(derived2);
-      value = update_reaction(derived2);
+      value2 = update_reaction(derived2);
     } finally {
       set_active_effect(prev_active_effect);
     }
   }
-  return value;
+  return value2;
 }
 function update_derived(derived2) {
-  var value = execute_derived(derived2);
+  var value2 = execute_derived(derived2);
   var status = (skip_reaction || (derived2.f & UNOWNED) !== 0) && derived2.deps !== null ? MAYBE_DIRTY : CLEAN;
   set_signal_status(derived2, status);
-  if (!derived2.equals(value)) {
-    derived2.v = value;
+  if (!derived2.equals(value2)) {
+    derived2.v = value2;
     derived2.wv = increment_write_version();
   }
 }
@@ -1151,11 +1151,11 @@ let is_micro_task_queued = false;
 let last_scheduled_effect = null;
 let is_flushing_effect = false;
 let is_destroying_effect = false;
-function set_is_flushing_effect(value) {
-  is_flushing_effect = value;
+function set_is_flushing_effect(value2) {
+  is_flushing_effect = value2;
 }
-function set_is_destroying_effect(value) {
-  is_destroying_effect = value;
+function set_is_destroying_effect(value2) {
+  is_destroying_effect = value2;
 }
 let queued_root_effects = [];
 let flush_count = 0;
@@ -1176,8 +1176,8 @@ function set_derived_sources(sources) {
 let new_deps = null;
 let skipped_deps = 0;
 let untracked_writes = null;
-function set_untracked_writes(value) {
-  untracked_writes = value;
+function set_untracked_writes(value2) {
+  untracked_writes = value2;
 }
 let write_version = 1;
 let read_version = 0;
@@ -1616,7 +1616,7 @@ function get$1(signal) {
   var flags2 = signal.f;
   var is_derived = (flags2 & DERIVED) !== 0;
   if (is_derived && (flags2 & DESTROYED) !== 0) {
-    var value = execute_derived(
+    var value2 = execute_derived(
       /** @type {Derived} */
       signal
     );
@@ -1624,7 +1624,7 @@ function get$1(signal) {
       /** @type {Derived} */
       signal
     );
-    return value;
+    return value2;
   }
   if (active_reaction !== null && !untracking) {
     if (derived_sources !== null && derived_sources.includes(signal)) {
@@ -1971,8 +1971,8 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
-  var str = value == null ? "" : typeof value === "object" ? value + "" : value;
+function set_text(text, value2) {
+  var str = value2 == null ? "" : typeof value2 === "object" ? value2 + "" : value2;
   if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
     text.__t = str;
     text.nodeValue = str == null ? "" : str + "";
@@ -2207,14 +2207,14 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
   var to_animate;
   var matched = [];
   var stashed = [];
-  var value;
+  var value2;
   var key;
   var item2;
   var i;
   if (is_animated) {
     for (i = 0; i < length; i += 1) {
-      value = array[i];
-      key = get_key(value, i);
+      value2 = array[i];
+      key = get_key(value2, i);
       item2 = items.get(key);
       if (item2 !== void 0) {
         (_a = item2.a) == null ? void 0 : _a.measure();
@@ -2223,8 +2223,8 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
     }
   }
   for (i = 0; i < length; i += 1) {
-    value = array[i];
-    key = get_key(value, i);
+    value2 = array[i];
+    key = get_key(value2, i);
     item2 = items.get(key);
     if (item2 === void 0) {
       var child_anchor = current ? (
@@ -2236,7 +2236,7 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
         state2,
         prev,
         prev === null ? state2.first : prev.next,
-        value,
+        value2,
         key,
         i,
         render_fn,
@@ -2250,7 +2250,7 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
       continue;
     }
     if (should_update) {
-      update_item(item2, value, i, flags2);
+      update_item(item2, value2, i, flags2);
     }
     if ((item2.e.f & INERT) !== 0) {
       resume_effect(item2.e);
@@ -2343,9 +2343,9 @@ function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, 
   active_effect.first = state2.first && state2.first.e;
   active_effect.last = prev && prev.e;
 }
-function update_item(item2, value, index2, type) {
+function update_item(item2, value2, index2, type) {
   if ((type & EACH_ITEM_REACTIVE) !== 0) {
-    internal_set(item2.v, value);
+    internal_set(item2.v, value2);
   }
   if ((type & EACH_INDEX_REACTIVE) !== 0) {
     internal_set(
@@ -2357,10 +2357,10 @@ function update_item(item2, value, index2, type) {
     item2.i = index2;
   }
 }
-function create_item(anchor, state2, prev, next, value, key, index2, render_fn, flags2, get_collection) {
+function create_item(anchor, state2, prev, next, value2, key, index2, render_fn, flags2, get_collection) {
   var reactive = (flags2 & EACH_ITEM_REACTIVE) !== 0;
   var mutable = (flags2 & EACH_ITEM_IMMUTABLE) === 0;
-  var v = reactive ? mutable ? /* @__PURE__ */ mutable_source(value) : source(value) : value;
+  var v = reactive ? mutable ? /* @__PURE__ */ mutable_source(value2) : source(value2) : value2;
   var i = (flags2 & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
   var item2 = {
     i,
@@ -2426,19 +2426,19 @@ function link(state2, prev, next) {
 }
 function html(node, get_value, svg, mathml, skip_warning) {
   var anchor = node;
-  var value = "";
+  var value2 = "";
   var effect2;
   block(() => {
-    if (value === (value = get_value() ?? "")) {
+    if (value2 === (value2 = get_value() ?? "")) {
       return;
     }
     if (effect2 !== void 0) {
       destroy_effect(effect2);
       effect2 = void 0;
     }
-    if (value === "") return;
+    if (value2 === "") return;
     effect2 = branch(() => {
-      var html2 = value + "";
+      var html2 = value2 + "";
       var node2 = create_fragment_from_html(html2);
       assign_nodes(
         /** @type {TemplateNode} */
@@ -2467,15 +2467,15 @@ function component(node, get_component, render_fn) {
     }
   }, EFFECT_TRANSPARENT);
 }
-function set_value(element, value) {
+function set_value(element, value2) {
   var attributes = element.__attributes ?? (element.__attributes = {});
   if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
-  value ?? void 0) || // @ts-expect-error
+  value2 ?? void 0) || // @ts-expect-error
   // `progress` elements always need their value set when it's `0`
-  element.value === value && (value !== 0 || element.nodeName !== "PROGRESS")) {
+  element.value === value2 && (value2 !== 0 || element.nodeName !== "PROGRESS")) {
     return;
   }
-  element.value = value ?? "";
+  element.value = value2 ?? "";
 }
 function set_checked(element, checked) {
   var attributes = element.__attributes ?? (element.__attributes = {});
@@ -2494,21 +2494,21 @@ function set_selected(element, selected) {
     element.removeAttribute("selected");
   }
 }
-function set_attribute(element, attribute, value, skip_warning) {
+function set_attribute(element, attribute, value2, skip_warning) {
   var attributes = element.__attributes ?? (element.__attributes = {});
-  if (attributes[attribute] === (attributes[attribute] = value)) return;
+  if (attributes[attribute] === (attributes[attribute] = value2)) return;
   if (attribute === "style" && "__styles" in element) {
     element.__styles = {};
   }
   if (attribute === "loading") {
-    element[LOADING_ATTR_SYMBOL] = value;
+    element[LOADING_ATTR_SYMBOL] = value2;
   }
-  if (value == null) {
+  if (value2 == null) {
     element.removeAttribute(attribute);
-  } else if (typeof value !== "string" && get_setters(element).includes(attribute)) {
-    element[attribute] = value;
+  } else if (typeof value2 !== "string" && get_setters(element).includes(attribute)) {
+    element[attribute] = value2;
   } else {
-    element.setAttribute(attribute, value);
+    element.setAttribute(attribute, value2);
   }
 }
 var setters_cache = /* @__PURE__ */ new Map();
@@ -2530,11 +2530,11 @@ function get_setters(element) {
   }
   return setters;
 }
-function set_class(dom, value, hash) {
+function set_class(dom, value2, hash) {
   var prev_class_name = dom.__className;
-  var next_class_name = to_class(value);
+  var next_class_name = to_class(value2);
   if (prev_class_name !== next_class_name || hydrating) {
-    if (value == null && true) {
+    if (value2 == null && true) {
       dom.removeAttribute("class");
     } else {
       dom.className = next_class_name;
@@ -2542,11 +2542,11 @@ function set_class(dom, value, hash) {
     dom.__className = next_class_name;
   }
 }
-function to_class(value, hash) {
-  return (value == null ? "" : value) + "";
+function to_class(value2, hash) {
+  return (value2 == null ? "" : value2) + "";
 }
-function toggle_class(dom, class_name, value) {
-  if (value) {
+function toggle_class(dom, class_name, value2) {
+  if (value2) {
     if (dom.classList.contains(class_name)) return;
     dom.classList.add(class_name);
   } else {
@@ -2610,10 +2610,10 @@ function css_to_keyframe(css) {
   const keyframe = {};
   const parts = css.split(";");
   for (const part of parts) {
-    const [property, value] = part.split(":");
-    if (!property || value === void 0) break;
+    const [property, value2] = part.split(":");
+    if (!property || value2 === void 0) break;
     const formatted_property = css_property_to_camelcase(property.trim());
-    keyframe[formatted_property] = value.trim();
+    keyframe[formatted_property] = value2.trim();
   }
   return keyframe;
 }
@@ -2820,13 +2820,13 @@ function animate(element, options, counterpart, t2, on_finish) {
 }
 function bind_value(input, get2, set2 = get2) {
   listen_to_event_and_reset_event(input, "input", (is_reset) => {
-    var value = is_reset ? input.defaultValue : input.value;
-    value = is_numberlike_input(input) ? to_number(value) : value;
-    set2(value);
-    if (value !== (value = get2())) {
+    var value2 = is_reset ? input.defaultValue : input.value;
+    value2 = is_numberlike_input(input) ? to_number(value2) : value2;
+    set2(value2);
+    if (value2 !== (value2 = get2())) {
       var start = input.selectionStart;
       var end = input.selectionEnd;
-      input.value = value ?? "";
+      input.value = value2 ?? "";
       if (end !== null) {
         input.selectionStart = start;
         input.selectionEnd = Math.min(end, input.value.length);
@@ -2843,22 +2843,22 @@ function bind_value(input, get2, set2 = get2) {
     set2(is_numberlike_input(input) ? to_number(input.value) : input.value);
   }
   render_effect(() => {
-    var value = get2();
-    if (is_numberlike_input(input) && value === to_number(input.value)) {
+    var value2 = get2();
+    if (is_numberlike_input(input) && value2 === to_number(input.value)) {
       return;
     }
-    if (input.type === "date" && !value && !input.value) {
+    if (input.type === "date" && !value2 && !input.value) {
       return;
     }
-    if (value !== input.value) {
-      input.value = value ?? "";
+    if (value2 !== input.value) {
+      input.value = value2 ?? "";
     }
   });
 }
 function bind_checked(input, get2, set2 = get2) {
   listen_to_event_and_reset_event(input, "change", (is_reset) => {
-    var value = is_reset ? input.defaultChecked : input.checked;
-    set2(value);
+    var value2 = is_reset ? input.defaultChecked : input.checked;
+    set2(value2);
   });
   if (
     // If we are hydrating and the value has since changed,
@@ -2869,29 +2869,29 @@ function bind_checked(input, get2, set2 = get2) {
     set2(input.checked);
   }
   render_effect(() => {
-    var value = get2();
-    input.checked = Boolean(value);
+    var value2 = get2();
+    input.checked = Boolean(value2);
   });
 }
 function is_numberlike_input(input) {
   var type = input.type;
   return type === "number" || type === "range";
 }
-function to_number(value) {
-  return value === "" ? null : +value;
+function to_number(value2) {
+  return value2 === "" ? null : +value2;
 }
-function select_option(select, value, mounting) {
+function select_option(select, value2, mounting) {
   if (select.multiple) {
-    return select_options(select, value);
+    return select_options(select, value2);
   }
   for (var option of select.options) {
     var option_value = get_option_value(option);
-    if (is(option_value, value)) {
+    if (is(option_value, value2)) {
       option.selected = true;
       return;
     }
   }
-  if (!mounting || value !== void 0) {
+  if (!mounting || value2 !== void 0) {
     select.selectedIndex = -1;
   }
 }
@@ -2903,8 +2903,8 @@ function init_select(select, get_value) {
     }
     mounting = false;
     var observer = new MutationObserver(() => {
-      var value = select.__value;
-      select_option(select, value);
+      var value2 = select.__value;
+      select_option(select, value2);
     });
     observer.observe(select, {
       // Listen to option element changes
@@ -2926,34 +2926,34 @@ function bind_select_value(select, get2, set2 = get2) {
   var mounting = true;
   listen_to_event_and_reset_event(select, "change", (is_reset) => {
     var query = is_reset ? "[selected]" : ":checked";
-    var value;
+    var value2;
     if (select.multiple) {
-      value = [].map.call(select.querySelectorAll(query), get_option_value);
+      value2 = [].map.call(select.querySelectorAll(query), get_option_value);
     } else {
       var selected_option = select.querySelector(query) ?? // will fall back to first non-disabled option if no option is selected
       select.querySelector("option:not([disabled])");
-      value = selected_option && get_option_value(selected_option);
+      value2 = selected_option && get_option_value(selected_option);
     }
-    set2(value);
+    set2(value2);
   });
   effect(() => {
-    var value = get2();
-    select_option(select, value, mounting);
-    if (mounting && value === void 0) {
+    var value2 = get2();
+    select_option(select, value2, mounting);
+    if (mounting && value2 === void 0) {
       var selected_option = select.querySelector(":checked");
       if (selected_option !== null) {
-        value = get_option_value(selected_option);
-        set2(value);
+        value2 = get_option_value(selected_option);
+        set2(value2);
       }
     }
-    select.__value = value;
+    select.__value = value2;
     mounting = false;
   });
   init_select(select);
 }
-function select_options(select, value) {
+function select_options(select, value2) {
   for (var option of select.options) {
-    option.selected = ~value.indexOf(get_option_value(option));
+    option.selected = ~value2.indexOf(get_option_value(option));
   }
 }
 function get_option_value(option) {
@@ -2997,13 +2997,13 @@ function bind_content_editable(property, element, get2, set2 = get2) {
     set2(element[property]);
   });
   render_effect(() => {
-    var value = get2();
-    if (element[property] !== value) {
-      if (value == null) {
+    var value2 = get2();
+    if (element[property] !== value2) {
+      if (value2 == null) {
         var non_null_value = element[property];
         set2(non_null_value);
       } else {
-        element[property] = value + "";
+        element[property] = value2 + "";
       }
     }
   });
@@ -3076,17 +3076,17 @@ function subscribe_to_store(store, run, invalidate) {
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
 const subscriber_queue = [];
-function writable(value, start = noop) {
+function writable(value2, start = noop) {
   let stop = null;
   const subscribers = /* @__PURE__ */ new Set();
   function set2(new_value) {
-    if (safe_not_equal(value, new_value)) {
-      value = new_value;
+    if (safe_not_equal(value2, new_value)) {
+      value2 = new_value;
       if (stop) {
         const run_queue = !subscriber_queue.length;
         for (const subscriber of subscribers) {
           subscriber[1]();
-          subscriber_queue.push(subscriber, value);
+          subscriber_queue.push(subscriber, value2);
         }
         if (run_queue) {
           for (let i = 0; i < subscriber_queue.length; i += 2) {
@@ -3100,7 +3100,7 @@ function writable(value, start = noop) {
   function update(fn) {
     set2(fn(
       /** @type {T} */
-      value
+      value2
     ));
   }
   function subscribe(run, invalidate = noop) {
@@ -3111,7 +3111,7 @@ function writable(value, start = noop) {
     }
     run(
       /** @type {T} */
-      value
+      value2
     );
     return () => {
       subscribers.delete(subscriber);
@@ -3124,9 +3124,9 @@ function writable(value, start = noop) {
   return { set: set2, update, subscribe };
 }
 function get(store) {
-  let value;
-  subscribe_to_store(store, (_) => value = _)();
-  return value;
+  let value2;
+  subscribe_to_store(store, (_) => value2 = _)();
+  return value2;
 }
 let is_store_binding = false;
 let IS_UNMOUNTED = Symbol();
@@ -3159,9 +3159,9 @@ function store_get(store, store_name, stores2) {
   }
   return get$1(entry.source);
 }
-function store_set(store, value) {
-  store.set(value);
-  return value;
+function store_set(store, value2) {
+  store.set(value2);
+  return value2;
 }
 function setup_stores() {
   const stores2 = {};
@@ -3201,14 +3201,14 @@ const spread_props_handler = {
       if (typeof p === "object" && p !== null && key in p) return p[key];
     }
   },
-  set(target, key, value) {
+  set(target, key, value2) {
     let i = target.props.length;
     while (i--) {
       let p = target.props[i];
       if (is_function(p)) p = p();
       const desc = get_descriptor(p, key);
       if (desc && desc.set) {
-        desc.set(value);
+        desc.set(value2);
         return true;
       }
     }
@@ -3314,14 +3314,14 @@ function prop(props, key, flags2, fallback) {
   var getter;
   {
     getter = () => {
-      var value = (
+      var value2 = (
         /** @type {V} */
         props[key]
       );
-      if (value === void 0) return get_fallback();
+      if (value2 === void 0) return get_fallback();
       fallback_dirty = true;
       fallback_used = false;
-      return value;
+      return value2;
     };
   }
   if ((flags2 & PROPS_IS_UPDATED) === 0) {
@@ -3329,12 +3329,12 @@ function prop(props, key, flags2, fallback) {
   }
   if (setter) {
     var legacy_parent = props.$$legacy;
-    return function(value, mutation) {
+    return function(value2, mutation) {
       if (arguments.length > 0) {
         if (!mutation || legacy_parent || is_store_sub) {
-          setter(mutation ? getter() : value);
+          setter(mutation ? getter() : value2);
         }
-        return value;
+        return value2;
       } else {
         return getter();
       }
@@ -3357,9 +3357,9 @@ function prop(props, key, flags2, fallback) {
     })
   );
   if (!immutable) current_value.equals = safe_equals;
-  return function(value, mutation) {
+  return function(value2, mutation) {
     if (arguments.length > 0) {
-      const new_value = mutation ? get$1(current_value) : bindable ? proxy(value) : value;
+      const new_value = mutation ? get$1(current_value) : bindable ? proxy(value2) : value2;
       if (!current_value.equals(new_value)) {
         from_child = true;
         set(inner_current_value, new_value);
@@ -3368,7 +3368,7 @@ function prop(props, key, flags2, fallback) {
         }
         untrack(() => get$1(current_value));
       }
-      return value;
+      return value2;
     }
     return get$1(current_value);
   };
@@ -3463,17 +3463,17 @@ function getRandomBellCurveWithMode(min, max, mode) {
   }
   const mean = mode;
   const stdDev = (max - min) / 6;
-  let value;
+  let value2;
   do {
-    value = randomNormal() * stdDev + mean;
-  } while (value < min || value > max);
-  const int = Math.floor(value);
+    value2 = randomNormal() * stdDev + mean;
+  } while (value2 < min || value2 > max);
+  const int = Math.floor(value2);
   return int;
 }
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$c = (e) => e.stopPropagation();
+var on_click$d = (e) => e.stopPropagation();
 var on_keydown$8 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -3489,7 +3489,7 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$H();
-  div.__click = [on_click$c];
+  div.__click = [on_click$d];
   div.__keydown = [on_keydown$8];
   var button = child(div);
   button.__click = [on_click_1$2, handleMove];
@@ -3519,16 +3519,16 @@ const stores = {
 function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
   if (!actorStores[actorId][storeName]) {
-    let value = customValue;
-    if (value && typeof value === "object") {
-      value = Array.isArray(value) ? [...value] : { ...value };
+    let value2 = customValue;
+    if (value2 && typeof value2 === "object") {
+      value2 = Array.isArray(value2) ? [...value2] : { ...value2 };
     }
-    actorStores[actorId][storeName] = writable(value);
+    actorStores[actorId][storeName] = writable(value2);
   }
   return actorStores[actorId][storeName];
 }
 var root_1$h = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
-var on_click$b = (_, actor) => openFilePicker(actor());
+var on_click$c = (_, actor) => openFilePicker(actor());
 var root_2$a = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$2 = (e, updateStoreName) => updateStoreName(e.target.value);
@@ -3604,7 +3604,7 @@ function Dossier($$anchor, $$props) {
     var alternate = ($$anchor2) => {
       var div_2 = root_2$a();
       var img_1 = child(div_2);
-      img_1.__click = [on_click$b, actor];
+      img_1.__click = [on_click$c, actor];
       template_effect(() => {
         set_attribute(img_1, "src", actor().img);
         set_attribute(img_1, "alt", actor().name + "!");
@@ -3840,9 +3840,9 @@ function requireGetSize() {
         window2.getSize = factory();
       }
     })(window, function factory() {
-      function getStyleSize(value) {
-        var num = parseFloat(value);
-        var isValid = value.indexOf("%") == -1 && !isNaN(num);
+      function getStyleSize(value2) {
+        var num = parseFloat(value2);
+        var isValid = value2.indexOf("%") == -1 && !isNaN(num);
         return isValid && num;
       }
       function noop2() {
@@ -3925,8 +3925,8 @@ function requireGetSize() {
         var isBorderBox = size.isBorderBox = style.boxSizing == "border-box";
         for (var i = 0; i < measurementsLength; i++) {
           var measurement = measurements[i];
-          var value = style[measurement];
-          var num = parseFloat(value);
+          var value2 = style[measurement];
+          var num = parseFloat(value2);
           size[measurement] = !isNaN(num) ? num : 0;
         }
         var paddingWidth = size.paddingLeft + size.paddingRight;
@@ -5399,11 +5399,11 @@ function AttributeCardCreationState($$anchor, $$props) {
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   let stat = prop($$props, "stat", 7);
   const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
+  let value2 = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
   let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
   let total = /* @__PURE__ */ derived(() => {
     var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
+    return get$1(value2) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
   });
   let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, $$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
@@ -5416,7 +5416,7 @@ function AttributeCardCreationState($$anchor, $$props) {
     var _a2, _b2, _c;
     return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
   });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
+  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value2) <= 1);
   let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
   function add(change) {
     if (!$attributeAssignmentLocked()) {
@@ -5447,7 +5447,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   };
   user_effect(() => {
     if (stat()) {
-      set(value, proxy(stat().value));
+      set(value2, proxy(stat().value));
       set(mod, proxy(stat().mod));
     }
   });
@@ -5508,11 +5508,11 @@ function AttributeCardKarmaState($$anchor, $$props) {
   let stat = prop($$props, "stat", 7);
   let isShoppingState = getActorStore($$props.actor.id, stores.isShoppingState, $$props.actor.getFlag(flags.sr3e, flags.isShoppingState));
   const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
+  let value2 = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
   let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
   let total = /* @__PURE__ */ derived(() => {
     var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
+    return get$1(value2) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
   });
   getActorStore($$props.actor.id, stores.intelligence);
   let metaHuman = /* @__PURE__ */ derived(() => (() => {
@@ -5524,7 +5524,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
     var _a2, _b2, _c;
     return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
   });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
+  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value2) <= 1);
   let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
   function add(change) {
     console.warn("TODO: Implement karma shopping");
@@ -5541,7 +5541,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   };
   user_effect(() => {
     if (stat()) {
-      set(value, proxy(stat().value));
+      set(value2, proxy(stat().value));
       set(mod, proxy(stat().mod));
     }
   });
@@ -5794,7 +5794,7 @@ function Movement($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-function handleKeyDown(e) {
+function handleKeyDown$2(e) {
   if (e.key === "Enter") {
     e.preventDefault();
     e.target.blur();
@@ -5849,7 +5849,7 @@ function SpecializationCard($$anchor, $$props) {
   var div = first_child(fragment);
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
-  div_1.__keydown = [handleKeyDown];
+  div_1.__keydown = [handleKeyDown$2];
   var h1 = sibling(div_1, 2);
   var text = child(h1);
   var div_2 = sibling(div, 2);
@@ -6038,7 +6038,7 @@ async function addNewSpecialization$2(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6048,7 +6048,7 @@ async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentL
         } else {
           refundForCurrentLevel = 1;
         }
-        store_set(value, $value() - 1);
+        store_set(value2, $value() - 1);
         store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
       }
     } else {
@@ -6059,7 +6059,7 @@ async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentL
   }
   await silentUpdate();
 }
-async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6080,14 +6080,14 @@ async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreat
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(value2, $value() + 1);
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
+      store_set(value2, 0);
       ui.notifications.info(localize($$props.config.notifications.skillpointsrefund));
     }
     await tick();
@@ -6101,7 +6101,7 @@ async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreat
     $$props.app.close();
   }
 }
-var on_click$a = async (__3, $$props) => openFilePicker($$props.actor);
+var on_click$b = async (__3, $$props) => openFilePicker($$props.actor);
 var root$x = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -6109,7 +6109,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let karmaShoppingService = null;
   onMount(() => {
@@ -6131,7 +6131,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     );
   });
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
+  let value2 = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
   let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
   let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, $$props.actor.system.creation.activePoints);
@@ -6147,7 +6147,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
             costForNextLevel = 2;
           }
           if ($skillPointStore() >= costForNextLevel) {
-            store_set(value, $value() + 1);
+            store_set(value2, $value() + 1);
             store_set(skillPointStore, $skillPointStore() - costForNextLevel);
           }
         }
@@ -6183,7 +6183,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$a, $$props];
+  img.__click = [on_click$b, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -6203,7 +6203,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     $isCharacterCreation,
     isCharacterCreation,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
@@ -6219,7 +6219,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     $specializations,
     specializations,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore
@@ -6305,7 +6305,7 @@ async function addNewSpecialization$1(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() < 6) {
@@ -6316,7 +6316,7 @@ async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentL
           costForNextLevel = 2;
         }
         if ($skillPointStore() >= costForNextLevel) {
-          store_set(value, $value() + 1);
+          store_set(value2, $value() + 1);
           store_set(skillPointStore, $skillPointStore() - costForNextLevel);
         }
       }
@@ -6328,7 +6328,7 @@ async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentL
   }
   silentUpdate();
 }
-async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6338,7 +6338,7 @@ async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentL
         } else {
           refundForCurrentLevel = 1;
         }
-        store_set(value, $value() - 1);
+        store_set(value2, $value() - 1);
         store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
       }
     } else {
@@ -6349,7 +6349,7 @@ async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentL
   }
   silentUpdate();
 }
-async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6370,14 +6370,14 @@ async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreat
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(value2, $value() + 1);
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
+      store_set(value2, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
@@ -6391,7 +6391,7 @@ async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreat
     $$props.app.close();
   }
 }
-var on_click$9 = async (__4, $$props) => openFilePicker($$props.actor);
+var on_click$a = async (__4, $$props) => openFilePicker($$props.actor);
 var root$w = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -6399,7 +6399,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
   let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
@@ -6414,7 +6414,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     );
   });
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
+  let value2 = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
   let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
   let skillPointStore = getActorStore($$props.actor.id, stores.knowledgePoints, $$props.actor.system.creation.knowledgePoints);
@@ -6439,7 +6439,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$9, $$props];
+  img.__click = [on_click$a, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -6457,7 +6457,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $isCharacterCreation,
     isCharacterCreation,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
@@ -6472,7 +6472,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $isCharacterCreation,
     isCharacterCreation,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
@@ -6488,7 +6488,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $specializations,
     specializations,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore
@@ -6554,7 +6554,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addNewSpecialization(_, $specializations, specializations, $$props, $value, value) {
+async function addNewSpecialization(_, $specializations, specializations, $$props, $value, value2) {
   if (!$specializations()) throw new Error("Cannot add lingo: specialization store is null");
   if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
     if ($specializations().length > 0) {
@@ -6565,7 +6565,7 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
       name: localize($$props.config.skill.newspecialization),
       value: $value() + 1
     });
-    store_set(value, $value() - 1);
+    store_set(value2, $value() - 1);
   } else {
     $specializations().push({
       name: localize($$props.config.skill.newspecialization),
@@ -6580,7 +6580,7 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() < 6) {
@@ -6591,7 +6591,7 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
           costForNextLevel = 2;
         }
         if ($skillPointStore() >= costForNextLevel) {
-          store_set(value, $value() + 1);
+          store_set(value2, $value() + 1);
           store_set(skillPointStore, $skillPointStore() - costForNextLevel);
         }
       }
@@ -6603,7 +6603,7 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6613,7 +6613,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
         } else {
           refundForCurrentLevel = 1;
         }
-        store_set(value, $value() - 1);
+        store_set(value2, $value() - 1);
         store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
       }
     } else {
@@ -6624,7 +6624,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   await silentUpdate();
 }
-async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value2, linkedAttributeRating, $skillPointStore, skillPointStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6645,14 +6645,14 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(value2, $value() + 1);
       }
       let refund = 0;
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
+      store_set(value2, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
@@ -6663,12 +6663,12 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
     $$props.app.close();
   }
 }
-var on_click$8 = async (__4, $$props) => openFilePicker($$props.actor);
+var on_click$9 = async (__4, $$props) => openFilePicker($$props.actor);
 var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="specialization-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
@@ -6678,7 +6678,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
+  let value2 = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
   let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
   let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
@@ -6717,7 +6717,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
-    store_set(value, $value() + 1);
+    store_set(value2, $value() + 1);
   }
   var div = root$v();
   var div_1 = child(div);
@@ -6726,7 +6726,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$8, $$props];
+  img.__click = [on_click$9, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -6750,7 +6750,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $isCharacterCreation,
     isCharacterCreation,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
@@ -6765,7 +6765,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $isCharacterCreation,
     isCharacterCreation,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore,
@@ -6781,7 +6781,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $specializations,
     specializations,
     $value,
-    value,
+    value2,
     linkedAttributeRating,
     $skillPointStore,
     skillPointStore
@@ -6793,7 +6793,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     specializations,
     $$props,
     $value,
-    value
+    value2
   ];
   var text_4 = child(button_3);
   var div_13 = sibling(div_2, 2);
@@ -6946,13 +6946,13 @@ function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let activeSkill = proxy(skill().system.activeSkill);
   let specializations = getActorStore(skill().id, actor().id, skill().system.activeSkill.specializations);
   let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, activeSkill.value);
+  let value2 = getActorStore(actor().id, skill().id, activeSkill.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7009,13 +7009,13 @@ function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let knowledgeSkill = proxy(skill().system.knowledgeSkill);
   let specializations = getActorStore(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
   let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, knowledgeSkill.value);
+  let value2 = getActorStore(actor().id, skill().id, knowledgeSkill.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7072,14 +7072,14 @@ function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
+  const $value = () => store_get(value2, "$value", $$stores);
   const $readWriteValue = () => store_get(readWriteValue, "$readWriteValue", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let languageSkill = proxy(skill().system.languageSkill);
   let specializations = getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
   let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, languageSkill.value);
+  let value2 = getActorStore(actor().id, skill().id, languageSkill.value);
   let readWriteValue = getActorStore(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
@@ -7360,7 +7360,7 @@ function SkillsActive($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var on_click$7 = (_, activeTab) => set(activeTab, "active");
+var on_click$8 = (_, activeTab) => set(activeTab, "active");
 var on_click_1$1 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
 var root$n = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
@@ -7381,7 +7381,7 @@ function Skills($$anchor, $$props) {
   var text = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click$7, activeTab];
+  button.__click = [on_click$8, activeTab];
   var button_1 = sibling(button, 2);
   button_1.__click = [on_click_1$1, activeTab];
   var button_2 = sibling(button_1, 2);
@@ -7797,20 +7797,20 @@ function AttributePointsState($$anchor, $$props) {
     languagePointStore.set(Math.floor($intelligenceStore() * 1.5));
   });
   user_effect(() => {
-    const value = $attributePointStore();
-    $$props.actor.update({ "system.creation.attributePoints": value }, { render: false });
+    const value2 = $attributePointStore();
+    $$props.actor.update({ "system.creation.attributePoints": value2 }, { render: false });
   });
   user_effect(() => {
-    const value = $skillPointStore();
-    $$props.actor.update({ "system.creation.activePoints": value }, { render: false });
+    const value2 = $skillPointStore();
+    $$props.actor.update({ "system.creation.activePoints": value2 }, { render: false });
   });
   user_effect(() => {
-    const value = $knowledgePointStore();
-    $$props.actor.update({ "system.creation.knowledgePoints": value }, { render: false });
+    const value2 = $knowledgePointStore();
+    $$props.actor.update({ "system.creation.knowledgePoints": value2 }, { render: false });
   });
   user_effect(() => {
-    const value = $languagePointStore();
-    $$props.actor.update({ "system.creation.languagePoints": value }, { render: false });
+    const value2 = $languagePointStore();
+    $$props.actor.update({ "system.creation.languagePoints": value2 }, { render: false });
   });
   user_effect(() => {
     if ($attributePointStore() === 0 && $attributeAssignmentLocked() === false) {
@@ -8917,7 +8917,7 @@ function handleSearch(__1, config, journalId, $$props) {
     }
   });
 }
-var on_click$6 = (e) => e.stopPropagation();
+var on_click$7 = (e) => e.stopPropagation();
 var on_keydown$1 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -8929,7 +8929,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
   var div = root$f();
-  div.__click = [on_click$6];
+  div.__click = [on_click$7];
   div.__keydown = [on_keydown$1];
   var button = child(div);
   button.__click = [handleOpen, journalId];
@@ -9079,8 +9079,8 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-var on_click$5 = async (_, item2) => openFilePicker(item2());
-var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
+var on_click$6 = async (_, item2) => openFilePicker(item2());
+var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_3$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
 var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
@@ -9357,9 +9357,9 @@ function MetahumanApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$5, item2];
+  img.__click = [on_click$6, item2];
   var input = sibling(div_5, 2);
-  input.__change = [on_change$5, item2];
+  input.__change = [on_change$6, item2];
   var node = sibling(input, 2);
   StatCard(node, spread_props(() => get$1(priorityEntry)));
   var node_1 = sibling(div_2, 2);
@@ -9549,8 +9549,8 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metahuman = new WeakMap();
-var on_click$4 = async (_, item2) => openFilePicker(item2());
-var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
+var on_click$5 = async (_, item2) => openFilePicker(item2());
+var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
@@ -9675,9 +9675,9 @@ function MagicApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$4, item2];
+  img.__click = [on_click$5, item2];
   var input = sibling(div_5, 2);
-  input.__change = [on_change$4, item2];
+  input.__change = [on_change$5, item2];
   var node = sibling(input, 2);
   StatCard(node, spread_props(() => get$1(archetype)));
   var node_1 = sibling(node, 2);
@@ -9998,8 +9998,8 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_click$3 = async (_, item2) => openFilePicker(item2());
-var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
+var on_click$4 = async (_, item2) => openFilePicker(item2());
+var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root$8 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
@@ -10065,9 +10065,9 @@ function WeaponApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$3, item2];
+  img.__click = [on_click$4, item2];
   var input = sibling(div_5, 2);
-  input.__change = [on_change$3, item2];
+  input.__change = [on_change$4, item2];
   var div_6 = sibling(div_2, 2);
   var div_7 = child(div_6);
   var div_8 = sibling(child(div_7), 2);
@@ -10269,8 +10269,8 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_click$2 = async (_, item2) => openFilePicker(item2());
-var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
+var on_click$3 = async (_, item2) => openFilePicker(item2());
+var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root$7 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
@@ -10300,9 +10300,9 @@ function AmmunitionApp($$anchor, $$props) {
   var div_3 = sibling(child(div_2), 2);
   var div_4 = child(div_3);
   var img = child(div_4);
-  img.__click = [on_click$2, item2];
+  img.__click = [on_click$3, item2];
   var input = sibling(div_4, 2);
-  input.__change = [on_change$2, item2];
+  input.__change = [on_change$3, item2];
   var div_5 = sibling(input, 2);
   each(div_5, 21, () => ammoEntries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
@@ -10392,40 +10392,51 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_click$1 = async (_, $$props) => openFilePicker($$props.item);
-var on_change$1 = (e, $$props) => $$props.item.update({ name: e.target.value });
-var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
+function handleKeyDown$1(e) {
+  if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 || // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+  e.keyCode === 65 && e.ctrlKey === true || e.keyCode === 67 && e.ctrlKey === true || e.keyCode === 86 && e.ctrlKey === true || e.keyCode === 88 && e.ctrlKey === true || // Allow: home, end, left, right
+  e.keyCode >= 35 && e.keyCode <= 39) {
+    return;
+  }
+  if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+    e.preventDefault();
+  }
+}
+var on_click$2 = async (_, item2) => openFilePicker(item2());
+var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
+var on_change_1 = (e) => updateSkillType(e.target.value);
 var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
-var on_change_2 = (e, $$props) => $$props.item.update({
+var on_change_2 = (e, item2) => item2().update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
 var root_3$2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$2 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <select><option disabled> </option><!></select></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="amount" type="text" placeholder="0 ¥"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
+  let item2 = prop($$props, "item", 7);
   let layoutMode = "single";
-  let value = /* @__PURE__ */ derived(() => $$props.item.system.skillType);
-  const selectOptions = [
-    {
-      value: "active",
-      label: localize($$props.config.skill.active)
-    },
-    {
-      value: "knowledge",
-      label: localize($$props.config.skill.knowledge)
-    },
-    {
-      value: "language",
-      label: localize($$props.config.skill.language)
+  let formattedAmount = /* @__PURE__ */ derived(() => `${item2().system.amount} ¥`);
+  function handleInput(e) {
+    let inputValue = e.target.value;
+    if (!inputValue.trim()) {
+      item2().system.amount = 0;
+      e.target.value = "0 ¥";
+      return;
     }
-  ];
-  const rawAttributes = ActorDataService.getLocalizedLinkingAttributes();
-  const attributeOptions = Object.entries(rawAttributes).map(([key, label]) => ({ value: key, label }));
-  async function updateSkillType(newValue) {
-    await $$props.item.update({ "system.skillType": newValue });
-    $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${$$props.item.name}`);
-    console.log("🔍 Skill created:", foundry.utils.duplicate($$props.item.toObject()));
+    const raw = inputValue.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    e.target.value = `${parsed} ¥`;
+  }
+  function handleFocus(e) {
+    e.target.select();
+  }
+  function handleBlur(e) {
+    const raw = e.target.value.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    e.target.value = `${parsed} ¥`;
   }
   var div = root$6();
   var div_1 = child(div);
@@ -10434,56 +10445,60 @@ function SkillApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$1, $$props];
+  img.__click = [on_click$2, item2];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var input = sibling(child(div_7), 2);
-  input.__change = [on_change$1, $$props];
+  input.__change = [on_change$2, item2];
   var div_8 = sibling(div_7, 2);
-  var select = sibling(child(div_8), 2);
-  init_select(select, () => get$1(value));
-  var select_value;
-  select.__change = [on_change_1, updateSkillType];
-  each(select, 21, () => selectOptions, index, ($$anchor2, option) => {
+  var input_1 = sibling(child(div_8), 2);
+  input_1.__input = handleInput;
+  input_1.__keydown = [handleKeyDown$1];
+  var div_9 = sibling(div_8, 2);
+  var select = sibling(child(div_9), 2);
+  init_select(select, () => value);
+  select.value = null == (select.__value = value) ? "" : value, select_option(select, value);
+  select.__change = [on_change_1];
+  each(select, 20, () => selectOptions, index, ($$anchor2, option) => {
     var option_1 = root_1$2();
     var option_1_value = {};
     var text = child(option_1);
     template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(option).value)) {
-        option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
+      if (option_1_value !== (option_1_value = option.value)) {
+        option_1.value = null == (option_1.__value = option.value) ? "" : option.value;
       }
-      set_text(text, get$1(option).label);
+      set_text(text, option.label);
     });
     append($$anchor2, option_1);
   });
-  var node = sibling(div_8, 2);
+  var node = sibling(div_9, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_9 = root_2$2();
-      var select_1 = sibling(child(div_9), 2);
-      init_select(select_1, () => $$props.item.system.activeSkill.linkedAttribute);
+      var div_10 = root_2$2();
+      var select_1 = sibling(child(div_10), 2);
+      init_select(select_1, () => item2().system.activeSkill.linkedAttribute);
       var select_1_value;
-      select_1.__change = [on_change_2, $$props];
+      select_1.__change = [on_change_2, item2];
       var option_2 = child(select_1);
       option_2.value = null == (option_2.__value = "") ? "" : "";
       var text_1 = child(option_2);
       var node_1 = sibling(option_2);
-      each(node_1, 17, () => attributeOptions, index, ($$anchor3, option) => {
+      each(node_1, 16, () => attributeOptions, index, ($$anchor3, option) => {
         var option_3 = root_3$2();
         var option_3_value = {};
         var text_2 = child(option_3);
         template_effect(() => {
-          if (option_3_value !== (option_3_value = get$1(option).value)) {
-            option_3.value = null == (option_3.__value = get$1(option).value) ? "" : get$1(option).value;
+          if (option_3_value !== (option_3_value = option.value)) {
+            option_3.value = null == (option_3.__value = option.value) ? "" : option.value;
           }
-          set_text(text_2, get$1(option).label);
+          set_text(text_2, option.label);
         });
         append($$anchor3, option_3);
       });
       template_effect(
         ($0) => {
-          if (select_1_value !== (select_1_value = $$props.item.system.activeSkill.linkedAttribute)) {
-            select_1.value = null == (select_1.__value = $$props.item.system.activeSkill.linkedAttribute) ? "" : $$props.item.system.activeSkill.linkedAttribute, select_option(select_1, $$props.item.system.activeSkill.linkedAttribute);
+          if (select_1_value !== (select_1_value = item2().system.activeSkill.linkedAttribute)) {
+            select_1.value = null == (select_1.__value = item2().system.activeSkill.linkedAttribute) ? "" : item2().system.activeSkill.linkedAttribute, select_option(select_1, item2().system.activeSkill.linkedAttribute);
           }
           set_text(text_1, $0);
         },
@@ -10491,16 +10506,16 @@ function SkillApp($$anchor, $$props) {
           () => localize($$props.config.skill.linkedAttribute)
         ]
       );
-      append($$anchor2, div_9);
+      append($$anchor2, div_10);
     };
     if_block(node, ($$render) => {
-      if (get$1(value) === "active") $$render(consequent);
+      if (value === "active") $$render(consequent);
     });
   }
   var node_2 = sibling(div_2, 2);
   JournalViewer(node_2, {
     get item() {
-      return $$props.item;
+      return item2();
     },
     get config() {
       return $$props.config;
@@ -10508,18 +10523,18 @@ function SkillApp($$anchor, $$props) {
   });
   template_effect(() => {
     set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-    set_attribute(img, "src", $$props.item.img);
-    set_attribute(img, "title", $$props.item.name);
-    set_attribute(img, "alt", $$props.item.name);
-    set_value(input, $$props.item.name);
-    if (select_value !== (select_value = get$1(value))) {
-      select.value = null == (select.__value = get$1(value)) ? "" : get$1(value), select_option(select, get$1(value));
-    }
+    set_attribute(img, "src", item2().img);
+    set_attribute(img, "title", item2().name);
+    set_attribute(img, "alt", item2().name);
+    set_value(input, item2().name);
+    set_value(input_1, get$1(formattedAmount));
   });
+  event("focus", input_1, handleFocus);
+  event("blur", input_1, handleBlur);
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["click", "change", "input", "keydown"]);
 class SkillItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
@@ -10664,17 +10679,6 @@ class SkillModel extends foundry.abstract.TypeDataModel {
           required: true,
           initial: ""
         })
-      })
-    };
-  }
-}
-class KarmaModel2 extends foundry.abstract.TypeDataModel {
-  static defineSchema() {
-    return {
-      value: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true
       })
     };
   }
@@ -11440,7 +11444,24 @@ function attachLightEffect(html2, activeTheme) {
     });
   });
 }
-var on_click = (_, onDelta) => onDelta()(-1);
+class StorytellerScreenModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      attributes: new foundry.data.fields.SchemaField(AttributesModel$1.defineSchema()),
+      dicePools: new foundry.data.fields.SchemaField(DicePoolsModel.defineSchema()),
+      movement: new foundry.data.fields.SchemaField(AttributesModel2.defineSchema()),
+      profile: new foundry.data.fields.SchemaField(Profile.defineSchema()),
+      creation: new foundry.data.fields.SchemaField(Creation.defineSchema()),
+      karma: new foundry.data.fields.SchemaField(KarmaModel.defineSchema()),
+      health: new foundry.data.fields.SchemaField(HealthModel.defineSchema()),
+      journalEntryUuid: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      })
+    };
+  }
+}
+var on_click$1 = (_, onDelta) => onDelta()(-1);
 var on_keydown = (e) => {
   if (e.key === "Enter") e.target.blur();
 };
@@ -11456,7 +11477,7 @@ function TimeActuatorInput($$anchor, $$props) {
   var text = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click, onDelta];
+  button.__click = [on_click$1, onDelta];
   var input_1 = sibling(button, 2);
   input_1.__keydown = [on_keydown];
   var button_1 = sibling(input_1, 2);
@@ -11646,76 +11667,6 @@ function TimeManager($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$2 = /* @__PURE__ */ template(`<div><!></div>`);
-function KarmaApp($$anchor) {
-  var div = root$2();
-  var node = child(div);
-  TimeManager(node, {});
-  append($$anchor, div);
-}
-class KarmaItemSheet extends foundry.applications.sheets.ItemSheetV2 {
-  constructor() {
-    super(...arguments);
-    __privateAdd(this, _karma);
-  }
-  get title() {
-    return `${localize(CONFIG.sr3e.karma.karma)}: ${this.item.name}`;
-  }
-  static get DEFAULT_OPTIONS() {
-    return {
-      ...super.DEFAULT_OPTIONS,
-      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
-      classes: ["sr3e", "sheet", "item", "karma"],
-      template: null,
-      position: { width: "auto", height: "auto" },
-      window: {
-        resizable: false
-      },
-      tag: "form",
-      submitOnChange: true,
-      closeOnSubmit: false
-    };
-  }
-  _renderHTML() {
-    return null;
-  }
-  _replaceHTML(_, windowContent) {
-    if (__privateGet(this, _karma)) {
-      unmount(__privateGet(this, _karma));
-      __privateSet(this, _karma, null);
-    }
-    __privateSet(this, _karma, mount(KarmaApp, {
-      target: windowContent,
-      props: {
-        item: this.document,
-        config: CONFIG.sr3e
-      }
-    }));
-    return windowContent;
-  }
-  /** @override prevent submission, since Svelte is managing state */
-  _onSubmit(event2) {
-    return;
-  }
-}
-_karma = new WeakMap();
-class StorytellerScreenModel extends foundry.abstract.TypeDataModel {
-  static defineSchema() {
-    return {
-      attributes: new foundry.data.fields.SchemaField(AttributesModel$1.defineSchema()),
-      dicePools: new foundry.data.fields.SchemaField(DicePoolsModel.defineSchema()),
-      movement: new foundry.data.fields.SchemaField(AttributesModel2.defineSchema()),
-      profile: new foundry.data.fields.SchemaField(Profile.defineSchema()),
-      creation: new foundry.data.fields.SchemaField(Creation.defineSchema()),
-      karma: new foundry.data.fields.SchemaField(KarmaModel$1.defineSchema()),
-      health: new foundry.data.fields.SchemaField(HealthModel.defineSchema()),
-      journalEntryUuid: new foundry.data.fields.StringField({
-        required: false,
-        initial: ""
-      })
-    };
-  }
-}
 async function commitSelected(_, listboxContent, deselectAll) {
   var _a, _b;
   for (const actor of get$1(listboxContent)) {
@@ -11749,7 +11700,7 @@ var on_input = async (e, actor) => {
     await get$1(actor).update({ "system.karma.pendingKarmaReward": val }, { render: false });
   }
 };
-var on_change = async (e, actor, forceRefresh) => {
+var on_change$1 = async (e, actor, forceRefresh) => {
   const newValue = e.target.checked;
   get$1(actor).system.karma.readyForCommit = newValue;
   await get$1(actor).update({ "system.karma.readyForCommit": newValue }, { render: false });
@@ -11758,7 +11709,7 @@ var on_change = async (e, actor, forceRefresh) => {
 var root_3 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td class=""><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
 var root_2 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function KarmaManager($$anchor, $$props) {
   push($$props, true);
   let delimiter = state("");
@@ -11816,21 +11767,21 @@ function KarmaManager($$anchor, $$props) {
     }
     forceRefresh();
   }
-  var div = root$1();
+  var div = root$2();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
   var select = child(div_4);
   each(select, 21, () => options, index, ($$anchor2, $$item) => {
-    let value = () => get$1($$item).value;
+    let value2 = () => get$1($$item).value;
     let label = () => get$1($$item).label;
     var option = root_1();
     var option_value = {};
     var text = child(option);
     template_effect(() => {
-      if (option_value !== (option_value = value())) {
-        option.value = null == (option.__value = value()) ? "" : value();
+      if (option_value !== (option_value = value2())) {
+        option.value = null == (option.__value = value2()) ? "" : value2();
       }
       set_text(text, label());
     });
@@ -11883,7 +11834,7 @@ function KarmaManager($$anchor, $$props) {
         var text_11 = child(h3_3);
         var td_6 = sibling(td_5);
         var input_2 = child(td_6);
-        input_2.__change = [on_change, actor, forceRefresh];
+        input_2.__change = [on_change$1, actor, forceRefresh];
         template_effect(() => {
           set_attribute(img, "src", get$1(actor).img);
           set_text(text_8, get$1(actor).name);
@@ -11941,11 +11892,11 @@ function KarmaManager($$anchor, $$props) {
   pop();
 }
 delegate(["click", "input", "change"]);
-var root = /* @__PURE__ */ template(`<div><!> <!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div><!> <!></div>`);
 function StorytellerScreenApp($$anchor, $$props) {
   prop($$props, "actor", 19, () => ({}));
   let config = prop($$props, "config", 19, () => ({}));
-  var div = root();
+  var div = root$1();
   var node = child(div);
   TimeManager(node, {
     get config() {
@@ -12005,6 +11956,179 @@ class StorytellerScreenActorSheet extends foundry.applications.sheets.ActorSheet
   }
 }
 _app3 = new WeakMap();
+class TransactionModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      amount: new foundry.data.fields.NumberField({
+        // Exposed already
+        required: true,
+        initial: 0
+      }),
+      recurrent: new foundry.data.fields.BooleanField({
+        //Expose
+        required: true,
+        initial: false
+      }),
+      isCreditStick: new foundry.data.fields.BooleanField({
+        //Expose
+        required: true,
+        initial: false
+      }),
+      type: new foundry.data.fields.StringField({
+        //Expose, is a select with Asset, Debt, Expense as options will be localized later
+        required: true,
+        initial: ""
+      }),
+      creditorId: new foundry.data.fields.StringField({
+        // If it is a debt, who is owed to, not exposed
+        required: false,
+        initial: ""
+      }),
+      interestPerMonth: new foundry.data.fields.NumberField({
+        //Expose
+        required: true,
+        initial: 0
+      }),
+      journalId: new foundry.data.fields.StringField({
+        //Exposed already
+        required: true,
+        initial: ""
+      })
+    };
+  }
+}
+function handleKeyDown(e) {
+  if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 || // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+  e.keyCode === 65 && e.ctrlKey === true || e.keyCode === 67 && e.ctrlKey === true || e.keyCode === 86 && e.ctrlKey === true || e.keyCode === 88 && e.ctrlKey === true || // Allow: home, end, left, right
+  e.keyCode >= 35 && e.keyCode <= 39) {
+    return;
+  }
+  if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+    e.preventDefault();
+  }
+}
+var on_click = async (_, item2) => openFilePicker(item2());
+var on_change = (e, item2) => item2().update({ name: e.target.value });
+var root = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="amount" type="text" placeholder="0 ¥"></div></div></div></div></div> <!></div></div>`);
+function TransactionApp($$anchor, $$props) {
+  push($$props, true);
+  let item2 = prop($$props, "item", 7);
+  let layoutMode = "single";
+  let formattedAmount = state(`${item2().system.amount} ¥`);
+  user_effect(() => {
+    set(formattedAmount, `${formatNumber(item2().system.amount)} ¥`);
+    item2().upde;
+  });
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+  function handleInput(e) {
+    let inputValue = e.target.value;
+    if (!inputValue.trim()) {
+      item2().system.amount = 0;
+      e.target.value = "0 ¥";
+      return;
+    }
+    const raw = inputValue.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    e.target.value = `${formatNumber(parsed)} ¥`;
+  }
+  function handleFocus(e) {
+    e.target.select();
+  }
+  function handleBlur(e) {
+    const raw = e.target.value.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    item2().update({ "system.amount": parsed }, { render: false });
+    e.target.value = `${formatNumber(parsed)} ¥`;
+  }
+  var div = root();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
+  img.__click = [on_click, item2];
+  var div_6 = sibling(div_5, 2);
+  var div_7 = child(div_6);
+  var input = sibling(child(div_7), 2);
+  input.__change = [on_change, item2];
+  var div_8 = sibling(div_7, 2);
+  var input_1 = sibling(child(div_8), 2);
+  input_1.__input = handleInput;
+  input_1.__keydown = [handleKeyDown];
+  var node = sibling(div_2, 2);
+  JournalViewer(node, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return $$props.config;
+    }
+  });
+  template_effect(() => {
+    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
+    set_attribute(img, "src", item2().img);
+    set_attribute(img, "title", item2().name);
+    set_attribute(img, "alt", item2().name);
+    set_value(input, item2().name);
+    set_value(input_1, get$1(formattedAmount));
+  });
+  event("focus", input_1, handleFocus);
+  event("blur", input_1, handleBlur);
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "change", "input", "keydown"]);
+class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _app4);
+  }
+  get title() {
+    return `${localize(CONFIG.sr3e.transaction.transaction)}: ${this.item.name}`;
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "transaction"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _app4)) {
+      unmount(__privateGet(this, _app4));
+      __privateSet(this, _app4, null);
+    }
+    __privateSet(this, _app4, mount(TransactionApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_app4 = new WeakMap();
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -12056,7 +12180,6 @@ function configureProject() {
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
-    karma: localize(CONFIG.sr3e.karma.karma),
     storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
     transaction: localize(CONFIG.sr3e.transaction.transaction)
   };
@@ -12116,8 +12239,8 @@ function setFlagsOnCharacterPreCreate(document2, data, options, userId) {
     { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
   ];
   const updateData = {};
-  flagsToSet.forEach(({ namespace, flag, value }) => {
-    updateData[`flags.${namespace}.${flag}`] = value;
+  flagsToSet.forEach(({ namespace, flag, value: value2 }) => {
+    updateData[`flags.${namespace}.${flag}`] = value2;
   });
   document2.updateSource(updateData);
 }
@@ -12126,8 +12249,8 @@ function debugFlagsOnActor(actor, options, userId) {
   const actorFlags = (_a = actor.flags) == null ? void 0 : _a[flags.sr3e];
   if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
   console.groupCollapsed(`Flags for actor "${actor.name}"`);
-  for (const [key, value] of Object.entries(actorFlags)) {
-    console.log(`→ ${key}:`, value);
+  for (const [key, value2] of Object.entries(actorFlags)) {
+    console.log(`→ ${key}:`, value2);
   }
   console.groupEnd();
 }
@@ -12214,7 +12337,7 @@ function registerHooks() {
         { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
         { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
         { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
-        { docClass: Item, type: "karma", model: KarmaModel2, sheet: KarmaItemSheet }
+        { docClass: Item, type: "transaction", model: TransactionModel, sheet: TransactionItemSheet }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");
