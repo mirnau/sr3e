@@ -2,52 +2,53 @@ import AmmunitionApp from "../../svelte/apps/AmmunitionApp.svelte";
 import { mount, unmount } from "svelte";
 import { localize } from "../../svelteHelpers.js";
 
+export default class AmmunitionItemSheet extends foundry.applications.sheets
+  .ItemSheetV2 {
+  #ammunition;
 
-export default class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  get title() {
+    return `${localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
+  }
 
-    #ammunition
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "ammunition"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false,
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false,
+    };
+  }
 
-        get title() {
-        return `${localize(CONFIG.sr3e.ammunition.ammunition)}: ${this.item.name}`;
+  _renderHTML() {
+    return null;
+  }
+
+  _replaceHTML(_, windowContent) {
+    if (this.#ammunition) {
+      unmount(this.#ammunition);
+      this.#ammunition = null;
     }
 
-    static get DEFAULT_OPTIONS() {
-        return {
-            ...super.DEFAULT_OPTIONS,
-            id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
-            classes: ["sr3e", "sheet", "item", "ammunition"],
-            template: null,
-            position: { width: 'auto', height: 'auto' },
-            window: {
-                resizable: false
-            },
-            tag: "form",
-            submitOnChange: true,
-            closeOnSubmit: false
-        };
-    }
+    this.#ammunition = mount(AmmunitionApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e,
+      },
+    });
 
-    _renderHTML() {
-        return null;
-    }
+    return windowContent;
+  }
 
-    _replaceHTML(_, windowContent) {
-        if (this.#ammunition) {
-            unmount(this.#ammunition);
-            this.#ammunition = null;
-        }
-
-        this.#ammunition = mount(AmmunitionApp, {
-            target: windowContent,
-            props: {
-                item: this.document,
-                config: CONFIG.sr3e
-            }
-        });
-
-        return windowContent;
-    }
-
-    /** @override prevent submission, since Svelte is managing state */
-    _onSubmit(event) { return; }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event) {
+    return;
+  }
 }

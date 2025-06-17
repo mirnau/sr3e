@@ -1468,6 +1468,105 @@
     text-shadow: 0 0 10px #45d06b, 0 0 20px #e6ff8d;
   }
 }
+.system-sr3e .counter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.system-sr3e .counter-bar h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+}
+.system-sr3e .counter-bar .text-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.system-sr3e .counter-bar .text-display .clock {
+  color: #5fd3ae;
+}
+.system-sr3e .counter-bar .time-editor {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+.system-sr3e .counter-bar .time-editor-component {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin: 0;
+}
+.system-sr3e .counter-bar .time-editor-component .time-display {
+  font-size: 1.5rem;
+}
+.system-sr3e .karma-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.system-sr3e .karma-manager .player.handler {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.system-sr3e .karma-manager .player.handler .typeOfCharacter {
+  width: fit-content;
+  padding: 0.25rem 0.5rem;
+}
+.system-sr3e .karma-manager .list-box {
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.system-sr3e .karma-manager .list-box table.actor-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  text-align: left;
+}
+.system-sr3e .karma-manager .list-box table.actor-table thead {
+  background: #222;
+  color: #fff;
+}
+.system-sr3e .karma-manager .list-box table.actor-table thead th {
+  padding: 0.5rem;
+  font-weight: bold;
+  border-bottom: 1px solid #444;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.system-sr3e .karma-manager .list-box table.actor-table tbody tr {
+  border-bottom: 1px solid #333;
+}
+.system-sr3e .karma-manager .list-box table.actor-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.system-sr3e .karma-manager .list-box table.actor-table tbody td {
+  padding: 0.5rem;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.system-sr3e .karma-manager .list-box table.actor-table tbody td.portrait-cell {
+  width: 3rem;
+}
+.system-sr3e .karma-manager .list-box table.actor-table tbody td.portrait-cell img {
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.system-sr3e .karma-manager .list-box .empty {
+  text-align: center;
+  color: #888;
+  padding: 1rem;
+  font-style: italic;
+}
 .system-sr3e .sr3e.sheet.character {
   overflow: visible !important;
 }
@@ -2182,35 +2281,4 @@
 .system-sr3e section.body.flexcol.scrollable {
   overflow-y: auto;
   max-height: 20rem;
-}
-.system-sr3e .counter-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.system-sr3e .counter-bar h1 {
-  font-size: 1.5rem;
-  margin-bottom: 0;
-}
-.system-sr3e .counter-bar .text-display {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 0.25rem;
-}
-.system-sr3e .counter-bar .time-editor {
-  display: flex;
-  flex-direction: row;
-  gap: 0.5rem;
-}
-.system-sr3e .counter-bar .time-editor-component {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  margin: 0;
-}
-.system-sr3e .counter-bar .time-editor-component .time-display {
-  font-size: 1.5rem;
 }

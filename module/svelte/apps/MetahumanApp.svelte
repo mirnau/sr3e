@@ -130,7 +130,7 @@
         {
             item,
             key: "factor",
-            label: localize(karmaConfig.advancementRatio),
+            label: localize(karmaConfig.advancementratio),
             value: system.karma.factor,
             path: "system.karma",
             type: "number",

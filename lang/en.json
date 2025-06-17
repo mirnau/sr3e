@@ -63,11 +63,19 @@
     },
     "karma": {
       "karma": "Karma",
-      "goodKarma": "Good Karma",
-      "karmaPool": "Karma Pool",
-      "advancementRatio": "Advancement Ratio",
-      "miraculousSurvival": "Miraculous Survival",
-      "lifetimeKarma": "Lifetime Karma"
+      "goodkarma": "Good Karma",
+      "karmapool": "Karma Pool",
+      "advancementratio": "Advancement Ratio",
+      "miraculoussurvival": "Miraculous Survival",
+      "lifetimekarma": "Lifetime Karma",
+      "commitselected": "Commit Selected",
+      "selectall": "Select All",
+      "deselectall": "Deselect All",
+      "commit": "Commit Changes"
+    },
+    "karmamanager": {
+      "character": "Player Characters",
+      "npc": "Non Player Characters"
     },
     "magic": {
       "magic": "Magic Tradition",

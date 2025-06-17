@@ -10,7 +10,7 @@
     let karma = $state(actor.system.karma);
     let essence = $state(actor.system.attributes.essence ?? 0);
     let gridContainer;
-    let survivor = $derived(karma.miraculousSurvival);
+    let survivor = $derived(karma.miraculoussurvival);
 
     $effect(() => {
         const rem = parseFloat(
@@ -35,9 +35,9 @@
 
     <div class="stat-card">
         <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.goodKarma)}</h4>
+        <h4 class="no-margin">{localize(config.karma.goodkarma)}</h4>
         <h1 class="stat-value">
-            {karma.goodKarma}
+            {karma.goodkarma}
         </h1>
     </div>
 
@@ -61,7 +61,7 @@
         <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4 class="no-margin">
-                {localize(config.karma.miraculousSurvival)}
+                {localize(config.karma.miraculoussurvival)}
             </h4>
             <h5 class="stat-value">
                 <i class="fa-solid fa-heart-circle-bolt"></i>

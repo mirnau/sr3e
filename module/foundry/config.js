@@ -85,11 +85,15 @@ sr3e.dicepools = {
 }
 sr3e.karma = {
     karma: "sr3e.karma.karma",
-    goodKarma: "sr3e.karma.goodKarma",
-    karmaPool: "sr3e.karma.karmaPool",
-    advancementRatio: "sr3e.karma.advancementRatio",
-    miraculousSurvival: "sr3e.karma.miraculousSurvival",
-    lifetimeKarma: "sr3e.karma.lifetimeKarma",
+    goodkarma: "sr3e.karma.goodkarma",
+    karmapool: "sr3e.karma.karmapool",
+    advancementratio: "sr3e.karma.advancementratio",
+    miraculoussurvival: "sr3e.karma.miraculoussurvival",
+    lifetimekarma: "sr3e.karma.lifetimekarma",
+    commitselected: "sr3e.karma.commitselected",
+    selectall: "sr3e.karma.selectall",
+    deselectall: "sr3e.karma.deselectall",
+    commit: "sr3e.karma.commit"
 }
 
 sr3e.movement = {
@@ -102,6 +106,11 @@ sr3e.movement = {
 sr3e.placeholders = {
     human: "sr3e.placeholders.human",
     fullshaman: "sr3e.placeholders.fullshaman"
+}
+
+sr3e.karmamanager = {
+    character: "sr3e.karmamanager.character",
+    npc: "sr3e.karmamanager.npc"
 }
 
 sr3e.sheet = {

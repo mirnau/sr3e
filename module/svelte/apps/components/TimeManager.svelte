@@ -31,12 +31,7 @@
     const monthAsString = $derived(
         currentDate.toLocaleDateString(undefined, { month: "long" }),
     );
-
-    function wrapDelta(fn) {
-        return (n) => {
-            fn(n);
-        };
-    }
+  
 </script>
 
 <div class="sheet-component">
@@ -46,14 +41,14 @@
             <div class="counter-bar">
                 <h1 class="text-display">
                     <div>{weekdayAsString}</div>
-                    <div>{day.toString().padStart(2, "0")}</div>
+                    <div>{day.toString().padStart(2, "0")}</div>  - 
                     <div>{monthAsString}</div>
-                    <div>{year}</div>
-                    <div>{hours.toString().padStart(2, "0")}</div>
+                    <div>{year}</div> - 
+                    <div class="clock">{hours.toString().padStart(2, "0")}</div>
                     :
-                    <div>{minutes.toString().padStart(2, "0")}</div>
+                    <div class="clock">{minutes.toString().padStart(2, "0")}</div>
                     :
-                    <div>{seconds.toString().padStart(2, "0")}</div>
+                    <div class="clock" >{seconds.toString().padStart(2, "0")}</div>
                 </h1>
 
                 <div class="time-editor">
