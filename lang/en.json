@@ -19,6 +19,10 @@
       "strength": "Strength",
       "willpower": "Willpower"
     },
+    "combosearch": {
+      "noresult": "No results...",
+      "search": "Search"
+    },
     "commodity": {
       "commodity": "Commodity Profile",
       "days": "Days",
@@ -189,7 +193,14 @@
       "ancient": "Very Old Indeed"
     },
     "transaction": {
-      "transaction": "Transaction"
+      "transaction": "Transaction",
+      "creditstick": "Credit-Stick",
+      "recurrent": "Recurremt",
+      "asset": "Asset",
+      "income": "Income",
+      "debt": "Debt",
+      "expense": "Expense",
+      "select": "Select"
     },
     "userconfig": {
       "setPlayerName": "Player Name",

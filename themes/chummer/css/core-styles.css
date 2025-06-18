@@ -863,6 +863,14 @@
   background-color: #ff0095;
   z-index: 10;
 }
+.system-sr3e .search-container {
+  position: relative;
+  display: inline-block;
+}
+.system-sr3e .search-container input {
+  padding-left: 2rem;
+  /* space for the icon */
+}
 .system-sr3e .form-group {
   padding: 0.5rem;
 }
@@ -1570,6 +1578,109 @@
   color: #888;
   padding: 1rem;
   font-style: italic;
+}
+.system-sr3e .combobox-container {
+  position: relative;
+  width: 100%;
+}
+.system-sr3e .combobox-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 0 0 1rem #1df0ff;
+  background: #1df0ff;
+  transition: box-shadow 0.3s ease;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .combobox-wrapper:focus-within {
+  box-shadow: inset 0 0 1rem #1df0ff;
+}
+.system-sr3e .combobox-wrapper.disabled {
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 15px grey;
+  cursor: not-allowed;
+}
+.system-sr3e .combobox-wrapper.disabled .combobox-icon {
+  cursor: not-allowed;
+}
+.system-sr3e .combobox-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 30px #1d282c, inset 0 0 1.5rem #1df0ff;
+  pointer-events: none;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .combobox-input {
+  flex: 1;
+  padding: 0rem 0.5rem;
+  background: transparent;
+  outline: none;
+  cursor: text;
+}
+.system-sr3e .combobox-input:disabled {
+  cursor: not-allowed;
+  color: #1df0ff;
+}
+.system-sr3e .combobox-input::placeholder {
+  color: #9ca3af;
+}
+.system-sr3e .combobox-icon {
+  padding: 0.5rem 0.5rem;
+  margin: 0.25rem;
+  transition: transform 0.15s ease-in-out;
+  cursor: none;
+  text-shadow: 0px 0px 0.5rem #1df0ff;
+  text-shadow: 0px 0px 0.25rem #1df0ff;
+}
+.system-sr3e .combobox-icon.rotated {
+  transform: rotate(180deg);
+}
+.system-sr3e .combobox-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: #1df0ff;
+  margin-top: 2px;
+  overflow-y: auto;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .combobox-dropdown::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  box-shadow: inset 0 0 30px #1d282c, inset 0 0 1.5rem #1df0ff;
+  pointer-events: none;
+  transition: box-shadow 0.15s ease-in-out;
+  clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+}
+.system-sr3e .combobox-option {
+  padding: 0.5rem 0.5rem;
+  cursor: pointer;
+  transition: box-shadow 0.25s ease-in-out;
+}
+.system-sr3e .combobox-option:hover,
+.system-sr3e .combobox-option.highlighted {
+  box-shadow: inset 0 0 0.7rem #1df0ff;
+  transition: box-shadow 0.25s ease-in-out;
+}
+.system-sr3e .combobox-option.selected {
+  box-shadow: inset 0 0 1.7rem #1df0ff;
+  transition: box-shadow 0.25s ease-in-out;
+}
+.system-sr3e .combobox-option.no-results {
+  color: grey;
+  cursor: default;
+}
+.system-sr3e .combobox-option.no-results:hover {
+  background-color: transparent;
 }
 .system-sr3e .sr3e.sheet.character {
   overflow: visible !important;

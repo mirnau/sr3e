@@ -1,64 +1,66 @@
 <script>
+  import { onMount, onDestroy } from "svelte";
   import { localize, openFilePicker } from "../../svelteHelpers.js";
   import ActorDataService from "../../foundry/services/ActorDataService.js";
+  import ComboSearch from "./components/ComboSearch.svelte";
   import JournalViewer from "./components/JournalViewer.svelte";
-  import { onMount } from "svelte";
 
   let { item, config } = $props();
 
   let layoutMode = $state("single");
   let formattedAmount = $state(`${item.system.amount} ¥`);
 
-  // Simple reactive display value
+  let creditorOptions = $state([]);
+  let selectedId = $state(item.system.creditorId ?? "");
+  let delimiter = $state("");
+
+  // Format display string
   $effect(() => {
     formattedAmount = `${formatNumber(item.system.amount)} ¥`;
-    item.upde;
   });
 
-  // Function to format numbers with periods as thousand separators
+  // Build options from game actors
+  $effect(() => {
+    const actors = game.actors;
+    const filtered =
+      delimiter.trim().length > 0
+        ? actors.filter((a) =>
+            a.name.toLowerCase().includes(delimiter.toLowerCase())
+          )
+        : actors;
+
+    creditorOptions = filtered.map((a) => ({
+      value: a.id,
+      label: a.name,
+    }));
+  });
+
+  function handleSelection(event) {
+    const id = event.detail.value;
+    selectedId = id;
+    item.update({ "system.creditorId": id });
+  }
+
   function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 
   function handleInput(e) {
-    let inputValue = e.target.value;
-
-    // If the input is completely empty or just whitespace, set to 0
-    if (!inputValue.trim()) {
-      item.system.amount = 0;
-      e.target.value = "0 ¥";
-      return;
-    }
-
-    // Remove all non-digits to get the raw number
+    const inputValue = e.target.value.trim();
     const raw = inputValue.replace(/[^\d]/g, "");
-
-    // Parse the number
     const parsed = parseInt(raw, 10) || 0;
-
-    // Update the item amount
     item.system.amount = parsed;
-
-    // Update the input field with formatted value
     e.target.value = `${formatNumber(parsed)} ¥`;
   }
 
   function handleKeyDown(e) {
-    // Allow: backspace, delete, tab, escape, enter
     if (
-      [8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-      // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-      (e.keyCode === 65 && e.ctrlKey === true) ||
-      (e.keyCode === 67 && e.ctrlKey === true) ||
-      (e.keyCode === 86 && e.ctrlKey === true) ||
-      (e.keyCode === 88 && e.ctrlKey === true) ||
-      // Allow: home, end, left, right
+      [8, 9, 27, 13, 46].includes(e.keyCode) ||
+      (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode)) ||
       (e.keyCode >= 35 && e.keyCode <= 39)
-    ) {
+    )
       return;
-    }
 
-    // Ensure that it is a number and stop the keypress
     if (
       (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
       (e.keyCode < 96 || e.keyCode > 105)
@@ -68,18 +70,14 @@
   }
 
   function handleFocus(e) {
-    // Select all text when focusing for easy editing
     e.target.select();
   }
 
   function handleBlur(e) {
-    // Ensure the value is properly formatted when leaving the field
     const raw = e.target.value.replace(/[^\d]/g, "");
     const parsed = parseInt(raw, 10) || 0;
     item.system.amount = parsed;
-
     item.update({ "system.amount": parsed }, { render: false });
-
     e.target.value = `${formatNumber(parsed)} ¥`;
   }
 </script>
@@ -100,6 +98,7 @@
               onclick={async () => openFilePicker(item)}
             />
           </div>
+
           <div class="stat-grid single-column">
             <div class="stat-card">
               <div class="stat-card-background"></div>
@@ -124,12 +123,70 @@
                 onkeydown={handleKeyDown}
                 onfocus={handleFocus}
                 onblur={handleBlur}
-                placeholder="0 ¥"
+                placeholder="0.00 %"
               />
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-background"></div>
+              <select
+                name="type"
+                bind:value={item.system.type}
+                onchange={(e) => item.update({ "system.type": e.target.value })}
+              >
+                <option value="" disabled
+                  >{localize(config.transaction.select)}</option
+                >
+                <option value="income"
+                  >{localize(config.transaction.income)}</option
+                >
+                <option value="asset"
+                  >{localize(config.transaction.asset)}</option
+                >
+                <option value="debt">{localize(config.transaction.debt)}</option
+                >
+                <option value="expense"
+                  >{localize(config.transaction.expense)}</option
+                >
+              </select>
+            </div>
+            <input type="text" bind:value={delimiter} placeholder="Search..." />
+            <div class="stat-grid two-column">
+              <div class="stat-card">
+                <div class="stat-card-background"></div>
+                <h4>{localize(config.transaction.recurrent)}</h4>
+                <input type="checkbox" bind:value={item.isRecurrent} />
+              </div>
+              <div class="stat-card">
+                <h4>{localize(config.transaction.creditstick)}</h4>
+                <div class="stat-card-background"></div>
+                <input type="checkbox" bind:value={item.isCreditStick} />
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {#if item.system.type !== "asset"}
+        <div class="item-sheet-component">
+          <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+              <div class="stat-grid single-column">
+                <div class="stat-card">
+                  <div class="stat-card-background"></div>
+                  <h3>Creditor</h3>
+                </div>
+                
+                <ComboSearch
+                  options={creditorOptions}
+                  bind:value={selectedId}
+                  on:select={handleSelection}
+                />
+
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
     </div>
     <JournalViewer {item} {config} />
   </div>

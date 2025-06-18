@@ -213,8 +213,20 @@ sr3e.time = {
     seconds: "sr3e.time.seconds"
 }
 
+sr3e.combosearch = {
+    noresult: "sr3e.combosearch.noresult",
+    search: "sr3e.combosearch.search"
+}
+
 sr3e.transaction ={
     transaction: "sr3e.transaction.transaction",
+    creditstick: "sr3e.transaction.creditstick",
+    recurrent: "sr3e.transaction.recurrent",
+    asset: "sr3e.transaction.asset",
+    income: "sr3e.transaction.income",
+    debt: "sr3e.transaction.debt",
+    expense: "sr3e.transaction.expense",
+    select: "sr3e.transaction.select",
 }
 
 sr3e.weapon = {

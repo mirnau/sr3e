@@ -1,7 +1,7 @@
 export default class TransactionModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      amount: new foundry.data.fields.NumberField({ // Exposed already
+      amount: new foundry.data.fields.NumberField({ 
         required: true,
         initial: 0.0,
       }),
