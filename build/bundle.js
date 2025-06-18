@@ -12046,11 +12046,11 @@ function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlighte
       break;
   }
 }
-var root$1 = /* @__PURE__ */ template(`<div class="combobox-container"><div class="combobox-wrapper"><input class="combobox-input" autocomplete="off" role="combobox" aria-haspopup="listbox"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
+var root$1 = /* @__PURE__ */ template(`<div class="combobox-container"><div class="combobox-wrapper"><input class="combobox-input" role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
 function ComboSearch($$anchor, $$props) {
   push($$props, true);
   const dispatch = createEventDispatcher();
-  let options = prop($$props, "options", 19, () => []), value2 = prop($$props, "value", 15, ""), placeholder = prop($$props, "placeholder", 3, "Search..."), disabled = prop($$props, "disabled", 3, false), maxHeight = prop($$props, "maxHeight", 3, "200px");
+  let options = prop($$props, "options", 19, () => []), value2 = prop($$props, "value", 15, ""), placeholder = prop($$props, "placeholder", 3, "Search..."), nomatchplaceholder = prop($$props, "nomatchplaceholder", 3, "No matches found..."), disabled = prop($$props, "disabled", 3, false), maxHeight = prop($$props, "maxHeight", 3, "200px");
   let isOpen = state(false);
   let searchTerm = state("");
   let filteredOptions = state(proxy([]));
@@ -12079,6 +12079,7 @@ function ComboSearch($$anchor, $$props) {
   onMount(() => {
     dropdownElement = document.createElement("div");
     dropdownElement.classList.add("combobox-dropdown");
+    dropdownElement.id = "combobox-dropdown-list";
     dropdownElement.style.position = "absolute";
     dropdownElement.style.zIndex = "9999";
     const anchor = get$1(wrapperElement).closest(".item-sheet-component") ?? document.body;
@@ -12119,7 +12120,7 @@ function ComboSearch($$anchor, $$props) {
       } else if (get$1(searchTerm).trim() !== "") {
         const el = document.createElement("div");
         el.className = "combobox-option no-results";
-        el.textContent = "No results found";
+        el.textContent = nomatchplaceholder();
         content.appendChild(el);
       }
       dropdownElement.appendChild(content);
@@ -12298,9 +12299,17 @@ function TransactionApp($$anchor, $$props) {
       var div_15 = sibling(child(div_14), 2);
       var div_16 = child(div_15);
       var node_1 = sibling(child(div_16), 2);
+      const expression = /* @__PURE__ */ derived(() => localize($$props.config.combosearch.search));
+      const expression_1 = /* @__PURE__ */ derived(() => localize($$props.config.combosearch.noresult));
       ComboSearch(node_1, {
         get options() {
           return get$1(creditorOptions);
+        },
+        get placeholder() {
+          return get$1(expression);
+        },
+        get nomatchplaceholder() {
+          return get$1(expression_1);
         },
         get value() {
           return get$1(selectedId);

@@ -178,6 +178,8 @@
                 
                 <ComboSearch
                   options={creditorOptions}
+                  placeholder={localize(config.combosearch.search)}
+                  nomatchplaceholder={localize(config.combosearch.noresult)}
                   bind:value={selectedId}
                   on:select={handleSelection}
                 />

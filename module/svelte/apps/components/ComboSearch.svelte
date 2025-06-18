@@ -7,6 +7,7 @@
     options = [],
     value = $bindable(""),
     placeholder = "Search...",
+    nomatchplaceholder = "No matches found...",
     disabled = false,
     maxHeight = "200px",
   } = $props();
@@ -44,6 +45,7 @@
   onMount(() => {
     dropdownElement = document.createElement("div");
     dropdownElement.classList.add("combobox-dropdown");
+    dropdownElement.id = "combobox-dropdown-list";
     dropdownElement.style.position = "absolute";
     dropdownElement.style.zIndex = "9999";
 
@@ -96,7 +98,7 @@
       } else if (searchTerm.trim() !== "") {
         const el = document.createElement("div");
         el.className = "combobox-option no-results";
-        el.textContent = "No results found";
+        el.textContent = nomatchplaceholder;
         content.appendChild(el);
       }
 
@@ -195,10 +197,10 @@
       {disabled}
       class="combobox-input"
       class:open={isOpen}
-      autocomplete="off"
       role="combobox"
       aria-expanded={isOpen}
       aria-haspopup="listbox"
+      aria-controls="combobox-dropdown-list"
     />
     <i class="fa-solid fa-magnifying-glass combobox-icon" class:rotated={isOpen}
     ></i>
