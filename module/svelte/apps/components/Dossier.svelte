@@ -4,21 +4,28 @@
   import CardToolbar from "./CardToolbar.svelte";
   import { tick } from "svelte";
   import { getActorStore, stores } from "../../stores/actorStores.js";
-  
+  import Image from "./basic/Image.svelte";
+
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
   let system = $state(actor.system);
 
   let actorNameStore = getActorStore(actor.id, stores.actorName, actor.name);
-  let isDetailsOpenStore = getActorStore(actor.id, "isDetailsOpen", actor.system.profile.isDetailsOpen ?? false);
+  let isDetailsOpenStore = getActorStore(
+    actor.id,
+    "isDetailsOpen",
+    actor.system.profile.isDetailsOpen ?? false
+  );
 
   let actorName = $state($actorNameStore);
   let isDetailsOpen = $state($isDetailsOpenStore);
   let imgPath = $state("");
+  let imgName = $state("");
 
   $effect(() => {
     const metahuman = actor.items.find((i) => i.type === "metahuman");
-    imgPath = metahuman?.img ?? "";
+    imgPath = metahuman.img;
+    imgName = metahuman.name;
   });
 
   function triggerMasonryReflow() {
@@ -38,7 +45,7 @@
     isDetailsOpen = !isDetailsOpen;
     actor?.update?.(
       { "system.profile.isDetailsOpen": isDetailsOpen },
-      { render: false },
+      { render: false }
     );
     isDetailsOpenStore.set(isDetailsOpen);
   }
@@ -63,25 +70,13 @@
   }
 </script>
 
-
 <CardToolbar {id} />
 
 <div class="dossier">
   {#if isDetailsOpen}
-    <div class="version-one image-mask">
-      <img role="presentation" alt="metaTypeName" src={imgPath} />
-    </div>
+    <Image src={imgPath} title={imgName} />
   {:else}
-    <div class="version-two image-mask">
-      <img
-        src={actor.img}
-        role="presentation"
-        alt={actor.name + "!"}
-        title={actor.name}
-        data-edit="img"
-        onclick={() => openFilePicker(actor)}
-      />
-    </div>
+    <Image entity={actor} />
   {/if}
 
   <div class="dossier-details">
@@ -130,7 +125,7 @@
               onblur={(e) =>
                 actor?.update?.(
                   { "system.profile.age": Number(e.target.innerText.trim()) },
-                  { render: false },
+                  { render: false }
                 )}
             >
               {system.profile.age}
@@ -153,7 +148,7 @@
                   {
                     "system.profile.height": Number(e.target.innerText.trim()),
                   },
-                  { render: false },
+                  { render: false }
                 )}
             >
               {system.profile.height}
@@ -176,7 +171,7 @@
                   {
                     "system.profile.weight": Number(e.target.innerText.trim()),
                   },
-                  { render: false },
+                  { render: false }
                 )}
             >
               {system.profile.weight}
@@ -195,7 +190,7 @@
           onblur={(e) =>
             actor?.update?.(
               { "system.profile.quote": e.target.innerText.trim() },
-              { render: false },
+              { render: false }
             )}
           onkeypress={(e) => {
             if (e.key === "Enter") {

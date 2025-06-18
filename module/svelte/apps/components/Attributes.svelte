@@ -1,6 +1,6 @@
 <script>
-    import AttributeCardCreationState from "./AttributeCardCreationState.svelte";
-    import AttributeCardKarmaState from "./AttributeCardKarmaState.svelte";
+    import AttributeCardCreationState from "./basic/AttributeCardCreationState.svelte";
+    import AttributeCardKarmaState from "./basic/AttributeCardKarmaState.svelte";
     import { localize } from "../../../svelteHelpers.js";
     import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
     import CardToolbar from "./CardToolbar.svelte";

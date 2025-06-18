@@ -1,3 +1,4 @@
+/*
 export function getResizeObserver(masonryInstance, gridElement, func = null) {
 
     gridElement.masonryInstance = masonryInstance;
@@ -19,3 +20,5 @@ export function getResizeObserver(masonryInstance, gridElement, func = null) {
 
     return resizeObserver;
 }
+
+*/

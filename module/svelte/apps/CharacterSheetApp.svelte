@@ -98,11 +98,6 @@
       gridSizerSelector: ".layout-grid-sizer",
       gutterSizerSelector: ".layout-gutter-sizer",
       minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
-      stateMachineThresholds: {
-        small: 0,
-        medium: 0.5 * maxWidth,
-        wide: 0.66 * maxWidth,
-      },
       onLayoutStateChange: (state) => {
         layoutState = state;
       },
