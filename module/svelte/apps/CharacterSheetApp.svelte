@@ -8,8 +8,8 @@
   import Health from "./components/Health.svelte";
   import Karma from "./components/Karma.svelte";
   import Inventory from "./components/Inventory.svelte";
+  import MasonryGrid from "./components/basic/MasonryGrid.svelte";
   import { masonryMinWidthFallbackValue } from "../../foundry/services/commonConsts.js";
-
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
   import { tick } from "svelte";
@@ -63,16 +63,6 @@
       .filter(Boolean);
   });
 
-  let container = null;
-
-  // Re-trigger masonry after card updates
-  $effect(async () => {
-    await tick();
-    container?.dispatchEvent(
-      new CustomEvent("masonry-reflow", { bubbles: true }),
-    );
-  });
-
   // Save layout to flag with debounce
   let saveTimeout = null;
   $effect(() => {
@@ -82,43 +72,9 @@
       actor.setFlag("sr3e", "customLayout", layout);
     }, 200);
   });
-
-  let layoutState = $state("small");
-  const maxWidth = 1400;
-  let masonryInstance = null;
-
-  $effect(() => {
-    if (!container) return;
-
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
-    const result = setupMasonry({
-      container,
-      itemSelector: ".sheet-component",
-      gridSizerSelector: ".layout-grid-sizer",
-      gutterSizerSelector: ".layout-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
-      onLayoutStateChange: (state) => {
-        layoutState = state;
-      },
-    });
-
-    masonryInstance = result.masonryInstance;
-
-    return result.cleanup;
-  });
 </script>
 
-<div
-  bind:this={container}
-  class="sheet-character-masonry-main"
-  onmasonry-reflow={() => {
-    masonryInstance.layout();
-  }}
->
-  <div class="layout-grid-sizer"></div>
-  <div class="layout-gutter-sizer"></div>
-
+<MasonryGrid itemSelector="sheet-component" gridPrefix="sheet">
   {#each cards as { comp: Comp, props } (props.id)}
     <div class={"sheet-component span-" + (props.span ?? 1)}>
       <div class="sr3e-inner-background-container">
@@ -129,4 +85,4 @@
       </div>
     </div>
   {/each}
-</div>
+</MasonryGrid>

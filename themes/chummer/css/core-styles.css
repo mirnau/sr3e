@@ -205,7 +205,7 @@
 .sr3e.sheet.character {
   min-width: calc(var(--component-width) + var(--component-grid-gap) * 4);
 }
-.sr3e.sheet.character .sheet-character-masonry-main {
+.sr3e.sheet.character .sheet-masonry-grid {
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1;
@@ -215,10 +215,10 @@
   height: 100%;
   background: transparent;
 }
-.sr3e.sheet.character .sheet-character-masonry-main .layout-gutter-sizer {
+.sr3e.sheet.character .sheet-masonry-grid .sheet-gutter-sizer {
   width: var(--component-grid-gap);
 }
-.sr3e.sheet.character .sheet-character-masonry-main .layout-grid-sizer {
+.sr3e.sheet.character .sheet-masonry-grid .sheet-grid-sizer {
   min-width: var(--component-width);
 }
 .system-sr3e {
