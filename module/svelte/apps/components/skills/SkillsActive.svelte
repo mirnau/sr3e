@@ -1,13 +1,12 @@
 <script>
     import SkillCategory from "./SkillCategory.svelte";
+    import MasonryGrid from "../basic/MasonryGrid.svelte";
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
     import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { tick } from "svelte";
 
     let { actor = {}, config = {} } = $props();
-    let gridContainer;
-    let masonryInstance = null;
 
     const activeSkillsIdArrayStore = getActorStore(
         actor.id,
@@ -39,33 +38,10 @@
         })),
     );
 
-    $effect(() => {
-        if (masonryInstance) return;
-
-        const rem = parseFloat(
-            getComputedStyle(document.documentElement).fontSize,
-        );
-
-        const result = setupMasonry({
-            container: gridContainer,
-            itemSelector: ".skill-category-container",
-            gridSizerSelector: ".skill-container-grid-sizer",
-            gutterSizerSelector: ".skill-container-gutter-sizer",
-            minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem,
-        });
-
-        masonryInstance = result.masonryInstance;
-
-        return result.cleanup;
-    });
-
-
 </script>
 
-<div bind:this={gridContainer} class="skill-container-masonry-grid">
-    <div class="skill-container-grid-sizer"></div>
-    <div class="skill-container-gutter-sizer"></div>
+<MasonryGrid itemSelector="skill-category-container" gridPrefix="skill-container">
     {#each attributeSortedSkills as category}
         <SkillCategory {...category} {actor} {config} />
     {/each}
-</div>
+</MasonryGrid>
