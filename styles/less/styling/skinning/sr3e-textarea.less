@@ -13,7 +13,7 @@ textarea#chat-message {
     width: 100%;
     height: 100%;
     padding:0.5rem;
-    background: @background-color;
+    background: var(--background-color);
     border-radius: 0rem;
     outline: none;
     .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
@@ -21,7 +21,7 @@ textarea#chat-message {
 
     &:focus {
         outline: none;
-        box-shadow: 0 0 0.5rem @highlight-color-secondary, inset 0 0 2rem @highlight-color-primary;
+        box-shadow: 0 0 0.5rem @highlight-color-secondary, inset 0 0 2rem var(--highlight-color-primary);
     }
 
     &:hover {

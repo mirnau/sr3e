@@ -1,8 +1,8 @@
 input[type="search"],
 input[type="number"],
 input[type="text"] {
-    background: @background-color;
-    box-shadow: inset 0 0 1rem @highlight-color-primary;
+    background: var(--background-color);
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary);
     color: @text-color;
     border: none;
     font-size: 1.5rem;
@@ -17,13 +17,13 @@ input[type="text"] {
     &.large {
         min-height: 1.5rem;
         font-size: 1.5rem;
-        text-shadow: @h1-color-bloom-primary;
+        text-shadow: var(--h1-color)-bloom-primary;
     }
 
     transition: box-shadow 0.3s ease;
 
     &::before {
-        background: @background-color !important;
+        background: var(--background-color) !important;
         box-shadow: inset 0 0 30px #1d282c;
         color: @text-color !important;
         content: '';
@@ -38,7 +38,7 @@ input[type="text"] {
     }
 
     &:focus {
-        box-shadow: inset 0 0 10px @highlight-color-primary;
+        box-shadow: inset 0 0 10px var(--highlight-color-primary);
         outline: none;
     }
 }

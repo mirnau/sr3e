@@ -6,16 +6,24 @@
 :root {
   --component-width: 17rem;
   --component-grid-gap: 0.25rem;
+  --background-color: linear-gradient(35deg,
+  #1a1a1a, // Deep blackened steel
+  #2f2f2f 35%, // Mid-tone gunmetal
+  #4d4d4d 65%, // Brushed metallic edge
+  #3b3b3b 90%, // Slight cool gray tint
+  #1e1e1e // Back to dark shadow
+  );
+  --highlight-color-primary: #11e6bf; // Pink for highlights
+  --highlight-color-secondary: #16a48d; // Pink for highlights
+}
+// Foundry system scoped overrides //
+* {
+  --color-scrollbar: #ff009572;
 }
 
+@highlight-color-secondary: #ff0095; // Pink for highlights
 
-@background-color: linear-gradient(35deg,
-    #1a1a1a, // Deep blackened steel
-    #2f2f2f 35%, // Mid-tone gunmetal
-    #4d4d4d 65%, // Brushed metallic edge
-    #3b3b3b 90%, // Slight cool gray tint
-    #1e1e1e // Back to dark shadow
-  );
+//var(--highlight-color-primary);: #1df0ff; // Pink for highlights
 
 
 
@@ -24,13 +32,10 @@
 @tertiary-color: #6825c0; // Soft green
 @quartiery-color: #552791; // Soft green
 
-@accent-color: #ff0095; // Neon blue
+@accent-color: rgb(255, 32, 144); // Neon blue
 @accent-apricot: #f4a370;
-@accent-cherry-blossom: #ff1d9d;
-@highlight-color-primary: #1df0ff; // Pink for highlights
-@highlight-color-secondary: #ff0095; // Pink for highlights
 @highlight-color-tertiary: #5fd3ae; // Pink for highlights
-@text-color: @highlight-color-primary;
+@text-color: var(--highlight-color-primary);
 @text-accent-color: #ff80c8;
 @warning-color: #ff0095;
 
@@ -42,11 +47,6 @@
     rgba(31, 44, 66, 0.6) 2px,
   );
 
-* {
-  /* Define your scrollbar‐color variable */
-  --color-scrollbar: #ff009572;
-  /* fallback example */
-}
 
 //Main Window Background
 @appwindow-background: none; //Makes the entire app transparent
@@ -56,9 +56,9 @@
 @window-header-color: transparent;
 
 //Default
-@default-sr3e-inner-background-color: @background-color;
+@default-sr3e-inner-background-color: var(--background-color);
 @default-fake-shadow-color: @primary-fake-shadow;
-@default-sheet-border-color: @accent-cherry-blossom;
+@default-sheet-border-color: @accent-color;
 
 //Default Input element 
 @input-background: #1c364b;
@@ -68,7 +68,7 @@
 //Character Attribute Stat Card
 @attribute-stat-card-color: @chummer-dark-fallback;
 @attribute-stat-card-label-color: @secondary-color;
-@attribute-stat-card-button-color: @h1-color;
+@attribute-stat-card-button-color: var(--h1-color);
 
 //Character Dice Pool Stat Card
 @dicepool-stat-card-color: @chummer-dark-fallback;
@@ -93,8 +93,8 @@
 //Character Tabs
 @tab-idle: @chummer-dark-fallback;
 @tab-active: @chummer-dark-fallback;
-@tab-hover: @accent-cherry-blossom;
-@tab-neon-border: inset 0 0 15px @accent-cherry-blossom;
+@tab-hover: @accent-color;
+@tab-neon-border: inset 0 0 15px @accent-color;
 @tab-neon-border-active: inset 0 0 15px @highlight-color-tertiary;
 @active-tab-font-color: @highlight-color-tertiary;
 @active-tab-text-shadow: @active-tab-font-color;
@@ -115,16 +115,6 @@
 @weapon-stat-card-color: @chummer-dark-fallback;
 @weapon-stat-card-label-color: @secondary-color;
 
-
-//Derivative styles:
-//Text
-@h1-color: @highlight-color-primary;
-@h2-color: @highlight-color-secondary;
-@h3-color: @highlight-color-tertiary;
-@h4-color: @highlight-color-tertiary;
-@h5-color: @highlight-color-tertiary;
-@h6-color: @highlight-color-tertiary;
-
 @option-background: @accent-color;
 
 
@@ -134,73 +124,8 @@
 
 //Shopping-Cart Pulse Colors
 @shopping-cart-primary: #00FC00C0;
-@shopping-cart-secondary: @highlight-color-primary;
-
-;
+@shopping-cart-secondary: var(--highlight-color-primary);
 
 //Fake Bloom
 @shopping-cart-bloom-primary: #45d06b;
 @shopping-cart-bloom-secondary: #e6ff8d;
-@h1-color-bloom-primary: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
-
-@h3-color-bloom-primary: 0 0 10px @shopping-cart-bloom-primary, 0 0 20px @shopping-cart-bloom-secondary;
-
-@h4-color-bloom-primary: 0 0 6px @shopping-cart-bloom-primary, 0 0 10px @shopping-cart-bloom-secondary;
-
-@h5-color-bloom-primary: 00 0 6px @shopping-cart-bloom-primary, 0 0 10px @shopping-cart-bloom-secondary;
-
-
-
-
-//Unused colors BELOW HERE:
-
-// Primary Colors
-@background: #1A1B26; // Main background
-@background-deep: #16161E; // Deep background
-@foreground: #C0CAF5; // Main text
-@foreground-secondary: #A9B1D6; // Secondary text
-
-// Accent Colors
-@blue: #7AA2F7; // Vibrant blue
-@purple-light: #9D7CD8; // Light purple
-@purple-lavender: #BB9AF7; // Lavender
-@red: #F7768E; // Bright red
-@green: #9ECE6A; // Soft green
-@teal-green: #73DACA; // Teal green
-@yellow: #E0AF68; // Warm yellow
-
-// Neutral Shades
-@gray-dark: #414868; // Dark gray-blue
-@gray-medium: #565F89; // Medium gray-blue
-
-
-// Primary and Neutral Shades
-@primary-dark: #1e2234;
-@primary-deep-dark: #232739;
-@primary-medium-dark: #272c40;
-@neutral-gray-dark: #373e5c;
-@neutral-gray-medium: #3a4160;
-
-// Blue Tones
-@blue-dark: #394b6e;
-@blue-medium: #3d579a;
-@blue-light: #425fa6;
-@blue-bright: #7399eb;
-@blue-soft: #79a4f4;
-
-// Purple Tones
-@purple-light: #b293ed;
-@purple-medium: #977ad7;
-@purple-dark: #9e7bcb;
-
-// Red Tones
-@red-bright: #f17d82;
-@red-dark: #cd4a58;
-
-// Yellow/Orange Tones
-@orange-light: #f5c580;
-
-// Teal and Green Tones
-@teal-light: #4dd8bd;
-@teal-medium: #4cd3bc;
-@green-soft: #c5e994;

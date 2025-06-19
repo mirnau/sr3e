@@ -11,10 +11,10 @@ export function attachLightEffect(html, activeTheme) {
       highlight: rgb(255, 192, 203), // soft cherry blossom
     },
     dark: {
-      silver: rgb(130, 130, 130),
-      lightGray: rgb(92, 92, 92),
-      darkGray: rgb(41, 41, 41),
-      highlight: rgb(255, 192, 203),
+      silver: rgb(77, 77, 77),
+      lightGray: rgb(31, 31, 32),
+      darkGray: rgb(23, 22, 22),
+      highlight: rgb(102, 119, 115),
     },
   };
 

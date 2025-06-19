@@ -2,11 +2,12 @@
 :root {
   --component-width: 17rem;
   --component-grid-gap: 0.25rem;
+  --background-color: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  --highlight-color-primary: #11e6bf;
+  --highlight-color-secondary: #16a48d;
 }
 * {
-  /* Define your scrollbar‐color variable */
   --color-scrollbar: #ff009572;
-  /* fallback example */
 }
 /*
 @import "./styling/skinning/sr3e-button.less";

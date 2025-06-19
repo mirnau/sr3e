@@ -6,6 +6,7 @@
   import JournalViewer from "./components/JournalViewer.svelte";
   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
   import Image from "./components/basic/Image.svelte";
+  import StatCard from "./components/basic/StatCard.svelte";
 
   let { item, config } = $props();
 
@@ -14,6 +15,7 @@
 
   let creditorOptions = $state([]);
   let selectedId = $state(item.system.creditorId ?? "");
+  let interest = $state("");
   let delimiter = $state("");
 
   // Format display string
@@ -106,10 +108,8 @@
         </div>
 
         <!-- Nuyen Amount Input -->
-        <div class="stat-card">
-          <div class="stat-card-background"></div>
+        <StatCard>
           <input
-            class="large"
             name="amount"
             type="text"
             value={formattedAmount}
@@ -117,43 +117,34 @@
             onkeydown={handleKeyDown}
             onfocus={handleFocus}
             onblur={handleBlur}
-            placeholder="0.00 %"
           />
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-background"></div>
+        </StatCard>
+        <StatCard>
           <select
             name="type"
             bind:value={item.system.type}
             onchange={(e) => item.update({ "system.type": e.target.value })}
           >
-            <option value="" disabled
-              >{localize(config.transaction.select)}</option
-            >
-            <option value="income">{localize(config.transaction.income)}</option
-            >
+            <option value="" disabled>{localize(config.transaction.select)}</option>
+            <option value="income">{localize(config.transaction.income)}</option>
             <option value="asset">{localize(config.transaction.asset)}</option>
             <option value="debt">{localize(config.transaction.debt)}</option>
-            <option value="expense"
-              >{localize(config.transaction.expense)}</option
-            >
+            <option value="expense">{localize(config.transaction.expense)}</option>
           </select>
-        </div>
-        <input type="text" bind:value={delimiter} placeholder="0.00%" />
+        </StatCard>
+        <StatCard>
+          <input type="text" bind:value={interest} placeholder="0.00%" />
+        </StatCard>
         <div class="stat-grid two-column">
-          <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4>{localize(config.transaction.recurrent)}</h4>
+          <StatCard label={config.transaction.recurrent}>
             <input type="checkbox" bind:value={item.isRecurrent} />
-          </div>
-          <div class="stat-card">
-            <h4>{localize(config.transaction.creditstick)}</h4>
-            <div class="stat-card-background"></div>
+          </StatCard>
+          <StatCard label={config.transaction.creditstick}>
             <input type="checkbox" bind:value={item.isCreditStick} />
-          </div>
+          </StatCard>
         </div>
-      </div>
-    </ItemSheetComponent>
+      </div></ItemSheetComponent
+    >
     {#if item.system.type !== "asset"}
       <ItemSheetComponent>
         <div class="stat-grid single-column">

@@ -7,17 +7,17 @@ button {
     position: relative;
 
     label {
-        color: @h1-color;
+        color: var(--h1-color);
         text-transform: uppercase;
-        text-shadow: 0 0 10px @h1-color;
+        text-shadow: 0 0 10px var(--h1-color);
     }
 }
 
 label {
     font-size: 1.2rem;
-    color: @h1-color !important;
+    color: var(--h1-color) !important;
     text-transform: uppercase;
-    text-shadow: 0 0 10px @h1-color;
+    text-shadow: 0 0 10px var(--h1-color);
     margin: 1rem !important;
 }
 
@@ -27,12 +27,12 @@ p.notes {
 
 h3.form-header {
     .VTT323-header();
-    color: @h3-color;
+    color: --h3-color;
 
 }
 
 .form-group.submenu {
-    box-shadow: inset 0 0 1.5rem @highlight-color-primary;
+    box-shadow: inset 0 0 1.5rem var(--highlight-color-primary);
     background-color: @secondary-color;
     padding: 0.5rem;
     .clipped-corners(0.5rem, 0.5rem, 1.4142rem, 0.5rem);
@@ -42,7 +42,7 @@ h3.form-header {
 .form-group {
     position: relative;
     box-shadow: inset 0 0 1.5rem @highlight-color-tertiary;
-    background-color: @accent-cherry-blossom;
+    background-color: @accent-color;
     padding: 0.5rem;
      .clipped-corners(0.5rem, 0.5rem, 1rem, 0.5rem);
 
@@ -62,7 +62,7 @@ footer
 }
 
 .directory-footer {
-    box-shadow: inset 0 0 1rem @highlight-color-primary;
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary);
 }
 
 

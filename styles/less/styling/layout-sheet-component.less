@@ -102,7 +102,7 @@ div#invitation-links,
         margin-top: 0.5rem;
         margin-bottom: 1rem;
         font-size: 1.2rem;
-        text-shadow: 0 0 10px @h2-color;
+        text-shadow: 0 0 10px --h2-color;
     }
 
     .sr3e-inner-background-container {
@@ -130,9 +130,9 @@ div#invitation-links,
     }
 
     label {
-        color: @h1-color;
+        color: var(--h1-color);
         text-transform: uppercase;
-        text-shadow: 0 0 10px @h1-color;
+        text-shadow: 0 0 10px var(--h1-color);
         padding: 1rem;
     }
 
@@ -185,11 +185,16 @@ div#invitation-links,
         align-items: center;
         justify-content: center;
         position: relative;
-        background: @accent-cherry-blossom;
+        background: var(--highlight-color-secondary);
         transition: transform 1.3s ease, background-color 1.3s ease;
         text-align: center;
         padding: 0rem 0.5rem 0.25rem 0.5rem; // reduce padding if needed
         z-index: 1;
+
+        
+        &.character {
+            background: var(--highlight-color-primary);
+        }
 
         .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
