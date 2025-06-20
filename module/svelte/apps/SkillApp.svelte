@@ -1,148 +1,125 @@
 <script>
   import { localize, openFilePicker } from "../../svelteHelpers.js";
-  import ActorDataService from "../../foundry/services/ActorDataService.js";
   import JournalViewer from "./components/JournalViewer.svelte";
-  import { onMount } from "svelte";
+  import Image from "./components/basic/Image.svelte";
+  import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
+  import StatCard from "./components/basic/StatCard.svelte";
 
   let { item, config } = $props();
 
   let layoutMode = $state("single");
 
-  // Create a reactive formatted display value
-  let formattedAmount = $derived(`${item.system.amount} ¥`);
+  let value = $state(item.system.skillType);
+
+  let formattedAmount = $state(`${item.system.amount} ¥`);
+
+  const selectOptions = [
+    { value: "active", label: localize(config.skill.active) },
+    { value: "knowledge", label: localize(config.skill.knowledge) },
+    { value: "language", label: localize(config.skill.language) },
+  ];
+
+  const attributeOptions = Object.entries(config.attributes).map(
+    ([key, label]) => ({
+      value: key,
+      label: localize(label),
+    })
+  );
+
+  function updateSkillType(type) {
+    value = type;
+    item.update({ "system.skillType": type });
+  }
 
   function handleInput(e) {
-    let inputValue = e.target.value;
-    
-    // If the input is completely empty or just whitespace, set to 0
-    if (!inputValue.trim()) {
+    const inputValue = e.target.value.trim();
+
+    if (!inputValue) {
       item.system.amount = 0;
-      e.target.value = "0 ¥";
+      formattedAmount = `0 ¥`;
       return;
     }
 
-    // Remove all non-digits to get the raw number
     const raw = inputValue.replace(/[^\d]/g, "");
-    
-    // Parse the number
     const parsed = parseInt(raw, 10) || 0;
-    
-    // Update the item amount
+
     item.system.amount = parsed;
-    
-    // Update the input field with formatted value
-    e.target.value = `${parsed} ¥`;
+    formattedAmount = `${parsed} ¥`;
   }
 
   function handleKeyDown(e) {
-    // Allow: backspace, delete, tab, escape, enter
-    if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
-        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-        (e.keyCode === 65 && e.ctrlKey === true) ||
-        (e.keyCode === 67 && e.ctrlKey === true) ||
-        (e.keyCode === 86 && e.ctrlKey === true) ||
-        (e.keyCode === 88 && e.ctrlKey === true) ||
-        // Allow: home, end, left, right
-        (e.keyCode >= 35 && e.keyCode <= 39)) {
+    if (
+      [8, 9, 27, 13, 46].includes(e.keyCode) || // Backspace, Tab, etc.
+      (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode)) || // Ctrl+A/C/V/X
+      (e.keyCode >= 35 && e.keyCode <= 39) // Home, End, Arrows
+    ) {
       return;
     }
-    
-    // Ensure that it is a number and stop the keypress
-    if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+
+    if (
+      (e.shiftKey || e.keyCode < 48 || e.keyCode > 57) &&
+      (e.keyCode < 96 || e.keyCode > 105)
+    ) {
       e.preventDefault();
     }
   }
 
   function handleFocus(e) {
-    // Select all text when focusing for easy editing
     e.target.select();
   }
 
   function handleBlur(e) {
-    // Ensure the value is properly formatted when leaving the field
     const raw = e.target.value.replace(/[^\d]/g, "");
     const parsed = parseInt(raw, 10) || 0;
     item.system.amount = parsed;
-    e.target.value = `${parsed} ¥`;
+    formattedAmount = `${parsed} ¥`;
   }
 </script>
 
 <div class="sr3e-waterfall-wrapper">
   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
-    <div class="item-sheet-component">
-      <div class="sr3e-inner-background-container">
-        <div class="fake-shadow"></div>
-        <div class="sr3e-inner-background">
-          <div class="image-mask">
-            <img
-              src={item.img}
-              role="presentation"
-              data-edit="img"
-              title={item.name}
-              alt={item.name}
-              onclick={async () => openFilePicker(item)}
-            />
-          </div>
-          <div class="stat-grid single-column">
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <input
-                class="large"
-                name="name"
-                type="text"
-                value={item.name}
-                onchange={(e) => item.update({ name: e.target.value })}
-              />
-            </div>
+    <ItemSheetComponent>
+      <Image src={item.img} title={item.name} />
+      <div class="stat-grid single-column">
+        <StatCard>
+          <div class="stat-card-background"></div>
+          <input
+            class="large"
+            name="name"
+            type="text"
+            value={item.name}
+            onchange={(e) => item.update({ name: e.target.value })}
+          />
+        </StatCard>
 
-            <!-- Nuyen Amount Input -->
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <input
-                class="large"
-                name="amount"
-                type="text"
-                value={formattedAmount}
-                oninput={handleInput}
-                onkeydown={handleKeyDown}
-                onfocus={handleFocus}
-                onblur={handleBlur}
-                placeholder="0 ¥"
-              />
-            </div>
+        <StatCard>
+          <select {value} onchange={(e) => updateSkillType(e.target.value)}>
+            {#each selectOptions as option}
+              <option value={option.value}>{option.label}</option>
+            {/each}
+          </select>
+        </StatCard>
 
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <select {value} onchange={(e) => updateSkillType(e.target.value)}>
-                {#each selectOptions as option}
-                  <option value={option.value}>{option.label}</option>
-                {/each}
-              </select>
-            </div>
-
-            {#if value === "active"}
-              <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <select
-                  value={item.system.activeSkill.linkedAttribute}
-                  onchange={(e) =>
-                    item.update({
-                      "system.activeSkill.linkedAttribute": e.target.value,
-                    })}
-                >
-                  <option disabled value="">
-                    {localize(config.skill.linkedAttribute)}
-                  </option>
-                  {#each attributeOptions as option}
-                    <option value={option.value}>{option.label}</option>
-                  {/each}
-                </select>
-              </div>
-            {/if}
-          </div>
-        </div>
+        {#if value === "active"}
+          <StatCard>
+            <select
+              value={item.system.activeSkill.linkedAttribute}
+              onchange={(e) =>
+                item.update({
+                  "system.activeSkill.linkedAttribute": e.target.value,
+                })}
+            >
+              <option disabled value="">
+                {localize(config.skill.linkedAttribute)}
+              </option>
+              {#each attributeOptions as option}
+                <option value={option.value}>{option.label}</option>
+              {/each}
+            </select>
+          </StatCard>
+        {/if}
       </div>
-    </div>
+    </ItemSheetComponent>
     <JournalViewer {item} {config} />
   </div>
 </div>

@@ -4,11 +4,9 @@
 </script>
 
 <div class="stat-card">
-  <div class="stat-card-background character"></div>
+  <div class="stat-card-background"></div>
   {#if label?.length > 0}
-    <h4 class="no-margin uppercase">
-      {localize(label)}
-    </h4>
+    <h4 class="no-margin uppercase">{localize(label)}</h4>
   {/if}
   {#if children}
     {@render children?.()}

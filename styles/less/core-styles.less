@@ -1,8 +1,15 @@
-// The theme's main file
+//Intorduces a sublayer, not recoginzed by LESS intellisence
 
-//Skinning
+@layer sr3e.prep {
+    h1, h2, h3, h4, h5, h6 {
+        all: unset;
+        text-transform: uppercase;
+    }
+}
+
+@layer sr3e {
+
 /*
-
 @import "./styling/skinning/sr3e-select.less";
 @import "./styling/skinning/sr3e-common.less";
 @import "./styling/skinning/sr3e-textarea.less";
@@ -15,77 +22,71 @@
 @import "./sheets/sheet-metahuman.less";
 */
 
-//Common styles
+  //Common styles
 
-//||||||||||||||   GLOBAL BEGIN  
-// Variables
-@import "./chummer-dark/theme.less";
-// Global font styling
-@import "./styling/common/common-fonts.less";
-@import "./styling/common/common-mixins.less";
-@import "./masonry/masonry-layout.less";
+  //||||||||||||||   GLOBAL BEGIN
+  // Variables
+  @import "./chummer-dark/theme.less";
 
-//||||||||||||||   GLOBAL END  
+  // Global font styling
+  @import "./styling/common/common-fonts.less";
+  @import "./styling/common/common-mixins.less";
+  @import "./masonry/masonry-layout.less";
 
-.system-sr3e {
+  //||||||||||||||   GLOBAL END
 
-    // All the style directives for themes
+  // Apps
+  @import "./styling/apps/sr3e-app-sheet-actor.less";
+  @import "./styling/apps/sr3e-app-metahuman.less";
+  @import "./styling/apps/sr3e-app-journal.less";
+  @import "./styling/apps/sr3e-app-journal-editor.less";
+  @import "./styling/apps/sr3e-journal-search-modal.less";
+  @import "./styling/apps/sr3e-app-character-creation.less";
+  @import "./styling/apps/sr3e-app-dossier.less";
+  @import "./styling/apps/sr3e-creation-point-app.less";
+  @import "./styling/apps/sr3e-app-active-skill-card.less";
+  @import "./styling/apps/sr3e-app-skill-category.less";
+  @import "./styling/apps/sr3e-app-active-skill-editor.less";
+  @import "./styling/apps/sr3e-app-transaction.less";
 
-    // Apps
-    @import "./styling/apps/sr3e-app-sheet-actor.less";
-    @import "./styling/apps/sr3e-app-metahuman.less";
-    @import "./styling/apps/sr3e-app-journal.less";
-    @import "./styling/apps/sr3e-app-journal-editor.less";
-    @import "./styling/apps/sr3e-journal-search-modal.less";
-    @import "./styling/apps/sr3e-app-character-creation.less";
-    @import "./styling/apps/sr3e-app-dossier.less";
-    @import "./styling/apps/sr3e-creation-point-app.less";
-    @import "./styling/apps/sr3e-app-active-skill-card.less";
-    @import "./styling/apps/sr3e-app-skill-category.less";
-    @import "./styling/apps/sr3e-app-active-skill-editor.less";
-    @import "./styling/apps/sr3e-app-transaction.less";
+  // Components
+  @import "./styling/components/component-form-group.less";
+  @import "./styling/components/sr3e-window-header.less";
+  @import "./styling/components/sr3e-button.less";
+  @import "./styling/components/sr3e-img.less";
+  @import "./styling/components/sr3e-select.less";
+  @import "./styling/components/sr3e-scrollbar.less";
+  @import "./styling/components/sr3e-input.less";
+  @import "./styling/components/sr3e-window-content.less";
+  @import "./styling/components/sr3e-menu-controls-dropdown.less";
 
-    // Components
-    @import "./styling/components/component-form-group.less";
-    @import "./styling/components/sr3e-window-header.less";
-    @import "./styling/components/sr3e-button.less";
-    @import "./styling/components/sr3e-img.less";
-    @import "./styling/components/sr3e-select.less";
-    @import "./styling/components/sr3e-scrollbar.less";
-    @import "./styling/components/sr3e-input.less";
-    @import "./styling/components/sr3e-window-content.less";
-    @import "./styling/components/sr3e-menu-controls-dropdown.less";
+  //Custom
+  @import "./styling/custom-components/sr3e-folder-tab-structure.less";
+  @import "./styling/custom-components/sr3e-journal-viewer.less";
 
-    //Custom
-    @import "./styling/custom-components/sr3e-folder-tab-structure.less";
-    @import "./styling/custom-components/sr3e-journal-viewer.less";
+  //Custom Components
+  @import "./styling/custom-components/sr3e-stat-card.less";
+  @import "./styling/custom-components/sr3e-sheet-component.less";
+  @import "./styling/custom-components/sr3e-card-toolbar.less";
+  @import "./styling/custom-components/sr3e-shopping-cart";
+  @import "./styling/custom-components/sr3e-timemanager.less";
+  @import "./styling/custom-components/sr3e-karmamanager.less";
+  @import "./styling/custom-components/sr3e-combo-search.less";
 
-    //Custom Components
-    @import "./styling/custom-components/sr3e-stat-card.less";
-    @import "./styling/custom-components/sr3e-sheet-component.less";
-    @import "./styling/custom-components/sr3e-card-toolbar.less";
-    @import "./styling/custom-components/sr3e-shopping-cart";
-    @import "./styling/custom-components/sr3e-timemanager.less";
-    @import "./styling/custom-components/sr3e-karmamanager.less";
-    @import "./styling/custom-components/sr3e-combo-search.less";
+  // Injections
+  @import "./styling/injections/neoname.less";
+  @import "./styling/injections/newsfeed.less";
 
-    // Injections
-    @import "./styling/injections/neoname.less";
-    @import "./styling/injections/newsfeed.less";
+  // Temporary Solutions (hoping for foundry updates to fix this in the future)
+  @import "./styling/skinning/tempfixes/sr3e-category-browser-temp-overrides.less";
 
-    // Temporary Solutions (hoping for foundry updates to fix this in the future)
-    @import "./styling/skinning/tempfixes/sr3e-category-browser-temp-overrides.less";
+  // Not yet refactored:
 
+  @import "./styling/skinning/sr3e-input-range.less";
+  @import "./styling/layout-sheet-component.less";
 
-    // Not yet refactored:
-
-    @import "./styling/skinning/sr3e-input-range.less";
-    @import "./styling/layout-sheet-component.less";
-
-    section.body.flexcol.scrollable {
-        overflow-y: auto;
-        max-height: 20rem;
-    }
-
-    
+  section.body.flexcol.scrollable {
+    overflow-y: auto;
+    max-height: 20rem;
+  }
 }

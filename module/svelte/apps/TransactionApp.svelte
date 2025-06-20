@@ -125,11 +125,16 @@
             bind:value={item.system.type}
             onchange={(e) => item.update({ "system.type": e.target.value })}
           >
-            <option value="" disabled>{localize(config.transaction.select)}</option>
-            <option value="income">{localize(config.transaction.income)}</option>
+            <option value="" disabled
+              >{localize(config.transaction.select)}</option
+            >
+            <option value="income">{localize(config.transaction.income)}</option
+            >
             <option value="asset">{localize(config.transaction.asset)}</option>
             <option value="debt">{localize(config.transaction.debt)}</option>
-            <option value="expense">{localize(config.transaction.expense)}</option>
+            <option value="expense"
+              >{localize(config.transaction.expense)}</option
+            >
           </select>
         </StatCard>
         <StatCard>
@@ -143,8 +148,8 @@
             <input type="checkbox" bind:value={item.isCreditStick} />
           </StatCard>
         </div>
-      </div></ItemSheetComponent
-    >
+      </div>
+    </ItemSheetComponent>
     {#if item.system.type !== "asset"}
       <ItemSheetComponent>
         <div class="stat-grid single-column">

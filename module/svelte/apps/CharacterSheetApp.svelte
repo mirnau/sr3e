@@ -18,14 +18,14 @@
 
   const defaultCardArray = [
     { comp: Dossier, props: { actor, config, id: 0, span: 1 } },
-    { comp: Initiative, props: { actor, config, id: 1, span: 1 } },
+    { comp: Initiative, props: { actor, config, id: 1, span: 2 } },
     { comp: Attributes, props: { actor, config, id: 2, span: 1 } },
     { comp: DicePools, props: { actor, config, id: 3, span: 1 } },
     { comp: Movement, props: { actor, config, id: 4, span: 1 } },
     { comp: Karma, props: { actor, config, id: 5, span: 1 } },
     { comp: Skills, props: { actor, config, id: 6, span: 2 } },
-    { comp: Health, props: { actor, config, id: 7, span: 1 } },
-    { comp: Inventory, props: { actor, config, id: 8, span: 1 } },
+    { comp: Health, props: { actor, config, id: 7, span: 2 } },
+    { comp: Inventory, props: { actor, config, id: 8, span: 2 } },
   ];
 
   $effect(async () => {
