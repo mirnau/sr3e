@@ -7879,20 +7879,17 @@ function Health($$anchor, $$props) {
   let ecgPointCanvas = state(void 0);
   let ecgService = state(void 0);
   function toggle(localIndex, isStun, willBeChecked) {
-    const currentArray = isStun ? $stunArray() : $physicalArray();
-    const wasChecked = currentArray[localIndex];
-    const checkedCount = currentArray.filter(Boolean).length;
-    if (wasChecked && !willBeChecked && checkedCount === 1) {
-      currentArray[localIndex] = false;
+    const currentArray = isStun ? $stunArray().slice() : $physicalArray().slice();
+    if (willBeChecked) {
+      for (let i = 0; i <= localIndex; i++) currentArray[i] = true;
+      for (let i = localIndex + 1; i < 10; i++) currentArray[i] = false;
     } else {
-      for (let i = 0; i < 10; i++) {
-        currentArray[i] = i <= localIndex;
-      }
+      for (let i = localIndex; i < 10; i++) currentArray[i] = false;
     }
     if (isStun) {
-      store_set(stunArray, proxy([...currentArray]));
+      store_set(stunArray, proxy(currentArray));
     } else {
-      store_set(physicalArray, proxy([...currentArray]));
+      store_set(physicalArray, proxy(currentArray));
     }
     set(maxDegree, proxy(Math.max($stunArray().filter(Boolean).length, $physicalArray().filter(Boolean).length)));
   }

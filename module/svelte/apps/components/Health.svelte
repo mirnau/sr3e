@@ -38,23 +38,21 @@
   let ecgService = $state();
 
   function toggle(localIndex, isStun, willBeChecked) {
-    const currentArray = isStun ? $stunArray : $physicalArray;
+    const currentArray = isStun ? $stunArray.slice() : $physicalArray.slice();
 
-    const wasChecked = currentArray[localIndex];
-    const checkedCount = currentArray.filter(Boolean).length;
-
-    if (wasChecked && !willBeChecked && checkedCount === 1) {
-      currentArray[localIndex] = false;
+    if (willBeChecked) {
+      // Fill up to the clicked box
+      for (let i = 0; i <= localIndex; i++) currentArray[i] = true;
+      for (let i = localIndex + 1; i < 10; i++) currentArray[i] = false;
     } else {
-      for (let i = 0; i < 10; i++) {
-        currentArray[i] = i <= localIndex;
-      }
+      // Uncheck from the clicked box onward
+      for (let i = localIndex; i < 10; i++) currentArray[i] = false;
     }
 
     if (isStun) {
-      $stunArray = [...currentArray];
+      $stunArray = currentArray;
     } else {
-      $physicalArray = [...currentArray];
+      $physicalArray = currentArray;
     }
 
     maxDegree = Math.max(
