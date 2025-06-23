@@ -16,7 +16,7 @@ import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
 import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
 import SkillItemSheet from "./module/foundry/sheets/SkillItemSheet.js";
 import SkillModel from "./module/models/item/SkillModel.js";
-import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte"
+import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte";
 import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
 import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 import SR3EActor from "./module/foundry/documents/SR3EActor.js";
@@ -25,6 +25,7 @@ import StorytellerScreenModel from "./module/models/actor/StorytellerScreenModel
 import StorytellerScreenActorSheet from "./module/foundry/sheets/StorytellerScreenActorSheet.js";
 import TransactionModel from "./module/models/item/TransactionModel.js";
 import TransactionItemSheet from "./module/foundry/sheets/TransactionItemSheet.js";
+import SR3ECombat from "./module/foundry/documents/SR3ECombat.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -33,12 +34,10 @@ function registerDocumentTypes({ args }) {
     const docName = docClass.documentName;
     CONFIG[docName].dataModels ||= {};
     CONFIG[docName].dataModels[type] = model;
-    DocumentSheetConfig.registerSheet(
-      docClass,
-      flags.sr3e,
-      sheet,
-      { types: [type], makeDefault: true }
-    );
+    DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
+      types: [type],
+      makeDefault: true,
+    });
   });
 }
 
@@ -47,6 +46,7 @@ function configureProject() {
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
   CONFIG.Actor.documentClass = SR3EActor;
+  CONFIG.Combat.documentClass = SR3ECombat;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -55,9 +55,9 @@ function configureProject() {
       {
         urls: ["systems/sr3e/fonts/Neonderthaw/Neonderthaw-Regular.ttf"],
         weight: 400,
-        style: "normal"
-      }
-    ]
+        style: "normal",
+      },
+    ],
   };
 
   CONFIG.fontDefinitions["VT323"] = {
@@ -66,9 +66,9 @@ function configureProject() {
       {
         urls: ["systems/sr3e/fonts/VT323/VT323-Regular.ttf"],
         weight: 400,
-        style: "normal"
-      }
-    ]
+        style: "normal",
+      },
+    ],
   };
 
   CONFIG.Actor.typeLabels = {
@@ -80,7 +80,9 @@ function configureProject() {
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
-    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+    storytellerscreen: localize(
+      CONFIG.sr3e.storytellerscreen.storytellerscreen
+    ),
     transaction: localize(CONFIG.sr3e.transaction.transaction),
   };
 
@@ -89,7 +91,6 @@ function configureProject() {
 }
 
 function setupMouseLightSourceEffect(includedThemes) {
-
   Hooks.on(hooks.renderApplicationV2, (app, html) => {
     const activeTheme = game.settings.get("sr3e", "theme");
     console.log("active theme", activeTheme);
@@ -107,7 +108,7 @@ function configureThemes() {
     config: true,
     type: String,
     choices: { defaultDark: "Chummer Dark", defaultLight: "Chummer Light" },
-    default: "defaultDark"
+    default: "defaultDark",
   });
   Hooks.on("ready", () => {
     const theme = game.settings.get("sr3e", "theme");
@@ -119,8 +120,8 @@ function configureThemes() {
 }
 
 function wrapContent(root) {
-
-  if (!root || root.firstElementChild?.classList.contains("sheet-component")) return;
+  if (!root || root.firstElementChild?.classList.contains("sheet-component"))
+    return;
 
   const existing = Array.from(root.children);
 
@@ -147,12 +148,24 @@ function wrapContent(root) {
 function setFlagsOnCharacterPreCreate(document, data, options, userId) {
   // Define your flags array
   const flagsToSet = [
-    { namespace: flags.sr3e, flag: flags.actor.isCharacterCreation, value: true },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.isCharacterCreation,
+      value: true,
+    },
     { namespace: flags.sr3e, flag: flags.actor.hasAwakened, value: false },
     { namespace: flags.sr3e, flag: flags.actor.burntOut, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.attributeAssignmentLocked, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.persistanceBlobCharacterSheetSize, value: {} },
-    { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.attributeAssignmentLocked,
+      value: false,
+    },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.persistanceBlobCharacterSheetSize,
+      value: {},
+    },
+    { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true },
   ];
 
   // Build the update object by looping through the array
@@ -176,11 +189,10 @@ function debugFlagsOnActor(actor, options, userId) {
   console.groupEnd();
 }
 
-
 function registerHooks() {
-
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
-    if (element.firstElementChild?.classList.contains("sheet-component")) return;
+    if (element.firstElementChild?.classList.contains("sheet-component"))
+      return;
 
     //Note: to find classes, just walk the namespace
 
@@ -236,21 +248,17 @@ function registerHooks() {
       { type: foundry.applications.sidebar.apps.InvitationLinks },
       { type: foundry.applications.sidebar.apps.FolderExport },
       { type: foundry.applications.settings.SettingsConfig },
-
-
-
     ];
 
     const typeDeselectors = [
       { type: foundry.applications.sheets.ActorSheetV2 },
-      { type: foundry.applications.sheets.ItemSheetV2 }
+      { type: foundry.applications.sheets.ItemSheetV2 },
     ];
 
-    if (typeDeselectors.some(entry => app instanceof entry.type)) return;
-    if (!typeSelectors.some(entry => app instanceof entry.type)) return;
+    if (typeDeselectors.some((entry) => app instanceof entry.type)) return;
+    if (!typeSelectors.some((entry) => app instanceof entry.type)) return;
 
     wrapContent(element);
-
   });
 
   Hooks.on(hooks.preCreateActor, setFlagsOnCharacterPreCreate);
@@ -269,15 +277,55 @@ function registerHooks() {
     configureThemes();
     registerDocumentTypes({
       args: [
-        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
-        { docClass: Actor, type: "storytellerscreen", model: StorytellerScreenModel, sheet: StorytellerScreenActorSheet },
-        { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
-        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
-        { docClass: Item, type: "transaction", model: TransactionModel, sheet: TransactionItemSheet }
-      ]
+        {
+          docClass: Actor,
+          type: "character",
+          model: CharacterModel,
+          sheet: CharacterActorSheet,
+        },
+        {
+          docClass: Actor,
+          type: "storytellerscreen",
+          model: StorytellerScreenModel,
+          sheet: StorytellerScreenActorSheet,
+        },
+        {
+          docClass: Item,
+          type: "metahuman",
+          model: MetahumanModel,
+          sheet: MetahumanItemSheet,
+        },
+        {
+          docClass: Item,
+          type: "magic",
+          model: MagicModel,
+          sheet: MagicItemSheet,
+        },
+        {
+          docClass: Item,
+          type: "weapon",
+          model: WeaponModel,
+          sheet: WeaponItemSheet,
+        },
+        {
+          docClass: Item,
+          type: "ammunition",
+          model: AmmunitionModel,
+          sheet: AmmunitionItemSheet,
+        },
+        {
+          docClass: Item,
+          type: "skill",
+          model: SkillModel,
+          sheet: SkillItemSheet,
+        },
+        {
+          docClass: Item,
+          type: "transaction",
+          model: TransactionModel,
+          sheet: TransactionItemSheet,
+        },
+      ],
     });
     Log.success("Initialization Completed", "sr3e.js");
   });

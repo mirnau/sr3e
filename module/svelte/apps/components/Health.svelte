@@ -22,13 +22,13 @@
 
   let penalty = getActorStore(
     actor.id,
-    stores.penalty,
+    stores.combat.penalty,
     actor.system.health.penalty ?? 0
   );
 
   let overflow = getActorStore(
     actor.id,
-    stores.overflow,
+    stores.combat.overflow,
     actor.system.health.overflow ?? 0
   );
 
@@ -77,6 +77,14 @@
       html: ecg.parentElement,
     });
   });
+
+  function incrementOverflow() {
+    $overflow = Math.min($overflow + 1, 10);
+  }
+
+  function decrementOverflow() {
+    $overflow = Math.max($overflow - 1, 0);
+  }
 </script>
 
 <CardToolbar {id} />
@@ -155,19 +163,25 @@
         </div>
       {/each}
       <!-- svelte-ignore a11y_missing_attribute -->
+
       <a
         class="overflow-button plus"
         role="button"
         tabindex="0"
         aria-label="Increase overflow"
+        onclick={incrementOverflow}
+        onkeydown={(e) => handleButtonKeypress(e, incrementOverflow)}
       >
         <i class="fa-solid fa-plus"></i>
       </a>
+
       <a
         class="overflow-button minus"
         role="button"
         tabindex="0"
         aria-label="Decrease overflow"
+        onclick={decrementOverflow}
+        onkeydown={(e) => handleButtonKeypress(e, decrementOverflow)}
       >
         <i class="fa-solid fa-minus"></i>
       </a>

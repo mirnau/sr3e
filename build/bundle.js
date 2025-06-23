@@ -3518,7 +3518,7 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$7 = (e) => e.stopPropagation();
-var on_keydown$8 = (e) => {
+var on_keydown$9 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
@@ -3534,7 +3534,7 @@ function CardToolbar($$anchor, $$props) {
   }
   var div = root$K();
   div.__click = [on_click$7];
-  div.__keydown = [on_keydown$8];
+  div.__keydown = [on_keydown$9];
   var button = child(div);
   button.__click = [on_click_1$3, handleMove];
   var button_1 = sibling(button, 2);
@@ -3559,9 +3559,12 @@ const stores = {
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
   isCharacterCreation: "isCharacterCreation",
+  initiativeDice: "initiativeDice",
   combat: {
     stunDamage: "stunDamage",
-    leathalDamage: "leathalDamage"
+    leathalDamage: "leathalDamage",
+    penalty: "penalty",
+    overflow: "overflow"
   }
 };
 function getActorStore(actorId, storeName, customValue = null) {
@@ -3601,7 +3604,7 @@ function Image($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$2 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$b = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$I = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
@@ -3693,7 +3696,7 @@ function Dossier($$anchor, $$props) {
   var div_1 = sibling(node_1, 2);
   var div_2 = child(div_1);
   div_2.__click = toggleDetails;
-  div_2.__keydown = [on_keydown$7, toggleDetails];
+  div_2.__keydown = [on_keydown$8, toggleDetails];
   var text2 = sibling(child(div_2));
   var node_2 = sibling(div_2, 2);
   {
@@ -5481,17 +5484,24 @@ var root_1$m = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
 var root$F = /* @__PURE__ */ template(`<h1> </h1> <!>`, 1);
 function Initiative($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $augmentedReaction = () => store_get(augmentedReaction, "$augmentedReaction", $$stores);
+  const $initiativeDice = () => store_get(initiativeDice, "$initiativeDice", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
+  let initiativeDice = getActorStore(actor().id, stores.initiativeDice, 1);
+  let augmentedReaction = getActorStore(actor().id, stores.augmentedReaction, 0);
   let attributes = proxy(actor().system.attributes);
   let intelligenceBaseTotal = /* @__PURE__ */ derived(() => attributes.intelligence.value + attributes.intelligence.mod);
   let intelligence = /* @__PURE__ */ derived(() => get$1(intelligenceBaseTotal) + (attributes.intelligence.meta ?? 0));
   let quicknessBaseTotal = /* @__PURE__ */ derived(() => attributes.quickness.value + attributes.quickness.mod);
   let quickness = /* @__PURE__ */ derived(() => get$1(quicknessBaseTotal) + (attributes.quickness.meta ?? 0));
   let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness) * 0.5));
-  let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
-  let initiativeDice = 1;
+  user_effect(() => {
+    store_set(augmentedReaction, proxy(get$1(reaction)));
+  });
+  store_set(initiativeDice, 1);
   var fragment = root$F();
   var h1 = first_child(fragment);
   var text2 = child(h1);
@@ -5506,7 +5516,9 @@ function Initiative($$anchor, $$props) {
         get label() {
           return config().initiative.initiativeDice;
         },
-        value: initiativeDice
+        get value() {
+          return $initiativeDice();
+        }
       });
       var node_2 = sibling(node_1, 2);
       StatCard$1(node_2, {
@@ -5523,7 +5535,7 @@ function Initiative($$anchor, $$props) {
           return config().initiative.augmentedReaction;
         },
         get value() {
-          return get$1(augmentedReaction);
+          return $augmentedReaction();
         }
       });
       append($$anchor2, fragment_1);
@@ -5535,9 +5547,10 @@ function Initiative($$anchor, $$props) {
   ]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
-var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_1$l = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
 var root_2$e = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$E = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <!></div>`);
@@ -5610,12 +5623,12 @@ function AttributeCardCreationState($$anchor, $$props) {
       var div_1 = root_1$l();
       var i_1 = child(div_1);
       i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$6, decrement2];
+      i_1.__keydown = [on_keydown$7, decrement2];
       var h1 = sibling(i_1, 2);
       var text_1 = child(h1);
       var i_2 = sibling(h1, 2);
       i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$1, increment2];
+      i_2.__keydown = [on_keydown_1$2, increment2];
       template_effect(() => {
         set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
         set_text(text_1, get$1(total));
@@ -5642,9 +5655,9 @@ function AttributeCardCreationState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$5 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var root_2$d = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_3$9 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$k = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
 var root_4$7 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
@@ -5707,7 +5720,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var i_1 = root_2$d();
           i_1.__click = decrement2;
-          i_1.__keydown = [on_keydown$5, decrement2];
+          i_1.__keydown = [on_keydown$6, decrement2];
           template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_1);
         };
@@ -5722,7 +5735,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
         var consequent_1 = ($$anchor3) => {
           var i_2 = root_3$9();
           i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1, increment2];
+          i_2.__keydown = [on_keydown_1$1, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_2);
         };
@@ -7056,7 +7069,7 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
   }
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
-var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
+var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
 var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
@@ -7081,7 +7094,7 @@ function ActiveSkillCard($$anchor, $$props) {
       var i = root_1$i();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$4, openSkill];
+      i.__keydown = [on_keydown$5, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
         () => localize(config().sheet.buyupgrades)
       ]);
@@ -7119,7 +7132,7 @@ function ActiveSkillCard($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
+var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$h = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
 var root$t = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
@@ -7144,7 +7157,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
       var i = root_1$h();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$3, openSkill];
+      i.__keydown = [on_keydown$4, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
         () => localize(config().sheet.buyupgrades)
       ]);
@@ -7182,7 +7195,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$2 = (e, openSkill) => e.key === "Enter" && openSkill();
+var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$g = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
 var root$s = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
@@ -7209,7 +7222,7 @@ function LanguageSkillCard($$anchor, $$props) {
       var i = root_1$g();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$2, openSkill];
+      i.__keydown = [on_keydown$3, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
         () => localize(config().sheet.buyupgrades)
       ]);
@@ -7861,6 +7874,8 @@ var root_2$8 = /* @__PURE__ */ template(`<div class="damage-description stun"><h
 var root_1$e = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$6 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_3$8 = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var on_keydown$2 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
+var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
 var root$n = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
@@ -7872,8 +7887,8 @@ function Health($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let stunArray = getActorStore(actor().id, stores.combat.stunDamage, foundry.utils.deepClone(actor().system.health.stun));
   let physicalArray = getActorStore(actor().id, stores.combat.leathalDamage, foundry.utils.deepClone(actor().system.health.physical));
-  let penalty = getActorStore(actor().id, stores.penalty, actor().system.health.penalty ?? 0);
-  let overflow = getActorStore(actor().id, stores.overflow, actor().system.health.overflow ?? 0);
+  let penalty = getActorStore(actor().id, stores.combat.penalty, actor().system.health.penalty ?? 0);
+  let overflow = getActorStore(actor().id, stores.combat.overflow, actor().system.health.overflow ?? 0);
   let maxDegree = state(0);
   let ecgCanvas = state(void 0);
   let ecgPointCanvas = state(void 0);
@@ -7908,6 +7923,12 @@ function Health($$anchor, $$props) {
       html: ecg.parentElement
     })));
   });
+  function incrementOverflow() {
+    store_set(overflow, proxy(Math.min($overflow() + 1, 10)));
+  }
+  function decrementOverflow() {
+    store_set(overflow, proxy(Math.max($overflow() - 1, 0)));
+  }
   var fragment = root$n();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -7997,6 +8018,12 @@ function Health($$anchor, $$props) {
     template_effect(() => set_checked(input_1, $physicalArray()[i]));
     append($$anchor2, div_7);
   });
+  var a = sibling(node_3, 2);
+  a.__click = incrementOverflow;
+  a.__keydown = [on_keydown$2, incrementOverflow];
+  var a_1 = sibling(a, 2);
+  a_1.__click = decrementOverflow;
+  a_1.__keydown = [on_keydown_1, decrementOverflow];
   var div_9 = sibling(div_2, 2);
   var div_10 = child(div_9);
   var node_5 = child(div_10);
@@ -8023,7 +8050,7 @@ function Health($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-delegate(["change"]);
+delegate(["change", "click", "keydown"]);
 function Garage($$anchor) {
   var text$1 = text("Hello garage!");
   append($$anchor, text$1);
@@ -12057,10 +12084,37 @@ async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, 
   options.renderSheet = false;
 }
 class SR3EActor extends Actor {
+  async rollInitiative(options = {}) {
+    const initiativeDice = get(
+      getActorStore(this.id, stores.initiativeDice, 1)
+    );
+    const augmentedReaction = get(
+      getActorStore(this.id, stores.augmentedReaction)
+    );
+    const roll = await new Roll(`${initiativeDice}d6`).evaluate();
+    const totalInit = roll.total + augmentedReaction;
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${this.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`
+    });
+    if (this.combatant) {
+      await this.combatant.update({ initiative: totalInit });
+    } else if (game.combat) {
+      const combatant = game.combat.combatants.find(
+        (c) => c.actor.id === this.id
+      );
+      if (combatant) {
+        await game.combat.setInitiative(combatant.id, totalInit);
+      }
+    }
+    return totalInit;
+  }
   async canAcceptMetahuman(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metahuman");
     if (existing.length > 1) {
-      const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
+      const [oldest, ...rest] = existing.sort(
+        (a, b) => a.id.localeCompare(b.id)
+      );
       const toDelete = rest.map((i) => i.id);
       await this.deleteEmbeddedDocuments("Item", toDelete);
     }
@@ -13142,6 +13196,27 @@ class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _app4 = new WeakMap();
+class SR3ECombat extends foundry.documents.Combat {
+  /**
+   * Override rollInitiative to call Actor.rollInitiative globally
+   */
+  async rollInitiative(ids, options = {}) {
+    ids = Array.isArray(ids) ? ids : [ids];
+    for (const cid of ids) {
+      const combatant = this.combatants.get(cid);
+      if (!combatant) throw new Error(`Invalid Combatant ID: ${cid}`);
+      const actor = combatant.actor;
+      if (actor == null ? void 0 : actor.rollInitiative) {
+        const initiativeValue = await actor.rollInitiative(options);
+        if (typeof initiativeValue === "number") {
+          await this.setInitiative(cid, initiativeValue);
+        }
+      } else {
+        await super.rollInitiative([cid], options);
+      }
+    }
+  }
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -13149,12 +13224,10 @@ function registerDocumentTypes({ args }) {
     const docName = docClass.documentName;
     (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
     CONFIG[docName].dataModels[type] = model;
-    DocumentSheetConfig.registerSheet(
-      docClass,
-      flags.sr3e,
-      sheet,
-      { types: [type], makeDefault: true }
-    );
+    DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
+      types: [type],
+      makeDefault: true
+    });
   });
 }
 function configureProject() {
@@ -13162,6 +13235,7 @@ function configureProject() {
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
   CONFIG.Actor.documentClass = SR3EActor;
+  CONFIG.Combat.documentClass = SR3ECombat;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -13193,7 +13267,9 @@ function configureProject() {
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
     skill: localize(CONFIG.sr3e.skill.skill),
-    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+    storytellerscreen: localize(
+      CONFIG.sr3e.storytellerscreen.storytellerscreen
+    ),
     transaction: localize(CONFIG.sr3e.transaction.transaction)
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
@@ -13227,7 +13303,8 @@ function configureThemes() {
 }
 function wrapContent(root2) {
   var _a;
-  if (!root2 || ((_a = root2.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component"))) return;
+  if (!root2 || ((_a = root2.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")))
+    return;
   const existing = Array.from(root2.children);
   const sheetComponent = document.createElement("div");
   sheetComponent.classList.add("sheet-component");
@@ -13244,11 +13321,23 @@ function wrapContent(root2) {
 }
 function setFlagsOnCharacterPreCreate(document2, data, options, userId) {
   const flagsToSet = [
-    { namespace: flags.sr3e, flag: flags.actor.isCharacterCreation, value: true },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.isCharacterCreation,
+      value: true
+    },
     { namespace: flags.sr3e, flag: flags.actor.hasAwakened, value: false },
     { namespace: flags.sr3e, flag: flags.actor.burntOut, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.attributeAssignmentLocked, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.persistanceBlobCharacterSheetSize, value: {} },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.attributeAssignmentLocked,
+      value: false
+    },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.persistanceBlobCharacterSheetSize,
+      value: {}
+    },
     { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
   ];
   const updateData = {};
@@ -13270,7 +13359,8 @@ function debugFlagsOnActor(actor, options, userId) {
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
-    if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
+    if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component"))
+      return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
       { type: foundry.applications.api.CategoryBrowser },
@@ -13343,14 +13433,54 @@ function registerHooks() {
     configureThemes();
     registerDocumentTypes({
       args: [
-        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
-        { docClass: Actor, type: "storytellerscreen", model: StorytellerScreenModel, sheet: StorytellerScreenActorSheet },
-        { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
-        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet },
-        { docClass: Item, type: "transaction", model: TransactionModel, sheet: TransactionItemSheet }
+        {
+          docClass: Actor,
+          type: "character",
+          model: CharacterModel,
+          sheet: CharacterActorSheet
+        },
+        {
+          docClass: Actor,
+          type: "storytellerscreen",
+          model: StorytellerScreenModel,
+          sheet: StorytellerScreenActorSheet
+        },
+        {
+          docClass: Item,
+          type: "metahuman",
+          model: MetahumanModel,
+          sheet: MetahumanItemSheet
+        },
+        {
+          docClass: Item,
+          type: "magic",
+          model: MagicModel,
+          sheet: MagicItemSheet
+        },
+        {
+          docClass: Item,
+          type: "weapon",
+          model: WeaponModel,
+          sheet: WeaponItemSheet
+        },
+        {
+          docClass: Item,
+          type: "ammunition",
+          model: AmmunitionModel,
+          sheet: AmmunitionItemSheet
+        },
+        {
+          docClass: Item,
+          type: "skill",
+          model: SkillModel,
+          sheet: SkillItemSheet
+        },
+        {
+          docClass: Item,
+          type: "transaction",
+          model: TransactionModel,
+          sheet: TransactionItemSheet
+        }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

@@ -1,14 +1,52 @@
+import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
+import { get } from "svelte/store";
+
 export default class SR3EActor extends Actor {
+  async rollInitiative(options = {}) {
+    const initiativeDice = get(
+      getActorStore(this.id, stores.initiativeDice, 1)
+    );
+    const augmentedReaction = get(
+      getActorStore(this.id, stores.augmentedReaction)
+    );
+
+    const roll = await new Roll(`${initiativeDice}d6`).evaluate();
+    const totalInit = roll.total + augmentedReaction;
+
+    // Show the roll in chat
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `${this.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`,
+    });
+
+    if (this.combatant) {
+      // If we have a direct combatant reference, update it
+      await this.combatant.update({ initiative: totalInit });
+    } else if (game.combat) {
+      // Find our combatant and update directly - NO rollInitiative call
+      const combatant = game.combat.combatants.find(
+        (c) => c.actor.id === this.id
+      );
+      if (combatant) {
+        await game.combat.setInitiative(combatant.id, totalInit);
+      }
+    }
+
+    return totalInit; // Return the total value, not the roll object
+  }
+
   async canAcceptMetahuman(incomingItem) {
-    const existing = this.items.filter(i => i.type === "metahuman");
+    const existing = this.items.filter((i) => i.type === "metahuman");
 
     if (existing.length > 1) {
-      const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
-      const toDelete = rest.map(i => i.id);
+      const [oldest, ...rest] = existing.sort((a, b) =>
+        a.id.localeCompare(b.id)
+      );
+      const toDelete = rest.map((i) => i.id);
       await this.deleteEmbeddedDocuments("Item", toDelete);
     }
 
-    const current = this.items.find(i => i.type === "metahuman");
+    const current = this.items.find((i) => i.type === "metahuman");
     if (!current) return "accept";
 
     const incomingName = incomingItem.name.toLowerCase();
@@ -25,13 +63,13 @@ export default class SR3EActor extends Actor {
   }
 
   async replaceMetahuman(newItem) {
-    const current = this.items.find(i => i.type === "metahuman");
+    const current = this.items.find((i) => i.type === "metahuman");
     if (current) await this.deleteEmbeddedDocuments("Item", [current.id]);
 
     await this.createEmbeddedDocuments("Item", [newItem.toObject()]);
     await this.update({
       "system.profile.metaHumanity": newItem.name,
-      "system.profile.img": newItem.img
+      "system.profile.img": newItem.img,
     });
   }
 }

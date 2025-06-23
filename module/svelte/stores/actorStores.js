@@ -15,6 +15,8 @@ export const stores = {
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
   isCharacterCreation: "isCharacterCreation",
+  initiativeDice: "initiativeDice",
+  baseInitiative: "baseInitiative",
   combat: {
     stunDamage: "stunDamage",
     leathalDamage: "leathalDamage",
