@@ -1,14 +1,14 @@
 <script>
   import AttributeCardCreationState from "./basic/AttributeCardCreationState.svelte";
   import AttributeCardKarmaState from "./basic/AttributeCardKarmaState.svelte";
-  import { localize } from "../../../svelteHelpers.js";
+  import { localize } from "../../../services/utilities.js";
   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
   import CardToolbar from "./CardToolbar.svelte";
   import { getActorStore, stores } from "../../stores/actorStores.js";
   import {
     flags,
     masonryMinWidthFallbackValue,
-  } from "../../../foundry/services/commonConsts.js";
+  } from "../../../services/commonConsts.js";
   import MasonryGrid from "./basic/MasonryGrid.svelte";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();

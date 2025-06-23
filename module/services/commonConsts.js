@@ -27,20 +27,14 @@ export const flags = {
   }
 };
 
-export const tags = {
-  skill: {
-    active: "active",
-    knowledge: "knowledge",
-    language: "language",
-    activeTab: "activeTab",
-    knowledgeTab: "knowledgeTab",
-    languageTab: "languageTab"
-  }
-}
-
 export const masonryMinWidthFallbackValue = {
   characterSheet: 12,
   attributeGrid: 13,
   skillCategoryGrid: 10,
   skillGrid: 4.5,
+}
+
+export const inventory = {
+  arsenal: "arsenal",
+  garage: "garage",
 }

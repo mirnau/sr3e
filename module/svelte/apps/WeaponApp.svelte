@@ -1,5 +1,5 @@
 <script>
-  import { localize, openFilePicker } from "../../svelteHelpers.js";
+  import { localize, openFilePicker } from "../../services/utilities.js";
   import { onMount } from "svelte";
   import JournalViewer from "./components/JournalViewer.svelte";
   import StatCard from "./components/StatCard.svelte";

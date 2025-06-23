@@ -2,7 +2,7 @@
     import SkillCategory from "./SkillCategory.svelte";
     import MasonryGrid from "../basic/MasonryGrid.svelte";
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
+    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { tick } from "svelte";
 

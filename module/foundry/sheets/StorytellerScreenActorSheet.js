@@ -1,6 +1,6 @@
 import StoryeerScreenApp from "../../svelte/apps/StorytellerScreenApp.svelte";
 import { mount, unmount } from "svelte";
-import { localize } from "../../svelteHelpers.js";
+import { localize } from "../../services/utilities.js";
 
 export default class StorytellerScreenActorSheet extends foundry.applications
   .sheets.ActorSheetV2 {

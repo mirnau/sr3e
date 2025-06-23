@@ -7,9 +7,9 @@
   import Skills from "./components/skills/Skills.svelte";
   import Health from "./components/Health.svelte";
   import Karma from "./components/Karma.svelte";
-  import Inventory from "./components/Inventory.svelte";
+  import Inventory from "./components/Inventory/Inventory.svelte";
   import MasonryGrid from "./components/basic/MasonryGrid.svelte";
-  import { masonryMinWidthFallbackValue } from "../../foundry/services/commonConsts.js";
+  import { masonryMinWidthFallbackValue } from "../../services/commonConsts.js";
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
   import { tick } from "svelte";
@@ -29,7 +29,6 @@
   ];
 
   $effect(async () => {
-    console.log("Actor ID " + actor.id);
     if (!actor?.id) return;
 
     const layout = await actor.getFlag("sr3e", "customLayout");

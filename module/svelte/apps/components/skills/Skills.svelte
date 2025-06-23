@@ -1,5 +1,5 @@
 <script>
-	import { localize } from "../../../../svelteHelpers.js";
+	import { localize } from "../../../../services/utilities.js";
 	import SkillsLanguage from "./SkillsLanguage.svelte";
 	import SkillsKnowledge from "./SkillsKnowledge.svelte";
 	import SkillsActive from "./SkillsActive.svelte";

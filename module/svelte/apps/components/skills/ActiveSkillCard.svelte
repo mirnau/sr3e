@@ -1,8 +1,8 @@
 <!-- Simplified HTML Structure -->
 <script>
 	import { getActorStore, stores } from "../../../stores/actorStores.js";
-	import { localize } from "../../../../svelteHelpers.js";
-	import { flags } from "../../../../foundry/services/commonConsts.js";
+	import { localize } from "../../../../services/utilities.js";
+	import { flags } from "../../../../services/commonConsts.js";
 	import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
 	import { mount } from "svelte";
 

@@ -2,7 +2,7 @@
   import MasonryGrid from "./basic/MasonryGrid.svelte";
   import StatCard from "./basic/StatCard.svelte";
   import CardToolbar from "./CardToolbar.svelte";
-  import { localize } from "../../../svelteHelpers.js";
+  import { localize } from "../../../services/utilities.js";
   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
   import { shoppingState } from "../../../svelteStore.js";
 

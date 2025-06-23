@@ -2,9 +2,9 @@
     import ActiveSkillCard from "./ActiveSkillCard.svelte";
     import KnowledgeSkillCard from "./KnowledgeSkillCard.svelte";
     import LanguageSkillCard from "./LanguageSkillCard.svelte";
-    import { localize } from "../../../../svelteHelpers.js";
+    import { localize } from "../../../../services/utilities.js";
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
+    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
 
     let {
         attribute,

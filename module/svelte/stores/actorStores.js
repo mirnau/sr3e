@@ -14,7 +14,14 @@ export const stores = {
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
-  isCharacterCreation: "isCharacterCreation"
+  isCharacterCreation: "isCharacterCreation",
+  combat: {
+    stunDamage: "stunDamage",
+    leathalDamage: "leathalDamage",
+    penalty: "penalty",
+    overflow: "overflow"
+
+  }
 }
 
 

@@ -1,5 +1,5 @@
 <script>
-    import { localize } from "../../../svelteHelpers.js";
+    import { localize } from "../../../services/utilities.js";
     // @runes
     const { config, onclose } = $props();
 

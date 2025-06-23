@@ -2,10 +2,10 @@
   import StatCard from "./basic/StatCard.svelte";
   import MasonryGrid from "./basic/MasonryGrid.svelte";
   import CardToolbar from "./CardToolbar.svelte";
-  import { localize } from "../../../svelteHelpers.js";
+  import { localize } from "../../../services/utilities.js";
   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
   import { shoppingState } from "../../../svelteStore.js";
-  import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
+  import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
   let movement = $state(actor.system.movement);

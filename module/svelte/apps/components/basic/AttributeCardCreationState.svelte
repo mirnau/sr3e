@@ -1,7 +1,7 @@
 <script>
-  import { localize } from "../../../../svelteHelpers.js";
+  import { localize } from "../../../../services/utilities.js";
   import { getActorStore, stores } from "../../../stores/actorStores.js";
-  import { flags } from "../../../../foundry/services/commonConsts.js";
+  import { flags } from "../../../../services/commonConsts.js";
 
   let { actor, stat, localization, key } = $props();
 

@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { openFilePicker } from "../../../../svelteHelpers.js";
+  import { openFilePicker } from "../../../../services/utilities.js";
 
   let { src = "", title = "", alt = "", entity = null } = $props();
 

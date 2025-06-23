@@ -5,8 +5,8 @@ import CharacterCreationManager from "../../svelte/apps/injections/charactercrea
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
 import SR3DLog from "../../../Log.js";
 import { mount, unmount } from 'svelte';
-import ActorDataService from "../services/ActorDataService.js";
-import { flags } from "../services/commonConsts.js";
+import ActorDataService from "../../services/ActorDataService.js";
+import { flags } from "../../services/commonConsts.js";
 import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {

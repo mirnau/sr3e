@@ -52,7 +52,9 @@
       "spell": "Control Pool"
     },
     "health": {
-      "health": "Health"
+      "health": "Health",
+      "overflow": "Overflow",
+      "penalty": "Penalty"
     },
     "initiative": {
       "augmentedReaction": "Augmented Reaction",

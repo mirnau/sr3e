@@ -23,6 +23,8 @@ sr3e.attributes = {
 
 sr3e.health = {
     health: "sr3e.health.health",
+    overflow: "sr3e.health.overflow",
+    penalty: "sr3e.health.penalty"
 }
 
 sr3e.modal = {

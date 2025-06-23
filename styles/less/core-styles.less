@@ -5,6 +5,12 @@
         all: unset;
         text-transform: uppercase;
     }
+    
+    input[type="checkbox"] {
+        all: unset;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
 }
 
 @layer sr3e {
@@ -72,6 +78,7 @@
   @import "./styling/custom-components/sr3e-timemanager.less";
   @import "./styling/custom-components/sr3e-karmamanager.less";
   @import "./styling/custom-components/sr3e-combo-search.less";
+  @import "./styling/custom-components/sr3e-health-component.less";
 
   // Injections
   @import "./styling/injections/neoname.less";

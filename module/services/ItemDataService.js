@@ -1,4 +1,4 @@
-import { localize } from "../svelteHelpers.js";
+import { localize } from "./utilities.js";
 
 export default class ItemDataService {
 

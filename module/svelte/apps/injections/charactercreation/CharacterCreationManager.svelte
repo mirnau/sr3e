@@ -1,7 +1,7 @@
 <script>
     import AttributePointsState from "./AttributePointsState.svelte";
     import SkillPointsState from "./SkillPointsState.svelte";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { flags } from "../../../../services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
 
     let { actor = {}, config = {} } = $props();

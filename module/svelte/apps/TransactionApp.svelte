@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy } from "svelte";
-  import { localize, openFilePicker } from "../../svelteHelpers.js";
-  import ActorDataService from "../../foundry/services/ActorDataService.js";
+  import { localize, openFilePicker } from "../../services/utilities.js";
+  import ActorDataService from "../../services/ActorDataService.js";
   import ComboSearch from "./components/basic/ComboSearch.svelte";
   import JournalViewer from "./components/JournalViewer.svelte";
   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";

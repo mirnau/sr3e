@@ -1,5 +1,5 @@
 <script>
-  import { localize } from "../../../../svelteHelpers.js";
+  import { localize } from "../../../../services/utilities.js";
   let { value, label, children } = $props();
 </script>
 

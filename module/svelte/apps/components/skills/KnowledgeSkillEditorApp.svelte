@@ -1,9 +1,9 @@
 <script>
-    import { openFilePicker, localize } from "../../../../svelteHelpers.js";
+    import { openFilePicker, localize } from "../../../../services/utilities.js";
     import SpecializationCard from "./SpecializationCard.svelte";
     import { onDestroy, tick } from "svelte";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { flags } from "../../../../services/commonConsts.js";
     import { get, set } from "svelte/store";
 
     let { skill, actor, config, app } = $props();

@@ -1,7 +1,7 @@
 <script>
     import SkillCategory from "./SkillCategory.svelte";
     import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
+    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
 
     let { actor = {}, config = {} } = $props();

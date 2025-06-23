@@ -1,6 +1,6 @@
 <script>
   import { slide } from "svelte/transition";
-  import { openFilePicker, localize } from "../../../svelteHelpers.js";
+  import { openFilePicker, localize } from "../../../services/utilities.js";
   import CardToolbar from "./CardToolbar.svelte";
   import { tick } from "svelte";
   import { getActorStore, stores } from "../../stores/actorStores.js";

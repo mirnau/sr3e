@@ -1,5 +1,5 @@
 <script>
-    import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { flags } from "../../../../services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import { createEventDispatcher } from "svelte";
 

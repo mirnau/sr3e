@@ -8,7 +8,8 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
+var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -1953,6 +1954,13 @@ function template(content, flags2) {
     return clone;
   };
 }
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1971,11 +1979,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -3486,29 +3494,39 @@ function getRandomBellCurveWithMode(min, max, mode) {
   const int = Math.floor(value);
   return int;
 }
+function lerpColor(color1, color2, t) {
+  const c1 = parseInt(color1.slice(1), 16);
+  const c2 = parseInt(color2.slice(1), 16);
+  const r1 = c1 >> 16 & 255, g1 = c1 >> 8 & 255, b1 = c1 & 255;
+  const r2 = c2 >> 16 & 255, g2 = c2 >> 8 & 255, b2 = c2 & 255;
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$6 = (e) => e.stopPropagation();
+var on_click$7 = (e) => e.stopPropagation();
 var on_keydown$8 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
-var on_click_1$2 = (__1, handleMove) => handleMove("up");
+var on_click_1$3 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$J = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$K = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$J();
-  div.__click = [on_click$6];
+  var div = root$K();
+  div.__click = [on_click$7];
   div.__keydown = [on_keydown$8];
   var button = child(div);
-  button.__click = [on_click_1$2, handleMove];
+  button.__click = [on_click_1$3, handleMove];
   var button_1 = sibling(button, 2);
   button_1.__click = [on_click_2$1, handleMove];
   var button_2 = sibling(button_1, 2);
@@ -3530,7 +3548,11 @@ const stores = {
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
-  isCharacterCreation: "isCharacterCreation"
+  isCharacterCreation: "isCharacterCreation",
+  combat: {
+    stunDamage: "stunDamage",
+    leathalDamage: "leathalDamage"
+  }
 };
 function getActorStore(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
@@ -3546,7 +3568,7 @@ function getActorStore(actorId, storeName, customValue = null) {
 async function handleClick(_, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$I = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3557,7 +3579,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$I();
+  var div = root$J();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3571,8 +3593,8 @@ function Image($$anchor, $$props) {
 delegate(["click"]);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$2 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$a = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$H = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$b = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root$I = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3626,7 +3648,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     actorNameStore.set(newName);
   }
-  var fragment = root$H();
+  var fragment = root$I();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3662,11 +3684,11 @@ function Dossier($$anchor, $$props) {
   var div_2 = child(div_1);
   div_2.__click = toggleDetails;
   div_2.__keydown = [on_keydown$7, toggleDetails];
-  var text = sibling(child(div_2));
+  var text2 = sibling(child(div_2));
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$a();
+      var fragment_3 = root_3$b();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -3775,7 +3797,7 @@ function Dossier($$anchor, $$props) {
       if (get$1(isDetailsOpen)) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
   $$cleanup();
@@ -5360,18 +5382,22 @@ const flags = {
 const masonryMinWidthFallbackValue = {
   skillGrid: 4.5
 };
-var root_1$l = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
-var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$G = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+const inventory = {
+  arsenal: "arsenal",
+  garage: "garage"
+};
+var root_1$n = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_3$a = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$H = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  var div = root$G();
+  var div = root$H();
   var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
-      var h4 = root_1$l();
-      var text = child(h4);
-      template_effect(($0) => set_text(text, $0), [() => localize($$props.label)]);
+      var h4 = root_1$n();
+      var text2 = child(h4);
+      template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
       append($$anchor2, h4);
     };
     if_block(node, ($$render) => {
@@ -5388,7 +5414,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var h1 = root_3$9();
+      var h1 = root_3$a();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, $$props.value));
       append($$anchor2, h1);
@@ -5401,7 +5427,7 @@ function StatCard$1($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$F = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+var root$G = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
   let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
@@ -5424,7 +5450,7 @@ function MasonryGrid($$anchor, $$props) {
   user_effect(async () => {
     gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
-  var div = root$F();
+  var div = root$G();
   var div_1 = child(div);
   var div_2 = sibling(div_1, 2);
   var node = sibling(div_2, 2);
@@ -5441,8 +5467,8 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$k = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
-var root$E = /* @__PURE__ */ template(`<h1> </h1> <!>`, 1);
+var root_1$m = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
+var root$F = /* @__PURE__ */ template(`<h1> </h1> <!>`, 1);
 function Initiative($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -5456,15 +5482,15 @@ function Initiative($$anchor, $$props) {
   let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness) * 0.5));
   let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
   let initiativeDice = 1;
-  var fragment = root$E();
+  var fragment = root$F();
   var h1 = first_child(fragment);
-  var text = child(h1);
+  var text2 = child(h1);
   var node = sibling(h1, 2);
   MasonryGrid(node, {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$k();
+      var fragment_1 = root_1$m();
       var node_1 = first_child(fragment_1);
       StatCard$1(node_1, {
         get label() {
@@ -5494,7 +5520,7 @@ function Initiative($$anchor, $$props) {
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().initiative.initiative)
   ]);
   append($$anchor, fragment);
@@ -5502,9 +5528,9 @@ function Initiative($$anchor, $$props) {
 }
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_1$j = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
-var root_2$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$D = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <!></div>`);
+var root_1$l = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
+var root_2$e = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$E = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <!></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5565,13 +5591,13 @@ function AttributeCardCreationState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$D();
+  var div = root$E();
   var h4 = child(div);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(h4, 4);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$j();
+      var div_1 = root_1$l();
       var i_1 = child(div_1);
       i_1.__click = decrement2;
       i_1.__keydown = [on_keydown$6, decrement2];
@@ -5588,7 +5614,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var h1_1 = root_2$d();
+      var h1_1 = root_2$e();
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, get$1(total)));
       append($$anchor2, h1_1);
@@ -5598,7 +5624,7 @@ function AttributeCardCreationState($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize($$props.localization[$$props.key])
   ]);
   append($$anchor, div);
@@ -5607,12 +5633,12 @@ function AttributeCardCreationState($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$5 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$c = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$d = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$8 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$i = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root_4$6 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$C = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin uppercase"> </h4> <!></div>`);
+var root_3$9 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$k = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
+var root_4$7 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$D = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin uppercase"> </h4> <!></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   var _a, _b;
   push($$props, true);
@@ -5659,17 +5685,17 @@ function AttributeCardKarmaState($$anchor, $$props) {
       set(mod, proxy(stat().mod));
     }
   });
-  var div = root$C();
+  var div = root$D();
   var h4 = sibling(child(div), 2);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(h4, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$i();
+      var div_1 = root_1$k();
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
-          var i_1 = root_2$c();
+          var i_1 = root_2$d();
           i_1.__click = decrement2;
           i_1.__keydown = [on_keydown$5, decrement2];
           template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
@@ -5684,7 +5710,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       var node_2 = sibling(h1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$8();
+          var i_2 = root_3$9();
           i_2.__click = increment2;
           i_2.__keydown = [on_keydown_1, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
@@ -5698,7 +5724,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       append($$anchor2, div_1);
     };
     var alternate = ($$anchor2) => {
-      var h1_1 = root_4$6();
+      var h1_1 = root_4$7();
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, get$1(total)));
       append($$anchor2, h1_1);
@@ -5708,7 +5734,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize($$props.localization[$$props.key])
   ]);
   append($$anchor, div);
@@ -5716,7 +5742,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5726,7 +5752,7 @@ function Attributes($$anchor, $$props) {
   let attributes = proxy(actor().system.attributes);
   let localization = config().attributes;
   let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.attributeAssignmentLocked));
-  var fragment = root$B();
+  var fragment = root$C();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5734,7 +5760,7 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var node_1 = sibling(h1, 2);
   MasonryGrid(node_1, {
     itemSelector: "stat-card",
@@ -5787,18 +5813,18 @@ function Attributes($$anchor, $$props) {
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text, $0), [() => localize(localization.attributes)]);
+  template_effect(($0) => set_text(text2, $0), [() => localize(localization.attributes)]);
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-var root$A = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let dicePools = proxy(actor().system.dicePools);
-  var fragment = root$A();
+  var fragment = root$B();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5806,7 +5832,7 @@ function DicePools($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var node_1 = sibling(h1, 2);
   MasonryGrid(node_1, {
     itemSelector: "stat-card",
@@ -5830,19 +5856,19 @@ function DicePools($$anchor, $$props) {
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
   pop();
 }
-var root$z = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$A = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let movement = proxy(actor().system.movement);
-  var fragment = root$z();
+  var fragment = root$A();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5850,7 +5876,7 @@ function Movement($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var node_1 = sibling(h1, 2);
   MasonryGrid(node_1, {
     itemSelector: "stat-card",
@@ -5874,7 +5900,7 @@ function Movement($$anchor, $$props) {
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().movement.movement)
   ]);
   append($$anchor, fragment);
@@ -5902,7 +5928,7 @@ function deleteThis$3(_, isCharacterCreation, specialization, $baseValue, baseVa
   }
   dispatch("delete", { specialization: specialization() });
 }
-var root$y = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="editable-name" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <h1 class="specialization-value"> </h1></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
+var root$z = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="editable-name" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <h1 class="specialization-value"> </h1></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
 function SpecializationCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5931,13 +5957,13 @@ function SpecializationCard($$anchor, $$props) {
     specialization(specialization().name = liveText, true);
     dispatch("arrayChanged");
   }
-  var fragment = root$y();
+  var fragment = root$z();
   var div = first_child(fragment);
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
   div_1.__keydown = [handleKeyDown$1];
   var h1 = sibling(div_1, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_2 = sibling(div, 2);
   var button = child(div_2);
   button.__click = [increment$2];
@@ -5953,7 +5979,7 @@ function SpecializationCard($$anchor, $$props) {
     dispatch
   ];
   template_effect(() => {
-    set_text(text, specialization().value);
+    set_text(text2, specialization().value);
     button.disabled = isCharacterCreation;
     button_1.disabled = isCharacterCreation;
   });
@@ -6019,9 +6045,9 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$b = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
-var root_1$h = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$x = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_2$c = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_1$j = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$y = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -6029,7 +6055,7 @@ function Karma($$anchor, $$props) {
   let karma = proxy(actor().system.karma);
   let essence = proxy(actor().system.attributes.essence ?? 0);
   let survivor = /* @__PURE__ */ derived(() => karma.miraculoussurvival);
-  var fragment = root$x();
+  var fragment = root$y();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6037,13 +6063,13 @@ function Karma($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var node_1 = sibling(h1, 2);
   MasonryGrid(node_1, {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$h();
+      var fragment_1 = root_1$j();
       var node_2 = first_child(fragment_1);
       const expression = /* @__PURE__ */ derived(() => localize(config().karma.goodkarma));
       StatCard$1(node_2, {
@@ -6077,7 +6103,7 @@ function Karma($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var div = root_2$b();
+          var div = root_2$c();
           var h4 = sibling(child(div), 2);
           var text_1 = child(h4);
           template_effect(($0) => set_text(text_1, $0), [
@@ -6096,7 +6122,7 @@ function Karma($$anchor, $$props) {
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text, $0), [() => localize(config().karma.karma)]);
+  template_effect(($0) => set_text(text2, $0), [() => localize(config().karma.karma)]);
   append($$anchor, fragment);
   pop();
 }
@@ -6183,8 +6209,8 @@ async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreat
     $$props.app.close();
   }
 }
-var on_click$5 = async (__3, $$props) => openFilePicker($$props.actor);
-var root$w = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var on_click$6 = async (__3, $$props) => openFilePicker($$props.actor);
+var root$x = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6258,18 +6284,18 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
   }
-  var div = root$w();
+  var div = root$x();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$5, $$props];
+  img.__click = [on_click$6, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_8 = sibling(div_7, 2);
   var h1_1 = sibling(child(div_8), 2);
   var text_1 = child(h1_1);
@@ -6349,7 +6375,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
+      set_text(text2, $$props.skill.name);
       set_text(text_1, $value());
       button.disabled = get$1(disableValueControls);
       button_1.disabled = get$1(disableValueControls);
@@ -6473,8 +6499,8 @@ async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreat
     $$props.app.close();
   }
 }
-var on_click$4 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var on_click$5 = async (__4, $$props) => openFilePicker($$props.actor);
+var root$w = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6514,18 +6540,18 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
   }
-  var div = root$v();
+  var div = root$w();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$4, $$props];
+  img.__click = [on_click$5, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_8 = sibling(div_7, 2);
   var h1_1 = sibling(child(div_8), 2);
   var text_1 = child(h1_1);
@@ -6618,7 +6644,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
+      set_text(text2, $$props.skill.name);
       set_text(text_1, $value());
       button.disabled = get$1(disableValueControls);
       button_1.disabled = get$1(disableValueControls);
@@ -6745,8 +6771,8 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
     $$props.app.close();
   }
 }
-var on_click$3 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$u = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="specialization-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var on_click$4 = async (__4, $$props) => openFilePicker($$props.actor);
+var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="specialization-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6801,18 +6827,18 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
     store_set(value, $value() + 1);
   }
-  var div = root$u();
+  var div = root$v();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$3, $$props];
+  img.__click = [on_click$4, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_8 = sibling(div_7, 2);
   var h1_1 = sibling(child(div_8), 2);
   var text_1 = child(h1_1);
@@ -6912,7 +6938,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
+      set_text(text2, $$props.skill.name);
       set_text(text_1, $value());
       set_text(text_2, `${$0 ?? ""}:`);
       set_text(text_3, get$1(readWrite));
@@ -7021,9 +7047,9 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$g = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$t = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7038,11 +7064,11 @@ function ActiveSkillCard($$anchor, $$props) {
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
-  var div = root$t();
+  var div = root$u();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$g();
+      var i = root_1$i();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$4, openSkill];
@@ -7058,7 +7084,70 @@ function ActiveSkillCard($$anchor, $$props) {
   var div_1 = sibling(node, 2);
   var div_2 = child(div_1);
   var h6 = sibling(child(div_2), 2);
-  var text = child(h6);
+  var text2 = child(h6);
+  var h1 = sibling(h6, 2);
+  var text_1 = child(h1);
+  var div_3 = sibling(div_2, 2);
+  each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
+    var div_4 = root_2$b();
+    var div_5 = sibling(child(div_4), 2);
+    var text_2 = child(div_5);
+    var h1_1 = sibling(div_5, 2);
+    var text_3 = child(h1_1);
+    template_effect(() => {
+      set_text(text_2, get$1(specialization).name);
+      set_text(text_3, get$1(specialization).value);
+    });
+    append($$anchor2, div_4);
+  });
+  template_effect(() => {
+    set_text(text2, skill().name);
+    set_text(text_1, $value());
+  });
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
+var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
+var root_1$h = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root$t = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+function KnowledgeSkillCard($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
+  const $value = () => store_get(value, "$value", $$stores);
+  const $specializations = () => store_get(specializations, "$specializations", $$stores);
+  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let knowledgeSkill = proxy(skill().system.knowledgeSkill);
+  let specializations = getActorStore(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
+  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let value = getActorStore(actor().id, skill().id, knowledgeSkill.value);
+  function openSkill() {
+    ActiveSkillEditorSheet.launch(actor(), skill(), config());
+  }
+  var div = root$t();
+  var node = child(div);
+  {
+    var consequent = ($$anchor2) => {
+      var i = root_1$h();
+      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
+      i.__click = openSkill;
+      i.__keydown = [on_keydown$3, openSkill];
+      template_effect(($0) => set_attribute(i, "aria-label", $0), [
+        () => localize(config().sheet.buyupgrades)
+      ]);
+      append($$anchor2, i);
+    };
+    if_block(node, ($$render) => {
+      if ($isShoppingState()) $$render(consequent);
+    });
+  }
+  var div_1 = sibling(node, 2);
+  var div_2 = child(div_1);
+  var h6 = sibling(child(div_2), 2);
+  var text2 = child(h6);
   var h1 = sibling(h6, 2);
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
@@ -7075,70 +7164,7 @@ function ActiveSkillCard($$anchor, $$props) {
     append($$anchor2, div_4);
   });
   template_effect(() => {
-    set_text(text, skill().name);
-    set_text(text_1, $value());
-  });
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
-var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$f = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$s = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
-function KnowledgeSkillCard($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
-  const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let knowledgeSkill = proxy(skill().system.knowledgeSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, knowledgeSkill.value);
-  function openSkill() {
-    ActiveSkillEditorSheet.launch(actor(), skill(), config());
-  }
-  var div = root$s();
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var i = root_1$f();
-      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
-      i.__click = openSkill;
-      i.__keydown = [on_keydown$3, openSkill];
-      template_effect(($0) => set_attribute(i, "aria-label", $0), [
-        () => localize(config().sheet.buyupgrades)
-      ]);
-      append($$anchor2, i);
-    };
-    if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
-    });
-  }
-  var div_1 = sibling(node, 2);
-  var div_2 = child(div_1);
-  var h6 = sibling(child(div_2), 2);
-  var text = child(h6);
-  var h1 = sibling(h6, 2);
-  var text_1 = child(h1);
-  var div_3 = sibling(div_2, 2);
-  each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$9();
-    var div_5 = sibling(child(div_4), 2);
-    var text_2 = child(div_5);
-    var h1_1 = sibling(div_5, 2);
-    var text_3 = child(h1_1);
-    template_effect(() => {
-      set_text(text_2, get$1(specialization).name);
-      set_text(text_3, get$1(specialization).value);
-    });
-    append($$anchor2, div_4);
-  });
-  template_effect(() => {
-    set_text(text, skill().name);
+    set_text(text2, skill().name);
     set_text(text_1, $value());
   });
   append($$anchor, div);
@@ -7147,9 +7173,9 @@ function KnowledgeSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$2 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$e = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$8 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$r = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
+var root_1$g = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root$s = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7166,11 +7192,11 @@ function LanguageSkillCard($$anchor, $$props) {
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
-  var div = root$r();
+  var div = root$s();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$e();
+      var i = root_1$g();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$2, openSkill];
@@ -7186,7 +7212,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var div_1 = sibling(node, 2);
   var div_2 = child(div_1);
   var h6 = sibling(child(div_2), 2);
-  var text = child(h6);
+  var text2 = child(h6);
   var h1 = sibling(h6, 2);
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
@@ -7195,7 +7221,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var text_2 = child(h1_1);
   var div_5 = sibling(div_3, 2);
   each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_6 = root_2$8();
+    var div_6 = root_2$9();
     var div_7 = sibling(child(div_6), 2);
     var text_3 = child(div_7);
     var h1_2 = sibling(div_7, 2);
@@ -7207,7 +7233,7 @@ function LanguageSkillCard($$anchor, $$props) {
     append($$anchor2, div_6);
   });
   template_effect(() => {
-    set_text(text, skill().name);
+    set_text(text2, skill().name);
     set_text(text_1, $value());
     set_text(text_2, $readWriteValue());
   });
@@ -7217,8 +7243,8 @@ function LanguageSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var root_7$1 = /* @__PURE__ */ template(`<div class="debug-unknown"> </div>`);
-var root_1$d = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$q = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+var root_1$f = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$r = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
   let categoryOfSkills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -7234,14 +7260,14 @@ function SkillCategory($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$q();
+  var div = root$r();
   var div_1 = sibling(child(div), 2);
   var h1 = child(div_1);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_2 = sibling(div_1, 2);
   var node = sibling(child(div_2), 4);
   each(node, 17, categoryOfSkills, (skill) => skill._id, ($$anchor2, skill) => {
-    var fragment = root_1$d();
+    var fragment = root_1$f();
     var node_1 = first_child(fragment);
     html(node_1, () => `<script>console.log(${JSON.stringify(get$1(skill))})<\/script>`);
     var node_2 = sibling(node_1, 2);
@@ -7329,13 +7355,13 @@ function SkillCategory($$anchor, $$props) {
     append($$anchor2, fragment);
   });
   bind_this(div_2, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes[$$props.attribute])
   ]);
   append($$anchor, div);
   pop();
 }
-var root$p = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$q = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsLanguage($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7344,7 +7370,7 @@ function SkillsLanguage($$anchor, $$props) {
   let gridContainer;
   const languageSkillsIdArrayStore = getActorStore(actor().id, stores.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let languageSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
-  var div = root$p();
+  var div = root$q();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -7363,7 +7389,7 @@ function SkillsLanguage($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$o = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$p = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsKnowledge($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7372,7 +7398,7 @@ function SkillsKnowledge($$anchor, $$props) {
   let gridContainer;
   const knowledgeSkillsIdArrayStore = getActorStore(actor().id, stores.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
   let knowledgeSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
-  var div = root$o();
+  var div = root$p();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -7432,16 +7458,16 @@ function SkillsActive($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var on_click$2 = (_, activeTab) => set(activeTab, "active");
-var on_click_1$1 = (__1, activeTab) => set(activeTab, "knowledge");
+var on_click$3 = (_, activeTab) => set(activeTab, "active");
+var on_click_1$2 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$n = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$o = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
-  var fragment = root$n();
+  var fragment = root$o();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -7450,12 +7476,12 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click$2, activeTab];
+  button.__click = [on_click$3, activeTab];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_1$1, activeTab];
+  button_1.__click = [on_click_1$2, activeTab];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [on_click_2, activeTab];
   var div_2 = sibling(div_1, 2);
@@ -7527,7 +7553,7 @@ function Skills($$anchor, $$props) {
   }
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       toggle_class(button, "active", get$1(activeTab) === "active");
       toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
       toggle_class(button_2, "active", get$1(activeTab) === "language");
@@ -7538,11 +7564,290 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$m = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+class CardiogramAnimationService {
+  constructor(lineCanvas, pointCanvas, {
+    freq = 1.5,
+    amp = 20,
+    color = "lime",
+    lineWidth = 2,
+    bottomColor = "#00FFFF",
+    topColor = "#0000FF"
+  } = {}) {
+    __publicField(this, "_animate", () => {
+      if (!this._isAnimating) return;
+      this._drawEcg();
+      this._animFrame = requestAnimationFrame(this._animate);
+    });
+    this.lineCanvas = lineCanvas;
+    this.lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true });
+    this.pointCanvas = pointCanvas;
+    this.pointCtx = pointCanvas.getContext("2d", { willReadFrequently: true });
+    this.width = lineCanvas.width;
+    this.height = lineCanvas.height;
+    this.phase = 0;
+    this.freq = freq;
+    this.amp = amp;
+    this.color = color;
+    this.lineWidth = lineWidth;
+    this._isAnimating = false;
+    this._animFrame = null;
+    this.bottomColor = bottomColor;
+    this.topColor = topColor;
+  }
+  start() {
+    if (this._isAnimating) return;
+    this._isAnimating = true;
+    this._animate();
+  }
+  stop() {
+    this._isAnimating = false;
+    if (this._animFrame) cancelAnimationFrame(this._animFrame);
+  }
+  setFrequency(freq) {
+    this.freq = freq;
+  }
+  setAmplitude(amp) {
+    this.amp = amp;
+  }
+  setTopColor(color) {
+    this.topColor = color;
+  }
+  setBottomColor(color) {
+    this.bottomColor = color;
+  }
+  _drawEcg() {
+    const offsetX = 10;
+    const offsetY = 10;
+    const imageData = this.lineCtx.getImageData(1, 0, this.width - 1, this.height);
+    this.lineCtx.clearRect(0, 0, this.width, this.height);
+    this.lineCtx.putImageData(imageData, 0, 0);
+    const x = this.width - 1 - offsetX;
+    const y = this.height / 2 + offsetY - this._getHeartY(this.phase);
+    if (this.prevY === void 0) {
+      this.prevY = y;
+    }
+    const normalizedAmp = (this._getHeartY(this.phase) + this.amp) / (2 * this.amp);
+    const interpolatedColor = lerpColor(this.bottomColor, this.topColor, normalizedAmp);
+    this.lineCtx.beginPath();
+    this.lineCtx.moveTo(x - 1, this.prevY);
+    this.lineCtx.lineTo(x, y);
+    this.lineCtx.strokeStyle = interpolatedColor;
+    this.lineCtx.lineWidth = this.lineWidth;
+    this.lineCtx.stroke();
+    this.pointCtx.clearRect(0, 0, this.width, this.height);
+    const radius = 4;
+    this.pointCtx.beginPath();
+    this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
+    this.pointCtx.fillStyle = this.topColor;
+    this.pointCtx.fill();
+    this.prevY = y;
+    this.phase += 0.04 * this.freq;
+  }
+  _getHeartY(phase) {
+    const t = phase;
+    const cycle = t % (2 * Math.PI) / (2 * Math.PI);
+    let y = 0;
+    if (cycle < 0.1) {
+      const alpha = cycle / 0.1;
+      y = 0.1 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.15) {
+      const alpha = (cycle - 0.1) / 0.05;
+      y = -0.2 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.2) {
+      const alpha = (cycle - 0.15) / 0.05;
+      y = 0.8 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.25) {
+      const alpha = (cycle - 0.2) / 0.05;
+      y = -0.2 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.55) {
+      const alpha = (cycle - 0.4) / 0.15;
+      y = 0.3 * Math.sin(alpha * Math.PI) * this.amp;
+    }
+    return y;
+  }
+}
+class ElectroCardiogramService {
+  constructor(actor, html2) {
+    __privateAdd(this, _ElectroCardiogramService_instances);
+    __privateAdd(this, _ecgCanvas);
+    __privateAdd(this, _ecgPointCanvas);
+    __privateAdd(this, _ctxLine);
+    __privateAdd(this, _ctxPoint);
+    __privateAdd(this, _actor);
+    __privateAdd(this, _html);
+    __publicField(this, "ecgAnimator");
+    __privateSet(this, _actor, actor);
+    __privateSet(this, _html, html2);
+    __privateSet(this, _ecgCanvas, html2.find("#ecg-canvas")[0]);
+    __privateSet(this, _ecgPointCanvas, html2.find("#ecg-point-canvas")[0]);
+    __privateSet(this, _ctxLine, __privateGet(this, _ecgCanvas).getContext("2d", {
+      willReadFrequently: true
+    }));
+    __privateSet(this, _ctxPoint, __privateGet(this, _ecgPointCanvas).getContext("2d", {
+      willReadFrequently: true
+    }));
+    __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
+    __privateGet(this, _ecgCanvas).addEventListener("resize", __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).bind(this));
+    __privateGet(this, _ecgPointCanvas).addEventListener(
+      "resize",
+      __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).bind(this)
+    );
+    this.ecgAnimator = new CardiogramAnimationService(__privateGet(this, _ecgCanvas), __privateGet(this, _ecgPointCanvas), {
+      freq: 2,
+      amp: 30,
+      color: "lime",
+      lineWidth: 2,
+      bottomColor: "#32CD32",
+      topColor: "#00FFFF"
+    });
+    this.ecgAnimator.start();
+  }
+  async onHealthBoxChange(event2) {
+    const clicked = event2.currentTarget;
+    const clickedIndex = parseInt(clicked.id.replace("healthBox", ""), 10);
+    const isStun = clickedIndex <= 10;
+    const localIndex = isStun ? clickedIndex - 1 : clickedIndex - 11;
+    const stunArray = [...__privateGet(this, _actor).system.health.stun];
+    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
+    const currentArray = isStun ? stunArray : physicalArray;
+    const wasChecked = currentArray[localIndex];
+    const willBeChecked = clicked.checked;
+    const checkedCount = currentArray.filter(Boolean).length;
+    if (wasChecked && !willBeChecked && checkedCount === 1) {
+      currentArray[localIndex] = false;
+      clicked.checked = false;
+      const siblingH4 = $(clicked).closest(".damage-input").find("h4");
+      siblingH4.removeClass("lit").addClass("unlit");
+    } else {
+      for (let i = 0; i < 10; i++) {
+        const shouldCheck = i <= localIndex;
+        currentArray[i] = shouldCheck;
+        const globalId = isStun ? i + 1 : i + 11;
+        const box = __privateGet(this, _html).find(`#healthBox${globalId}`);
+        box.prop("checked", shouldCheck);
+        const siblingH4 = box.closest(".damage-input").find("h4");
+        if (siblingH4.length) {
+          siblingH4.toggleClass("lit", shouldCheck);
+          siblingH4.toggleClass("unlit", !shouldCheck);
+        }
+      }
+    }
+    if (isStun) {
+      __privateGet(this, _actor).system.health.stun = stunArray;
+    } else {
+      __privateGet(this, _actor).system.health.physical = physicalArray;
+    }
+    const penalty = this.calculatePenalty(stunArray, physicalArray);
+    __privateGet(this, _html).find(".health-penalty").text(penalty);
+    await __privateGet(this, _actor).update(
+      {
+        ["system.health.stun"]: stunArray,
+        ["system.health.physical"]: physicalArray,
+        ["system.health.penalty"]: penalty
+      },
+      { render: false }
+    );
+  }
+  updateHealthOnStart() {
+    const stunArray = [...__privateGet(this, _actor).system.health.stun];
+    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
+    const penalty = this.calculatePenalty(stunArray, physicalArray);
+    __privateGet(this, _html).find(".health-penalty").text(penalty);
+  }
+  calculatePenalty(stunArray, physicalArray) {
+    const degreeStun = stunArray.filter(Boolean).length;
+    const degreePhysical = physicalArray.filter(Boolean).length;
+    const maxDegree = Math.max(degreeStun, degreePhysical);
+    return this._calculateSeverity(maxDegree);
+  }
+  _calculateSeverity(degree = 0) {
+    if (degree === 0) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 1.5, 20), 0;
+    if (degree < 3) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 2, 20), 1;
+    if (degree < 6) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 4, 25), 2;
+    if (degree < 9) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 8, 35), 3;
+    if (degree === 9) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 10, 40), 4;
+    return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 1, 8), 4;
+  }
+}
+_ecgCanvas = new WeakMap();
+_ecgPointCanvas = new WeakMap();
+_ctxLine = new WeakMap();
+_ctxPoint = new WeakMap();
+_actor = new WeakMap();
+_html = new WeakMap();
+_ElectroCardiogramService_instances = new WeakSet();
+resizeCanvas_fn = function() {
+  const wRatio = window.devicePixelRatio;
+  const resize = (canvas, ctx) => {
+    const width = canvas.offsetWidth * wRatio;
+    const height = canvas.offsetHeight * wRatio;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(wRatio, wRatio);
+  };
+  resize(__privateGet(this, _ecgCanvas), __privateGet(this, _ctxLine));
+  resize(__privateGet(this, _ecgPointCanvas), __privateGet(this, _ctxPoint));
+};
+setPace_fn = function(freq, amp) {
+  this.ecgAnimator.setFrequency(freq);
+  this.ecgAnimator.setAmplitude(amp);
+};
+var root_2$8 = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_1$e = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var root_4$6 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
+var root_3$8 = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var root$n = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $stunArray = () => store_get(stunArray, "$stunArray", $$stores);
+  const $physicalArray = () => store_get(physicalArray, "$physicalArray", $$stores);
+  const $penalty = () => store_get(penalty, "$penalty", $$stores);
+  const $overflow = () => store_get(overflow, "$overflow", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  var fragment = root$m();
+  let stunArray = getActorStore(actor().id, stores.combat.stunDamage, foundry.utils.deepClone(actor().system.health.stun));
+  let physicalArray = getActorStore(actor().id, stores.combat.leathalDamage, foundry.utils.deepClone(actor().system.health.physical));
+  let penalty = getActorStore(actor().id, stores.penalty, actor().system.health.penalty ?? 0);
+  let overflow = getActorStore(actor().id, stores.overflow, actor().system.health.overflow ?? 0);
+  let maxDegree = state(0);
+  let ecgCanvas = state(void 0);
+  let ecgPointCanvas = state(void 0);
+  let ecgService = state(void 0);
+  function toggle(localIndex, isStun, willBeChecked) {
+    const currentArray = isStun ? $stunArray() : $physicalArray();
+    const wasChecked = currentArray[localIndex];
+    const checkedCount = currentArray.filter(Boolean).length;
+    if (wasChecked && !willBeChecked && checkedCount === 1) {
+      currentArray[localIndex] = false;
+    } else {
+      for (let i = 0; i < 10; i++) {
+        currentArray[i] = i <= localIndex;
+      }
+    }
+    if (isStun) {
+      store_set(stunArray, proxy([...currentArray]));
+    } else {
+      store_set(physicalArray, proxy([...currentArray]));
+    }
+    set(maxDegree, proxy(Math.max($stunArray().filter(Boolean).length, $physicalArray().filter(Boolean).length)));
+  }
+  user_effect(() => {
+    var _a;
+    store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
+  });
+  onMount(() => {
+    set(ecgService, proxy(new ElectroCardiogramService(actor(), {
+      find: (selector) => {
+        if (selector === "#ecg-canvas") return [get$1(ecgCanvas)];
+        if (selector === "#ecg-point-canvas") return [get$1(ecgPointCanvas)];
+        return [];
+      }
+    })));
+  });
+  var fragment = root$n();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -7550,25 +7855,273 @@ function Health($$anchor, $$props) {
     }
   });
   var div = sibling(node, 2);
-  var h1 = child(div);
-  var text = child(h1);
-  var span = sibling(h1, 2);
-  var text_1 = child(span);
-  template_effect(
-    ($0) => {
-      set_text(text, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+  var canvas = child(div);
+  bind_this(canvas, ($$value) => set(ecgCanvas, $$value), () => get$1(ecgCanvas));
+  var canvas_1 = sibling(canvas, 2);
+  bind_this(canvas_1, ($$value) => set(ecgPointCanvas, $$value), () => get$1(ecgPointCanvas));
+  var div_1 = sibling(div, 2);
+  var div_2 = child(div_1);
+  var div_3 = child(div_2);
+  var node_1 = sibling(child(div_3), 2);
+  each(node_1, 16, () => Array(10), index, ($$anchor2, _, i) => {
+    var div_4 = root_1$e();
+    var input = child(div_4);
+    set_attribute(input, "id", `healthBox${i + 1}`);
+    input.__change = (e) => toggle(i, true, e.target.checked);
+    var node_2 = sibling(input, 2);
+    {
+      var consequent = ($$anchor3) => {
+        var div_5 = root_2$8();
+        var h4 = child(div_5);
+        var text2 = child(h4);
+        template_effect(() => {
+          set_class(h4, `no-margin ${($stunArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_text(text2, [
+            "Light",
+            "",
+            "Moderate",
+            "",
+            "",
+            "Serious",
+            "",
+            "",
+            "",
+            "Deadly"
+          ][i]);
+        });
+        append($$anchor3, div_5);
+      };
+      if_block(node_2, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent);
+      });
+    }
+    template_effect(() => set_checked(input, $stunArray()[i]));
+    append($$anchor2, div_4);
+  });
+  var div_6 = sibling(div_3, 2);
+  var node_3 = sibling(child(div_6), 2);
+  each(node_3, 16, () => Array(10), index, ($$anchor2, _, i) => {
+    var div_7 = root_3$8();
+    var input_1 = child(div_7);
+    set_attribute(input_1, "id", `healthBox${i + 11}`);
+    input_1.__change = (e) => toggle(i, false, e.target.checked);
+    var node_4 = sibling(input_1, 2);
+    {
+      var consequent_1 = ($$anchor3) => {
+        var div_8 = root_4$6();
+        var h4_1 = child(div_8);
+        var text_1 = child(h4_1);
+        template_effect(() => {
+          set_class(h4_1, `no-margin ${($physicalArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_text(text_1, [
+            "Light",
+            "",
+            "Moderate",
+            "",
+            "",
+            "Serious",
+            "",
+            "",
+            "",
+            "Deadly"
+          ][i]);
+        });
+        append($$anchor3, div_8);
+      };
+      if_block(node_4, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_1);
+      });
+    }
+    template_effect(() => set_checked(input_1, $physicalArray()[i]));
+    append($$anchor2, div_7);
+  });
+  var div_9 = sibling(div_2, 2);
+  var div_10 = child(div_9);
+  var node_5 = child(div_10);
+  const expression = /* @__PURE__ */ derived(() => localize(config().health.penalty));
+  StatCard$1(node_5, {
+    get value() {
+      return $penalty();
     },
-    [() => localize(config().health.health)]
-  );
+    get label() {
+      return get$1(expression);
+    }
+  });
+  var node_6 = sibling(node_5, 2);
+  const expression_1 = /* @__PURE__ */ derived(() => localize(config().health.overflow));
+  StatCard$1(node_6, {
+    get value() {
+      return $overflow();
+    },
+    get label() {
+      return get$1(expression_1);
+    }
+  });
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
-var root$l = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
+delegate(["change"]);
+function Garage($$anchor) {
+  var text$1 = text("Hello garage!");
+  append($$anchor, text$1);
+}
+var root_1$d = /* @__PURE__ */ template(`<div><div> </div></div>`);
+var root$m = /* @__PURE__ */ template(`<div></div>`);
+function Arsenal($$anchor, $$props) {
+  let arsenal = prop($$props, "arsenal", 19, () => []);
+  var div = root$m();
+  each(div, 21, arsenal, index, ($$anchor2, item2) => {
+    var div_1 = root_1$d();
+    var div_2 = child(div_1);
+    var text2 = child(div_2);
+    template_effect(() => {
+      set_value(div_1, get$1(item2).id);
+      set_text(text2, get$1(item2).name);
+    });
+    append($$anchor2, div_1);
+  });
+  append($$anchor, div);
+}
+class ActorDataService {
+  static prepareSkills(items) {
+    return {
+      active: this._categorizeAndSortSkills(
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "activeSkill"
+        ),
+        (item2) => item2.system.activeSkill.linkedAttribute
+      ),
+      knowledge: this._categorizeAndSortSkills(
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "knowledgeSkill"
+        ),
+        (item2) => item2.system.knowledgeSkill.linkedAttribute
+      ),
+      language: this._sortSkillsByName(
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "languageSkill"
+        )
+      )
+    };
+  }
+  static prepareLanguages(items) {
+    return items.filter(
+      (item2) => item2.type === "skill" && item2.system.skillType === "languageSkill"
+    ).map((item2) => {
+      var _a, _b, _c;
+      const languageData = {
+        id: item2.id,
+        name: item2.name,
+        skills: [
+          {
+            type: localize(CONFIG.sr3e.skill.speak),
+            value: (_a = item2.system.languageSkill.speak) == null ? void 0 : _a.value,
+            specializations: item2.system.languageSkill.speak.specializations
+          },
+          {
+            type: localize(CONFIG.sr3e.skill.read),
+            value: (_b = item2.system.languageSkill.read) == null ? void 0 : _b.value,
+            specializations: item2.system.languageSkill.read.specializations
+          },
+          {
+            type: localize(CONFIG.sr3e.skill.write),
+            value: (_c = item2.system.languageSkill.write) == null ? void 0 : _c.value,
+            specializations: item2.system.languageSkill.write.specializations
+          }
+        ]
+      };
+      return languageData;
+    });
+  }
+  static _categorizeAndSortSkills(skills, keyFn) {
+    const categories = skills.reduce((acc, skill) => {
+      const category = keyFn(skill) || "uncategorized";
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(skill);
+      return acc;
+    }, {});
+    Object.keys(categories).forEach(
+      (key) => categories[key].sort((a, b) => a.name.localeCompare(b.name))
+    );
+    return categories;
+  }
+  static _sortSkillsByName(skills) {
+    return skills.sort((a, b) => a.name.localeCompare(b.name));
+  }
+  static getLocalizedLinkingAttributes() {
+    return {
+      body: localize(CONFIG.sr3e.attributes.body),
+      quickness: localize(CONFIG.sr3e.attributes.quickness),
+      strength: localize(CONFIG.sr3e.attributes.strength),
+      charisma: localize(CONFIG.sr3e.attributes.charisma),
+      intelligence: localize(CONFIG.sr3e.attributes.intelligence),
+      willpower: localize(CONFIG.sr3e.attributes.willpower),
+      reaction: localize(CONFIG.sr3e.attributes.reaction),
+      magic: localize(CONFIG.sr3e.attributes.magic)
+    };
+  }
+  static getCharacterCreationStats() {
+    return {
+      attributes: [
+        { priority: "A", points: 30 },
+        { priority: "B", points: 27 },
+        { priority: "C", points: 24 },
+        { priority: "D", points: 21 },
+        { priority: "E", points: 18 }
+      ],
+      skills: [
+        { priority: "A", points: 50 },
+        { priority: "B", points: 40 },
+        { priority: "C", points: 34 },
+        { priority: "D", points: 30 },
+        { priority: "E", points: 27 }
+      ],
+      resources: [
+        { priority: "A", points: 1e6 },
+        { priority: "B", points: 4e5 },
+        { priority: "C", points: 9e4 },
+        { priority: "D", points: 2e4 },
+        { priority: "E", points: 5e3 }
+      ]
+    };
+  }
+  static getPhaseTemplate() {
+    return [
+      { text: localize(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
+      { text: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
+      { text: localize(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
+      { text: localize(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
+      { text: localize(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
+      { text: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
+      { text: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
+    ];
+  }
+  static getInventoryCategory(actor, types) {
+    if (!(types == null ? void 0 : types.length)) return [];
+    let all = [];
+    types.forEach((type) => {
+      const matches = actor.items.filter((item2) => item2.type === type).map((item2) => ({
+        id: item2.id,
+        // or item._id, both work in Foundry
+        name: item2.name,
+        type: item2.type,
+        isSelected: false
+      }));
+      all.push(...matches);
+    });
+    return all;
+  }
+}
+var on_click$2 = (_, activeTab) => set(activeTab, proxy(inventory.arsenal));
+var on_click_1$1 = (__1, activeTab) => set(activeTab, proxy(inventory.garage));
+var root$l = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="sr3e-tabs"><button>Arsenal</button> <button>Garage</button></div> <div class="sr3e-inner-background"><!></div>`, 1);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
+  let activeTab = state(proxy(inventory.arsenal));
+  let arsenal = ActorDataService.getInventoryCategory(actor(), ["weapon", "ammunition"]);
   var fragment = root$l();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -7576,15 +8129,54 @@ function Inventory($$anchor, $$props) {
       return id();
     }
   });
-  var div = sibling(node, 2);
-  var h1 = child(div);
-  var text = child(h1);
-  var span_1 = sibling(h1, 2);
-  var text_1 = child(span_1);
+  var h1 = sibling(node, 2);
+  var text2 = child(h1);
+  var div = sibling(h1, 2);
+  var button = child(div);
+  button.__click = [on_click$2, activeTab];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_1$1, activeTab];
+  var div_1 = sibling(div, 2);
+  var node_1 = child(div_1);
+  {
+    var consequent = ($$anchor2) => {
+      Arsenal($$anchor2, {
+        arsenal,
+        get actor() {
+          return actor();
+        },
+        get config() {
+          return config();
+        }
+      });
+    };
+    var alternate = ($$anchor2) => {
+      var fragment_2 = comment();
+      var node_2 = first_child(fragment_2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          Garage($$anchor3);
+        };
+        if_block(
+          node_2,
+          ($$render) => {
+            if (get$1(activeTab) === inventory.garage) $$render(consequent_1);
+          },
+          true
+        );
+      }
+      append($$anchor2, fragment_2);
+    };
+    if_block(node_1, ($$render) => {
+      if (get$1(activeTab) === inventory.arsenal) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
   template_effect(
     ($0) => {
-      set_text(text, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
+      set_text(text2, $0);
+      toggle_class(button, "active", get$1(activeTab) === inventory.arsenal);
+      toggle_class(button_1, "active", get$1(activeTab) === inventory.garage);
     },
     [
       () => localize(config().inventory.inventory)
@@ -7593,6 +8185,7 @@ function Inventory($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
+delegate(["click"]);
 var root_2$7 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
@@ -7683,7 +8276,6 @@ function CharacterSheetApp($$anchor, $$props) {
   ];
   user_effect(async () => {
     var _a;
-    console.log("Actor ID " + $$props.actor.id);
     if (!((_a = $$props.actor) == null ? void 0 : _a.id)) return;
     const layout = await $$props.actor.getFlag("sr3e", "customLayout");
     const defaultLayout = defaultCardArray.map((c) => ({ id: c.props.id, span: c.props.span }));
@@ -7793,11 +8385,11 @@ function CreationPointList($$anchor, $$props) {
     var div_1 = root_1$c();
     set_attribute(div_1, "style", `top: ${i * 8}rem`);
     var h1 = child(div_1);
-    var text = child(h1);
+    var text2 = child(h1);
     var div_2 = sibling(h1, 2);
     var text_1 = child(div_2);
     template_effect(() => {
-      set_text(text, get$1(point).value);
+      set_text(text2, get$1(point).value);
       set_text(text_1, get$1(point).text);
     });
     append($$anchor2, div_1);
@@ -8048,111 +8640,6 @@ function ShoppingCart($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-class ActorDataService {
-  static prepareSkills(items) {
-    return {
-      active: this._categorizeAndSortSkills(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "activeSkill"),
-        (item2) => item2.system.activeSkill.linkedAttribute
-      ),
-      knowledge: this._categorizeAndSortSkills(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledgeSkill"),
-        (item2) => item2.system.knowledgeSkill.linkedAttribute
-      ),
-      language: this._sortSkillsByName(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "languageSkill")
-      )
-    };
-  }
-  static prepareLanguages(items) {
-    return items.filter((item2) => item2.type === "skill" && item2.system.skillType === "languageSkill").map((item2) => {
-      var _a, _b, _c;
-      const languageData = {
-        id: item2.id,
-        name: item2.name,
-        skills: [
-          {
-            type: localize(CONFIG.sr3e.skill.speak),
-            value: (_a = item2.system.languageSkill.speak) == null ? void 0 : _a.value,
-            specializations: item2.system.languageSkill.speak.specializations
-          },
-          {
-            type: localize(CONFIG.sr3e.skill.read),
-            value: (_b = item2.system.languageSkill.read) == null ? void 0 : _b.value,
-            specializations: item2.system.languageSkill.read.specializations
-          },
-          {
-            type: localize(CONFIG.sr3e.skill.write),
-            value: (_c = item2.system.languageSkill.write) == null ? void 0 : _c.value,
-            specializations: item2.system.languageSkill.write.specializations
-          }
-        ]
-      };
-      return languageData;
-    });
-  }
-  static _categorizeAndSortSkills(skills, keyFn) {
-    const categories = skills.reduce((acc, skill) => {
-      const category = keyFn(skill) || "uncategorized";
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(skill);
-      return acc;
-    }, {});
-    Object.keys(categories).forEach((key) => categories[key].sort((a, b) => a.name.localeCompare(b.name)));
-    return categories;
-  }
-  static _sortSkillsByName(skills) {
-    return skills.sort((a, b) => a.name.localeCompare(b.name));
-  }
-  static getLocalizedLinkingAttributes() {
-    return {
-      body: localize(CONFIG.sr3e.attributes.body),
-      quickness: localize(CONFIG.sr3e.attributes.quickness),
-      strength: localize(CONFIG.sr3e.attributes.strength),
-      charisma: localize(CONFIG.sr3e.attributes.charisma),
-      intelligence: localize(CONFIG.sr3e.attributes.intelligence),
-      willpower: localize(CONFIG.sr3e.attributes.willpower),
-      reaction: localize(CONFIG.sr3e.attributes.reaction),
-      magic: localize(CONFIG.sr3e.attributes.magic)
-    };
-  }
-  static getCharacterCreationStats() {
-    return {
-      attributes: [
-        { priority: "A", points: 30 },
-        { priority: "B", points: 27 },
-        { priority: "C", points: 24 },
-        { priority: "D", points: 21 },
-        { priority: "E", points: 18 }
-      ],
-      skills: [
-        { priority: "A", points: 50 },
-        { priority: "B", points: 40 },
-        { priority: "C", points: 34 },
-        { priority: "D", points: 30 },
-        { priority: "E", points: 27 }
-      ],
-      resources: [
-        { priority: "A", points: 1e6 },
-        { priority: "B", points: 4e5 },
-        { priority: "C", points: 9e4 },
-        { priority: "D", points: 2e4 },
-        { priority: "E", points: 5e3 }
-      ]
-    };
-  }
-  static getPhaseTemplate() {
-    return [
-      { text: localize(CONFIG.sr3e.traits.child), from: 0, to: 0.15 },
-      { text: localize(CONFIG.sr3e.traits.adolecent), from: 0.15, to: 0.2 },
-      { text: localize(CONFIG.sr3e.traits.youngadult), from: 0.2, to: 0.4 },
-      { text: localize(CONFIG.sr3e.traits.adult), from: 0.4, to: 0.5 },
-      { text: localize(CONFIG.sr3e.traits.middleage), from: 0.5, to: 0.65 },
-      { text: localize(CONFIG.sr3e.traits.goldenyears), from: 0.65, to: 0.8 },
-      { text: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
-    ];
-  }
-}
 class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
     super(...arguments);
@@ -8384,7 +8871,9 @@ sr3e.attributes = {
   essence: "sr3e.attributes.essence"
 };
 sr3e.health = {
-  health: "sr3e.health.health"
+  health: "sr3e.health.health",
+  overflow: "sr3e.health.overflow",
+  penalty: "sr3e.health.penalty"
 };
 sr3e.modal = {
   confirm: "sr3e.modal.confirm",
@@ -8907,10 +9396,10 @@ function JournalSearchModal($$anchor, $$props) {
                 var li = root_4$5();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text = sibling(child(div_4));
+                var text2 = sibling(child(div_4));
                 template_effect(() => {
                   set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                  set_text(text2, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -9051,11 +9540,21 @@ function JournalViewer($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
+var root$e = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+function ItemSheetComponent($$anchor, $$props) {
+  var div = root$e();
+  set_class(div, "item-sheet-component");
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var node = child(div_2);
+  snippet(node, () => $$props.children ?? noop);
+  append($$anchor, div);
+}
 var root_1$9 = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$7 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input>`);
-var root$e = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4 class="no-margin uppercase"> </h4></div> <!></div>`);
+var root$d = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4 class="no-margin uppercase"> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
   let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
@@ -9070,10 +9569,10 @@ function StatCard($$anchor, $$props) {
     $$props.item.update({ [`${$$props.path}.${$$props.key}`]: val });
     console.log(`Updated ${$$props.path}.${$$props.key} to`, val);
   }
-  var div = root$e();
+  var div = root$d();
   var div_1 = sibling(child(div), 2);
   var h4 = child(div_1);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
@@ -9136,21 +9635,11 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(() => set_text(text, $$props.label));
+  template_effect(() => set_text(text2, $$props.label));
   append($$anchor, div);
   pop();
 }
 delegate(["change"]);
-var root$d = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-function ItemSheetComponent($$anchor, $$props) {
-  var div = root$d();
-  set_class(div, "item-sheet-component");
-  var div_1 = child(div);
-  var div_2 = sibling(child(div_1), 2);
-  var node = child(div_2);
-  snippet(node, () => $$props.children ?? noop);
-  append($$anchor, div);
-}
 var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$8 = /* @__PURE__ */ template(`<!> <input class="large" name="name" type="text"> <!>`, 1);
 var root_3$6 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
@@ -9457,12 +9946,12 @@ function MetahumanApp($$anchor, $$props) {
         children: ($$anchor3, $$slotProps) => {
           var fragment_2 = root_3$6();
           var h3 = first_child(fragment_2);
-          var text = child(h3);
+          var text2 = child(h3);
           var div_2 = sibling(h3, 2);
           each(div_2, 21, () => get$1(agerange), index, ($$anchor4, entry) => {
             StatCard($$anchor4, spread_props(() => get$1(entry)));
           });
-          template_effect(($0) => set_text(text, $0), [() => localize(traits.agerange)]);
+          template_effect(($0) => set_text(text2, $0), [() => localize(traits.agerange)]);
           append($$anchor3, fragment_2);
         }
       });
@@ -10047,14 +10536,14 @@ function Commodity($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$6();
       var h3 = first_child(fragment_1);
-      var text = child(h3);
+      var text2 = child(h3);
       var div = sibling(h3, 2);
       each(div, 21, () => entries, index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(
         ($0) => {
-          set_text(text, $0);
+          set_text(text2, $0);
           set_class(div, `stat-grid ${gridCss() ?? ""}`);
         },
         [
@@ -10093,14 +10582,14 @@ function Portability($$anchor, $$props) {
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
     StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
     },
     [
@@ -10206,7 +10695,7 @@ function WeaponApp($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_3$4();
       var h3 = first_child(fragment_1);
-      var text = child(h3);
+      var text2 = child(h3);
       var div_3 = sibling(h3, 2);
       var node_4 = child(div_3);
       StatCard(node_4, spread_props(weaponMode));
@@ -10214,7 +10703,7 @@ function WeaponApp($$anchor, $$props) {
       each(div_4, 21, () => weaponEntries, index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text, $0), [
+      template_effect(($0) => set_text(text2, $0), [
         () => localize(config().common.details)
       ]);
       append($$anchor2, fragment_1);
@@ -10601,12 +11090,12 @@ function SkillApp($$anchor, $$props) {
           each(select, 21, () => selectOptions, index, ($$anchor4, option) => {
             var option_1 = root_4$3();
             var option_1_value = {};
-            var text = child(option_1);
+            var text2 = child(option_1);
             template_effect(() => {
               if (option_1_value !== (option_1_value = get$1(option).value)) {
                 option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
               }
-              set_text(text, get$1(option).label);
+              set_text(text2, get$1(option).label);
             });
             append($$anchor4, option_1);
           });
@@ -11182,7 +11671,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_7 = child(div_6);
   var div_8 = sibling(child(div_7), 2);
   var div_9 = child(div_8);
-  var text = child(div_9);
+  var text2 = child(div_9);
   var input_1 = sibling(div_9, 2);
   var div_10 = sibling(input_1, 2);
   var text_1 = child(div_10);
@@ -11349,7 +11838,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       set_attribute(img, "src", ((_a = get$1(metahumanItem)) == null ? void 0 : _a.img) ?? "");
       set_attribute(img, "title", ((_b = get$1(metahumanItem)) == null ? void 0 : _b.name) ?? "");
       set_attribute(img, "alt", ((_c = get$1(metahumanItem)) == null ? void 0 : _c.name) ?? "");
-      set_text(text, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} (${get$1(currentPhase) ?? ""})`);
+      set_text(text2, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} (${get$1(currentPhase) ?? ""})`);
       set_attribute(input_1, "min", ((_f = (_e = (_d = get$1(metahumanItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
       set_attribute(input_1, "max", ((_i = (_h = (_g = get$1(metahumanItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
       set_text(text_1, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
@@ -11403,12 +11892,12 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
       onCancel: null
     }, options);
     super(mergedOptions);
-    __privateAdd(this, _actor);
+    __privateAdd(this, _actor2);
     __privateAdd(this, _onSubmit);
     __privateAdd(this, _onCancel);
     __privateAdd(this, _svelteApp);
     __privateAdd(this, _wasSubmitted, false);
-    __privateSet(this, _actor, actor);
+    __privateSet(this, _actor2, actor);
     __privateSet(this, _onSubmit, mergedOptions.onSubmit);
     __privateSet(this, _onCancel, mergedOptions.onCancel);
   }
@@ -11420,7 +11909,7 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
     __privateSet(this, _svelteApp, mount(CharacterCreationDialogApp, {
       target: windowContent,
       props: {
-        actor: __privateGet(this, _actor),
+        actor: __privateGet(this, _actor2),
         config: CONFIG.sr3e,
         onSubmit: (result) => {
           var _a;
@@ -11448,7 +11937,7 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
     return super.close(options);
   }
 }
-_actor = new WeakMap();
+_actor2 = new WeakMap();
 _onSubmit = new WeakMap();
 _onCancel = new WeakMap();
 _svelteApp = new WeakMap();
@@ -11620,7 +12109,7 @@ function TimeActuatorInput($$anchor, $$props) {
   let input = state("");
   var div = root$5();
   var h1 = sibling(child(div), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
   button.__click = [on_click, onDelta];
@@ -11630,7 +12119,7 @@ function TimeActuatorInput($$anchor, $$props) {
   button_1.__click = [on_click_1, onDelta];
   template_effect(
     ($0) => {
-      set_text(text, label());
+      set_text(text2, label());
       set_attribute(button, "aria-label", `Decrement ${label()}`);
       set_attribute(input_1, "placeholder", $0);
       set_attribute(button_1, "aria-label", `Increment ${label()}`);
@@ -11719,7 +12208,7 @@ function TimeManager($$anchor, $$props) {
   var div_3 = child(div_2);
   var h1 = child(div_3);
   var div_4 = child(h1);
-  var text = child(div_4);
+  var text2 = child(div_4);
   var div_5 = sibling(div_4, 2);
   var text_1 = child(div_5);
   var div_6 = sibling(div_5, 2);
@@ -11795,7 +12284,7 @@ function TimeManager($$anchor, $$props) {
   });
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text, get$1(weekdayAsString));
+      set_text(text2, get$1(weekdayAsString));
       set_text(text_1, $0);
       set_text(text_2, get$1(monthAsString));
       set_text(text_3, get$1(year));
@@ -11924,12 +12413,12 @@ function KarmaManager($$anchor, $$props) {
     let label = () => get$1($$item).label;
     var option = root_1$1();
     var option_value = {};
-    var text = child(option);
+    var text2 = child(option);
     template_effect(() => {
       if (option_value !== (option_value = value())) {
         option.value = null == (option.__value = value()) ? "" : value();
       }
-      set_text(text, label());
+      set_text(text2, label());
     });
     append($$anchor2, option);
   });
@@ -12424,7 +12913,7 @@ function TransactionApp($$anchor, $$props) {
           select.__change = [on_change_1, item2];
           var option = child(select);
           option.value = null == (option.__value = "") ? "" : "";
-          var text = child(option);
+          var text2 = child(option);
           var option_1 = sibling(option);
           option_1.value = null == (option_1.__value = "income") ? "" : "income";
           var text_1 = child(option_1);
@@ -12439,7 +12928,7 @@ function TransactionApp($$anchor, $$props) {
           var text_4 = child(option_4);
           template_effect(
             ($0, $1, $2, $3, $4) => {
-              set_text(text, $0);
+              set_text(text2, $0);
               set_text(text_1, $1);
               set_text(text_2, $2);
               set_text(text_3, $3);

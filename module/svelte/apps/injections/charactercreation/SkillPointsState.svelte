@@ -1,6 +1,6 @@
 <script>
-    import { localize } from "../../../../svelteHelpers.js";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
+    import { localize } from "../../../../services/utilities.js";
+    import { flags } from "../../../../services/commonConsts.js";
     import { getActorStore, stores } from "../../../stores/actorStores.js";
     import CreationPointList from "../../components/CreationPointList.svelte";
 

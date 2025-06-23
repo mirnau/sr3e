@@ -1,5 +1,5 @@
 <script>
-  import { localize } from "../../../svelteHelpers.js";
+  import { localize } from "../../../services/utilities.js";
   import StatCard from "./StatCard.svelte";
   import ItemSheetComponent from "./basic/ItemSheetComponent.svelte";
   let { item, config, gridCss = "" } = $props();
