@@ -3453,7 +3453,10 @@ function moveCardById(id, direction) {
     const newIndex = direction === "up" ? index2 - 1 : index2 + 1;
     if (newIndex < 0 || newIndex >= cards.length) return cards;
     const reordered = [...cards];
-    [reordered[index2], reordered[newIndex]] = [reordered[newIndex], reordered[index2]];
+    [reordered[index2], reordered[newIndex]] = [
+      reordered[newIndex],
+      reordered[index2]
+    ];
     return reordered;
   });
 }
@@ -3494,15 +3497,22 @@ function getRandomBellCurveWithMode(min, max, mode) {
   const int = Math.floor(value);
   return int;
 }
-function lerpColor(color1, color2, t) {
-  const c1 = parseInt(color1.slice(1), 16);
-  const c2 = parseInt(color2.slice(1), 16);
-  const r1 = c1 >> 16 & 255, g1 = c1 >> 8 & 255, b1 = c1 & 255;
-  const r2 = c2 >> 16 & 255, g2 = c2 >> 8 & 255, b2 = c2 & 255;
-  const r = Math.round(r1 + (r2 - r1) * t);
-  const g = Math.round(g1 + (g2 - g1) * t);
-  const b = Math.round(b1 + (b2 - b1) * t);
-  return `rgb(${r}, ${g}, ${b})`;
+function lerpColor(hex1, hex2, t) {
+  const parseHex = (hex) => parseInt(hex.slice(1), 16);
+  const c1 = parseHex(hex1);
+  const c2 = parseHex(hex2);
+  const r1 = c1 >> 16 & 255;
+  const g1 = c1 >> 8 & 255;
+  const b1 = c1 & 255;
+  const r2 = c2 >> 16 & 255;
+  const g2 = c2 >> 8 & 255;
+  const b2 = c2 & 255;
+  const lerp = (a, b3, t2) => a + (b3 - a) * t2;
+  const r = Math.round(lerp(r1, r2, t));
+  const g = Math.round(lerp(g1, g2, t));
+  const b = Math.round(lerp(b1, b2, t));
+  const toHex = (n) => n.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
@@ -7630,23 +7640,27 @@ class EcgAnimator {
     );
     this.lineCtx.clearRect(0, 0, this.width, this.height);
     this.lineCtx.putImageData(imageData, 0, 0);
-    const y = this.height / 2 + offsetY - this._getHeartY(this.phase);
+    const heartY = this._getHeartY(this.phase);
+    const centerY = this.height / 2 + offsetY;
+    const y = centerY - heartY;
     if (this.prevY === void 0) {
       this.prevY = y;
+      this.prevHeartY = heartY;
+      this.prevPhase = this.phase;
     }
-    const normalizedAmp = (this._getHeartY(this.phase) + this.amp) / (2 * this.amp);
-    const interpolatedColor = lerpColor(
-      this.bottomColor,
-      this.topColor,
-      normalizedAmp
-    );
+    const prevHeartY = this.prevHeartY;
+    const t1 = Math.min(1, Math.abs(prevHeartY) / this.amp);
+    const t2 = Math.min(1, Math.abs(heartY) / this.amp);
+    const gradient = this.lineCtx.createLinearGradient(x - 1, this.prevY, x, y);
+    gradient.addColorStop(0, lerpColor(this.bottomColor, this.topColor, t1));
+    gradient.addColorStop(1, lerpColor(this.bottomColor, this.topColor, t2));
     this.lineCtx.beginPath();
     this.lineCtx.moveTo(x - 1, this.prevY);
     this.lineCtx.lineTo(x, y);
-    this.lineCtx.strokeStyle = interpolatedColor;
+    this.lineCtx.strokeStyle = gradient;
     this.lineCtx.lineWidth = this.lineWidth;
     this.lineCtx.stroke();
-    this.lineCtx.fillStyle = interpolatedColor;
+    this.lineCtx.fillStyle = lerpColor(this.bottomColor, this.topColor, t2);
     this.lineCtx.fillRect(x, y, 1, 1);
     this.pointCtx.clearRect(0, 0, this.width, this.height);
     this.pointCtx.beginPath();
@@ -7657,6 +7671,8 @@ class EcgAnimator {
     this.pointCtx.fill();
     this.pointCtx.shadowBlur = 0;
     this.prevY = y;
+    this.prevHeartY = heartY;
+    this.prevPhase = this.phase;
     this.phase += 0.04 * this.freq;
   }
   _getHeartY(phase) {

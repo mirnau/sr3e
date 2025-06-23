@@ -74,64 +74,71 @@ export default class EcgAnimator {
     this._animFrame = requestAnimationFrame(this._animate);
   };
 
-  _drawEcg() {
-    const offsetX = 10;
-    const offsetY = 10;
-    const radius = 4;
-    const x = this.width - offsetX - radius;
+_drawEcg() {
+  const offsetX = 10;
+  const offsetY = 10;
+  const radius = 4;
+  const x = this.width - offsetX - radius;
 
-    // Scroll the line canvas left by 1px
-    const imageData = this.lineCtx.getImageData(
-      1,
-      0,
-      this.width - 1,
-      this.height
-    );
-    this.lineCtx.clearRect(0, 0, this.width, this.height);
-    this.lineCtx.putImageData(imageData, 0, 0);
+  // Scroll the line canvas left by 1px
+  const imageData = this.lineCtx.getImageData(
+    1,
+    0,
+    this.width - 1,
+    this.height
+  );
+  this.lineCtx.clearRect(0, 0, this.width, this.height);
+  this.lineCtx.putImageData(imageData, 0, 0);
 
-    // Calculate current point
-    const y = this.height / 2 + offsetY - this._getHeartY(this.phase);
+  const heartY = this._getHeartY(this.phase);
+  const centerY = this.height / 2 + offsetY;
+  const y = centerY - heartY;
 
-    if (this.prevY === undefined) {
-      this.prevY = y;
-    }
-
-    // Color interpolation
-    const normalizedAmp =
-      (this._getHeartY(this.phase) + this.amp) / (2 * this.amp);
-    const interpolatedColor = lerpColor(
-      this.bottomColor,
-      this.topColor,
-      normalizedAmp
-    );
-
-    // Draw ECG curve
-    this.lineCtx.beginPath();
-    this.lineCtx.moveTo(x - 1, this.prevY);
-    this.lineCtx.lineTo(x, y);
-    this.lineCtx.strokeStyle = interpolatedColor;
-    this.lineCtx.lineWidth = this.lineWidth;
-    this.lineCtx.stroke();
-
-    // Optionally fill a pixel in case line gaps happen
-    this.lineCtx.fillStyle = interpolatedColor;
-    this.lineCtx.fillRect(x, y, 1, 1);
-
-    // Draw needle on top canvas
-    this.pointCtx.clearRect(0, 0, this.width, this.height);
-    this.pointCtx.beginPath();
-    this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
-    this.pointCtx.fillStyle = this.topColor;
-    this.pointCtx.shadowBlur = 5;
-    this.pointCtx.shadowColor = this.topColor;
-    this.pointCtx.fill();
-    this.pointCtx.shadowBlur = 0;
-
-    // Save previous point and advance phase
+  if (this.prevY === undefined) {
     this.prevY = y;
-    this.phase += 0.04 * this.freq;
+    this.prevHeartY = heartY;
+    this.prevPhase = this.phase;
   }
+
+  // --- Gradient stroke ---
+  const prevHeartY = this.prevHeartY;
+  const t1 = Math.min(1, Math.abs(prevHeartY) / this.amp);
+  const t2 = Math.min(1, Math.abs(heartY) / this.amp);
+
+  const gradient = this.lineCtx.createLinearGradient(x - 1, this.prevY, x, y);
+  gradient.addColorStop(0, lerpColor(this.bottomColor, this.topColor, t1));
+  gradient.addColorStop(1, lerpColor(this.bottomColor, this.topColor, t2));
+
+  this.lineCtx.beginPath();
+  this.lineCtx.moveTo(x - 1, this.prevY);
+  this.lineCtx.lineTo(x, y);
+  this.lineCtx.strokeStyle = gradient;
+  this.lineCtx.lineWidth = this.lineWidth;
+  this.lineCtx.stroke();
+
+  // Optional: solid pixel to ensure continuity
+  this.lineCtx.fillStyle = lerpColor(this.bottomColor, this.topColor, t2);
+  this.lineCtx.fillRect(x, y, 1, 1);
+
+  // Draw needle on top canvas
+  this.pointCtx.clearRect(0, 0, this.width, this.height);
+  this.pointCtx.beginPath();
+  this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
+  this.pointCtx.fillStyle = this.topColor;
+  this.pointCtx.shadowBlur = 5;
+  this.pointCtx.shadowColor = this.topColor;
+  this.pointCtx.fill();
+  this.pointCtx.shadowBlur = 0;
+
+  // Update previous state
+  this.prevY = y;
+  this.prevHeartY = heartY;
+  this.prevPhase = this.phase;
+
+  // Advance waveform
+  this.phase += 0.04 * this.freq;
+}
+
 
   _getHeartY(phase) {
     const t = phase;

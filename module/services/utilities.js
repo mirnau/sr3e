@@ -1,5 +1,5 @@
 import { cardLayout } from "../svelteStore";
-import { tick } from 'svelte';
+import { tick } from "svelte";
 
 export function localize(key) {
   return game.i18n.localize(key);
@@ -18,8 +18,13 @@ export async function openFilePicker(document) {
   });
 }
 
-
-export function activateTextEditor({ target, content, owner, editable, callback }) {
+export function activateTextEditor({
+  target,
+  content,
+  owner,
+  editable,
+  callback,
+}) {
   if (editable) {
     TextEditor.activateEditor({
       target: target,
@@ -38,23 +43,25 @@ export function activateTextEditor({ target, content, owner, editable, callback 
 }
 
 export function moveCardById(id, direction) {
-  cardLayout.update(cards => {
-    const index = cards.findIndex(c => c.id === id);
+  cardLayout.update((cards) => {
+    const index = cards.findIndex((c) => c.id === id);
     if (index === -1) return cards;
 
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= cards.length) return cards;
 
     const reordered = [...cards];
-    [reordered[index], reordered[newIndex]] = [reordered[newIndex], reordered[index]];
+    [reordered[index], reordered[newIndex]] = [
+      reordered[newIndex],
+      reordered[index],
+    ];
     return reordered;
   });
 }
 
-
 export function toggleCardSpanById(id) {
-  cardLayout.update(cards => {
-    return cards.map(card => {
+  cardLayout.update((cards) => {
+    return cards.map((card) => {
       if (card.id === id) {
         let nextSpan = (card.span ?? 1) + 1;
         if (nextSpan > 3) nextSpan = 1;
@@ -78,7 +85,8 @@ export function getRandomBellCurveWithMode(min, max, mode) {
   }
 
   function randomNormal() {
-    let u = 0, v = 0;
+    let u = 0,
+      v = 0;
     while (u === 0) u = Math.random(); // Ensure u != 0
     while (v === 0) v = Math.random(); // Ensure v != 0
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
@@ -98,32 +106,51 @@ export function getRandomBellCurveWithMode(min, max, mode) {
   return int;
 }
 
-export function lerpColor(color1, color2, t) {
-    const c1 = parseInt(color1.slice(1), 16); // Convert hex to int
-    const c2 = parseInt(color2.slice(1), 16);
+export function lerpColor(hex1, hex2, t) {
+  const parseHex = (hex) => parseInt(hex.slice(1), 16);
 
-    const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
-    const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff;
+  const c1 = parseHex(hex1);
+  const c2 = parseHex(hex2);
 
-    const r = Math.round(r1 + (r2 - r1) * t);
-    const g = Math.round(g1 + (g2 - g1) * t);
-    const b = Math.round(b1 + (b2 - b1) * t);
+  const r1 = (c1 >> 16) & 0xff;
+  const g1 = (c1 >> 8) & 0xff;
+  const b1 = c1 & 0xff;
 
-    return `rgb(${r}, ${g}, ${b})`;
+  const r2 = (c2 >> 16) & 0xff;
+  const g2 = (c2 >> 8) & 0xff;
+  const b2 = c2 & 0xff;
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  const r = Math.round(lerp(r1, r2, t));
+  const g = Math.round(lerp(g1, g2, t));
+  const b = Math.round(lerp(b1, b2, t));
+
+  const toHex = (n) => n.toString(16).padStart(2, "0");
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 export function lerpColorToHexAsString(color1, color2, t) {
-    const c1 = parseInt(color1.slice(1), 16); // Convert hex to int
-    const c2 = parseInt(color2.slice(1), 16);
+  const c1 = parseInt(color1.slice(1), 16); // Convert hex to int
+  const c2 = parseInt(color2.slice(1), 16);
 
-    const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
-    const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff;
+  const r1 = (c1 >> 16) & 0xff,
+    g1 = (c1 >> 8) & 0xff,
+    b1 = c1 & 0xff;
+  const r2 = (c2 >> 16) & 0xff,
+    g2 = (c2 >> 8) & 0xff,
+    b2 = c2 & 0xff;
 
-    const r = Math.round(r1 + (r2 - r1) * t);
-    const g = Math.round(g1 + (g2 - g1) * t);
-    const b = Math.round(b1 + (b2 - b1) * t);
+  const r = Math.round(r1 + (r2 - r1) * t);
+  const g = Math.round(g1 + (g2 - g1) * t);
+  const b = Math.round(b1 + (b2 - b1) * t);
 
-    // Convert interpolated RGB to hex string
-    const toHex = (value) => value.toString(16).padStart(2, '0'); // Ensure 2 digits
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  // Convert interpolated RGB to hex string
+  const toHex = (value) => value.toString(16).padStart(2, "0"); // Ensure 2 digits
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+export function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
