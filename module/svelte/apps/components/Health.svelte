@@ -67,6 +67,8 @@
     $penalty = ecgService?.calculatePenalty($stunArray, $physicalArray);
   });
 
+  let ecg;
+
   onMount(() => {
     ecgService = new ElectroCardiogramService(actor, {
       find: (selector) => {
@@ -74,13 +76,14 @@
         if (selector === "#ecg-point-canvas") return [ecgPointCanvas];
         return [];
       },
+      html: ecg.parentElement,
     });
   });
 </script>
 
 <CardToolbar {id} />
 
-<div class="ecg-container">
+<div bind:this={ecg} class="ecg-container">
   <canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
   <canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
   <div class="left-gradient"></div>

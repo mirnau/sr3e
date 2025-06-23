@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
+var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -7564,11 +7564,10 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-class CardiogramAnimationService {
+class EcgAnimator {
   constructor(lineCanvas, pointCanvas, {
     freq = 1.5,
     amp = 20,
-    color = "lime",
     lineWidth = 2,
     bottomColor = "#00FFFF",
     topColor = "#0000FF"
@@ -7587,7 +7586,6 @@ class CardiogramAnimationService {
     this.phase = 0;
     this.freq = freq;
     this.amp = amp;
-    this.color = color;
     this.lineWidth = lineWidth;
     this._isAnimating = false;
     this._animFrame = null;
@@ -7615,31 +7613,49 @@ class CardiogramAnimationService {
   setBottomColor(color) {
     this.bottomColor = color;
   }
+  updateDimensions(width, height) {
+    this.width = Math.floor(width);
+    this.height = Math.floor(height);
+  }
   _drawEcg() {
     const offsetX = 10;
     const offsetY = 10;
-    const imageData = this.lineCtx.getImageData(1, 0, this.width - 1, this.height);
+    const radius = 4;
+    const x = this.width - offsetX - radius;
+    const imageData = this.lineCtx.getImageData(
+      1,
+      0,
+      this.width - 1,
+      this.height
+    );
     this.lineCtx.clearRect(0, 0, this.width, this.height);
     this.lineCtx.putImageData(imageData, 0, 0);
-    const x = this.width - 1 - offsetX;
     const y = this.height / 2 + offsetY - this._getHeartY(this.phase);
     if (this.prevY === void 0) {
       this.prevY = y;
     }
     const normalizedAmp = (this._getHeartY(this.phase) + this.amp) / (2 * this.amp);
-    const interpolatedColor = lerpColor(this.bottomColor, this.topColor, normalizedAmp);
+    const interpolatedColor = lerpColor(
+      this.bottomColor,
+      this.topColor,
+      normalizedAmp
+    );
     this.lineCtx.beginPath();
     this.lineCtx.moveTo(x - 1, this.prevY);
     this.lineCtx.lineTo(x, y);
     this.lineCtx.strokeStyle = interpolatedColor;
     this.lineCtx.lineWidth = this.lineWidth;
     this.lineCtx.stroke();
+    this.lineCtx.fillStyle = interpolatedColor;
+    this.lineCtx.fillRect(x, y, 1, 1);
     this.pointCtx.clearRect(0, 0, this.width, this.height);
-    const radius = 4;
     this.pointCtx.beginPath();
     this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
     this.pointCtx.fillStyle = this.topColor;
+    this.pointCtx.shadowBlur = 5;
+    this.pointCtx.shadowColor = this.topColor;
     this.pointCtx.fill();
+    this.pointCtx.shadowBlur = 0;
     this.prevY = y;
     this.phase += 0.04 * this.freq;
   }
@@ -7667,7 +7683,7 @@ class CardiogramAnimationService {
   }
 }
 class ElectroCardiogramService {
-  constructor(actor, html2) {
+  constructor(actor, { find, html: html2 }) {
     __privateAdd(this, _ElectroCardiogramService_instances);
     __privateAdd(this, _ecgCanvas);
     __privateAdd(this, _ecgPointCanvas);
@@ -7675,30 +7691,38 @@ class ElectroCardiogramService {
     __privateAdd(this, _ctxPoint);
     __privateAdd(this, _actor);
     __privateAdd(this, _html);
+    __privateAdd(this, _resizeObserver);
     __publicField(this, "ecgAnimator");
+    __privateAdd(this, _isResizing, false);
     __privateSet(this, _actor, actor);
-    __privateSet(this, _html, html2);
-    __privateSet(this, _ecgCanvas, html2.find("#ecg-canvas")[0]);
-    __privateSet(this, _ecgPointCanvas, html2.find("#ecg-point-canvas")[0]);
+    __privateSet(this, _html, { find });
+    __privateSet(this, _ecgCanvas, __privateGet(this, _html).find("#ecg-canvas")[0]);
+    __privateSet(this, _ecgPointCanvas, __privateGet(this, _html).find("#ecg-point-canvas")[0]);
     __privateSet(this, _ctxLine, __privateGet(this, _ecgCanvas).getContext("2d", {
       willReadFrequently: true
     }));
     __privateSet(this, _ctxPoint, __privateGet(this, _ecgPointCanvas).getContext("2d", {
       willReadFrequently: true
     }));
+    __privateSet(this, _resizeObserver, new ResizeObserver((entries) => {
+      if (__privateGet(this, _isResizing)) return;
+      __privateSet(this, _isResizing, true);
+      requestAnimationFrame(() => {
+        __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
+        __privateSet(this, _isResizing, false);
+      });
+    }));
+    console.log(html2);
+    __privateGet(this, _resizeObserver).observe(html2);
     __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
-    __privateGet(this, _ecgCanvas).addEventListener("resize", __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).bind(this));
-    __privateGet(this, _ecgPointCanvas).addEventListener(
-      "resize",
-      __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).bind(this)
-    );
-    this.ecgAnimator = new CardiogramAnimationService(__privateGet(this, _ecgCanvas), __privateGet(this, _ecgPointCanvas), {
+    const highlightColorPrimary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-primary").trim();
+    const highlightColorTertiary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-tertiary").trim();
+    this.ecgAnimator = new EcgAnimator(__privateGet(this, _ecgCanvas), __privateGet(this, _ecgPointCanvas), {
       freq: 2,
       amp: 30,
-      color: "lime",
       lineWidth: 2,
-      bottomColor: "#32CD32",
-      topColor: "#00FFFF"
+      bottomColor: highlightColorPrimary,
+      topColor: highlightColorTertiary
     });
     this.ecgAnimator.start();
   }
@@ -7775,12 +7799,21 @@ _ctxLine = new WeakMap();
 _ctxPoint = new WeakMap();
 _actor = new WeakMap();
 _html = new WeakMap();
+_resizeObserver = new WeakMap();
+_isResizing = new WeakMap();
 _ElectroCardiogramService_instances = new WeakSet();
 resizeCanvas_fn = function() {
+  var _a;
   const wRatio = window.devicePixelRatio;
+  const wasAnimating = (_a = this.ecgAnimator) == null ? void 0 : _a._isAnimating;
+  if (this.ecgAnimator && wasAnimating) {
+    this.ecgAnimator.stop();
+  }
   const resize = (canvas, ctx) => {
-    const width = canvas.offsetWidth * wRatio;
-    const height = canvas.offsetHeight * wRatio;
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    const width = displayWidth * wRatio;
+    const height = displayHeight * wRatio;
     if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
@@ -7790,10 +7823,23 @@ resizeCanvas_fn = function() {
   };
   resize(__privateGet(this, _ecgCanvas), __privateGet(this, _ctxLine));
   resize(__privateGet(this, _ecgPointCanvas), __privateGet(this, _ctxPoint));
+  if (this.ecgAnimator) {
+    this.ecgAnimator.updateDimensions(
+      __privateGet(this, _ecgCanvas).offsetWidth,
+      __privateGet(this, _ecgCanvas).offsetHeight
+    );
+    if (wasAnimating) {
+      setTimeout(() => {
+        this.ecgAnimator.start();
+      }, 10);
+    }
+  }
 };
 setPace_fn = function(freq, amp) {
-  this.ecgAnimator.setFrequency(freq);
-  this.ecgAnimator.setAmplitude(amp);
+  if (this.ecgAnimator) {
+    this.ecgAnimator.setFrequency(freq);
+    this.ecgAnimator.setAmplitude(amp);
+  }
 };
 var root_2$8 = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
 var root_1$e = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
@@ -7838,13 +7884,15 @@ function Health($$anchor, $$props) {
     var _a;
     store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
   });
+  let ecg;
   onMount(() => {
     set(ecgService, proxy(new ElectroCardiogramService(actor(), {
       find: (selector) => {
         if (selector === "#ecg-canvas") return [get$1(ecgCanvas)];
         if (selector === "#ecg-point-canvas") return [get$1(ecgPointCanvas)];
         return [];
-      }
+      },
+      html: ecg.parentElement
     })));
   });
   var fragment = root$n();
@@ -7859,6 +7907,7 @@ function Health($$anchor, $$props) {
   bind_this(canvas, ($$value) => set(ecgCanvas, $$value), () => get$1(ecgCanvas));
   var canvas_1 = sibling(canvas, 2);
   bind_this(canvas_1, ($$value) => set(ecgPointCanvas, $$value), () => get$1(ecgPointCanvas));
+  bind_this(div, ($$value) => ecg = $$value, () => ecg);
   var div_1 = sibling(div, 2);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
