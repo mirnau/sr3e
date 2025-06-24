@@ -6,8 +6,8 @@
   padding: 0;
 
   h4.message-sender {
-    color: var(--user-color);
-    text-shadow: 0 0 1rem var(--user-color), 0 0 0.5rem black;
+    color: var(--author-color);
+    text-shadow: 0 0 1rem var(--author-color), 0 0 0.5rem black;
   }
 
   .chat-message-wrapper {
@@ -15,7 +15,7 @@
 
     .chat-message-dynamic-background {
       z-index: 0;
-      .fake-shadow(var(--user-color));
+      .fake-shadow(var(--author-color));
       .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
     }
 
@@ -23,7 +23,7 @@
       position: relative;
       z-index: 1;
       padding: 0.5rem;
-      background: var(--user-color);
+      background: var(--author-color);
       .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 
       &::before {

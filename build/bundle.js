@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4;
+var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -12110,6 +12110,8 @@ class SR3EActor extends Actor {
     }
     return totalInit;
   }
+  getWoundModifier() {
+  }
   async canAcceptMetahuman(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metahuman");
     if (existing.length > 1) {
@@ -13197,75 +13199,52 @@ class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _app4 = new WeakMap();
+function Print(message = "Combat Service Print Function") {
+  ui.notifications.info(message);
+  console.log(message);
+}
 class SR3ECombat extends foundry.documents.Combat {
-  // 1. Roll custom initiative
-  async rollInitiative(ids, options = {}) {
-    ids = Array.isArray(ids) ? ids : [ids];
-    for (const cid of ids) {
-      const combatant = this.combatants.get(cid);
-      if (!combatant) throw new Error(`Invalid Combatant ID: ${cid}`);
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _SR3ECombat_instances);
+  }
+  async startCombat() {
+    Print("Combat Started");
+    await this._refreshDicePools();
+  }
+  _refreshDicePools() {
+    for (const combatant of this.combatants) {
       const actor = combatant.actor;
-      if (actor == null ? void 0 : actor.rollInitiative) {
-        const initValue = await actor.rollInitiative(options);
-        if (typeof initValue === "number") {
-          await this.setInitiative(cid, initValue);
-        }
-      } else {
-        await super.rollInitiative([cid], options);
-      }
+      if (!actor) continue;
+      actor.getWoundModifier();
     }
   }
-  // 2. Called at the very start of each Combat Turn
-  async _onUpdate(data, options, userId) {
-    await super._onUpdate(data, options, userId);
-    if (data.round != null) {
-      await this.setFlag("sr3e", "pass", 1);
-      await this.refreshAllDicePools();
-    }
+  nextTurn() {
+    throw new NotImplementedError("nextInitiativePass");
   }
-  // 3. Refresh each actor's dice pools once per Combat Turn
-  async refreshAllDicePools() {
-    for (const c of this.combatants) {
-      const actor = c.actor;
-      if (actor == null ? void 0 : actor.refreshDicePools) {
-        await actor.refreshDicePools();
-      }
-    }
-  }
-  // 4. Called at the beginning of each combatant's turn
-  async _onStartTurn(combatant, context = {}) {
-    await super._onStartTurn(combatant, context);
-    let pass = this.getFlag("sr3e", "pass") || 1;
-    const turnId = combatant.id;
-    if (context.passStart && pass > 1) {
-      const newInit = combatant.initiative - 10;
-      await this.setInitiative(turnId, newInit);
-    }
-    if (this._isEndOfPass(turnId)) {
-      await this.advancePassOrTurn();
-    }
-  }
-  _isEndOfPass(currentCombatantId) {
-    const maxInit = Math.max(
-      ...this.combatants.map((c) => c.initiative)
-    );
-    const lastId = this.turns[this.turns.length - 1].id;
-    return currentCombatantId === lastId && maxInit > 0;
-  }
-  // 5. Advance to next pass or next round
-  async advancePassOrTurn() {
-    let pass = this.getFlag("sr3e", "pass") || 1;
-    pass++;
-    await this.setFlag("sr3e", "pass", pass);
-    if (this.combatants.some((c) => c.initiative > 0)) {
-      ui.notifications.info(`Starting initiative pass ${pass}`);
-      await this.setupTurns();
-      await this.nextTurn();
-    } else {
-      await this.nextRound();
-    }
+  nextRound() {
+    throw new NotImplementedError("nextInitiativePass");
   }
 }
+_SR3ECombat_instances = new WeakSet();
+nextInitiativePass_fn = function() {
+  throw new NotImplementedError("nextInitiativePass");
+};
+startNewCombatTurn_fn = function() {
+  throw new NotImplementedError("startNewCombatTurn");
+};
+recordAction_fn = function() {
+  throw new NotImplementedError("recordAction");
+};
+resetCombatantActions_fn = function() {
+  throw new NotImplementedError("resetCombatantActions");
+};
+handleDelayedAction_fn = function() {
+  throw new NotImplementedError("handleDelayedAction");
+};
+handleIntervention_fn = function() {
+  throw new NotImplementedError("handleIntervention");
+};
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -13418,6 +13397,13 @@ function wrapChatMessage(message, html2, context) {
   html2.innerHTML = "";
   html2.appendChild(wrapper);
 }
+function applyAuthorColorToChatMessage(message, html2, context) {
+  var _a;
+  const color = (_a = message.author) == null ? void 0 : _a.color;
+  if (color) {
+    html2.style.setProperty("--author-color", color);
+  }
+}
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
@@ -13491,6 +13477,7 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
+  Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
   Hooks.once(hooks.init, () => {
     configureProject();
     configureThemes();

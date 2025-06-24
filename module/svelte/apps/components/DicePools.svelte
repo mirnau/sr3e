@@ -8,6 +8,10 @@
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
   let dicePools = $state(actor.system.dicePools);
+
+  
+
+
 </script>
 
 <CardToolbar {id} />

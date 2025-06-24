@@ -207,6 +207,13 @@ function wrapChatMessage(message, html, context) {
   html.appendChild(wrapper);
 }
 
+function applyAuthorColorToChatMessage(message, html, context) {
+  const color = message.author?.color;
+  if (color) {
+    html.style.setProperty("--author-color", color);
+  }
+}
+
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     if (element.firstElementChild?.classList.contains("sheet-component"))
@@ -291,6 +298,7 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
 
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
+  Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
 
   Hooks.once(hooks.init, () => {
     configureProject();

@@ -8,6 +8,15 @@
     all: unset;
     text-transform: uppercase;
   }
+  body,
+  p {
+    font-family: unset;
+    font-size: 1rem;
+  }
+  footer {
+    font-family: unset;
+    font-size: 0.8rem;
+  }
   input[type="checkbox"] {
     all: unset;
     box-sizing: border-box;
@@ -1281,8 +1290,8 @@
     padding: 0;
   }
   .chat-message.message h4.message-sender {
-    color: var(--user-color);
-    text-shadow: 0 0 1rem var(--user-color), 0 0 0.5rem black;
+    color: var(--author-color);
+    text-shadow: 0 0 1rem var(--author-color), 0 0 0.5rem black;
   }
   .chat-message.message .chat-message-wrapper {
     padding: 0.5rem;
@@ -1292,7 +1301,7 @@
     position: absolute;
     top: 1.5rem;
     left: 1.5rem;
-    background-color: var(--user-color);
+    background-color: var(--author-color);
     width: calc(100% - 1.5rem);
     height: calc(100% - 1.5rem);
     z-index: -2;
@@ -1303,7 +1312,7 @@
     position: relative;
     z-index: 1;
     padding: 0.5rem;
-    background: var(--user-color);
+    background: var(--author-color);
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   .chat-message.message .chat-message-wrapper .chat-message-dynamic::before {
