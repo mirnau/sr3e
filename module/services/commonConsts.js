@@ -10,7 +10,8 @@ export const hooks = {
   createActor: "createActor",
   init: "init",
   ready: "ready",
-  renderApplicationV2: "renderApplicationV2"
+  renderApplicationV2: "renderApplicationV2",
+  renderChatMessageHTML: "renderChatMessageHTML"
 };
 
 export const flags = {

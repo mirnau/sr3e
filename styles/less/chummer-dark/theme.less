@@ -6,16 +6,36 @@
 :root {
   --component-width: 17rem;
   --component-grid-gap: 0.25rem;
-  --background-color: linear-gradient(35deg,
-  #1a1a1a, // Deep blackened steel
-  #2f2f2f 35%, // Mid-tone gunmetal
-  #4d4d4d 65%, // Brushed metallic edge
-  #3b3b3b 90%, // Slight cool gray tint
-  #1e1e1e // Back to dark shadow
+  --background-color: linear-gradient(
+    35deg,
+    #1a1a1a,
+    // Deep blackened steel
+    #2f2f2f 35%,
+    // Mid-tone gunmetal
+    #4d4d4d 65%,
+    // Brushed metallic edge
+    #3b3b3b 90%,
+    // Slight cool gray tint
+    #1e1e1e // Back to dark shadow
   );
+
+  --background-with-image: radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 90%
+    ),
+    linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.4) 30%,
+      rgba(0, 0, 0, 0.4) 70%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
+
   --highlight-color-primary: #11e6bf; // Pink for highlights
   --highlight-color-secondary: #16a48d; // Pink for highlights
-  --highlight-color-tertiary: #ff0000; ; // Pink for highlights
+  --highlight-color-tertiary: #ff0000; // Pink for highlights
 }
 // Foundry system scoped overrides //
 * {
@@ -25,8 +45,6 @@
 @highlight-color-secondary: #ff0095; // Pink for highlights
 
 //var(--highlight-color-primary);: #1df0ff; // Pink for highlights
-
-
 
 @primary-color: #1b1f24; // Dark background
 @secondary-color: #003856; // Soft green
@@ -42,12 +60,12 @@
 
 @primary-fake-shadow: @accent-color;
 
-@chummer-dark-fallback: repeating-linear-gradient(0deg,
-    rgba(81, 106, 134, 0.6) 1px,
-    rgba(57, 77, 100, 0.6) 5px,
-    rgba(31, 44, 66, 0.6) 2px,
-  );
-
+@chummer-dark-fallback: repeating-linear-gradient(
+  0deg,
+  rgba(81, 106, 134, 0.6) 1px,
+  rgba(57, 77, 100, 0.6) 5px,
+  rgba(31, 44, 66, 0.6) 2px
+);
 
 //Main Window Background
 @appwindow-background: none; //Makes the entire app transparent
@@ -61,10 +79,10 @@
 @default-fake-shadow-color: @primary-fake-shadow;
 @default-sheet-border-color: @accent-color;
 
-//Default Input element 
+//Default Input element
 @input-background: #1c364b;
 
-//Attribute Sheet Component 
+//Attribute Sheet Component
 
 //Character Attribute Stat Card
 @attribute-stat-card-color: @chummer-dark-fallback;
@@ -90,7 +108,6 @@
 //language skill-card
 @language-card-background: @chummer-dark-fallback;
 
-
 //Character Tabs
 @tab-idle: @chummer-dark-fallback;
 @tab-active: @chummer-dark-fallback;
@@ -99,7 +116,6 @@
 @tab-neon-border-active: inset 0 0 15px @highlight-color-tertiary;
 @active-tab-font-color: @highlight-color-tertiary;
 @active-tab-text-shadow: @active-tab-font-color;
-
 
 //Metahuman fake shadow
 //Meta Human Item StatCard
@@ -118,13 +134,12 @@
 
 @option-background: @accent-color;
 
-
 //Attribute Point Pulse Colors
 @attribute-pulse-primary: magenta;
 @attribute-pulse-secondary: blueViolet;
 
 //Shopping-Cart Pulse Colors
-@shopping-cart-primary: #00FC00C0;
+@shopping-cart-primary: #00fc00c0;
 @shopping-cart-secondary: var(--highlight-color-primary);
 
 //Fake Bloom

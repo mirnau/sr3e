@@ -3,6 +3,7 @@
   --component-width: 17rem;
   --component-grid-gap: 0.25rem;
   --background-color: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+  --background-with-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 90%), linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 100%), url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
   --highlight-color-primary: #11e6bf;
   --highlight-color-secondary: #16a48d;
   --highlight-color-tertiary: #ff0000;

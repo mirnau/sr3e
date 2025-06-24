@@ -5378,7 +5378,8 @@ const hooks = {
   preCreateActor: "preCreateActor",
   createActor: "createActor",
   init: "init",
-  renderApplicationV2: "renderApplicationV2"
+  renderApplicationV2: "renderApplicationV2",
+  renderChatMessageHTML: "renderChatMessageHTML"
 };
 const flags = {
   sr3e: "sr3e",
@@ -13197,9 +13198,7 @@ class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 }
 _app4 = new WeakMap();
 class SR3ECombat extends foundry.documents.Combat {
-  /**
-   * Override rollInitiative to call Actor.rollInitiative globally
-   */
+  // 1. Roll custom initiative
   async rollInitiative(ids, options = {}) {
     ids = Array.isArray(ids) ? ids : [ids];
     for (const cid of ids) {
@@ -13207,13 +13206,63 @@ class SR3ECombat extends foundry.documents.Combat {
       if (!combatant) throw new Error(`Invalid Combatant ID: ${cid}`);
       const actor = combatant.actor;
       if (actor == null ? void 0 : actor.rollInitiative) {
-        const initiativeValue = await actor.rollInitiative(options);
-        if (typeof initiativeValue === "number") {
-          await this.setInitiative(cid, initiativeValue);
+        const initValue = await actor.rollInitiative(options);
+        if (typeof initValue === "number") {
+          await this.setInitiative(cid, initValue);
         }
       } else {
         await super.rollInitiative([cid], options);
       }
+    }
+  }
+  // 2. Called at the very start of each Combat Turn
+  async _onUpdate(data, options, userId) {
+    await super._onUpdate(data, options, userId);
+    if (data.round != null) {
+      await this.setFlag("sr3e", "pass", 1);
+      await this.refreshAllDicePools();
+    }
+  }
+  // 3. Refresh each actor's dice pools once per Combat Turn
+  async refreshAllDicePools() {
+    for (const c of this.combatants) {
+      const actor = c.actor;
+      if (actor == null ? void 0 : actor.refreshDicePools) {
+        await actor.refreshDicePools();
+      }
+    }
+  }
+  // 4. Called at the beginning of each combatant's turn
+  async _onStartTurn(combatant, context = {}) {
+    await super._onStartTurn(combatant, context);
+    let pass = this.getFlag("sr3e", "pass") || 1;
+    const turnId = combatant.id;
+    if (context.passStart && pass > 1) {
+      const newInit = combatant.initiative - 10;
+      await this.setInitiative(turnId, newInit);
+    }
+    if (this._isEndOfPass(turnId)) {
+      await this.advancePassOrTurn();
+    }
+  }
+  _isEndOfPass(currentCombatantId) {
+    const maxInit = Math.max(
+      ...this.combatants.map((c) => c.initiative)
+    );
+    const lastId = this.turns[this.turns.length - 1].id;
+    return currentCombatantId === lastId && maxInit > 0;
+  }
+  // 5. Advance to next pass or next round
+  async advancePassOrTurn() {
+    let pass = this.getFlag("sr3e", "pass") || 1;
+    pass++;
+    await this.setFlag("sr3e", "pass", pass);
+    if (this.combatants.some((c) => c.initiative > 0)) {
+      ui.notifications.info(`Starting initiative pass ${pass}`);
+      await this.setupTurns();
+      await this.nextTurn();
+    } else {
+      await this.nextRound();
     }
   }
 }
@@ -13356,6 +13405,19 @@ function debugFlagsOnActor(actor, options, userId) {
   }
   console.groupEnd();
 }
+function wrapChatMessage(message, html2, context) {
+  const wrapper = document.createElement("div");
+  const dynamicBackground = document.createElement("div");
+  const dynamicMessage = document.createElement("div");
+  wrapper.classList.add("chat-message-wrapper");
+  dynamicBackground.classList.add("chat-message-dynamic-background");
+  dynamicMessage.classList.add("chat-message-dynamic");
+  dynamicMessage.append(...html2.childNodes);
+  wrapper.append(dynamicBackground);
+  wrapper.append(dynamicMessage);
+  html2.innerHTML = "";
+  html2.appendChild(wrapper);
+}
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
@@ -13428,6 +13490,7 @@ function registerHooks() {
   Hooks.on(hooks.createActor, displayCreationDialog);
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
+  Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
   Hooks.once(hooks.init, () => {
     configureProject();
     configureThemes();

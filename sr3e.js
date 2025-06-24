@@ -189,6 +189,24 @@ function debugFlagsOnActor(actor, options, userId) {
   console.groupEnd();
 }
 
+function wrapChatMessage(message, html, context) {
+  const wrapper = document.createElement("div");
+  const dynamicBackground = document.createElement("div");
+  const dynamicMessage = document.createElement("div");
+
+  wrapper.classList.add("chat-message-wrapper");
+  dynamicBackground.classList.add("chat-message-dynamic-background");
+  dynamicMessage.classList.add("chat-message-dynamic");
+
+  dynamicMessage.append(...html.childNodes);
+
+  wrapper.append(dynamicBackground);
+  wrapper.append(dynamicMessage);
+
+  html.innerHTML = "";
+  html.appendChild(wrapper);
+}
+
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     if (element.firstElementChild?.classList.contains("sheet-component"))
@@ -271,6 +289,8 @@ function registerHooks() {
   //INFO: Fancy Decorations
   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
+
+  Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
 
   Hooks.once(hooks.init, () => {
     configureProject();

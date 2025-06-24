@@ -18,7 +18,6 @@
   /*
 @import "./styling/skinning/sr3e-select.less";
 @import "./styling/skinning/sr3e-common.less";
-@import "./styling/skinning/sr3e-textarea.less";
 @import "./styling/skinning/sr3e-form.less";
 @import "./styling/skinning/sr3e-table.less";
 @import "./styling/skinning/sr3e-playerconfig.less";
@@ -32,6 +31,7 @@
     --component-width: 17rem;
     --component-grid-gap: 0.25rem;
     --background-color: linear-gradient(35deg, #1a1a1a, #2f2f2f 35%, #4d4d4d 65%, #3b3b3b 90%, #1e1e1e);
+    --background-with-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 90%), linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 100%), url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
     --highlight-color-primary: #11e6bf;
     --highlight-color-secondary: #16a48d;
     --highlight-color-tertiary: #ff0000;
@@ -1271,6 +1271,84 @@
   menu.controls-dropdown.expanded {
     z-index: 999;
   }
+  .chat-message.message {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border-radius: 0rem;
+    margin: 0;
+    padding: 0;
+  }
+  .chat-message.message h4.message-sender {
+    color: var(--user-color);
+    text-shadow: 0 0 1rem var(--user-color), 0 0 0.5rem black;
+  }
+  .chat-message.message .chat-message-wrapper {
+    padding: 0.5rem;
+  }
+  .chat-message.message .chat-message-wrapper .chat-message-dynamic-background {
+    z-index: 0;
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    background-color: var(--user-color);
+    width: calc(100% - 1.5rem);
+    height: calc(100% - 1.5rem);
+    z-index: -2;
+    filter: blur(20px);
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .chat-message.message .chat-message-wrapper .chat-message-dynamic {
+    position: relative;
+    z-index: 1;
+    padding: 0.5rem;
+    background: var(--user-color);
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .chat-message.message .chat-message-wrapper .chat-message-dynamic::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 1px;
+    left: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    background: var(--background-with-image);
+    background-blend-mode: multiply, multiply, overlay;
+    background-repeat: repeat;
+    background-size: 200;
+    box-shadow: inset 0 0 30px black;
+    pointer-events: none;
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  textarea#chat-message {
+    font-family: 'VT323', monospace;
+    margin: 0.33rem 0;
+    line-height: 1rem;
+    color: var(--h1-color);
+    color: var(--user-color);
+    margin: 0rem;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem;
+    background: var(--background-color);
+    border-radius: 0rem;
+    outline: none;
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  textarea#chat-message:focus {
+    outline: none;
+    box-shadow: 0 0 0.5rem #ff0095, inset 0 0 2rem var(--user-color);
+  }
+  textarea#chat-message:hover {
+    outline: none;
+    box-shadow: inset 0 0 2rem var(--user-color);
+  }
+  textarea#chat-message:active {
+    box-shadow: inset 0 0 3rem var(--user-color);
+  }
   .sr3e-tabs {
     display: flex;
     flex-direction: row;
@@ -1484,7 +1562,7 @@
     0%,
     100% {
       transform: scale(0.98);
-      color: #00FC00C0;
+      color: #00fc00c0;
       text-shadow: none;
     }
     50% {
@@ -2444,7 +2522,7 @@
     inset: 1px;
     z-index: -1;
     pointer-events: none;
-    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 90%), linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 100%), url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
+    background: var(--background-with-image);
     background-blend-mode: multiply, multiply, overlay;
     background-repeat: repeat;
     background-size: 200;
