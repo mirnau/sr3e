@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
+var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _documentStore, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3525,14 +3525,14 @@ var on_keydown$9 = (e) => {
 };
 var on_click_1$3 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$K = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$K();
+  var div = root$J();
   div.__click = [on_click$7];
   div.__keydown = [on_keydown$9];
   var button = child(div);
@@ -3546,9 +3546,7 @@ function CardToolbar($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 const actorStores = {};
-const stores = {
-  intelligence: "intelligence",
-  attributePoints: "attributePoints",
+const stores$1 = {
   activePoints: "activePoints",
   knowledgePoints: "knowledgePoints",
   languagePoints: "languagePoints",
@@ -3559,7 +3557,6 @@ const stores = {
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
   isCharacterCreation: "isCharacterCreation",
-  initiativeDice: "initiativeDice",
   combat: {
     stunDamage: "stunDamage",
     leathalDamage: "leathalDamage",
@@ -3567,7 +3564,7 @@ const stores = {
     overflow: "overflow"
   }
 };
-function getActorStore(actorId, storeName, customValue = null) {
+function getActorStore$1(actorId, storeName, customValue = null) {
   actorStores[actorId] ?? (actorStores[actorId] = {});
   if (!actorStores[actorId][storeName]) {
     let value = customValue;
@@ -3581,7 +3578,7 @@ function getActorStore(actorId, storeName, customValue = null) {
 async function handleClick(_, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$J = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$I = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3592,7 +3589,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$J();
+  var div = root$I();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3606,8 +3603,8 @@ function Image($$anchor, $$props) {
 delegate(["click"]);
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var on_input$2 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$b = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$I = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$a = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root$H = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3616,8 +3613,8 @@ function Dossier($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let system = proxy(actor().system);
-  let actorNameStore = getActorStore(actor().id, stores.actorName, actor().name);
-  let isDetailsOpenStore = getActorStore(actor().id, "isDetailsOpen", actor().system.profile.isDetailsOpen ?? false);
+  let actorNameStore = getActorStore$1(actor().id, stores$1.actorName, actor().name);
+  let isDetailsOpenStore = getActorStore$1(actor().id, "isDetailsOpen", actor().system.profile.isDetailsOpen ?? false);
   let actorName = state(proxy($actorNameStore()));
   let isDetailsOpen = state(proxy($isDetailsOpenStore()));
   let imgPath = state("");
@@ -3661,7 +3658,7 @@ function Dossier($$anchor, $$props) {
     set(actorName, proxy(newName));
     actorNameStore.set(newName);
   }
-  var fragment = root$I();
+  var fragment = root$H();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3701,7 +3698,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$b();
+      var fragment_3 = root_3$a();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -3816,6 +3813,206 @@ function Dossier($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown", "input"]);
+const hooks = {
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  renderApplicationV2: "renderApplicationV2",
+  renderChatMessageHTML: "renderChatMessageHTML"
+};
+const flags = {
+  sr3e: "sr3e",
+  core: "core",
+  actor: {
+    isCharacterCreation: "isCharacterCreation",
+    isShoppingState: "isShoppingState",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut",
+    attributeAssignmentLocked: "attributeAssignmentLocked",
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
+  }
+};
+const masonryMinWidthFallbackValue = {
+  skillGrid: 4.5
+};
+const inventory = {
+  arsenal: "arsenal",
+  garage: "garage"
+};
+var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var root_1$n = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root$G = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+function AttributeCardCreationState($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $value = () => store_get(value, "$value", $$stores);
+  const $mod = () => store_get(mod, "$mod", $$stores);
+  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const attributePointStore = $$props.actor.getStore("creation.attributePoints");
+  let value = $$props.actor.getStore(`attributes.${$$props.key}.value`);
+  let mod = $$props.actor.getStore(`attributes.${$$props.key}.mod`);
+  let total = /* @__PURE__ */ derived(() => {
+    var _a;
+    return $value() + $mod() + (((_a = $$props.stat) == null ? void 0 : _a.meta) ?? 0);
+  });
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let metaHuman = /* @__PURE__ */ derived(() => {
+    var _a;
+    return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metahuman") : null;
+  });
+  let attributeLimit = /* @__PURE__ */ derived(() => {
+    var _a, _b, _c;
+    return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$1(metaHuman)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
+  });
+  let isMinLimit = /* @__PURE__ */ derived(() => $value() <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
+  function add(change) {
+    if (!$attributeAssignmentLocked()) {
+      const newPoints = $attributePointStore() - change;
+      if (newPoints < 0) return;
+      store_set(value, $value() + change);
+      store_set(attributePointStore, newPoints);
+    }
+  }
+  const increment2 = () => {
+    if (!get$1(isMaxLimit)) add(1);
+  };
+  const decrement2 = () => {
+    if (!get$1(isMinLimit)) add(-1);
+  };
+  var div = root$G();
+  var h4 = child(div);
+  var text2 = child(h4);
+  var div_1 = sibling(h4, 4);
+  var node = child(div_1);
+  {
+    var consequent = ($$anchor2) => {
+      var i_1 = root_1$n();
+      i_1.__click = decrement2;
+      i_1.__keydown = [on_keydown$7, decrement2];
+      template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+      append($$anchor2, i_1);
+    };
+    if_block(node, ($$render) => {
+      if ("meta" in $$props.stat) $$render(consequent);
+    });
+  }
+  var h1 = sibling(node, 2);
+  var text_1 = child(h1);
+  var node_1 = sibling(h1, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var i_2 = root_2$e();
+      i_2.__click = increment2;
+      i_2.__keydown = [on_keydown_1$2, increment2];
+      template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+      append($$anchor2, i_2);
+    };
+    if_block(node_1, ($$render) => {
+      if ("meta" in $$props.stat) $$render(consequent_1);
+    });
+  }
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, get$1(total));
+    },
+    [
+      () => localize($$props.localization[$$props.key])
+    ]
+  );
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
+var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var root_1$m = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_2$d = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root$F = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+function AttributeCardKarmaState($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $value = () => store_get(value, "$value", $$stores);
+  const $mod = () => store_get(mod, "$mod", $$stores);
+  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const attributePointStore = $$props.actor.getStore("creation.attributePoints");
+  let value = $$props.actor.getStore(`attributes.${$$props.key}.value`);
+  let mod = $$props.actor.getStore(`attributes.${$$props.key}.mod`);
+  let total = /* @__PURE__ */ derived(() => {
+    var _a;
+    return $value() + $mod() + (((_a = $$props.stat) == null ? void 0 : _a.meta) ?? 0);
+  });
+  getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let metaHuman = /* @__PURE__ */ derived(() => {
+    var _a;
+    return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metahuman") : null;
+  });
+  let attributeLimit = /* @__PURE__ */ derived(() => {
+    var _a, _b, _c;
+    return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$1(metaHuman)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
+  });
+  let isMinLimit = /* @__PURE__ */ derived(() => $value() <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
+  function add(change) {
+    ui.notifications.warn("This function is not implemented yet. Please check the console for more details.");
+  }
+  const increment2 = () => {
+    if (!get$1(isMaxLimit)) add();
+  };
+  const decrement2 = () => {
+    if (!get$1(isMinLimit)) add();
+  };
+  var div = root$F();
+  var h4 = child(div);
+  var text2 = child(h4);
+  var div_1 = sibling(h4, 4);
+  var node = child(div_1);
+  {
+    var consequent = ($$anchor2) => {
+      var i_1 = root_1$m();
+      i_1.__click = decrement2;
+      i_1.__keydown = [on_keydown$6, decrement2];
+      template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+      append($$anchor2, i_1);
+    };
+    if_block(node, ($$render) => {
+      if ("meta" in $$props.stat) $$render(consequent);
+    });
+  }
+  var h1 = sibling(node, 2);
+  var text_1 = child(h1);
+  var node_1 = sibling(h1, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var i_2 = root_2$d();
+      i_2.__click = increment2;
+      i_2.__keydown = [on_keydown_1$1, increment2];
+      template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+      append($$anchor2, i_2);
+    };
+    if_block(node_1, ($$render) => {
+      if ("meta" in $$props.stat) $$render(consequent_1);
+    });
+  }
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      set_text(text_1, get$1(total));
+    },
+    [
+      () => localize($$props.localization[$$props.key])
+    ]
+  );
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -5374,42 +5571,16 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-const hooks = {
-  preCreateActor: "preCreateActor",
-  createActor: "createActor",
-  init: "init",
-  renderApplicationV2: "renderApplicationV2",
-  renderChatMessageHTML: "renderChatMessageHTML"
-};
-const flags = {
-  sr3e: "sr3e",
-  core: "core",
-  actor: {
-    isCharacterCreation: "isCharacterCreation",
-    isShoppingState: "isShoppingState",
-    hasAwakened: "hasAwakened",
-    burntOut: "burntOut",
-    attributeAssignmentLocked: "attributeAssignmentLocked",
-    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
-  }
-};
-const masonryMinWidthFallbackValue = {
-  skillGrid: 4.5
-};
-const inventory = {
-  arsenal: "arsenal",
-  garage: "garage"
-};
-var root_1$n = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
-var root_3$a = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$H = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+var root_1$l = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$E = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  var div = root$H();
+  var div = root$E();
   var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
-      var h4 = root_1$n();
+      var h4 = root_1$l();
       var text2 = child(h4);
       template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
       append($$anchor2, h4);
@@ -5428,7 +5599,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var h1 = root_3$a();
+      var h1 = root_3$9();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, $$props.value));
       append($$anchor2, h1);
@@ -5441,7 +5612,7 @@ function StatCard$1($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$G = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+var root$D = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
   let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
@@ -5464,7 +5635,7 @@ function MasonryGrid($$anchor, $$props) {
   user_effect(async () => {
     gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
-  var div = root$G();
+  var div = root$D();
   var div_1 = child(div);
   var div_2 = sibling(div_1, 2);
   var node = sibling(div_2, 2);
@@ -5481,301 +5652,37 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$m = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
-var root$F = /* @__PURE__ */ template(`<h1> </h1> <!>`, 1);
-function Initiative($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $augmentedReaction = () => store_get(augmentedReaction, "$augmentedReaction", $$stores);
-  const $initiativeDice = () => store_get(initiativeDice, "$initiativeDice", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let initiativeDice = getActorStore(actor().id, stores.initiativeDice, 1);
-  let augmentedReaction = getActorStore(actor().id, stores.augmentedReaction, 0);
-  let attributes = proxy(actor().system.attributes);
-  let intelligenceBaseTotal = /* @__PURE__ */ derived(() => attributes.intelligence.value + attributes.intelligence.mod);
-  let intelligence = /* @__PURE__ */ derived(() => get$1(intelligenceBaseTotal) + (attributes.intelligence.meta ?? 0));
-  let quicknessBaseTotal = /* @__PURE__ */ derived(() => attributes.quickness.value + attributes.quickness.mod);
-  let quickness = /* @__PURE__ */ derived(() => get$1(quicknessBaseTotal) + (attributes.quickness.meta ?? 0));
-  let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness) * 0.5));
-  user_effect(() => {
-    store_set(augmentedReaction, proxy(get$1(reaction)));
-  });
-  store_set(initiativeDice, 1);
-  var fragment = root$F();
-  var h1 = first_child(fragment);
-  var text2 = child(h1);
-  var node = sibling(h1, 2);
-  MasonryGrid(node, {
-    itemSelector: "stat-card",
-    gridPrefix: "attribute",
-    children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$m();
-      var node_1 = first_child(fragment_1);
-      StatCard$1(node_1, {
-        get label() {
-          return config().initiative.initiativeDice;
-        },
-        get value() {
-          return $initiativeDice();
-        }
-      });
-      var node_2 = sibling(node_1, 2);
-      StatCard$1(node_2, {
-        get label() {
-          return config().initiative.reaction;
-        },
-        get value() {
-          return get$1(reaction);
-        }
-      });
-      var node_3 = sibling(node_2, 2);
-      StatCard$1(node_3, {
-        get label() {
-          return config().initiative.augmentedReaction;
-        },
-        get value() {
-          return $augmentedReaction();
-        }
-      });
-      append($$anchor2, fragment_1);
-    },
-    $$slots: { default: true }
-  });
-  template_effect(($0) => set_text(text2, $0), [
-    () => localize(config().initiative.initiative)
-  ]);
-  append($$anchor, fragment);
-  pop();
-  $$cleanup();
-}
-var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_1$l = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
-var root_2$e = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$E = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <!></div>`);
-function AttributeCardCreationState($$anchor, $$props) {
-  var _a, _b;
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  let stat = prop($$props, "stat", 7);
-  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
-  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
-  let total = /* @__PURE__ */ derived(() => {
-    var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
-  });
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, $$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
-  let metaHuman = /* @__PURE__ */ derived(() => (() => {
-    var _a2;
-    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
-    return $$props.actor.items.find((i) => i.type === "metahuman");
-  })());
-  let attributeLimit = /* @__PURE__ */ derived(() => {
-    var _a2, _b2, _c;
-    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
-  });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
-  function add(change) {
-    if (!$attributeAssignmentLocked()) {
-      const newPoints = $attributePointStore() + change * -1;
-      if (newPoints < 0) return;
-      stat().value += change;
-      store_set(attributePointStore, newPoints);
-      $$props.actor.update(
-        {
-          [`system.attributes.${$$props.key}.value`]: stat().value,
-          "system.creation.attributePoints": $attributePointStore()
-        },
-        { render: false }
-      );
-      if ($$props.key === "intelligence") store_set(intelligenceStore, proxy(stat().value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta));
-    } else {
-      console.warn("There is an error in charactercreation");
-    }
-  }
-  const increment2 = () => {
-    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
-      add(1);
-    }
-  };
-  const decrement2 = () => {
-    if (get$1(isMinLimit)) return;
-    if (get$1(total) > 0) add(-1);
-  };
-  user_effect(() => {
-    if (stat()) {
-      set(value, proxy(stat().value));
-      set(mod, proxy(stat().mod));
-    }
-  });
-  var div = root$E();
-  var h4 = child(div);
-  var text2 = child(h4);
-  var node = sibling(h4, 4);
-  {
-    var consequent = ($$anchor2) => {
-      var div_1 = root_1$l();
-      var i_1 = child(div_1);
-      i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$7, decrement2];
-      var h1 = sibling(i_1, 2);
-      var text_1 = child(h1);
-      var i_2 = sibling(h1, 2);
-      i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$2, increment2];
-      template_effect(() => {
-        set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
-        set_text(text_1, get$1(total));
-        set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
-      });
-      append($$anchor2, div_1);
-    };
-    var alternate = ($$anchor2) => {
-      var h1_1 = root_2$e();
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, h1_1);
-    };
-    if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  template_effect(($0) => set_text(text2, $0), [
-    () => localize($$props.localization[$$props.key])
-  ]);
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
-var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$d = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$9 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$k = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root_4$7 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$D = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin uppercase"> </h4> <!></div>`);
-function AttributeCardKarmaState($$anchor, $$props) {
-  var _a, _b;
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  let stat = prop($$props, "stat", 7);
-  let isShoppingState = getActorStore($$props.actor.id, stores.isShoppingState, $$props.actor.getFlag(flags.sr3e, flags.isShoppingState));
-  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
-  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
-  let total = /* @__PURE__ */ derived(() => {
-    var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
-  });
-  getActorStore($$props.actor.id, stores.intelligence);
-  let metaHuman = /* @__PURE__ */ derived(() => (() => {
-    var _a2;
-    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
-    return $$props.actor.items.find((i) => i.type === "metahuman");
-  })());
-  let attributeLimit = /* @__PURE__ */ derived(() => {
-    var _a2, _b2, _c;
-    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
-  });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
-  function add(change) {
-    console.warn("TODO: Implement karma shopping");
-    return;
-  }
-  const increment2 = () => {
-    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
-      add();
-    }
-  };
-  const decrement2 = () => {
-    if (get$1(isMinLimit)) return;
-    if (get$1(total) > 0) add();
-  };
-  user_effect(() => {
-    if (stat()) {
-      set(value, proxy(stat().value));
-      set(mod, proxy(stat().mod));
-    }
-  });
-  var div = root$D();
-  var h4 = sibling(child(div), 2);
-  var text2 = child(h4);
-  var node = sibling(h4, 2);
-  {
-    var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$k();
-      var node_1 = child(div_1);
-      {
-        var consequent = ($$anchor3) => {
-          var i_1 = root_2$d();
-          i_1.__click = decrement2;
-          i_1.__keydown = [on_keydown$6, decrement2];
-          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_1);
-        };
-        if_block(node_1, ($$render) => {
-          if ($isShoppingState()) $$render(consequent);
-        });
-      }
-      var h1 = sibling(node_1, 2);
-      var text_1 = child(h1);
-      var node_2 = sibling(h1, 2);
-      {
-        var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$9();
-          i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1$1, increment2];
-          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_2);
-        };
-        if_block(node_2, ($$render) => {
-          if ($isShoppingState()) $$render(consequent_1);
-        });
-      }
-      template_effect(() => set_text(text_1, get$1(total)));
-      append($$anchor2, div_1);
-    };
-    var alternate = ($$anchor2) => {
-      var h1_1 = root_4$7();
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, h1_1);
-    };
-    if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent_2);
-      else $$render(alternate, false);
-    });
-  }
-  template_effect(($0) => set_text(text2, $0), [
-    () => localize($$props.localization[$$props.key])
-  ]);
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
+var root_1$k = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
 var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $intelligencevalue = () => store_get(intelligencevalue, "$intelligencevalue", $$stores);
+  const $intelligenceMod = () => store_get(intelligenceMod, "$intelligenceMod", $$stores);
+  const $intelligenceMeta = () => store_get(intelligenceMeta, "$intelligenceMeta", $$stores);
+  const $quicknessValue = () => store_get(quicknessValue, "$quicknessValue", $$stores);
+  const $quicknessMod = () => store_get(quicknessMod, "$quicknessMod", $$stores);
+  const $quicknessMeta = () => store_get(quicknessMeta, "$quicknessMeta", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
   let localization = config().attributes;
-  let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.attributeAssignmentLocked));
+  let attributeAssignmentLocked = getActorStore$1(actor().id, stores$1.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.attributeAssignmentLocked));
+  let intelligenceMod = actor().getStore("attributes.intelligence.mod");
+  let intelligenceMeta = actor().getStore("attributes.intelligence.meta");
+  let intelligencevalue = actor().getStore("attributes.intelligence.value");
+  let quicknessMod = actor().getStore("attributes.quickness.mod");
+  let quicknessMeta = actor().getStore("attributes.quickness.meta");
+  let quicknessValue = actor().getStore("attributes.quickness.value");
+  let intelligence = /* @__PURE__ */ derived(() => $intelligencevalue() + $intelligenceMod() + $intelligenceMeta());
+  let quickness = /* @__PURE__ */ derived(() => $quicknessValue() + $quicknessMod() + $quicknessMeta());
+  let reaction = /* @__PURE__ */ derived(() => Math.floor((get$1(intelligence) + get$1(quickness)) * 0.5));
+  let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction) + getTotalModifiersFromItems());
+  function getTotalModifiersFromItems() {
+    ui.notifications.warn("This function is not implemented yet. Please check the console for more details.");
+    return 0;
+  }
   var fragment = root$C();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5790,7 +5697,7 @@ function Attributes($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = comment();
+      var fragment_1 = root_1$k();
       var node_2 = first_child(fragment_1);
       each(node_2, 17, () => Object.entries(attributes), index, ($$anchor3, $$item) => {
         let key = () => get$1($$item)[0];
@@ -5832,6 +5739,24 @@ function Attributes($$anchor, $$props) {
           });
         }
         append($$anchor3, fragment_2);
+      });
+      var node_4 = sibling(node_2, 2);
+      StatCard$1(node_4, {
+        get label() {
+          return config().initiative.reaction;
+        },
+        get value() {
+          return get$1(reaction);
+        }
+      });
+      var node_5 = sibling(node_4, 2);
+      StatCard$1(node_5, {
+        get label() {
+          return config().initiative.augmentedReaction;
+        },
+        get value() {
+          return get$1(augmentedReaction);
+        }
       });
       append($$anchor2, fragment_1);
     },
@@ -5961,7 +5886,7 @@ function SpecializationCard($$anchor, $$props) {
   const dispatch = createEventDispatcher();
   let isCharacterCreation = proxy(actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation) ?? false);
   let liveText = specialization().name;
-  let baseValue = getActorStore(actor().id, skill().id, skill().system.activeSkill.value);
+  let baseValue = getActorStore$1(actor().id, skill().id, skill().system.activeSkill.value);
   user_effect(() => {
     if (isCharacterCreation) {
       if (specialization().value === 0) {
@@ -6226,7 +6151,7 @@ async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreat
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.activeSkillsIds);
+      const store = getActorStore$1($$props.actor.id, stores$1.activeSkillsIds);
       const current = get(store);
       store.set(current.filter((sid) => sid !== id));
     }
@@ -6250,9 +6175,9 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   onDestroy(() => {
     karmaShoppingService = null;
   });
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
-  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
-  getActorStore($$props.actor.id, stores.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
+  let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
+  let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  getActorStore$1($$props.actor.id, stores$1.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
   let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
@@ -6263,11 +6188,11 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     );
   });
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
+  let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
   let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, $$props.actor.system.creation.activePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.activePoints, $$props.actor.system.creation.activePoints);
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   async function increment2() {
     if ($attributeAssignmentLocked()) {
       if ($isCharacterCreation()) {
@@ -6516,7 +6441,7 @@ async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreat
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.knowledgeSkillsIds);
+      const store = getActorStore$1($$props.actor.id, stores$1.knowledgeSkillsIds);
       const current = get(store);
       store.set(current.filter((sid) => sid !== id));
     }
@@ -6533,9 +6458,9 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
-  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
-  getActorStore($$props.actor.id, stores.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
+  let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
+  let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  getActorStore$1($$props.actor.id, stores$1.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
   let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
@@ -6546,11 +6471,11 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     );
   });
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
+  let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
   let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.knowledgePoints, $$props.actor.system.creation.knowledgePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.knowledgePoints, $$props.actor.system.creation.knowledgePoints);
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   async function silentUpdate() {
     await $$props.skill.update({ "system.knowledgeSkill.value": $value() }, { render: false });
     await $$props.actor.update(
@@ -6790,7 +6715,7 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
     await tick();
     const id = $$props.skill.id;
     await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-    const store = getActorStore($$props.actor.id, stores.languageSkillsIds);
+    const store = getActorStore$1($$props.actor.id, stores$1.languageSkillsIds);
     store.set(get(store).filter((sid) => sid !== id));
     $$props.app.close();
   }
@@ -6806,15 +6731,15 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   console.log("skill", $$props.skill);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
-  let isCharacterCreation = getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
-  getActorStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
+  let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  getActorStore$1($$props.actor.id, stores$1.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
+  let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
   let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.languagePoints, $$props.actor.system.creation.languagePoints);
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let readWrite = /* @__PURE__ */ derived(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
   let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
@@ -7082,9 +7007,9 @@ function ActiveSkillCard($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let activeSkill = proxy(skill().system.activeSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.activeSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, activeSkill.value);
+  let specializations = getActorStore$1(skill().id, actor().id, skill().system.activeSkill.specializations);
+  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let value = getActorStore$1(actor().id, skill().id, activeSkill.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7145,9 +7070,9 @@ function KnowledgeSkillCard($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let knowledgeSkill = proxy(skill().system.knowledgeSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, knowledgeSkill.value);
+  let specializations = getActorStore$1(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
+  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let value = getActorStore$1(actor().id, skill().id, knowledgeSkill.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7209,10 +7134,10 @@ function LanguageSkillCard($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let languageSkill = proxy(skill().system.languageSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, languageSkill.value);
-  let readWriteValue = getActorStore(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
+  let specializations = getActorStore$1(skill().id, actor().id, skill().system.languageSkill.specializations);
+  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let value = getActorStore$1(actor().id, skill().id, languageSkill.value);
+  let readWriteValue = getActorStore$1(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7392,7 +7317,7 @@ function SkillsLanguage($$anchor, $$props) {
   const $languageSkillsIdArrayStore = () => store_get(languageSkillsIdArrayStore, "$languageSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  const languageSkillsIdArrayStore = getActorStore(actor().id, stores.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  const languageSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let languageSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
   var div = root$q();
   var node = child(div);
@@ -7420,7 +7345,7 @@ function SkillsKnowledge($$anchor, $$props) {
   const $knowledgeSkillsIdArrayStore = () => store_get(knowledgeSkillsIdArrayStore, "$knowledgeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  const knowledgeSkillsIdArrayStore = getActorStore(actor().id, stores.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
+  const knowledgeSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
   let knowledgeSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
   var div = root$p();
   var node = child(div);
@@ -7446,7 +7371,7 @@ function SkillsActive($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $activeSkillsIdArrayStore = () => store_get(activeSkillsIdArrayStore, "$activeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  const activeSkillsIdArrayStore = getActorStore(actor().id, stores.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
+  const activeSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
   let attributeSortedSkills = /* @__PURE__ */ derived(() => [
     "body",
     "quickness",
@@ -7886,10 +7811,10 @@ function Health($$anchor, $$props) {
   const $penalty = () => store_get(penalty, "$penalty", $$stores);
   const $overflow = () => store_get(overflow, "$overflow", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  let stunArray = getActorStore(actor().id, stores.combat.stunDamage, foundry.utils.deepClone(actor().system.health.stun));
-  let physicalArray = getActorStore(actor().id, stores.combat.leathalDamage, foundry.utils.deepClone(actor().system.health.physical));
-  let penalty = getActorStore(actor().id, stores.combat.penalty, actor().system.health.penalty ?? 0);
-  let overflow = getActorStore(actor().id, stores.combat.overflow, actor().system.health.overflow ?? 0);
+  let stunArray = getActorStore$1(actor().id, stores$1.combat.stunDamage, foundry.utils.deepClone(actor().system.health.stun));
+  let physicalArray = getActorStore$1(actor().id, stores$1.combat.leathalDamage, foundry.utils.deepClone(actor().system.health.physical));
+  let penalty = getActorStore$1(actor().id, stores$1.combat.penalty, actor().system.health.penalty ?? 0);
+  let overflow = getActorStore$1(actor().id, stores$1.combat.overflow, actor().system.health.overflow ?? 0);
   let maxDegree = state(0);
   let ecgCanvas = state(void 0);
   let ecgPointCanvas = state(void 0);
@@ -8292,20 +8217,11 @@ function CharacterSheetApp($$anchor, $$props) {
       }
     },
     {
-      comp: Initiative,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 1,
-        span: 2
-      }
-    },
-    {
       comp: Attributes,
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 2,
+        id: 1,
         span: 1
       }
     },
@@ -8314,7 +8230,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 3,
+        id: 2,
         span: 1
       }
     },
@@ -8323,7 +8239,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 4,
+        id: 3,
         span: 1
       }
     },
@@ -8332,7 +8248,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 5,
+        id: 4,
         span: 1
       }
     },
@@ -8341,7 +8257,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 6,
+        id: 5,
         span: 2
       }
     },
@@ -8350,7 +8266,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 7,
+        id: 6,
         span: 2
       }
     },
@@ -8359,7 +8275,7 @@ function CharacterSheetApp($$anchor, $$props) {
       props: {
         actor: $$props.actor,
         config: $$props.config,
-        id: 8,
+        id: 7,
         span: 2
       }
     }
@@ -8434,7 +8350,7 @@ function NeonName($$anchor, $$props) {
   const $actorName = () => store_get(actorName, "$actorName", $$stores);
   let actor = prop($$props, "actor", 19, () => ({}));
   let malfunctioningIndexes = [];
-  const actorName = getActorStore(actor().id, stores.actorName, actor().name);
+  const actorName = getActorStore$1(actor().id, stores$1.actorName, actor().name);
   let name = /* @__PURE__ */ derived($actorName);
   let neonHTML = /* @__PURE__ */ derived(() => getNeonHtml(get$1(name)));
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -8490,30 +8406,35 @@ function CreationPointList($$anchor, $$props) {
 function AttributePointsState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
+  const $intelligenceValue = () => store_get(intelligenceValue, "$intelligenceValue", $$stores);
+  const $intelligenceMod = () => store_get(intelligenceMod, "$intelligenceMod", $$stores);
+  const $intelligenceMeta = () => store_get(intelligenceMeta, "$intelligenceMeta", $$stores);
+  const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
+  const $activeSkillPoints = () => store_get(activeSkillPoints, "$activeSkillPoints", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
-  const $intelligenceStore = () => store_get(intelligenceStore, "$intelligenceStore", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  let system = proxy($$props.actor.system);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, $$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
-  let attributePointStore = getActorStore($$props.actor.id, stores.attributePoints, system.creation.attributePoints);
-  let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, system.creation.activePoints);
-  let knowledgePointStore = getActorStore($$props.actor.id, stores.knowledgePoints, system.creation.knowledgePoints);
-  let languagePointStore = getActorStore($$props.actor.id, stores.languagePoints, system.creation.languagePoints);
+  proxy($$props.actor.system);
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let intelligenceMod = $$props.actor.getStore("attributes.intelligence.mod");
+  let intelligenceMeta = $$props.actor.getStore("attributes.intelligence.meta");
+  let intelligenceValue = $$props.actor.getStore("attributes.intelligence.value");
+  let intelligence = /* @__PURE__ */ derived(() => $intelligenceValue() + $intelligenceMod() + $intelligenceMeta());
+  let attributePointsStore = $$props.actor.getStore("creation.attributePoints");
+  let activeSkillPoints = $$props.actor.getStore("creation.activePoints");
+  let knowledgePointStore = $$props.actor.getStore("creation.knowledgePoints");
+  let languagePointStore = $$props.actor.getStore("creation.languagePoints");
   let attributePointsText = localize($$props.config.attributes.attributes);
   let activePointsText = localize($$props.config.skill.active);
   let knowledgePointsText = localize($$props.config.skill.knowledge);
   let languagePointsText = localize($$props.config.skill.language);
   let pointList = /* @__PURE__ */ derived(() => [
     {
-      value: $attributePointStore(),
+      value: $attributePointsStore(),
       text: attributePointsText
     },
     {
-      value: $skillPointStore(),
+      value: $activeSkillPoints(),
       text: activePointsText
     },
     {
@@ -8526,27 +8447,11 @@ function AttributePointsState($$anchor, $$props) {
     }
   ]);
   user_effect(() => {
-    knowledgePointStore.set($intelligenceStore() * 5);
-    languagePointStore.set(Math.floor($intelligenceStore() * 1.5));
+    knowledgePointStore.set(get$1(intelligence) * 5);
+    languagePointStore.set(Math.floor(get$1(intelligence) * 1.5));
   });
   user_effect(() => {
-    const value = $attributePointStore();
-    $$props.actor.update({ "system.creation.attributePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $skillPointStore();
-    $$props.actor.update({ "system.creation.activePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $knowledgePointStore();
-    $$props.actor.update({ "system.creation.knowledgePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $languagePointStore();
-    $$props.actor.update({ "system.creation.languagePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    if ($attributePointStore() === 0 && $attributeAssignmentLocked() === false) {
+    if ($attributePointsStore() === 0 && $attributeAssignmentLocked() === false) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           window: {
@@ -8582,24 +8487,24 @@ function AttributePointsState($$anchor, $$props) {
 function SkillPointsState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
   const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let system = proxy(actor().system);
-  let attributePointStore = getActorStore(actor().id, stores.attributePoints, system.creation.attributePoints);
-  let skillPointStore = getActorStore(actor().id, stores.activePoints, system.creation.activePoints);
-  let knowledgePointStore = getActorStore(actor().id, stores.knowledgePoints, system.creation.knowledgePoints);
-  let languagePointStore = getActorStore(actor().id, stores.languagePoints, system.creation.languagePoints);
-  let isCharacterCreation = getActorStore(actor().id, stores.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  let attributePointsStore = actor().getStore("creation.attributePoints", system.creation.attributePoints);
+  let skillPointStore = getActorStore$1(actor().id, stores$1.activePoints, system.creation.activePoints);
+  let knowledgePointStore = getActorStore$1(actor().id, stores$1.knowledgePoints, system.creation.knowledgePoints);
+  let languagePointStore = getActorStore$1(actor().id, stores$1.languagePoints, system.creation.languagePoints);
+  let isCharacterCreation = getActorStore$1(actor().id, stores$1.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   let attributePointsText = localize(config().attributes.attributes);
   let activePointsText = localize(config().skill.active);
   let knowledgePointsText = localize(config().skill.knowledge);
   let languagePointsText = localize(config().skill.language);
   let pointList = /* @__PURE__ */ derived(() => [
     {
-      value: $attributePointStore(),
+      value: $attributePointsStore(),
       text: attributePointsText
     },
     {
@@ -8656,9 +8561,9 @@ function CharacterCreationManager($$anchor, $$props) {
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let attributeAssignmentLocked = getActorStore$1(actor().id, stores$1.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   console.log("attributeAssignmentLocked", $attributeAssignmentLocked());
-  let isCharacterCreation = getActorStore(actor().id, stores.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  let isCharacterCreation = getActorStore$1(actor().id, stores$1.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   var fragment = comment();
   var node = first_child(fragment);
   {
@@ -8707,7 +8612,7 @@ function ShoppingCart($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.actor.isShoppingState));
+  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.actor.isShoppingState));
   function toggleShoppingState() {
     store_set(isShoppingState, !$isShoppingState());
     actor().setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
@@ -8895,9 +8800,9 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     const storeKeyByType = {
-      active: stores.activeSkillsIds,
-      knowledge: stores.knowledgeSkillsIds,
-      language: stores.languageSkillsIds
+      active: stores$1.activeSkillsIds,
+      knowledge: stores$1.knowledgeSkillsIds,
+      language: stores$1.languageSkillsIds
     };
     const storeKey = storeKeyByType[skillType];
     if (!storeKey) {
@@ -8912,7 +8817,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.warn("Skill creation failed or returned no result.");
       return;
     }
-    const targetStore = getActorStore(this.document.id, storeKey, []);
+    const targetStore = getActorStore$1(this.document.id, storeKey, []);
     targetStore.update((current) => [...current, createdItem.id]);
   }
   async handleMetahuman(droppedItem) {
@@ -12085,6 +11990,63 @@ async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, 
   options.renderSheet = false;
 }
 class SR3EActor extends Actor {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _documentStore, {});
+  }
+  /**
+   * Creates or retrieves a reactive Svelte store for a given data path within the actor's system data.
+   * The store is initialized with the current value at the specified path and updates both the system data
+   * and the underlying document when its value changes.
+   *
+   * @param {string} dataPath - The dot-separated path within the actor's system data to bind to the store.
+   * @returns {import('svelte/store').Writable<any>} A Svelte writable store bound to the specified data path.
+   * @throws {Error} If the store cannot be created or the data path is invalid.
+   */
+  getStore(dataPath) {
+    try {
+      const fullPath = `system.${dataPath}`;
+      if (!__privateGet(this, _documentStore)[dataPath]) {
+        let value = foundry.utils.getProperty(this.system, dataPath);
+        if (value && typeof value === "object") {
+          value = Array.isArray(value) ? [...value] : { ...value };
+        }
+        const store = writable(value);
+        store.subscribe((newValue) => {
+          foundry.utils.setProperty(this.system, dataPath, newValue);
+          this.update({ [fullPath]: newValue }, { render: false });
+        });
+        __privateGet(this, _documentStore)[dataPath] = store;
+      }
+      return __privateGet(this, _documentStore)[dataPath];
+    } catch (err) {
+      console.error(`Failed to create reactive store for "system.${dataPath}"`, err);
+      throw err;
+    }
+  }
+  _onDelete() {
+    super._onDelete();
+    for (const store of Object.values(__privateGet(this, _documentStore))) {
+      if (store._unsubscribe) {
+        store._unsubscribe();
+      }
+    }
+    __privateSet(this, _documentStore, {});
+  }
+  get getInitiativeDice() {
+    let dice = 1;
+    console.warn(
+      "SR3EActor.getInitiativeDice is not implemented. Returning 1 by default."
+    );
+    return dice;
+  }
+  get AugumentedReaction() {
+    let augmentedReaction = 0;
+    console.warn(
+      "SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default."
+    );
+    return augmentedReaction;
+  }
   async rollInitiative(options = {}) {
     const initiativeDice = get(
       getActorStore(this.id, stores.initiativeDice, 1)
@@ -12109,8 +12071,6 @@ class SR3EActor extends Actor {
       }
     }
     return totalInit;
-  }
-  getWoundModifier() {
   }
   async canAcceptMetahuman(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metahuman");
@@ -12142,6 +12102,7 @@ class SR3EActor extends Actor {
     });
   }
 }
+_documentStore = new WeakMap();
 function attachLightEffect(html2, activeTheme) {
   function rgb(r, g, b) {
     return `rgb(${r}, ${g}, ${b})`;

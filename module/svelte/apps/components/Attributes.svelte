@@ -4,6 +4,7 @@
   import { localize } from "../../../services/utilities.js";
   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
   import CardToolbar from "./CardToolbar.svelte";
+  import StatCard from "./basic/StatCard.svelte";
   import { getActorStore, stores } from "../../stores/actorStores.js";
   import {
     flags,
@@ -21,6 +22,29 @@
     actor.getFlag(flags.sr3e, flags.attributeAssignmentLocked)
   );
 
+  let intelligenceMod = actor.getStore("attributes.intelligence.mod");
+  let intelligenceMeta = actor.getStore("attributes.intelligence.meta");
+  let intelligencevalue = actor.getStore("attributes.intelligence.value");
+  let quicknessMod = actor.getStore("attributes.quickness.mod");
+  let quicknessMeta = actor.getStore("attributes.quickness.meta");
+  let quicknessValue = actor.getStore("attributes.quickness.value");
+
+  let intelligence = $derived(
+    $intelligencevalue + $intelligenceMod + $intelligenceMeta
+  );
+
+  let quickness = $derived($quicknessValue + $quicknessMod + $quicknessMeta);
+
+  let reaction = $derived(Math.floor((intelligence + quickness) * 0.5));
+
+  let augmentedReaction = $derived(reaction + getTotalModifiersFromItems());
+
+  function getTotalModifiersFromItems() {
+    ui.notifications.warn(
+      "This function is not implemented yet. Please check the console for more details."
+    );
+    return 0;
+  }
 </script>
 
 <CardToolbar {id} />
@@ -33,4 +57,9 @@
       <AttributeCardKarmaState {actor} {stat} {localization} {key} />
     {/if}
   {/each}
+  <StatCard label={config.initiative.reaction} value={reaction} />
+  <StatCard
+    label={config.initiative.augmentedReaction}
+    value={augmentedReaction}
+  />
 </MasonryGrid>

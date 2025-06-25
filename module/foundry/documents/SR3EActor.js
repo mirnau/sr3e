@@ -1,7 +1,84 @@
-import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
 import { get } from "svelte/store";
+import { writable } from "svelte/store";
 
 export default class SR3EActor extends Actor {
+  #documentStore = {};
+
+/**
+ * Creates or retrieves a reactive Svelte store for a given data path within the actor's system data.
+ * The store is initialized with the current value at the specified path and updates both the system data
+ * and the underlying document when its value changes.
+ *
+ * @param {string} dataPath - The dot-separated path within the actor's system data to bind to the store.
+ * @returns {import('svelte/store').Writable<any>} A Svelte writable store bound to the specified data path.
+ * @throws {Error} If the store cannot be created or the data path is invalid.
+ */
+getStore(dataPath) {
+  try {
+    const fullPath = `system.${dataPath}`;
+
+    if (!this.#documentStore[dataPath]) {
+      let value = foundry.utils.getProperty(this.system, dataPath);
+
+      if (value && typeof value === "object") {
+        value = Array.isArray(value) ? [...value] : { ...value };
+      }
+
+      const store = writable(value);
+
+      store.subscribe((newValue) => {
+        foundry.utils.setProperty(this.system, dataPath, newValue);
+        this.update({ [fullPath]: newValue }, { render: false });
+      });
+
+      this.#documentStore[dataPath] = store;
+    }
+
+    return this.#documentStore[dataPath];
+  } catch (err) {
+    console.error(`Failed to create reactive store for "system.${dataPath}"`, err);
+    throw err;
+  }
+}
+
+_onDelete() {
+    super._onDelete();
+    
+    // Clean up store subscriptions
+    for (const store of Object.values(this.#documentStore)) {
+      if (store._unsubscribe) {
+        store._unsubscribe();
+      }
+    }
+    
+    this.#documentStore = {};
+  }
+
+
+  get getInitiativeDice() {
+    let dice = 1;
+    // Get all bioware
+    // Get all cybeware
+    // Spell effects
+    // Adept powers
+    console.warn(
+      "SR3EActor.getInitiativeDice is not implemented. Returning 1 by default."
+    );
+    return dice;
+  }
+
+  get AugumentedReaction() {
+    let augmentedReaction = 0;
+    // Get all bioware
+    // Get all cybeware
+    // Spell effects
+    // Adept powers
+    console.warn(
+      "SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default."
+    );
+    return augmentedReaction;
+  }
+
   async rollInitiative(options = {}) {
     const initiativeDice = get(
       getActorStore(this.id, stores.initiativeDice, 1)
