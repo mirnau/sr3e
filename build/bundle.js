@@ -3547,9 +3547,6 @@ function CardToolbar($$anchor, $$props) {
 delegate(["click", "keydown"]);
 const actorStores = {};
 const stores$1 = {
-  activePoints: "activePoints",
-  knowledgePoints: "knowledgePoints",
-  languagePoints: "languagePoints",
   attributeAssignmentLocked: "attributeAssignmentLocked",
   actorName: "actorName",
   isShoppingState: "isShoppingState",
@@ -6095,7 +6092,7 @@ async function addNewSpecialization$2(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6106,7 +6103,7 @@ async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentL
           refundForCurrentLevel = 1;
         }
         store_set(value, $value() - 1);
-        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+        store_set(activeSkillPointsStore, $activeSkillPointsStore() + refundForCurrentLevel);
       }
     } else {
       console.log("TODO: implement karma based shopping");
@@ -6116,7 +6113,7 @@ async function decrement$2(__1, $attributeAssignmentLocked, attributeAssignmentL
   }
   await silentUpdate();
 }
-async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6143,7 +6140,7 @@ async function deleteThis$2(__2, $$props, $isCharacterCreation, isCharacterCreat
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
-      store_set(skillPointStore, $skillPointStore() + refund);
+      store_set(activeSkillPointsStore, $activeSkillPointsStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.notifications.skillpointsrefund));
     }
@@ -6167,7 +6164,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
+  const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
   let karmaShoppingService = null;
   onMount(() => {
     karmaShoppingService ?? (karmaShoppingService = new KarmaShoppingService($$props.skill));
@@ -6191,7 +6188,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
   let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.activePoints, $$props.actor.system.creation.activePoints);
+  let activeSkillPointsStore = $$props.actor.getStore(`creation.activePoints`);
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   async function increment2() {
     if ($attributeAssignmentLocked()) {
@@ -6203,9 +6200,9 @@ function ActiveSkillEditorApp($$anchor, $$props) {
           } else {
             costForNextLevel = 2;
           }
-          if ($skillPointStore() >= costForNextLevel) {
+          if ($activeSkillPointsStore() >= costForNextLevel) {
             store_set(value, $value() + 1);
-            store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+            store_set(activeSkillPointsStore, $activeSkillPointsStore() - costForNextLevel);
           }
         }
       } else {
@@ -6221,7 +6218,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     await $$props.skill.update({ "system.activeSkill.value": $value() }, { render: false });
     await $$props.actor.update(
       {
-        "system.creation.activePoints": $skillPointStore()
+        "system.creation.activePoints": $activeSkillPointsStore()
       },
       { render: false }
     );
@@ -6262,8 +6259,8 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
+    $activeSkillPointsStore,
+    activeSkillPointsStore,
     $$props,
     silentUpdate
   ];
@@ -6278,8 +6275,8 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
+    $activeSkillPointsStore,
+    activeSkillPointsStore
   ];
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
@@ -6362,7 +6359,7 @@ async function addNewSpecialization$1(_, $$props, $specializations, specializati
     { render: false }
   );
 }
-async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() < 6) {
@@ -6372,9 +6369,9 @@ async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentL
         } else {
           costForNextLevel = 2;
         }
-        if ($skillPointStore() >= costForNextLevel) {
+        if ($knowledgeSkillPointsStore() >= costForNextLevel) {
           store_set(value, $value() + 1);
-          store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+          store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() - costForNextLevel);
         }
       }
     } else {
@@ -6385,7 +6382,7 @@ async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentL
   }
   silentUpdate();
 }
-async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6396,7 +6393,7 @@ async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentL
           refundForCurrentLevel = 1;
         }
         store_set(value, $value() - 1);
-        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+        store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() + refundForCurrentLevel);
       }
     } else {
       console.log("TODO: implement karma based shopping");
@@ -6406,7 +6403,7 @@ async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentL
   }
   silentUpdate();
 }
-async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6433,7 +6430,7 @@ async function deleteThis$1(__3, $$props, $isCharacterCreation, isCharacterCreat
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
-      store_set(skillPointStore, $skillPointStore() + refund);
+      store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
@@ -6457,7 +6454,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
+  const $knowledgeSkillPointsStore = () => store_get(knowledgeSkillPointsStore, "$knowledgeSkillPointsStore", $$stores);
   let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
   let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore$1($$props.actor.id, stores$1.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
@@ -6474,13 +6471,13 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
   let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.knowledgePoints, $$props.actor.system.creation.knowledgePoints);
+  let knowledgeSkillPointsStore = $$props.actor.getStore(`creation.knowledgePoints`);
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   async function silentUpdate() {
     await $$props.skill.update({ "system.knowledgeSkill.value": $value() }, { render: false });
     await $$props.actor.update(
       {
-        "system.creation.knowledgePoints": $skillPointStore()
+        "system.creation.knowledgePoints": $knowledgeSkillPointsStore()
       },
       { render: false }
     );
@@ -6516,8 +6513,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
+    $knowledgeSkillPointsStore,
+    knowledgeSkillPointsStore,
     $$props,
     silentUpdate
   ];
@@ -6531,8 +6528,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
+    $knowledgeSkillPointsStore,
+    knowledgeSkillPointsStore,
     $$props,
     silentUpdate
   ];
@@ -6547,8 +6544,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
+    $knowledgeSkillPointsStore,
+    knowledgeSkillPointsStore
   ];
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
@@ -6637,7 +6634,7 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() < 6) {
@@ -6647,9 +6644,9 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
         } else {
           costForNextLevel = 2;
         }
-        if ($skillPointStore() >= costForNextLevel) {
+        if ($languageSkillPointsStore() >= costForNextLevel) {
           store_set(value, $value() + 1);
-          store_set(skillPointStore, $skillPointStore() - costForNextLevel);
+          store_set(languageSkillPointsStore, $languageSkillPointsStore() - costForNextLevel);
         }
       }
     } else {
@@ -6660,7 +6657,7 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, $$props, silentUpdate) {
+async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
       if ($value() > 0) {
@@ -6671,7 +6668,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
           refundForCurrentLevel = 1;
         }
         store_set(value, $value() - 1);
-        store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+        store_set(languageSkillPointsStore, $languageSkillPointsStore() + refundForCurrentLevel);
       }
     } else {
       console.log("TODO: implement karma based shopping");
@@ -6681,7 +6678,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   await silentUpdate();
 }
-async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6708,7 +6705,7 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
       for (let i = 1; i <= $value(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
-      store_set(skillPointStore, $skillPointStore() + refund);
+      store_set(languageSkillPointsStore, $languageSkillPointsStore() + refund);
       store_set(value, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
@@ -6729,7 +6726,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
+  const $languageSkillPointsStore = () => store_get(languageSkillPointsStore, "$languageSkillPointsStore", $$stores);
   console.log("skill", $$props.skill);
   let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
   let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
@@ -6738,7 +6735,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
   let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore$1($$props.actor.id, stores$1.languagePoints, $$props.actor.system.creation.languagePoints);
+  let languageSkillPointsStore = $$props.actor.getStore("creation.languagePoints");
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let readWrite = /* @__PURE__ */ derived(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
   let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
@@ -6766,7 +6763,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     );
     await $$props.actor.update(
       {
-        "system.creation.languagePoints": $skillPointStore()
+        "system.creation.languagePoints": $languageSkillPointsStore()
       },
       { render: false }
     );
@@ -6809,8 +6806,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
+    $languageSkillPointsStore,
+    languageSkillPointsStore,
     $$props,
     silentUpdate
   ];
@@ -6824,8 +6821,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
+    $languageSkillPointsStore,
+    languageSkillPointsStore,
     $$props,
     silentUpdate
   ];
@@ -6840,8 +6837,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $value,
     value,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
+    $languageSkillPointsStore,
+    languageSkillPointsStore
   ];
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
@@ -8488,15 +8485,15 @@ function SkillPointsState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
-  const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
+  const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
+  const $knowledgePointsStore = () => store_get(knowledgePointsStore, "$knowledgePointsStore", $$stores);
+  const $languagePointsStore = () => store_get(languagePointsStore, "$languagePointsStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let system = proxy(actor().system);
   let attributePointsStore = actor().getStore("creation.attributePoints", system.creation.attributePoints);
-  let skillPointStore = getActorStore$1(actor().id, stores$1.activePoints, system.creation.activePoints);
-  let knowledgePointStore = getActorStore$1(actor().id, stores$1.knowledgePoints, system.creation.knowledgePoints);
-  let languagePointStore = getActorStore$1(actor().id, stores$1.languagePoints, system.creation.languagePoints);
+  let activeSkillPointsStore = actor().getStore("creation.activePoints");
+  let knowledgePointsStore = actor().getStore("creation.knowledgePoints");
+  let languagePointsStore = actor().getStore("creation.languagePoints");
   let isCharacterCreation = getActorStore$1(actor().id, stores$1.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   let attributePointsText = localize(config().attributes.attributes);
   let activePointsText = localize(config().skill.active);
@@ -8508,20 +8505,20 @@ function SkillPointsState($$anchor, $$props) {
       text: attributePointsText
     },
     {
-      value: $skillPointStore(),
+      value: $activeSkillPointsStore(),
       text: activePointsText
     },
     {
-      value: $knowledgePointStore(),
+      value: $knowledgePointsStore(),
       text: knowledgePointsText
     },
     {
-      value: $languagePointStore(),
+      value: $languagePointsStore(),
       text: languagePointsText
     }
   ]);
   user_effect(() => {
-    if ($skillPointStore() === 0 && $knowledgePointStore() === 0 && $languagePointStore() === 0) {
+    if ($activeSkillPointsStore() === 0 && $knowledgePointsStore() === 0 && $languagePointsStore() === 0) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           window: {

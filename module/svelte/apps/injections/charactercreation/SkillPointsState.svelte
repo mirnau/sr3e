@@ -13,21 +13,9 @@
     system.creation.attributePoints
   );
 
-  let skillPointStore = getActorStore(
-    actor.id,
-    stores.activePoints,
-    system.creation.activePoints
-  );
-  let knowledgePointStore = getActorStore(
-    actor.id,
-    stores.knowledgePoints,
-    system.creation.knowledgePoints
-  );
-  let languagePointStore = getActorStore(
-    actor.id,
-    stores.languagePoints,
-    system.creation.languagePoints
-  );
+  let activeSkillPointsStore = actor.getStore("creation.activePoints");
+  let knowledgePointsStore = actor.getStore("creation.knowledgePoints");
+  let languagePointsStore = actor.getStore("creation.languagePoints");
 
   let isCharacterCreation = getActorStore(
     actor.id,
@@ -43,16 +31,16 @@
   // Make pointList reactive by using derived stores
   let pointList = $derived([
     { value: $attributePointsStore, text: attributePointsText },
-    { value: $skillPointStore, text: activePointsText },
-    { value: $knowledgePointStore, text: knowledgePointsText },
-    { value: $languagePointStore, text: languagePointsText },
+    { value: $activeSkillPointsStore, text: activePointsText },
+    { value: $knowledgePointsStore, text: knowledgePointsText },
+    { value: $languagePointsStore, text: languagePointsText },
   ]);
 
   $effect(() => {
     if (
-      $skillPointStore === 0 &&
-      $knowledgePointStore === 0 &&
-      $languagePointStore === 0
+      $activeSkillPointsStore === 0 &&
+      $knowledgePointsStore === 0 &&
+      $languagePointsStore === 0
     ) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
