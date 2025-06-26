@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _documentStore, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
+var _document, _persistentStore, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -145,7 +145,16 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+      essence: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 6
+      }),
+      magic: new foundry.data.fields.SchemaField({
+        ...SimpleStat.defineSchema(),
+        isBurnedOut: new foundry.data.fields.BooleanField({
+          initial: false
+        })
+      })
     };
   }
 };
@@ -740,7 +749,7 @@ function clear_text_content(node) {
   node.textContent = "";
 }
 // @__NO_SIDE_EFFECTS__
-function derived(fn) {
+function derived$1(fn) {
   var flags2 = DERIVED | DIRTY;
   if (active_effect === null) {
     flags2 |= UNOWNED;
@@ -774,7 +783,7 @@ function derived(fn) {
 }
 // @__NO_SIDE_EFFECTS__
 function derived_safe_equal(fn) {
-  const signal = /* @__PURE__ */ derived(fn);
+  const signal = /* @__PURE__ */ derived$1(fn);
   signal.equals = safe_equals;
   return signal;
 }
@@ -957,7 +966,7 @@ function effect(fn) {
 function render_effect(fn) {
   return create_effect(RENDER_EFFECT, fn, true);
 }
-function template_effect(fn, thunks = [], d = derived) {
+function template_effect(fn, thunks = [], d = derived$1) {
   const deriveds = thunks.map(d);
   const effect2 = () => fn(...deriveds.map(get$1));
   return block(effect2);
@@ -3088,6 +3097,7 @@ function createEventDispatcher() {
 function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
     run(void 0);
+    if (invalidate) invalidate(void 0);
     return noop;
   }
   const unsub = untrack(
@@ -3100,6 +3110,11 @@ function subscribe_to_store(store, run, invalidate) {
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
 const subscriber_queue = [];
+function readable(value, start) {
+  return {
+    subscribe: writable(value, start).subscribe
+  };
+}
 function writable(value, start = noop) {
   let stop = null;
   const subscribers = /* @__PURE__ */ new Set();
@@ -3146,6 +3161,54 @@ function writable(value, start = noop) {
     };
   }
   return { set: set2, update, subscribe };
+}
+function derived(stores2, fn, initial_value) {
+  const single = !Array.isArray(stores2);
+  const stores_array = single ? [stores2] : stores2;
+  if (!stores_array.every(Boolean)) {
+    throw new Error("derived() expects stores as input, got a falsy value");
+  }
+  const auto = fn.length < 2;
+  return readable(initial_value, (set2, update) => {
+    let started = false;
+    const values = [];
+    let pending = 0;
+    let cleanup = noop;
+    const sync = () => {
+      if (pending) {
+        return;
+      }
+      cleanup();
+      const result = fn(single ? values[0] : values, set2, update);
+      if (auto) {
+        set2(result);
+      } else {
+        cleanup = typeof result === "function" ? result : noop;
+      }
+    };
+    const unsubscribers = stores_array.map(
+      (store, i) => subscribe_to_store(
+        store,
+        (value) => {
+          values[i] = value;
+          pending &= ~(1 << i);
+          if (started) {
+            sync();
+          }
+        },
+        () => {
+          pending |= 1 << i;
+        }
+      )
+    );
+    started = true;
+    sync();
+    return function stop() {
+      run_all(unsubscribers);
+      cleanup();
+      started = false;
+    };
+  });
 }
 function get(store) {
   let value;
@@ -3368,7 +3431,7 @@ function prop(props, key, flags2, fallback) {
   var was_from_child = false;
   var inner_current_value = /* @__PURE__ */ mutable_source(prop_value);
   var current_value = with_parent_branch(
-    () => /* @__PURE__ */ derived(() => {
+    () => /* @__PURE__ */ derived$1(() => {
       var parent_value = getter();
       var child_value = get$1(inner_current_value);
       if (from_child) {
@@ -3836,36 +3899,97 @@ const inventory = {
   arsenal: "arsenal",
   garage: "garage"
 };
+const storeManagers = /* @__PURE__ */ new Map();
+const _StoreManager = class _StoreManager {
+  constructor(document2) {
+    __privateAdd(this, _document);
+    __privateAdd(this, _persistentStore, {});
+    __privateSet(this, _document, document2);
+  }
+  static Subscribe(document2) {
+    if (storeManagers.has(document2.id)) {
+      const handlerData = storeManagers.get(document2.id);
+      handlerData.subscribers++;
+      return handlerData.handler;
+    }
+    const handler = new _StoreManager(document2);
+    storeManagers.set(document2.id, { handler, subscribers: 1 });
+    return handler;
+  }
+  static Unsubscribe(document2) {
+    const handlerData = storeManagers.get(document2.id);
+    handlerData.subscribers--;
+    if (handlerData.subscribers < 1) {
+      storeManagers.delete(document2.id);
+    }
+  }
+  GetStore(dataPath) {
+    const fullPath = `system.${dataPath}`;
+    const value = foundry.utils.getProperty(__privateGet(this, _document).system, dataPath);
+    if (!__privateGet(this, _persistentStore)[dataPath]) {
+      const clonedValue = value && typeof value === "object" ? Array.isArray(value) ? [...value] : { ...value } : value;
+      const store = writable(clonedValue);
+      store.subscribe((newValue) => {
+        foundry.utils.setProperty(__privateGet(this, _document).system, dataPath, newValue);
+        __privateGet(this, _document).update({ [fullPath]: newValue }, { render: false });
+      });
+      __privateGet(this, _persistentStore)[dataPath] = store;
+    }
+    return __privateGet(this, _persistentStore)[dataPath];
+  }
+  /**
+   * Creates a derived Svelte store that combines multiple stores into a single object.
+   * Each key in the resulting object corresponds to a store value, and an additional `sum` property
+   * contains the sum of all store values.
+   *
+   * @param {string} basePath - The base path used to retrieve individual stores.
+   * @param {string[]} keys - An array of keys to identify which stores to combine.
+   * @returns {import('svelte/store').Readable<Object>} A derived Svelte store object with each key's value and a `sum` property.
+   */
+  GetCompositeStore(basePath, keys) {
+    const stores2 = keys.map((key) => this.GetStore(`${basePath}.${key}`));
+    return derived(stores2, ($stores) => {
+      const obj = {};
+      let sum = 0;
+      keys.forEach((key, i) => {
+        obj[key] = $stores[i];
+        sum += $stores[i];
+      });
+      obj.sum = sum;
+      return obj;
+    });
+  }
+};
+_document = new WeakMap();
+_persistentStore = new WeakMap();
+let StoreManager = _StoreManager;
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_1$n = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$o = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root$G = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $value = () => store_get(value, "$value", $$stores);
-  const $mod = () => store_get(mod, "$mod", $$stores);
+  const $total = () => store_get(total, "$total", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const attributePointStore = $$props.actor.getStore("creation.attributePoints");
-  let value = $$props.actor.getStore(`attributes.${$$props.key}.value`);
-  let mod = $$props.actor.getStore(`attributes.${$$props.key}.mod`);
-  let total = /* @__PURE__ */ derived(() => {
-    var _a;
-    return $value() + $mod() + (((_a = $$props.stat) == null ? void 0 : _a.meta) ?? 0);
-  });
+  const storeManager = StoreManager.Subscribe($$props.actor);
+  let total = storeManager.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
+  let value = storeManager.GetStore(`attributes.${$$props.key}.value`);
+  let attributePointStore = storeManager.GetStore("creation.attributePoints");
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let metaHuman = /* @__PURE__ */ derived(() => {
+  let metaHuman = /* @__PURE__ */ derived$1(() => {
     var _a;
     return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metahuman") : null;
   });
-  let attributeLimit = /* @__PURE__ */ derived(() => {
+  let attributeLimit = /* @__PURE__ */ derived$1(() => {
     var _a, _b, _c;
     return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$1(metaHuman)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
   });
-  let isMinLimit = /* @__PURE__ */ derived(() => $value() <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
+  let isMinLimit = /* @__PURE__ */ derived$1(() => $value() <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived$1(() => get$1(attributeLimit) ? $total().sum >= get$1(attributeLimit) : false);
   function add(change) {
     if (!$attributeAssignmentLocked()) {
       const newPoints = $attributePointStore() - change;
@@ -3880,6 +4004,9 @@ function AttributeCardCreationState($$anchor, $$props) {
   const decrement2 = () => {
     if (!get$1(isMinLimit)) add(-1);
   };
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
   var div = root$G();
   var h4 = child(div);
   var text2 = child(h4);
@@ -3887,7 +4014,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   var node = child(div_1);
   {
     var consequent = ($$anchor2) => {
-      var i_1 = root_1$n();
+      var i_1 = root_1$o();
       i_1.__click = decrement2;
       i_1.__keydown = [on_keydown$7, decrement2];
       template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
@@ -3902,7 +4029,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   var node_1 = sibling(h1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$e();
+      var i_2 = root_2$f();
       i_2.__click = increment2;
       i_2.__keydown = [on_keydown_1$2, increment2];
       template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
@@ -3915,7 +4042,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   template_effect(
     ($0) => {
       set_text(text2, $0);
-      set_text(text_1, get$1(total));
+      set_text(text_1, $total().sum);
     },
     [
       () => localize($$props.localization[$$props.key])
@@ -3927,43 +4054,49 @@ function AttributeCardCreationState($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_1$m = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$n = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_2$d = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root$F = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $value = () => store_get(value, "$value", $$stores);
-  const $mod = () => store_get(mod, "$mod", $$stores);
+  const $total = () => store_get(total, "$total", $$stores);
+  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const attributePointStore = $$props.actor.getStore("creation.attributePoints");
-  let value = $$props.actor.getStore(`attributes.${$$props.key}.value`);
-  let mod = $$props.actor.getStore(`attributes.${$$props.key}.mod`);
-  let total = /* @__PURE__ */ derived(() => {
-    var _a;
-    return $value() + $mod() + (((_a = $$props.stat) == null ? void 0 : _a.meta) ?? 0);
-  });
-  getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let metaHuman = /* @__PURE__ */ derived(() => {
+  const storeManager = StoreManager.Subscribe($$props.actor);
+  let total = storeManager.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
+  let value = storeManager.GetStore(`attributes.${$$props.key}.value`);
+  let attributePointStore = storeManager.GetStore("creation.attributePoints");
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let metaHuman = /* @__PURE__ */ derived$1(() => {
     var _a;
     return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metahuman") : null;
   });
-  let attributeLimit = /* @__PURE__ */ derived(() => {
+  let attributeLimit = /* @__PURE__ */ derived$1(() => {
     var _a, _b, _c;
     return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$1(metaHuman)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
   });
-  let isMinLimit = /* @__PURE__ */ derived(() => $value() <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
+  let isMinLimit = /* @__PURE__ */ derived$1(() => $value() <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived$1(() => get$1(attributeLimit) ? $total().sum >= get$1(attributeLimit) : false);
   function add(change) {
-    ui.notifications.warn("This function is not implemented yet. Please check the console for more details.");
+    if (!$attributeAssignmentLocked()) {
+      const newPoints = $attributePointStore() - change;
+      if (newPoints < 0) return;
+      store_set(value, $value() + change);
+      store_set(attributePointStore, newPoints);
+    }
   }
   const increment2 = () => {
-    if (!get$1(isMaxLimit)) add();
+    if (!get$1(isMaxLimit)) add(1);
   };
   const decrement2 = () => {
-    if (!get$1(isMinLimit)) add();
+    if (!get$1(isMinLimit)) add(-1);
   };
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
   var div = root$F();
   var h4 = child(div);
   var text2 = child(h4);
@@ -3971,7 +4104,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   var node = child(div_1);
   {
     var consequent = ($$anchor2) => {
-      var i_1 = root_1$m();
+      var i_1 = root_1$n();
       i_1.__click = decrement2;
       i_1.__keydown = [on_keydown$6, decrement2];
       template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
@@ -3986,7 +4119,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   var node_1 = sibling(h1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$d();
+      var i_2 = root_2$e();
       i_2.__click = increment2;
       i_2.__keydown = [on_keydown_1$1, increment2];
       template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
@@ -3999,7 +4132,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   template_effect(
     ($0) => {
       set_text(text2, $0);
-      set_text(text_1, get$1(total));
+      set_text(text_1, $total().sum);
     },
     [
       () => localize($$props.localization[$$props.key])
@@ -5568,7 +5701,7 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root_1$l = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_1$m = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$E = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
@@ -5577,7 +5710,7 @@ function StatCard$1($$anchor, $$props) {
   var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
-      var h4 = root_1$l();
+      var h4 = root_1$m();
       var text2 = child(h4);
       template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
       append($$anchor2, h4);
@@ -5649,37 +5782,43 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$k = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
+var root_1$l = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $intelligencevalue = () => store_get(intelligencevalue, "$intelligencevalue", $$stores);
-  const $intelligenceMod = () => store_get(intelligenceMod, "$intelligenceMod", $$stores);
-  const $intelligenceMeta = () => store_get(intelligenceMeta, "$intelligenceMeta", $$stores);
-  const $quicknessValue = () => store_get(quicknessValue, "$quicknessValue", $$stores);
-  const $quicknessMod = () => store_get(quicknessMod, "$quicknessMod", $$stores);
-  const $quicknessMeta = () => store_get(quicknessMeta, "$quicknessMeta", $$stores);
+  const $essence = () => store_get(essence, "$essence", $$stores);
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $magic = () => store_get(magic, "$magic", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
+  proxy(actor().items);
+  let isAwakened = state(false);
   let localization = config().attributes;
   let attributeAssignmentLocked = getActorStore$1(actor().id, stores$1.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.attributeAssignmentLocked));
-  let intelligenceMod = actor().getStore("attributes.intelligence.mod");
-  let intelligenceMeta = actor().getStore("attributes.intelligence.meta");
-  let intelligencevalue = actor().getStore("attributes.intelligence.value");
-  let quicknessMod = actor().getStore("attributes.quickness.mod");
-  let quicknessMeta = actor().getStore("attributes.quickness.meta");
-  let quicknessValue = actor().getStore("attributes.quickness.value");
-  let intelligence = /* @__PURE__ */ derived(() => $intelligencevalue() + $intelligenceMod() + $intelligenceMeta());
-  let quickness = /* @__PURE__ */ derived(() => $quicknessValue() + $quicknessMod() + $quicknessMeta());
-  let reaction = /* @__PURE__ */ derived(() => Math.floor((get$1(intelligence) + get$1(quickness)) * 0.5));
-  let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction) + getTotalModifiersFromItems());
+  let storeManager = StoreManager.Subscribe(actor());
+  let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+  let magic = storeManager.GetCompositeStore("attributes.magic", ["value", "mod"]);
+  let essence = storeManager.GetStore("attributes.essence");
+  let magicValueStore = storeManager.GetStore("attributes.magic.value");
+  let magicCap = /* @__PURE__ */ derived$1(() => Math.floor($essence()));
+  let reaction = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum) * 0.5));
+  let augmentedReaction = /* @__PURE__ */ derived$1(() => get$1(reaction) + getTotalModifiersFromItems());
   function getTotalModifiersFromItems() {
-    ui.notifications.warn("This function is not implemented yet. Please check the console for more details.");
+    ui.notifications.warn("This function is not implemented yet. Attributes.svelte");
     return 0;
   }
+  user_effect(() => {
+    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
+    store_set(magicValueStore, proxy(get$1(magicCap)));
+  });
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
   var fragment = root$C();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5694,9 +5833,9 @@ function Attributes($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$k();
+      var fragment_1 = root_1$l();
       var node_2 = first_child(fragment_1);
-      each(node_2, 17, () => Object.entries(attributes), index, ($$anchor3, $$item) => {
+      each(node_2, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor3, $$item) => {
         let key = () => get$1($$item)[0];
         let stat = () => get$1($$item)[1];
         var fragment_2 = comment();
@@ -5738,7 +5877,23 @@ function Attributes($$anchor, $$props) {
         append($$anchor3, fragment_2);
       });
       var node_4 = sibling(node_2, 2);
-      StatCard$1(node_4, {
+      {
+        var consequent_1 = ($$anchor3) => {
+          StatCard$1($$anchor3, {
+            get label() {
+              return config().magic.magic;
+            },
+            get value() {
+              return $magic().sum;
+            }
+          });
+        };
+        if_block(node_4, ($$render) => {
+          if (get$1(isAwakened)) $$render(consequent_1);
+        });
+      }
+      var node_5 = sibling(node_4, 2);
+      StatCard$1(node_5, {
         get label() {
           return config().initiative.reaction;
         },
@@ -5746,8 +5901,8 @@ function Attributes($$anchor, $$props) {
           return get$1(reaction);
         }
       });
-      var node_5 = sibling(node_4, 2);
-      StatCard$1(node_5, {
+      var node_6 = sibling(node_5, 2);
+      StatCard$1(node_6, {
         get label() {
           return config().initiative.augmentedReaction;
         },
@@ -5764,12 +5919,42 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
+var root_2$d = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_1$k = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
+  const $willpower = () => store_get(willpower, "$willpower", $$stores);
+  const $charisma = () => store_get(charisma, "$charisma", $$stores);
+  const $magic = () => store_get(magic, "$magic", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let dicePools = proxy(actor().system.dicePools);
+  let isAwakened = state(false);
+  user_effect(() => {
+    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
+  });
+  const storeManager = StoreManager.Subscribe(actor());
+  let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let willpower = storeManager.GetCompositeStore("attributes.willpower", ["value", "mod", "meta"]);
+  let charisma = storeManager.GetCompositeStore("attributes.charisma", ["value", "mod", "meta"]);
+  let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+  let magic = storeManager.GetCompositeStore("attributes.magic", ["value", "mod"]);
+  storeManager.GetStore("dicePools.combat");
+  storeManager.GetStore("dicePools.control");
+  storeManager.GetStore("dicePools.hacking");
+  let combatPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5));
+  let controlPool = 999;
+  let hackingPool = 999;
+  storeManager.GetStore("dicePools.astral");
+  storeManager.GetStore("dicePools.spell");
+  let astralPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5));
+  let spellPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5));
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
   var fragment = root$B();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -5784,20 +5969,58 @@ function DicePools($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = comment();
+      var fragment_1 = root_1$k();
       var node_2 = first_child(fragment_1);
-      each(node_2, 17, () => Object.entries(dicePools), index, ($$anchor3, $$item) => {
-        let key = () => get$1($$item)[0];
-        let stat = () => get$1($$item)[1];
-        StatCard$1($$anchor3, {
-          get label() {
-            return config().dicepools[key()];
-          },
-          get value() {
-            return stat().value;
-          }
-        });
+      StatCard$1(node_2, {
+        get label() {
+          return config().dicepools.combat;
+        },
+        get value() {
+          return get$1(combatPool);
+        }
       });
+      var node_3 = sibling(node_2, 2);
+      StatCard$1(node_3, {
+        get label() {
+          return config().dicepools.control;
+        },
+        value: controlPool
+      });
+      var node_4 = sibling(node_3, 2);
+      StatCard$1(node_4, {
+        get label() {
+          return config().dicepools.hacking;
+        },
+        value: hackingPool
+      });
+      var node_5 = sibling(node_4, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var fragment_2 = root_2$d();
+          var node_6 = first_child(fragment_2);
+          StatCard$1(node_6, {
+            get label() {
+              return config().dicepools.astral;
+            },
+            get value() {
+              return get$1(astralPool);
+            }
+          });
+          var node_7 = sibling(node_6, 2);
+          StatCard$1(node_7, {
+            get label() {
+              return config().dicepools.spell;
+            },
+            get value() {
+              return get$1(spellPool);
+            }
+          });
+          append($$anchor3, fragment_2);
+        };
+        if_block(node_5, ($$render) => {
+          if (get$1(isAwakened)) $$render(consequent);
+        });
+      }
       append($$anchor2, fragment_1);
     },
     $$slots: { default: true }
@@ -5807,6 +6030,7 @@ function DicePools($$anchor, $$props) {
   ]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
 var root$A = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
@@ -6000,7 +6224,7 @@ function Karma($$anchor, $$props) {
   prop($$props, "span", 19, () => ({}));
   let karma = proxy(actor().system.karma);
   let essence = proxy(actor().system.attributes.essence ?? 0);
-  let survivor = /* @__PURE__ */ derived(() => karma.miraculoussurvival);
+  let survivor = /* @__PURE__ */ derived$1(() => karma.miraculoussurvival);
   var fragment = root$y();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -6017,7 +6241,7 @@ function Karma($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$j();
       var node_2 = first_child(fragment_1);
-      const expression = /* @__PURE__ */ derived(() => localize(config().karma.goodkarma));
+      const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
       StatCard$1(node_2, {
         get label() {
           return get$1(expression);
@@ -6027,7 +6251,7 @@ function Karma($$anchor, $$props) {
         }
       });
       var node_3 = sibling(node_2, 2);
-      const expression_1 = /* @__PURE__ */ derived(() => localize(config().karma.karmapool));
+      const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
       StatCard$1(node_3, {
         get label() {
           return get$1(expression_1);
@@ -6037,7 +6261,7 @@ function Karma($$anchor, $$props) {
         }
       });
       var node_4 = sibling(node_3, 2);
-      const expression_2 = /* @__PURE__ */ derived(() => localize(config().attributes.essence));
+      const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
       StatCard$1(node_4, {
         get label() {
           return get$1(expression_2);
@@ -6175,7 +6399,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
   let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore$1($$props.actor.id, stores$1.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -6458,7 +6682,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
   let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore$1($$props.actor.id, stores$1.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -6737,8 +6961,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
   let languageSkillPointsStore = $$props.actor.getStore("creation.languagePoints");
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let readWrite = /* @__PURE__ */ derived(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
-  let disableValueControls = /* @__PURE__ */ derived(() => $isCharacterCreation() && $specializations().length > 0);
+  let readWrite = /* @__PURE__ */ derived$1(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
@@ -7315,7 +7539,7 @@ function SkillsLanguage($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
   const languageSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
-  let languageSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
+  let languageSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
   var div = root$q();
   var node = child(div);
   SkillCategory(node, {
@@ -7343,7 +7567,7 @@ function SkillsKnowledge($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
   const knowledgeSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
-  let knowledgeSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
+  let knowledgeSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
   var div = root$p();
   var node = child(div);
   SkillCategory(node, {
@@ -7369,7 +7593,7 @@ function SkillsActive($$anchor, $$props) {
   const $activeSkillsIdArrayStore = () => store_get(activeSkillsIdArrayStore, "$activeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const activeSkillsIdArrayStore = getActorStore$1(actor().id, stores$1.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
-  let attributeSortedSkills = /* @__PURE__ */ derived(() => [
+  let attributeSortedSkills = /* @__PURE__ */ derived$1(() => [
     "body",
     "quickness",
     "strength",
@@ -7511,13 +7735,7 @@ function Skills($$anchor, $$props) {
 }
 delegate(["click"]);
 class EcgAnimator {
-  constructor(lineCanvas, pointCanvas, {
-    freq = 1.5,
-    amp = 20,
-    lineWidth = 2,
-    bottomColor = "#00FFFF",
-    topColor = "#0000FF"
-  } = {}) {
+  constructor(lineCanvas, pointCanvas, { freq = 1.5, amp = 20, lineWidth = 2, bottomColor = "#00FFFF", topColor = "#0000FF" } = {}) {
     __publicField(this, "_animate", () => {
       if (!this._isAnimating) return;
       this._drawEcg();
@@ -7564,16 +7782,12 @@ class EcgAnimator {
     this.height = Math.floor(height);
   }
   _drawEcg() {
+    if (this.width <= 0 || this.height <= 0) return;
     const offsetX = 10;
     const offsetY = 10;
     const radius = 4;
     const x = this.width - offsetX - radius;
-    const imageData = this.lineCtx.getImageData(
-      1,
-      0,
-      this.width - 1,
-      this.height
-    );
+    const imageData = this.lineCtx.getImageData(1, 0, this.width - 1, this.height);
     this.lineCtx.clearRect(0, 0, this.width, this.height);
     this.lineCtx.putImageData(imageData, 0, 0);
     const heartY = this._getHeartY(this.phase);
@@ -7950,7 +8164,7 @@ function Health($$anchor, $$props) {
   var div_9 = sibling(div_2, 2);
   var div_10 = child(div_9);
   var node_5 = child(div_10);
-  const expression = /* @__PURE__ */ derived(() => localize(config().health.penalty));
+  const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
   StatCard$1(node_5, {
     get value() {
       return $penalty();
@@ -7960,7 +8174,7 @@ function Health($$anchor, $$props) {
     }
   });
   var node_6 = sibling(node_5, 2);
-  const expression_1 = /* @__PURE__ */ derived(() => localize(config().health.overflow));
+  const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().health.overflow));
   StatCard$1(node_6, {
     get value() {
       return $overflow();
@@ -8348,8 +8562,8 @@ function NeonName($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({}));
   let malfunctioningIndexes = [];
   const actorName = getActorStore$1(actor().id, stores$1.actorName, actor().name);
-  let name = /* @__PURE__ */ derived($actorName);
-  let neonHTML = /* @__PURE__ */ derived(() => getNeonHtml(get$1(name)));
+  let name = /* @__PURE__ */ derived$1($actorName);
+  let neonHTML = /* @__PURE__ */ derived$1(() => getNeonHtml(get$1(name)));
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   function getNeonHtml(name2) {
     malfunctioningIndexes = [];
@@ -8403,31 +8617,26 @@ function CreationPointList($$anchor, $$props) {
 function AttributePointsState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $intelligenceValue = () => store_get(intelligenceValue, "$intelligenceValue", $$stores);
-  const $intelligenceMod = () => store_get(intelligenceMod, "$intelligenceMod", $$stores);
-  const $intelligenceMeta = () => store_get(intelligenceMeta, "$intelligenceMeta", $$stores);
-  const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
+  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   const $activeSkillPoints = () => store_get(activeSkillPoints, "$activeSkillPoints", $$stores);
   const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
   const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  proxy($$props.actor.system);
-  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceMod = $$props.actor.getStore("attributes.intelligence.mod");
-  let intelligenceMeta = $$props.actor.getStore("attributes.intelligence.meta");
-  let intelligenceValue = $$props.actor.getStore("attributes.intelligence.value");
-  let intelligence = /* @__PURE__ */ derived(() => $intelligenceValue() + $intelligenceMod() + $intelligenceMeta());
-  let attributePointsStore = $$props.actor.getStore("creation.attributePoints");
-  let activeSkillPoints = $$props.actor.getStore("creation.activePoints");
-  let knowledgePointStore = $$props.actor.getStore("creation.knowledgePoints");
-  let languagePointStore = $$props.actor.getStore("creation.languagePoints");
   let attributePointsText = localize($$props.config.attributes.attributes);
   let activePointsText = localize($$props.config.skill.active);
   let knowledgePointsText = localize($$props.config.skill.knowledge);
   let languagePointsText = localize($$props.config.skill.language);
-  let pointList = /* @__PURE__ */ derived(() => [
+  let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let storeManager = StoreManager.Subscribe($$props.actor);
+  let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let attributePointStore = storeManager.GetStore("creation.attributePoints");
+  let activeSkillPoints = storeManager.GetStore("creation.activePoints");
+  let knowledgePointStore = storeManager.GetStore("creation.knowledgePoint");
+  let languagePointStore = storeManager.GetStore("creation.languagePoint");
+  let pointList = /* @__PURE__ */ derived$1(() => [
     {
-      value: $attributePointsStore(),
+      value: $attributePointStore(),
       text: attributePointsText
     },
     {
@@ -8444,11 +8653,11 @@ function AttributePointsState($$anchor, $$props) {
     }
   ]);
   user_effect(() => {
-    knowledgePointStore.set(get$1(intelligence) * 5);
-    languagePointStore.set(Math.floor(get$1(intelligence) * 1.5));
+    knowledgePointStore.set($intelligence().sum * 5);
+    languagePointStore.set(Math.floor($intelligence().sum * 1.5));
   });
   user_effect(() => {
-    if ($attributePointsStore() === 0 && $attributeAssignmentLocked() === false) {
+    if ($attributePointStore() === 0 && $attributeAssignmentLocked() === false) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           window: {
@@ -8472,6 +8681,9 @@ function AttributePointsState($$anchor, $$props) {
       })();
     }
   });
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
   CreationPointList($$anchor, {
     get points() {
       return get$1(pointList);
@@ -8484,41 +8696,36 @@ function AttributePointsState($$anchor, $$props) {
 function SkillPointsState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
   const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
-  const $knowledgePointsStore = () => store_get(knowledgePointsStore, "$knowledgePointsStore", $$stores);
-  const $languagePointsStore = () => store_get(languagePointsStore, "$languagePointsStore", $$stores);
+  const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
+  const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let system = proxy(actor().system);
-  let attributePointsStore = actor().getStore("creation.attributePoints", system.creation.attributePoints);
-  let activeSkillPointsStore = actor().getStore("creation.activePoints");
-  let knowledgePointsStore = actor().getStore("creation.knowledgePoints");
-  let languagePointsStore = actor().getStore("creation.languagePoints");
-  let isCharacterCreation = getActorStore$1(actor().id, stores$1.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   let attributePointsText = localize(config().attributes.attributes);
   let activePointsText = localize(config().skill.active);
   let knowledgePointsText = localize(config().skill.knowledge);
   let languagePointsText = localize(config().skill.language);
-  let pointList = /* @__PURE__ */ derived(() => [
-    {
-      value: $attributePointsStore(),
-      text: attributePointsText
-    },
+  let storeManager = StoreManager.Subscribe(actor());
+  let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
+  let knowledgePointStore = storeManager.GetStore("creation.knowledgePoint");
+  let languagePointStore = storeManager.GetStore("creation.languagePoint");
+  let isCharacterCreation = getActorStore$1(actor().id, stores$1.isCharacterCreation, actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation));
+  let pointList = /* @__PURE__ */ derived$1(() => [
+    { value: 0, text: attributePointsText },
     {
       value: $activeSkillPointsStore(),
       text: activePointsText
     },
     {
-      value: $knowledgePointsStore(),
+      value: $knowledgePointStore(),
       text: knowledgePointsText
     },
     {
-      value: $languagePointsStore(),
+      value: $languagePointStore(),
       text: languagePointsText
     }
   ]);
   user_effect(() => {
-    if ($activeSkillPointsStore() === 0 && $knowledgePointsStore() === 0 && $languagePointsStore() === 0) {
+    if ($activeSkillPointsStore() === 0 && $knowledgePointStore() === 0 && $languagePointStore() === 0) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           window: {
@@ -8541,6 +8748,9 @@ function SkillPointsState($$anchor, $$props) {
         }
       })();
     }
+  });
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
   });
   CreationPointList($$anchor, {
     get points() {
@@ -9654,7 +9864,7 @@ function MetahumanApp($$anchor, $$props) {
   const visionConfig = config().vision;
   const traits = config().traits;
   let layoutMode = "double";
-  const agerange = /* @__PURE__ */ derived(() => [
+  const agerange = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -9683,7 +9893,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const height = /* @__PURE__ */ derived(() => [
+  const height = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -9712,7 +9922,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const weight = /* @__PURE__ */ derived(() => [
+  const weight = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -9741,7 +9951,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const movement = /* @__PURE__ */ derived(() => [
+  const movement = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "base",
@@ -9761,7 +9971,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const karma = /* @__PURE__ */ derived(() => [
+  const karma = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "factor",
@@ -9772,7 +9982,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const attributeModifiers = /* @__PURE__ */ derived(() => [
+  const attributeModifiers = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "strength",
@@ -9828,7 +10038,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const attributeLimits = /* @__PURE__ */ derived(() => [
+  const attributeLimits = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "strength",
@@ -9884,7 +10094,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const vision = /* @__PURE__ */ derived(() => [
+  const vision = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "type",
@@ -9899,7 +10109,7 @@ function MetahumanApp($$anchor, $$props) {
       ]
     }
   ]);
-  const priorityEntry = /* @__PURE__ */ derived(() => ({
+  const priorityEntry = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "priority",
     label: "Select Priority",
@@ -10169,7 +10379,7 @@ function MagicApp($$anchor, $$props) {
     localize(labels.shamanic),
     localize(config().common.other)
   ];
-  const archetype = /* @__PURE__ */ derived(() => ({
+  const archetype = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "archetype",
     label: localize(labels.archetype),
@@ -10178,7 +10388,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: archetypeOptions
   }));
-  const priority = /* @__PURE__ */ derived(() => ({
+  const priority = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "priority",
     label: localize(labels.priority),
@@ -10187,7 +10397,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: ["A", "B"]
   }));
-  const magicianType = /* @__PURE__ */ derived(() => ({
+  const magicianType = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "magicianType",
     label: localize(labels.magicianType),
@@ -10196,7 +10406,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: magicianTypeOptions
   }));
-  const aspect = /* @__PURE__ */ derived(() => ({
+  const aspect = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "aspect",
     label: localize(labels.aspect),
@@ -10205,7 +10415,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: aspectsOptions
   }));
-  const magicianFields = /* @__PURE__ */ derived(() => [
+  const magicianFields = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "tradition",
@@ -10243,7 +10453,7 @@ function MagicApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const adeptFields = /* @__PURE__ */ derived(() => []);
+  const adeptFields = /* @__PURE__ */ derived$1(() => []);
   let isAspected = state(false);
   user_effect(() => {
     set(isAspected, get$1(magicianType).value === localize(labels.aspectedmage));
@@ -11510,8 +11720,8 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     console.log("Available metahumans:", get$1(metahumans).map((m) => m.name));
     console.log("Selected default metahuman:", (_a = get$1(metahumanItem)) == null ? void 0 : _a.name);
   });
-  const metahumanDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMetaHumans(get$1(metahumans)));
-  const magicsDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMagics(get$1(magics)));
+  const metahumanDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMetaHumans(get$1(metahumans)));
+  const magicsDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMagics(get$1(magics)));
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
   const skillPointDropdownOptions = priorities.skills;
@@ -11544,15 +11754,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       }
     }
   });
-  let canCreate = /* @__PURE__ */ derived(() => get$1(selectedMetahuman) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
+  let canCreate = /* @__PURE__ */ derived$1(() => get$1(selectedMetahuman) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
   let ageMin = 0;
-  let ageMax = /* @__PURE__ */ derived(() => {
+  let ageMax = /* @__PURE__ */ derived$1(() => {
     var _a, _b, _c;
     return ((_c = (_b = (_a = get$1(metahumanItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
   });
-  let lifespan = /* @__PURE__ */ derived(() => get$1(ageMax) - ageMin);
+  let lifespan = /* @__PURE__ */ derived$1(() => get$1(ageMax) - ageMin);
   let phaseTemplate = ActorDataService.getPhaseTemplate();
-  let agePhases = /* @__PURE__ */ derived(() => phaseTemplate.map((p) => {
+  let agePhases = /* @__PURE__ */ derived$1(() => phaseTemplate.map((p) => {
     const from = ageMin + p.from * get$1(lifespan);
     const to = ageMin + p.to * get$1(lifespan);
     const midpoint = (from + to) / 2;
@@ -11564,7 +11774,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       percent: (midpoint - ageMin) / get$1(lifespan) * 100
     };
   }));
-  let currentPhase = /* @__PURE__ */ derived(() => {
+  let currentPhase = /* @__PURE__ */ derived$1(() => {
     var _a;
     return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
   });
@@ -11987,70 +12197,19 @@ async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, 
   options.renderSheet = false;
 }
 class SR3EActor extends Actor {
-  constructor() {
-    super(...arguments);
-    __privateAdd(this, _documentStore, {});
-  }
-  /**
-   * Creates or retrieves a reactive Svelte store for a given data path within the actor's system data.
-   * The store is initialized with the current value at the specified path and updates both the system data
-   * and the underlying document when its value changes.
-   *
-   * @param {string} dataPath - The dot-separated path within the actor's system data to bind to the store.
-   * @returns {import('svelte/store').Writable<any>} A Svelte writable store bound to the specified data path.
-   * @throws {Error} If the store cannot be created or the data path is invalid.
-   */
-  getStore(dataPath) {
-    try {
-      const fullPath = `system.${dataPath}`;
-      if (!__privateGet(this, _documentStore)[dataPath]) {
-        let value = foundry.utils.getProperty(this.system, dataPath);
-        if (value && typeof value === "object") {
-          value = Array.isArray(value) ? [...value] : { ...value };
-        }
-        const store = writable(value);
-        store.subscribe((newValue) => {
-          foundry.utils.setProperty(this.system, dataPath, newValue);
-          this.update({ [fullPath]: newValue }, { render: false });
-        });
-        __privateGet(this, _documentStore)[dataPath] = store;
-      }
-      return __privateGet(this, _documentStore)[dataPath];
-    } catch (err) {
-      console.error(`Failed to create reactive store for "system.${dataPath}"`, err);
-      throw err;
-    }
-  }
-  _onDelete() {
-    super._onDelete();
-    for (const store of Object.values(__privateGet(this, _documentStore))) {
-      if (store._unsubscribe) {
-        store._unsubscribe();
-      }
-    }
-    __privateSet(this, _documentStore, {});
-  }
   get getInitiativeDice() {
     let dice = 1;
-    console.warn(
-      "SR3EActor.getInitiativeDice is not implemented. Returning 1 by default."
-    );
+    console.warn("SR3EActor.getInitiativeDice is not implemented. Returning 1 by default.");
     return dice;
   }
   get AugumentedReaction() {
     let augmentedReaction = 0;
-    console.warn(
-      "SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default."
-    );
+    console.warn("SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default.");
     return augmentedReaction;
   }
   async rollInitiative(options = {}) {
-    const initiativeDice = get(
-      getActorStore(this.id, stores.initiativeDice, 1)
-    );
-    const augmentedReaction = get(
-      getActorStore(this.id, stores.augmentedReaction)
-    );
+    const initiativeDice = get(getActorStore(this.id, stores.initiativeDice, 1));
+    const augmentedReaction = get(getActorStore(this.id, stores.augmentedReaction));
     const roll = await new Roll(`${initiativeDice}d6`).evaluate();
     const totalInit = roll.total + augmentedReaction;
     await roll.toMessage({
@@ -12060,9 +12219,7 @@ class SR3EActor extends Actor {
     if (this.combatant) {
       await this.combatant.update({ initiative: totalInit });
     } else if (game.combat) {
-      const combatant = game.combat.combatants.find(
-        (c) => c.actor.id === this.id
-      );
+      const combatant = game.combat.combatants.find((c) => c.actor.id === this.id);
       if (combatant) {
         await game.combat.setInitiative(combatant.id, totalInit);
       }
@@ -12072,9 +12229,7 @@ class SR3EActor extends Actor {
   async canAcceptMetahuman(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metahuman");
     if (existing.length > 1) {
-      const [oldest, ...rest] = existing.sort(
-        (a, b) => a.id.localeCompare(b.id)
-      );
+      const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
       const toDelete = rest.map((i) => i.id);
       await this.deleteEmbeddedDocuments("Item", toDelete);
     }
@@ -12099,7 +12254,6 @@ class SR3EActor extends Actor {
     });
   }
 }
-_documentStore = new WeakMap();
 function attachLightEffect(html2, activeTheme) {
   function rgb(r, g, b) {
     return `rgb(${r}, ${g}, ${b})`;
@@ -12272,13 +12426,13 @@ function TimeManager($$anchor, $$props) {
     Hooks.on("updateWorldTime", handler);
     return () => Hooks.off("updateWorldTime", handler);
   });
-  const year = /* @__PURE__ */ derived(() => get$1(currentDate).getFullYear());
-  const day = /* @__PURE__ */ derived(() => get$1(currentDate).getDate());
-  const hours = /* @__PURE__ */ derived(() => get$1(currentDate).getHours());
-  const minutes = /* @__PURE__ */ derived(() => get$1(currentDate).getMinutes());
-  const seconds = /* @__PURE__ */ derived(() => get$1(currentDate).getSeconds());
-  const weekdayAsString = /* @__PURE__ */ derived(() => get$1(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
-  const monthAsString = /* @__PURE__ */ derived(() => get$1(currentDate).toLocaleDateString(void 0, { month: "long" }));
+  const year = /* @__PURE__ */ derived$1(() => get$1(currentDate).getFullYear());
+  const day = /* @__PURE__ */ derived$1(() => get$1(currentDate).getDate());
+  const hours = /* @__PURE__ */ derived$1(() => get$1(currentDate).getHours());
+  const minutes = /* @__PURE__ */ derived$1(() => get$1(currentDate).getMinutes());
+  const seconds = /* @__PURE__ */ derived$1(() => get$1(currentDate).getSeconds());
+  const weekdayAsString = /* @__PURE__ */ derived$1(() => get$1(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
+  const monthAsString = /* @__PURE__ */ derived$1(() => get$1(currentDate).toLocaleDateString(void 0, { month: "long" }));
   var div = root$4();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
@@ -12300,7 +12454,7 @@ function TimeManager($$anchor, $$props) {
   var text_6 = child(div_10);
   var div_11 = sibling(h1, 2);
   var node = child(div_11);
-  const expression = /* @__PURE__ */ derived(() => localize(config().time.year));
+  const expression = /* @__PURE__ */ derived$1(() => localize(config().time.year));
   TimeActuatorInput(node, {
     get label() {
       return get$1(expression);
@@ -12310,7 +12464,7 @@ function TimeManager($$anchor, $$props) {
     }
   });
   var node_1 = sibling(node, 2);
-  const expression_1 = /* @__PURE__ */ derived(() => localize(config().time.month));
+  const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().time.month));
   TimeActuatorInput(node_1, {
     get label() {
       return get$1(expression_1);
@@ -12320,7 +12474,7 @@ function TimeManager($$anchor, $$props) {
     }
   });
   var node_2 = sibling(node_1, 2);
-  const expression_2 = /* @__PURE__ */ derived(() => localize(config().time.day));
+  const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().time.day));
   TimeActuatorInput(node_2, {
     get label() {
       return get$1(expression_2);
@@ -12330,7 +12484,7 @@ function TimeManager($$anchor, $$props) {
     }
   });
   var node_3 = sibling(node_2, 2);
-  const expression_3 = /* @__PURE__ */ derived(() => localize(config().time.hours));
+  const expression_3 = /* @__PURE__ */ derived$1(() => localize(config().time.hours));
   TimeActuatorInput(node_3, {
     get label() {
       return get$1(expression_3);
@@ -12340,7 +12494,7 @@ function TimeManager($$anchor, $$props) {
     }
   });
   var node_4 = sibling(node_3, 2);
-  const expression_4 = /* @__PURE__ */ derived(() => localize(config().time.minutes));
+  const expression_4 = /* @__PURE__ */ derived$1(() => localize(config().time.minutes));
   TimeActuatorInput(node_4, {
     get label() {
       return get$1(expression_4);
@@ -12350,7 +12504,7 @@ function TimeManager($$anchor, $$props) {
     }
   });
   var node_5 = sibling(node_4, 2);
-  const expression_5 = /* @__PURE__ */ derived(() => localize(config().time.seconds));
+  const expression_5 = /* @__PURE__ */ derived$1(() => localize(config().time.seconds));
   TimeActuatorInput(node_5, {
     get label() {
       return get$1(expression_5);
@@ -12438,7 +12592,7 @@ function KarmaManager($$anchor, $$props) {
   ];
   let filter = state("character");
   let listboxContent = state(null);
-  let anyReady = /* @__PURE__ */ derived(() => {
+  let anyReady = /* @__PURE__ */ derived$1(() => {
     var _a;
     return (_a = get$1(listboxContent)) == null ? void 0 : _a.some((a) => a.system.karma.readyForCommit);
   });
@@ -12759,7 +12913,7 @@ function ComboSearch($$anchor, $$props) {
   let inputElement = state(void 0);
   let wrapperElement = state(void 0);
   let dropdownElement;
-  let displayValue = /* @__PURE__ */ derived(() => {
+  let displayValue = /* @__PURE__ */ derived$1(() => {
     var _a;
     return ((_a = options().find((opt) => opt.value === value())) == null ? void 0 : _a.label) ?? "";
   });
@@ -13069,8 +13223,8 @@ function TransactionApp($$anchor, $$props) {
         children: ($$anchor3, $$slotProps) => {
           var div_5 = root_8();
           var node_8 = sibling(child(div_5), 2);
-          const expression = /* @__PURE__ */ derived(() => localize($$props.config.combosearch.search));
-          const expression_1 = /* @__PURE__ */ derived(() => localize($$props.config.combosearch.noresult));
+          const expression = /* @__PURE__ */ derived$1(() => localize($$props.config.combosearch.search));
+          const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.combosearch.noresult));
           ComboSearch(node_8, {
             get options() {
               return get$1(creditorOptions);

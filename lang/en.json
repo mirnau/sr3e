@@ -49,7 +49,7 @@
       "hacking": "Hacking Pool",
       "astral": "Astral Pool",
       "control": "Control Pool",
-      "spell": "Control Pool"
+      "spell": "Spell Pool"
     },
     "health": {
       "health": "Health",
@@ -84,7 +84,7 @@
       "npc": "Non Player Characters"
     },
     "magic": {
-      "magic": "Magic Tradition",
+      "magic": "Magic",
       "adept": "Adept",
       "magician": "Magician",
       "fullmage": "Full Mage",
