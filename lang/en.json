@@ -16,6 +16,7 @@
       "magic": "Magic Pool",
       "modifiers": "Attribute Modifiers",
       "quickness": "Quickness",
+      "reaction": "Reaction",
       "strength": "Strength",
       "willpower": "Willpower"
     },

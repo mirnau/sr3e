@@ -6786,7 +6786,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addNewSpecialization(_, $specializations, specializations, $$props, $value, value) {
+async function addNewSpecialization(_, $specializations, specializations, $$props, $valueStore, valueStore) {
   if (!$specializations()) throw new Error("Cannot add lingo: specialization store is null");
   if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
     if ($specializations().length > 0) {
@@ -6795,9 +6795,9 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
     }
     $specializations().push({
       name: localize($$props.config.skill.newspecialization),
-      value: $value() + 1
+      value: $valueStore() + 1
     });
-    store_set(value, $value() - 1);
+    store_set(valueStore, $valueStore() - 1);
   } else {
     $specializations().push({
       name: localize($$props.config.skill.newspecialization),
@@ -6812,18 +6812,18 @@ async function addNewSpecialization(_, $specializations, specializations, $$prop
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
-      if ($value() < 6) {
+      if ($valueStore() < 6) {
         let costForNextLevel;
-        if ($value() < linkedAttributeRating) {
+        if ($valueStore() < linkedAttributeRating) {
           costForNextLevel = 1;
         } else {
           costForNextLevel = 2;
         }
         if ($languageSkillPointsStore() >= costForNextLevel) {
-          store_set(value, $value() + 1);
+          store_set(valueStore, $valueStore() + 1);
           store_set(languageSkillPointsStore, $languageSkillPointsStore() - costForNextLevel);
         }
       }
@@ -6835,17 +6835,17 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
   if ($attributeAssignmentLocked()) {
     if ($isCharacterCreation()) {
-      if ($value() > 0) {
+      if ($valueStore() > 0) {
         let refundForCurrentLevel;
-        if ($value() > linkedAttributeRating) {
+        if ($valueStore() > linkedAttributeRating) {
           refundForCurrentLevel = 2;
         } else {
           refundForCurrentLevel = 1;
         }
-        store_set(value, $value() - 1);
+        store_set(valueStore, $valueStore() - 1);
         store_set(languageSkillPointsStore, $languageSkillPointsStore() + refundForCurrentLevel);
       }
     } else {
@@ -6856,7 +6856,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   await silentUpdate();
 }
-async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $value, value, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
+async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6877,14 +6877,14 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(valueStore, $valueStore() + 1);
       }
       let refund = 0;
-      for (let i = 1; i <= $value(); i++) {
+      for (let i = 1; i <= $valueStore(); i++) {
         refund += i <= linkedAttributeRating ? 1 : 2;
       }
       store_set(languageSkillPointsStore, $languageSkillPointsStore() + refund);
-      store_set(value, 0);
+      store_set(valueStore, 0);
       ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
     }
     await tick();
@@ -6900,22 +6900,23 @@ var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div>
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $value = () => store_get(value, "$value", $$stores);
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
   const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $languageSkillPointsStore = () => store_get(languageSkillPointsStore, "$languageSkillPointsStore", $$stores);
-  console.log("skill", $$props.skill);
-  let specializations = getActorStore$1($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations ?? []);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  let itemStoreManager = StoreManager.Subscribe($$props.skill);
+  let specializations = itemStoreManager.GetStore("languageSkill.specializations");
+  let valueStore = itemStoreManager.GetStore("languageSkill.value");
+  let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
   let isCharacterCreation = getActorStore$1($$props.actor.id, stores$1.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
   getActorStore$1($$props.actor.id, stores$1.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
-  let value = getActorStore$1($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
   let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let languageSkillPointsStore = $$props.actor.getStore("creation.languagePoints");
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let readWrite = /* @__PURE__ */ derived$1(() => $value() <= 1 ? 0 : Math.floor($value() / 2));
+  let readWrite = /* @__PURE__ */ derived$1(() => $valueStore() <= 1 ? 0 : Math.floor($valueStore() / 2));
   let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
   user_effect(() => {
     $$props.skill.update(
@@ -6934,7 +6935,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   async function silentUpdate() {
     await $$props.skill.update(
       {
-        "system.languageSkill.value": $value(),
+        "system.languageSkill.value": $valueStore(),
         "system.languageSkill.readwrite.value": get$1(readWrite)
       },
       { render: false }
@@ -6949,7 +6950,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
-    store_set(value, $value() + 1);
+    store_set(valueStore, $valueStore() + 1);
   }
   var div = root$v();
   var div_1 = child(div);
@@ -6981,8 +6982,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     attributeAssignmentLocked,
     $isCharacterCreation,
     isCharacterCreation,
-    $value,
-    value,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
     $languageSkillPointsStore,
     languageSkillPointsStore,
@@ -6996,8 +6997,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     attributeAssignmentLocked,
     $isCharacterCreation,
     isCharacterCreation,
-    $value,
-    value,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
     $languageSkillPointsStore,
     languageSkillPointsStore,
@@ -7012,8 +7013,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     isCharacterCreation,
     $specializations,
     specializations,
-    $value,
-    value,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
     $languageSkillPointsStore,
     languageSkillPointsStore
@@ -7024,8 +7025,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     $specializations,
     specializations,
     $$props,
-    $value,
-    value
+    $valueStore,
+    valueStore
   ];
   var text_4 = child(button_3);
   var div_13 = sibling(div_2, 2);
@@ -7063,12 +7064,12 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
       set_text(text2, $$props.skill.name);
-      set_text(text_1, $value());
+      set_text(text_1, $valueStore());
       set_text(text_2, `${$0 ?? ""}:`);
       set_text(text_3, get$1(readWrite));
       button.disabled = get$1(disableValueControls);
       button_1.disabled = get$1(disableValueControls);
-      button_3.disabled = $value() <= 1;
+      button_3.disabled = $valueStore() <= 1;
       set_text(text_4, $1);
       set_text(text_5, $2);
     },
@@ -7247,10 +7248,13 @@ function KnowledgeSkillCard($$anchor, $$props) {
   const $value = () => store_get(value, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let knowledgeSkill = proxy(skill().system.knowledgeSkill);
-  let specializations = getActorStore$1(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
+  let skillStoreManager = StoreManager.Subscribe(skill());
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
+  let value = skillStoreManager.GetStore("knowledgeSkill.value");
+  let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
   let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore$1(actor().id, skill().id, knowledgeSkill.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -9027,7 +9031,8 @@ sr3e.attributes = {
   initiative: "sr3e.attributes.initiative",
   modifiers: "sr3e.attributes.modifiers",
   limits: "sr3e.attributes.limits",
-  essence: "sr3e.attributes.essence"
+  essence: "sr3e.attributes.essence",
+  reaction: "sr3e.attributes.reaction"
 };
 sr3e.health = {
   health: "sr3e.health.health",
@@ -11198,7 +11203,19 @@ function SkillApp($$anchor, $$props) {
       label: localize($$props.config.skill.language)
     }
   ];
-  const attributeOptions = Object.entries($$props.config.attributes).map(([key, label]) => ({ value: key, label: localize(label) }));
+  const baseAttributeKeys = [
+    "body",
+    "quickness",
+    "strength",
+    "charisma",
+    "intelligence",
+    "willpower",
+    "reaction"
+  ];
+  const attributeOptions = baseAttributeKeys.map((key) => ({
+    value: key,
+    label: localize($$props.config.attributes[key])
+  }));
   function updateSkillType(type) {
     set(value, proxy(type));
     item2().update({ "system.skillType": type });

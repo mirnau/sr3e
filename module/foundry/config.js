@@ -19,6 +19,7 @@ sr3e.attributes = {
     modifiers: "sr3e.attributes.modifiers",
     limits: "sr3e.attributes.limits",
     essence: "sr3e.attributes.essence",
+    reaction: "sr3e.attributes.reaction",
 }
 
 sr3e.health = {

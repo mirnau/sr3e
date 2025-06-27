@@ -1,29 +1,27 @@
-<!-- Simplified HTML Structure -->
 <script>
 	import { getActorStore, stores } from "../../../stores/actorStores.js";
 	import { localize } from "../../../../services/utilities.js";
 	import { flags } from "../../../../services/commonConsts.js";
 	import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
-	import { mount } from "svelte";
+	import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+	import { onDestroy } from "svelte";
 
 	let { skill = {}, actor = {}, config = {} } = $props();
 
-	let knowledgeSkill = $state(skill.system.knowledgeSkill);
-	let specializations = getActorStore(
-		skill.id,
-		actor.id,
-		skill.system.knowledgeSkill.specializations,
-	);
+	let skillStoreManager = StoreManager.Subscribe(skill);
+
+	onDestroy(() => {
+		StoreManager.Unsubscribe(skill);
+	});
+
+	let value = skillStoreManager.GetStore("knowledgeSkill.value");
+	let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
 
 	let isShoppingState = getActorStore(
 		actor.id,
 		stores.isShoppingState,
 		actor.getFlag(flags.sr3e, flags.isShoppingState),
 	);
-
-	let value = getActorStore(actor.id, skill.id, knowledgeSkill.value);
-
-	let skillEditorInstance = null;
 
 	function openSkill() {
 		ActiveSkillEditorSheet.launch(actor, skill, config);
