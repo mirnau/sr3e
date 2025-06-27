@@ -15,8 +15,8 @@
 
    let storeManager = StoreManager.Subscribe(actor);
    let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
-   let knowledgePointStore = storeManager.GetStore("creation.knowledgePoint");
-   let languagePointStore = storeManager.GetStore("creation.languagePoint");
+   let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
+   let languagePointsStore = storeManager.GetStore("creation.languagePoints");
 
    let isCharacterCreation = getActorStore(
       actor.id,
@@ -28,12 +28,12 @@
    let pointList = $derived([
       { value: 0, text: attributePointsText },
       { value: $activeSkillPointsStore, text: activePointsText },
-      { value: $knowledgePointStore, text: knowledgePointsText },
-      { value: $languagePointStore, text: languagePointsText },
+      { value: $knowledgePointsStore, text: knowledgePointsText },
+      { value: $languagePointsStore, text: languagePointsText },
    ]);
 
    $effect(() => {
-      if ($activeSkillPointsStore === 0 && $knowledgePointStore === 0 && $languagePointStore === 0) {
+      if ($activeSkillPointsStore === 0 && $knowledgePointsStore === 0 && $languagePointsStore === 0) {
          (async () => {
             const confirmed = await foundry.applications.api.DialogV2.confirm({
                window: {

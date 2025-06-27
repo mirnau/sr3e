@@ -43,13 +43,13 @@
     for (const actor of listboxContent) {
       if (actor.system.karma.readyForCommit) {
         const karma = foundry.utils.deepClone(actor.system.karma);
-        const metahumanItem = actor.items.find((i) => i.type === "metahuman");
+        const metatypeItem = actor.items.find((i) => i.type === "metatype");
 
         karma.lifetimeKarma += karma.pendingKarmaReward;
 
-        if (metahumanItem?.system?.karma?.factor) {
+        if (metatypeItem?.system?.karma?.factor) {
           karma.karmaPool = Math.floor(
-            karma.lifetimeKarma * metahumanItem.system.karma.factor
+            karma.lifetimeKarma * metatypeItem.system.karma.factor
           );
         }
 

@@ -18,17 +18,6 @@
         skill.system.activeSkill.value,
     );
 
-
-    $effect(() => {
-        if (isCharacterCreation) {
-            if (specialization.value === 0) {
-                specialization.value = $baseValue + 1;
-                $baseValue -= 1;
-                dispatch("arrayChanged");
-            }
-        }
-    });
-
     $effect(() => {
         if (liveText !== specialization.name) {
             liveText = specialization.name;

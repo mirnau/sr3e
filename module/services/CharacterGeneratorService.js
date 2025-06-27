@@ -1,24 +1,24 @@
 export default class CharacterGeneratorService {
 	static VALID_PRIORITIES = ["A", "B", "C", "D", "E"];
 
-	static generatePriorityCombination({ metahumanOptions = [], magicOptions = [] } = {}) {
+	static generatePriorityCombination({ metatypeOptions = [], magicOptions = [] } = {}) {
 		const priorities = [...this.VALID_PRIORITIES];
 		console.log(`sr3d | Randomizer | Initial Priorities: ${priorities.join(", ")}`);
 
 		const weights = {
-			metahuman: { E: 64, C: 18, D: 18 },
+			metatype: { E: 64, C: 18, D: 18 },
 			magic:     { A: 2, B: 2, C: 32, D: 32, E: 32 }
 		};
 
 		const combination = {};
 
-		// If there's only one metahuman, use its actual priority
-		const isOnlyOneMeta = metahumanOptions.length === 1;
-		combination.metahuman = isOnlyOneMeta
-			? this._forcePriority(priorities, metahumanOptions[0].priority)
-			: this._draw(priorities, weights.metahuman);
+		// If there's only one metatype, use its actual priority
+		const isOnlyOneMeta = metatypeOptions.length === 1;
+		combination.metatype = isOnlyOneMeta
+			? this._forcePriority(priorities, metatypeOptions[0].priority)
+			: this._draw(priorities, weights.metatype);
 
-		console.log(`sr3d | Randomizer | Metahuman Priority: ${combination.metahuman}`);
+		console.log(`sr3d | Randomizer | metatype Priority: ${combination.metatype}`);
 
 		// Same logic for magic
 		const isOnlyOneMagic = magicOptions.length === 1;

@@ -18,23 +18,23 @@
     let characterAge = $state(25);
     let characterWeight = $state(75);
     let characterHeight = $state(175);
-    let selectedMetahuman = $state("");
+    let selectedmetatype = $state("");
     let selectedMagic = $state("");
     let selectedAttribute = $state("");
     let selectedSkill = $state("");
     let selectedResource = $state("");
     let chooseAnOption = localize(config.sheet.chooseanoption);
-    let metahumanItem = $state(null);
-    let metahumans = $state([]);
+    let metatypeItem = $state(null);
+    let metatypes = $state([]);
     let magics = $state([]);
 
     onMount(async () => {
-        metahumans = ItemDataService.getAllItemsOfType("metahuman");
+        metatypes = ItemDataService.getAllItemsOfType("metatype");
 
-        if (metahumans.length === 0) {
+        if (metatypes.length === 0) {
             const humanItem = ItemDataService.getDefaultHumanItem();
             await Item.create(humanItem);
-            metahumans = ItemDataService.getAllItemsOfType("metahuman");
+            metatypes = ItemDataService.getAllItemsOfType("metatype");
         }
 
         magics = ItemDataService.getAllItemsOfType("magic");
@@ -45,17 +45,17 @@
             magics = ItemDataService.getAllItemsOfType("magic");
         }
 
-        metahumanItem =
-            metahumans.find((m) => m.name === "Human") || metahumans[0];
+        metatypeItem =
+            metatypes.find((m) => m.name === "Human") || metatypes[0];
         console.log(
-            "Available metahumans:",
-            metahumans.map((m) => m.name),
+            "Available metatypes:",
+            metatypes.map((m) => m.name),
         );
-        console.log("Selected default metahuman:", metahumanItem?.name);
+        console.log("Selected default metatype:", metatypeItem?.name);
     });
 
-    const metahumanDropdownOptions = $derived(
-        ItemDataService.getAllMetaHumans(metahumans),
+    const metatypeDropdownOptions = $derived(
+        ItemDataService.getAllmetatypes(metatypes),
     );
     const magicsDropdownOptions = $derived(
         ItemDataService.getAllMagics(magics),
@@ -67,7 +67,7 @@
 
     let priority = CharacterGeneratorService.generatePriorityCombination(
         // svelte-ignore state_referenced_locally
-        metahumans[0],
+        metatypes[0],
         // svelte-ignore state_referenced_locally
         magics[0],
     );
@@ -75,18 +75,18 @@
     console.log("CHARACTER", actor);
 
     $effect(() => {
-        if (selectedMetahuman) {
-            const foundItem = metahumans.find(
-                (i) => i.id === selectedMetahuman,
+        if (selectedmetatype) {
+            const foundItem = metatypes.find(
+                (i) => i.id === selectedmetatype,
             );
             if (foundItem) {
-                metahumanItem = foundItem;
+                metatypeItem = foundItem;
             }
         } else {
             const fallback =
-                metahumans.find((m) => m.name === "Human") || metahumans[0];
+                metatypes.find((m) => m.name === "Human") || metatypes[0];
             if (fallback) {
-                metahumanItem = fallback;
+                metatypeItem = fallback;
             }
         }
     });
@@ -101,7 +101,7 @@
     });
 
     let canCreate = $derived(
-        selectedMetahuman &&
+        selectedmetatype &&
             selectedMagic &&
             selectedAttribute &&
             selectedSkill &&
@@ -109,7 +109,7 @@
     );
 
     let ageMin = 0;
-    let ageMax = $derived(metahumanItem?.system?.agerange?.max ?? 100);
+    let ageMax = $derived(metatypeItem?.system?.agerange?.max ?? 100);
 
     let lifespan = $derived(ageMax - ageMin);
     let phaseTemplate = ActorDataService.getPhaseTemplate();
@@ -138,8 +138,8 @@
 
     $effect(() => {
         const arr = [];
-        const m = metahumanDropdownOptions.find(
-            (o) => o.foundryitemid === selectedMetahuman,
+        const m = metatypeDropdownOptions.find(
+            (o) => o.foundryitemid === selectedmetatype,
         );
         if (m) arr.push(m.priority);
         const g = magicsDropdownOptions.find(
@@ -157,8 +157,8 @@
 
         console.log("Handle submit was entered");
 
-        const metahuman = metahumans.find((m) => m.id === selectedMetahuman);
-        const worldMetahuman = game.items.get(metahuman.id);
+        const metatype = metatypes.find((m) => m.id === selectedmetatype);
+        const worldmetatype = game.items.get(metatype.id);
 
         const selectedAttributeObj = attributPointDropdownOptions.find(
             (attr) => attr.priority === selectedAttribute,
@@ -168,28 +168,28 @@
         );
 
         let initBody =
-            metahuman.system.modifiers.body < 0
-                ? -metahuman.system.modifiers.body + 1
+            metatype.system.modifiers.body < 0
+                ? -metatype.system.modifiers.body + 1
                 : 1;
         let initStrength =
-            metahuman.system.modifiers.strength < 0
-                ? -metahuman.system.modifiers.strength + 1
+            metatype.system.modifiers.strength < 0
+                ? -metatype.system.modifiers.strength + 1
                 : 1;
         let initQuickness =
-            metahuman.system.modifiers.quickness < 0
-                ? -metahuman.system.modifiers.quickness + 1
+            metatype.system.modifiers.quickness < 0
+                ? -metatype.system.modifiers.quickness + 1
                 : 1;
         let initIntelligence =
-            metahuman.system.modifiers.intelligence < 0
-                ? -metahuman.system.modifiers.intelligence + 1
+            metatype.system.modifiers.intelligence < 0
+                ? -metatype.system.modifiers.intelligence + 1
                 : 1;
         let initWillpower =
-            metahuman.system.modifiers.willpower < 0
-                ? -metahuman.system.modifiers.willpower + 1
+            metatype.system.modifiers.willpower < 0
+                ? -metatype.system.modifiers.willpower + 1
                 : 1;
         let initCharisma =
-            metahuman.system.modifiers.charisma < 0
-                ? -metahuman.system.modifiers.charisma + 1
+            metatype.system.modifiers.charisma < 0
+                ? -metatype.system.modifiers.charisma + 1
                 : 1;
 
         let initTotal =
@@ -201,7 +201,7 @@
             initCharisma;
 
         if (initTotal > selectedAttributeObj.points)
-            throw new Error("The metahuman has excessive negative modifiers");
+            throw new Error("The metatype has excessive negative modifiers");
 
         let remainingPoints = selectedAttributeObj.points - initTotal;
 
@@ -217,21 +217,21 @@
             "system.attributes.charisma.value": initCharisma,
             "system.attributes.intelligence.value": initIntelligence,
             "system.attributes.willpower.value": initWillpower,
-            "system.attributes.body.meta": metahuman.system.modifiers.body,
+            "system.attributes.body.meta": metatype.system.modifiers.body,
             "system.attributes.quickness.meta":
-                metahuman.system.modifiers.quickness,
+                metatype.system.modifiers.quickness,
             "system.attributes.strength.meta":
-                metahuman.system.modifiers.strength,
+                metatype.system.modifiers.strength,
             "system.attributes.charisma.meta":
-                metahuman.system.modifiers.charisma,
+                metatype.system.modifiers.charisma,
             "system.attributes.intelligence.meta":
-                metahuman.system.modifiers.intelligence,
+                metatype.system.modifiers.intelligence,
             "system.attributes.willpower.meta":
-                metahuman.system.modifiers.willpower,
+                metatype.system.modifiers.willpower,
         });
 
         await actor.createEmbeddedDocuments("Item", [
-            worldMetahuman.toObject(),
+            worldmetatype.toObject(),
         ]);
 
         const magic = magics.find((m) => m.id === selectedMagic);
@@ -255,37 +255,37 @@
         let combo, metaOpts, magicOpts;
         do {
             combo = CharacterGeneratorService.generatePriorityCombination({
-                metahumanOptions: metahumanDropdownOptions,
+                metatypeOptions: metatypeDropdownOptions,
                 magicOptions: magicsDropdownOptions,
             });
-            metaOpts = metahumanDropdownOptions.filter(
-                (i) => i.priority === combo.metahuman,
+            metaOpts = metatypeDropdownOptions.filter(
+                (i) => i.priority === combo.metatype,
             );
             magicOpts = magicsDropdownOptions.filter(
                 (i) => i.priority === combo.magic,
             );
         } while (!metaOpts.length || !magicOpts.length);
 
-        selectedMetahuman =
+        selectedmetatype =
             metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid;
         selectedMagic =
             magicOpts[getRandomIntinRange(0, magicOpts.length - 1)]
                 .foundryitemid;
 
-        metahumanItem = metahumans.find((i) => i.id === selectedMetahuman);
+        metatypeItem = metatypes.find((i) => i.id === selectedmetatype);
 
         const ageSrc =
-            metahumanItem.system.agerange ?? metahumanItem.system.lifespan;
+            metatypeItem.system.agerange ?? metatypeItem.system.lifespan;
         characterAge = getRandomBellCurveWithMode(
             ageSrc.min,
             ageSrc.max,
             ageSrc.average,
         );
 
-        const h = metahumanItem.system.physical.height;
+        const h = metatypeItem.system.physical.height;
         characterHeight = getRandomBellCurveWithMode(h.min, h.max, h.average);
 
-        const w = metahumanItem.system.physical.weight;
+        const w = metatypeItem.system.physical.weight;
         characterWeight = getRandomBellCurveWithMode(w.min, w.max, w.average);
 
         selectedAttribute = combo.attribute;
@@ -294,7 +294,7 @@
     }
 
     function handleClear() {
-        selectedMetahuman = "";
+        selectedmetatype = "";
         selectedMagic = "";
         selectedAttribute = "";
         selectedSkill = "";
@@ -304,8 +304,8 @@
         characterHeight = 175;
         characterWeight = 75;
 
-        metahumanItem =
-            metahumans.find((m) => m.name === "Human") || metahumans[0];
+        metatypeItem =
+            metatypes.find((m) => m.name === "Human") || metatypes[0];
     }
 </script>
 
@@ -319,11 +319,11 @@
                     <div class="sr3e-inner-background">
                         <div class="image-mask">
                             <img
-                                src={metahumanItem?.img ?? ""}
+                                src={metatypeItem?.img ?? ""}
                                 role="presentation"
                                 data-edit="img"
-                                title={metahumanItem?.name ?? ""}
-                                alt={metahumanItem?.name ?? ""}
+                                title={metatypeItem?.name ?? ""}
+                                alt={metatypeItem?.name ?? ""}
                             />
                         </div>
                         <input
@@ -346,8 +346,8 @@
                         <input
                             id="age-slider"
                             type="range"
-                            min={metahumanItem?.system?.agerange?.min ?? 0}
-                            max={metahumanItem?.system?.agerange?.max ?? 100}
+                            min={metatypeItem?.system?.agerange?.min ?? 0}
+                            max={metatypeItem?.system?.agerange?.max ?? 100}
                             step="1"
                             bind:value={characterAge}
                         />
@@ -358,9 +358,9 @@
                         <input
                             id="height-slider"
                             type="range"
-                            min={metahumanItem?.system?.physical?.height?.min ??
+                            min={metatypeItem?.system?.physical?.height?.min ??
                                 0}
-                            max={metahumanItem?.system?.physical?.height?.max ??
+                            max={metatypeItem?.system?.physical?.height?.max ??
                                 200}
                             step="1"
                             bind:value={characterHeight}
@@ -371,9 +371,9 @@
                         <input
                             id="weight-slider"
                             type="range"
-                            min={metahumanItem?.system?.physical?.weight?.min ??
+                            min={metatypeItem?.system?.physical?.weight?.min ??
                                 0}
-                            max={metahumanItem?.system?.physical?.weight?.max ??
+                            max={metatypeItem?.system?.physical?.weight?.max ??
                                 200}
                             step="1"
                             bind:value={characterWeight}
@@ -387,17 +387,17 @@
                     <div class="sr3e-inner-background">
                         <div>
                             <div class="creation-dropdwn">
-                                <h3>{localize(config.traits.metahumanity)}</h3>
+                                <h3>{localize(config.traits.metaType)}</h3>
                                 <select
-                                    id="metahuman-select"
-                                    bind:value={selectedMetahuman}
+                                    id="metatype-select"
+                                    bind:value={selectedmetatype}
                                 >
                                     <option value="" disabled selected hidden
                                         >{chooseAnOption}</option
                                     >
-                                    {#each metahumanDropdownOptions as metahuman}
-                                        <option value={metahuman.foundryitemid}>
-                                            {metahuman.priority}: {metahuman.name}
+                                    {#each metatypeDropdownOptions as metatype}
+                                        <option value={metatype.foundryitemid}>
+                                            {metatype.priority}: {metatype.name}
                                         </option>
                                     {/each}
                                 </select>

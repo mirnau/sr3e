@@ -22,27 +22,27 @@
    let storeManager = StoreManager.Subscribe(actor);
 
    let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-   let attributePointStore = storeManager.GetStore("creation.attributePoints");
-   let activeSkillPoints = storeManager.GetStore("creation.activePoints");
-   let knowledgePointStore = storeManager.GetStore("creation.knowledgePoint");
-   let languagePointStore = storeManager.GetStore("creation.languagePoint");
+   let attributePointsStore = storeManager.GetStore("creation.attributePoints");
+   let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
+   let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
+   let languagePointsStore = storeManager.GetStore("creation.languagePoints");
 
    // Make pointList reactive by using derived stores
    let pointList = $derived([
-      { value: $attributePointStore, text: attributePointsText },
-      { value: $activeSkillPoints, text: activePointsText },
-      { value: $knowledgePointStore, text: knowledgePointsText },
-      { value: $languagePointStore, text: languagePointsText },
+      { value: $attributePointsStore, text: attributePointsText },
+      { value: $activeSkillPointsStore, text: activePointsText },
+      { value: $knowledgePointsStore, text: knowledgePointsText },
+      { value: $languagePointsStore, text: languagePointsText },
    ]);
 
    // Update dependent values when intelligence changes
    $effect(() => {
-      knowledgePointStore.set($intelligence.sum * 5);
-      languagePointStore.set(Math.floor($intelligence.sum * 1.5));
+      knowledgePointsStore.set($intelligence.sum * 5);
+      languagePointsStore.set(Math.floor($intelligence.sum * 1.5));
    });
 
    $effect(() => {
-      if ($attributePointStore === 0 && $attributeAssignmentLocked === false) {
+      if ($attributePointsStore === 0 && $attributeAssignmentLocked === false) {
          (async () => {
             const confirmed = await foundry.applications.api.DialogV2.confirm({
                window: {

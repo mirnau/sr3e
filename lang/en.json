@@ -44,12 +44,12 @@
       "details": "Details"
     },
     "dicepools": {
-      "dicepools": "Dice Pools",
-      "combat": "Combat Pool",
-      "hacking": "Hacking Pool",
-      "astral": "Astral Pool",
-      "control": "Control Pool",
-      "spell": "Spell Pool"
+      "dicepools": "Dice",
+      "combat": "Combat",
+      "hacking": "Hacking",
+      "astral": "Astral",
+      "control": "Control",
+      "spell": "Spell"
     },
     "health": {
       "health": "Health",
@@ -183,8 +183,8 @@
       "age": "Age",
       "agerange": "Playable Age Range",
       "height": "Height",
-      "metahuman": "Metahuman",
-      "metahumanity": "Metahumanity",
+      "metatype": "metatype",
+      "metaType": "metaType",
       "weight": "Weight",
       "child": "Child",
       "adolecent": "Adolecent",

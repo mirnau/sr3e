@@ -48,8 +48,8 @@ export default class SR3EActor extends Actor {
       return totalInit; // Return the total value, not the roll object
    }
 
-   async canAcceptMetahuman(incomingItem) {
-      const existing = this.items.filter((i) => i.type === "metahuman");
+   async canAcceptmetatype(incomingItem) {
+      const existing = this.items.filter((i) => i.type === "metatype");
 
       if (existing.length > 1) {
          const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
@@ -57,7 +57,7 @@ export default class SR3EActor extends Actor {
          await this.deleteEmbeddedDocuments("Item", toDelete);
       }
 
-      const current = this.items.find((i) => i.type === "metahuman");
+      const current = this.items.find((i) => i.type === "metatype");
       if (!current) return "accept";
 
       const incomingName = incomingItem.name.toLowerCase();
@@ -73,13 +73,13 @@ export default class SR3EActor extends Actor {
       return "reject";
    }
 
-   async replaceMetahuman(newItem) {
-      const current = this.items.find((i) => i.type === "metahuman");
+   async replacemetatype(newItem) {
+      const current = this.items.find((i) => i.type === "metatype");
       if (current) await this.deleteEmbeddedDocuments("Item", [current.id]);
 
       await this.createEmbeddedDocuments("Item", [newItem.toObject()]);
       await this.update({
-         "system.profile.metaHumanity": newItem.name,
+         "system.profile.metaType": newItem.name,
          "system.profile.img": newItem.img,
       });
    }

@@ -1,336 +1,282 @@
 <script>
-  import { openFilePicker, localize } from "../../../../services/utilities.js";
-  import SpecializationCard from "./SpecializationCard.svelte";
-  import { onDestroy, tick } from "svelte";
-  import { getActorStore, stores } from "../../../stores/actorStores.js";
-  import { flags } from "../../../../services/commonConsts.js";
-  import { get, set } from "svelte/store";
-  import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
-  import Karma from "../Karma.svelte";
-  import { onMount } from "svelte";
+   import { openFilePicker, localize } from "../../../../services/utilities.js";
+   import SpecializationCard from "./SpecializationCard.svelte";
+   import { onDestroy, tick } from "svelte";
+   import { getActorStore, stores } from "../../../stores/actorStores.js";
+   import { flags } from "../../../../services/commonConsts.js";
+   import { get, set } from "svelte/store";
+   import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import Karma from "../Karma.svelte";
+   import { onMount } from "svelte";
 
-  let { skill, actor, config, app } = $props();
+   let { skill, actor, config, app } = $props();
 
-  let karmaShoppingService = null;
+   let actorStoreManager = StoreManager.Subscribe(actor);
+   let itemStoreManager = StoreManager.Subscribe(skill);
 
-  onMount(() => {
-    karmaShoppingService ??= new KarmaShoppingService(skill);
-  });
+   let specializations = itemStoreManager.GetStore("activeSkill.specializations");
+   let activeSkillPointsStore = actorStoreManager.GetStore("creation.activePoints");
+   let valueStore = itemStoreManager.GetStore("activeSkill.value");
 
-  onDestroy(() => {
-    karmaShoppingService = null;
-  });
+   let karmaShoppingService = null;
 
-  let specializations = getActorStore(
-    skill.id,
-    actor.id,
-    skill.system.activeSkill.specializations
-  );
+   onMount(() => {
+      karmaShoppingService ??= new KarmaShoppingService(skill);
+   });
 
-  let isCharacterCreation = getActorStore(
-    actor.id,
-    stores.isCharacterCreation,
-    actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
-  );
+   onDestroy(() => {
+      karmaShoppingService = null;
+   });
 
-  const activeSkillsIdArrayStore = getActorStore(
-    actor.id,
-    stores.activeSkillsIds,
-    actor.items
-      .filter(
-        (item) => item.type === "skill" && item.system.skillType === "active"
-      )
-      .map((item) => item.id)
-  );
+   let isCharacterCreation = getActorStore(
+      actor.id,
+      stores.isCharacterCreation,
+      actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
+   );
 
-  let disableValueControls = $derived(
-    $isCharacterCreation && $specializations.length > 0
-  );
+   let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
 
-  $effect(() => {
-    skill.update(
-      { "system.activeSkill.specializations": $specializations },
-      { render: false }
-    );
-  });
+   let layoutMode = $state("single");
 
-  let layoutMode = $state("single");
+   let linkedAttribute = skill.system.activeSkill.linkedAttribute;
+   let linkedAttributeRating = $state(
+      Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.value`)) +
+         Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
+   );
 
-  let value = getActorStore(actor.id, skill.id, skill.system.activeSkill.value);
+   let attributeAssignmentLocked = getActorStore(
+      actor.id,
+      stores.attributeAssignmentLocked,
+      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
+   );
 
-  let linkedAttribute = skill.system.activeSkill.linkedAttribute;
-  let linkedAttributeRating = $state(
-    Number(
-      foundry.utils.getProperty(
-        actor,
-        `system.attributes.${linkedAttribute}.value`
-      )
-    ) +
-      Number(
-        foundry.utils.getProperty(
-          actor,
-          `system.attributes.${linkedAttribute}.mod`
-        )
-      )
-  );
+   async function addNewSpecialization() {
+      let newSkillSpecialization;
 
-  let activeSkillPointsStore = actor.getStore(`creation.activePoints`);
+      if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+         if ($specializations.length > 0) {
+            ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
+            return;
+         }
 
-  let attributeAssignmentLocked = getActorStore(
-    actor.id,
-    stores.attributeAssignmentLocked,
-    actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-  );
+         newSkillSpecialization = {
+            name: localize(config.skill.newspecialization),
+            value: $valueStore + 1,
+         };
 
-  async function addNewSpecialization() {
-    if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-      if ($specializations.length > 0) {
-        ui.notifications.info(
-          localize(config.skill.onlyonespecializationatcreation)
-        );
-        return;
-      }
-    }
-
-    let newSkill = {
-      name: localize(config.skill.newspecialization),
-      value: 0,
-    };
-
-    $specializations.push(newSkill);
-    $specializations = [...$specializations];
-
-    await skill.update(
-      {
-        "system.activeSkill.specializations": $specializations,
-      },
-      { render: false }
-    );
-  }
-
-  async function increment() {
-    if ($attributeAssignmentLocked) {
-      if ($isCharacterCreation) {
-        if ($value < 6) {
-          let costForNextLevel;
-
-          if ($value < linkedAttributeRating) {
-            costForNextLevel = 1;
-          } else {
-            costForNextLevel = 2;
-          }
-
-          if ($activeSkillPointsStore >= costForNextLevel) {
-            $value += 1;
-            $activeSkillPointsStore -= costForNextLevel;
-          }
-        }
+         $valueStore -= 1;
       } else {
-        karmaShoppingService = new KarmaShoppingService(skill);
-
-        console.log("TODO: implement karma based shopping");
+         console.log("TODO: create a addSpecialization procedure for Karma");
       }
-    } else {
-      ui.notifications.warn(
-        localize(config.notifications.assignattributesfirst)
-      );
-    }
-    silentUpdate();
-  }
 
-  async function decrement() {
-    if ($attributeAssignmentLocked) {
-      if ($isCharacterCreation) {
-        if ($value > 0) {
-          let refundForCurrentLevel;
+      if (newSkillSpecialization) {
+         $specializations.push(newSkillSpecialization);
+         $specializations = [...$specializations];
+      }
+   }
 
-          if ($value > linkedAttributeRating) {
-            refundForCurrentLevel = 2;
-          } else {
-            refundForCurrentLevel = 1;
-          }
+   async function increment() {
+      if ($attributeAssignmentLocked) {
+         if ($isCharacterCreation) {
+            if ($valueStore < 6) {
+               let costForNextLevel;
 
-          $value -= 1;
-          $activeSkillPointsStore += refundForCurrentLevel;
-        }
+               if ($valueStore < linkedAttributeRating) {
+                  costForNextLevel = 1;
+               } else {
+                  costForNextLevel = 2;
+               }
+
+               if ($activeSkillPointsStore >= costForNextLevel) {
+                  $valueStore += 1;
+                  $activeSkillPointsStore -= costForNextLevel;
+               }
+            }
+         } else {
+            karmaShoppingService = new KarmaShoppingService(skill);
+
+            console.log("TODO: implement karma based shopping");
+         }
       } else {
-        console.log("TODO: implement karma based shopping");
+         ui.notifications.warn(localize(config.notifications.assignattributesfirst));
       }
-    } else {
-      ui.notifications.warn(
-        localize(config.notifications.assignattributesfirst)
-      );
-    }
+   }
 
-    await silentUpdate();
-  }
+   async function decrement() {
+      if ($attributeAssignmentLocked) {
+         if ($isCharacterCreation) {
+            if ($valueStore > 0) {
+               let refundForCurrentLevel;
 
-  async function silentUpdate() {
-    await skill.update(
-      { "system.activeSkill.value": $value },
-      { render: false }
-    );
+               if ($valueStore > linkedAttributeRating) {
+                  refundForCurrentLevel = 2;
+               } else {
+                  refundForCurrentLevel = 1;
+               }
 
-    await actor.update(
-      { "system.creation.activePoints": $activeSkillPointsStore },
-      { render: false }
-    );
-  }
-
-  $effect(() => {
-    console.log("VALUE CHANGED", $value);
-  });
-
-  async function deleteThis() {
-    const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: {
-        title: localize(config.modal.deleteskilltitle),
-      },
-      content: localize(config.modal.deleteskill),
-      yes: {
-        label: localize(config.modal.confirm),
-        default: true,
-      },
-      no: {
-        label: localize(config.modal.decline),
-      },
-      modal: true,
-      rejectClose: true,
-    });
-
-    if (confirmed) {
-      if ($isCharacterCreation) {
-        if ($specializations.length > 0) {
-          $specializations = [];
-
-          await tick();
-
-          $value += 1;
-        }
-
-        let refund = 0;
-        for (let i = 1; i <= $value; i++) {
-          refund += i <= linkedAttributeRating ? 1 : 2;
-        }
-
-        $activeSkillPointsStore += refund;
-        $value = 0;
-
-        ui.notifications.info(localize(config.notifications.skillpointsrefund));
+               $valueStore -= 1;
+               $activeSkillPointsStore += refundForCurrentLevel;
+            }
+         } else {
+            console.log("TODO: implement karma based shopping");
+         }
+      } else {
+         ui.notifications.warn(localize(config.notifications.assignattributesfirst));
       }
+   }
 
-      await tick();
+   async function deleteThis() {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: {
+            title: localize(config.modal.deleteskilltitle),
+         },
+         content: localize(config.modal.deleteskill),
+         yes: {
+            label: localize(config.modal.confirm),
+            default: true,
+         },
+         no: {
+            label: localize(config.modal.decline),
+         },
+         modal: true,
+         rejectClose: true,
+      });
 
-      if (skill) {
-        const id = skill.id;
-        await actor.deleteEmbeddedDocuments("Item", [id], {
-          render: false,
-        });
+      if (confirmed) {
+         if ($isCharacterCreation) {
+            if ($specializations.length > 0) {
+               $specializations = [];
 
-        const store = getActorStore(actor.id, stores.activeSkillsIds);
-        const current = get(store);
-        store.set(current.filter((sid) => sid !== id));
+               await tick();
+
+               $valueStore += 1;
+            }
+
+            let refund = 0;
+            for (let i = 1; i <= $valueStore; i++) {
+               refund += i <= linkedAttributeRating ? 1 : 2;
+            }
+
+            $activeSkillPointsStore += refund;
+            $valueStore = 0;
+
+            ui.notifications.info(localize(config.notifications.skillpointsrefund));
+         }
+
+         await tick();
+
+         if (skill) {
+            const id = skill.id;
+            await actor.deleteEmbeddedDocuments("Item", [id], {
+               render: false,
+            });
+
+            const store = getActorStore(actor.id, stores.activeSkillsIds);
+            const current = get(store);
+            store.set(current.filter((sid) => sid !== id));
+         }
+
+         app.close();
       }
+   }
 
-      app.close();
-    }
-  }
-
-  function deleteSpecialization(event) {
-    const toDelete = event.detail.specialization;
-    $specializations = $specializations.filter((s) => s !== toDelete);
-  }
+   function deleteSpecialization(event) {
+      const toDelete = event.detail.specialization;
+      $specializations = $specializations.filter((s) => s !== toDelete);
+      $valueStore += 1;
+   }
 </script>
 
 <div class="sr3e-waterfall-wrapper">
-  <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
-    <div class="item-sheet-component">
-      <div class="sr3e-inner-background-container">
-        <div class="fake-shadow"></div>
-        <div class="sr3e-inner-background">
-          <div class="image-mask">
-            <img
-              src={skill.img}
-              role="presentation"
-              data-edit="img"
-              title={skill.name}
-              alt={skill.name}
-              onclick={async () => openFilePicker(actor)}
-            />
-          </div>
-          <div class="stat-grid single-column">
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <h1>{skill.name}</h1>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <h1>{$value}</h1>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card-background"></div>
-              <div class="buttons-vertical-distribution">
-                <button
-                  class="header-control icon sr3e-toolbar-button"
-                  aria-label="Toggle card span"
-                  onclick={increment}
-                  disabled={disableValueControls}
-                >
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-                <button
-                  class="header-control icon sr3e-toolbar-button"
-                  aria-label="Toggle card span"
-                  onclick={decrement}
-                  disabled={disableValueControls}
-                >
-                  <i class="fa-solid fa-minus"></i>
-                </button>
+   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+      <div class="item-sheet-component">
+         <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+               <div class="image-mask">
+                  <img
+                     src={skill.img}
+                     role="presentation"
+                     data-edit="img"
+                     title={skill.name}
+                     alt={skill.name}
+                     onclick={async () => openFilePicker(actor)}
+                  />
+               </div>
+               <div class="stat-grid single-column">
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <h1>{skill.name}</h1>
+                  </div>
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <h1>{$valueStore}</h1>
+                  </div>
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <div class="buttons-vertical-distribution">
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Toggle card span"
+                           onclick={increment}
+                           disabled={disableValueControls}
+                        >
+                           <i class="fa-solid fa-plus"></i>
+                        </button>
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Toggle card span"
+                           onclick={decrement}
+                           disabled={disableValueControls}
+                        >
+                           <i class="fa-solid fa-minus"></i>
+                        </button>
 
-                <button
-                  class="header-control icon sr3e-toolbar-button"
-                  aria-label="Toggle card span"
-                  onclick={deleteThis}
-                >
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-                <button
-                  class="header-control icon sr3e-toolbar-button"
-                  aria-label="Toggle card span"
-                  onclick={addNewSpecialization}
-                  disabled={$value <= 1}
-                >
-                  {localize(config.skill.addspecialization)}
-                </button>
-              </div>
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Toggle card span"
+                           onclick={deleteThis}
+                        >
+                           <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Toggle card span"
+                           onclick={addNewSpecialization}
+                           disabled={$valueStore <= 1}
+                        >
+                           {localize(config.skill.addspecialization)}
+                        </button>
+                     </div>
+                  </div>
+               </div>
             </div>
-          </div>
-        </div>
+         </div>
       </div>
-    </div>
-    <div class="item-sheet-component">
-      <div class="sr3e-inner-background-container">
-        <div class="fake-shadow"></div>
-        <div class="sr3e-inner-background">
-          <h1 class="uppercase">
-            {localize(config.skill.specializations)}
-          </h1>
-          <div class="stat-grid single-column">
-            {#each $specializations as specialization, i}
-              <SpecializationCard
-                bind:specialization={$specializations[i]}
-                {actor}
-                {skill}
-                on:arrayChanged={() => {
-                  $specializations = [...$specializations];
-                  console.log("array was reassigned");
-                }}
-                on:delete={deleteSpecialization}
-              />
-            {/each}
-          </div>
-        </div>
+      <div class="item-sheet-component">
+         <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+               <h1 class="uppercase">
+                  {localize(config.skill.specializations)}
+               </h1>
+               <div class="stat-grid single-column">
+                  {#each $specializations as specialization, i}
+                     <SpecializationCard
+                        bind:specialization={$specializations[i]}
+                        {actor}
+                        {skill}
+                        on:arrayChanged={() => {
+                           $specializations = [...$specializations];
+                           console.log("array was reassigned");
+                        }}
+                        on:delete={deleteSpecialization}
+                     />
+                  {/each}
+               </div>
+            </div>
+         </div>
       </div>
-    </div>
-  </div>
+   </div>
 </div>

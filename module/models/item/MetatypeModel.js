@@ -1,4 +1,4 @@
-export default class MetahumanModel extends foundry.abstract.TypeDataModel {
+export default class MetatypeModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
 

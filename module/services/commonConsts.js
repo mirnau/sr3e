@@ -1,8 +1,8 @@
 export const hooks = {
   renderCharacterActorSheet: "renderCharacterActorSheet",
   closeCharacterActorSheet: "closeCharacterActorSheet",
-  renderMetahumanItemSheet: "renderMetahumanItemSheet",
-  closeMetahumanItemSheet: "closeMetahumanItemSheet",
+  renderMetatypeItemSheet: "renderMetatypeItemSheet",
+  closeMetatypeItemSheet: "closeMetatypeItemSheet",
   renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
   renderChatMessageHTML: "renderChatMessageHTML",

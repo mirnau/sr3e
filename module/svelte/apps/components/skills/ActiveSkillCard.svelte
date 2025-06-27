@@ -4,26 +4,28 @@
 	import { localize } from "../../../../services/utilities.js";
 	import { flags } from "../../../../services/commonConsts.js";
 	import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
-	import { mount } from "svelte";
+	import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+	import { onDestroy } from "svelte";
 
 	let { skill = {}, actor = {}, config = {} } = $props();
 
-	let activeSkill = $state(skill.system.activeSkill);
-	let specializations = getActorStore(
-		skill.id,
-		actor.id,
-		skill.system.activeSkill.specializations,
-	);
+	// Store managers
+	let skillStoreManager = StoreManager.Subscribe(skill);
 
+	onDestroy(() => {
+		StoreManager.Unsubscribe(skill);
+	});
+
+	// Stores from StoreManager
+	let valueStore = skillStoreManager.GetStore("activeSkill.value");
+	let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
+
+	// Legacy stores that still need getActorStore (flags don't follow system path)
 	let isShoppingState = getActorStore(
 		actor.id,
 		stores.isShoppingState,
 		actor.getFlag(flags.sr3e, flags.isShoppingState),
 	);
-
-	let value = getActorStore(actor.id, skill.id, activeSkill.value);
-
-	let skillEditorInstance = null;
 
 	function openSkill() {
 		ActiveSkillEditorSheet.launch(actor, skill, config);
@@ -45,11 +47,11 @@
 		<div class="core-skill">
 			<div class="skill-background-layer"></div>
 			<h6 class="no-margin skill-name">{skill.name}</h6>
-			<h1 class="skill-value">{$value}</h1>
+			<h1 class="skill-value">{$valueStore}</h1>
 		</div>
 
 		<div class="specialization-container">
-			{#each $specializations as specialization}
+			{#each $specializationsStore as specialization}
 				<div class="skill-specialization-card">
 					<div class="specialization-background"></div>
 					<div class="specialization-name">{specialization.name}</div>

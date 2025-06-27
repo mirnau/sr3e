@@ -23,9 +23,9 @@
   let imgName = $state("");
 
   $effect(() => {
-    const metahuman = actor.items.find((i) => i.type === "metahuman");
-    imgPath = metahuman.img;
-    imgName = metahuman.name;
+    const metatype = actor.items.find((i) => i.type === "metatype");
+    imgPath = metatype.img;
+    imgName = metatype.name;
   });
 
   function triggerMasonryReflow() {

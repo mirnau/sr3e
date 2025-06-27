@@ -6,8 +6,8 @@ import { hooks, flags } from "./module/services/commonConsts.js";
 import { injectFooterIntoWindowApp } from "./module/foundry/hooks/renderApplicationV2/injectFooterIntoWindowApp.js";
 import { localize } from "./module/services/utilities.js";
 import injectCssSelectors from "./module/foundry/hooks/renderApplicationV2/injectCssSelectors.js";
-import MetahumanModel from "./module/models/item/MetahumanModel.js";
-import MetahumanItemSheet from "./module/foundry/sheets/MetahumanItemSheet.js";
+import MetatypeModel from "./module/models/item/MetatypeModel.js";
+import MetatypeItemSheet from "./module/foundry/sheets/MetatypeItemSheet.js";
 import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
 import MagicModel from "./module/models/item/MagicModel.js";
 import WeaponItemSheet from "./module/foundry/sheets/WeaponItemSheet.js";
@@ -75,7 +75,7 @@ function configureProject() {
     character: localize(CONFIG.sr3e.sheet.playercharacter),
   };
   CONFIG.Item.typeLabels = {
-    metahuman: localize(CONFIG.sr3e.traits.metahuman),
+    metatype: localize(CONFIG.sr3e.traits.metatype),
     magic: localize(CONFIG.sr3e.magic.magic),
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
@@ -319,9 +319,9 @@ function registerHooks() {
         },
         {
           docClass: Item,
-          type: "metahuman",
-          model: MetahumanModel,
-          sheet: MetahumanItemSheet,
+          type: "metatype",
+          model: MetatypeModel,
+          sheet: MetatypeItemSheet,
         },
         {
           docClass: Item,

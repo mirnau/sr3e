@@ -19,10 +19,10 @@
       actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
    );
 
-   let metaHuman = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metahuman") : null);
+   let metatype = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metatype") : null);
 
    let attributeLimit = $derived(
-      key === "magic" || !("meta" in stat) ? null : (metaHuman?.system?.attributeLimits?.[key] ?? 0)
+      key === "magic" || !("meta" in stat) ? null : (metatype?.system?.attributeLimits?.[key] ?? 0)
    );
 
    let isMinLimit = $derived($value <= 1);

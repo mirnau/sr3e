@@ -185,8 +185,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       return;
     }
 
-    if (droppedItem.type === "metahuman") {
-      this.handleMetahuman(droppedItem);
+    if (droppedItem.type === "metatype") {
+      this.handlemetatype(droppedItem);
       return super._onDrop(event);
     }
 
@@ -228,11 +228,11 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
     targetStore.update(current => [...current, createdItem.id]);
   }
 
-  async handleMetahuman(droppedItem) {
-    const result = await this.actor.canAcceptMetahuman(droppedItem);
+  async handlemetatype(droppedItem) {
+    const result = await this.actor.canAcceptmetatype(droppedItem);
 
     if (result === "accept") {
-      await this.actor.replaceMetahuman(droppedItem);
+      await this.actor.replacemetatype(droppedItem);
     } else if (result === "goblinize") {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         title: "Goblinization",
@@ -243,10 +243,10 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       });
 
       if (confirmed) {
-        await this.actor.replaceMetahuman(droppedItem);
+        await this.actor.replacemetatype(droppedItem);
       }
     } else {
-      ui.notifications.info("Only one metahuman type allowed.");
+      ui.notifications.info("Only one metatype type allowed.");
     }
   }
 }

@@ -6,18 +6,18 @@ export default class ItemDataService {
         return game.items.filter((item) => item.type === name);
     }
 
-    static getAllMetaHumans(metahumans) {
-        return metahumans
+    static getAllmetatypes(metatypes) {
+        return metatypes
             .filter(m =>
                 m &&
                 typeof m.name === "string" &&
                 typeof m.id === "string" &&
                 m.system?.priority
             )
-            .map(metahuman => ({
-                name: metahuman.name,
-                foundryitemid: metahuman.id,
-                priority: metahuman.system.priority,
+            .map(metatype => ({
+                name: metatype.name,
+                foundryitemid: metatype.id,
+                priority: metatype.system.priority,
             }));
     }
 
@@ -47,8 +47,8 @@ export default class ItemDataService {
     
     static getDefaultHumanItem() {
         return {
-            name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
-            type: "metahuman",
+            name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
+            type: "metatype",
             img: "systems/sr3e/textures/ai-generated/humans.webp",
             system: {
                 agerange: { min: 0, average: 30, max: 100 },
@@ -73,8 +73,7 @@ export default class ItemDataService {
                     willpower: 6
                 },
                 movement: {
-                    base: 5,
-                    modifier: 0
+                    modifier: 3
                 },
                 karma: {
                     factor: 0.1

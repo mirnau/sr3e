@@ -25,7 +25,7 @@
         "broadcaster"
     ],
     "itemTypes": [
-        "metahuman",
+        "metatype",
         "magic",
         "weapon",
         "ammunition",
@@ -38,7 +38,7 @@
             "storytellerscreen": {}
         },
         "Item": {
-            "metahuman": {},
+            "metatype": {},
             "magic": {},
             "weapon": {},
             "ammunition": {},
