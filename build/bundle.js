@@ -3937,6 +3937,17 @@ const _StoreManager = class _StoreManager {
     }
     return __privateGet(this, _persistentStore)[dataPath];
   }
+  GetFlagStore(flag) {
+    if (!__privateGet(this, _persistentStore)[flag]) {
+      const currentValue = __privateGet(this, _document).getFlag(flags.sr3e, flag);
+      const store = writable(currentValue);
+      store.subscribe((newValue) => {
+        __privateGet(this, _document).setFlag(flags.sr3e, flag, newValue);
+      });
+      __privateGet(this, _persistentStore)[flag] = store;
+    }
+    return __privateGet(this, _persistentStore)[flag];
+  }
   /**
    * Creates a derived Svelte store that combines multiple stores into a single object.
    * Each key in the resulting object corresponds to a store value, and an additional `sum` property
@@ -8780,15 +8791,17 @@ function ShoppingCart($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.actor.isShoppingState));
-  function toggleShoppingState() {
-    store_set(isShoppingState, !$isShoppingState());
-    actor().setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
-    console.log("shoppingState", $isShoppingState());
-  }
+  let storeManager = StoreManager.Subscribe(actor());
+  let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
   var div = root$h();
   var button = child(div);
-  button.__click = toggleShoppingState;
+  button.__click = function(...$$args) {
+    var _a;
+    (_a = store_set(isShoppingState, !$isShoppingState())) == null ? void 0 : _a.apply(this, $$args);
+  };
   template_effect(
     ($0) => {
       set_attribute(button, "aria-label", $0);
@@ -8889,12 +8902,13 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     }
   }
   _injectNeonName(header) {
-    var _a;
     let neonSlot = header == null ? void 0 : header.previousElementSibling;
-    if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
+    if (!neonSlot || !neonSlot.classList.contains("neon-name-position")) {
       neonSlot = document.createElement("div");
       neonSlot.classList.add("neon-name-position");
       header.parentElement.insertBefore(neonSlot, header);
+    }
+    if (neonSlot.childNodes.length === 0) {
       __privateSet(this, _neon, mount(NeonName, {
         target: neonSlot,
         props: { actor: this.document }

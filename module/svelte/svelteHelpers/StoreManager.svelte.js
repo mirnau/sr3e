@@ -1,4 +1,5 @@
 import { writable, derived } from "svelte/store";
+import { flags } from "../../services/commonConsts.js";
 
 const storeManagers = new Map();
 
@@ -50,6 +51,22 @@ export class StoreManager {
       }
 
       return this.#persistentStore[dataPath];
+   }
+
+   GetFlagStore(flag) {
+      if (!this.#persistentStore[flag]) {
+         const currentValue = this.#document.getFlag(flags.sr3e, flag);
+
+         const store = writable(currentValue);
+
+         store.subscribe((newValue) => {
+            this.#document.setFlag(flags.sr3e, flag, newValue);
+         });
+
+         this.#persistentStore[flag] = store;
+      }
+
+      return this.#persistentStore[flag];
    }
 
    /**
