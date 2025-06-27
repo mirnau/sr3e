@@ -3612,7 +3612,6 @@ const actorStores = {};
 const stores$1 = {
   attributeAssignmentLocked: "attributeAssignmentLocked",
   actorName: "actorName",
-  isShoppingState: "isShoppingState",
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
@@ -3975,9 +3974,9 @@ _document = new WeakMap();
 _persistentStore = new WeakMap();
 let StoreManager = _StoreManager;
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_1$p = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_2$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_4$8 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root$G = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   push($$props, true);
@@ -3986,10 +3985,12 @@ function AttributeCardCreationState($$anchor, $$props) {
   const $total = () => store_get(total, "$total", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const storeManager = StoreManager.Subscribe($$props.actor);
   let total = storeManager.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
   let value = storeManager.GetStore(`attributes.${$$props.key}.value`);
   let attributePointStore = storeManager.GetStore("creation.attributePoints");
+  let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let metatype = /* @__PURE__ */ derived$1(() => {
     var _a;
@@ -4024,30 +4025,50 @@ function AttributeCardCreationState($$anchor, $$props) {
   var div_1 = sibling(h4, 4);
   var node = child(div_1);
   {
-    var consequent = ($$anchor2) => {
-      var i_1 = root_1$p();
-      i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$7, decrement2];
-      template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_1);
+    var consequent_1 = ($$anchor2) => {
+      var fragment = comment();
+      var node_1 = first_child(fragment);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$f();
+          i_1.__click = decrement2;
+          i_1.__keydown = [on_keydown$7, decrement2];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent);
+        });
+      }
+      append($$anchor2, fragment);
     };
     if_block(node, ($$render) => {
-      if ("meta" in $$props.stat) $$render(consequent);
+      if ($isShoppingState()) $$render(consequent_1);
     });
   }
   var h1 = sibling(node, 2);
   var text_1 = child(h1);
-  var node_1 = sibling(h1, 2);
+  var node_2 = sibling(h1, 2);
   {
-    var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$f();
-      i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$2, increment2];
-      template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_2);
+    var consequent_3 = ($$anchor2) => {
+      var fragment_1 = comment();
+      var node_3 = first_child(fragment_1);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var i_2 = root_4$8();
+          i_2.__click = increment2;
+          i_2.__keydown = [on_keydown_1$2, increment2];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_3, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent_2);
+        });
+      }
+      append($$anchor2, fragment_1);
     };
-    if_block(node_1, ($$render) => {
-      if ("meta" in $$props.stat) $$render(consequent_1);
+    if_block(node_2, ($$render) => {
+      if ($isShoppingState()) $$render(consequent_3);
     });
   }
   template_effect(
@@ -4065,9 +4086,9 @@ function AttributeCardCreationState($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_1$o = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_4$7 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root$F = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   push($$props, true);
@@ -4076,10 +4097,12 @@ function AttributeCardKarmaState($$anchor, $$props) {
   const $total = () => store_get(total, "$total", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const storeManager = StoreManager.Subscribe($$props.actor);
   let total = storeManager.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
   let value = storeManager.GetStore(`attributes.${$$props.key}.value`);
   let attributePointStore = storeManager.GetStore("creation.attributePoints");
+  let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLocked = getActorStore$1($$props.actor.id, stores$1.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
   let metatype = /* @__PURE__ */ derived$1(() => {
     var _a;
@@ -4114,30 +4137,50 @@ function AttributeCardKarmaState($$anchor, $$props) {
   var div_1 = sibling(h4, 4);
   var node = child(div_1);
   {
-    var consequent = ($$anchor2) => {
-      var i_1 = root_1$o();
-      i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$6, decrement2];
-      template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_1);
+    var consequent_1 = ($$anchor2) => {
+      var fragment = comment();
+      var node_1 = first_child(fragment);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$e();
+          i_1.__click = decrement2;
+          i_1.__keydown = [on_keydown$6, decrement2];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent);
+        });
+      }
+      append($$anchor2, fragment);
     };
     if_block(node, ($$render) => {
-      if ("meta" in $$props.stat) $$render(consequent);
+      if ($isShoppingState()) $$render(consequent_1);
     });
   }
   var h1 = sibling(node, 2);
   var text_1 = child(h1);
-  var node_1 = sibling(h1, 2);
+  var node_2 = sibling(h1, 2);
   {
-    var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$e();
-      i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$1, increment2];
-      template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_2);
+    var consequent_3 = ($$anchor2) => {
+      var fragment_1 = comment();
+      var node_3 = first_child(fragment_1);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var i_2 = root_4$7();
+          i_2.__click = increment2;
+          i_2.__keydown = [on_keydown_1$1, increment2];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_3, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent_2);
+        });
+      }
+      append($$anchor2, fragment_1);
     };
-    if_block(node_1, ($$render) => {
-      if ("meta" in $$props.stat) $$render(consequent_1);
+    if_block(node_2, ($$render) => {
+      if ($isShoppingState()) $$render(consequent_3);
     });
   }
   template_effect(
@@ -7194,15 +7237,16 @@ function ActiveSkillCard($$anchor, $$props) {
   const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
-  onDestroy(() => {
-    StoreManager.Unsubscribe(skill());
-  });
+  let actorStoreManager = StoreManager.Subscribe(actor());
   let valueStore = skillStoreManager.GetStore("activeSkill.value");
   let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
-  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
   var div = root$u();
   var node = child(div);
   {
@@ -7260,15 +7304,16 @@ function KnowledgeSkillCard($$anchor, $$props) {
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
-  onDestroy(() => {
-    StoreManager.Unsubscribe(skill());
-  });
+  let actorStoreManager = StoreManager.Subscribe(actor());
   let value = skillStoreManager.GetStore("knowledgeSkill.value");
   let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
-  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
   var div = root$t();
   var node = child(div);
   {
@@ -7326,14 +7371,19 @@ function LanguageSkillCard($$anchor, $$props) {
   const $readWriteValue = () => store_get(readWriteValue, "$readWriteValue", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  StoreManager.Subscribe(skill());
+  let actorStoreManager = StoreManager.Subscribe(actor());
   let languageSkill = proxy(skill().system.languageSkill);
   let specializations = getActorStore$1(skill().id, actor().id, skill().system.languageSkill.specializations);
-  let isShoppingState = getActorStore$1(actor().id, stores$1.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   let value = getActorStore$1(actor().id, skill().id, languageSkill.value);
   let readWriteValue = getActorStore$1(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
   var div = root$s();
   var node = child(div);
   {

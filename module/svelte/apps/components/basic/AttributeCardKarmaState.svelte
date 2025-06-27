@@ -13,6 +13,8 @@
    let value = storeManager.GetStore(`attributes.${key}.value`);
    let attributePointStore = storeManager.GetStore("creation.attributePoints");
 
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+
    let attributeAssignmentLocked = getActorStore(
       actor.id,
       stores.attributeAssignmentLocked,
@@ -56,28 +58,31 @@
    <div class="stat-card-background"></div>
 
    <div class="stat-label">
-      {#if "meta" in stat}
-         <i
-            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-            role="button"
-            tabindex="0"
-            onclick={decrement}
-            onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-         ></i>
+      {#if $isShoppingState}
+         {#if "meta" in stat}
+            <i
+               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+               role="button"
+               tabindex="0"
+               onclick={decrement}
+               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+            ></i>
+         {/if}
       {/if}
 
       <h1 class="stat-value">{$total.sum}</h1>
-
-      {#if "meta" in stat}
-         <i
-            class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
-               ? 'disabled'
-               : ''}"
-            role="button"
-            tabindex="0"
-            onclick={increment}
-            onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-         ></i>
+      {#if $isShoppingState}
+         {#if "meta" in stat}
+            <i
+               class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
+                  ? 'disabled'
+                  : ''}"
+               role="button"
+               tabindex="0"
+               onclick={increment}
+               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+            ></i>
+         {/if}
       {/if}
    </div>
 </div>
