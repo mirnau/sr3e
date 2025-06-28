@@ -51,7 +51,7 @@
             <div class="skill-specialization-card">
                <div class="specialization-background"></div>
                <div class="specialization-name">{specialization.name}</div>
-               <h1 class="specialization-value">{specialization.value}</h1>
+               <h1 class="embedded-value">{specialization.value}</h1>
             </div>
          {/each}
       </div>

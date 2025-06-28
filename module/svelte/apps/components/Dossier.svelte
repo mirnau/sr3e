@@ -4,46 +4,39 @@
    import CardToolbar from "./CardToolbar.svelte";
    import { tick } from "svelte";
    import Image from "./basic/Image.svelte";
-   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte.js";
+   import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte.js";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
    let storeManger = StoreManager.Subscribe(actor);
 
    let system = $state(actor.system);
-
-   let actorNameStore = storeManger.GetShallowStore(actor.id, actor.name, actor.name);
-
+   let actorNameStore = storeManger.GetShallowStore(actor.id, stores.actorName, actor.name);
    let isDetailsOpenStore = storeManger.GetStore("profile.isDetailsOpen");
 
-   let actorName = $state($actorNameStore);
    let isDetailsOpen = $state($isDetailsOpenStore);
-   let imgPath = $state("");
-   let imgName = $state("");
 
-   $effect(() => {
-      const metatype = actor.items.find((i) => i.type === "metatype");
-      imgPath = metatype.img;
-      imgName = metatype.name;
-   });
+   // Simplified image state - derive directly from actor
+   let metatype = $derived(actor.items.find((i) => i.type === "metatype"));
+   let imgPath = $derived(metatype?.img || "");
+   let imgName = $derived(metatype?.name || "");
 
    function triggerMasonryReflow() {
       document
          .querySelector(".sheet-character-masonry-main")
-         ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+         .dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
    }
 
    async function handleOutroEnd() {
-      await tick(); // wait for Svelte to actually remove the node
-      document
-         .querySelector(".sheet-character-masonry-main")
-         ?.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+      await tick();
+      triggerMasonryReflow();
    }
 
    function toggleDetails() {
       $isDetailsOpenStore = !$isDetailsOpenStore;
    }
 
-   function saveActorName(event) {
+   // Simplified - single handler for all actor name updates
+   function handleActorNameChange(event) {
       $actorNameStore = event.target.value;
    }
 
@@ -52,12 +45,24 @@
    }
 
    function cubicInOut(t) {
-      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) * 0.5;
    }
 
-   function updateStoreName(newName) {
-      actorName = newName;
-      actorNameStore.set(newName);
+   // Simplified update handlers for profile fields
+   function updateAge(event) {
+      actor.update({ "system.profile.age": Number(event.target.innerText.trim()) }, { render: false });
+   }
+
+   function updateHeight(event) {
+      actor.update({ "system.profile.height": Number(event.target.innerText.trim()) }, { render: false });
+   }
+
+   function updateWeight(event) {
+      actor.update({ "system.profile.weight": Number(event.target.innerText.trim()) }, { render: false });
+   }
+
+   function updateQuote(event) {
+      actor.update({ "system.profile.quote": event.target.innerText.trim() }, { render: false });
    }
 </script>
 
@@ -94,10 +99,10 @@
                   type="text"
                   id="actor-name"
                   name="name"
-                  value={actorName}
-                  oninput={(e) => updateStoreName(e.target.value)}
-                  onblur={saveActorName}
-                  onkeypress={(e) => e.key === "Enter" && saveActorName(e)}
+                  value={$actorNameStore}
+                  oninput={handleActorNameChange}
+                  onblur={handleActorNameChange}
+                  onkeypress={(e) => e.key === "Enter" && handleActorNameChange(e)}
                />
             </div>
          </div>
@@ -109,12 +114,7 @@
                   <div class="dotted-line"></div>
                </div>
                <div class="value-unit">
-                  <div
-                     class="editable-field"
-                     contenteditable="true"
-                     onblur={(e) =>
-                        actor?.update?.({ "system.profile.age": Number(e.target.innerText.trim()) }, { render: false })}
-                  >
+                  <div class="editable-field" contenteditable="true" onblur={updateAge}>
                      {system.profile.age}
                   </div>
                   <span class="unit">yrs</span>
@@ -127,17 +127,7 @@
                   <div class="dotted-line"></div>
                </div>
                <div class="value-unit">
-                  <div
-                     class="editable-field"
-                     contenteditable="true"
-                     onblur={(e) =>
-                        actor?.update?.(
-                           {
-                              "system.profile.height": Number(e.target.innerText.trim()),
-                           },
-                           { render: false }
-                        )}
-                  >
+                  <div class="editable-field" contenteditable="true" onblur={updateHeight}>
                      {system.profile.height}
                   </div>
                   <span class="unit">cm</span>
@@ -150,17 +140,7 @@
                   <div class="dotted-line"></div>
                </div>
                <div class="value-unit">
-                  <div
-                     class="editable-field"
-                     contenteditable="true"
-                     onblur={(e) =>
-                        actor?.update?.(
-                           {
-                              "system.profile.weight": Number(e.target.innerText.trim()),
-                           },
-                           { render: false }
-                        )}
-                  >
+                  <div class="editable-field" contenteditable="true" onblur={updateWeight}>
                      {system.profile.weight}
                   </div>
                   <span class="unit">kg</span>
@@ -174,7 +154,7 @@
                class="editable-field quote"
                role="presentation"
                contenteditable="true"
-               onblur={(e) => actor?.update?.({ "system.profile.quote": e.target.innerText.trim() }, { render: false })}
+               onblur={updateQuote}
                onkeypress={(e) => {
                   if (e.key === "Enter") {
                      e.preventDefault();

@@ -1,12 +1,13 @@
 .input-component-container {
    width: 100%;
-   height: 2rem; 
+   height: 2rem;
    position: relative;
    display: flex;
    align-items: center;
-   justify-content: space-between;
    background: var(--highlight-color-primary);
-   padding: 0.25rem 0.25rem 0.25rem 0;
+   padding: 0.25rem;
+   min-width: 0;
+
    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 
    .input-component-container-background {
@@ -23,20 +24,23 @@
    }
 
    .input-container-text {
-      position: relative;
-      z-index: 1;
-      margin-right: auto;
-      margin-left: 0.5rem;
-      text-align: left;
-      padding-right: 0.5rem;
-      padding-left: 0;
+      display: block;
+      max-width: 12rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      flex-shrink: 1;
+      flex-grow: 0;
+      margin: 0rem 0rem 0rem 0.5rem;
+      padding-right: 0.5rem;
+      text-align: left;
       pointer-events: auto;
+      position: relative;
+      z-index: 1;
    }
 
    .input-container-text:focus {
+      text-overflow: clip;
       outline: none;
    }
 }

@@ -3025,22 +3025,6 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
-function bind_content_editable(property, element, get2, set2 = get2) {
-  element.addEventListener("input", () => {
-    set2(element[property]);
-  });
-  render_effect(() => {
-    var value = get2();
-    if (element[property] !== value) {
-      if (value == null) {
-        var non_null_value = element[property];
-        set2(non_null_value);
-      } else {
-        element[property] = value + "";
-      }
-    }
-  });
-}
 function onMount(fn) {
   if (component_context === null) {
     lifecycle_outside_component();
@@ -3588,14 +3572,14 @@ var on_keydown$9 = (e) => {
 };
 var on_click_1$3 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$J = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$K = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$J();
+  var div = root$K();
   div.__click = [on_click$7];
   div.__keydown = [on_keydown$9];
   var button = child(div);
@@ -3611,7 +3595,7 @@ delegate(["click", "keydown"]);
 async function handleClick(_, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$I = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3622,7 +3606,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$I();
+  var div = root$J();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3753,52 +3737,78 @@ _persistentStore = new WeakMap();
 _actorStores = new WeakMap();
 let StoreManager = _StoreManager;
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var on_input$2 = (e, updateStoreName) => updateStoreName(e.target.value);
 var root_3$a = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$H = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$I = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $actorNameStore = () => store_get(actorNameStore, "$actorNameStore", $$stores);
   const $isDetailsOpenStore = () => store_get(isDetailsOpenStore, "$isDetailsOpenStore", $$stores);
+  const $actorNameStore = () => store_get(actorNameStore, "$actorNameStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManger2 = StoreManager.Subscribe(actor());
   let system = proxy(actor().system);
-  let actorNameStore = storeManger2.GetShallowStore(actor().id, actor().name, actor().name);
+  let actorNameStore = storeManger2.GetShallowStore(actor().id, stores$1.actorName, actor().name);
   let isDetailsOpenStore = storeManger2.GetStore("profile.isDetailsOpen");
-  let actorName = state(proxy($actorNameStore()));
   proxy($isDetailsOpenStore());
-  let imgPath = state("");
-  let imgName = state("");
-  user_effect(() => {
-    const metatype = actor().items.find((i) => i.type === "metatype");
-    set(imgPath, proxy(metatype.img));
-    set(imgName, proxy(metatype.name));
+  let metatype = /* @__PURE__ */ derived$1(() => actor().items.find((i) => i.type === "metatype"));
+  let imgPath = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return ((_a = get$1(metatype)) == null ? void 0 : _a.img) || "";
+  });
+  let imgName = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return ((_a = get$1(metatype)) == null ? void 0 : _a.name) || "";
   });
   function triggerMasonryReflow() {
-    var _a;
-    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+    document.querySelector(".sheet-character-masonry-main").dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   }
   async function handleOutroEnd() {
-    var _a;
     await tick();
-    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+    triggerMasonryReflow();
   }
   function toggleDetails() {
     store_set(isDetailsOpenStore, !$isDetailsOpenStore());
   }
-  function saveActorName(event2) {
+  function handleActorNameChange(event2) {
     store_set(actorNameStore, proxy(event2.target.value));
   }
   function cubicInOut(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) * 0.5;
   }
-  function updateStoreName(newName) {
-    set(actorName, proxy(newName));
-    actorNameStore.set(newName);
+  function updateAge(event2) {
+    actor().update(
+      {
+        "system.profile.age": Number(event2.target.innerText.trim())
+      },
+      { render: false }
+    );
   }
-  var fragment = root$H();
+  function updateHeight(event2) {
+    actor().update(
+      {
+        "system.profile.height": Number(event2.target.innerText.trim())
+      },
+      { render: false }
+    );
+  }
+  function updateWeight(event2) {
+    actor().update(
+      {
+        "system.profile.weight": Number(event2.target.innerText.trim())
+      },
+      { render: false }
+    );
+  }
+  function updateQuote(event2) {
+    actor().update(
+      {
+        "system.profile.quote": event2.target.innerText.trim()
+      },
+      { render: false }
+    );
+  }
+  var fragment = root$I();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3842,7 +3852,7 @@ function Dossier($$anchor, $$props) {
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
-      input.__input = [on_input$2, updateStoreName];
+      input.__input = handleActorNameChange;
       var div_5 = sibling(div_3, 2);
       var div_6 = child(div_5);
       var div_7 = child(div_6);
@@ -3872,7 +3882,7 @@ function Dossier($$anchor, $$props) {
       var text_8 = child(div_22);
       template_effect(
         ($0, $1, $2, $3) => {
-          set_value(input, get$1(actorName));
+          set_value(input, $actorNameStore());
           set_text(text_1, $0);
           set_text(text_2, system.profile.age);
           set_text(text_3, $1);
@@ -3891,50 +3901,14 @@ function Dossier($$anchor, $$props) {
       );
       event("introend", div_3, triggerMasonryReflow);
       event("outroend", div_3, handleOutroEnd);
-      event("blur", input, saveActorName);
-      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
+      event("blur", input, handleActorNameChange);
+      event("keypress", input, (e) => e.key === "Enter" && handleActorNameChange(e));
       transition(1, div_3, () => slide, () => ({ duration: 100, easing: cubicInOut }));
       transition(2, div_3, () => slide, () => ({ duration: 50, easing: cubicInOut }));
-      event("blur", div_10, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.age": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_15, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.height": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_20, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.weight": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_22, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.quote": e.target.innerText.trim()
-          },
-          { render: false }
-        );
-      });
+      event("blur", div_10, updateAge);
+      event("blur", div_15, updateHeight);
+      event("blur", div_20, updateWeight);
+      event("blur", div_22, updateQuote);
       event("keypress", div_22, (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -3957,7 +3931,7 @@ var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") &
 var root_2$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_4$8 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root$G = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var root$H = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardCreationState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3999,7 +3973,7 @@ function AttributeCardCreationState($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe($$props.actor);
   });
-  var div = root$G();
+  var div = root$H();
   var h4 = child(div);
   var text2 = child(h4);
   var div_1 = sibling(h4, 4);
@@ -4069,7 +4043,7 @@ var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") &
 var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_4$7 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root$F = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var root$G = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 function AttributeCardKarmaState($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4111,7 +4085,7 @@ function AttributeCardKarmaState($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe($$props.actor);
   });
-  var div = root$F();
+  var div = root$G();
   var h4 = child(div);
   var text2 = child(h4);
   var div_1 = sibling(h4, 4);
@@ -5735,16 +5709,16 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root_1$n = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_1$o = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$E = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+var root$F = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  var div = root$E();
+  var div = root$F();
   var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
-      var h4 = root_1$n();
+      var h4 = root_1$o();
       var text2 = child(h4);
       template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
       append($$anchor2, h4);
@@ -5776,7 +5750,7 @@ function StatCard$1($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$D = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+var root$E = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
   let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
@@ -5799,7 +5773,7 @@ function MasonryGrid($$anchor, $$props) {
   user_effect(async () => {
     gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
-  var div = root$D();
+  var div = root$E();
   var div_1 = child(div);
   var div_2 = sibling(div_1, 2);
   var node = sibling(div_2, 2);
@@ -5816,8 +5790,8 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$m = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$n = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$D = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5853,7 +5827,7 @@ function Attributes($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$C();
+  var fragment = root$D();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5867,7 +5841,7 @@ function Attributes($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$m();
+      var fragment_1 = root_1$n();
       var node_2 = first_child(fragment_1);
       each(node_2, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor3, $$item) => {
         let key = () => get$1($$item)[0];
@@ -5954,8 +5928,8 @@ function Attributes($$anchor, $$props) {
   $$cleanup();
 }
 var root_2$d = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root_1$l = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$m = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -5989,7 +5963,7 @@ function DicePools($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$B();
+  var fragment = root$C();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6003,7 +5977,7 @@ function DicePools($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$l();
+      var fragment_1 = root_1$m();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get label() {
@@ -6066,8 +6040,8 @@ function DicePools($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_1$k = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$A = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$l = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6083,7 +6057,7 @@ function Movement($$anchor, $$props) {
   });
   proxy($quickness().sum);
   let running = /* @__PURE__ */ derived$1(() => $quickness().sum * get$1(runningmodifier));
-  var fragment = root$A();
+  var fragment = root$B();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6097,7 +6071,7 @@ function Movement($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$k();
+      var fragment_1 = root_1$l();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get label() {
@@ -6127,12 +6101,41 @@ function Movement($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-function handleKeyDown$1(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.target.blur();
+var root$A = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+function TextInput($$anchor, $$props) {
+  push($$props, true);
+  let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
+  }), oninput = prop($$props, "oninput", 3, () => {
+  }), onkeydown = prop($$props, "onkeydown", 3, () => {
+  });
+  let editableEl;
+  user_effect(() => {
+    if (editableEl && editableEl.innerText !== text2()) {
+      editableEl.innerText = text2() ?? "";
+    }
+  });
+  function handleInput(e) {
+    text2(editableEl.innerText);
+    oninput()(e);
   }
+  var div = root$A();
+  var div_1 = sibling(child(div), 2);
+  div_1.__input = handleInput;
+  div_1.__keydown = function(...$$args) {
+    var _a;
+    (_a = onkeydown()) == null ? void 0 : _a.apply(this, $$args);
+  };
+  bind_this(div_1, ($$value) => editableEl = $$value, () => editableEl);
+  var node = sibling(div_1, 2);
+  snippet(node, () => $$props.children ?? noop);
+  event("blur", div_1, function(...$$args) {
+    var _a;
+    (_a = onblur()) == null ? void 0 : _a.apply(this, $$args);
+  });
+  append($$anchor, div);
+  pop();
 }
+delegate(["input", "keydown"]);
 function increment$1() {
   console.log("increment Entered");
 }
@@ -6149,7 +6152,8 @@ function deleteThis$3(_, $isCharacterCreationStore, isCharacterCreationStore, sp
   }
   dispatch("delete", { specialization: specialization() });
 }
-var root$z = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="editable-name" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <h1 class="specialization-value"> </h1></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
+var root_1$k = /* @__PURE__ */ template(`<h1 class="embedded-value no-margin"> </h1>`);
+var root$z = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
 function SpecializationCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6175,15 +6179,28 @@ function SpecializationCard($$anchor, $$props) {
     specialization(specialization().name = liveText, true);
     dispatch("arrayChanged");
   }
+  function handleKeyDown2(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.target.blur();
+    }
+  }
   var fragment = root$z();
-  var div = first_child(fragment);
-  var div_1 = sibling(child(div), 2);
-  div_1.__input = handleInput;
-  div_1.__keydown = [handleKeyDown$1];
-  var h1 = sibling(div_1, 2);
-  var text2 = child(h1);
-  var div_2 = sibling(div, 2);
-  var button = child(div_2);
+  var node = first_child(fragment);
+  TextInput(node, {
+    text: liveText,
+    oninput: handleInput,
+    onkeydown: handleKeyDown2,
+    children: ($$anchor2, $$slotProps) => {
+      var h1 = root_1$k();
+      var text2 = child(h1);
+      template_effect(() => set_text(text2, specialization().value));
+      append($$anchor2, h1);
+    },
+    $$slots: { default: true }
+  });
+  var div = sibling(node, 2);
+  var button = child(div);
   button.__click = [increment$1];
   var button_1 = sibling(button, 2);
   button_1.__click = [decrement$3];
@@ -6198,16 +6215,14 @@ function SpecializationCard($$anchor, $$props) {
     dispatch
   ];
   template_effect(() => {
-    set_text(text2, specialization().value);
     button.disabled = $isCharacterCreationStore();
     button_1.disabled = $isCharacterCreationStore();
   });
-  bind_content_editable("innerText", div_1, () => liveText, ($$value) => liveText = $$value);
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-delegate(["input", "keydown", "click"]);
+delegate(["click"]);
 class KarmaShoppingService {
   constructor(skill) {
     __publicField(this, "currentFloor", -1);
@@ -6937,7 +6952,7 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
   }
 }
 var on_click$4 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="specialization-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7214,7 +7229,7 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7281,7 +7296,7 @@ function ActiveSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$h = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$t = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7348,7 +7363,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$g = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
+var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$s = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);

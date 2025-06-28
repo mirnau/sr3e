@@ -220,7 +220,7 @@
                         <h6>
                            {localize(config.skill.readwrite)}:
                         </h6>
-                        <h1 class="specialization-value">
+                        <h1 class="embedded-value">
                            {readWrite}
                         </h1>
                      </div>
