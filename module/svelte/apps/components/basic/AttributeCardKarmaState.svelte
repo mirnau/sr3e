@@ -1,6 +1,5 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { flags } from "../../../../services/commonConsts.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
@@ -15,11 +14,7 @@
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
 
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
+   let attributeAssignmentLocked = storeManger.getActorStore(flags.actor.attributeAssignmentLocked);
 
    let metatype = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metatype") : null);
 

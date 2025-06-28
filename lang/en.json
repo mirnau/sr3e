@@ -1,244 +1,245 @@
 {
-  "sr3e": {
-    "ammunition": {
-      "ammunition": "Ammunition",
-      "type": "Ammuntion Type",
-      "rounds": "Rounds"
-    },
-    "attributes": {
-      "attributes": "Attributes",
-      "body": "Body",
-      "charisma": "Charisma",
-      "essence": "Essence",
-      "initiative": "Initiative",
-      "intelligence": "Intelligence",
-      "limits": "Attribute Limits",
-      "magic": "Magic Pool",
-      "modifiers": "Attribute Modifiers",
-      "quickness": "Quickness",
-      "reaction": "Reaction",
-      "strength": "Strength",
-      "willpower": "Willpower"
-    },
-    "combosearch": {
-      "noresult": "No results...",
-      "search": "Search"
-    },
-    "commodity": {
-      "commodity": "Commodity Profile",
-      "days": "Days",
-      "cost": "Cost",
-      "streetIndex": "Street Index",
-      "restrictionLevel": "Restriction Level",
-      "legalityType": "Legality Type",
-      "legalityCategory": "Legality Category",
-      "isBroken": "Broken"
-    },
-    "common": {
-      "max": "Maximum",
-      "min": "Minimum",
-      "average": "Average",
-      "description": "Description",
-      "priority": "Priority",
-      "custom": "Custom",
-      "other": "Other",
-      "details": "Details"
-    },
-    "dicepools": {
-      "dicepools": "Dice",
-      "combat": "Combat",
-      "hacking": "Hacking",
-      "astral": "Astral",
-      "control": "Control",
-      "spell": "Spell"
-    },
-    "health": {
-      "health": "Health",
-      "overflow": "Overflow",
-      "penalty": "Penalty"
-    },
-    "initiative": {
-      "augmentedReaction": "Augmented Reaction",
-      "initiative": "Initiative",
-      "initiativeDice": "Initiative Dice",
-      "natuaralReaction": "Natural Reaction",
-      "reaction": "Reaction",
-      "reactionPenalty": "Reaction Penalty"
-    },
-    "inventory": {
-      "inventory": "Inventory"
-    },
-    "karma": {
-      "karma": "Karma",
-      "goodkarma": "Good Karma",
-      "karmapool": "Karma Pool",
-      "advancementratio": "Advancement Ratio",
-      "miraculoussurvival": "Miraculous Survival",
-      "lifetimekarma": "Lifetime Karma",
-      "commitselected": "Commit Selected",
-      "selectall": "Select All",
-      "deselectall": "Deselect All",
-      "commit": "Commit Changes"
-    },
-    "karmamanager": {
-      "character": "Player Characters",
-      "npc": "Non Player Characters"
-    },
-    "magic": {
-      "magic": "Magic",
-      "adept": "Adept",
-      "magician": "Magician",
-      "fullmage": "Full Mage",
-      "aspectedmage": "Aspected Mage",
-      "conjurer": "Conjurer",
-      "sorcerer ": "sorcerer ",
-      "elementalist": "Elementalist",
-      "hermetic": "Hermetic",
-      "shamanic": "Shamanic",
-      "adeptnote": "Short note",
-      "shamannote": "Applies to Shamans",
-      "type": "Awakened Type",
-      "magicianType": "Magician Type",
-      "tradition": "Tradition",
-      "aspect": "Aspect",
-      "canAstrallyProject": "Can Astrally Project",
-      "usesPowers": "Uses Powers",
-      "focus": "Focus",
-      "resistanceAttribute": "Drain Resistance Attribute",
-      "totem": "Totem",
-      "priority": "Priority",
-      "spellPoints": "Spell Points",
-      "powerPoints": "Power Points"
-    },
-    "modal": {
-      "confirm": "Yes",
-      "decline": "No",
-      "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
-      "deleteskilltitle": "Delete Skill?",
-      "exitattributesassignment": "You've used all your attribute points. Are you ready to continue with skill assignment?",
-      "exitcreationmode": "You've used all your skill points. Exit character creation?",
-      "exitattributesassignmenttitle": "Finish Attribute Point Assignement?",
-      "exitcreationmodetitle": "Exit skill assignment?"
-    },
-    "movement": {
-      "movement": "Movement",
-      "walking": "Walking Speed",
-      "running": "Running Speed",
-      "runSpeedModifier": "Running Modifier"
-    },
-    "notifications": {
-      "assignattributesfirst": "You need to assign all attributes before assigning skills",
-      "skillpointsrefund": "Your skillpoints have been refunded!"
-    },
-    "placeholders": {
-      "human": "Human",
-      "fullshaman": "Full Mage Bear Shaman"
-    },
-    "portability": {
-      "portability": "Portability",
-      "concealability": "Conceal",
-      "weight": "Weight"
-    },
-    "sheet": {
-      "playercharacter": "Player Character",
-      "details": "Details",
-      "viewbackground": "View Background",
-      "buyupgrades": "Buy upgrades",
-      "searchJournals": "Search Journals",
-      "createCharacter": "Create Character",
-      "cancel": "Cancel",
-      "randomize": "Randomize",
-      "clear": "Clear",
-      "chooseanoption": "Choose an option... ",
-      "attributepoints": "Attribute Points",
-      "skillpoints": "Skill Points",
-      "resources": "Resources",
-      "quote": "Quote"
-    },
-    "skill": {
-      "active": "Active Skill",
-      "addlingo": "Add Lingo",
-      "addspecialization": "Add Specialization",
-      "knowledge": "Knowledge Skill",
-      "language": "Language Skill",
-      "lingos": "lingos",
-      "linkedAttribute": "Choose a Linked Attribute...",
-      "newspecialization": "New Specialization",
-      "onlyonespecializationatcreation": "Only one specialization can be taken at character creation!",
-      "readwrite": "Read/Write",
-      "skill": "Skill",
-      "specializations": "Specializations"
-    },
-    "storytellerscreen": {
-      "storytellerscreen": "Storyteller's Screen"
-    },
-    "time": {
-      "year": "Year",
-      "month": "Month",
-      "day": "Day",
-      "hours": "Hours",
-      "minutes": "Minutes",
-      "seconds": "Seconds"
-    },
-    "traits": {
-      "age": "Age",
-      "agerange": "Playable Age Range",
-      "height": "Height",
-      "metatype": "metatype",
-      "metaType": "metaType",
-      "weight": "Weight",
-      "child": "Child",
-      "adolecent": "Adolecent",
-      "youngadult": "Young Adult",
-      "adult": "Adult",
-      "middleage": "Middle Aged",
-      "goldenyears": "Golden Oldie",
-      "ancient": "Very Old Indeed"
-    },
-    "transaction": {
-      "transaction": "Transaction",
-      "creditstick": "Credit-Stick",
-      "recurrent": "Recurremt",
-      "asset": "Asset",
-      "income": "Income",
-      "debt": "Debt",
-      "expense": "Expense",
-      "select": "Select"
-    },
-    "userconfig": {
-      "setPlayerName": "Player Name",
-      "playerName": "The Players Name",
-      "avatar": "User Avatar",
-      "imageFile": "Image file",
-      "openFilePicker": "Select Image",
-      "choosePlayerColor": "User Colour",
-      "playersPreferredPronoun": "The User's Pronoun",
-      "selectMainCharacter": "The User's Main Character",
-      "saveSettings": "Save Settings",
-      "saveUserSettings": "Save the Current Users Settings"
-    },
-    "vision": {
-      "vision": "Vision",
-      "type": "Type",
-      "normalvision": "Normal vision",
-      "thermographic": "Thermographic vision",
-      "lowlight": "Low-light vision"
-    },
-    "weapon": {
-      "weapon": "Weapon",
-      "weaponStats": "Weapon Stats",
-      "damage": "Damage",
-      "mode": "Mode",
-      "range": "Range",
-      "recoilCompensation": "Recoil Compensation",
-      "currentClip": "Current Clip",
-      "manual": "Manual Firearm",
-      "semiauto": "Semi Automatic Firearm",
-      "fullauto": "Fully Automatic Firearm",
-      "blade": "Melee Weapon",
-      "explosive": "Explosive Weapon",
-      "blunt": "Blunt Weapon",
-      "energy": "Energy Weapon"
-    }
-  }
+   "sr3e": {
+      "ammunition": {
+         "ammunition": "Ammunition",
+         "type": "Ammuntion Type",
+         "rounds": "Rounds"
+      },
+      "attributes": {
+         "attributes": "Attributes",
+         "body": "Body",
+         "charisma": "Charisma",
+         "essence": "Essence",
+         "initiative": "Initiative",
+         "intelligence": "Intelligence",
+         "limits": "Attribute Limits",
+         "magic": "Magic Pool",
+         "modifiers": "Attribute Modifiers",
+         "quickness": "Quickness",
+         "reaction": "Reaction",
+         "strength": "Strength",
+         "willpower": "Willpower"
+      },
+      "combosearch": {
+         "noresult": "No results...",
+         "search": "Search"
+      },
+      "commodity": {
+         "commodity": "Commodity Profile",
+         "days": "Days",
+         "cost": "Cost",
+         "streetIndex": "Street Index",
+         "restrictionLevel": "Restriction Level",
+         "legalityType": "Legality Type",
+         "legalityCategory": "Legality Category",
+         "isBroken": "Broken"
+      },
+      "common": {
+         "max": "Maximum",
+         "min": "Minimum",
+         "average": "Average",
+         "description": "Description",
+         "priority": "Priority",
+         "custom": "Custom",
+         "other": "Other",
+         "details": "Details"
+      },
+      "dicepools": {
+        "associateselect": "Choose an Associated Dicepool...",
+         "dicepools": "Dice",
+         "combat": "Combat",
+         "hacking": "Hacking",
+         "astral": "Astral",
+         "control": "Control",
+         "spell": "Spell"
+      },
+      "health": {
+         "health": "Health",
+         "overflow": "Overflow",
+         "penalty": "Penalty"
+      },
+      "initiative": {
+         "augmentedReaction": "Augmented Reaction",
+         "initiative": "Initiative",
+         "initiativeDice": "Initiative Dice",
+         "natuaralReaction": "Natural Reaction",
+         "reaction": "Reaction",
+         "reactionPenalty": "Reaction Penalty"
+      },
+      "inventory": {
+         "inventory": "Inventory"
+      },
+      "karma": {
+         "karma": "Karma",
+         "goodkarma": "Good Karma",
+         "karmapool": "Karma Pool",
+         "advancementratio": "Advancement Ratio",
+         "miraculoussurvival": "Miraculous Survival",
+         "lifetimekarma": "Lifetime Karma",
+         "commitselected": "Commit Selected",
+         "selectall": "Select All",
+         "deselectall": "Deselect All",
+         "commit": "Commit Changes"
+      },
+      "karmamanager": {
+         "character": "Player Characters",
+         "npc": "Non Player Characters"
+      },
+      "magic": {
+         "magic": "Magic",
+         "adept": "Adept",
+         "magician": "Magician",
+         "fullmage": "Full Mage",
+         "aspectedmage": "Aspected Mage",
+         "conjurer": "Conjurer",
+         "sorcerer ": "sorcerer ",
+         "elementalist": "Elementalist",
+         "hermetic": "Hermetic",
+         "shamanic": "Shamanic",
+         "adeptnote": "Short note",
+         "shamannote": "Applies to Shamans",
+         "type": "Awakened Type",
+         "magicianType": "Magician Type",
+         "tradition": "Tradition",
+         "aspect": "Aspect",
+         "canAstrallyProject": "Can Astrally Project",
+         "usesPowers": "Uses Powers",
+         "focus": "Focus",
+         "resistanceAttribute": "Drain Resistance Attribute",
+         "totem": "Totem",
+         "priority": "Priority",
+         "spellPoints": "Spell Points",
+         "powerPoints": "Power Points"
+      },
+      "modal": {
+         "confirm": "Yes",
+         "decline": "No",
+         "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
+         "deleteskilltitle": "Delete Skill?",
+         "exitattributesassignment": "You've used all your attribute points. Are you ready to continue with skill assignment?",
+         "exitcreationmode": "You've used all your skill points. Exit character creation?",
+         "exitattributesassignmenttitle": "Finish Attribute Point Assignement?",
+         "exitcreationmodetitle": "Exit skill assignment?"
+      },
+      "movement": {
+         "movement": "Movement",
+         "walking": "Walking Speed",
+         "running": "Running Speed",
+         "runSpeedModifier": "Running Modifier"
+      },
+      "notifications": {
+         "assignattributesfirst": "You need to assign all attributes before assigning skills",
+         "skillpointsrefund": "Your skillpoints have been refunded!"
+      },
+      "placeholders": {
+         "human": "Human",
+         "fullshaman": "Full Mage Bear Shaman"
+      },
+      "portability": {
+         "portability": "Portability",
+         "concealability": "Conceal",
+         "weight": "Weight"
+      },
+      "sheet": {
+         "playercharacter": "Player Character",
+         "details": "Details",
+         "viewbackground": "View Background",
+         "buyupgrades": "Buy upgrades",
+         "searchJournals": "Search Journals",
+         "createCharacter": "Create Character",
+         "cancel": "Cancel",
+         "randomize": "Randomize",
+         "clear": "Clear",
+         "chooseanoption": "Choose an option... ",
+         "attributepoints": "Attribute Points",
+         "skillpoints": "Skill Points",
+         "resources": "Resources",
+         "quote": "Quote"
+      },
+      "skill": {
+         "active": "Active Skill",
+         "addlingo": "Add Lingo",
+         "addspecialization": "Add Specialization",
+         "knowledge": "Knowledge Skill",
+         "language": "Language Skill",
+         "lingos": "lingos",
+         "linkedAttribute": "Choose a Linked Attribute...",
+         "newspecialization": "New Specialization",
+         "onlyonespecializationatcreation": "Only one specialization can be taken at character creation!",
+         "readwrite": "Read/Write",
+         "skill": "Skill",
+         "specializations": "Specializations"
+      },
+      "storytellerscreen": {
+         "storytellerscreen": "Storyteller's Screen"
+      },
+      "time": {
+         "year": "Year",
+         "month": "Month",
+         "day": "Day",
+         "hours": "Hours",
+         "minutes": "Minutes",
+         "seconds": "Seconds"
+      },
+      "traits": {
+         "age": "Age",
+         "agerange": "Playable Age Range",
+         "height": "Height",
+         "metatype": "metatype",
+         "metaType": "metaType",
+         "weight": "Weight",
+         "child": "Child",
+         "adolecent": "Adolecent",
+         "youngadult": "Young Adult",
+         "adult": "Adult",
+         "middleage": "Middle Aged",
+         "goldenyears": "Golden Oldie",
+         "ancient": "Very Old Indeed"
+      },
+      "transaction": {
+         "transaction": "Transaction",
+         "creditstick": "Credit-Stick",
+         "recurrent": "Recurremt",
+         "asset": "Asset",
+         "income": "Income",
+         "debt": "Debt",
+         "expense": "Expense",
+         "select": "Select"
+      },
+      "userconfig": {
+         "setPlayerName": "Player Name",
+         "playerName": "The Players Name",
+         "avatar": "User Avatar",
+         "imageFile": "Image file",
+         "openFilePicker": "Select Image",
+         "choosePlayerColor": "User Colour",
+         "playersPreferredPronoun": "The User's Pronoun",
+         "selectMainCharacter": "The User's Main Character",
+         "saveSettings": "Save Settings",
+         "saveUserSettings": "Save the Current Users Settings"
+      },
+      "vision": {
+         "vision": "Vision",
+         "type": "Type",
+         "normalvision": "Normal vision",
+         "thermographic": "Thermographic vision",
+         "lowlight": "Low-light vision"
+      },
+      "weapon": {
+         "weapon": "Weapon",
+         "weaponStats": "Weapon Stats",
+         "damage": "Damage",
+         "mode": "Mode",
+         "range": "Range",
+         "recoilCompensation": "Recoil Compensation",
+         "currentClip": "Current Clip",
+         "manual": "Manual Firearm",
+         "semiauto": "Semi Automatic Firearm",
+         "fullauto": "Fully Automatic Firearm",
+         "blade": "Melee Weapon",
+         "explosive": "Explosive Weapon",
+         "blunt": "Blunt Weapon",
+         "energy": "Energy Weapon"
+      }
+   }
 }

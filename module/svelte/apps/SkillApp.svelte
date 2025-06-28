@@ -13,7 +13,7 @@
 
    let formattedAmount = $state(`${item.system.amount} ¥`);
 
-   const selectOptions = [
+   const typeOfSkillSelectOptions = [
       { value: "active", label: localize(config.skill.active) },
       { value: "knowledge", label: localize(config.skill.knowledge) },
       { value: "language", label: localize(config.skill.language) },
@@ -24,6 +24,13 @@
    const attributeOptions = baseAttributeKeys.map((key) => ({
       value: key,
       label: localize(config.attributes[key]),
+   }));
+
+   const associatedDicepoolKeys = ["astral", "combat", "hacking", "control", "spell"];
+
+   const dicePoolOptions = associatedDicepoolKeys.map((key) => ({
+      value: key,
+      label: localize(config.dicepools[key]),
    }));
 
    function updateSkillType(type) {
@@ -91,7 +98,7 @@
 
             <StatCard>
                <select {value} onchange={(e) => updateSkillType(e.target.value)}>
-                  {#each selectOptions as option}
+                  {#each typeOfSkillSelectOptions as option}
                      <option value={option.value}>{option.label}</option>
                   {/each}
                </select>
@@ -110,6 +117,23 @@
                         {localize(config.skill.linkedAttribute)}
                      </option>
                      {#each attributeOptions as option}
+                        <option value={option.value}>{option.label}</option>
+                     {/each}
+                  </select>
+               </StatCard>
+               <StatCard>
+                  <select
+                     value={item.system.activeSkill.associatedDicePool}
+                     onchange={(e) =>
+                        item.update({
+                           "system.activeSkill.associatedDicePool": e.target.value,
+                        })}
+                  >
+                     <option disabled selected>
+                        {localize(config.dicepools.associateselect)}
+                     </option>
+                     <option value="">{localize(config.dicepools.associateselect)}</option>
+                     {#each dicePoolOptions as option}
                         <option value={option.value}>{option.label}</option>
                      {/each}
                   </select>

@@ -5,7 +5,6 @@
    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
    import CardToolbar from "./CardToolbar.svelte";
    import StatCard from "./basic/StatCard.svelte";
-   import { getActorStore, stores } from "../../stores/actorStores.js";
    import { flags, masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
@@ -16,14 +15,9 @@
    let itemState = $state(actor.items);
    let isAwakened = $state(false);
    let localization = config.attributes;
-
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.attributeAssignmentLocked)
-   );
-
    let storeManager = StoreManager.Subscribe(actor);
+
+   let attributeAssignmentLocked = storeManager.GetFlagStore(flags.attributeAssignmentLocked);
 
    let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
    let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);

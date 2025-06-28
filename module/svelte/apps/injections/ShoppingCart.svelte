@@ -3,14 +3,13 @@
    import { flags } from "../../../services/commonConsts.js";
    import { localize } from "../../../services/utilities.js";
    import { shoppingState } from "../../../svelteStore.js";
-   import { getActorStore, stores } from "../../stores/actorStores.js";
    import { onDestroy } from "svelte";
 
    let { actor = {}, config = {} } = $props();
 
    let storeManager = StoreManager.Subscribe(actor);
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
-   
+
    onDestroy(() => {
       StoreManager.Unsubscribe(actor);
    });

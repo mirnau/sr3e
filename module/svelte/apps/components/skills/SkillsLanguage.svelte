@@ -1,36 +1,28 @@
 <script>
-    import SkillCategory from "./SkillCategory.svelte";
-    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
+   import SkillCategory from "./SkillCategory.svelte";
+   import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
+   import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
+   import { onDestroy } from "svelte";
 
-    let { actor = {}, config = {} } = $props();
-    let gridContainer;
+   let { actor = {}, config = {} } = $props();
+   let gridContainer;
 
-    const languageSkillsIdArrayStore = getActorStore(
-        actor.id,
-        stores.languageSkillsIds,
-        actor.items
-            .filter(
-                (item) =>
-                    item.type === "skill" &&
-                    item.system.skillType === "language",
-            )
-            .map((item) => item.id),
-    );
+   let storeManager = StoreManager.Subscribe(actor);
 
-    let languageSkills = $derived(
-        actor.items.filter((item) =>
-            $languageSkillsIdArrayStore.includes(item.id),
-        ),
-    );
+   const languageSkillsIdArrayStore = storeManger.GetShallowStore(
+      actor.id,
+      stores.languageSkillsIds,
+      actor.items.filter((item) => item.type === "skill" && item.system.skillType === "language").map((item) => item.id)
+   );
+
+   let languageSkills = $derived(actor.items.filter((item) => $languageSkillsIdArrayStore.includes(item.id)));
+
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 </script>
 
 <div bind:this={gridContainer} class="skill-container-masonry-grid">
-    <SkillCategory
-        attribute="intelligence"
-        skills={languageSkills}
-        {actor}
-        {config}
-    />
+   <SkillCategory attribute="intelligence" skills={languageSkills} {actor} {config} />
 </div>

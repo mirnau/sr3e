@@ -1,22 +1,21 @@
 <script>
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
     import { flags } from "../../../../services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy } from "svelte";
 
     let { specialization = $bindable(), actor = {}, skill = {} } = $props();
     const dispatch = createEventDispatcher();
 
-    let isCharacterCreation = $state(
-        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation) ?? false,
-    );
+    let storeManger = StoreManager.Subscribe(actor);
+    onDestroy(() => {
+        storeManger.Unsubscribe(actor);
+    });
+
+    let isCharacterCreationStore = storeManger.GetFlagStore(flags.actor.isCharacterCreation)
 
     let liveText = specialization.name;
 
-    let baseValue = getActorStore(
-        actor.id,
-        skill.id,
-        skill.system.activeSkill.value,
-    );
+    let baseValue = storeManger.GetStore("activeSkill.value");
 
     $effect(() => {
         if (liveText !== specialization.name) {
@@ -33,7 +32,7 @@
     function handleKeyDown(e) {
         if (e.key === "Enter") {
             e.preventDefault();
-            e.target.blur(); // INFO: exits editing
+            e.target.blur();
         }
     }
 
@@ -46,7 +45,7 @@
     }
 
     function deleteThis() {
-        if (isCharacterCreation) {
+        if ($isCharacterCreationStore) {
             if (specialization.value === $baseValue + 2) {
                 specialization.value = 0;
                 $baseValue += 1;
@@ -81,7 +80,7 @@
         class="header-control icon sr3e-toolbar-button"
         aria-label="Increment"
         onclick={increment}
-        disabled={isCharacterCreation}
+        disabled={$isCharacterCreationStore}
     >
         <i class="fa-solid fa-plus"></i>
     </button>
@@ -89,7 +88,7 @@
         class="header-control icon sr3e-toolbar-button"
         aria-label="Decrement"
         onclick={decrement}
-        disabled={isCharacterCreation}
+        disabled={$isCharacterCreationStore}
     >
         <i class="fa-solid fa-minus"></i>
     </button>

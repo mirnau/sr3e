@@ -1,7 +1,6 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import CreationPointList from "../../components/CreationPointList.svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
@@ -18,11 +17,7 @@
    let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
    let languagePointsStore = storeManager.GetStore("creation.languagePoints");
 
-   let isCharacterCreation = getActorStore(
-      actor.id,
-      stores.isCharacterCreation,
-      actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
-   );
+   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
    // Make pointList reactive by using derived stores
    let pointList = $derived([
@@ -53,7 +48,7 @@
 
             if (confirmed) {
                actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
-               $isCharacterCreation = false;
+               $isCharacterCreationStore = false;
             }
          })();
       }

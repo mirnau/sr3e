@@ -3,9 +3,33 @@ import { flags } from "../../services/commonConsts.js";
 
 const storeManagers = new Map();
 
+export const stores = {
+   intelligence: "intelligence",
+   attributePoints: "attributePoints",
+   activePoints: "activePoints",
+   knowledgePoints: "knowledgePoints",
+   languagePoints: "languagePoints",
+   attributeAssignmentLocked: "attributeAssignmentLocked",
+   actorName: "actorName",
+   isShoppingState: "isShoppingState",
+   activeSkillsIds: "activeSkillsIds",
+   knowledgeSkillsIds: "knowledgeSkillsIds",
+   languageSkillsIds: "languageSkillsIds",
+   isCharacterCreation: "isCharacterCreation",
+   initiativeDice: "initiativeDice",
+   baseInitiative: "baseInitiative",
+   combat: {
+      stunDamage: "stunDamage",
+      leathalDamage: "leathalDamage",
+      penalty: "penalty",
+      overflow: "overflow",
+   },
+};
+
 export class StoreManager {
    #document;
    #persistentStore = {};
+   #actorStores = {};
 
    constructor(document) {
       this.#document = document;
@@ -51,6 +75,22 @@ export class StoreManager {
       }
 
       return this.#persistentStore[dataPath];
+   }
+
+   GetShallowStore(actorId, storeName, customValue = null) {
+      this.#actorStores[actorId] ??= {};
+
+      if (!this.#actorStores[actorId][storeName]) {
+         let value = customValue;
+
+         if (value && typeof value === "object") {
+            value = Array.isArray(value) ? [...value] : { ...value };
+         }
+
+         this.#actorStores[actorId][storeName] = writable(value);
+      }
+
+      return this.#actorStores[actorId][storeName];
    }
 
    GetFlagStore(flag) {

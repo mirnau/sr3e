@@ -85,6 +85,7 @@ sr3e.dicepools = {
     control: "sr3e.dicepools.control",
     hacking: "sr3e.dicepools.hacking",
     spell: "sr3e.dicepools.spell",
+    associateselect: "sr3e.dicepools.associateselect",
 }
 sr3e.karma = {
     karma: "sr3e.karma.karma",

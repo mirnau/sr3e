@@ -2,35 +2,18 @@
   import { onMount } from "svelte";
   import { localize } from "../../../services/utilities.js";
   import CardToolbar from "./CardToolbar.svelte";
-  import { getActorStore, stores } from "../../stores/actorStores.js";
   import ElectroCardiogramService from "../../../services/ElectroCardiogramService.js";
   import StatCard from "./basic/StatCard.svelte";
+  import { StoreManager } from "../../../svelte/svelteHelpers/StoreManager.svelte.js";
 
   let { actor = {}, config = {}, id = {} } = $props();
 
-  let stunArray = getActorStore(
-    actor.id,
-    stores.combat.stunDamage,
-    foundry.utils.deepClone(actor.system.health.stun)
-  );
+  let storeManager = StoreManager.Subscribe(actor);
 
-  let physicalArray = getActorStore(
-    actor.id,
-    stores.combat.leathalDamage,
-    foundry.utils.deepClone(actor.system.health.physical)
-  );
-
-  let penalty = getActorStore(
-    actor.id,
-    stores.combat.penalty,
-    actor.system.health.penalty ?? 0
-  );
-
-  let overflow = getActorStore(
-    actor.id,
-    stores.combat.overflow,
-    actor.system.health.overflow ?? 0
-  );
+  let stunArray = storeManager.GetStore("health.stun");
+  let physicalArray = storeManager.GetStore("health.physical");
+  let penalty = storeManager.GetStore("health.penalty");
+  let overflow = storeManager.GetStore("health.overflow");
 
   let maxDegree = $state(0);
   let ecgCanvas = $state();

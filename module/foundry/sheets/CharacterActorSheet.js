@@ -7,7 +7,7 @@ import SR3DLog from "../../../Log.js";
 import { mount, unmount } from "svelte";
 import ActorDataService from "../../services/ActorDataService.js";
 import { flags } from "../../services/commonConsts.js";
-import { getActorStore, stores } from "../../svelte/stores/actorStores.js";
+import { StoreManager } from "../../svelte/svelteHelpers/StoreManager.svelte";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
@@ -193,6 +193,9 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    }
 
    async handleSkill(droppedItem) {
+
+      let storeManager = StoreManager.Subscribe(this.document);
+
       const skillType = droppedItem.system.skillType;
       const itemData = droppedItem.toObject();
 
@@ -223,8 +226,10 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          return;
       }
 
-      const targetStore = getActorStore(this.document.id, storeKey, []);
+      const targetStore = storeManger.getActorStore(this.document.id, storeKey, []);
       targetStore.update((current) => [...current, createdItem.id]);
+
+      StoreManager.Unsubscribe(this.document);
    }
 
    async handlemetatype(droppedItem) {

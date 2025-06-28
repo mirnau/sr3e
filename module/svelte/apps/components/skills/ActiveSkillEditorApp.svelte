@@ -2,7 +2,6 @@
    import { openFilePicker, localize } from "../../../../services/utilities.js";
    import SpecializationCard from "./SpecializationCard.svelte";
    import { onDestroy, tick } from "svelte";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { flags } from "../../../../services/commonConsts.js";
    import { get, set } from "svelte/store";
    import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
@@ -15,7 +14,7 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
    let itemStoreManager = StoreManager.Subscribe(skill);
 
-   let specializations = itemStoreManager.GetStore("activeSkill.specializations");
+   let specializationsStore = itemStoreManager.GetStore("activeSkill.specializations");
    let activeSkillPointsStore = actorStoreManager.GetStore("creation.activePoints");
    let valueStore = itemStoreManager.GetStore("activeSkill.value");
 
@@ -29,13 +28,9 @@
       karmaShoppingService = null;
    });
 
-   let isCharacterCreation = getActorStore(
-      actor.id,
-      stores.isCharacterCreation,
-      actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
-   );
+   let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-   let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
+   let disableValueControls = $derived($isCharacterCreationStore && $specializationsStore.length > 0);
 
    let layoutMode = $state("single");
 
@@ -45,17 +40,13 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
+   let attributeAssignmentLocked = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    async function addNewSpecialization() {
       let newSkillSpecialization;
 
       if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-         if ($specializations.length > 0) {
+         if ($specializationsStore.length > 0) {
             ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
             return;
          }
@@ -71,14 +62,14 @@
       }
 
       if (newSkillSpecialization) {
-         $specializations.push(newSkillSpecialization);
-         $specializations = [...$specializations];
+         $specializationsStore.push(newSkillSpecialization);
+         $specializationsStore = [...$specializationsStore];
       }
    }
 
    async function increment() {
       if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+         if ($isCharacterCreationStore) {
             if ($valueStore < 6) {
                let costForNextLevel;
 
@@ -105,7 +96,7 @@
 
    async function decrement() {
       if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+         if ($isCharacterCreationStore) {
             if ($valueStore > 0) {
                let refundForCurrentLevel;
 
@@ -144,9 +135,9 @@
       });
 
       if (confirmed) {
-         if ($isCharacterCreation) {
-            if ($specializations.length > 0) {
-               $specializations = [];
+         if ($isCharacterCreationStore) {
+            if ($specializationsStore.length > 0) {
+               $specializationsStore = [];
 
                await tick();
 
@@ -172,7 +163,7 @@
                render: false,
             });
 
-            const store = getActorStore(actor.id, stores.activeSkillsIds);
+            const store = storeManger.getActorStore(actor.id, stores.activeSkillsIds);
             const current = get(store);
             store.set(current.filter((sid) => sid !== id));
          }
@@ -183,7 +174,7 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
-      $specializations = $specializations.filter((s) => s !== toDelete);
+      $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
 </script>
@@ -262,13 +253,13 @@
                   {localize(config.skill.specializations)}
                </h1>
                <div class="stat-grid single-column">
-                  {#each $specializations as specialization, i}
+                  {#each $specializationsStore as specialization, i}
                      <SpecializationCard
-                        bind:specialization={$specializations[i]}
+                        bind:specialization={$specializationsStore[i]}
                         {actor}
                         {skill}
                         on:arrayChanged={() => {
-                           $specializations = [...$specializations];
+                           $specializationsStore = [...$specializationsStore];
                            console.log("array was reassigned");
                         }}
                         on:delete={deleteSpecialization}

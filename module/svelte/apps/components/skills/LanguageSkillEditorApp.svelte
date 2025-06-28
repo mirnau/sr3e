@@ -2,7 +2,6 @@
    import { openFilePicker, localize } from "../../../../services/utilities.js";
    import SpecializationCard from "./SpecializationCard.svelte";
    import { onDestroy, tick } from "svelte";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { flags } from "../../../../services/commonConsts.js";
    import { get, set } from "svelte/store";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
@@ -16,13 +15,10 @@
    let valueStore = itemStoreManager.GetStore("languageSkill.value");
    let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
 
-   let isCharacterCreation = getActorStore(
-      actor.id,
-      stores.isCharacterCreation,
-      actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
-   );
 
-   const languageSkillsIdArrayStore = getActorStore(
+   let isCharacterCreation = storeManger.GetFlagStore(flags.actor.isCharacterCreation);
+
+   const languageSkillsIdArrayStore = storeManger.GetShallowStore(
       actor.id,
       stores.languageSkillsIds,
       actor.items.filter((item) => item.type === "skill" && item.system.skillType === "language").map((item) => item.id)
@@ -37,12 +33,7 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
+   let attributeAssignmentLocked = storeManger.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let readWrite = $derived($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
    let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
@@ -181,7 +172,7 @@
             render: false,
          });
 
-         const store = getActorStore(actor.id, stores.languageSkillsIds);
+         const store = storeManger.getActorStore(actor.id, stores.languageSkillsIds);
          store.set(get(store).filter((sid) => sid !== id));
 
          app.close();

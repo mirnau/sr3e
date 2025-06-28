@@ -1,6 +1,5 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { flags } from "../../../../services/commonConsts.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
@@ -14,12 +13,7 @@
    let attributePointStore = storeManager.GetStore("creation.attributePoints");
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
-
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
+   let attributeAssignmentLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let metatype = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metatype") : null);
 
@@ -31,7 +25,7 @@
    let isMaxLimit = $derived(attributeLimit ? $total.sum >= attributeLimit : false);
 
    function add(change) {
-      if (!$attributeAssignmentLocked) {
+      if (!$attributeAssignmentLockedStore) {
          const newPoints = $attributePointStore - change;
          if (newPoints < 0) return;
 

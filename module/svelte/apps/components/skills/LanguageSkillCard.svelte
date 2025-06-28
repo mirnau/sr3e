@@ -1,6 +1,5 @@
 <!-- Language Skill Card Component -->
 <script>
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
    import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
@@ -13,12 +12,12 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
 
    let languageSkill = $state(skill.system.languageSkill);
-   let specializations = getActorStore(skill.id, actor.id, skill.system.languageSkill.specializations);
+   let specializations = storeManger.getActorStore(skill.id, actor.id, skill.system.languageSkill.specializations);
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
-   let value = getActorStore(actor.id, skill.id, languageSkill.value);
-   let readWriteValue = getActorStore(actor.id, `${skill.id}-readwrite`, languageSkill.readwrite.value);
+   let value = storeManger.getActorStore(actor.id, skill.id, languageSkill.value);
+   let readWriteValue = storeManger.getActorStore(actor.id, `${skill.id}-readwrite`, languageSkill.readwrite.value);
 
    let skillEditorInstance = null;
 

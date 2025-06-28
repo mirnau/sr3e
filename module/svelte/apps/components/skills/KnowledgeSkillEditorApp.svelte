@@ -2,7 +2,6 @@
    import { openFilePicker, localize } from "../../../../services/utilities.js";
    import SpecializationCard from "./SpecializationCard.svelte";
    import { onDestroy, tick } from "svelte";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import { flags } from "../../../../services/commonConsts.js";
    import { get, set } from "svelte/store";
    import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
@@ -29,7 +28,7 @@
       karmaShoppingService = null;
    });
 
-   let isCharacterCreation = getActorStore(
+   let isCharacterCreation = storeManger.getActorStore(
       actor.id,
       stores.isCharacterCreation,
       actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
@@ -45,7 +44,7 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = getActorStore(
+   let attributeAssignmentLocked = storeManger.getActorStore(
       actor.id,
       stores.attributeAssignmentLocked,
       actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
@@ -172,7 +171,7 @@
                render: false,
             });
 
-            const store = getActorStore(actor.id, stores.knowledgeSkillsIds);
+            const store = storeManger.getActorStore(actor.id, stores.knowledgeSkillsIds);
             const current = get(store);
             store.set(current.filter((sid) => sid !== id));
          }

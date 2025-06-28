@@ -1,7 +1,6 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
-   import { getActorStore, stores } from "../../../stores/actorStores.js";
    import CreationPointList from "../../components/CreationPointList.svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
@@ -12,14 +11,9 @@
    let activePointsText = localize(config.skill.active);
    let knowledgePointsText = localize(config.skill.knowledge);
    let languagePointsText = localize(config.skill.language);
-
-   let attributeAssignmentLocked = getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
-
    let storeManager = StoreManager.Subscribe(actor);
+
+   let attributeAssignmentLocked = storeManger.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
    let attributePointsStore = storeManager.GetStore("creation.attributePoints");
