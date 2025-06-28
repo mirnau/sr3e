@@ -1,6 +1,5 @@
 <script>
-   import AttributeCardCreationState from "./basic/AttributeCardCreationState.svelte";
-   import AttributeCardKarmaState from "./basic/AttributeCardKarmaState.svelte";
+   import AttributeCard from "./basic/AttributeCard.svelte";
    import { localize } from "../../../services/utilities.js";
    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
    import CardToolbar from "./CardToolbar.svelte";
@@ -25,7 +24,6 @@
    let essence = storeManager.GetStore("attributes.essence");
    let magicValueStore = storeManager.GetStore("attributes.magic.value");
    let magicCap = $derived(Math.floor($essence));
-   
 
    let reaction = $derived(Math.floor(($intelligence.sum + $quickness.sum) * 0.5));
 
@@ -50,11 +48,7 @@
 <h1>{localize(localization.attributes)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
    {#each Object.entries(attributes).slice(0, 6) as [key, stat]}
-      {#if !$attributeAssignmentLocked}
-         <AttributeCardCreationState {actor} {stat} {localization} {key} />
-      {:else}
-         <AttributeCardKarmaState {actor} {stat} {localization} {key} />
-      {/if}
+      <AttributeCard {actor} {stat} {localization} {key} />
    {/each}
    {#if isAwakened}
       <StatCard label={config.magic.magic} value={$magic.sum} />

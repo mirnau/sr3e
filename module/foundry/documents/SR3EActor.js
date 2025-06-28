@@ -1,6 +1,5 @@
 import { get } from "svelte/store";
 export default class SR3EActor extends Actor {
-   
    get getInitiativeDice() {
       let dice = 1;
       // Get all bioware
@@ -46,6 +45,35 @@ export default class SR3EActor extends Actor {
       }
 
       return totalInit; // Return the total value, not the roll object
+   }
+   async rollAttribute(attribute, options = {}) {
+      const attr = this.system.attributes[attribute];
+
+      const formula = `${attr.value}d6!`;
+      const roll = new Roll(formula);
+      await roll.evaluate();
+
+      const term = roll.terms.find((t) => t instanceof foundry.dice.terms.Die);
+      const isSR3 = term instanceof CONFIG.Dice.terms["d"];
+
+      let resultSummary = "";
+      if (isSR3 && typeof term.successes === "number") {
+         if (term.successes > 0) {
+            resultSummary = `${term.successes} success${term.successes > 1 ? "es" : ""}`;
+         } else if (term.isBotch) {
+            resultSummary = `💥 Disastrous mistake! ${term.ones} ones and no successes.`;
+         } else {
+            resultSummary = "No successes.";
+         }
+      }
+
+      const flavor = `${this.name} rolls ${attribute} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
+
+      await roll.toMessage({
+         speaker: ChatMessage.getSpeaker({ actor: this }),
+         flavor,
+         rollMode: options.rollMode ?? game.settings.get("core", "rollMode"),
+      });
    }
 
    async canAcceptmetatype(incomingItem) {

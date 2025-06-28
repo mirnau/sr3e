@@ -20,17 +20,6 @@
    let imgPath = $derived(metatype?.img || "");
    let imgName = $derived(metatype?.name || "");
 
-   function triggerMasonryReflow() {
-      document
-         .querySelector(".sheet-character-masonry-main")
-         .dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
-   }
-
-   async function handleOutroEnd() {
-      await tick();
-      triggerMasonryReflow();
-   }
-
    function toggleDetails() {
       $isDetailsOpenStore = !$isDetailsOpenStore;
    }
@@ -89,8 +78,6 @@
          <div
             in:slide={{ duration: 100, easing: cubicInOut }}
             out:slide={{ duration: 50, easing: cubicInOut }}
-            onintroend={triggerMasonryReflow}
-            onoutroend={handleOutroEnd}
          >
             <div>
                <input
@@ -128,7 +115,7 @@
                   <div class="editable-field" contenteditable="true" onblur={updateHeight}>
                      {system.profile.height}
                   </div>
-                  <span class="unit">cm</span>
+                  <span class="unit">kg</span>
                </div>
             </div>
 

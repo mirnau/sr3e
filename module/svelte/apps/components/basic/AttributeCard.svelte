@@ -47,7 +47,32 @@
    });
 </script>
 
-<div class="stat-card">
+<div
+   class="stat-card"
+   class:button={!$isShoppingState}
+   role="button"
+   tabindex="0"
+   onclick={async () => await actor.rollAttribute(key)}
+   onkeydown={async (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+         await actor.rollAttribute(key);
+         e.preventDefault();
+      }
+   }}
+>
+   {#if $isShoppingState}
+      <div class="stat-card-toolbar">
+         <i
+            class="fa-solid fa-gear"
+            role="button"
+            tabindex="0"
+            onclick={() => (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
+            onkeydown={(e) =>
+               (e.key === "Enter" || e.key === " ") &&
+               (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
+         ></i>
+      </div>
+   {/if}
    <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
    <div class="stat-card-background"></div>
 

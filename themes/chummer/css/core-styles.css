@@ -2602,7 +2602,7 @@
     justify-content: center;
     position: relative;
     background: var(--highlight-color-secondary);
-    transition: transform 1.3s ease, background-color 1.3s ease;
+    transition: transform 1s ease, background-color 0.3s ease;
     text-align: center;
     padding: 0rem 0.5rem 0.25rem 0.5rem;
     z-index: 1;
@@ -2657,6 +2657,62 @@
     margin: 0;
     margin-bottom: 0.25rem;
     text-align: center;
+  }
+  dialog .stat-card.button,
+  form .stat-card.button,
+  div#support-details .stat-card.button,
+  div#invitation-links .stat-card.button,
+  .application.category-browser .stat-card.button,
+  .sr3e.sheet.item .stat-card.button,
+  .sr3e.sheet.character .stat-card.button {
+    cursor: pointer;
+    transition: transform 0.2s ease-out, background-color 0.5s ease;
+    will-change: transform;
+  }
+  dialog .stat-card.button:hover,
+  form .stat-card.button:hover,
+  div#support-details .stat-card.button:hover,
+  div#invitation-links .stat-card.button:hover,
+  .application.category-browser .stat-card.button:hover,
+  .sr3e.sheet.item .stat-card.button:hover,
+  .sr3e.sheet.character .stat-card.button:hover {
+    transform: scale(1.05);
+  }
+  dialog .stat-card.button:hover .stat-card-background,
+  form .stat-card.button:hover .stat-card-background,
+  div#support-details .stat-card.button:hover .stat-card-background,
+  div#invitation-links .stat-card.button:hover .stat-card-background,
+  .application.category-browser .stat-card.button:hover .stat-card-background,
+  .sr3e.sheet.item .stat-card.button:hover .stat-card-background,
+  .sr3e.sheet.character .stat-card.button:hover .stat-card-background {
+    box-shadow: inset 0 0 10px var(--highlight-color-primary);
+  }
+  dialog .stat-card.button:active,
+  form .stat-card.button:active,
+  div#support-details .stat-card.button:active,
+  div#invitation-links .stat-card.button:active,
+  .application.category-browser .stat-card.button:active,
+  .sr3e.sheet.item .stat-card.button:active,
+  .sr3e.sheet.character .stat-card.button:active {
+    transform: scale(0.97);
+  }
+  dialog .stat-card.button:active .stat-card-background,
+  form .stat-card.button:active .stat-card-background,
+  div#support-details .stat-card.button:active .stat-card-background,
+  div#invitation-links .stat-card.button:active .stat-card-background,
+  .application.category-browser .stat-card.button:active .stat-card-background,
+  .sr3e.sheet.item .stat-card.button:active .stat-card-background,
+  .sr3e.sheet.character .stat-card.button:active .stat-card-background {
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
+  }
+  dialog .stat-card:active,
+  form .stat-card:active,
+  div#support-details .stat-card:active,
+  div#invitation-links .stat-card:active,
+  .application.category-browser .stat-card:active,
+  .sr3e.sheet.item .stat-card:active,
+  .sr3e.sheet.character .stat-card:active {
+    transform: scale(0.97);
   }
   dialog .stat-card-background,
   form .stat-card-background,
