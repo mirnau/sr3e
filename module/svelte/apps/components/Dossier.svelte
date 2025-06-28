@@ -5,17 +5,17 @@
    import { tick } from "svelte";
    import Image from "./basic/Image.svelte";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte.js";
+   import TextInput from "./basic/TextInput.svelte";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
-   let storeManger = StoreManager.Subscribe(actor);
+   let storeManager = StoreManager.Subscribe(actor);
 
    let system = $state(actor.system);
-   let actorNameStore = storeManger.GetShallowStore(actor.id, stores.actorName, actor.name);
-   let isDetailsOpenStore = storeManger.GetStore("profile.isDetailsOpen");
+   let actorNameStore = storeManager.GetShallowStore(actor.id, stores.actorName, actor.name);
+   let isDetailsOpenStore = storeManager.GetStore("profile.isDetailsOpen");
 
    let isDetailsOpen = $state($isDetailsOpenStore);
 
-   // Simplified image state - derive directly from actor
    let metatype = $derived(actor.items.find((i) => i.type === "metatype"));
    let imgPath = $derived(metatype?.img || "");
    let imgName = $derived(metatype?.name || "");
@@ -35,7 +35,6 @@
       $isDetailsOpenStore = !$isDetailsOpenStore;
    }
 
-   // Simplified - single handler for all actor name updates
    function handleActorNameChange(event) {
       $actorNameStore = event.target.value;
    }
@@ -48,7 +47,6 @@
       return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) * 0.5;
    }
 
-   // Simplified update handlers for profile fields
    function updateAge(event) {
       actor.update({ "system.profile.age": Number(event.target.innerText.trim()) }, { render: false });
    }

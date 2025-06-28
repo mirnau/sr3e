@@ -10,7 +10,7 @@
 
    let storeManager = StoreManager.Subscribe(actor);
 
-   const languageSkillsIdArrayStore = storeManger.GetShallowStore(
+   const languageSkillsIdArrayStore = storeManager.GetShallowStore(
       actor.id,
       stores.languageSkillsIds,
       actor.items.filter((item) => item.type === "skill" && item.system.skillType === "language").map((item) => item.id)

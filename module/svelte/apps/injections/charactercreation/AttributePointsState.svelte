@@ -13,7 +13,7 @@
    let languagePointsText = localize(config.skill.language);
    let storeManager = StoreManager.Subscribe(actor);
 
-   let attributeAssignmentLocked = storeManger.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
    let attributePointsStore = storeManager.GetStore("creation.attributePoints");

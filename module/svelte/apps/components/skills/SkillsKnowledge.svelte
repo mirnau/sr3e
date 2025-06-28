@@ -10,7 +10,7 @@
 
    let storeManager = StoreManager.Subscribe(actor);
 
-   const knowledgeSkillsIdArrayStore = storeManger.GetShallowStore(
+   const knowledgeSkillsIdArrayStore = storeManager.GetShallowStore(
       actor.id,
       stores.knowledgeSkillsIds,
       actor.items

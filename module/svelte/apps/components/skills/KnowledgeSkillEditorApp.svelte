@@ -28,7 +28,7 @@
       karmaShoppingService = null;
    });
 
-   let isCharacterCreation = storeManger.getActorStore(
+   let isCharacterCreation = storeManager.getActorStore(
       actor.id,
       stores.isCharacterCreation,
       actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
@@ -44,7 +44,7 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = storeManger.getActorStore(
+   let attributeAssignmentLocked = storeManager.getActorStore(
       actor.id,
       stores.attributeAssignmentLocked,
       actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
@@ -171,7 +171,7 @@
                render: false,
             });
 
-            const store = storeManger.getActorStore(actor.id, stores.knowledgeSkillsIds);
+            const store = storeManager.getActorStore(actor.id, stores.knowledgeSkillsIds);
             const current = get(store);
             store.set(current.filter((sid) => sid !== id));
          }

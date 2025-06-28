@@ -13,7 +13,6 @@
       text = editableEl.innerText;
       oninput(e);
    }
-
    
 </script>
 

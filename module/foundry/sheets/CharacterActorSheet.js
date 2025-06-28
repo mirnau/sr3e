@@ -226,7 +226,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          return;
       }
 
-      const targetStore = storeManger.getActorStore(this.document.id, storeKey, []);
+      const targetStore = storeManager.getActorStore(this.document.id, storeKey, []);
       targetStore.update((current) => [...current, createdItem.id]);
 
       StoreManager.Unsubscribe(this.document);

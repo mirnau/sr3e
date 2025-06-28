@@ -22,8 +22,8 @@ export default class SR3EActor extends Actor {
    }
 
    async rollInitiative(options = {}) {
-      const initiativeDice = get(storeManger.getActorStore(this.id, stores.initiativeDice, 1));
-      const augmentedReaction = get(storeManger.getActorStore(this.id, stores.augmentedReaction));
+      const initiativeDice = get(storeManager.getActorStore(this.id, stores.initiativeDice, 1));
+      const augmentedReaction = get(storeManager.getActorStore(this.id, stores.augmentedReaction));
 
       const roll = await new Roll(`${initiativeDice}d6`).evaluate();
       const totalInit = roll.total + augmentedReaction;

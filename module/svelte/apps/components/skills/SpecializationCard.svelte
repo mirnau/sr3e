@@ -7,16 +7,16 @@
    let { specialization = $bindable(), actor = {}, skill = {} } = $props();
    const dispatch = createEventDispatcher();
 
-   let storeManger = StoreManager.Subscribe(actor);
+   let storeManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
-      storeManger.Unsubscribe(actor);
+      storeManager.Unsubscribe(actor);
    });
 
-   let isCharacterCreationStore = storeManger.GetFlagStore(flags.actor.isCharacterCreation);
+   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
    let liveText = specialization.name;
 
-   let baseValue = storeManger.GetStore("activeSkill.value");
+   let baseValue = storeManager.GetStore("activeSkill.value");
 
    $effect(() => {
       if (liveText !== specialization.name) {

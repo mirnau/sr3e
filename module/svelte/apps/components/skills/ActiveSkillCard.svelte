@@ -16,7 +16,7 @@
    let valueStore = skillStoreManager.GetStore("activeSkill.value");
    let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
 
-   // Legacy stores that still need storeManger.getActorStore (flags don't follow system path)
+   // Legacy stores that still need storeManager.getActorStore (flags don't follow system path)
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
    function openSkill() {

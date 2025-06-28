@@ -163,7 +163,7 @@
                render: false,
             });
 
-            const store = storeManger.getActorStore(actor.id, stores.activeSkillsIds);
+            const store = storeManager.getActorStore(actor.id, stores.activeSkillsIds);
             const current = get(store);
             store.set(current.filter((sid) => sid !== id));
          }

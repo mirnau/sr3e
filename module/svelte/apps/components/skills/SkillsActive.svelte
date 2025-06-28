@@ -8,9 +8,9 @@
 
    let { actor = {}, config = {} } = $props();
 
-   let storeManger = StoreManager.Subscribe(actor);
+   let storeManager = StoreManager.Subscribe(actor);
 
-   const activeSkillsIdArrayStore = storeManger.GetShallowStore(
+   const activeSkillsIdArrayStore = storeManager.GetShallowStore(
       actor.id,
       "activeSkillsIds",
       actor.items.filter((item) => item.type === "skill" && item.system.skillType === "active").map((item) => item.id)

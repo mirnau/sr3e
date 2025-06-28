@@ -14,7 +14,7 @@
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
 
-   let attributeAssignmentLocked = storeManger.getActorStore(flags.actor.attributeAssignmentLocked);
+   let attributeAssignmentLocked = storeManager.getActorStore(flags.actor.attributeAssignmentLocked);
 
    let metatype = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metatype") : null);
 
