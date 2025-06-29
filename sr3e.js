@@ -91,6 +91,8 @@ function configureProject() {
 
    DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
    DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
+
+   SR3Edie.ConfigureRollParser();
 }
 
 function setupMouseLightSourceEffect(includedThemes) {
@@ -302,6 +304,9 @@ function registerHooks() {
    Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
 
    Hooks.once(hooks.init, () => {
+
+
+
       configureProject();
       configureThemes();
       registerDocumentTypes({

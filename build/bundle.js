@@ -13383,72 +13383,71 @@ handleDelayedAction_fn = function() {
 handleIntervention_fn = function() {
   throw new NotImplementedError("handleIntervention");
 };
-class SR3Edie extends foundry.dice.terms.Die {
-  constructor({ number = 1, faces = 6, modifiers = [], ...rest } = {}) {
-    super({ number, faces, modifiers, ...rest });
-  }
+const _SR3Edie = class _SR3Edie extends foundry.dice.terms.Die {
   /* ------------------------------------------------------------------ */
-  /*  Core evaluation                                                   */
+  /*  Evaluation                                                        */
   /* ------------------------------------------------------------------ */
-  /** Sync path (called by `_evaluate` internally when deterministic) */
   _evaluateSync({ maximize = false, minimize = false } = {}) {
     this.results = [];
     const randomFace = () => super.randomFace({ maximize, minimize });
+    const hasBang = this.modifiers.includes("!");
+    const hasBangOnce = this.modifiers.includes("!o");
+    const explodeOnce = hasBangOnce;
+    const explode = hasBang || hasBangOnce;
+    const canExplode = explode && !(maximize || minimize);
     for (let i = 0; i < this.number; i++) {
       let value = randomFace();
       let total = value;
-      let didExplode = false;
-      const canExplode = !(maximize || minimize);
-      while (canExplode && value === 6) {
-        value = randomFace();
-        total += value;
-        didExplode = true;
+      let exploded = false;
+      if (canExplode && value === 6) {
+        do {
+          value = randomFace();
+          total += value;
+          exploded = true;
+        } while (!explodeOnce && value === 6);
       }
-      this.results.push({
-        result: total,
-        active: true,
-        exploded: didExplode
-        // lets the UI apply the “exploded” CSS
-      });
+      this.results.push({ result: total, active: true, exploded });
     }
     return this;
   }
-  async _evaluateAsync(opts = {}) {
-    return this._evaluateSync(opts);
+  async _evaluateAsync(o = {}) {
+    return this._evaluateSync(o);
   }
   /* ------------------------------------------------------------------ */
-  /*  Helpers                                                           */
+  /*  SR3E QoL getters                                                  */
   /* ------------------------------------------------------------------ */
-  /** Roll and convert the face value to a standard result object */
-  _randomFace(opts) {
-    return super.randomFace();
-  }
-  /** Push a result object in the structure the core UI expects */
-  _pushResult(value, extra = {}) {
-    this.results.push({ result: value, active: true, ...extra });
-  }
-  /* ------------------------------------------------------------------ */
-  /*  SR3E quality-of-life getters                                      */
-  /* ------------------------------------------------------------------ */
-  /** Standard success ≥5 */
   get successes() {
     return this.results.filter((r) => r.active && r.result >= 5).length;
   }
-  /** Traditional botch (any 1 and no successes) */
   get isBotch() {
-    const ones = this.results.filter((r) => r.active && r.result === 1).length;
-    return ones > 0 && this.successes === 0;
+    const active = this.results.filter((r) => r.active);
+    return active.length > 0 && this.successes === 0 && active.every((r) => r.result === 1);
   }
-  /* ------------------------------------------------------------------ */
-  /*  Registration helper                                               */
-  /* ------------------------------------------------------------------ */
-  static register() {
-    CONFIG.Dice.terms[this.DENOMINATION] = this;
-    CONFIG.Dice.terms[this.name] = this;
+  get isFailure() {
+    return this.successes === 0 && !this.isBotch;
   }
-}
-/**  The letter the parser looks for (keep "d" so "6d6" still works) */
-__publicField(SR3Edie, "DENOMINATION", "d");
+  static ConfigureRollParser() {
+    CONFIG.Dice.terms["d"] = _SR3Edie;
+    CONFIG.Dice.terms.SR3Edie = _SR3Edie;
+  }
+};
+/** Keep the normal “d” so 10d still parses */
+__publicField(_SR3Edie, "DENOMINATION", "d");
+/* ------------------------------------------------------------------ */
+/*  Declare custom modifiers so the parser accepts ! and !o            */
+/* ------------------------------------------------------------------ */
+__publicField(_SR3Edie, "MODIFIERS", {
+  ...foundry.dice.terms.Die.MODIFIERS,
+  e: function() {
+    this._explodeOpen = true;
+    return this;
+  },
+  eo: function() {
+    this._explodeOnce = true;
+    return this;
+  }
+});
+let SR3Edie = _SR3Edie;
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -13506,6 +13505,7 @@ function configureProject() {
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
+  SR3Edie.ConfigureRollParser();
 }
 function setupMouseLightSourceEffect(includedThemes) {
   Hooks.on(hooks.renderApplicationV2, (app, html2) => {

@@ -1,87 +1,76 @@
+// src/dice/SR3Edie.js
 export default class SR3Edie extends foundry.dice.terms.Die {
-   /**  The letter the parser looks for (keep "d" so "6d6" still works) */
+   /** Keep the normal “d” so 10d still parses */
    static DENOMINATION = "d";
 
-   constructor({ number = 1, faces = 6, modifiers = [], ...rest } = {}) {
-      // Make sure faces is always 6 and store modifiers array
-      super({ number, faces, modifiers, ...rest });
-   }
+   /* ------------------------------------------------------------------ */
+   /*  Declare custom modifiers so the parser accepts ! and !o            */
+   /* ------------------------------------------------------------------ */
+   static MODIFIERS = {
+      ...foundry.dice.terms.Die.MODIFIERS,
+      e: function () {
+         this._explodeOpen = true;
+         return this;
+      },
+      eo: function () {
+         this._explodeOnce = true;
+         return this;
+      },
+   };
 
    /* ------------------------------------------------------------------ */
-   /*  Core evaluation                                                   */
+   /*  Evaluation                                                        */
    /* ------------------------------------------------------------------ */
-
-   /** Sync path (called by `_evaluate` internally when deterministic) */
-
    _evaluateSync({ maximize = false, minimize = false } = {}) {
       this.results = [];
-
-      // helper that respects maximise/minimise flags
       const randomFace = () => super.randomFace({ maximize, minimize });
 
-      for (let i = 0; i < this.number; i++) {
-         let value = randomFace(); // first roll
-         let total = value; // running total for this die
-         let didExplode = false;
+      // Decide what kind of roll we’re dealing with
+      const hasBang = this.modifiers.includes("!");
+      const hasBangOnce = this.modifiers.includes("!o");
+      const explodeOnce = hasBangOnce; // true  → single extra roll
+      const explode = hasBang || hasBangOnce;
+      const canExplode = explode && !(maximize || minimize);
 
-         // open-ended Shadowrun explosions
-         const canExplode = !(maximize || minimize);
-         while (canExplode && value === 6) {
-            value = randomFace();
-            total += value;
-            didExplode = true;
+      for (let i = 0; i < this.number; i++) {
+         let value = randomFace();
+         let total = value;
+         let exploded = false;
+
+         if (canExplode && value === 6) {
+            do {
+               value = randomFace();
+               total += value;
+               exploded = true;
+            } while (!explodeOnce && value === 6); // keep going unless !o
          }
 
-         // push a *single* result representing the whole chain
-         this.results.push({
-            result: total,
-            active: true,
-            exploded: didExplode, // lets the UI apply the “exploded” CSS
-         });
+         this.results.push({ result: total, active: true, exploded });
       }
       return this;
    }
-
-   async _evaluateAsync(opts = {}) {
-      return this._evaluateSync(opts);
+   async _evaluateAsync(o = {}) {
+      return this._evaluateSync(o);
    }
 
    /* ------------------------------------------------------------------ */
-   /*  Helpers                                                           */
+   /*  SR3E QoL getters                                                  */
    /* ------------------------------------------------------------------ */
-
-   /** Roll and convert the face value to a standard result object */
-   _randomFace(opts) {
-      // Die#_roll eventually calls Die#randomFace, so skip the extra await here
-      return super.randomFace();
-   }
-
-   /** Push a result object in the structure the core UI expects */
-   _pushResult(value, extra = {}) {
-      this.results.push({ result: value, active: true, ...extra });
-   }
-
-   /* ------------------------------------------------------------------ */
-   /*  SR3E quality-of-life getters                                      */
-   /* ------------------------------------------------------------------ */
-
-   /** Standard success ≥5 */
    get successes() {
       return this.results.filter((r) => r.active && r.result >= 5).length;
    }
-   /** Traditional botch (any 1 and no successes) */
    get isBotch() {
-      const ones = this.results.filter((r) => r.active && r.result === 1).length;
-      return ones > 0 && this.successes === 0;
+      const active = this.results.filter((r) => r.active);
+      return active.length > 0 && this.successes === 0 && active.every((r) => r.result === 1);
+   }
+   get isFailure() {
+      return this.successes === 0 && !this.isBotch;
    }
 
-   /* ------------------------------------------------------------------ */
-   /*  Registration helper                                               */
-   /* ------------------------------------------------------------------ */
+   static ConfigureRollParser() {
+      // Hook into the main parse method to preprocess the formula
 
-   static register() {
-      // Replace the default d6 term *once*, during init
-      CONFIG.Dice.terms[this.DENOMINATION] = this;
-      CONFIG.Dice.terms[this.name] = this; // direct construction
+      CONFIG.Dice.terms["d"] = SR3Edie;
+      CONFIG.Dice.terms.SR3Edie = SR3Edie;
    }
 }
