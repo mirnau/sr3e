@@ -43,15 +43,18 @@ export default class SR3Edie extends foundry.dice.terms.Die {
       const canExplode = !(maximize || minimize);
 
       for (let i = 0; i < this.number; i++) {
-         let total = 0,
-            exploded = false;
-         do {
+         let total = 0;
+         let didExplode = false;
+         while (true) {
             const roll = randomFace();
             total += roll;
-            if (roll === 6 && canExplode && total < cap) exploded = true;
-            else break;
-         } while (true);
-         this.results.push({ result: total, active: true, exploded });
+            if (roll === 6 && canExplode && total < cap) {
+               didExplode = true;
+            } else {
+               break;
+            }
+         }
+         this.results.push({ result: total, active: true, exploded: didExplode });
       }
       return this;
    }

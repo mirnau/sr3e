@@ -3957,7 +3957,7 @@ var root_1$q = /* @__PURE__ */ template(`<div class="popup"><div class="popup-co
 function RollComposerModal($$anchor, $$props) {
   push($$props, true);
   let targetNumber = "";
-  let isDefaulting = false;
+  let isDefaultingAsString = "false";
   let inputEl;
   let selectEl;
   let buttonEl;
@@ -4000,12 +4000,12 @@ function RollComposerModal($$anchor, $$props) {
     if (["ArrowUp", "w", "W"].includes(e.key)) {
       e.preventDefault();
       selectEl.selectedIndex = 0;
-      isDefaulting = selectEl.value;
+      isDefaultingAsString = selectEl.value;
     }
     if (["ArrowDown", "s", "S"].includes(e.key)) {
       e.preventDefault();
       selectEl.selectedIndex = 1;
-      isDefaulting = selectEl.value;
+      isDefaultingAsString = selectEl.value;
     }
     if (e.key === "Enter" || e.key === "Tab") {
       e.preventDefault();
@@ -4023,6 +4023,8 @@ function RollComposerModal($$anchor, $$props) {
     }
   }
   function submit() {
+    let isDefaulting = isDefaultingAsString === "true";
+    targetNumber = targetNumber < 2 || targetNumber === "" ? 2 : targetNumber;
     if (isDefaulting) {
       let baseTn = targetNumber;
       targetNumber += 2;
@@ -4061,7 +4063,7 @@ function RollComposerModal($$anchor, $$props) {
         () => localize($$props.config.attributes[$$props.caller])
       ]);
       bind_value(input, () => targetNumber, ($$value) => targetNumber = $$value);
-      bind_select_value(select, () => isDefaulting, ($$value) => isDefaulting = $$value);
+      bind_select_value(select, () => isDefaultingAsString, ($$value) => isDefaultingAsString = $$value);
       append($$anchor2, div);
     };
     if_block(node, ($$render) => {
@@ -13581,14 +13583,18 @@ const _SR3Edie = class _SR3Edie extends foundry.dice.terms.Die {
     this._targetNumber = cap === Infinity ? null : cap;
     const canExplode = !(maximize || minimize);
     for (let i = 0; i < this.number; i++) {
-      let total = 0, exploded = false;
-      do {
+      let total = 0;
+      let didExplode = false;
+      while (true) {
         const roll = randomFace();
         total += roll;
-        if (roll === 6 && canExplode && total < cap) exploded = true;
-        else break;
-      } while (true);
-      this.results.push({ result: total, active: true, exploded });
+        if (roll === 6 && canExplode && total < cap) {
+          didExplode = true;
+        } else {
+          break;
+        }
+      }
+      this.results.push({ result: total, active: true, exploded: didExplode });
     }
     return this;
   }

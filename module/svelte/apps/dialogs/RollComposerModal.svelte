@@ -5,7 +5,7 @@
    let { actor, caller, type, dice, config, onclose } = $props();
 
    let targetNumber = "";
-   let isDefaulting = false;
+   let isDefaultingAsString = "false";
 
    let inputEl;
    let selectEl;
@@ -58,12 +58,12 @@
       if (["ArrowUp", "w", "W"].includes(e.key)) {
          e.preventDefault();
          selectEl.selectedIndex = 0;
-         isDefaulting = selectEl.value;
+         isDefaultingAsString = selectEl.value;
       }
       if (["ArrowDown", "s", "S"].includes(e.key)) {
          e.preventDefault();
          selectEl.selectedIndex = 1;
-         isDefaulting = selectEl.value;
+         isDefaultingAsString = selectEl.value;
       }
       if (e.key === "Enter" || e.key === "Tab") {
          e.preventDefault();
@@ -83,10 +83,17 @@
    }
 
    function submit() {
+      
+      let isDefaulting = isDefaultingAsString === "true";
+
+      targetNumber = targetNumber < 2 || targetNumber === "" ? 2 : targetNumber;
+
       if (isDefaulting) {
          let baseTn = targetNumber;
          targetNumber += 2;
-         console.log(`The target number ${baseTn} was increased to ${targetNumber}, to compensate for defaulting on linked skill`);
+         console.log(
+            `The target number ${baseTn} was increased to ${targetNumber}, to compensate for defaulting on linked skill`
+         );
       }
 
       onclose({
@@ -103,7 +110,7 @@
          <h1>{localize(config.attributes[caller])} ROLL</h1>
          <div class="field-group">
             <input bind:this={inputEl} type="number" bind:value={targetNumber} onkeydown={handleInputKeydown} />
-            <select bind:this={selectEl} bind:value={isDefaulting} onkeydown={handleSelectKeydown}>
+            <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
                <option value="false">Regular roll</option>
                <option value="true">Defaulting</option>
             </select>
