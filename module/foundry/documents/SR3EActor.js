@@ -1,4 +1,5 @@
 import { get } from "svelte/store";
+import RollService from "../../services/RollService.js";
 export default class SR3EActor extends Actor {
    get getInitiativeDice() {
       let dice = 1;
@@ -20,60 +21,12 @@ export default class SR3EActor extends Actor {
       return augmentedReaction;
    }
 
-   async rollInitiative(options = {}) {
-      const initiativeDice = get(storeManager.getActorStore(this.id, stores.initiativeDice, 1));
-      const augmentedReaction = get(storeManager.getActorStore(this.id, stores.augmentedReaction));
-
-      const roll = await new Roll(`${initiativeDice}d6`).evaluate();
-      const totalInit = roll.total + augmentedReaction;
-
-      // Show the roll in chat
-      await roll.toMessage({
-         speaker: ChatMessage.getSpeaker({ actor: this }),
-         flavor: `${this.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`,
-      });
-
-      if (this.combatant) {
-         // If we have a direct combatant reference, update it
-         await this.combatant.update({ initiative: totalInit });
-      } else if (game.combat) {
-         // Find our combatant and update directly - NO rollInitiative call
-         const combatant = game.combat.combatants.find((c) => c.actor.id === this.id);
-         if (combatant) {
-            await game.combat.setInitiative(combatant.id, totalInit);
-         }
-      }
-
-      return totalInit; // Return the total value, not the roll object
+   async InitiativeRoll(dice, options) {
+      await RollService.Initiative(this, dice, options);
    }
-   async rollAttribute(attribute, options = {}) {
-      const attr = this.system.attributes[attribute];
 
-      const formula = `${attr.value}d6!`;
-      const roll = new Roll(formula);
-      await roll.evaluate();
-
-      const term = roll.terms.find((t) => t instanceof foundry.dice.terms.Die);
-      const isSR3 = term instanceof CONFIG.Dice.terms["d"];
-
-      let resultSummary = "";
-      if (isSR3 && typeof term.successes === "number") {
-         if (term.successes > 0) {
-            resultSummary = `${term.successes} success${term.successes > 1 ? "es" : ""}`;
-         } else if (term.isBotch) {
-            resultSummary = `💥 Disastrous mistake! ${term.ones} ones and no successes.`;
-         } else {
-            resultSummary = "No successes.";
-         }
-      }
-
-      const flavor = `${this.name} rolls ${attribute} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
-
-      await roll.toMessage({
-         speaker: ChatMessage.getSpeaker({ actor: this }),
-         flavor,
-         rollMode: options.rollMode ?? game.settings.get("core", "rollMode"),
-      });
+   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, explodes: true }) {
+      await RollService.AttributeRoll(this, attributeName, dice, options);
    }
 
    async canAcceptmetatype(incomingItem) {
@@ -110,5 +63,9 @@ export default class SR3EActor extends Actor {
          "system.profile.metaType": newItem.name,
          "system.profile.img": newItem.img,
       });
+   }
+
+   static Register() {
+      CONFIG.Actor.documentClass = SR3EActor;
    }
 }

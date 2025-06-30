@@ -1,6 +1,5 @@
 <script>
     import { localize } from "../../../services/utilities.js";
-    // @runes
     const { config, onclose } = $props();
 
     let visible = $state(true);

@@ -46,10 +46,8 @@ function configureProject() {
    CONFIG.sr3e = sr3e;
    CONFIG.Actor.dataModels = {};
    CONFIG.Item.dataModels = {};
-   CONFIG.Actor.documentClass = SR3EActor;
+
    CONFIG.Combat.documentClass = SR3ECombat;
-   CONFIG.Dice.terms["d"] = SR3Edie;
-   CONFIG.Dice.terms["SR3Edie"] = SR3Edie;
    //CONFIG.Dice.rolls.push(SR3ERoll);
    //CONFIG.Dice.Roll = SR3ERoll;
    CONFIG.canvasTextStyle.fontFamily = "VT323";
@@ -92,7 +90,9 @@ function configureProject() {
    DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
    DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 
-   SR3Edie.ConfigureRollParser();
+   SR3EActor.Register();
+   SR3ECombat.Register();
+   SR3Edie.Register();
 }
 
 function setupMouseLightSourceEffect(includedThemes) {

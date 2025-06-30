@@ -3,6 +3,8 @@
    import { flags } from "../../../../services/commonConsts.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
+   import RollComposerModal from "../../dialogs/RollComposerModal.svelte";
+   import { mount, unmount } from "svelte";
 
    let { actor, stat, localization, key } = $props();
 
@@ -24,6 +26,8 @@
    let isMinLimit = $derived($value <= 1);
    let isMaxLimit = $derived(attributeLimit ? $total.sum >= attributeLimit : false);
 
+   let activeModal = null;
+
    function add(change) {
       if (!$attributeAssignmentLockedStore) {
          const newPoints = $attributePointStore - change;
@@ -42,22 +46,65 @@
       if (!isMinLimit) add(-1);
    };
 
+   function handleEscape(e) {
+      if (e.key === "Escape" && activeModal) {
+         e.preventDefault();
+         e.stopImmediatePropagation();
+         e.stopPropagation();
+         unmount(activeModal);
+         activeModal = null;
+      }
+   }
+
    onDestroy(() => {
       StoreManager.Unsubscribe(actor);
+      if (activeModal) {
+         unmount(activeModal);
+         activeModal = null;
+      }
    });
+
+   async function Roll(e) {
+      if (e.shiftKey) {
+         const options = await new Promise((resolve) => {
+            activeModal = mount(RollComposerModal, {
+               target: document.body,
+               props: {
+                  actor,
+                  caller: key,
+                  type: "attribute",
+                  dice: $total.sum,
+                  config: CONFIG.sr3e,
+                  onclose: (result) => {
+                     unmount(activeModal);
+                     activeModal = null;
+                     resolve(result);
+                  },
+               },
+            });
+         });
+
+         if (options) {
+            await actor.AttributeRoll($total.sum, key, options);
+         }
+      } else {
+         await actor.AttributeRoll($total.sum, key);
+      }
+
+      e.preventDefault();
+   }
 </script>
+
+<svelte:window on:keydown|capture={handleEscape} />
 
 <div
    class="stat-card"
    class:button={!$isShoppingState}
    role="button"
    tabindex="0"
-   onclick={async () => await actor.rollAttribute(key)}
-   onkeydown={async (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-         await actor.rollAttribute(key);
-         e.preventDefault();
-      }
+   onclick={Roll}
+   onkeydown={(e) => {
+      if (e.key === "Enter" || e.key === " ") Roll(e);
    }}
 >
    {#if $isShoppingState}
@@ -77,31 +124,28 @@
    <div class="stat-card-background"></div>
 
    <div class="stat-label">
-      {#if $isShoppingState}
-         {#if "meta" in stat}
-            <i
-               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-               role="button"
-               tabindex="0"
-               onclick={decrement}
-               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-            ></i>
-         {/if}
+      {#if $isShoppingState && "meta" in stat}
+         <i
+            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+            role="button"
+            tabindex="0"
+            onclick={decrement}
+            onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+         ></i>
       {/if}
 
       <h1 class="stat-value">{$total.sum}</h1>
-      {#if $isShoppingState}
-         {#if "meta" in stat}
-            <i
-               class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
-                  ? 'disabled'
-                  : ''}"
-               role="button"
-               tabindex="0"
-               onclick={increment}
-               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-            ></i>
-         {/if}
+
+      {#if $isShoppingState && "meta" in stat}
+         <i
+            class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
+               ? 'disabled'
+               : ''}"
+            role="button"
+            tabindex="0"
+            onclick={increment}
+            onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+         ></i>
       {/if}
    </div>
 </div>

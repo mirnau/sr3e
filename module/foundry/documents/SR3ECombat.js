@@ -43,4 +43,8 @@ export default class SR3ECombat extends foundry.documents.Combat {
   #handleIntervention() {
     throw new NotImplementedError("handleIntervention");
   }
+
+  static Register() {
+    CONFIG.Combat.documentClass = SR3ECombat;
+  }
 }
