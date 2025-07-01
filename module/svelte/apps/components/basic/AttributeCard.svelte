@@ -97,52 +97,53 @@
 
 <svelte:window on:keydown|capture={handleEscape} />
 
-<div
-   class="stat-card"
-   class:button={!$isShoppingState}
-   role="button"
-   tabindex="0"
-   onclick={Roll}
-   onkeydown={(e) => {
-      if (e.key === "Enter" || e.key === " ") Roll(e);
-   }}
->
-   {#if $isShoppingState}
-      <i
-         class="fa-solid fa-pen-to-square edit-icon"
-         role="button"
-         tabindex="0"
-         onclick={() => (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
-         onkeydown={(e) =>
-            (e.key === "Enter" || e.key === " ") && (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
-      ></i>
-   {/if}
-   <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
-   <div class="stat-card-background"></div>
+{#if $isShoppingState}
+   <div class="stat-card" class:button={!$isShoppingState} role="button" tabindex="0">
+      <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
+      <div class="stat-card-background"></div>
 
-   <div class="stat-label">
-      {#if $isShoppingState && "meta" in stat}
-         <i
-            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-            role="button"
-            tabindex="0"
-            onclick={decrement}
-            onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-         ></i>
-      {/if}
+      <div class="stat-label">
+         {#if "meta" in stat}
+            <i
+               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+               role="button"
+               tabindex="0"
+               onclick={decrement}
+               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+            ></i>
+         {/if}
 
-      <h1 class="stat-value">{$total.sum}</h1>
+         <h1 class="stat-value">{$total.sum}</h1>
 
-      {#if $isShoppingState && "meta" in stat}
-         <i
-            class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
-               ? 'disabled'
-               : ''}"
-            role="button"
-            tabindex="0"
-            onclick={increment}
-            onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-         ></i>
-      {/if}
+         {#if "meta" in stat}
+            <i
+               class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
+                  ? 'disabled'
+                  : ''}"
+               role="button"
+               tabindex="0"
+               onclick={increment}
+               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+            ></i>
+         {/if}
+      </div>
    </div>
-</div>
+{:else}
+   <div
+      class="stat-card"
+      class:button={!$isShoppingState}
+      role="button"
+      tabindex="0"
+      onclick={Roll}
+      onkeydown={(e) => {
+         if (e.key === "Enter" || e.key === " ") Roll(e);
+      }}
+   >
+      <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
+      <div class="stat-card-background"></div>
+
+      <div class="stat-label">
+         <h1 class="stat-value">{$total.sum}</h1>
+      </div>
+   </div>
+{/if}

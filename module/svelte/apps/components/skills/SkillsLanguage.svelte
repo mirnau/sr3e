@@ -2,7 +2,7 @@
    import SkillCategory from "./SkillCategory.svelte";
    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
 
    let { actor = {}, config = {} } = $props();

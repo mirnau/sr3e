@@ -12,12 +12,13 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
 
    let languageSkill = $state(skill.system.languageSkill);
-   let specializations = storeManager.getActorStore(skill.id, actor.id, skill.system.languageSkill.specializations);
+
+   let specializations = skillStoreManager.GetStore("skill.system.languageSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
-   let value = storeManager.getActorStore(actor.id, skill.id, languageSkill.value);
-   let readWriteValue = storeManager.getActorStore(actor.id, `${skill.id}-readwrite`, languageSkill.readwrite.value);
+   let value = skillStoreManager.GetStore("languageSkill.value");
+   let readWriteValue = skillStoreManager.GetStore("languageSkill.readwrite.value");
 
    let skillEditorInstance = null;
 

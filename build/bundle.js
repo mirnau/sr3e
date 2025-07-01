@@ -3572,14 +3572,14 @@ var on_keydown$8 = (e) => {
 };
 var on_click_1$4 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$K = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$K();
+  var div = root$J();
   div.__click = [on_click$8];
   div.__keydown = [on_keydown$8];
   var button = child(div);
@@ -3595,7 +3595,7 @@ delegate(["click", "keydown"]);
 async function handleClick(_, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$J = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$I = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3606,7 +3606,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$J();
+  var div = root$I();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3739,7 +3739,7 @@ _document = new WeakMap();
 _persistentStore = new WeakMap();
 _actorStores = new WeakMap();
 let StoreManager = _StoreManager;
-var root$I = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+var root$H = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
   push($$props, true);
   let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
@@ -3756,7 +3756,7 @@ function TextInput($$anchor, $$props) {
     text2(editableEl.innerText);
     oninput()(e);
   }
-  var div = root$I();
+  var div = root$H();
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
   div_1.__keydown = function(...$$args) {
@@ -3776,7 +3776,7 @@ function TextInput($$anchor, $$props) {
 delegate(["input", "keydown"]);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var root_3$b = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$H = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$G = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3839,7 +3839,7 @@ function Dossier($$anchor, $$props) {
       { render: false }
     );
   }
-  var fragment = root$H();
+  var fragment = root$G();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3975,7 +3975,7 @@ var on_click_1$3 = (__1, increment2, $$props) => {
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
 };
-var root$G = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
+var root$F = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
 function Counter($$anchor, $$props) {
   push($$props, true);
   let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
@@ -4012,7 +4012,7 @@ function Counter($$anchor, $$props) {
   user_effect(() => {
     updateDisplay();
   });
-  var div = root$G();
+  var div = root$F();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
   button.__click = [on_click$7, decrement2, $$props];
@@ -4333,15 +4333,15 @@ function RollComposerComponent($$anchor, $$props) {
   pop();
 }
 delegate(["keydown", "click"]);
-var on_keydown$6 = (e, Roll2) => {
+var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_3$a = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$p = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var on_keydown_2 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_1$p = /* @__PURE__ */ template(`<i class="fa-solid fa-pen-to-square edit-icon" role="button" tabindex="0"></i>`);
-var on_keydown_1$1 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$a = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root$F = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><!> <h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var root_4$7 = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4424,64 +4424,82 @@ function AttributeCard($$anchor, $$props) {
     }
     e.preventDefault();
   }
-  var div = root$F();
+  var fragment = comment();
   event("keydown", $window, handleEscape, true);
-  div.__click = Roll2;
-  div.__keydown = [on_keydown$6, Roll2];
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var i_1 = root_1$p();
-      i_1.__click = () => attributeAssignmentLockedStore = !$attributeAssignmentLockedStore();
-      i_1.__keydown = (e) => (e.key === "Enter" || e.key === " ") && (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore());
-      append($$anchor2, i_1);
-    };
-    if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
-    });
-  }
-  var h4 = sibling(node, 2);
-  var text2 = child(h4);
-  var div_1 = sibling(h4, 4);
-  var node_1 = child(div_1);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$e();
-      i_2.__click = decrement2;
-      i_2.__keydown = [on_keydown_1$1, decrement2];
-      template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_2);
-    };
-    if_block(node_1, ($$render) => {
-      if ($isShoppingState() && "meta" in $$props.stat) $$render(consequent_1);
-    });
-  }
-  var h1 = sibling(node_1, 2);
-  var text_1 = child(h1);
-  var node_2 = sibling(h1, 2);
+  var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var i_3 = root_3$a();
-      i_3.__click = increment2;
-      i_3.__keydown = [on_keydown_2, increment2];
-      template_effect(() => set_class(i_3, `fa-solid fa-circle-chevron-up increment-attribute ${(get$2(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-      append($$anchor2, i_3);
+      var div = root_1$p();
+      var h4 = child(div);
+      var text2 = child(h4);
+      var div_1 = sibling(h4, 4);
+      var node_1 = child(div_1);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$e();
+          i_1.__click = decrement2;
+          i_1.__keydown = [on_keydown$6, decrement2];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent);
+        });
+      }
+      var h1 = sibling(node_1, 2);
+      var text_1 = child(h1);
+      var node_2 = sibling(h1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i_2 = root_3$a();
+          i_2.__click = increment2;
+          i_2.__keydown = [on_keydown_1$1, increment2];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$2(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_2, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent_1);
+        });
+      }
+      template_effect(
+        ($0) => {
+          toggle_class(div, "button", !$isShoppingState());
+          set_text(text2, $0);
+          set_text(text_1, $total().sum);
+        },
+        [
+          () => localize($$props.localization[$$props.key])
+        ]
+      );
+      append($$anchor2, div);
     };
-    if_block(node_2, ($$render) => {
-      if ($isShoppingState() && "meta" in $$props.stat) $$render(consequent_2);
+    var alternate = ($$anchor2) => {
+      var div_2 = root_4$7();
+      div_2.__click = Roll2;
+      div_2.__keydown = [on_keydown_2, Roll2];
+      var h4_1 = child(div_2);
+      var text_2 = child(h4_1);
+      var div_3 = sibling(h4_1, 4);
+      var h1_1 = child(div_3);
+      var text_3 = child(h1_1);
+      template_effect(
+        ($0) => {
+          toggle_class(div_2, "button", !$isShoppingState());
+          set_text(text_2, $0);
+          set_text(text_3, $total().sum);
+        },
+        [
+          () => localize($$props.localization[$$props.key])
+        ]
+      );
+      append($$anchor2, div_2);
+    };
+    if_block(node, ($$render) => {
+      if ($isShoppingState()) $$render(consequent_2);
+      else $$render(alternate, false);
     });
   }
-  template_effect(
-    ($0) => {
-      toggle_class(div, "button", !$isShoppingState());
-      set_text(text2, $0);
-      set_text(text_1, $total().sum);
-    },
-    [
-      () => localize($$props.localization[$$props.key])
-    ]
-  );
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
   $$cleanup();
 }
@@ -6435,14 +6453,14 @@ function SpecializationCard($$anchor, $$props) {
   const $baseValue = () => store_get(baseValue, "$baseValue", $$stores);
   let specialization = prop($$props, "specialization", 15), actor = prop($$props, "actor", 19, () => ({}));
   prop($$props, "skill", 19, () => ({}));
-  const dispatch = createEventDispatcher();
   let storeManager2 = StoreManager.Subscribe(actor());
+  const dispatch = createEventDispatcher();
   onDestroy(() => {
-    storeManager2.Unsubscribe(actor());
+    StoreManager.Unsubscribe(actor());
   });
   let isCharacterCreationStore = storeManager2.GetFlagStore(flags.actor.isCharacterCreation);
-  let liveText = specialization().name;
   let baseValue = storeManager2.GetStore("activeSkill.value");
+  let liveText = specialization().name;
   user_effect(() => {
     if (liveText !== specialization().name) {
       liveText = specialization().name;
@@ -6634,8 +6652,8 @@ function Karma($$anchor, $$props) {
   append($$anchor, fragment);
   pop();
 }
-async function decrement$2(_, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore, $$props) {
-  if ($attributeAssignmentLocked()) {
+async function decrement$2(_, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore, $$props) {
+  if ($attributeAssignmentLockedStore()) {
     if ($isCharacterCreationStore()) {
       if ($valueStore() > 0) {
         let refundForCurrentLevel;
@@ -6704,7 +6722,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
   const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
   const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
@@ -6723,7 +6741,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   let layoutMode = "single";
   let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let attributeAssignmentLocked = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
   async function addNewSpecialization2() {
     let newSkillSpecialization;
     if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
@@ -6745,7 +6763,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     }
   }
   async function increment2() {
-    if ($attributeAssignmentLocked()) {
+    if ($attributeAssignmentLockedStore()) {
       if ($isCharacterCreationStore()) {
         if ($valueStore() < 6) {
           let costForNextLevel;
@@ -6757,6 +6775,9 @@ function ActiveSkillEditorApp($$anchor, $$props) {
           if ($activeSkillPointsStore() >= costForNextLevel) {
             store_set(valueStore, $valueStore() + 1);
             store_set(activeSkillPointsStore, $activeSkillPointsStore() - costForNextLevel);
+            if ($valueStore() === linkedAttributeRating) {
+              ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+            }
           }
         }
       } else {
@@ -6794,8 +6815,8 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [
     decrement$2,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
     $isCharacterCreationStore,
     isCharacterCreationStore,
     $valueStore,
@@ -6875,9 +6896,9 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function decrement$1(_, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore, $$props) {
-  if ($attributeAssignmentLocked()) {
-    if ($isCharacterCreation()) {
+async function decrement$1(_, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore, $$props) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
       if ($valueStore() > 0) {
         let refundForCurrentLevel;
         if ($valueStore() > linkedAttributeRating) {
@@ -6895,7 +6916,7 @@ async function decrement$1(_, $attributeAssignmentLocked, attributeAssignmentLoc
     ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
 }
-async function deleteThis$1(__1, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore) {
+async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacterCreationStore, $specializations, specializations, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -6912,7 +6933,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreation, isCharacterCreat
     rejectClose: true
   });
   if (confirmed) {
-    if ($isCharacterCreation()) {
+    if ($isCharacterCreationStore()) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
@@ -6930,7 +6951,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreation, isCharacterCreat
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = storeManager.getActorStore($$props.actor.id, stores.knowledgeSkillsIds);
+      const store = storeManager.getActorStore($$props.actor.id, stores$1.knowledgeSkillsIds);
       const current = get$1(store);
       store.set(current.filter((sid) => sid !== id));
     }
@@ -6942,10 +6963,10 @@ var root$w = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div>
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $knowledgeSkillPointsStore = () => store_get(knowledgeSkillPointsStore, "$knowledgeSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
@@ -6959,12 +6980,12 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   onDestroy(() => {
     karmaShoppingService = null;
   });
-  let isCharacterCreation = storeManager.getActorStore($$props.actor.id, stores.isCharacterCreation, $$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation));
-  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
+  let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreationStore() && $specializations().length > 0);
   let layoutMode = "single";
   let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let attributeAssignmentLocked = storeManager.getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
   async function addNewSpecialization2() {
     let newSkillSpecialization;
     if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
@@ -6986,8 +7007,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     }
   }
   async function increment2() {
-    if ($attributeAssignmentLocked()) {
-      if ($isCharacterCreation()) {
+    if ($attributeAssignmentLockedStore()) {
+      if ($isCharacterCreationStore()) {
         if ($valueStore() < 6) {
           let costForNextLevel;
           if ($valueStore() < linkedAttributeRating) {
@@ -6998,6 +7019,9 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
           if ($knowledgeSkillPointsStore() >= costForNextLevel) {
             store_set(valueStore, $valueStore() + 1);
             store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() - costForNextLevel);
+            if ($valueStore() === linkedAttributeRating) {
+              ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+            }
           }
         }
       } else {
@@ -7035,10 +7059,10 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [
     decrement$1,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $isCharacterCreation,
-    isCharacterCreation,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     $valueStore,
     valueStore,
     linkedAttributeRating,
@@ -7050,8 +7074,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   button_2.__click = [
     deleteThis$1,
     $$props,
-    $isCharacterCreation,
-    isCharacterCreation,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     $specializations,
     specializations,
     $valueStore,
@@ -7116,35 +7140,35 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addNewSpecialization(_, $specializations, specializations, $$props, $valueStore, valueStore) {
-  if (!$specializations()) throw new Error("Cannot add lingo: specialization store is null");
+async function addNewSpecialization(_, $specializationsStore, specializationsStore, $$props, $valueStore, valueStore) {
+  if (!$specializationsStore()) throw new Error("Cannot add lingo: specialization store is null");
   if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-    if ($specializations().length > 0) {
+    if ($specializationsStore().length > 0) {
       ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
       return;
     }
-    $specializations().push({
+    $specializationsStore().push({
       name: localize($$props.config.skill.newspecialization),
       value: $valueStore() + 1
     });
     store_set(valueStore, $valueStore() - 1);
   } else {
-    $specializations().push({
+    $specializationsStore().push({
       name: localize($$props.config.skill.newspecialization),
       value: 0
     });
   }
-  store_set(specializations, proxy([...$specializations()]));
+  store_set(specializationsStore, proxy([...$specializationsStore()]));
   await $$props.skill.update(
     {
-      "system.languageSkill.specializations": $specializations()
+      "system.languageSkill.specializations": $specializationsStore()
     },
     { render: false }
   );
 }
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($isCharacterCreation()) {
+async function increment(__1, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
       if ($valueStore() < 6) {
         let costForNextLevel;
         if ($valueStore() < linkedAttributeRating) {
@@ -7155,6 +7179,9 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
         if ($languageSkillPointsStore() >= costForNextLevel) {
           store_set(valueStore, $valueStore() + 1);
           store_set(languageSkillPointsStore, $languageSkillPointsStore() - costForNextLevel);
+          if ($valueStore() === linkedAttributeRating) {
+            ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+          }
         }
       }
     } else {
@@ -7165,9 +7192,9 @@ async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $isCharacterCreation, isCharacterCreation, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($isCharacterCreation()) {
+async function decrement(__2, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
       if ($valueStore() > 0) {
         let refundForCurrentLevel;
         if ($valueStore() > linkedAttributeRating) {
@@ -7186,7 +7213,7 @@ async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLoc
   }
   await silentUpdate();
 }
-async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreation, $specializations, specializations, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
+async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCreationStore, $specializationsStore, specializationsStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: {
       title: localize($$props.config.modal.deleteskilltitle)
@@ -7203,9 +7230,9 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
     rejectClose: true
   });
   if (confirmed) {
-    if ($isCharacterCreation()) {
-      if ($specializations().length > 0) {
-        store_set(specializations, proxy([]));
+    if ($isCharacterCreationStore()) {
+      if ($specializationsStore().length > 0) {
+        store_set(specializationsStore, proxy([]));
         await tick();
         store_set(valueStore, $valueStore() + 1);
       }
@@ -7220,7 +7247,7 @@ async function deleteThis(__3, $$props, $isCharacterCreation, isCharacterCreatio
     await tick();
     const id = $$props.skill.id;
     await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-    const store = storeManager.getActorStore($$props.actor.id, stores.languageSkillsIds);
+    const store = storeManager.getActorStore($$props.actor.id, stores$1.languageSkillsIds);
     store.set(get$1(store).filter((sid) => sid !== id));
     $$props.app.close();
   }
@@ -7231,27 +7258,27 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
-  const $isCharacterCreation = () => store_get(isCharacterCreation, "$isCharacterCreation", $$stores);
-  const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
+  const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $languageSkillPointsStore = () => store_get(languageSkillPointsStore, "$languageSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
-  let specializations = itemStoreManager.GetStore("languageSkill.specializations");
+  let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
   let valueStore = itemStoreManager.GetStore("languageSkill.value");
   let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
-  let isCharacterCreation = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
-  storeManager.GetShallowStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+  actorStoreManager.GetShallowStore($$props.actor.id, stores$1.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
   let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
   let readWrite = /* @__PURE__ */ derived$1(() => $valueStore() <= 1 ? 0 : Math.floor($valueStore() / 2));
-  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreation() && $specializations().length > 0);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreationStore() && $specializationsStore().length > 0);
   user_effect(() => {
     $$props.skill.update(
       {
-        "system.languageSkill.specializations": $specializations()
+        "system.languageSkill.specializations": $specializationsStore()
       },
       { render: false }
     );
@@ -7279,7 +7306,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   }
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
-    store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
+    store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
   var div = root$v();
@@ -7308,10 +7335,10 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var button = child(div_12);
   button.__click = [
     increment,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $isCharacterCreation,
-    isCharacterCreation,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     $valueStore,
     valueStore,
     linkedAttributeRating,
@@ -7323,10 +7350,10 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [
     decrement,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $isCharacterCreation,
-    isCharacterCreation,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     $valueStore,
     valueStore,
     linkedAttributeRating,
@@ -7339,10 +7366,10 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   button_2.__click = [
     deleteThis,
     $$props,
-    $isCharacterCreation,
-    isCharacterCreation,
-    $specializations,
-    specializations,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $specializationsStore,
+    specializationsStore,
     $valueStore,
     valueStore,
     linkedAttributeRating,
@@ -7352,8 +7379,8 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var button_3 = sibling(button_2, 2);
   button_3.__click = [
     addNewSpecialization,
-    $specializations,
-    specializations,
+    $specializationsStore,
+    specializationsStore,
     $$props,
     $valueStore,
     valueStore
@@ -7365,7 +7392,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var h1_3 = child(div_15);
   var text_5 = child(h1_3);
   var div_16 = sibling(h1_3, 2);
-  each(div_16, 5, $specializations, index, ($$anchor2, specialization, i) => {
+  each(div_16, 5, $specializationsStore, index, ($$anchor2, specialization, i) => {
     SpecializationCard($$anchor2, {
       get actor() {
         return $$props.actor;
@@ -7374,14 +7401,14 @@ function LanguageSkillEditorApp($$anchor, $$props) {
         return $$props.skill;
       },
       get specialization() {
-        return $specializations()[i];
+        return $specializationsStore()[i];
       },
       set specialization($$value) {
-        store_mutate(specializations, untrack($specializations)[i] = $$value, untrack($specializations));
+        store_mutate(specializationsStore, untrack($specializationsStore)[i] = $$value, untrack($specializationsStore));
       },
       $$events: {
         arrayChanged: () => {
-          store_set(specializations, proxy([...$specializations()]));
+          store_set(specializationsStore, proxy([...$specializationsStore()]));
         },
         delete: deleteSpecialization
       }
@@ -7647,13 +7674,13 @@ function LanguageSkillCard($$anchor, $$props) {
   const $readWriteValue = () => store_get(readWriteValue, "$readWriteValue", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  StoreManager.Subscribe(skill());
+  let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
-  let languageSkill = proxy(skill().system.languageSkill);
-  let specializations = storeManager.getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
+  proxy(skill().system.languageSkill);
+  let specializations = skillStoreManager.GetStore("skill.system.languageSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
-  let value = storeManager.getActorStore(actor().id, skill().id, languageSkill.value);
-  let readWriteValue = storeManager.getActorStore(actor().id, `${skill().id}-readwrite`, languageSkill.readwrite.value);
+  let value = skillStoreManager.GetStore("languageSkill.value");
+  let readWriteValue = skillStoreManager.GetStore("languageSkill.readwrite.value");
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -7837,7 +7864,7 @@ function SkillsLanguage($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
   let storeManager2 = StoreManager.Subscribe(actor());
-  const languageSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  const languageSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores$1.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let languageSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
@@ -7869,7 +7896,7 @@ function SkillsKnowledge($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
   let storeManager2 = StoreManager.Subscribe(actor());
-  const knowledgeSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
+  const knowledgeSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores$1.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
   let knowledgeSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
@@ -9256,6 +9283,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     }
   }
   _injectFooter(form) {
+    if (form.querySelector(".actor-footer")) return;
     const footer = document.createElement("div");
     footer.classList.add("actor-footer");
     const resizeHandle = form.querySelector(".window-resize-handle");
@@ -9450,7 +9478,7 @@ sr3e.modal = {
   confirm: "sr3e.modal.confirm",
   decline: "sr3e.modal.decline",
   deleteskill: "sr3e.modal.deleteskill",
-  deleteskill: "sr3e.modal.deleteskilltitle",
+  deleteskilltitle: "sr3e.modal.deleteskilltitle",
   exitattributesassignment: "sr3e.modal.exitattributesassignment",
   exitcreationmode: "sr3e.modal.exitcreationmode",
   exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
@@ -9549,7 +9577,6 @@ sr3e.traits = {
   agerange: "sr3e.traits.agerange",
   metatype: "sr3e.traits.metatype",
   metaType: "sr3e.traits.metaType",
-  ancient: "sr3e.traits.metaType",
   child: "sr3e.traits.child",
   adolecent: "sr3e.traits.adolecent",
   youngadult: "sr3e.traits.youngadult",
@@ -9608,7 +9635,8 @@ sr3e.magic = {
 };
 sr3e.notifications = {
   assignattributesfirst: "sr3e.notifications.assignattributesfirst",
-  skillpointsrefund: "sr3e.notifications.skillpointsrefund"
+  skillpointsrefund: "sr3e.notifications.skillpointsrefund",
+  skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold"
 };
 sr3e.time = {
   year: "sr3e.time.year",

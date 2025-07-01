@@ -4,21 +4,20 @@
    import { onDestroy, tick } from "svelte";
    import { flags } from "../../../../services/commonConsts.js";
    import { get, set } from "svelte/store";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
 
    let { skill, actor, config, app } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    let itemStoreManager = StoreManager.Subscribe(skill);
-   
-   let specializations = itemStoreManager.GetStore("languageSkill.specializations");
+
+   let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
    let valueStore = itemStoreManager.GetStore("languageSkill.value");
    let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
 
+   let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-   let isCharacterCreation = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
-
-   const languageSkillsIdArrayStore = storeManager.GetShallowStore(
+   const languageSkillsIdArrayStore = actorStoreManager.GetShallowStore(
       actor.id,
       stores.languageSkillsIds,
       actor.items.filter((item) => item.type === "skill" && item.system.skillType === "language").map((item) => item.id)
@@ -26,49 +25,48 @@
 
    let layoutMode = $state("single");
 
-
    let linkedAttribute = skill.system.languageSkill.linkedAttribute;
    let linkedAttributeRating = $state(
       Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.value`)) +
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let readWrite = $derived($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
-   let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
+   let disableValueControls = $derived($isCharacterCreationStore && $specializationsStore.length > 0);
 
    $effect(() => {
-      skill.update({ "system.languageSkill.specializations": $specializations }, { render: false });
+      skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
       skill.update({ "system.languageSkill.readwrite.value": readWrite }, { render: false });
    });
 
    async function addNewSpecialization() {
-      if (!$specializations) throw new Error("Cannot add lingo: specialization store is null");
+      if (!$specializationsStore) throw new Error("Cannot add lingo: specialization store is null");
 
       if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-         if ($specializations.length > 0) {
+         if ($specializationsStore.length > 0) {
             ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
             return;
          }
-         $specializations.push({
+         $specializationsStore.push({
             name: localize(config.skill.newspecialization),
             value: $valueStore + 1,
          });
          $valueStore -= 1;
       } else {
-         $specializations.push({
+         $specializationsStore.push({
             name: localize(config.skill.newspecialization),
             value: 0,
          });
       }
-      $specializations = [...$specializations];
-      await skill.update({ "system.languageSkill.specializations": $specializations }, { render: false });
+      $specializationsStore = [...$specializationsStore];
+      await skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
    }
 
    async function increment() {
-      if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
             if ($valueStore < 6) {
                let costForNextLevel;
 
@@ -81,6 +79,10 @@
                if ($languageSkillPointsStore >= costForNextLevel) {
                   $valueStore += 1;
                   $languageSkillPointsStore -= costForNextLevel;
+
+                  if ($valueStore === linkedAttributeRating) {
+                     ui.notifications.info(config.notifications.skillpricecrossedthreshold);
+                  }
                }
             }
          } else {
@@ -89,12 +91,13 @@
       } else {
          ui.notifications.warn(localize(config.notifications.assignattributesfirst));
       }
+
       silentUpdate();
    }
 
    async function decrement() {
-      if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
             if ($valueStore > 0) {
                let refundForCurrentLevel;
 
@@ -147,9 +150,9 @@
       });
 
       if (confirmed) {
-         if ($isCharacterCreation) {
-            if ($specializations.length > 0) {
-               $specializations = [];
+         if ($isCharacterCreationStore) {
+            if ($specializationsStore.length > 0) {
+               $specializationsStore = [];
                await tick();
                $valueStore += 1;
             }
@@ -181,7 +184,7 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
-      $specializations = $specializations.filter((s) => s !== toDelete);
+      $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
 </script>
@@ -265,13 +268,13 @@
                   {localize(config.skill.lingos)}
                </h1>
                <div class="stat-grid single-column">
-                  {#each $specializations as specialization, i}
+                  {#each $specializationsStore as specialization, i}
                      <SpecializationCard
-                        bind:specialization={$specializations[i]}
+                        bind:specialization={$specializationsStore[i]}
                         {actor}
                         {skill}
                         on:arrayChanged={() => {
-                           $specializations = [...$specializations];
+                           $specializationsStore = [...$specializationsStore];
                         }}
                         on:delete={deleteSpecialization}
                      />

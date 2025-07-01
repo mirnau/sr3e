@@ -108,6 +108,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    }
 
    _injectFooter(form) {
+      if (form.querySelector(".actor-footer")) return;
+
       const footer = document.createElement("div");
       footer.classList.add("actor-footer");
 

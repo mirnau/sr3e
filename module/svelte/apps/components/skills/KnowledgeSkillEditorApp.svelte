@@ -5,7 +5,7 @@
    import { flags } from "../../../../services/commonConsts.js";
    import { get, set } from "svelte/store";
    import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
    import Karma from "../Karma.svelte";
    import { onMount } from "svelte";
 
@@ -28,13 +28,9 @@
       karmaShoppingService = null;
    });
 
-   let isCharacterCreation = storeManager.getActorStore(
-      actor.id,
-      stores.isCharacterCreation,
-      actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)
-   );
+   let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-   let disableValueControls = $derived($isCharacterCreation && $specializations.length > 0);
+   let disableValueControls = $derived($isCharacterCreationStore && $specializations.length > 0);
 
    let layoutMode = $state("single");
 
@@ -44,11 +40,7 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = storeManager.getActorStore(
-      actor.id,
-      stores.attributeAssignmentLocked,
-      actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked)
-   );
+   let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    async function addNewSpecialization() {
       let newSkillSpecialization;
@@ -76,8 +68,8 @@
    }
 
    async function increment() {
-      if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
             if ($valueStore < 6) {
                let costForNextLevel;
 
@@ -90,6 +82,10 @@
                if ($knowledgeSkillPointsStore >= costForNextLevel) {
                   $valueStore += 1;
                   $knowledgeSkillPointsStore -= costForNextLevel;
+
+                  if ($valueStore === linkedAttributeRating) {
+                     ui.notifications.info(config.notifications.skillpricecrossedthreshold);
+                  }
                }
             }
          } else {
@@ -103,8 +99,8 @@
    }
 
    async function decrement() {
-      if ($attributeAssignmentLocked) {
-         if ($isCharacterCreation) {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
             if ($valueStore > 0) {
                let refundForCurrentLevel;
 
@@ -143,7 +139,7 @@
       });
 
       if (confirmed) {
-         if ($isCharacterCreation) {
+         if ($isCharacterCreationStore) {
             if ($specializations.length > 0) {
                $specializations = [];
 

@@ -5,18 +5,18 @@
    import TextInput from "../basic/TextInput.svelte";
 
    let { specialization = $bindable(), actor = {}, skill = {} } = $props();
-   const dispatch = createEventDispatcher();
 
    let storeManager = StoreManager.Subscribe(actor);
+   const dispatch = createEventDispatcher();
+
    onDestroy(() => {
-      storeManager.Unsubscribe(actor);
+      StoreManager.Unsubscribe(actor);
    });
 
    let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
+   let baseValue = storeManager.GetStore("activeSkill.value");
 
    let liveText = specialization.name;
-
-   let baseValue = storeManager.GetStore("activeSkill.value");
 
    $effect(() => {
       if (liveText !== specialization.name) {

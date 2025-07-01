@@ -45,7 +45,7 @@
          "details": "Details"
       },
       "dicepools": {
-        "associateselect": "Choose an Associated Dicepool...",
+         "associateselect": "Choose an Associated Dicepool...",
          "dicepools": "Dice",
          "combat": "Combat",
          "hacking": "Hacking",
@@ -139,7 +139,8 @@
       },
       "notifications": {
          "assignattributesfirst": "You need to assign all attributes before assigning skills",
-         "skillpointsrefund": "Your skillpoints have been refunded!"
+         "skillpointsrefund": "Your skillpoints have been refunded!",
+         "skillpricecrossedthreshold": "Points over the attribute limit will cost two skill points."
       },
       "placeholders": {
          "human": "Human",

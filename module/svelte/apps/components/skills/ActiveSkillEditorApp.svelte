@@ -40,7 +40,7 @@
          Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
    );
 
-   let attributeAssignmentLocked = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    async function addNewSpecialization() {
       let newSkillSpecialization;
@@ -68,7 +68,7 @@
    }
 
    async function increment() {
-      if ($attributeAssignmentLocked) {
+      if ($attributeAssignmentLockedStore) {
          if ($isCharacterCreationStore) {
             if ($valueStore < 6) {
                let costForNextLevel;
@@ -82,6 +82,10 @@
                if ($activeSkillPointsStore >= costForNextLevel) {
                   $valueStore += 1;
                   $activeSkillPointsStore -= costForNextLevel;
+
+                  if ($valueStore === linkedAttributeRating) {
+                     ui.notifications.info(config.notifications.skillpricecrossedthreshold);
+                  }
                }
             }
          } else {
@@ -95,7 +99,7 @@
    }
 
    async function decrement() {
-      if ($attributeAssignmentLocked) {
+      if ($attributeAssignmentLockedStore) {
          if ($isCharacterCreationStore) {
             if ($valueStore > 0) {
                let refundForCurrentLevel;

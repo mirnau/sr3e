@@ -43,7 +43,7 @@ sr3e.modal = {
    confirm: "sr3e.modal.confirm",
    decline: "sr3e.modal.decline",
    deleteskill: "sr3e.modal.deleteskill",
-   deleteskill: "sr3e.modal.deleteskilltitle",
+   deleteskilltitle: "sr3e.modal.deleteskilltitle",
    exitattributesassignment: "sr3e.modal.exitattributesassignment",
    exitcreationmode: "sr3e.modal.exitcreationmode",
    exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
@@ -152,7 +152,6 @@ sr3e.traits = {
    agerange: "sr3e.traits.agerange",
    metatype: "sr3e.traits.metatype",
    metaType: "sr3e.traits.metaType",
-   ancient: "sr3e.traits.metaType",
    child: "sr3e.traits.child",
    adolecent: "sr3e.traits.adolecent",
    youngadult: "sr3e.traits.youngadult",
@@ -217,6 +216,7 @@ sr3e.magic = {
 sr3e.notifications = {
    assignattributesfirst: "sr3e.notifications.assignattributesfirst",
    skillpointsrefund: "sr3e.notifications.skillpointsrefund",
+   skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold",
 };
 
 sr3e.time = {
