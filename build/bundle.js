@@ -4331,7 +4331,7 @@ var on_keydown$6 = (e, Roll2) => {
 };
 var root_1$q = /* @__PURE__ */ template(`<div class="stat-card-toolbar"><i class="fa-solid fa-gear" role="button" tabindex="0"></i></div>`);
 var on_keydown_1$1 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_3$a = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root$F = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><!> <h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
@@ -4440,7 +4440,7 @@ function AttributeCard($$anchor, $$props) {
   var node_1 = child(div_2);
   {
     var consequent_1 = ($$anchor2) => {
-      var i_2 = root_2$e();
+      var i_2 = root_2$f();
       i_2.__click = decrement2;
       i_2.__keydown = [on_keydown_1$1, decrement2];
       template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`));
@@ -6230,7 +6230,7 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_2$d = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_2$e = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$n = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
@@ -6307,7 +6307,7 @@ function DicePools($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var fragment_2 = root_2$d();
+          var fragment_2 = root_2$e();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
             get label() {
@@ -6547,7 +6547,7 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$c = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_2$d = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
 var root_1$k = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$y = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
@@ -6605,7 +6605,7 @@ function Karma($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var div = root_2$c();
+          var div = root_2$d();
           var h4 = sibling(child(div), 2);
           var text_1 = child(h4);
           template_effect(($0) => set_text(text_1, $0), [
@@ -7497,7 +7497,7 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7542,7 +7542,7 @@ function ActiveSkillCard($$anchor, $$props) {
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
   each(div_3, 5, $specializationsStore, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$b();
+    var div_4 = root_2$c();
     var div_5 = sibling(child(div_4), 2);
     var text_2 = child(div_5);
     var h1_1 = sibling(div_5, 2);
@@ -7564,7 +7564,7 @@ function ActiveSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$t = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7609,7 +7609,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
   each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$a();
+    var div_4 = root_2$b();
     var div_5 = sibling(child(div_4), 2);
     var text_2 = child(div_5);
     var h1_1 = sibling(div_5, 2);
@@ -7631,7 +7631,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$h = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$s = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7683,7 +7683,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var text_2 = child(h1_1);
   var div_5 = sibling(div_3, 2);
   each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_6 = root_2$9();
+    var div_6 = root_2$a();
     var div_7 = sibling(child(div_6), 2);
     var text_3 = child(div_7);
     var h1_2 = sibling(div_7, 2);
@@ -8318,7 +8318,7 @@ setPace_fn = function(freq, amp) {
     this.ecgAnimator.setAmplitude(amp);
   }
 };
-var root_2$8 = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_2$9 = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
 var root_1$f = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$6 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_3$8 = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
@@ -8403,7 +8403,7 @@ function Health($$anchor, $$props) {
     var node_2 = sibling(input, 2);
     {
       var consequent = ($$anchor3) => {
-        var div_5 = root_2$8();
+        var div_5 = root_2$9();
         var h4 = child(div_5);
         var text2 = child(h4);
         template_effect(() => {
@@ -8724,7 +8724,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root_2$7 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_2$8 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8849,7 +8849,7 @@ function CharacterSheetApp($$anchor, $$props) {
       each(node, 17, () => get$2(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
         let Comp = () => get$2($$item).comp;
         let props = () => get$2($$item).props;
-        var div = root_2$7();
+        var div = root_2$8();
         var div_1 = child(div);
         var div_2 = sibling(child(div_1), 2);
         var node_1 = child(div_2);
@@ -9163,7 +9163,13 @@ function ShoppingCart($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-var root_1$b = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1 class="no-margin">Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1 class="no-margin">Target Number</h1> <h4 class="no-margin"> </h4> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Modifiers</h1> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Karma</h1> <h4 class="no-margin"> </h4> <!></div> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
+function swallowDirectional(e) {
+  if (e.key === "Shift" || e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    e.stopPropagation();
+  }
+}
+var root_2$7 = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1 class="no-margin">Karma</h1> <h4 class="no-margin"> </h4> <!></div>`);
+var root_1$b = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1 class="no-margin">Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1 class="no-margin">Target Number</h1> <h4 class="no-margin"> </h4> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Modifiers</h1> <!></div> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
   let targetNumber = state(5);
@@ -9180,14 +9186,19 @@ function RollComposerComponent($$anchor, $$props) {
   let focusables = [];
   let difficulties = ItemDataService.getDifficultieGradings($$props.config);
   onMount(() => {
-    focusables = Array.from(containerEl.querySelectorAll("select, .counter-component[tabindex='0'], button[type]"));
+    updateFocusables();
     selectEl == null ? void 0 : selectEl.focus();
   });
+  function updateFocusables() {
+    const selector = get$2(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
+    focusables = Array.from(containerEl.querySelectorAll(selector));
+  }
   function karmaCostCalculator() {
     set(karmaCost, 0.5 * get$2(diceBought) * (get$2(diceBought) + 1));
   }
   user_effect(() => {
     set(isDefaulting, get$2(isDefaultingAsString) === "true");
+    updateFocusables();
   });
   user_effect(() => {
     const tn = Number(get$2(targetNumber));
@@ -9230,6 +9241,7 @@ function RollComposerComponent($$anchor, $$props) {
   function handleKey(e) {
     if (e.key === "Enter") {
       e.preventDefault();
+      e.stopPropagation();
       const root2 = getRoot(document.activeElement);
       if (root2 === rollBtn) {
         Submit();
@@ -9242,6 +9254,7 @@ function RollComposerComponent($$anchor, $$props) {
       focusNext();
     } else if (e.key === "Tab") {
       e.preventDefault();
+      e.stopPropagation();
       const root2 = getRoot(document.activeElement);
       if (root2 === rollBtn) {
         Reset();
@@ -9263,6 +9276,7 @@ function RollComposerComponent($$anchor, $$props) {
     }
   }
   var div = root_1$b();
+  div.__keydown = [swallowDirectional];
   var div_1 = child(div);
   var select = sibling(child(div_1), 2);
   select.__keydown = handleSelectKeydown;
@@ -9295,32 +9309,40 @@ function RollComposerComponent($$anchor, $$props) {
       set(modifiers, proxy($$value));
     }
   });
-  var div_4 = sibling(div_3, 2);
-  var h4_1 = sibling(child(div_4), 2);
-  var text_1 = child(h4_1);
-  var node_2 = sibling(h4_1, 2);
-  Counter(node_2, {
-    min: "0",
-    onIncrement: karmaCostCalculator,
-    onDecrement: karmaCostCalculator,
-    get value() {
-      return get$2(diceBought);
-    },
-    set value($$value) {
-      set(diceBought, proxy($$value));
-    }
-  });
-  var button = sibling(div_4, 2);
+  var node_2 = sibling(div_3, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var div_4 = root_2$7();
+      var h4_1 = sibling(child(div_4), 2);
+      var text_1 = child(h4_1);
+      var node_3 = sibling(h4_1, 2);
+      Counter(node_3, {
+        class: "karma-counter",
+        min: "0",
+        onIncrement: karmaCostCalculator,
+        onDecrement: karmaCostCalculator,
+        get value() {
+          return get$2(diceBought);
+        },
+        set value($$value) {
+          set(diceBought, proxy($$value));
+        }
+      });
+      template_effect(() => set_text(text_1, `Cost ${get$2(karmaCost) ?? ""}`));
+      append($$anchor2, div_4);
+    };
+    if_block(node_2, ($$render) => {
+      if (!get$2(isDefaulting)) $$render(consequent);
+    });
+  }
+  var button = sibling(node_2, 2);
   button.__click = Submit;
   bind_this(button, ($$value) => rollBtn = $$value, () => rollBtn);
   var button_1 = sibling(button, 2);
   button_1.__click = Reset;
   bind_this(button_1, ($$value) => clearBtn = $$value, () => clearBtn);
   bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
-  template_effect(() => {
-    set_text(text2, get$2(difficulty));
-    set_text(text_1, `Cost ${get$2(karmaCost) ?? ""}`);
-  });
+  template_effect(() => set_text(text2, get$2(difficulty)));
   event("keydown", div, handleKey, true);
   bind_select_value(select, () => get$2(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
   append($$anchor, div);
