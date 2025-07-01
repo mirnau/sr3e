@@ -8942,38 +8942,39 @@ function handleKeydown(e, increment2, decrement2) {
 var root$i = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
 function Counter($$anchor, $$props) {
   push($$props, true);
-  let value = prop($$props, "value", 15);
+  let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
   let editableDiv;
   function increment2() {
-    const newValue = value() + 1;
-    value($$props.max !== void 0 && newValue > $$props.max ? $$props.max : newValue);
-    updateDiv();
+    value(clampToLimits(value() + 1));
   }
   function decrement2() {
-    const newValue = value() - 1;
-    value($$props.min !== void 0 && newValue < $$props.min ? $$props.min : newValue);
-    updateDiv();
-  }
-  function updateDiv() {
-    editableDiv.textContent = value();
-  }
-  function handleDivInput(e) {
-    const newValue = parseInt(e.target.textContent);
-    const clampedValue = clampToLimits(newValue);
-    value(clampedValue);
-    e.target.textContent = clampedValue;
+    value(clampToLimits(value() - 1));
   }
   function clampToLimits(val) {
-    let result = val;
-    if ($$props.min !== void 0 && result < $$props.min) result = $$props.min;
-    if ($$props.max !== void 0 && result > $$props.max) result = $$props.max;
-    return result;
+    if (isNaN(val)) return min();
+    return Math.min(Math.max(val, min()), max());
+  }
+  function handleDivInput(e) {
+    const raw = e.target.textContent.trim();
+    const num = Number(raw);
+    const valid = !isNaN(num);
+    const clamped = clampToLimits(num);
+    if (valid) {
+      value(clamped);
+      e.target.textContent = String(clamped);
+    } else {
+      e.target.textContent = String(value());
+    }
   }
   onMount(() => {
     editableDiv.focus();
+    updateDisplay();
   });
+  function updateDisplay() {
+    editableDiv.textContent = String(value());
+  }
   user_effect(() => {
-    updateDiv();
+    updateDisplay();
   });
   var div = root$i();
   div.__keydown = [handleKeydown, increment2, decrement2];
@@ -8986,8 +8987,8 @@ function Counter($$anchor, $$props) {
   var button_1 = sibling(div_1, 2);
   button_1.__click = increment2;
   template_effect(() => {
-    set_attribute(div, "aria-valuemin", $$props.min);
-    set_attribute(div, "aria-valuemax", $$props.max);
+    set_attribute(div, "aria-valuemin", min());
+    set_attribute(div, "aria-valuemax", max());
     set_attribute(div, "aria-valuenow", value());
     set_text(text2, value());
   });
@@ -8995,6 +8996,121 @@ function Counter($$anchor, $$props) {
   pop();
 }
 delegate(["keydown", "click", "input"]);
+class ItemDataService {
+  static getAllItemsOfType(name) {
+    return game.items.filter((item2) => item2.type === name);
+  }
+  static getAllmetatypes(metatypes) {
+    return metatypes.filter((m) => {
+      var _a;
+      return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
+    }).map((metatype) => ({
+      name: metatype.name,
+      foundryitemid: metatype.id,
+      priority: metatype.system.priority
+    }));
+  }
+  static getAllMagics(magics) {
+    return [
+      { priority: "E", name: "Unawakened", foundryitemid: "E-foundryItemId" },
+      { priority: "D", name: "Unawakened", foundryitemid: "D-foundryItemId" },
+      { priority: "C", name: "Unawakened", foundryitemid: "C-foundryItemId" },
+      ...magics.map((magic) => {
+        return {
+          priority: magic.system.awakened.priority,
+          name: magic.name,
+          foundryitemid: magic.id
+        };
+      })
+    ];
+  }
+  static getPriorities() {
+    return {
+      attributes: { A: 30, B: 27, C: 24, D: 21, E: 18 },
+      skills: { A: 50, B: 40, C: 34, D: 30, E: 27 },
+      resources: { A: 1e6, B: 4e5, C: 9e4, D: 2e4, E: 5e3 }
+    };
+  }
+  static getDefaultHumanItem() {
+    return {
+      name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
+      type: "metatype",
+      img: "systems/sr3e/textures/ai-generated/humans.webp",
+      system: {
+        agerange: { min: 0, average: 30, max: 100 },
+        physical: {
+          height: { min: 150, average: 170, max: 220 },
+          weight: { min: 50, average: 70, max: 250 }
+        },
+        modifiers: {
+          strength: 0,
+          quickness: 0,
+          body: 0,
+          charisma: 0,
+          intelligence: 0,
+          willpower: 0
+        },
+        attributeLimits: {
+          strength: 6,
+          quickness: 6,
+          body: 6,
+          charisma: 6,
+          intelligence: 6,
+          willpower: 6
+        },
+        movement: {
+          modifier: 3
+        },
+        karma: {
+          factor: 0.1
+        },
+        vision: {
+          type: ""
+        },
+        priority: "E",
+        journalId: ""
+        // Set to a real JournalEntry ID if needed
+      }
+    };
+  }
+  static getDefaultMagic() {
+    return {
+      name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
+      type: "magic",
+      system: {
+        awakened: {
+          archetype: "magician",
+          priority: "A"
+        },
+        magicianData: {
+          magicianType: "Full",
+          tradition: "Bear",
+          drainResistanceAttribute: "Charisma",
+          aspect: "",
+          canAstrallyProject: true,
+          totem: "Bear",
+          spellPoints: 25
+        },
+        adeptData: {
+          powerPoints: 0
+        }
+      }
+    };
+  }
+  static getDifficultieGradings(config) {
+    let difficulty = [
+      "simple",
+      "routine",
+      "average",
+      "challenging",
+      "hard",
+      "strenuous",
+      "extreme",
+      "nearlyimpossible"
+    ];
+    return Object.fromEntries(difficulty.map((key) => [key, localize(config.difficulty[key])]));
+  }
+}
 function Reset() {
 }
 function Submit() {
@@ -9003,15 +9119,40 @@ var on_keydown$2 = (e, trapFocus) => {
   e.stopPropagation();
   trapFocus(e);
 };
-var root$h = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><h1 class="no-margin">Target Number</h1> <!> <h1 class="no-margin">Modifiers</h1> <!> <button type="reset">Clear</button> <button type="submit">Roll!</button></div>`);
+var root$h = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><h1 class="no-margin">Target Number</h1> <!> <h4 class="no-margin"> </h4> <h1 class="no-margin">Modifiers</h1> <!> <button class="regular" type="reset">Clear</button> <button class="regular" type="submit">Roll!</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
+  let targetNumber = state(5);
+  let difficulty = state("");
   let boundValue = state(5);
   onMount(() => {
     const first = containerEl.querySelector(".counter-component[tabindex='0']");
     if (first) first.focus();
   });
   let containerEl;
+  let difficulties = ItemDataService.getDifficultieGradings($$props.config);
+  console.log(difficulties);
+  user_effect(() => {
+    if (!difficulties) return;
+    const tn = Number(get$2(targetNumber));
+    if (tn === 2) {
+      set(difficulty, proxy(difficulties.simple));
+    } else if (tn === 3) {
+      set(difficulty, proxy(difficulties.routine));
+    } else if (tn === 4) {
+      set(difficulty, proxy(difficulties.average));
+    } else if (tn === 5) {
+      set(difficulty, proxy(difficulties.challenging));
+    } else if (tn === 6 || tn === 7) {
+      set(difficulty, proxy(difficulties.hard));
+    } else if (tn === 8) {
+      set(difficulty, proxy(difficulties.strenuous));
+    } else if (tn === 9) {
+      set(difficulty, proxy(difficulties.extreme));
+    } else if (tn >= 10) {
+      set(difficulty, proxy(difficulties.nearlyimpossible));
+    }
+  });
   function trapFocus(e) {
     if (e.key !== "Tab") return;
     const focusables = Array.from(containerEl.querySelectorAll(".counter-component[tabindex='0'], button[type]"));
@@ -9030,14 +9171,17 @@ function RollComposerComponent($$anchor, $$props) {
   div.__keydown = [on_keydown$2, trapFocus];
   var node = sibling(child(div), 2);
   Counter(node, {
+    min: "2",
     get value() {
-      return get$2(boundValue);
+      return get$2(targetNumber);
     },
     set value($$value) {
-      set(boundValue, proxy($$value));
+      set(targetNumber, proxy($$value));
     }
   });
-  var node_1 = sibling(node, 4);
+  var h4 = sibling(node, 2);
+  var text2 = child(h4);
+  var node_1 = sibling(h4, 4);
   Counter(node_1, {
     get value() {
       return get$2(boundValue);
@@ -9051,6 +9195,7 @@ function RollComposerComponent($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [Submit];
   bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
+  template_effect(() => set_text(text2, get$2(difficulty)));
   append($$anchor, div);
   pop();
 }
@@ -9330,6 +9475,16 @@ sr3e.attributes = {
   limits: "sr3e.attributes.limits",
   essence: "sr3e.attributes.essence",
   reaction: "sr3e.attributes.reaction"
+};
+sr3e.difficulty = {
+  simple: "sr3e.difficulty.simple",
+  routine: "sr3e.difficulty.routine",
+  average: "sr3e.difficulty.average",
+  challenging: "sr3e.difficulty.challenging",
+  hard: "sr3e.difficulty.hard",
+  strenuous: "sr3e.difficulty.strenuous",
+  extreme: "sr3e.difficulty.extreme",
+  nearlyimpossible: "sr3e.difficulty.nearlyimpossible"
 };
 sr3e.health = {
   health: "sr3e.health.health",
@@ -11821,110 +11976,6 @@ class SkillModel extends foundry.abstract.TypeDataModel {
           initial: ""
         })
       })
-    };
-  }
-}
-class ItemDataService {
-  static getAllItemsOfType(name) {
-    return game.items.filter((item2) => item2.type === name);
-  }
-  static getAllmetatypes(metatypes) {
-    return metatypes.filter(
-      (m) => {
-        var _a;
-        return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
-      }
-    ).map((metatype) => ({
-      name: metatype.name,
-      foundryitemid: metatype.id,
-      priority: metatype.system.priority
-    }));
-  }
-  static getAllMagics(magics) {
-    return [
-      { priority: "E", name: "Unawakened", foundryitemid: "E-foundryItemId" },
-      { priority: "D", name: "Unawakened", foundryitemid: "D-foundryItemId" },
-      { priority: "C", name: "Unawakened", foundryitemid: "C-foundryItemId" },
-      ...magics.map((magic) => {
-        return {
-          priority: magic.system.awakened.priority,
-          name: magic.name,
-          foundryitemid: magic.id
-        };
-      })
-    ];
-  }
-  static getPriorities() {
-    return {
-      attributes: { A: 30, B: 27, C: 24, D: 21, E: 18 },
-      skills: { A: 50, B: 40, C: 34, D: 30, E: 27 },
-      resources: { A: 1e6, B: 4e5, C: 9e4, D: 2e4, E: 5e3 }
-    };
-  }
-  static getDefaultHumanItem() {
-    return {
-      name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
-      type: "metatype",
-      img: "systems/sr3e/textures/ai-generated/humans.webp",
-      system: {
-        agerange: { min: 0, average: 30, max: 100 },
-        physical: {
-          height: { min: 150, average: 170, max: 220 },
-          weight: { min: 50, average: 70, max: 250 }
-        },
-        modifiers: {
-          strength: 0,
-          quickness: 0,
-          body: 0,
-          charisma: 0,
-          intelligence: 0,
-          willpower: 0
-        },
-        attributeLimits: {
-          strength: 6,
-          quickness: 6,
-          body: 6,
-          charisma: 6,
-          intelligence: 6,
-          willpower: 6
-        },
-        movement: {
-          modifier: 3
-        },
-        karma: {
-          factor: 0.1
-        },
-        vision: {
-          type: ""
-        },
-        priority: "E",
-        journalId: ""
-        // Set to a real JournalEntry ID if needed
-      }
-    };
-  }
-  static getDefaultMagic() {
-    return {
-      name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
-      type: "magic",
-      system: {
-        awakened: {
-          archetype: "magician",
-          priority: "A"
-        },
-        magicianData: {
-          magicianType: "Full",
-          tradition: "Bear",
-          drainResistanceAttribute: "Charisma",
-          aspect: "",
-          canAstrallyProject: true,
-          totem: "Bear",
-          spellPoints: 25
-        },
-        adeptData: {
-          powerPoints: 0
-        }
-      }
     };
   }
 }

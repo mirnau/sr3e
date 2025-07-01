@@ -1,4 +1,7 @@
 .roll-composer-container {
+   -webkit-backdrop-filter: blur(10px);
+   backdrop-filter: blur(10px); //INFO: Known Chrome bug. Leaving here in hope of future patches
+   transform: translateZ(0);
    display: flex;
    flex-direction: column;
    background: oklch(from var(--highlight-color-primary) l c h / 0.15);
@@ -19,3 +22,12 @@
       width: 0;
    }
 }
+
+// INFO: increases readability while still allowing for translucency
+.roll-composer-container,
+.roll-composer-container * {
+   text-shadow:
+      0 0 3px oklch(0% 0 0 / .35),
+      0 0 6px oklch(0% 0 0 / .25);
+}
+

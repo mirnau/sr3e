@@ -1988,7 +1988,7 @@
     margin: 0rem 0.5rem 0rem 0.5rem;
     outline: none;
   }
-  .counter-component button.counter-button {
+  .roll-composer-container button {
     background: transparent;
     display: flex;
     align-items: center;
@@ -2000,7 +2000,12 @@
     transition: transform 0.2s ease, box-shadow 0.7s ease;
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .counter-component button.counter-button::after {
+  .roll-composer-container button.regular {
+    width: 100%;
+    font-size: 1rem;
+    margin: 0;
+  }
+  .roll-composer-container button::after {
     content: "";
     z-index: -1;
     color: var(--highlight-color-primary);
@@ -2015,28 +2020,28 @@
     transition: box-shadow 0.3s ease;
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .counter-component button.counter-button:hover {
+  .roll-composer-container button:hover {
     background: transparent;
   }
-  .counter-component button.counter-button:hover::after {
+  .roll-composer-container button:hover::after {
     transition: background-color 0.5s ease;
     box-shadow: inset 0 0 15px var(--highlight-color-primary), inset 0 0 5px var(--highlight-color-primary);
   }
-  .counter-component button.counter-button:focus {
+  .roll-composer-container button:focus {
     outline: none;
     background: red;
   }
-  .counter-component button.counter-button:active {
+  .roll-composer-container button:active {
     background: transparent;
   }
-  .counter-component button.counter-button:active::after {
+  .roll-composer-container button:active::after {
     position: absolute;
     box-shadow: inset 0 0 15px var(--highlight-color-primary);
   }
-  .counter-component button.counter-button:active .fa-solid {
+  .roll-composer-container button:active .fa-solid {
     margin: 0;
   }
-  .counter-component button.counter-button:active:active {
+  .roll-composer-container button:active:active {
     transform: scale(0.9);
   }
   @keyframes pulses {
@@ -2292,8 +2297,12 @@
     animation: marquee-move 7s linear infinite;
     line-height: 0;
     margin: 0;
+    text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);
   }
   .roll-composer-container {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    transform: translateZ(0);
     display: flex;
     flex-direction: column;
     background: oklch(from var(--highlight-color-primary) l c h / 0.15);
@@ -2311,6 +2320,10 @@
   }
   .roll-composer-container.collapsed {
     width: 0;
+  }
+  .roll-composer-container,
+  .roll-composer-container * {
+    text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);
   }
   form#prototype-token-overrides.application,
   form#dice-config.application,

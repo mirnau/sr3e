@@ -1,36 +1,34 @@
 <script>
    import { onMount } from "svelte";
-   let { value = $bindable(), min, max } = $props();
+   let { value = $bindable(), min = -Infinity, max = Infinity } = $props();
    let editableDiv;
 
    function increment() {
-      const newValue = value + 1;
-      value = max !== undefined && newValue > max ? max : newValue;
-      updateDiv();
+      value = clampToLimits(value + 1);
    }
 
    function decrement() {
-      const newValue = value - 1;
-      value = min !== undefined && newValue < min ? min : newValue;
-      updateDiv();
-   }
-
-   function updateDiv() {
-      editableDiv.textContent = value;
-   }
-
-   function handleDivInput(e) {
-      const newValue = parseInt(e.target.textContent);
-      const clampedValue = clampToLimits(newValue);
-      value = clampedValue;
-      e.target.textContent = clampedValue;
+      value = clampToLimits(value - 1);
    }
 
    function clampToLimits(val) {
-      let result = val;
-      if (min !== undefined && result < min) result = min;
-      if (max !== undefined && result > max) result = max;
-      return result;
+      if (isNaN(val)) return min;
+      return Math.min(Math.max(val, min), max);
+   }
+
+   function handleDivInput(e) {
+      const raw = e.target.textContent.trim();
+      const num = Number(raw);
+      const valid = !isNaN(num);
+      const clamped = clampToLimits(num);
+
+      if (valid) {
+         value = clamped;
+         e.target.textContent = String(clamped);
+      } else {
+         // Restore last known valid number
+         e.target.textContent = String(value);
+      }
    }
 
    function handleKeydown(e) {
@@ -45,10 +43,15 @@
 
    onMount(() => {
       editableDiv.focus();
+      updateDisplay();
    });
 
+   function updateDisplay() {
+      editableDiv.textContent = String(value);
+   }
+
    $effect(() => {
-      updateDiv();
+      updateDisplay();
    });
 </script>
 

@@ -53,6 +53,16 @@
          "control": "Control",
          "spell": "Spell"
       },
+      "difficulty": {
+         "simple": "Simple",
+         "routine": "Routine",
+         "average": "Average",
+         "challenging": "Challenging",
+         "hard": "Hard",
+         "strenuous": "Strenuous",
+         "extreme": "Extreme",
+         "nearlyimpossible": "Nearly Impossible"
+      },
       "health": {
          "health": "Health",
          "overflow": "Overflow",

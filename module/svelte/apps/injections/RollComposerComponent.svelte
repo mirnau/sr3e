@@ -1,8 +1,11 @@
 <script>
    import { onMount } from "svelte";
    import Counter from "../components/basic/Counter.svelte";
+   import ItemDataService from "../../../services/ItemDataService.js";
    let { actor, config } = $props();
 
+   let targetNumber = $state(5);
+   let difficulty = $state("");
    let boundValue = $state(5);
 
    function Reset() {}
@@ -14,6 +17,34 @@
    });
 
    let containerEl;
+
+   let difficulties = ItemDataService.getDifficultieGradings(config);
+
+   console.log(difficulties);
+
+   $effect(() => {
+      if (!difficulties) return;
+
+      const tn = Number(targetNumber); // guaranteed to be a number, but be safe
+
+      if (tn === 2) {
+         difficulty = difficulties.simple;
+      } else if (tn === 3) {
+         difficulty = difficulties.routine;
+      } else if (tn === 4) {
+         difficulty = difficulties.average;
+      } else if (tn === 5) {
+         difficulty = difficulties.challenging;
+      } else if (tn === 6 || tn === 7) {
+         difficulty = difficulties.hard;
+      } else if (tn === 8) {
+         difficulty = difficulties.strenuous;
+      } else if (tn === 9) {
+         difficulty = difficulties.extreme;
+      } else if (tn >= 10) {
+         difficulty = difficulties.nearlyimpossible;
+      }
+   });
 
    function trapFocus(e) {
       if (e.key !== "Tab") return;
@@ -35,6 +66,7 @@
    }
 </script>
 
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
    class="roll-composer-container"
    bind:this={containerEl}
@@ -46,9 +78,10 @@
    }}
 >
    <h1 class="no-margin">Target Number</h1>
-   <Counter bind:value={boundValue} />
+   <Counter bind:value={targetNumber} min="2" />
+   <h4 class="no-margin">{difficulty}</h4>
    <h1 class="no-margin">Modifiers</h1>
    <Counter bind:value={boundValue} />
-   <button type="reset" onclick={Reset}>Clear</button>
-   <button type="submit" onclick={Submit}>Roll!</button>
+   <button class="regular" type="reset" onclick={Reset}>Clear</button>
+   <button class="regular" type="submit" onclick={Submit}>Roll!</button>
 </div>
