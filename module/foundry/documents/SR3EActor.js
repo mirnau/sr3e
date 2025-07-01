@@ -25,7 +25,7 @@ export default class SR3EActor extends Actor {
       await RollService.Initiative(this, dice, options);
    }
 
-   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, explodes: true }) {
+   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
       await RollService.AttributeRoll(this, attributeName, dice, options);
    }
 

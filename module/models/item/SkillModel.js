@@ -42,7 +42,7 @@ export default class SkillModel extends foundry.abstract.TypeDataModel {
                required: true,
                initial: "intelligence",
             }),
-
+           
             specializations: new foundry.data.fields.ArrayField(
                new foundry.data.fields.SchemaField({
                   ...SkillSpecialization.defineSchema(),

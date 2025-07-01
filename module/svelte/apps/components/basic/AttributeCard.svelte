@@ -1,7 +1,7 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
    import { mount, unmount } from "svelte";
    import RollComposerComponent from "../../components/RollComposerComponent.svelte";
@@ -27,6 +27,7 @@
    let isMaxLimit = $derived(attributeLimit ? $total.sum >= attributeLimit : false);
 
    let activeModal = null;
+   let isModalOpen = storeManager.GetShallowStore(actor.id, stores.isrollcomposeropen, false);
 
    function add(change) {
       if (!$attributeAssignmentLockedStore) {
@@ -52,6 +53,7 @@
          e.stopImmediatePropagation();
          e.stopPropagation();
          unmount(activeModal);
+         $isModalOpen = false;
          activeModal = null;
       }
    }
@@ -60,23 +62,26 @@
       StoreManager.Unsubscribe(actor);
       if (activeModal) {
          unmount(activeModal);
+         $isModalOpen = false;
          activeModal = null;
       }
    });
 
    async function Roll(e) {
       if (e.shiftKey) {
+         if ($isModalOpen) return;
+         $isModalOpen = true;
+
          const options = await new Promise((resolve) => {
             activeModal = mount(RollComposerComponent, {
-               target: document.body,
+               target: document.querySelector(".composer-position"),
                props: {
                   actor,
-                  caller: key,
-                  type: "attribute",
-                  dice: $total.sum,
                   config: CONFIG.sr3e,
+                  caller: { key, type: "attribute", options: { dice: $total.sum } },
                   onclose: (result) => {
                      unmount(activeModal);
+                     $isModalOpen = false;
                      activeModal = null;
                      resolve(result);
                   },
@@ -85,7 +90,7 @@
          });
 
          if (options) {
-            await actor.AttributeRoll($total.sum, key, options);
+            await actor.AttributeRoll(options.dice, options.attributeName, options.options);
          }
       } else {
          await actor.AttributeRoll($total.sum, key);

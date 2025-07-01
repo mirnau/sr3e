@@ -1,38 +1,38 @@
 <script>
-  import { localize } from "../../../services/utilities.js";
-  import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
-  import { shoppingState } from "../../../svelteStore.js";
-  import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
-  import CardToolbar from "./CardToolbar.svelte";
-  import MasonryGrid from "./basic/MasonryGrid.svelte";
-  import StatCard from "./basic/StatCard.svelte";
+   import { localize } from "../../../services/utilities.js";
+   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+   import { shoppingState } from "../../../svelteStore.js";
+   import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
+   import CardToolbar from "./CardToolbar.svelte";
+   import MasonryGrid from "./basic/MasonryGrid.svelte";
+   import StatCard from "./basic/StatCard.svelte";
+   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte.js";
 
-  let { actor = {}, config = {}, id = {}, span = {} } = $props();
-  let karma = $state(actor.system.karma);
-  let essence = $state(actor.system.attributes.essence ?? 0);
-  let survivor = $derived(karma.miraculoussurvival);
+   let { actor = {}, config = {}, id = {}, span = {} } = $props();
+   let storeManager = StoreManager.Subscribe(actor);
 
+   let karmaPoolStore = storeManager.GetStore("karma.karmaPool");
+   let goodKarmaStore = storeManager.GetStore("karma.goodKarma");
+   let essenceStore = storeManager.GetStore("attributes.essence");
+   let miraculousSurvivalStore = storeManager.GetStore("karma.miraculousSurvival");
 </script>
 
 <CardToolbar {id} />
 <h1>{localize(config.karma.karma)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
+   <StatCard label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
+   <StatCard label={localize(config.karma.karmapool)} value={$karmaPoolStore} />
+   <StatCard label={localize(config.attributes.essence)} value={$essenceStore} />
 
-  <StatCard label={localize(config.karma.goodkarma)} value={karma.goodKarma}/>
-  <StatCard label={localize(config.karma.karmapool)} value={karma.karmaPool}/>
-  <StatCard label={localize(config.attributes.essence)} value={essence}/>
-
-  {#if !survivor}
-    <div class="stat-card">
-      <div class="stat-card-background"></div>
-      <h4 class="no-margin">
-        {localize(config.karma.miraculoussurvival)}
-      </h4>
-      <h5 class="stat-value">
-        <i class="fa-solid fa-heart-circle-bolt"></i>
-      </h5>
-    </div>
-  {:else}
-    <!--display nothing-->
-  {/if}
+   {#if !$miraculousSurvivalStore}
+      <div class="stat-card">
+         <div class="stat-card-background"></div>
+         <h4 class="no-margin">
+            {localize(config.karma.miraculoussurvival)}
+         </h4>
+         <i class="fa-solid fa-heart-circle-bolt"></i>
+      </div>
+   {:else}
+      <!--display nothing-->
+   {/if}
 </MasonryGrid>

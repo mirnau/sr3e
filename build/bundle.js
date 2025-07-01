@@ -197,6 +197,12 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
         initial: 1,
         integer: true
       }),
+      //NOTE: Used to calculate the current karma pool reset, not exposed to the player
+      karmaPoolCeiling: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 1,
+        integer: true
+      }),
       pendingKarmaReward: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
@@ -206,7 +212,7 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
         required: true,
         initial: false
       }),
-      //NOTE: Used to calculate the current karma pool, not exposed to the player
+      //NOTE: Used to calculate the current karmaPoolCeiling, not exposed to the player
       lifetimeKarma: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
@@ -3649,7 +3655,8 @@ const stores$1 = {
   actorName: "actorName",
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
-  languageSkillsIds: "languageSkillsIds"
+  languageSkillsIds: "languageSkillsIds",
+  isrollcomposeropen: "isrollcomposeropen"
 };
 const _StoreManager = class _StoreManager {
   constructor(document2) {
@@ -3689,17 +3696,17 @@ const _StoreManager = class _StoreManager {
     }
     return __privateGet(this, _persistentStore)[dataPath];
   }
-  GetShallowStore(actorId, storeName, customValue = null) {
+  GetShallowStore(docId, storeName, customValue = null) {
     var _a;
-    (_a = __privateGet(this, _actorStores))[actorId] ?? (_a[actorId] = {});
-    if (!__privateGet(this, _actorStores)[actorId][storeName]) {
+    (_a = __privateGet(this, _actorStores))[docId] ?? (_a[docId] = {});
+    if (!__privateGet(this, _actorStores)[docId][storeName]) {
       let value = customValue;
       if (value && typeof value === "object") {
         value = Array.isArray(value) ? [...value] : { ...value };
       }
-      __privateGet(this, _actorStores)[actorId][storeName] = writable(value);
+      __privateGet(this, _actorStores)[docId][storeName] = writable(value);
     }
-    return __privateGet(this, _actorStores)[actorId][storeName];
+    return __privateGet(this, _actorStores)[docId][storeName];
   }
   GetFlagStore(flag) {
     if (!__privateGet(this, _persistentStore)[flag]) {
@@ -4026,7 +4033,9 @@ function Counter($$anchor, $$props) {
     set_attribute(div, "aria-valuemin", min());
     set_attribute(div, "aria-valuemax", max());
     set_attribute(div, "aria-valuenow", value());
+    button.disabled = value() <= min();
     set_text(text2, value());
+    button_1.disabled = value() >= max();
   });
   append($$anchor, div);
   pop();
@@ -4153,16 +4162,26 @@ function swallowDirectional(e) {
   }
 }
 var root_2$f = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1 class="no-margin">Karma</h1> <h4 class="no-margin"> </h4> <!></div>`);
-var root_1$q = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1 class="no-margin">Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1 class="no-margin">Target Number</h1> <h4 class="no-margin"> </h4> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Modifiers</h1> <!></div> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
+var root_1$q = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1></div> <div class="roll-composer-card"><h1 class="no-margin">Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1 class="no-margin">Target Number</h1> <h4 class="no-margin"> </h4> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Modifiers</h1> <!></div> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
+  $karmaPoolStore();
   let targetNumber = state(5);
   let modifiers = state(0);
   let karmaCost = state(0);
   let diceBought = state(0);
   let difficulty = state("");
+  let canSubmit = state(true);
   let isDefaultingAsString = state("false");
   let isDefaulting = state(false);
+  let title = state("");
   let containerEl;
   let selectEl;
   let rollBtn;
@@ -4172,6 +4191,12 @@ function RollComposerComponent($$anchor, $$props) {
   onMount(() => {
     updateFocusables();
     selectEl == null ? void 0 : selectEl.focus();
+    if ($$props.caller.type === "attribute") {
+      console.log("An attribute roll");
+      set(title, proxy(localize($$props.config.attributes[$$props.caller.key])));
+    } else if ($$props.caller.type === "activeSkill") ;
+    else if ($$props.caller.type === "knowledgeSkill") ;
+    else if ($$props.caller.type === "languageSkill") ;
   });
   function updateFocusables() {
     const selector = get$2(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
@@ -4204,13 +4229,19 @@ function RollComposerComponent($$anchor, $$props) {
     set(isDefaultingAsString, "false");
     selectEl == null ? void 0 : selectEl.focus();
   }
+  user_effect(() => {
+    set(canSubmit, get$2(targetNumber) + get$2(modifiers) < 2);
+  });
   function Submit() {
-    console.log("Submit:", {
-      targetNumber: get$2(targetNumber),
-      modifiers: get$2(modifiers),
-      diceBought: get$2(diceBought),
-      karmaCost: get$2(karmaCost),
-      isDefaulting: get$2(isDefaulting)
+    store_set(karmaPoolStore, $karmaPoolStore() - get$2(karmaCost));
+    $$props.onclose({
+      dice: $$props.caller.options.dice + get$2(diceBought),
+      attributeName: $$props.caller.key,
+      options: {
+        targetNumber: get$2(targetNumber),
+        modifiers: get$2(modifiers),
+        explodes: !get$2(isDefaulting)
+      }
     });
   }
   function getRoot(el) {
@@ -4262,16 +4293,19 @@ function RollComposerComponent($$anchor, $$props) {
   var div = root_1$q();
   div.__keydown = [swallowDirectional];
   var div_1 = child(div);
-  var select = sibling(child(div_1), 2);
+  var h1 = child(div_1);
+  var text2 = child(h1);
+  var div_2 = sibling(div_1, 2);
+  var select = sibling(child(div_2), 2);
   select.__keydown = handleSelectKeydown;
   var option = child(select);
   option.value = null == (option.__value = "false") ? "" : "false";
   var option_1 = sibling(option);
   option_1.value = null == (option_1.__value = "true") ? "" : "true";
   bind_this(select, ($$value) => selectEl = $$value, () => selectEl);
-  var div_2 = sibling(div_1, 2);
-  var h4 = sibling(child(div_2), 2);
-  var text2 = child(h4);
+  var div_3 = sibling(div_2, 2);
+  var h4 = sibling(child(div_3), 2);
+  var text_1 = child(h4);
   var node = sibling(h4, 2);
   Counter(node, {
     min: "2",
@@ -4282,10 +4316,9 @@ function RollComposerComponent($$anchor, $$props) {
       set(targetNumber, proxy($$value));
     }
   });
-  var div_3 = sibling(div_2, 2);
-  var node_1 = sibling(child(div_3), 2);
+  var div_4 = sibling(div_3, 2);
+  var node_1 = sibling(child(div_4), 2);
   Counter(node_1, {
-    min: "0",
     get value() {
       return get$2(modifiers);
     },
@@ -4293,16 +4326,19 @@ function RollComposerComponent($$anchor, $$props) {
       set(modifiers, proxy($$value));
     }
   });
-  var node_2 = sibling(div_3, 2);
+  var node_2 = sibling(div_4, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_4 = root_2$f();
-      var h4_1 = sibling(child(div_4), 2);
-      var text_1 = child(h4_1);
+      var div_5 = root_2$f();
+      var h4_1 = sibling(child(div_5), 2);
+      var text_2 = child(h4_1);
       var node_3 = sibling(h4_1, 2);
       Counter(node_3, {
         class: "karma-counter",
         min: "0",
+        get max() {
+          return $$props.actor.system.karma.karmaPool;
+        },
         onIncrement: karmaCostCalculator,
         onDecrement: karmaCostCalculator,
         get value() {
@@ -4312,8 +4348,8 @@ function RollComposerComponent($$anchor, $$props) {
           set(diceBought, proxy($$value));
         }
       });
-      template_effect(() => set_text(text_1, `Cost ${get$2(karmaCost) ?? ""}`));
-      append($$anchor2, div_4);
+      template_effect(() => set_text(text_2, `Cost ${get$2(karmaCost) ?? ""}`));
+      append($$anchor2, div_5);
     };
     if_block(node_2, ($$render) => {
       if (!get$2(isDefaulting)) $$render(consequent);
@@ -4326,11 +4362,16 @@ function RollComposerComponent($$anchor, $$props) {
   button_1.__click = Reset;
   bind_this(button_1, ($$value) => clearBtn = $$value, () => clearBtn);
   bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
-  template_effect(() => set_text(text2, get$2(difficulty)));
+  template_effect(() => {
+    set_text(text2, get$2(title));
+    set_text(text_1, get$2(difficulty));
+    button.disabled = get$2(canSubmit);
+  });
   event("keydown", div, handleKey, true);
   bind_select_value(select, () => get$2(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
   append($$anchor, div);
   pop();
+  $$cleanup();
 }
 delegate(["keydown", "click"]);
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
@@ -4349,6 +4390,7 @@ function AttributeCard($$anchor, $$props) {
   const $total = () => store_get(total, "$total", $$stores);
   const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const storeManager2 = StoreManager.Subscribe($$props.actor);
   let total = storeManager2.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
@@ -4367,6 +4409,7 @@ function AttributeCard($$anchor, $$props) {
   let isMinLimit = /* @__PURE__ */ derived$1(() => $value() <= 1);
   let isMaxLimit = /* @__PURE__ */ derived$1(() => get$2(attributeLimit) ? $total().sum >= get$2(attributeLimit) : false);
   let activeModal = null;
+  let isModalOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
   function add(change) {
     if (!$attributeAssignmentLockedStore()) {
       const newPoints = $attributePointStore() - change;
@@ -4387,6 +4430,7 @@ function AttributeCard($$anchor, $$props) {
       e.stopImmediatePropagation();
       e.stopPropagation();
       unmount(activeModal);
+      store_set(isModalOpen, false);
       activeModal = null;
     }
   }
@@ -4394,22 +4438,28 @@ function AttributeCard($$anchor, $$props) {
     StoreManager.Unsubscribe($$props.actor);
     if (activeModal) {
       unmount(activeModal);
+      store_set(isModalOpen, false);
       activeModal = null;
     }
   });
   async function Roll2(e) {
     if (e.shiftKey) {
+      if ($isModalOpen()) return;
+      store_set(isModalOpen, true);
       const options = await new Promise((resolve) => {
         activeModal = mount(RollComposerComponent, {
-          target: document.body,
+          target: document.querySelector(".composer-position"),
           props: {
             actor: $$props.actor,
-            caller: $$props.key,
-            type: "attribute",
-            dice: $total().sum,
             config: CONFIG.sr3e,
+            caller: {
+              key: $$props.key,
+              type: "attribute",
+              options: { dice: $total().sum }
+            },
             onclose: (result) => {
               unmount(activeModal);
+              store_set(isModalOpen, false);
               activeModal = null;
               resolve(result);
             }
@@ -4417,7 +4467,7 @@ function AttributeCard($$anchor, $$props) {
         });
       });
       if (options) {
-        await $$props.actor.AttributeRoll($total().sum, $$props.key, options);
+        await $$props.actor.AttributeRoll(options.dice, options.attributeName, options.options);
       }
     } else {
       await $$props.actor.AttributeRoll($total().sum, $$props.key);
@@ -6571,16 +6621,23 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$c = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
 var root_1$j = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$y = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $goodKarmaStore = () => store_get(goodKarmaStore, "$goodKarmaStore", $$stores);
+  const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  const $essenceStore = () => store_get(essenceStore, "$essenceStore", $$stores);
+  const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let karma = proxy(actor().system.karma);
-  let essence = proxy(actor().system.attributes.essence ?? 0);
-  let survivor = /* @__PURE__ */ derived$1(() => karma.miraculoussurvival);
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let karmaPoolStore = storeManager2.GetStore("karma.karmaPool");
+  let goodKarmaStore = storeManager2.GetStore("karma.goodKarma");
+  let essenceStore = storeManager2.GetStore("attributes.essence");
+  let miraculousSurvivalStore = storeManager2.GetStore("karma.miraculousSurvival");
   var fragment = root$y();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -6603,7 +6660,7 @@ function Karma($$anchor, $$props) {
           return get$2(expression);
         },
         get value() {
-          return karma.goodKarma;
+          return $goodKarmaStore();
         }
       });
       var node_3 = sibling(node_2, 2);
@@ -6613,7 +6670,7 @@ function Karma($$anchor, $$props) {
           return get$2(expression_1);
         },
         get value() {
-          return karma.karmaPool;
+          return $karmaPoolStore();
         }
       });
       var node_4 = sibling(node_3, 2);
@@ -6623,7 +6680,7 @@ function Karma($$anchor, $$props) {
           return get$2(expression_2);
         },
         get value() {
-          return essence;
+          return $essenceStore();
         }
       });
       var node_5 = sibling(node_4, 2);
@@ -6640,7 +6697,7 @@ function Karma($$anchor, $$props) {
         var alternate = ($$anchor3) => {
         };
         if_block(node_5, ($$render) => {
-          if (!get$2(survivor)) $$render(consequent);
+          if (!$miraculousSurvivalStore()) $$render(consequent);
           else $$render(alternate, false);
         });
       }
@@ -6651,6 +6708,7 @@ function Karma($$anchor, $$props) {
   template_effect(($0) => set_text(text2, $0), [() => localize(config().karma.karma)]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
 async function decrement$2(_, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore, $$props) {
   if ($attributeAssignmentLockedStore()) {
@@ -12538,13 +12596,14 @@ class RollService {
     targetNumber: 0,
     //Target number 0 is forbidden in shadowrun, so we can know that thw roll has no target if target < 2
     explodes: true,
-    defaulted: false
+    defaulted: false,
+    modifiers: 0
   }) {
     let formula = "";
     if (options.explodes) {
       formula = `${dice}d6x`;
       if (options.targetNumber && options.targetNumber > 1) {
-        formula += options.targetNumber.toString();
+        formula += (options.targetNumber + options.modifiers).toString();
       }
     } else {
       formula = `${dice}d6`;
@@ -12566,6 +12625,8 @@ class RollService {
     let flavor = "";
     if (options.defaulted) {
       flavor = `${actor.name} rolls a skill default on linked attribute ${attributeName} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
+    } else if (options.modifier > 0) {
+      flavor = `${actor.name} rolls ${attributeName} (${formula}) with ${options.modifiers} modifier${resultSummary ? `<br>${resultSummary}` : ""}`;
     } else {
       flavor = `${actor.name} rolls ${attributeName} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
     }
@@ -12613,7 +12674,7 @@ class SR3EActor extends Actor {
   async InitiativeRoll(dice, options) {
     await RollService.Initiative(this, dice, options);
   }
-  async AttributeRoll(dice, attributeName, options = { targetNumber: -1, explodes: true }) {
+  async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.AttributeRoll(this, attributeName, dice, options);
   }
   async canAcceptmetatype(incomingItem) {

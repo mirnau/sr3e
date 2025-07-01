@@ -7,6 +7,7 @@ export default class RollService {
          targetNumber: 0, //Target number 0 is forbidden in shadowrun, so we can know that thw roll has no target if target < 2
          explodes: true,
          defaulted: false,
+         modifiers: 0,
       }
    ) {
       let formula = "";
@@ -14,7 +15,7 @@ export default class RollService {
          formula = `${dice}d6x`;
 
          if (options.targetNumber && options.targetNumber > 1) {
-            formula += options.targetNumber.toString();
+            formula += (options.targetNumber + options.modifiers).toString();
          }
       } else {
          formula = `${dice}d6`;
@@ -41,6 +42,10 @@ export default class RollService {
 
       if (options.defaulted) {
          flavor = `${actor.name} rolls a skill default on linked attribute ${attributeName} (${formula})${
+            resultSummary ? `<br>${resultSummary}` : ""
+         }`;
+      } else if (options.modifier > 0) {
+         flavor = `${actor.name} rolls ${attributeName} (${formula}) with ${options.modifiers} modifier${
             resultSummary ? `<br>${resultSummary}` : ""
          }`;
       } else {

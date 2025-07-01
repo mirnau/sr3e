@@ -24,7 +24,8 @@ export const flags = {
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
     attributeAssignmentLocked: "attributeAssignmentLocked",
-    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize",
+    isrollcomposeropen: "isrollcomposeropen"
   }
 };
 

@@ -1,12 +1,6 @@
 <script>
    import { onMount } from "svelte";
-   let {
-      value = $bindable(),
-      min = -Infinity,
-      max = Infinity,
-      onIncrement,
-      onDecrement,
-   } = $props();
+   let { value = $bindable(), min = -Infinity, max = Infinity, onIncrement, onDecrement } = $props();
    let editableDiv;
 
    function increment() {
@@ -80,6 +74,7 @@
          onDecrement?.();
       }}
       tabindex="-1"
+      disabled={value <= min}
    >
       <i class="fa-solid fa-minus"></i>
    </button>
@@ -104,6 +99,7 @@
          onIncrement?.();
       }}
       tabindex="-1"
+      disabled={value >= max}
    >
       <i class="fa-solid fa-plus"></i>
    </button>

@@ -18,6 +18,7 @@ export const stores = {
    isCharacterCreation: "isCharacterCreation",
    initiativeDice: "initiativeDice",
    baseInitiative: "baseInitiative",
+   isrollcomposeropen: "isrollcomposeropen",
    combat: {
       stunDamage: "stunDamage",
       leathalDamage: "leathalDamage",
@@ -77,20 +78,20 @@ export class StoreManager {
       return this.#persistentStore[dataPath];
    }
 
-   GetShallowStore(actorId, storeName, customValue = null) {
-      this.#actorStores[actorId] ??= {};
+   GetShallowStore(docId, storeName, customValue = null) {
+      this.#actorStores[docId] ??= {};
 
-      if (!this.#actorStores[actorId][storeName]) {
+      if (!this.#actorStores[docId][storeName]) {
          let value = customValue;
 
          if (value && typeof value === "object") {
             value = Array.isArray(value) ? [...value] : { ...value };
          }
 
-         this.#actorStores[actorId][storeName] = writable(value);
+         this.#actorStores[docId][storeName] = writable(value);
       }
 
-      return this.#actorStores[actorId][storeName];
+      return this.#actorStores[docId][storeName];
    }
 
    GetFlagStore(flag) {
