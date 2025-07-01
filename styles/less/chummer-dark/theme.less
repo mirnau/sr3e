@@ -4,45 +4,41 @@
 
 /* globals.less measurements are in rem*/
 :root {
-  --component-width: 17rem;
-  --component-grid-gap: 0.25rem;
-  --background-color: linear-gradient(
-    35deg,
-    #1a1a1a,
-    // Deep blackened steel
-    #2f2f2f 35%,
-    // Mid-tone gunmetal
-    #4d4d4d 65%,
-    // Brushed metallic edge
-    #3b3b3b 90%,
-    // Slight cool gray tint
-    #1e1e1e // Back to dark shadow
-  );
+   --component-width: 17rem;
+   --component-grid-gap: 0.25rem;
+   --background-color: linear-gradient(
+      35deg,
+      #1a1a1a,
+      // Deep blackened steel
+      #2f2f2f 35%,
+      // Mid-tone gunmetal
+      #4d4d4d 65%,
+      // Brushed metallic edge
+      #3b3b3b 90%,
+      // Slight cool gray tint
+      #1e1e1e // Back to dark shadow
+   );
 
-  --background-with-image: radial-gradient(
-      ellipse at center,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0) 90%
-    ),
-    linear-gradient(
-      to right,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 0.4) 30%,
-      rgba(0, 0, 0, 0.4) 70%,
-      rgba(0, 0, 0, 0) 100%
-    ),
-    url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
+   --background-with-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 90%),
+      linear-gradient(
+         to right,
+         rgba(0, 0, 0, 0) 0%,
+         rgba(0, 0, 0, 0.4) 30%,
+         rgba(0, 0, 0, 0.4) 70%,
+         rgba(0, 0, 0, 0) 100%
+      ),
+      url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
 
-  --highlight-color-primary: #11e6bf; // Pink for highlights
-  --highlight-color-secondary: #16a48d; // Pink for highlights
-  --highlight-color-tertiary: #ff0000; // Pink for highlights
+   --highlight-color-primary: #11e6bf; // Pink for highlights
+   --highlight-color-secondary: #16a48d; // Pink for highlights
+   --highlight-color-tertiary: #ff0000; // Pink for highlights
+   --accent-color-primary: #d91587;
+   --accent-color-secondary: rgb(255, 79, 79);
 }
 // Foundry system scoped overrides //
 * {
-  --color-scrollbar: #ff009572;
+   --color-scrollbar: #ff009572;
 }
-
-@highlight-color-secondary: #ff0095; // Pink for highlights
 
 //var(--highlight-color-primary);: #1df0ff; // Pink for highlights
 
@@ -61,10 +57,10 @@
 @primary-fake-shadow: @accent-color;
 
 @chummer-dark-fallback: repeating-linear-gradient(
-  0deg,
-  rgba(81, 106, 134, 0.6) 1px,
-  rgba(57, 77, 100, 0.6) 5px,
-  rgba(31, 44, 66, 0.6) 2px
+   0deg,
+   rgba(81, 106, 134, 0.6) 1px,
+   rgba(57, 77, 100, 0.6) 5px,
+   rgba(31, 44, 66, 0.6) 2px
 );
 
 //Main Window Background

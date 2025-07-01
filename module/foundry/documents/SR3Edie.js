@@ -17,11 +17,12 @@ export default class SR3Edie extends foundry.dice.terms.Die {
    /*  Evaluation                                                        */
    /* ------------------------------------------------------------------ */
 
-   //Must support 1d6 for non exploding rolls
-   //Must support 1d6x for uncapped exploding rolls (infinte recursion)
-   //Must support 1d6xN where N is a positive number higher than 2 (If lower than two, use two anyway). N is the cap of the roll. When any individual die reaches the cap, the explosion ends and the accumulative result of the die is reported, just like with uncapped
-   //Must not support xo or xo N, as they are not a part of Shadowrun Third Editionrules.
-   //Must No dice generate new dice. Instead they accumulate their value. So if I roll six, it explodes, then I roll again and get value, the six sided die should report 11, and not spawn a new die.
+   // INFO:
+   // Must support 1d6 for non exploding rolls
+   // Must support 1d6x for uncapped exploding rolls (infinte recursion)
+   // Must support 1d6xN where N is a positive number higher than 2 (If lower than two, use two anyway). N is the cap of the roll. When any individual die reaches the cap, the explosion ends and the accumulative result of the die is reported, just like with uncapped
+   // Must not support xo or xo N, as they are not a part of Shadowrun Third Editionrules.
+   // Must No dice generate new dice. Instead they accumulate their value. So if I roll six, it explodes, then I roll again and get value, the six sided die should report 11, and not spawn a new die.
 
    async _evaluate(opts = {}) {
       // async wrapper

@@ -7,6 +7,8 @@
   --highlight-color-primary: #11e6bf;
   --highlight-color-secondary: #16a48d;
   --highlight-color-tertiary: #ff0000;
+  --accent-color-primary: #d91587;
+  --accent-color-secondary: #ff4f4f;
 }
 * {
   --color-scrollbar: #ff009572;

@@ -13,6 +13,7 @@
 
    let canvas;
    let forms = [];
+   let associatedDicepoolKeys = $state([]);
 
    onMount(() => {
       inputEl.focus();
@@ -31,6 +32,14 @@
          form.style.filter = "blur(5px)";
          form.style.pointerEvents = "none";
       }
+
+      associatedDicepoolKeys = ["combat", "control"];
+
+      if (
+         actor.items?.some((item) => item.type === "magic")
+      ) {
+         associatedDicepoolKeys.push("magic", "astral");
+      }
    });
 
    onDestroy(() => {
@@ -46,6 +55,13 @@
          form.style.pointerEvents = "";
       }
    });
+
+   const dicePoolOptions = $derived(() =>
+      associatedDicepoolKeys.map((key) => ({
+         value: key,
+         label: localize(config.dicepools[key]),
+      }))
+   );
 
    function handleInputKeydown(e) {
       if (e.key === "Enter" || e.key === "Tab") {
@@ -83,7 +99,6 @@
    }
 
    function submit() {
-      
       let isDefaulting = isDefaultingAsString === "true";
 
       targetNumber = targetNumber < 2 || targetNumber === "" ? 2 : targetNumber;
@@ -109,7 +124,9 @@
       <div class="popup-container">
          <h1>{localize(config.attributes[caller])} ROLL</h1>
          <div class="field-group">
+            <h1>Target Number</h1>
             <input bind:this={inputEl} type="number" bind:value={targetNumber} onkeydown={handleInputKeydown} />
+            <h1>Type of Roll</h1>
             <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
                <option value="false">Regular roll</option>
                <option value="true">Defaulting</option>
@@ -117,6 +134,15 @@
             <button bind:this={buttonEl} onclick={submit} onkeydown={handleButtonKeydown} type="button">
                Roll the Dice!
             </button>
+
+            <div>
+               <h1>Associated Dicepool - if any</h1>
+               <ul>
+                  {#each dicePoolOptions as opt}
+                     <li>{opt.label}</li>
+                  {/each}
+               </ul>
+            </div>
          </div>
       </div>
    </div>

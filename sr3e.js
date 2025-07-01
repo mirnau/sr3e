@@ -3,7 +3,6 @@ import CharacterModel from "./module/models/actor/CharacterModel.js";
 import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
 import { sr3e } from "./module/foundry/config.js";
 import { hooks, flags } from "./module/services/commonConsts.js";
-import { injectFooterIntoWindowApp } from "./module/foundry/hooks/renderApplicationV2/injectFooterIntoWindowApp.js";
 import { localize } from "./module/services/utilities.js";
 import injectCssSelectors from "./module/foundry/hooks/renderApplicationV2/injectCssSelectors.js";
 import MetatypeModel from "./module/models/item/MetatypeModel.js";
@@ -297,16 +296,12 @@ function registerHooks() {
    Hooks.on(hooks.createActor, displayCreationDialog);
 
    //INFO: Fancy Decorations
-   Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
    Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
 
    Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
    Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
 
    Hooks.once(hooks.init, () => {
-
-
-
       configureProject();
       configureThemes();
       registerDocumentTypes({

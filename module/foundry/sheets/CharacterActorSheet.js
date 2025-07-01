@@ -8,6 +8,7 @@ import { mount, unmount } from "svelte";
 import ActorDataService from "../../services/ActorDataService.js";
 import { flags } from "../../services/commonConsts.js";
 import { StoreManager } from "../../svelte/svelteHelpers/StoreManager.svelte";
+import RollComposerComponent from "../../svelte/apps/injections/RollComposerComponent.svelte";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
@@ -15,6 +16,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    #feed;
    #cart;
    #creation;
+   #rollComposer;
+   #footer;
 
    static get DEFAULT_OPTIONS() {
       return {
@@ -57,6 +60,14 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          unmount(this.#creation);
          this.#creation = null;
       }
+      if (this.#rollComposer) {
+         unmount(this.#rollComposer);
+         this.#creation = null;
+      }
+      if (this.#footer) {
+         unmount(this.#footer);
+         this.#creation = null;
+      }
 
       windowContent.innerHTML = "";
       const form = windowContent.parentNode;
@@ -78,13 +89,47 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
       this._injectNewsFeed(form, header);
 
+      this._injectFooter(form);
+
       let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
       if (isCharacterCreation) {
-         this._injectCharachterCreationPointsApp(header);
-      }
+         //this._injectCharachterCreationPointsApp(header);
+         this._injectRollComposer(header);
+      } 
 
       SR3DLog.success("Svelte mounted", this.constructor.name);
       return windowContent;
+   }
+
+   _injectRollComposer(header) {
+      let anchor = header?.previousElementSibling;
+      if (!anchor?.classList?.contains("composer-position")) {
+         anchor = document.createElement("div");
+         anchor.classList.add("composer-position");
+         header.parentElement.insertBefore(anchor, header);
+      }
+
+      if (!this.#rollComposer) {
+         this.#rollComposer = mount(RollComposerComponent, {
+            target: anchor,
+            props: {
+               actor: this.document,
+               config: CONFIG.sr3e,
+            },
+         });
+      }
+   }
+
+   _injectFooter(form) {
+      const footer = document.createElement("div");
+      footer.classList.add("actor-footer");
+
+      const resizeHandle = form.querySelector(".window-resize-handle");
+      if (resizeHandle?.parentNode) {
+         resizeHandle.parentNode.insertBefore(footer, resizeHandle.nextSibling);
+      } else {
+         form.appendChild(footer);
+      }
    }
 
    _injectCharachterCreationPointsApp(header) {
@@ -163,7 +208,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       if (this.#feed) await unmount(this.#feed);
       if (this.#cart) await unmount(this.#cart);
       if (this.#creation) await unmount(this.#creation);
-      this.#app = this.#neon = this.#feed = this.#cart = null;
+      if (this.#rollComposer) await unmount(this.#rollComposer);
+      this.#app = this.#neon = this.#feed = this.#cart = this.#creation = this.#rollComposer = this.#footer = null;
       return super._tearDown();
    }
 
@@ -193,7 +239,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    }
 
    async handleSkill(droppedItem) {
-
       let storeManager = StoreManager.Subscribe(this.document);
 
       const skillType = droppedItem.system.skillType;

@@ -1,0 +1,21 @@
+.roll-composer-container {
+   display: flex;
+   flex-direction: column;
+   background: oklch(from var(--highlight-color-primary) l c h / 0.15);
+   height: auto;
+   width: 10rem;
+   min-height: 5rem;
+   left: -12rem;
+   top: 0rem;
+   position: absolute;
+   transition: width 0.3s ease;
+   padding: 0.5rem;
+   gap: 0.5rem;
+   .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+
+   box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+
+   &.collapsed {
+      width: 0;
+   }
+}
