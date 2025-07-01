@@ -3,8 +3,8 @@
    import { flags } from "../../../../services/commonConsts.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
-   import RollComposerModal from "../../dialogs/RollComposerModal.svelte";
    import { mount, unmount } from "svelte";
+   import RollComposerComponent from "../../components/RollComposerComponent.svelte";
 
    let { actor, stat, localization, key } = $props();
 
@@ -67,7 +67,7 @@
    async function Roll(e) {
       if (e.shiftKey) {
          const options = await new Promise((resolve) => {
-            activeModal = mount(RollComposerModal, {
+            activeModal = mount(RollComposerComponent, {
                target: document.body,
                props: {
                   actor,
@@ -108,17 +108,14 @@
    }}
 >
    {#if $isShoppingState}
-      <div class="stat-card-toolbar">
-         <i
-            class="fa-solid fa-gear"
-            role="button"
-            tabindex="0"
-            onclick={() => (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
-            onkeydown={(e) =>
-               (e.key === "Enter" || e.key === " ") &&
-               (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
-         ></i>
-      </div>
+      <i
+         class="fa-solid fa-pen-to-square edit-icon"
+         role="button"
+         tabindex="0"
+         onclick={() => (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
+         onkeydown={(e) =>
+            (e.key === "Enter" || e.key === " ") && (attributeAssignmentLockedStore = !$attributeAssignmentLockedStore)}
+      ></i>
    {/if}
    <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
    <div class="stat-card-background"></div>

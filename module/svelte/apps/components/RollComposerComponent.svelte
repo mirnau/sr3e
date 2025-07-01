@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte"
-	import Counter from "../components/basic/Counter.svelte"
+	import Counter from "./basic/Counter.svelte"
 	import ItemDataService from "../../../services/ItemDataService.js"
 
 	let { actor, config } = $props()

@@ -4,7 +4,7 @@
    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
    import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
    import { tick } from "svelte";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte";
 
    let { actor = {}, config = {} } = $props();
 
@@ -12,7 +12,7 @@
 
    const activeSkillsIdArrayStore = storeManager.GetShallowStore(
       actor.id,
-      "activeSkillsIds",
+      stores.activeSkillsIds,
       actor.items.filter((item) => item.type === "skill" && item.system.skillType === "active").map((item) => item.id)
    );
 

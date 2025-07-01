@@ -7,8 +7,8 @@ import SR3DLog from "../../../Log.js";
 import { mount, unmount } from "svelte";
 import ActorDataService from "../../services/ActorDataService.js";
 import { flags } from "../../services/commonConsts.js";
-import { StoreManager } from "../../svelte/svelteHelpers/StoreManager.svelte";
-import RollComposerComponent from "../../svelte/apps/injections/RollComposerComponent.svelte";
+import { StoreManager, stores } from "../../svelte/svelteHelpers/StoreManager.svelte";
+import RollComposerComponent from "../../svelte/apps/components/RollComposerComponent.svelte";
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
@@ -16,7 +16,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    #feed;
    #cart;
    #creation;
-   #rollComposer;
    #footer;
 
    static get DEFAULT_OPTIONS() {
@@ -60,10 +59,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          unmount(this.#creation);
          this.#creation = null;
       }
-      if (this.#rollComposer) {
-         unmount(this.#rollComposer);
-         this.#creation = null;
-      }
       if (this.#footer) {
          unmount(this.#footer);
          this.#creation = null;
@@ -90,33 +85,25 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       this._injectNewsFeed(form, header);
 
       this._injectFooter(form);
+      
+      this._injectRollComposer(header);
 
       let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
       if (isCharacterCreation) {
-         //this._injectCharachterCreationPointsApp(header);
-         this._injectRollComposer(header);
-      } 
+         this._injectCharacterCreationPointsApp(header);
+      }
 
       SR3DLog.success("Svelte mounted", this.constructor.name);
       return windowContent;
    }
 
+   // Injects from the svelte component later
    _injectRollComposer(header) {
       let anchor = header?.previousElementSibling;
       if (!anchor?.classList?.contains("composer-position")) {
          anchor = document.createElement("div");
          anchor.classList.add("composer-position");
          header.parentElement.insertBefore(anchor, header);
-      }
-
-      if (!this.#rollComposer) {
-         this.#rollComposer = mount(RollComposerComponent, {
-            target: anchor,
-            props: {
-               actor: this.document,
-               config: CONFIG.sr3e,
-            },
-         });
       }
    }
 
@@ -132,7 +119,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       }
    }
 
-   _injectCharachterCreationPointsApp(header) {
+   _injectCharacterCreationPointsApp(header) {
       let anchor = header?.previousElementSibling;
       if (!anchor?.classList?.contains("points-position")) {
          anchor = document.createElement("div");
@@ -208,8 +195,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       if (this.#feed) await unmount(this.#feed);
       if (this.#cart) await unmount(this.#cart);
       if (this.#creation) await unmount(this.#creation);
-      if (this.#rollComposer) await unmount(this.#rollComposer);
-      this.#app = this.#neon = this.#feed = this.#cart = this.#creation = this.#rollComposer = this.#footer = null;
+      this.#app = this.#neon = this.#feed = this.#cart = this.#creation = this.#footer = null;
       return super._tearDown();
    }
 
@@ -271,7 +257,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          return;
       }
 
-      const targetStore = storeManager.getActorStore(this.document.id, storeKey, []);
+      const targetStore = storeManager.GetShallowStore(this.document.id, storeKey, []);
       targetStore.update((current) => [...current, createdItem.id]);
 
       StoreManager.Unsubscribe(this.document);
