@@ -1,6 +1,12 @@
 <script>
    import { onMount } from "svelte";
-   let { value = $bindable(), min = -Infinity, max = Infinity } = $props();
+   let {
+      value = $bindable(),
+      min = -Infinity,
+      max = Infinity,
+      onIncrement,
+      onDecrement,
+   } = $props();
    let editableDiv;
 
    function increment() {
@@ -66,7 +72,15 @@
    aria-label="Adjust value"
    onkeydown={handleKeydown}
 >
-   <button class="counter-button" aria-label="Decrement Value" onclick={decrement} tabindex="-1">
+   <button
+      class="counter-button"
+      aria-label="Decrement Value"
+      onclick={() => {
+         decrement();
+         onDecrement?.();
+      }}
+      tabindex="-1"
+   >
       <i class="fa-solid fa-minus"></i>
    </button>
 
@@ -82,7 +96,15 @@
       {value}
    </div>
 
-   <button class="counter-button" aria-label="Increment Value" onclick={increment} tabindex="-1">
+   <button
+      class="counter-button"
+      aria-label="Increment Value"
+      onclick={() => {
+         increment();
+         onIncrement?.();
+      }}
+      tabindex="-1"
+   >
       <i class="fa-solid fa-plus"></i>
    </button>
 </div>

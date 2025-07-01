@@ -1,73 +1,70 @@
 <script>
-   import { onDestroy, onMount } from "svelte";
-   import { localize } from "../../../services/utilities.js";
+   import { onMount } from "svelte";
+   import Counter from "../components/basic/Counter.svelte";
+   import ItemDataService from "../../../services/ItemDataService.js";
 
-   let { actor, caller, type, dice, config, onclose } = $props();
+   let { actor, config } = $props();
 
-   let targetNumber = "";
-   let isDefaultingAsString = "false";
+   let targetNumber = $state(5);
+   let modifiers = $state(0);
+   let karmaCost = $state(0);
+   let diceBought = $state(0);
+   let difficulty = $state("");
+   let isDefaultingAsString = $state("false");
+   let isDefaulting = $state(false);
 
-   let inputEl;
+   let containerEl;
    let selectEl;
-   let buttonEl;
+   let focusables = [];
 
-   let canvas;
-   let forms = [];
-   let associatedDicepoolKeys = $state([]);
+   let difficulties = ItemDataService.getDifficultieGradings(config);
 
    onMount(() => {
-      inputEl.focus();
-
-      canvas = document.querySelector("canvas");
-      if (canvas) {
-         canvas.style.transition = "filter 0.2s ease";
-         canvas.style.filter = "blur(5px)";
-         canvas.style.pointerEvents = "none";
-      }
-
-      forms = Array.from(document.querySelectorAll("form")).filter((form) => !form.classList.contains("chat-form"));
-
-      for (const form of forms) {
-         form.style.transition = "filter 0.2s ease";
-         form.style.filter = "blur(5px)";
-         form.style.pointerEvents = "none";
-      }
-
-      associatedDicepoolKeys = ["combat", "control"];
-
-      if (
-         actor.items?.some((item) => item.type === "magic")
-      ) {
-         associatedDicepoolKeys.push("magic", "astral");
-      }
+      focusables = Array.from(
+         containerEl.querySelectorAll("select, .counter-component[tabindex='0'], button[type]")
+      );
+      selectEl?.focus();
    });
 
-   onDestroy(() => {
-      if (canvas) {
-         canvas.style.filter = "";
-         canvas.style.transition = "";
-         canvas.style.pointerEvents = "";
-      }
+   function karmaCostCalculator() {
+      karmaCost = 0.5 * diceBought * (diceBought + 1);
+   }
 
-      for (const form of forms) {
-         form.style.filter = "";
-         form.style.transition = "";
-         form.style.pointerEvents = "";
-      }
+   $effect(() => {
+      isDefaulting = isDefaultingAsString === "true";
    });
 
-   const dicePoolOptions = $derived(() =>
-      associatedDicepoolKeys.map((key) => ({
-         value: key,
-         label: localize(config.dicepools[key]),
-      }))
-   );
+   $effect(() => {
+      const tn = Number(targetNumber);
+      if (!difficulties) return;
 
-   function handleInputKeydown(e) {
-      if (e.key === "Enter" || e.key === "Tab") {
-         e.preventDefault();
-         selectEl.focus();
-      }
+      if (tn === 2) difficulty = difficulties.simple;
+      else if (tn === 3) difficulty = difficulties.routine;
+      else if (tn === 4) difficulty = difficulties.average;
+      else if (tn === 5) difficulty = difficulties.challenging;
+      else if (tn === 6 || tn === 7) difficulty = difficulties.hard;
+      else if (tn === 8) difficulty = difficulties.strenuous;
+      else if (tn === 9) difficulty = difficulties.extreme;
+      else if (tn >= 10) difficulty = difficulties.nearlyimpossible;
+   });
+
+   function Reset() {
+      targetNumber = 5;
+      modifiers = 0;
+      diceBought = 0;
+      karmaCost = 0;
+      isDefaultingAsString = "false";
+      selectEl?.focus();
+   }
+
+   function Submit() {
+      console.log("Submit:", {
+         targetNumber,
+         modifiers,
+         diceBought,
+         karmaCost,
+         isDefaulting,
+      });
    }
 
    function handleSelectKeydown(e) {
@@ -83,67 +80,103 @@
       }
       if (e.key === "Enter" || e.key === "Tab") {
          e.preventDefault();
-         buttonEl.focus();
+         focusNext();
       }
    }
 
-   function handleButtonKeydown(e) {
+   function handleCounterKeydown(e) {
+      if (e.key === "Enter" || e.key === "Tab") {
+         e.preventDefault();
+         focusNext();
+      }
+   }
+
+   function handleRollButtonKeydown(e) {
       if (e.key === "Enter") {
          e.preventDefault();
-         submit();
-      }
-      if (e.key === "Tab") {
+         Submit();
+      } else if (e.key === "Tab") {
          e.preventDefault();
-         inputEl.focus();
+         Reset();
+         selectEl?.focus();
       }
    }
 
-   function submit() {
-      let isDefaulting = isDefaultingAsString === "true";
-
-      targetNumber = targetNumber < 2 || targetNumber === "" ? 2 : targetNumber;
-
-      if (isDefaulting) {
-         let baseTn = targetNumber;
-         targetNumber += 2;
-         console.log(
-            `The target number ${baseTn} was increased to ${targetNumber}, to compensate for defaulting on linked skill`
-         );
+   function handleClearButtonKeydown(e) {
+      if (e.key === "Enter") {
+         e.preventDefault();
+         Reset();
+      } else if (e.key === "Tab") {
+         e.preventDefault();
+         selectEl?.focus();
       }
+   }
 
-      onclose({
-         targetNumber: targetNumber,
-         explodes: true,
-         defaulted: isDefaulting,
-      });
+   function focusNext() {
+      const index = focusables.findIndex((el) => el === document.activeElement);
+      if (index !== -1 && index < focusables.length - 1) {
+         focusables[index + 1]?.focus();
+      }
+   }
+
+   function trapFocus(e) {
+      if (e.key !== "Tab" && e.key !== "Enter") return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (document.activeElement === last) {
+         e.preventDefault();
+         first?.focus();
+      }
    }
 </script>
 
-{#if type === "attribute"}
-   <div class="popup">
-      <div class="popup-container">
-         <h1>{localize(config.attributes[caller])} ROLL</h1>
-         <div class="field-group">
-            <h1>Target Number</h1>
-            <input bind:this={inputEl} type="number" bind:value={targetNumber} onkeydown={handleInputKeydown} />
-            <h1>Type of Roll</h1>
-            <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
-               <option value="false">Regular roll</option>
-               <option value="true">Defaulting</option>
-            </select>
-            <button bind:this={buttonEl} onclick={submit} onkeydown={handleButtonKeydown} type="button">
-               Roll the Dice!
-            </button>
-
-            <div>
-               <h1>Associated Dicepool - if any</h1>
-               <ul>
-                  {#each dicePoolOptions as opt}
-                     <li>{opt.label}</li>
-                  {/each}
-               </ul>
-            </div>
-         </div>
-      </div>
+<div
+   class="roll-composer-container"
+   bind:this={containerEl}
+   role="group"
+   tabindex="-1"
+   onkeydown={(e) => {
+      e.stopPropagation();
+      trapFocus(e);
+   }}
+>
+   <div class="roll-composer-card">
+      <h1 class="no-margin">Roll Type</h1>
+      <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
+         <option value="false">Regular roll</option>
+         <option value="true">Defaulting</option>
+      </select>
    </div>
-{/if}
+
+   <div class="roll-composer-card">
+      <h1 class="no-margin">Target Number</h1>
+      <h4 class="no-margin">{difficulty}</h4>
+      <Counter bind:value={targetNumber} min="2" onkeydown={handleCounterKeydown} />
+   </div>
+
+   <div class="roll-composer-card">
+      <h1 class="no-margin">Modifiers</h1>
+      <Counter bind:value={modifiers} min="0" onkeydown={handleCounterKeydown} />
+   </div>
+
+   <div class="roll-composer-card">
+      <h1 class="no-margin">Karma</h1>
+      <h4 class="no-margin">Cost {karmaCost}</h4>
+      <Counter
+         bind:value={diceBought}
+         min="0"
+         onIncrement={karmaCostCalculator}
+         onDecrement={karmaCostCalculator}
+         onkeydown={handleCounterKeydown}
+      />
+   </div>
+
+   <button class="regular" type="submit" onclick={Submit} onkeydown={handleRollButtonKeydown}>
+      Roll!
+   </button>
+   <button class="regular" type="reset" onclick={Reset} onkeydown={handleClearButtonKeydown}>
+      Clear
+   </button>
+</div>
