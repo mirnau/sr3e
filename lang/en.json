@@ -182,8 +182,16 @@
          "specializations": "Specializations"
       },
       "storytellerscreen": {
-         "storytellerscreen": "Storyteller's Screen"
+         "storytellerscreen": "Storyteller's Screen",
+         "refreshcombatpool": "Refresh Combat Pool",
+         "refreshastralpool": "Refresh Astral Pool",
+         "refreshhackingpool": "Refresh Hacking Pool",
+         "refreshcontrolpool": "Refresh Control Pool",
+         "refreshspellpool": "Refresh Spell Pool",
+         "refreshkarmapool": "Refresh Karma Pool",
+         "refresh": "Refresh"
       },
+
       "time": {
          "year": "Year",
          "month": "Month",

@@ -24,17 +24,17 @@
    let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
 
    let magic = storeManager.GetCompositeStore("attributes.magic", ["value", "mod"]);
-   let combat = storeManager.GetStore("dicePools.combat");
-   let control = storeManager.GetStore("dicePools.control");
-   let hacking = storeManager.GetStore("dicePools.hacking");
+   let combat = storeManager.GetStore("dicePools.combat.value");
+   let control = storeManager.GetStore("dicePools.control.value");
+   let hacking = storeManager.GetStore("dicePools.hacking.value");
 
    let reaction = $derived(Math.floor(($intelligence.sum + $quickness.sum) * 0.5));
    let combatPool = $derived(Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5));
    let controlPool = 999; //Temp debug
    let hackingPool = 999; //Temp debug
 
-   let astral = storeManager.GetStore("dicePools.astral");
-   let spell = storeManager.GetStore("dicePools.spell");
+   let astral = storeManager.GetStore("dicePools.astral.value");
+   let spell = storeManager.GetStore("dicePools.spell.value");
    let astralPool = $derived(Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5));
    let spellPool = $derived(Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5));
 

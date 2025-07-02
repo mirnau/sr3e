@@ -25,7 +25,7 @@
 
    let pendingKarmaReward = storeManager.GetStore("karma.pendingKarmaReward");
    let goodKarma = storeManager.GetStore("karma.goodKarma");
-   let karmaPool = storeManager.GetStore("karma.karmaPool");
+   let karmaPoolCeiling = storeManager.GetStore("karma.karmaPoolCeiling");
    let spentKarma = storeManager.GetStore("karma.spentKarma");
    let lifetimeKarma = storeManager.GetStore("karma.lifetimeKarma");
    let readyForCommit = storeManager.GetStore("karma.readyForCommit");
@@ -37,10 +37,10 @@
          $lifetimeKarma += $pendingKarmaReward;
 
          if (metatypeItem.system.karma.factor) {
-            $karmaPool = Math.floor($lifetimeKarma * metatypeItem.system.karma.factor);
+            $karmaPoolCeiling = Math.floor($lifetimeKarma * metatypeItem.system.karma.factor);
          }
 
-         $goodKarma = $lifetimeKarma - $spentKarma - $karmaPool;
+         $goodKarma = $lifetimeKarma - $spentKarma - $karmaPoolCeiling;
          $pendingKarmaReward = 0;
          $readyForCommit = false;
          OnCommitStatusChange();
@@ -77,7 +77,7 @@
       <h3>{$goodKarma}</h3>
    </td>
    <td>
-      <h3>{$karmaPool}</h3>
+      <h3>{$karmaPoolCeiling}</h3>
    </td>
    <td>
       <h3>{$lifetimeKarma}</h3>

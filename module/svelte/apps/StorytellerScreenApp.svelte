@@ -1,7 +1,7 @@
 <script>
     import TimeManager from "./components/TimeManager.svelte";
     import KarmaManager from "./components/KarmaManager/KarmaManager.svelte";
-    import DicePoolManager from "./components/DicePoolManager.svelte";
+    import DicePoolManager from "./components/DicePoolManager/DicePoolManager.svelte";
     let { actor = {}, config = {} } = $props();
 </script>
 

@@ -184,6 +184,13 @@ sr3e.userconfig = {
 
 sr3e.storytellerscreen = {
    storytellerscreen: "sr3e.storytellerscreen.storytellerscreen",
+   refreshcombatpool: "sr3e.storytellerscreen.refreshcombatpool",
+   refreshastralpool: "sr3e.storytellerscreen.refreshastralpool",
+   refreshhackingpool: "sr3e.storytellerscreen.refreshhackingpool",
+   refreshcontrolpool: "sr3e.storytellerscreen.refreshcontrolpool",
+   refreshspellpool: "sr3e.storytellerscreen.refreshspellpool",
+   refreshkarma: "sr3e.storytellerscreen.refreshkarmapool",
+   refresh: "sr3e.storytellerscreen.refresh",
 };
 
 sr3e.magic = {

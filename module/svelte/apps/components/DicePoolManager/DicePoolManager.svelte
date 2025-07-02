@@ -1,6 +1,6 @@
 <script>
    import { localize } from "../../../../services/utilities.js";
-   import KarmaRow from "./KarmaRow.svelte";
+   import DicePoolRow from "./DicePoolRow.svelte";
 
    let { config } = $props();
    let delimiter = $state("");
@@ -15,19 +15,19 @@
    ];
 
    let anyReady = $state([]);
-   
+
    function OnCommitStatusChange() {
-       anyReady = Array.from(rowRefs.values()).some(row => row.readyForCommit);
+      anyReady = Array.from(rowRefs.values()).some((row) => row.readyForCommit);
    }
 
    $effect(() => {
       let baseList = [];
       switch (filter) {
          case "character":
-            baseList = game.actors.filter((a) => a.type === "character");
+            baseList = game.actors.filter((a) => a.type === "character" && a.system?.karma && a.system?.dicePools);
             break;
          case "npc":
-            baseList = game.actors.filter((a) => a.type === "npc");
+            baseList = game.actors.filter((a) => a.type === "npc" && a.system?.karma && a.system?.dicePools);
             break;
          default:
             baseList = game.actors.filter((a) => a.system?.karma);
@@ -97,16 +97,17 @@
                         <tr>
                            <th>Portrait</th>
                            <th>Name</th>
-                           <th>Points</th>
-                           <th>{localize(config.karma.goodkarma)}</th>
                            <th>{localize(config.karma.karmapool)}</th>
-                           <th>{localize(config.karma.lifetimekarma)}</th>
-                           <th>{localize(config.karma.commit)}</th>
+                           <th>{localize(config.dicepools.combat)}</th>
+                           <th>{localize(config.dicepools.astral)}</th>
+                           <th>{localize(config.dicepools.hacking)}</th>
+                           <th>{localize(config.dicepools.control)}</th>
+                           <th>{localize(config.dicepools.spell)}</th>
                         </tr>
                      </thead>
                      <tbody>
                         {#each listboxContent as actor (actor.id)}
-                           <KarmaRow
+                           <DicePoolRow
                               {actor}
                               {config}
                               {OnCommitStatusChange}
