@@ -3570,7 +3570,7 @@ function lerpColor(hex1, hex2, t) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$9 = (e) => e.stopPropagation();
+var on_click$a = (e) => e.stopPropagation();
 var on_keydown$8 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
@@ -3586,7 +3586,7 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$J();
-  div.__click = [on_click$9];
+  div.__click = [on_click$a];
   div.__keydown = [on_keydown$8];
   var button = child(div);
   button.__click = [on_click_1$5, handleMove];
@@ -3782,7 +3782,7 @@ function TextInput($$anchor, $$props) {
 }
 delegate(["input", "keydown"]);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$c = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$d = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$G = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3886,7 +3886,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$c();
+      var fragment_3 = root_3$d();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -3972,7 +3972,7 @@ function handleKeydown(e, increment2, decrement2) {
     decrement2();
   }
 }
-var on_click$8 = (_, decrement2, $$props) => {
+var on_click$9 = (_, decrement2, $$props) => {
   var _a;
   decrement2();
   (_a = $$props.onDecrement) == null ? void 0 : _a.call($$props);
@@ -4022,7 +4022,7 @@ function Counter($$anchor, $$props) {
   var div = root$F();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
-  button.__click = [on_click$8, decrement2, $$props];
+  button.__click = [on_click$9, decrement2, $$props];
   var div_1 = sibling(button, 2);
   div_1.__input = handleDivInput;
   var text2 = child(div_1);
@@ -4161,53 +4161,141 @@ function swallowDirectional(e) {
     e.stopPropagation();
   }
 }
-var root_2$f = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1 class="no-margin">Karma</h1> <h4 class="no-margin"> </h4> <!></div>`);
-var root_1$q = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1></div> <div class="roll-composer-card"><h1 class="no-margin">Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1 class="no-margin">Target Number</h1> <h4 class="no-margin"> </h4> <!></div> <div class="roll-composer-card"><h1 class="no-margin">Modifiers</h1> <!></div> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
+var on_click$8 = (__1, modifiersArray) => {
+  set(modifiersArray, proxy([
+    ...get$2(modifiersArray),
+    { name: "Modifier", value: 0 }
+  ]));
+};
+var root_2$f = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_3$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_4$9 = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
+var root_1$q = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  const $penalty = () => store_get(penalty, "$penalty", $$stores);
+  const $associatedDicePoolStore = () => store_get(associatedDicePoolStore, "$associatedDicePoolStore", $$stores);
+  const $linkedAttributeStore = () => store_get(linkedAttributeStore, "$linkedAttributeStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
-  onDestroy(() => {
-    StoreManager.Unsubscribe($$props.actor);
-  });
+  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
   let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
+  let penalty = actorStoreManager.GetStore("health.penalty");
   $karmaPoolStore();
   let targetNumber = state(5);
-  let modifiers = state(0);
+  let modifiersArray = state(proxy([]));
   let karmaCost = state(0);
   let diceBought = state(0);
+  let poolDiceBought = state(0);
+  let modifiersTotal = state(0);
   let difficulty = state("");
   let canSubmit = state(true);
   let isDefaultingAsString = state("false");
   let isDefaulting = state(false);
   let title = state("");
+  let associatedDicePoolString = state("");
+  let associatedDicePoolStore;
   let containerEl;
   let selectEl;
   let rollBtn;
   let clearBtn;
+  let linkedAttributeString;
+  let linkedAttributeStore;
   let focusables = [];
   let difficulties = ItemDataService.getDifficultieGradings($$props.config);
   onMount(() => {
     updateFocusables();
     selectEl == null ? void 0 : selectEl.focus();
+    if ($penalty() > 0) {
+      set(modifiersArray, proxy([
+        {
+          name: localize($$props.config.health.penalty),
+          value: -$penalty()
+        }
+      ]));
+    }
     if ($$props.caller.type === "attribute") {
-      console.log("An attribute roll");
       set(title, proxy(localize($$props.config.attributes[$$props.caller.key])));
-    } else if ($$props.caller.type === "activeSkill") ;
-    else if ($$props.caller.type === "knowledgeSkill") ;
-    else if ($$props.caller.type === "languageSkill") ;
+    }
+    if ($$props.caller.skillId) {
+      let skill = $$props.actor.items.get($$props.caller.skillId);
+      set(title, proxy($$props.caller.key));
+      console.log("Resolved skill:", skill);
+      if (skill.system.skillType === "active") {
+        linkedAttributeString = skill.system.activeSkill.linkedAttribute;
+        console.log("linkedAttributeString", linkedAttributeString);
+        set(associatedDicePoolString, proxy(skill.system.activeSkill.associatedDicePool));
+        associatedDicePoolStore = actorStoreManager.GetStore(`dicePools.${get$2(associatedDicePoolString)}`);
+        console.log("associatedDicePoolStore", $associatedDicePoolStore());
+      } else if (skill.system.skillType === "knowledge") {
+        linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
+      } else if (skill.system.skillType === "language") {
+        linkedAttributeString = skill.system.languageSkill.linkedAttribute;
+        skill.system.languageSkill.readwrite;
+      }
+      if (linkedAttributeString !== "") {
+        linkedAttributeStore = actorStoreManager.GetCompositeStore(`attributes.${linkedAttributeString}`, ["value", "mod", "meta"]);
+        console.log("linkedAttributeStore", $linkedAttributeStore());
+      }
+    }
   });
   function updateFocusables() {
     const selector = get$2(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
     focusables = Array.from(containerEl.querySelectorAll(selector));
   }
-  function karmaCostCalculator() {
+  function KarmaCostCalculator() {
     set(karmaCost, 0.5 * get$2(diceBought) * (get$2(diceBought) + 1));
+  }
+  function AddDiceFromPool() {
+    if ($associatedDicePoolStore() > 0) {
+      set(poolDiceBought, get$2(poolDiceBought) + 1);
+      store_set(associatedDicePoolStore, $associatedDicePoolStore() - 1);
+    }
+  }
+  function RemoveDiceFromPool() {
   }
   user_effect(() => {
     set(isDefaulting, get$2(isDefaultingAsString) === "true");
     updateFocusables();
+  });
+  user_effect(() => {
+    const baseModifiers = $penalty() > 0 ? [
+      {
+        name: localize($$props.config.health.penalty),
+        value: -$penalty()
+      }
+    ] : [];
+    if (get$2(isDefaulting)) {
+      switch ($$props.caller.type) {
+        case "attribute":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Skill to attribute", value: 4 }
+          ]));
+          break;
+        case "activeSkill":
+        case "knowledgeSkill":
+        case "languageSkill":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Skill to skill", value: 2 }
+          ]));
+          break;
+        case "specialization":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Specialization to skill", value: 3 }
+          ]));
+          break;
+        default:
+          console.warn(`Unknown caller type for defaulting: ${$$props.caller.type}`);
+          set(canSubmit, false);
+          break;
+      }
+    } else {
+      set(modifiersArray, proxy(baseModifiers));
+    }
   });
   user_effect(() => {
     const tn = Number(get$2(targetNumber));
@@ -4223,23 +4311,31 @@ function RollComposerComponent($$anchor, $$props) {
   });
   function Reset() {
     set(targetNumber, 5);
-    set(modifiers, 0);
+    set(modifiersArray, proxy($penalty() > 0 ? [
+      {
+        name: localize($$props.config.health.penalty),
+        value: -$penalty()
+      }
+    ] : []));
     set(diceBought, 0);
     set(karmaCost, 0);
     set(isDefaultingAsString, "false");
     selectEl == null ? void 0 : selectEl.focus();
   }
   user_effect(() => {
-    set(canSubmit, get$2(targetNumber) + get$2(modifiers) < 2);
+    set(modifiersTotal, proxy(get$2(modifiersArray).reduce((acc, val) => acc + val.value, 0)));
+  });
+  user_effect(() => {
+    set(canSubmit, get$2(targetNumber) + get$2(modifiersTotal) < 2);
   });
   function Submit() {
     store_set(karmaPoolStore, $karmaPoolStore() - get$2(karmaCost));
     $$props.onclose({
-      dice: $$props.caller.options.dice + get$2(diceBought),
+      dice: $$props.caller.dice + get$2(diceBought),
       attributeName: $$props.caller.key,
       options: {
         targetNumber: get$2(targetNumber),
-        modifiers: get$2(modifiers),
+        modifiers: get$2(modifiersArray),
         explodes: !get$2(isDefaulting)
       }
     });
@@ -4295,16 +4391,15 @@ function RollComposerComponent($$anchor, $$props) {
   var div_1 = child(div);
   var h1 = child(div_1);
   var text2 = child(h1);
-  var div_2 = sibling(div_1, 2);
-  var select = sibling(child(div_2), 2);
+  var select = sibling(h1, 4);
   select.__keydown = handleSelectKeydown;
   var option = child(select);
   option.value = null == (option.__value = "false") ? "" : "false";
   var option_1 = sibling(option);
   option_1.value = null == (option_1.__value = "true") ? "" : "true";
   bind_this(select, ($$value) => selectEl = $$value, () => selectEl);
-  var div_3 = sibling(div_2, 2);
-  var h4 = sibling(child(div_3), 2);
+  var div_2 = sibling(div_1, 2);
+  var h4 = sibling(child(div_2), 2);
   var text_1 = child(h4);
   var node = sibling(h4, 2);
   Counter(node, {
@@ -4316,31 +4411,86 @@ function RollComposerComponent($$anchor, $$props) {
       set(targetNumber, proxy($$value));
     }
   });
-  var div_4 = sibling(div_3, 2);
-  var node_1 = sibling(child(div_4), 2);
-  Counter(node_1, {
-    get value() {
-      return get$2(modifiers);
-    },
-    set value($$value) {
-      set(modifiers, proxy($$value));
-    }
+  var div_3 = sibling(div_2, 2);
+  var button = sibling(child(div_3), 2);
+  button.__click = [on_click$8, modifiersArray];
+  var h4_1 = sibling(button, 2);
+  var text_2 = child(h4_1);
+  var node_1 = sibling(h4_1, 2);
+  each(node_1, 17, () => get$2(modifiersArray), index, ($$anchor2, modifier, i) => {
+    var div_4 = root_2$f();
+    var h4_2 = child(div_4);
+    var text_3 = child(h4_2);
+    var node_2 = sibling(h4_2, 2);
+    Counter(node_2, {
+      get value() {
+        return get$2(modifier).value;
+      },
+      set value($$value) {
+        get$2(modifier).value = $$value;
+      }
+    });
+    var button_1 = sibling(node_2, 2);
+    button_1.__click = () => {
+      set(modifiersArray, proxy(get$2(modifiersArray).filter((_, j) => j !== i)));
+    };
+    template_effect(() => set_text(text_3, get$2(modifier).name));
+    append($$anchor2, div_4);
   });
-  var node_2 = sibling(div_4, 2);
+  var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_2$f();
-      var h4_1 = sibling(child(div_5), 2);
-      var text_2 = child(h4_1);
-      var node_3 = sibling(h4_1, 2);
-      Counter(node_3, {
+      var div_5 = root_3$c();
+      var h1_1 = child(div_5);
+      var text_4 = child(h1_1);
+      var h4_3 = sibling(h1_1, 2);
+      var text_5 = child(h4_3);
+      var node_4 = sibling(h4_3, 2);
+      Counter(node_4, {
+        class: "karma-counter",
+        min: "0",
+        get max() {
+          return $linkedAttributeStore().sum;
+        },
+        onIncrement: AddDiceFromPool,
+        onDecrement: RemoveDiceFromPool,
+        get value() {
+          return get$2(poolDiceBought);
+        },
+        set value($$value) {
+          set(poolDiceBought, proxy($$value));
+        }
+      });
+      template_effect(
+        ($0) => {
+          set_text(text_4, $0);
+          set_text(text_5, `Dice Added: ${get$2(poolDiceBought) ?? ""}`);
+        },
+        [
+          () => localize($$props.config.dicepools[get$2(associatedDicePoolString)])
+        ]
+      );
+      append($$anchor2, div_5);
+    };
+    if_block(node_3, ($$render) => {
+      if (get$2(associatedDicePoolString) !== "") $$render(consequent);
+    });
+  }
+  var node_5 = sibling(node_3, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div_6 = root_4$9();
+      var h4_4 = sibling(child(div_6), 2);
+      var text_6 = child(h4_4);
+      var node_6 = sibling(h4_4, 2);
+      Counter(node_6, {
         class: "karma-counter",
         min: "0",
         get max() {
           return $$props.actor.system.karma.karmaPool;
         },
-        onIncrement: karmaCostCalculator,
-        onDecrement: karmaCostCalculator,
+        onIncrement: KarmaCostCalculator,
+        onDecrement: KarmaCostCalculator,
         get value() {
           return get$2(diceBought);
         },
@@ -4348,24 +4498,25 @@ function RollComposerComponent($$anchor, $$props) {
           set(diceBought, proxy($$value));
         }
       });
-      template_effect(() => set_text(text_2, `Cost ${get$2(karmaCost) ?? ""}`));
-      append($$anchor2, div_5);
+      template_effect(() => set_text(text_6, `Extra Dice Cost: ${get$2(karmaCost) ?? ""}`));
+      append($$anchor2, div_6);
     };
-    if_block(node_2, ($$render) => {
-      if (!get$2(isDefaulting)) $$render(consequent);
+    if_block(node_5, ($$render) => {
+      if (!get$2(isDefaulting)) $$render(consequent_1);
     });
   }
-  var button = sibling(node_2, 2);
-  button.__click = Submit;
-  bind_this(button, ($$value) => rollBtn = $$value, () => rollBtn);
-  var button_1 = sibling(button, 2);
-  button_1.__click = Reset;
-  bind_this(button_1, ($$value) => clearBtn = $$value, () => clearBtn);
+  var button_2 = sibling(node_5, 2);
+  button_2.__click = Submit;
+  bind_this(button_2, ($$value) => rollBtn = $$value, () => rollBtn);
+  var button_3 = sibling(button_2, 2);
+  button_3.__click = Reset;
+  bind_this(button_3, ($$value) => clearBtn = $$value, () => clearBtn);
   bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
   template_effect(() => {
     set_text(text2, get$2(title));
     set_text(text_1, get$2(difficulty));
-    button.disabled = get$2(canSubmit);
+    set_text(text_2, `Modifiers Total: ${get$2(modifiersTotal) ?? ""}`);
+    button_2.disabled = get$2(canSubmit);
   });
   event("keydown", div, handleKey, true);
   bind_select_value(select, () => get$2(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
@@ -4454,8 +4605,9 @@ function AttributeCard($$anchor, $$props) {
             config: CONFIG.sr3e,
             caller: {
               key: $$props.key,
+              value: $value(),
               type: "attribute",
-              options: { dice: $total().sum }
+              dice: $total().sum
             },
             onclose: (result) => {
               unmount(activeModal);
@@ -7590,13 +7742,13 @@ var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$b = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
-var on_click$4 = (_, Roll2, skill) => Roll2(skill().id);
+var on_click$4 = (e, Roll2, skill) => Roll2(e, skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
-  if (e.key === "Enter" || e.key === " ") Roll2(skill().id);
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
-var on_click_1$3 = (__1, Roll2, skill, specialization) => Roll2(skill().id, get$2(specialization).name);
+var on_click_1$3 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$2(specialization).name);
 var on_keydown_2 = (e, Roll2, skill, specialization) => {
-  if (e.key === "Enter" || e.key === " ") Roll2(skill().id, get$2(specialization).name);
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$2(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$5 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
@@ -7605,24 +7757,65 @@ var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!></di
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
   const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
   let valueStore = skillStoreManager.GetStore("activeSkill.value");
   let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+  let isModalOpen = state(false);
+  let activeModal = null;
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
-  function Roll2(id, specialization) {
-    if (!specialization) {
-      console.log("A skill roll!");
+  async function Roll2(e, skillId, specializationName2 = null) {
+    var _a, _b;
+    if (e.shiftKey) {
+      if (get$2(isModalOpen)) return;
+      set(isModalOpen, true);
+      const rollType = specializationName2 ? "specialization" : "skill";
+      const rollName = specializationName2 || skill().name;
+      const dice = specializationName2 ? (_a = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _a.value : $valueStore();
+      const options = await new Promise((resolve) => {
+        activeModal = mount(RollComposerComponent, {
+          target: document.querySelector(".composer-position"),
+          props: {
+            actor: actor(),
+            config: config(),
+            caller: {
+              key: rollName,
+              type: rollType,
+              dice,
+              skillId
+            },
+            onclose: (result) => {
+              unmount(activeModal);
+              set(isModalOpen, false);
+              activeModal = null;
+              resolve(result);
+            }
+          }
+        });
+      });
+      if (options) {
+        if (specializationName2) {
+          await actor().SpecializationRoll(options.dice, specializationName2.name, options.options);
+        } else {
+          await actor().SkillRoll(options.dice, skill().name, options.options);
+        }
+      }
     } else {
-      console.log("A specialization roll!");
+      if (specializationName2) {
+        const specValue = (_b = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _b.value;
+        await actor().SpecializationRoll(specValue, skill().name);
+      } else {
+        await actor().SkillRoll($valueStore(), skill().name);
+      }
     }
+    e.preventDefault();
   }
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
@@ -12709,9 +12902,19 @@ class RollService {
       rollMode: options.rollMode ?? game.settings.get("core", "rollMode")
     });
   }
-  SkillDefaulting(dice, options = {}) {
+  static async SkillRoll(actor, skillName, dice, options) {
+    console.log("[SkillRoll]", {
+      skillName,
+      dice,
+      options
+    });
   }
-  SkillTest(dice, options = {}) {
+  static async SpecializationRoll(actor, skillName, dice, options) {
+    console.log("[SpecializationRoll]", {
+      skillName,
+      dice,
+      options
+    });
   }
   static async Initiaitve(actor) {
     const initiativeDice = get(storeManager.getActorStore(actor.id, stores.initiativeDice, 1));
@@ -12749,6 +12952,12 @@ class SR3EActor extends Actor {
   }
   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.AttributeRoll(this, attributeName, dice, options);
+  }
+  async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+    await RollService.SkillRoll(this, skillName, dice, options);
+  }
+  async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+    await RollService.SpecializationRoll(this, specializationName, dice, options);
   }
   async canAcceptmetatype(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metatype");

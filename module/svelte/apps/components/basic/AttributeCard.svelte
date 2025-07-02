@@ -78,7 +78,7 @@
                props: {
                   actor,
                   config: CONFIG.sr3e,
-                  caller: { key, type: "attribute", options: { dice: $total.sum } },
+                  caller: { key, value: $value, type: "attribute", dice: $total.sum },
                   onclose: (result) => {
                      unmount(activeModal);
                      $isModalOpen = false;

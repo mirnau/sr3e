@@ -59,8 +59,21 @@ export default class RollService {
       });
    }
 
-   SkillDefaulting(dice, options = {}) {}
-   SkillTest(dice, options = {}) {}
+   static async SkillRoll(actor, skillName, dice, options) {
+      console.log("[SkillRoll]", {
+         skillName,
+         dice,
+         options,
+      });
+   }
+
+   static async SpecializationRoll(actor, skillName, dice, options) {
+      console.log("[SpecializationRoll]", {
+         skillName,
+         dice,
+         options,
+      });
+   }
 
    static async Initiaitve(actor) {
       const initiativeDice = get(storeManager.getActorStore(actor.id, stores.initiativeDice, 1));

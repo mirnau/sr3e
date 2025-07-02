@@ -2,50 +2,87 @@
    import { onDestroy, onMount } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import ItemDataService from "../../../services/ItemDataService.js";
-   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
+   import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "../../../services/utilities.js";
 
    let { actor, config, caller, onclose } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
-
-   onDestroy(() => {
-      StoreManager.Unsubscribe(actor);
-   });
+   onDestroy(() => StoreManager.Unsubscribe(actor));
 
    let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
+   let penalty = actorStoreManager.GetStore("health.penalty");
    let karmaPoolBacking = $karmaPoolStore;
 
    let targetNumber = $state(5);
-   let modifiers = $state(0);
+   let modifiersArray = $state([]);
    let karmaCost = $state(0);
    let diceBought = $state(0);
+   let poolDiceBought = $state(0);
+   let modifiersTotal = $state(0);
    let difficulty = $state("");
    let canSubmit = $state(true);
    let isDefaultingAsString = $state("false");
    let isDefaulting = $state(false);
    let title = $state("");
+   let associatedDicePoolString = $state("");
 
+   let associatedDicePoolStore;
    let containerEl;
    let selectEl;
    let rollBtn;
    let clearBtn;
+   let callingSkill;
+   let linkedAttributeString;
+   let linkedAttributeStore;
+   let readwrite;
    let focusables = [];
 
    let difficulties = ItemDataService.getDifficultieGradings(config);
-
-   let result = {};
 
    onMount(() => {
       updateFocusables();
       selectEl?.focus();
 
+      if ($penalty > 0) {
+         modifiersArray = [{ name: localize(config.health.penalty), value: -$penalty }];
+      }
+
       if (caller.type === "attribute") {
-         console.log("An attribute roll");
          title = localize(config.attributes[caller.key]);
-      } else if (caller.type === "activeSkill") {
-      } else if (caller.type === "knowledgeSkill") {
-      } else if (caller.type === "languageSkill") {
+      }
+
+      if (caller.skillId) {
+         let skill = actor.items.get(caller.skillId);
+         title = caller.key;
+
+         console.log("Resolved skill:", skill); // OK
+
+         if (skill.system.skillType === "active") {
+            linkedAttributeString = skill.system.activeSkill.linkedAttribute;
+
+            console.log("linkedAttributeString", linkedAttributeString); //OK
+
+            associatedDicePoolString = skill.system.activeSkill.associatedDicePool;
+            associatedDicePoolStore = actorStoreManager.GetStore(`dicePools.${associatedDicePoolString}`);
+
+            console.log("associatedDicePoolStore", $associatedDicePoolStore); // OK
+         } else if (skill.system.skillType === "knowledge") {
+            linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
+         } else if (skill.system.skillType === "language") {
+            linkedAttributeString = skill.system.languageSkill.linkedAttribute;
+            readwrite = skill.system.languageSkill.readwrite;
+         }
+
+         if (linkedAttributeString !== "") {
+            linkedAttributeStore = actorStoreManager.GetCompositeStore(`attributes.${linkedAttributeString}`, [
+               "value",
+               "mod",
+               "meta",
+            ]);
+
+            console.log("linkedAttributeStore", $linkedAttributeStore); // OK
+         }
       }
    });
 
@@ -53,17 +90,51 @@
       const selector = isDefaulting
          ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]"
          : "select, .counter-component[tabindex='0'], button[type]";
-
       focusables = Array.from(containerEl.querySelectorAll(selector));
    }
 
-   function karmaCostCalculator() {
+   function KarmaCostCalculator() {
       karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
+
+   function AddDiceFromPool() {
+      if ($associatedDicePoolStore > 0) {
+         poolDiceBought += 1;
+         $associatedDicePoolStore -= 1;
+      }
+   }
+
+   function RemoveDiceFromPool() {}
 
    $effect(() => {
       isDefaulting = isDefaultingAsString === "true";
       updateFocusables();
+   });
+
+   $effect(() => {
+      const baseModifiers = $penalty > 0 ? [{ name: localize(config.health.penalty), value: -$penalty }] : [];
+
+      if (isDefaulting) {
+         switch (caller.type) {
+            case "attribute":
+               modifiersArray = [...baseModifiers, { name: "Skill to attribute", value: 4 }];
+               break;
+            case "activeSkill":
+            case "knowledgeSkill":
+            case "languageSkill":
+               modifiersArray = [...baseModifiers, { name: "Skill to skill", value: 2 }];
+               break;
+            case "specialization":
+               modifiersArray = [...baseModifiers, { name: "Specialization to skill", value: 3 }];
+               break;
+            default:
+               console.warn(`Unknown caller type for defaulting: ${caller.type}`);
+               canSubmit = false;
+               break;
+         }
+      } else {
+         modifiersArray = baseModifiers;
+      }
    });
 
    $effect(() => {
@@ -81,7 +152,7 @@
 
    function Reset() {
       targetNumber = 5;
-      modifiers = 0;
+      modifiersArray = $penalty > 0 ? [{ name: localize(config.health.penalty), value: -$penalty }] : [];
       diceBought = 0;
       karmaCost = 0;
       isDefaultingAsString = "false";
@@ -89,18 +160,22 @@
    }
 
    $effect(() => {
-      canSubmit = targetNumber + modifiers < 2;
+      modifiersTotal = modifiersArray.reduce((acc, val) => acc + val.value, 0);
+   });
+
+   $effect(() => {
+      canSubmit = targetNumber + modifiersTotal < 2;
    });
 
    function Submit() {
       $karmaPoolStore -= karmaCost;
 
       onclose({
-         dice: caller.options.dice + diceBought,
+         dice: caller.dice + diceBought,
          attributeName: caller.key,
          options: {
             targetNumber: targetNumber,
-            modifiers: modifiers,
+            modifiers: modifiersArray,
             explodes: !isDefaulting,
          },
       });
@@ -180,9 +255,7 @@
 >
    <div class="roll-composer-card">
       <h1>{title}</h1>
-   </div>
-   <div class="roll-composer-card">
-      <h1 class="no-margin">Roll Type</h1>
+      <h1>Roll Type</h1>
       <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
          <option value="false">Regular roll</option>
          <option value="true">Defaulting</option>
@@ -190,27 +263,68 @@
    </div>
 
    <div class="roll-composer-card">
-      <h1 class="no-margin">Target Number</h1>
-      <h4 class="no-margin">{difficulty}</h4>
+      <h1>Target Number</h1>
+      <h4>{difficulty}</h4>
       <Counter bind:value={targetNumber} min="2" />
    </div>
 
    <div class="roll-composer-card">
-      <h1 class="no-margin">Modifiers</h1>
-      <Counter bind:value={modifiers} />
+      <h1>Modifiers</h1>
+      <button
+         aria-label="Add a modifier"
+         class="regular"
+         onclick={() => {
+            modifiersArray = [...modifiersArray, { name: "Modifier", value: 0 }];
+         }}
+      >
+         <i class="fa-solid fa-plus"></i>
+      </button>
+
+      <h4>Modifiers Total: {modifiersTotal}</h4>
+
+      {#each modifiersArray as modifier, i (i)}
+         <div class="roll-composer-card array">
+            <h4 contenteditable="true">{modifier.name}</h4>
+            <Counter bind:value={modifier.value} />
+            <button
+               class="regular"
+               aria-label="Remove a modifier"
+               onclick={() => {
+                  modifiersArray = modifiersArray.filter((_, j) => j !== i);
+               }}
+            >
+               <i class="fa-solid fa-minus"></i>
+            </button>
+         </div>
+      {/each}
    </div>
+
+   {#if associatedDicePoolString !== ""}
+      <div class="roll-composer-card">
+         <h1>{localize(config.dicepools[associatedDicePoolString])}</h1>
+         <h4>Dice Added: {poolDiceBought}</h4>
+         <Counter
+            class="karma-counter"
+            bind:value={poolDiceBought}
+            min="0"
+            max={$linkedAttributeStore.sum}
+            onIncrement={AddDiceFromPool}
+            onDecrement={RemoveDiceFromPool}
+         />
+      </div>
+   {/if}
 
    {#if !isDefaulting}
       <div class="roll-composer-card">
-         <h1 class="no-margin">Karma</h1>
-         <h4 class="no-margin">Cost {karmaCost}</h4>
+         <h1>Karma</h1>
+         <h4>Extra Dice Cost: {karmaCost}</h4>
          <Counter
             class="karma-counter"
             bind:value={diceBought}
             min="0"
             max={actor.system.karma.karmaPool}
-            onIncrement={karmaCostCalculator}
-            onDecrement={karmaCostCalculator}
+            onIncrement={KarmaCostCalculator}
+            onDecrement={KarmaCostCalculator}
          />
       </div>
    {/if}

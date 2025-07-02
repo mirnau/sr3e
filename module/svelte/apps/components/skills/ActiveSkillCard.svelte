@@ -3,6 +3,8 @@
    import { flags } from "../../../../services/commonConsts.js";
    import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import RollComposerComponent from "../../components/RollComposerComponent.svelte";
+   import { mount, unmount } from "svelte";
    import { onDestroy } from "svelte";
 
    let { skill = {}, actor = {}, config = {} } = $props();
@@ -14,17 +16,64 @@
    let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+   
+   let isModalOpen = $state(false);
+   let activeModal = null;
 
    function openSkill() {
       ActiveSkillEditorSheet.launch(actor, skill, config);
    }
 
-   function Roll(id, specialization) {
-      if (!specialization) {
-         console.log("A skill roll!");
+   async function Roll(e, skillId, specializationName = null) {
+      if (e.shiftKey) {
+         if (isModalOpen) return;
+         isModalOpen = true;
+
+         const rollType = specializationName ? "specialization" : "skill";
+         const rollName = specializationName || skill.name;
+         const dice = specializationName ? 
+            $specializationsStore.find(s => s.name === specializationName)?.value : 
+            $valueStore;
+
+         const options = await new Promise((resolve) => {
+            activeModal = mount(RollComposerComponent, {
+               target: document.querySelector(".composer-position"),
+               props: {
+                  actor,
+                  config: config,
+                  caller: { 
+                     key: rollName, 
+                     type: rollType, 
+                     dice: dice,
+                     skillId: skillId
+                  },
+                  onclose: (result) => {
+                     unmount(activeModal);
+                     isModalOpen = false;
+                     activeModal = null;
+                     resolve(result);
+                  },
+               },
+            });
+         });
+
+         if (options) {
+            if (specializationName) {
+               await actor.SpecializationRoll(options.dice, specializationName.name, options.options);
+            } else {
+               await actor.SkillRoll(options.dice, skill.name, options.options);
+            }
+         }
       } else {
-         console.log("A specialization roll!");
+         if (specializationName) {
+            const specValue = $specializationsStore.find(s => s.name === specializationName)?.value;
+            await actor.SpecializationRoll(specValue, skill.name);
+         } else {
+            await actor.SkillRoll($valueStore, skill.name);
+         }
       }
+
+      e.preventDefault();
    }
 
    onDestroy(() => {
@@ -73,9 +122,9 @@
             class="skill-main-container button"
             role="button"
             tabindex="0"
-            onclick={() => Roll(skill.id)}
+            onclick={(e) => Roll(e, skill.id)}
             onkeydown={(e) => {
-               if (e.key === "Enter" || e.key === " ") Roll(skill.id);
+               if (e.key === "Enter" || e.key === " ") Roll(e, skill.id);
             }}
          >
             <h1 class="skill-value">{$valueStore}</h1>
@@ -89,9 +138,9 @@
                      class:button={!$isShoppingState}
                      role="button"
                      tabindex="0"
-                     onclick={() => Roll(skill.id, specialization.name)}
+                     onclick={(e) => Roll(e, skill.id, specialization.name)}
                      onkeydown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") Roll(skill.id, specialization.name);
+                        if (e.key === "Enter" || e.key === " ") Roll(e, skill.id, specialization.name);
                      }}
                   >
                      <div class="specialization-background"></div>

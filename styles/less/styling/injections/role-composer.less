@@ -1,10 +1,10 @@
 .roll-composer-container {
-   -webkit-backdrop-filter: blur(10px);
-   backdrop-filter: blur(10px); //INFO: Known Chrome bug. Leaving here in hope of future patches
    transform: translateZ(0);
    display: flex;
    flex-direction: column;
-   background: oklch(from var(--highlight-color-primary) l c h / 0.15);
+   background: oklch(from rgb(0, 86, 86) l c h / 0.75);
+   backdrop-filter: blur(10px);
+
    height: auto;
    width: 10rem;
    min-height: 5rem;
@@ -21,13 +21,25 @@
    &.collapsed {
       width: 0;
    }
+
+   h1, h2, h3, h4,h5,h6 {
+      margin-bottom: 0.25rem;
+      margin-top: 0.25rem;
+   }
+}
+
+
+
+.roll-composer-card {
+   display: flex;
+   flex-direction: column;
+   padding: 0.25rem;
+   box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+   .clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.2rem);
 }
 
 // INFO: increases readability while still allowing for translucency
 .roll-composer-container,
 .roll-composer-container * {
-   text-shadow:
-      0 0 3px oklch(0% 0 0 / .35),
-      0 0 6px oklch(0% 0 0 / .25);
+   text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);
 }
-

@@ -29,6 +29,14 @@ export default class SR3EActor extends Actor {
       await RollService.AttributeRoll(this, attributeName, dice, options);
    }
 
+   async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+      await RollService.SkillRoll(this, skillName, dice, options);
+   }
+
+   async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+      await RollService.SpecializationRoll(this, specializationName, dice, options);
+   }
+
    async canAcceptmetatype(incomingItem) {
       const existing = this.items.filter((i) => i.type === "metatype");
 
