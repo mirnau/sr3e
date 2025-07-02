@@ -13554,7 +13554,7 @@ var on_click_2 = (__3, $$props) => $$props.actor.RefreshAstralPool();
 var on_click_3 = (__4, $$props) => $$props.actor.RefreshSpellPool();
 var on_click_4 = (__5, $$props) => $$props.actor.RefreshControlPool();
 var on_click_5 = (__6, $$props) => $$props.actor.RefreshHackingPool();
-var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fas fa-karma"></i></button></td><td><h3> </h3> <button> <i class="fas fa-fist-raised"></i></button></td><td><h3> </h3> <button> <i class="fas fa-star"></i></button></td><td><h3> </h3> <button> <i class="fas fa-hat-wizard"></i></button></td><td><h3> </h3> <button> <i class="fas fa-gamepad"></i></button></td><td><h3> </h3> <button> <i class="fas fa-laptop-code"></i></button></td><td><input type="checkbox"></td></tr>`);
+var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
 function DicePoolRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -13682,7 +13682,7 @@ function DicePoolRow($$anchor, $$props) {
       set_text(text_6, `${$1 ?? ""} `);
       set_text(text_7, `${$spellPoolStore() ?? ""} / ${$4 ?? ""}`);
       set_attribute(button_3, "aria-label", $6);
-      set_text(text_8, `${$1 ?? ""} `);
+      set_text(text_8, $1);
       set_text(text_9, `${$controlPoolStore() ?? ""} / TODO`);
       set_attribute(button_4, "aria-label", $7);
       set_text(text_10, `${$1 ?? ""} `);
@@ -13850,9 +13850,9 @@ function DicePoolManager($$anchor, $$props) {
           () => localize($$props.config.karma.karmapool),
           () => localize($$props.config.dicepools.combat),
           () => localize($$props.config.dicepools.astral),
-          () => localize($$props.config.dicepools.hacking),
+          () => localize($$props.config.dicepools.spell),
           () => localize($$props.config.dicepools.control),
-          () => localize($$props.config.dicepools.spell)
+          () => localize($$props.config.dicepools.hacking)
         ]
       );
       append($$anchor2, table);

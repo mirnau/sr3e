@@ -100,9 +100,9 @@
                            <th>{localize(config.karma.karmapool)}</th>
                            <th>{localize(config.dicepools.combat)}</th>
                            <th>{localize(config.dicepools.astral)}</th>
-                           <th>{localize(config.dicepools.hacking)}</th>
-                           <th>{localize(config.dicepools.control)}</th>
                            <th>{localize(config.dicepools.spell)}</th>
+                           <th>{localize(config.dicepools.control)}</th>
+                           <th>{localize(config.dicepools.hacking)}</th>
                         </tr>
                      </thead>
                      <tbody>

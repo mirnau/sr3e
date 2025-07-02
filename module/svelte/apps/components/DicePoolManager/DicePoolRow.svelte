@@ -83,7 +83,7 @@
    <td>
       <h3>{$karmaPoolStore} / {$karmaPoolCeilingStore}</h3>
       <button aria-label={localize(config.storytellerscreen.refreshkarmapool)} onclick={() => actor.RefreshKarmaPool()}>
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-karma"></i>
+         {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-dharmachakra"></i>
       </button>
    </td>
 
@@ -95,7 +95,7 @@
          aria-label={localize(config.storytellerscreen.refreshcombatpool)}
          onclick={() => actor.RefreshCombatPool()}
       >
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-fist-raised"></i>
+         {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-person-rifle"></i>
       </button>
    </td>
 
@@ -105,14 +105,14 @@
          aria-label={localize(config.storytellerscreen.refreshastralpool)}
          onclick={() => actor.RefreshAstralPool()}
       >
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-star"></i>
+         {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-star"></i>
       </button>
    </td>
 
    <td>
       <h3>{$spellPoolStore} / {Math.floor(($intelligenceStore.sum + $willpowerStore.sum) * 0.5)}</h3>
       <button aria-label={localize(config.storytellerscreen.refreshspellpool)} onclick={() => actor.RefreshSpellPool()}>
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-hat-wizard"></i>
+         {localize(config.storytellerscreen.refresh)}<i class="fa-solid fa-wand-sparkles"></i>
       </button>
    </td>
 
@@ -122,7 +122,7 @@
          aria-label={localize(config.storytellerscreen.refreshcontrolpool)}
          onclick={() => actor.RefreshControlPool()}
       >
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-gamepad"></i>
+         {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-robot"></i>
       </button>
    </td>
 
@@ -132,7 +132,7 @@
          aria-label={localize(config.storytellerscreen.refreshhackingpool)}
          onclick={() => actor.RefreshHackingPool()}
       >
-         {localize(config.storytellerscreen.refresh)} <i class="fas fa-laptop-code"></i>
+         {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-computer"></i>
       </button>
    </td>
 
