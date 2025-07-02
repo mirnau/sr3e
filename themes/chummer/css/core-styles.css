@@ -684,10 +684,11 @@
     vertical-align: top;
     box-sizing: border-box;
     position: relative;
-    gap: 0.25rem;
+    row-gap: 0.25rem;
+    margin-bottom: 0.25rem;
     overflow: visible;
   }
-  .skill-masonry-grid .skill-card-container padding:0.5rem .fa-pen-to-square {
+  .skill-masonry-grid .skill-card-container .fa-pen-to-square {
     position: absolute;
     top: -0.25rem;
     right: -0.25rem;
@@ -878,7 +879,7 @@
   }
   .skill-container-masonry-grid {
     margin: 0 auto;
-    height: 100%;
+    height: auto;
   }
   .skill-container-masonry-grid .skill-container-gutter-sizer {
     width: 0.25rem;
