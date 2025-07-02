@@ -7587,8 +7587,9 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`, 1);
+var root_3$9 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$b = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$4 = (_, Roll2, skill) => Roll2(skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(skill().id);
@@ -7597,8 +7598,9 @@ var on_click_1$3 = (__1, Roll2, skill, specialization) => Roll2(skill().id, get$
 var on_keydown_2 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(skill().id, get$2(specialization).name);
 };
-var root_4$7 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_3$9 = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
+var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_5$5 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_4$7 = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7628,7 +7630,7 @@ function ActiveSkillCard($$anchor, $$props) {
   var div = root$u();
   var node = child(div);
   {
-    var consequent = ($$anchor2) => {
+    var consequent_1 = ($$anchor2) => {
       var fragment = root_1$i();
       var i = first_child(fragment);
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
@@ -7640,19 +7642,28 @@ function ActiveSkillCard($$anchor, $$props) {
       var div_2 = sibling(h6, 2);
       var h1 = child(div_2);
       var text_1 = child(h1);
-      var div_3 = sibling(div_2, 2);
-      each(div_3, 5, $specializationsStore, index, ($$anchor3, specialization) => {
-        var div_4 = root_2$b();
-        var div_5 = sibling(child(div_4), 2);
-        var text_2 = child(div_5);
-        var h1_1 = sibling(div_5, 2);
-        var text_3 = child(h1_1);
-        template_effect(() => {
-          set_text(text_2, get$2(specialization).name);
-          set_text(text_3, get$2(specialization).value);
+      var node_1 = sibling(div_2, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var div_3 = root_2$b();
+          each(div_3, 5, $specializationsStore, index, ($$anchor4, specialization) => {
+            var div_4 = root_3$9();
+            var div_5 = sibling(child(div_4), 2);
+            var text_2 = child(div_5);
+            var h1_1 = sibling(div_5, 2);
+            var text_3 = child(h1_1);
+            template_effect(() => {
+              set_text(text_2, get$2(specialization).name);
+              set_text(text_3, get$2(specialization).value);
+            });
+            append($$anchor4, div_4);
+          });
+          append($$anchor3, div_3);
+        };
+        if_block(node_1, ($$render) => {
+          if ($specializationsStore().length > 0) $$render(consequent);
         });
-        append($$anchor3, div_4);
-      });
+      }
       template_effect(
         ($0) => {
           set_attribute(i, "aria-label", $0);
@@ -7666,7 +7677,7 @@ function ActiveSkillCard($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var div_6 = root_3$9();
+      var div_6 = root_4$7();
       var h6_1 = sibling(child(div_6), 2);
       var text_4 = child(h6_1);
       var div_7 = sibling(h6_1, 2);
@@ -7674,22 +7685,31 @@ function ActiveSkillCard($$anchor, $$props) {
       div_7.__keydown = [on_keydown_1$1, Roll2, skill];
       var h1_2 = child(div_7);
       var text_5 = child(h1_2);
-      var div_8 = sibling(div_7, 2);
-      each(div_8, 5, $specializationsStore, index, ($$anchor3, specialization) => {
-        var div_9 = root_4$7();
-        div_9.__click = [on_click_1$3, Roll2, skill, specialization];
-        div_9.__keydown = [on_keydown_2, Roll2, skill, specialization];
-        var div_10 = sibling(child(div_9), 2);
-        var text_6 = child(div_10);
-        var h1_3 = sibling(div_10, 2);
-        var text_7 = child(h1_3);
-        template_effect(() => {
-          toggle_class(div_9, "button", !$isShoppingState());
-          set_text(text_6, get$2(specialization).name);
-          set_text(text_7, get$2(specialization).value);
+      var node_2 = sibling(div_7, 2);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var div_8 = root_5$5();
+          each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
+            var div_9 = root_6$3();
+            div_9.__click = [on_click_1$3, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2, Roll2, skill, specialization];
+            var div_10 = sibling(child(div_9), 2);
+            var text_6 = child(div_10);
+            var h1_3 = sibling(div_10, 2);
+            var text_7 = child(h1_3);
+            template_effect(() => {
+              toggle_class(div_9, "button", !$isShoppingState());
+              set_text(text_6, get$2(specialization).name);
+              set_text(text_7, get$2(specialization).value);
+            });
+            append($$anchor4, div_9);
+          });
+          append($$anchor3, div_8);
+        };
+        if_block(node_2, ($$render) => {
+          if ($specializationsStore().length > 0) $$render(consequent_2);
         });
-        append($$anchor3, div_9);
-      });
+      }
       template_effect(() => {
         set_text(text_4, skill().name);
         set_text(text_5, $valueStore());
@@ -7697,7 +7717,7 @@ function ActiveSkillCard($$anchor, $$props) {
       append($$anchor2, div_6);
     };
     if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
+      if ($isShoppingState()) $$render(consequent_1);
       else $$render(alternate, false);
     });
   }

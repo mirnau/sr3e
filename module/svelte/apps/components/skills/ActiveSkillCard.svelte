@@ -50,15 +50,18 @@
          <div class="skill-main-container">
             <h1 class="skill-value">{$valueStore}</h1>
          </div>
-         <div class="specialization-container">
-            {#each $specializationsStore as specialization}
-               <div class="skill-specialization-card">
-                  <div class="specialization-background"></div>
-                  <div class="specialization-name">{specialization.name}</div>
-                  <h1 class="embedded-value">{specialization.value}</h1>
-               </div>
-            {/each}
-         </div>
+
+         {#if $specializationsStore.length > 0}
+            <div class="specialization-container">
+               {#each $specializationsStore as specialization}
+                  <div class="skill-specialization-card">
+                     <div class="specialization-background"></div>
+                     <div class="specialization-name">{specialization.name}</div>
+                     <h1 class="embedded-value">{specialization.value}</h1>
+                  </div>
+               {/each}
+            </div>
+         {/if}
       </div>
    {:else}
       <div class="skill-card">
@@ -77,24 +80,27 @@
          >
             <h1 class="skill-value">{$valueStore}</h1>
          </div>
-         <div class="specialization-container">
-            {#each $specializationsStore as specialization}
-               <div
-                  class="skill-specialization-card"
-                  class:button={!$isShoppingState}
-                  role="button"
-                  tabindex="0"
-                  onclick={() => Roll(skill.id, specialization.name)}
-                  onkeydown={(e) => {
-                     if (e.key === "Enter" || e.key === " ") Roll(skill.id, specialization.name);
-                  }}
-               >
-                  <div class="specialization-background"></div>
-                  <div class="specialization-name">{specialization.name}</div>
-                  <h1 class="embedded-value">{specialization.value}</h1>
-               </div>
-            {/each}
-         </div>
+
+         {#if $specializationsStore.length > 0}
+            <div class="specialization-container">
+               {#each $specializationsStore as specialization}
+                  <div
+                     class="skill-specialization-card"
+                     class:button={!$isShoppingState}
+                     role="button"
+                     tabindex="0"
+                     onclick={() => Roll(skill.id, specialization.name)}
+                     onkeydown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") Roll(skill.id, specialization.name);
+                     }}
+                  >
+                     <div class="specialization-background"></div>
+                     <div class="specialization-name">{specialization.name}</div>
+                     <h1 class="embedded-value">{specialization.value}</h1>
+                  </div>
+               {/each}
+            </div>
+         {/if}
       </div>
    {/if}
 </div>
