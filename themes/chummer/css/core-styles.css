@@ -2401,6 +2401,35 @@
     margin-bottom: 0.25rem;
     margin-top: 0.25rem;
   }
+  .roll-composer-container select.roll-type-select,
+  .roll-composer-container select {
+    appearance: none;
+    text-indent: 0.5rem;
+    background: transparent !important;
+    color: var(--highlight-color-primary);
+    width: 100%;
+    border: none;
+    border-radius: 0rem !important;
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+    margin: 0 !important;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+  }
+  .roll-composer-container optgroup {
+    background-color: lime;
+  }
+  .roll-composer-container option {
+    text-indent: 0.5rem;
+    background-color: blue;
+    border-radius: 0rem;
+    border: none;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+  }
+  .roll-composer-container select option {
+    background: black !important;
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary) !important;
+    color: var(--highlight-color-primary);
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+  }
   .roll-composer-card {
     display: flex;
     flex-direction: column;

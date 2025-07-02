@@ -1,5 +1,6 @@
 <script>
   import { localize } from "../../../services/utilities.js";
+  import { StoreManager } from "../../svelteHelpers/StoreManager.svelte.js";
 
   let { config } = $props();
   let delimiter = $state("");
@@ -41,6 +42,9 @@
 
   async function commitSelected() {
     for (const actor of listboxContent) {
+
+        let StoreManager = ""
+
       if (actor.system.karma.readyForCommit) {
         const karma = foundry.utils.deepClone(actor.system.karma);
         const metatypeItem = actor.items.find((i) => i.type === "metatype");

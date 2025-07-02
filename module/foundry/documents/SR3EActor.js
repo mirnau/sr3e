@@ -37,6 +37,14 @@ export default class SR3EActor extends Actor {
       await RollService.SpecializationRoll(this, specializationName, dice, options);
    }
 
+   RefreshKarmaPool() {console.log("SR3EActor.RefreshKarmaPool is not implemented.");};
+   RefreshCombatPool() {console.log("SR3EActor.RefreshCombatPool is not implemented.");};
+   RefreshAstralPool() {console.log("SR3EActor.RefreshAstralPool is not implemented.");};
+   RefreshHackingPool() {console.log("SR3EActor.RefreshHackingPool is not implemented.");};
+   RefreshControlPool() {console.log("SR3EActor.RefreshControlPool is not implemented.");};
+   RefreshSpellPool() {console.log("SR3EActor.RefreshSpellPool is not implemented.");};
+
+
    async canAcceptmetatype(incomingItem) {
       const existing = this.items.filter((i) => i.type === "metatype");
 

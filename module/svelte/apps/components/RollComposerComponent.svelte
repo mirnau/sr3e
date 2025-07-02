@@ -64,7 +64,10 @@
             console.log("linkedAttributeString", linkedAttributeString); //OK
 
             associatedDicePoolString = skill.system.activeSkill.associatedDicePool;
-            associatedDicePoolStore = actorStoreManager.GetStore(`dicePools.${associatedDicePoolString}`);
+            associatedDicePoolStore = actorStoreManager.GetCompositeStore(`dicePools.${associatedDicePoolString}`, [
+               "value",
+               "mod",
+            ]);
 
             console.log("associatedDicePoolStore", $associatedDicePoolStore); // OK
          } else if (skill.system.skillType === "knowledge") {
@@ -269,7 +272,7 @@
    </div>
 
    <div class="roll-composer-card">
-      <h1>Modifiers</h1>
+      <h1>T.N. Modifiers</h1>
       <button
          aria-label="Add a modifier"
          class="regular"
