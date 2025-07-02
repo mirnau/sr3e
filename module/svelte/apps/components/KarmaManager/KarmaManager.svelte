@@ -14,7 +14,11 @@
       { value: "npc", label: localize(config.karmamanager.npc) },
    ];
 
-   let anyReady = $derived(listboxContent?.some((a) => a.system.karma.readyForCommit));
+   let anyReady = $state([]);
+   
+   function OnCommitStatusChange() {
+       anyReady = Array.from(rowRefs.values()).some(row => row.readyForCommit);
+   }
 
    $effect(() => {
       let baseList = [];
@@ -55,6 +59,10 @@
          const row = rowRefs.get(actor.id);
          if (row?.Deselect) row.Deselect();
       }
+   }
+
+   function updateReadyState(actorId, isReady) {
+      // No longer needed - rowRefs handle this directly
    }
 </script>
 
@@ -101,6 +109,7 @@
                            <KarmaRow
                               {actor}
                               {config}
+                              {OnCommitStatusChange}
                               onmount={(el) => rowRefs.set(actor.id, el)}
                            />
                         {/each}

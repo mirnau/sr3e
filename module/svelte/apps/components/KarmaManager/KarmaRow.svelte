@@ -3,11 +3,18 @@
    import { localize } from "../../../../services/utilities.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
 
-   let { actor, config, onmount } = $props();
+   let { actor, config, OnCommitStatusChange, onmount } = $props();
 
    onMount(() => {
       if (onmount) {
-         onmount({ CommitSelected, Select, Deselect });
+         onmount({
+            CommitSelected,
+            Select,
+            Deselect,
+            get readyForCommit() {
+               return $readyForCommit;
+            },
+         });
       }
    });
 
@@ -24,11 +31,8 @@
    let readyForCommit = storeManager.GetStore("karma.readyForCommit");
 
    async function CommitSelected() {
-      console.log("CommitSelected was called");
-
       if ($readyForCommit) {
          const metatypeItem = actor.items.find((i) => i.type === "metatype");
-         console.log(metatypeItem);
 
          $lifetimeKarma += $pendingKarmaReward;
 
@@ -39,15 +43,23 @@
          $goodKarma = $lifetimeKarma - $spentKarma - $karmaPool;
          $pendingKarmaReward = 0;
          $readyForCommit = false;
+         OnCommitStatusChange();
       }
    }
 
+   $effect(() => {
+      let _ = $readyForCommit;
+      OnCommitStatusChange();
+   });
+
    function Select() {
       $readyForCommit = true;
+      OnCommitStatusChange();
    }
 
    function Deselect() {
       $readyForCommit = false;
+      OnCommitStatusChange();
    }
 </script>
 
@@ -71,13 +83,6 @@
       <h3>{$lifetimeKarma}</h3>
    </td>
    <td>
-      <input
-         type="checkbox"
-         bind:checked={$readyForCommit}
-         onchange={async (e) => {
-            const newValue = e.target.checked;
-            $readyForCommit = newValue;
-         }}
-      />
+      <input type="checkbox" bind:checked={$readyForCommit} />
    </td>
 </tr>

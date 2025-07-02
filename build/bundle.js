@@ -10540,7 +10540,7 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-var on_change$7 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$9 = /* @__PURE__ */ template(`<!> <input class="large" name="name" type="text"> <!>`, 1);
 var root_3$6 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_6$2 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
@@ -10823,7 +10823,7 @@ function MetatypeApp($$anchor, $$props) {
         }
       });
       var input = sibling(node_1, 2);
-      input.__change = [on_change$7, item2];
+      input.__change = [on_change$6, item2];
       var node_2 = sibling(input, 2);
       StatCard(node_2, spread_props(() => get$2(priorityEntry)));
       bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -11030,7 +11030,7 @@ class MetatypeItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metatype = new WeakMap();
-var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$6 = /* @__PURE__ */ template(`<input>`);
 var root_1$8 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
 var root_3$5 = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
@@ -11167,7 +11167,7 @@ function MagicApp($$anchor, $$props) {
       StatCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var input = root_2$6();
-          input.__change = [on_change$6, item2];
+          input.__change = [on_change$5, item2];
           bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
           append($$anchor3, input);
         },
@@ -11490,7 +11490,7 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$5 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
 var root_1$6 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
 var root_3$4 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
@@ -11572,7 +11572,7 @@ function WeaponApp($$anchor, $$props) {
       StatCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var input = root_2$5();
-          input.__change = [on_change$5, item2];
+          input.__change = [on_change$4, item2];
           bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
           append($$anchor3, input);
         },
@@ -11776,7 +11776,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$5 = /* @__PURE__ */ template(`<!> <input> <div class="stat-grid two-column"></div>`, 1);
 var root$a = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
 function AmmunitionApp($$anchor, $$props) {
@@ -11818,7 +11818,7 @@ function AmmunitionApp($$anchor, $$props) {
         }
       });
       var input = sibling(node_1, 2);
-      input.__change = [on_change$4, item2];
+      input.__change = [on_change$3, item2];
       var div_2 = sibling(input, 2);
       each(div_2, 21, () => ammoEntries, index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$2(entry)));
@@ -11907,7 +11907,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$4 = /* @__PURE__ */ template(`<div class="stat-card-background"></div> <input class="large" name="name" type="text">`, 1);
 var on_change_1$1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_4$4 = /* @__PURE__ */ template(`<option> </option>`);
@@ -11994,7 +11994,7 @@ function SkillApp($$anchor, $$props) {
         children: ($$anchor3, $$slotProps2) => {
           var fragment_1 = root_2$4();
           var input = sibling(first_child(fragment_1), 2);
-          input.__change = [on_change$3, item2];
+          input.__change = [on_change$2, item2];
           template_effect(() => set_value(input, item2().name));
           append($$anchor3, fragment_1);
         },
@@ -13287,10 +13287,6 @@ function TimeManager($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_change$2 = async (e, $readyForCommit, readyForCommit) => {
-  const newValue = e.target.checked;
-  store_set(readyForCommit, proxy(newValue));
-};
 var root$5 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
 function KarmaRow($$anchor, $$props) {
   push($$props, true);
@@ -13303,7 +13299,14 @@ function KarmaRow($$anchor, $$props) {
   const $spentKarma = () => store_get(spentKarma, "$spentKarma", $$stores);
   onMount(() => {
     if ($$props.onmount) {
-      $$props.onmount({ CommitSelected, Select, Deselect });
+      $$props.onmount({
+        CommitSelected,
+        Select,
+        Deselect,
+        get readyForCommit() {
+          return $readyForCommit();
+        }
+      });
     }
   });
   let storeManager2 = StoreManager.Subscribe($$props.actor);
@@ -13317,10 +13320,8 @@ function KarmaRow($$anchor, $$props) {
   let lifetimeKarma = storeManager2.GetStore("karma.lifetimeKarma");
   let readyForCommit = storeManager2.GetStore("karma.readyForCommit");
   async function CommitSelected() {
-    console.log("CommitSelected was called");
     if ($readyForCommit()) {
       const metatypeItem = $$props.actor.items.find((i) => i.type === "metatype");
-      console.log(metatypeItem);
       store_set(lifetimeKarma, $lifetimeKarma() + $pendingKarmaReward());
       if (metatypeItem.system.karma.factor) {
         store_set(karmaPool, proxy(Math.floor($lifetimeKarma() * metatypeItem.system.karma.factor)));
@@ -13328,13 +13329,20 @@ function KarmaRow($$anchor, $$props) {
       store_set(goodKarma, $lifetimeKarma() - $spentKarma() - $karmaPool());
       store_set(pendingKarmaReward, 0);
       store_set(readyForCommit, false);
+      $$props.OnCommitStatusChange();
     }
   }
+  user_effect(() => {
+    $readyForCommit();
+    $$props.OnCommitStatusChange();
+  });
   function Select() {
     store_set(readyForCommit, true);
+    $$props.OnCommitStatusChange();
   }
   function Deselect() {
     store_set(readyForCommit, false);
+    $$props.OnCommitStatusChange();
   }
   var tr = root$5();
   var td = child(tr);
@@ -13355,7 +13363,6 @@ function KarmaRow($$anchor, $$props) {
   var text_3 = child(h3_3);
   var td_6 = sibling(td_5);
   var input_1 = child(td_6);
-  input_1.__change = [on_change$2, $readyForCommit, readyForCommit];
   template_effect(() => {
     set_attribute(img, "src", $$props.actor.img);
     set_text(text2, $$props.actor.name);
@@ -13370,7 +13377,6 @@ function KarmaRow($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-delegate(["change"]);
 async function commitSelected$1(_, listboxContent, rowRefs) {
   for (const actor of get$2(listboxContent)) {
     const row = rowRefs.get(actor.id);
@@ -13409,10 +13415,10 @@ function KarmaManager($$anchor, $$props) {
       label: localize($$props.config.karmamanager.npc)
     }
   ];
-  let anyReady = /* @__PURE__ */ derived$1(() => {
-    var _a;
-    return (_a = get$2(listboxContent)) == null ? void 0 : _a.some((a) => a.system.karma.readyForCommit);
-  });
+  let anyReady = state(proxy([]));
+  function OnCommitStatusChange() {
+    set(anyReady, proxy(Array.from(rowRefs.values()).some((row) => row.readyForCommit)));
+  }
   user_effect(() => {
     var _a;
     let baseList = [];
@@ -13492,6 +13498,7 @@ function KarmaManager($$anchor, $$props) {
           get config() {
             return $$props.config;
           },
+          OnCommitStatusChange,
           onmount: (el) => rowRefs.set(get$2(actor).id, el)
         });
       });
