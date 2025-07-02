@@ -1,4 +1,3 @@
-<!-- Simplified HTML Structure -->
 <script>
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
@@ -8,19 +7,24 @@
 
    let { skill = {}, actor = {}, config = {} } = $props();
 
-   // Store managers
    let skillStoreManager = StoreManager.Subscribe(skill);
    let actorStoreManager = StoreManager.Subscribe(actor);
 
-   // Stores from StoreManager
    let valueStore = skillStoreManager.GetStore("activeSkill.value");
    let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
 
-   // Legacy stores that still need storeManager.getActorStore (flags don't follow system path)
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
    function openSkill() {
       ActiveSkillEditorSheet.launch(actor, skill, config);
+   }
+
+   function Roll(id, specialization) {
+      if (!specialization) {
+         console.log("A skill roll!");
+      } else {
+         console.log("A specialization roll!");
+      }
    }
 
    onDestroy(() => {
@@ -38,22 +42,59 @@
          onclick={openSkill}
          onkeydown={(e) => e.key === "Enter" && openSkill()}
       ></i>
-   {/if}
-   <div class="skill-card">
-      <div class="core-skill">
+      <div class="skill-card">
          <div class="skill-background-layer"></div>
-         <h6 class="no-margin skill-name">{skill.name}</h6>
-         <h1 class="skill-value">{$valueStore}</h1>
-      </div>
 
-      <div class="specialization-container">
-         {#each $specializationsStore as specialization}
-            <div class="skill-specialization-card">
-               <div class="specialization-background"></div>
-               <div class="specialization-name">{specialization.name}</div>
-               <h1 class="embedded-value">{specialization.value}</h1>
-            </div>
-         {/each}
+         <h6 class="no-margin skill-name">{skill.name}</h6>
+
+         <div class="skill-main-container">
+            <h1 class="skill-value">{$valueStore}</h1>
+         </div>
+         <div class="specialization-container">
+            {#each $specializationsStore as specialization}
+               <div class="skill-specialization-card">
+                  <div class="specialization-background"></div>
+                  <div class="specialization-name">{specialization.name}</div>
+                  <h1 class="embedded-value">{specialization.value}</h1>
+               </div>
+            {/each}
+         </div>
       </div>
-   </div>
+   {:else}
+      <div class="skill-card">
+         <div class="skill-background-layer"></div>
+
+         <h6 class="no-margin skill-name">{skill.name}</h6>
+
+         <div
+            class="skill-main-container button"
+            role="button"
+            tabindex="0"
+            onclick={() => Roll(skill.id)}
+            onkeydown={(e) => {
+               if (e.key === "Enter" || e.key === " ") Roll(skill.id);
+            }}
+         >
+            <h1 class="skill-value">{$valueStore}</h1>
+         </div>
+         <div class="specialization-container">
+            {#each $specializationsStore as specialization}
+               <div
+                  class="skill-specialization-card"
+                  class:button={!$isShoppingState}
+                  role="button"
+                  tabindex="0"
+                  onclick={() => Roll(skill.id, specialization.name)}
+                  onkeydown={(e) => {
+                     if (e.key === "Enter" || e.key === " ") Roll(skill.id, specialization.name);
+                  }}
+               >
+                  <div class="specialization-background"></div>
+                  <div class="specialization-name">{specialization.name}</div>
+                  <h1 class="embedded-value">{specialization.value}</h1>
+               </div>
+            {/each}
+         </div>
+      </div>
+   {/if}
 </div>

@@ -1,77 +1,76 @@
 .attribute-masonry-grid {
-  margin: 0 auto;
+   margin: 0 auto;
 
-  .attribute-gutter-sizer {
-    width: 0.25rem;
-  }
+   .attribute-gutter-sizer {
+      width: 0.25rem;
+   }
 
-  //NOTE: the width is to account for double digits
-  .stat-card {
-    min-width: 6.5rem;
-  }
+   //NOTE: the width is to account for double digits
+   .stat-card {
+      min-width: 6.5rem;
+   }
 
-  .stat-card {
-    margin-top: 0.25rem;
-    padding: 0rem 0.5rem 0rem 0.5rem;
+   .stat-card {
+      margin-top: 0.25rem;
+      padding: 0rem 0.5rem 0rem 0.5rem;
+      outline: none;
 
-    .stat-label {
-      display: flex;
-      align-items: center;
-      justify-content: center; // or center, depending on your layout
-      padding: 0;
-      margin: 0;
+      .stat-label {
+         display: flex;
+         align-items: center;
+         justify-content: center; // or center, depending on your layout
+         padding: 0;
+         margin: 0;
 
-      h4.no-margin.uppercase {
-        padding: 0rem !important;
+         h4.no-margin.uppercase {
+            margin: 0.5rem 0rem 0rem 0.5rem;
+         }
+
+         input {
+            margin: 0rem;
+
+            &:hover {
+               box-shadow: inset 0 0 25px var(--highlight-color-primary);
+               transition: box-shadow 0.3s ease-in;
+            }
+         }
+
+         i {
+            margin-right: 0.5rem;
+            margin-left: 0.5rem;
+         }
+
+         .decrement-attribute,
+         .increment-attribute {
+            text-align: center;
+            font-size: 0.8rem;
+            color: @attribute-stat-card-button-color;
+            cursor: pointer;
+            transition: text-shadow 0.3s ease, filter 0.3s ease, transform 0.1s ease; // transform is reused for both hover and active
+
+            &:hover {
+               text-shadow: 0 0 10px var(--highlight-color-primary);
+               filter: brightness(1.5);
+               transform: scale(1.3);
+               z-index: 10;
+            }
+
+            &:active {
+               transform: scale(1.1); // slightly less than hover to give a press-in effect
+               filter: brightness(1.2);
+            }
+
+            &.disabled {
+               color: grey;
+               pointer-events: none;
+               opacity: 0.5;
+            }
+         }
       }
 
-      input {
-        margin: 0rem;
-
-        &:hover {
-          box-shadow: inset 0 0 25px var(--highlight-color-primary);
-          transition: box-shadow 0.3s ease-in;
-        }
+      &:hover {
+         background-color: @accent-color;
+         z-index: 10;
       }
-
-      i {
-        margin-right: 0.5rem;
-        margin-left: 0.5rem;
-      }
-
-      .decrement-attribute,
-      .increment-attribute {
-        text-align: center;
-        font-size: 0.8rem;
-        color: @attribute-stat-card-button-color;
-        cursor: pointer;
-        transition: text-shadow 0.3s ease, filter 0.3s ease, transform 0.1s ease; // transform is reused for both hover and active
-
-        &:hover {
-          text-shadow: 0 0 10px var(--highlight-color-primary);
-          filter: brightness(1.5);
-          transform: scale(1.3);
-          z-index: 10;
-        }
-
-        &:active {
-          transform: scale(
-            1.1
-          ); // slightly less than hover to give a press-in effect
-          filter: brightness(1.2);
-        }
-
-        &.disabled {
-          color: grey;
-          pointer-events: none;
-          opacity: 0.5;
-        }
-      }
-    }
-
-    &:hover {
-      background-color: @accent-color;
-      z-index: 10;
-    }
-  }
+   }
 }

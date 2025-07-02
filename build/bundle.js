@@ -3570,13 +3570,13 @@ function lerpColor(hex1, hex2, t) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$8 = (e) => e.stopPropagation();
+var on_click$9 = (e) => e.stopPropagation();
 var on_keydown$8 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
-var on_click_1$4 = (__1, handleMove) => handleMove("up");
+var on_click_1$5 = (__1, handleMove) => handleMove("up");
 var on_click_2$1 = (__2, handleMove) => handleMove("down");
 var root$J = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
@@ -3586,10 +3586,10 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$J();
-  div.__click = [on_click$8];
+  div.__click = [on_click$9];
   div.__keydown = [on_keydown$8];
   var button = child(div);
-  button.__click = [on_click_1$4, handleMove];
+  button.__click = [on_click_1$5, handleMove];
   var button_1 = sibling(button, 2);
   button_1.__click = [on_click_2$1, handleMove];
   var button_2 = sibling(button_1, 2);
@@ -3782,7 +3782,7 @@ function TextInput($$anchor, $$props) {
 }
 delegate(["input", "keydown"]);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$b = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$c = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$G = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3886,7 +3886,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$b();
+      var fragment_3 = root_3$c();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -3972,12 +3972,12 @@ function handleKeydown(e, increment2, decrement2) {
     decrement2();
   }
 }
-var on_click$7 = (_, decrement2, $$props) => {
+var on_click$8 = (_, decrement2, $$props) => {
   var _a;
   decrement2();
   (_a = $$props.onDecrement) == null ? void 0 : _a.call($$props);
 };
-var on_click_1$3 = (__1, increment2, $$props) => {
+var on_click_1$4 = (__1, increment2, $$props) => {
   var _a;
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
@@ -4022,13 +4022,13 @@ function Counter($$anchor, $$props) {
   var div = root$F();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
-  button.__click = [on_click$7, decrement2, $$props];
+  button.__click = [on_click$8, decrement2, $$props];
   var div_1 = sibling(button, 2);
   div_1.__input = handleDivInput;
   var text2 = child(div_1);
   bind_this(div_1, ($$value) => editableDiv = $$value, () => editableDiv);
   var button_1 = sibling(div_1, 2);
-  button_1.__click = [on_click_1$3, increment2, $$props];
+  button_1.__click = [on_click_1$4, increment2, $$props];
   template_effect(() => {
     set_attribute(div, "aria-valuemin", min());
     set_attribute(div, "aria-valuemax", max());
@@ -4376,13 +4376,13 @@ function RollComposerComponent($$anchor, $$props) {
 delegate(["keydown", "click"]);
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var root_2$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$a = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_3$b = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$p = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
-var on_keydown_2 = (e, Roll2) => {
+var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_4$7 = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_4$8 = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4501,9 +4501,9 @@ function AttributeCard($$anchor, $$props) {
       var node_2 = sibling(h1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$a();
+          var i_2 = root_3$b();
           i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1$1, increment2];
+          i_2.__keydown = [on_keydown_1$2, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$2(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_2);
         };
@@ -4524,9 +4524,9 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_4$7();
+      var div_2 = root_4$8();
       div_2.__click = Roll2;
-      div_2.__keydown = [on_keydown_2, Roll2];
+      div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
       var text_2 = child(h4_1);
       var div_3 = sibling(h4_1, 4);
@@ -6113,7 +6113,7 @@ function setupMasonry({
   return { masonryInstance: msnry, cleanup };
 }
 var root_1$o = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
-var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$a = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$E = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
@@ -6140,7 +6140,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var h1 = root_3$9();
+      var h1 = root_3$a();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, $$props.value));
       append($$anchor2, h1);
@@ -6772,7 +6772,7 @@ async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacter
     $$props.app.close();
   }
 }
-var on_click$6 = async (__2, $$props) => openFilePicker($$props.actor);
+var on_click$7 = async (__2, $$props) => openFilePicker($$props.actor);
 var root$x = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -6858,7 +6858,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$6, $$props];
+  img.__click = [on_click$7, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7016,7 +7016,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacter
     $$props.app.close();
   }
 }
-var on_click$5 = async (__2, $$props) => openFilePicker($$props.actor);
+var on_click$6 = async (__2, $$props) => openFilePicker($$props.actor);
 var root$w = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -7102,7 +7102,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$5, $$props];
+  img.__click = [on_click$6, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7310,7 +7310,7 @@ async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCr
     $$props.app.close();
   }
 }
-var on_click$4 = async (__4, $$props) => openFilePicker($$props.actor);
+var on_click$5 = async (__4, $$props) => openFilePicker($$props.actor);
 var root$v = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -7374,7 +7374,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$4, $$props];
+  img.__click = [on_click$5, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7587,9 +7587,19 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`, 1);
+var on_click$4 = (_, Roll2, skill) => Roll2(skill().id);
+var on_keydown_1$1 = (e, Roll2, skill) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(skill().id);
+};
+var on_click_1$3 = (__1, Roll2, skill, specialization) => Roll2(skill().id, get$2(specialization).name);
+var on_keydown_2 = (e, Roll2, skill, specialization) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(skill().id, get$2(specialization).name);
+};
+var root_4$7 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_3$9 = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
+var root$u = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7605,6 +7615,13 @@ function ActiveSkillCard($$anchor, $$props) {
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
+  function Roll2(id, specialization) {
+    if (!specialization) {
+      console.log("A skill roll!");
+    } else {
+      console.log("A specialization roll!");
+    }
+  }
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
@@ -7612,42 +7629,78 @@ function ActiveSkillCard($$anchor, $$props) {
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$i();
+      var fragment = root_1$i();
+      var i = first_child(fragment);
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$5, openSkill];
-      template_effect(($0) => set_attribute(i, "aria-label", $0), [
-        () => localize(config().sheet.buyupgrades)
-      ]);
-      append($$anchor2, i);
+      var div_1 = sibling(i, 2);
+      var h6 = sibling(child(div_1), 2);
+      var text2 = child(h6);
+      var div_2 = sibling(h6, 2);
+      var h1 = child(div_2);
+      var text_1 = child(h1);
+      var div_3 = sibling(div_2, 2);
+      each(div_3, 5, $specializationsStore, index, ($$anchor3, specialization) => {
+        var div_4 = root_2$b();
+        var div_5 = sibling(child(div_4), 2);
+        var text_2 = child(div_5);
+        var h1_1 = sibling(div_5, 2);
+        var text_3 = child(h1_1);
+        template_effect(() => {
+          set_text(text_2, get$2(specialization).name);
+          set_text(text_3, get$2(specialization).value);
+        });
+        append($$anchor3, div_4);
+      });
+      template_effect(
+        ($0) => {
+          set_attribute(i, "aria-label", $0);
+          set_text(text2, skill().name);
+          set_text(text_1, $valueStore());
+        },
+        [
+          () => localize(config().sheet.buyupgrades)
+        ]
+      );
+      append($$anchor2, fragment);
+    };
+    var alternate = ($$anchor2) => {
+      var div_6 = root_3$9();
+      var h6_1 = sibling(child(div_6), 2);
+      var text_4 = child(h6_1);
+      var div_7 = sibling(h6_1, 2);
+      div_7.__click = [on_click$4, Roll2, skill];
+      div_7.__keydown = [on_keydown_1$1, Roll2, skill];
+      var h1_2 = child(div_7);
+      var text_5 = child(h1_2);
+      var div_8 = sibling(div_7, 2);
+      each(div_8, 5, $specializationsStore, index, ($$anchor3, specialization) => {
+        var div_9 = root_4$7();
+        div_9.__click = [on_click_1$3, Roll2, skill, specialization];
+        div_9.__keydown = [on_keydown_2, Roll2, skill, specialization];
+        var div_10 = sibling(child(div_9), 2);
+        var text_6 = child(div_10);
+        var h1_3 = sibling(div_10, 2);
+        var text_7 = child(h1_3);
+        template_effect(() => {
+          toggle_class(div_9, "button", !$isShoppingState());
+          set_text(text_6, get$2(specialization).name);
+          set_text(text_7, get$2(specialization).value);
+        });
+        append($$anchor3, div_9);
+      });
+      template_effect(() => {
+        set_text(text_4, skill().name);
+        set_text(text_5, $valueStore());
+      });
+      append($$anchor2, div_6);
     };
     if_block(node, ($$render) => {
       if ($isShoppingState()) $$render(consequent);
+      else $$render(alternate, false);
     });
   }
-  var div_1 = sibling(node, 2);
-  var div_2 = child(div_1);
-  var h6 = sibling(child(div_2), 2);
-  var text2 = child(h6);
-  var h1 = sibling(h6, 2);
-  var text_1 = child(h1);
-  var div_3 = sibling(div_2, 2);
-  each(div_3, 5, $specializationsStore, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$b();
-    var div_5 = sibling(child(div_4), 2);
-    var text_2 = child(div_5);
-    var h1_1 = sibling(div_5, 2);
-    var text_3 = child(h1_1);
-    template_effect(() => {
-      set_text(text_2, get$2(specialization).name);
-      set_text(text_3, get$2(specialization).value);
-    });
-    append($$anchor2, div_4);
-  });
-  template_effect(() => {
-    set_text(text2, skill().name);
-    set_text(text_1, $valueStore());
-  });
   append($$anchor, div);
   pop();
   $$cleanup();

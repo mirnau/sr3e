@@ -694,10 +694,13 @@
     z-index: 1;
   }
   .skill-masonry-grid .skill-card-container .skill-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     box-sizing: border-box;
     position: relative;
     margin-bottom: 0.25rem;
-    background: #ff2090;
+    background: var(--highlight-color-primary);
     text-align: center;
     padding: 0.5rem;
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
@@ -718,31 +721,24 @@
   .skill-masonry-grid .skill-card-container .skill-card select {
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .skill-masonry-grid .skill-card-container .core-skill {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 0.5rem;
-    padding: 0.25rem;
-  }
-  .skill-masonry-grid .skill-card-container .core-skill .skill-name {
+  .skill-masonry-grid .skill-card-container .skill-name {
     flex: 1;
     text-indent: 0;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
   }
-  .skill-masonry-grid .skill-card-container .core-skill .skill-value {
+  .skill-masonry-grid .skill-card-container .skill-main-container {
+    width: 100%;
     position: relative;
-    min-width: 2rem;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--highlight-color-primary);
-    padding: 0.25rem 0.5rem;
-    margin: 0;
+    padding: 0.25rem;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
-  .skill-masonry-grid .skill-card-container .core-skill .skill-value::before {
+  .skill-masonry-grid .skill-card-container .skill-main-container::before {
     content: "";
     position: absolute;
     z-index: -1;
@@ -750,7 +746,47 @@
     left: 1px;
     width: calc(100% - 2px);
     height: calc(100% - 2px);
-    background: #003856;
+    background: var(--background-color);
+    box-shadow: inset 0 0 12px var(--highlight-color-primary);
+    pointer-events: none;
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .skill-masonry-grid .skill-card-container .skill-main-container.button {
+    cursor: pointer;
+    transition: transform 0.2s ease-out, background-color 0.5s ease;
+    will-change: transform;
+  }
+  .skill-masonry-grid .skill-card-container .skill-main-container.button:hover {
+    transform: scale(1.05);
+  }
+  .skill-masonry-grid .skill-card-container .skill-main-container.button:hover .stat-card-background {
+    box-shadow: inset 0 0 10px var(--highlight-color-primary);
+  }
+  .skill-masonry-grid .skill-card-container .skill-main-container.button:active {
+    transform: scale(0.97);
+  }
+  .skill-masonry-grid .skill-card-container .skill-main-container.button:active .stat-card-background {
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
+  }
+  .skill-masonry-grid .skill-card-container .skill-value {
+    position: relative;
+    min-width: 2rem;
+    width: 100%;
+    text-align: center;
+    background: var(--highlight-color-primary);
+    padding: 0.25rem;
+    margin: 0;
+    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .skill-masonry-grid .skill-card-container .skill-value::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 1px;
+    left: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    background: var(--background-color);
     box-shadow: inset 0 0 12px var(--highlight-color-primary);
     pointer-events: none;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -761,7 +797,7 @@
     flex-direction: row;
     gap: 0.25rem;
     background: transparent;
-    clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+    overflow: visible;
   }
   .skill-specialization-card {
     width: 100%;
@@ -781,10 +817,27 @@
     left: 1px;
     width: calc(100% - 2px);
     height: calc(100% - 2px);
-    background: #003856;
+    background: var(--background-color);
     box-shadow: inset 0 0 12px var(--highlight-color-primary);
     pointer-events: none;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .skill-specialization-card.button {
+    cursor: pointer;
+    transition: transform 0.2s ease-out, background-color 0.5s ease;
+    will-change: transform;
+  }
+  .skill-specialization-card.button:hover {
+    transform: scale(1.05);
+  }
+  .skill-specialization-card.button:hover .stat-card-background {
+    box-shadow: inset 0 0 10px var(--highlight-color-primary);
+  }
+  .skill-specialization-card.button:active {
+    transform: scale(0.97);
+  }
+  .skill-specialization-card.button:active .stat-card-background {
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
   .skill-specialization-card .specialization-name {
     display: block;
@@ -819,7 +872,7 @@
     left: 1px;
     width: calc(100% - 2px);
     height: calc(100% - 2px);
-    background: #003856;
+    background: var(--background-color);
     box-shadow: inset 0 0 12px var(--highlight-color-primary);
     pointer-events: none;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
@@ -1474,6 +1527,7 @@
   .attribute-masonry-grid .stat-card {
     margin-top: 0.25rem;
     padding: 0rem 0.5rem 0rem 0.5rem;
+    outline: none;
   }
   .attribute-masonry-grid .stat-card .stat-label {
     display: flex;
@@ -1483,7 +1537,7 @@
     margin: 0;
   }
   .attribute-masonry-grid .stat-card .stat-label h4.no-margin.uppercase {
-    padding: 0rem !important;
+    margin: 0.5rem 0rem 0rem 0.5rem;
   }
   .attribute-masonry-grid .stat-card .stat-label input {
     margin: 0rem;
