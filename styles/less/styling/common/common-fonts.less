@@ -16,18 +16,37 @@
 
 :root {
     font-family: 'VT323', monospace;
+
+    --h1-color: var(--highlight-color-primary);
+    --h1-bloom: 
+    0 0 1px #004659, 
+    0 0 10px #4affb4, 
+    0 0 20px rgb(0, 100, 162);
+
+    
+    
+    --h3-color: rgb(208, 183, 43); //var(--highlight-color-primary);
+    --h3-bloom:     
+    0 0 1px #7d7703, 
+    0 0 10px #ffd54a, 
+    0 0 20px rgb(162, 116, 0);
+    
+    --h4-color: var(--highlight-color-primary);
+
+    --h5-color: violet;
+
 }
 
 .VTT323-header() {
     .VTT323();
-    border: none;
 
     &.uppercase {
         text-transform: uppercase;
     }
 
     &.no-margin {
-        margin: 0;
+        padding: inherit;
+        margin: 0rem;
     }
 }
 
@@ -35,7 +54,7 @@
     font-family: 'VT323', monospace;
     margin: 0.33rem 0;
     line-height: @line-height;
-    color: @h1-color;
+    color: var(--h1-color);
 }
 
 .system-sr3e {
@@ -46,13 +65,13 @@
     }
 
     div {
-        color: @h1-color;
+        color: var(--h1-color);
     }
 
     h1 {
         .VTT323-header();
-        color: @h1-color;
-        text-shadow: @h1-color-bloom-primary;
+        color: var(--h1-color);
+        text-shadow: var(--h1-bloom);
         margin-bottom: 0.7rem;
         font-size: 1.4rem;
     }
@@ -60,14 +79,14 @@
     summary,
     h2 {
         .VTT323-header();
-        color: @h2-color;
+        color: var(--h2-color);
         font-size: 1.2rem;
     }
 
     h3 {
         .VTT323-header();
-        color: @h3-color;
-        text-shadow: @h3-color-bloom-primary;
+        color: var(--h3-color);
+        text-shadow: var(--h3-bloom);
         font-size: 1.1rem;
     }
 
@@ -75,28 +94,26 @@
     span,
     h4 {
         .VTT323-header();
-        color: @h4-color;
-        text-shadow: @h4-color-bloom-primary;
+        color: var(--h4-color);
         font-size: 1.0rem;
     }
 
     h5 {
         .VTT323-header();
         font-size: 1.1rem;
-        color: @h5-color;
-        text-shadow: @h5-color-bloom-primary;
+        color: var(--h5-color);
     }
 
     h6 {
         .VTT323-header();
-        color: @h6-color;
+        color: var(--h6-color);
     }
 
     span {
         .VTT323();
-        color: @h4-color;
+        color: --h4-color;
         border: none;
-        text-shadow: @h3-color-bloom-primary;
+        text-shadow: var(--h3-bloom);
         font-size: 1.0rem;
 
         &.no-margin {
@@ -140,5 +157,4 @@
             -webkit-font-smoothing: antialiased;
         }
     }
-
 }

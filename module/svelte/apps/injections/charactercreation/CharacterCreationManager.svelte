@@ -1,29 +1,26 @@
 <script>
-    import AttributePointsState from "./AttributePointsState.svelte";
-    import SkillPointsState from "./SkillPointsState.svelte";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
+   import AttributePointsState from "./AttributePointsState.svelte";
+   import SkillPointsState from "./SkillPointsState.svelte";
+   import { flags } from "../../../../services/commonConsts.js";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
+   import { onDestroy } from "svelte";
+   let { actor = {}, config = {} } = $props();
 
-    let { actor = {}, config = {} } = $props();
+   let storeManager = StoreManager.Subscribe(actor);
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 
-    let attributeAssignmentLocked = getActorStore(
-        actor.id,
-        stores.attributeAssignmentLocked,
-        actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
-    );
-    console.log("attributeAssignmentLocked", $attributeAssignmentLocked);
-
-    let isCharacterCreation = $state(
-        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation),
-    );
+   let attributeAssignementLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 </script>
 
-{#if isCharacterCreation}
-    <div>
-        {#if $attributeAssignmentLocked}
-            <SkillPointsState {actor} {config} bind:isCharacterCreation />
-        {:else}
-            <AttributePointsState {actor} {config} />
-        {/if}
-    </div>
+{#if $isCharacterCreationStore}
+   <div>
+      {#if $attributeAssignementLockedStore}
+         <SkillPointsState {actor} {config} />
+      {:else}
+         <AttributePointsState {actor} {config} />
+      {/if}
+   </div>
 {/if}

@@ -1,6 +1,5 @@
 <script>
-    import { localize } from "../../../svelteHelpers.js";
-    // @runes
+    import { localize } from "../../../services/utilities.js";
     const { config, onclose } = $props();
 
     let visible = $state(true);

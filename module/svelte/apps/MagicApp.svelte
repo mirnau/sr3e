@@ -1,7 +1,9 @@
 <script>
-  import { localize, openFilePicker } from "../../svelteHelpers.js";
+  import { localize, openFilePicker } from "../../services/utilities.js";
   import StatCard from "./components/StatCard.svelte";
   import JournalViewer from "./components/JournalViewer.svelte";
+  import Image from "./components/basic/Image.svelte";
+  import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
 
   let { item = {}, config = {} } = $props();
 
@@ -128,77 +130,44 @@
 <div class="sr3e-waterfall-wrapper">
   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
     <!-- Header -->
-    <div class="item-sheet-component">
-      <div class="sr3e-inner-background-container">
-        <div class="fake-shadow"></div>
-        <div class="sr3e-inner-background">
-          <div class="image-mask">
-            <img
-              src={item.img}
-              role="presentation"
-              data-edit="img"
-              title={item.name}
-              alt={item.name}
-              onclick={async () => openFilePicker(item)}
-            />
-          </div>
+    <ItemSheetComponent>
+      <Image src={item.img} title={item.name} />
+      <div class="stat-grid single-column">
+        <StatCard>
           <input
-            class="large"
-            name="name"
-            type="text"
             bind:value={item.name}
             onchange={(e) => item.update({ name: e.target.value })}
           />
-          <StatCard {...archetype} />
-          <StatCard {...priority} />
-        </div>
+        </StatCard>
+        <StatCard {...archetype} />
+        <StatCard {...priority} />
       </div>
-    </div>
+    </ItemSheetComponent>
 
     <!-- Magician UI -->
     {#if awakened.archetype === archetype.options[1]}
-      <div class="item-sheet-component">
-        <div class="sr3e-inner-background-container">
-          <div class="fake-shadow"></div>
-          <div class="sr3e-inner-background">
-            <StatCard {...magicianType} />
-          </div>
-        </div>
-      </div>
+      <ItemSheetComponent>
+        <StatCard {...magicianType} />
+      </ItemSheetComponent>
 
       {#if isAspected}
-        <div class="item-sheet-component">
-          <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-              <StatCard {...aspect} />
-            </div>
-          </div>
-        </div>
+        <ItemSheetComponent>
+          <StatCard {...aspect} />
+        </ItemSheetComponent>
       {/if}
 
       {#each magicianFields as entry}
-        <div class="item-sheet-component">
-          <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-              <StatCard {...entry} />
-            </div>
-          </div>
-        </div>
+        <ItemSheetComponent>
+          <StatCard {...entry} />
+        </ItemSheetComponent>
       {/each}
 
       <!-- Adept UI -->
     {:else if awakened.archetype === archetype.options[0]}
       {#each adeptFields as entry}
-        <div class="item-sheet-component">
-          <div class="sr3e-inner-background-container">
-            <div class="fake-shadow"></div>
-            <div class="sr3e-inner-background">
-              <StatCard {...entry} />
-            </div>
-          </div>
-        </div>
+        <ItemSheetComponent>
+          <StatCard {...entry} />
+        </ItemSheetComponent>
       {/each}
     {/if}
 

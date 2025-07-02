@@ -1,45 +1,50 @@
 <script>
-    import { getActorStore, stores } from "../../stores/actorStores.js";
+   import { onDestroy } from "svelte";
+   import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
 
-    let { actor = {} } = $props();
+   let { actor = {} } = $props();
 
-    let malfunctioningIndexes = [];
+   let storeManager = StoreManager.Subscribe(actor);
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 
-    const actorName = getActorStore(actor.id, stores.actorName, actor.name);
+   let malfunctioningIndexes = [];
 
-    let name = $derived($actorName);
-    let neonHTML = $derived(getNeonHtml(name));
+   const actorName = storeManager.GetShallowStore(actor.id, stores.actorName, actor.name);
 
-    const randomInRange = (min, max) =>
-        Math.floor(Math.random() * (max - min + 1)) + min;
+   let name = $derived($actorName);
+   let neonHTML = $derived(getNeonHtml(name));
 
-    function getNeonHtml(name) {
-        malfunctioningIndexes = [];
+   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        if (name.length < 4) {
-            malfunctioningIndexes.push(randomInRange(0, name.length - 1));
-        } else {
-            const malfunctionInNplaces = name.length % 4;
+   function getNeonHtml(name) {
+      malfunctioningIndexes = [];
 
-            for (let i = 0; i < malfunctionInNplaces; i++) {
-                let index;
-                do {
-                    index = randomInRange(0, name.length - 1);
-                } while (malfunctioningIndexes.includes(index));
-                malfunctioningIndexes.push(index);
-            }
-        }
+      if (name.length < 4) {
+         malfunctioningIndexes.push(randomInRange(0, name.length - 1));
+      } else {
+         const malfunctionInNplaces = name.length % 4;
 
-        return [...name]
-            .map((char, index) =>
-                malfunctioningIndexes.includes(index)
-                    ? `<div class="neon-name-text malfunc">${char}</div>`
-                    : `<div class="neon-name-text">${char}</div>`,
-            )
-            .join("");
-    }
+         for (let i = 0; i < malfunctionInNplaces; i++) {
+            let index;
+            do {
+               index = randomInRange(0, name.length - 1);
+            } while (malfunctioningIndexes.includes(index));
+            malfunctioningIndexes.push(index);
+         }
+      }
+
+      return [...name]
+         .map((char, index) =>
+            malfunctioningIndexes.includes(index)
+               ? `<div class="neon-name-text malfunc">${char}</div>`
+               : `<div class="neon-name-text">${char}</div>`
+         )
+         .join("");
+   }
 </script>
 
 <div class="neon-name">
-    {@html neonHTML}
+   {@html neonHTML}
 </div>

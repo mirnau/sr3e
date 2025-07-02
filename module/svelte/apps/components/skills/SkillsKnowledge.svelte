@@ -1,36 +1,30 @@
 <script>
-    import SkillCategory from "./SkillCategory.svelte";
-    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
+   import SkillCategory from "./SkillCategory.svelte";
+   import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
+   import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte";
+   import { onDestroy } from "svelte";
 
-    let { actor = {}, config = {} } = $props();
-    let gridContainer;
+   let { actor = {}, config = {} } = $props();
+   let gridContainer;
 
-    const knowledgeSkillsIdArrayStore = getActorStore(
-        actor.id,
-        stores.knowledgeSkillsIds,
-        actor.items
-            .filter(
-                (item) =>
-                    item.type === "skill" &&
-                    item.system.skillType === "knowledge",
-            )
-            .map((item) => item.id),
-    );
+   let storeManager = StoreManager.Subscribe(actor);
 
-    let knowledgeSkills = $derived(
-        actor.items.filter((item) =>
-            $knowledgeSkillsIdArrayStore.includes(item.id),
-        ),
-    );
+   const knowledgeSkillsIdArrayStore = storeManager.GetShallowStore(
+      actor.id,
+      stores.knowledgeSkillsIds,
+      actor.items
+         .filter((item) => item.type === "skill" && item.system.skillType === "knowledge")
+         .map((item) => item.id)
+   );
+
+   let knowledgeSkills = $derived(actor.items.filter((item) => $knowledgeSkillsIdArrayStore.includes(item.id)));
+
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 </script>
 
 <div bind:this={gridContainer} class="skill-container-masonry-grid">
-    <SkillCategory
-        attribute="intelligence"
-        skills={knowledgeSkills}
-        {actor}
-        {config}
-    />
+   <SkillCategory attribute="intelligence" skills={knowledgeSkills} {actor} {config} />
 </div>

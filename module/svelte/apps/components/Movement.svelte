@@ -1,40 +1,32 @@
 <script>
-    import AttributeCard from "./AttributeCardKarmaState.svelte";
-    import { localize } from "../../../svelteHelpers.js";
-    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
-    import { shoppingState } from "../../../svelteStore.js";
-    import CardToolbar from "./CardToolbar.svelte";
-    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
+   import StatCard from "./basic/StatCard.svelte";
+   import MasonryGrid from "./basic/MasonryGrid.svelte";
+   import CardToolbar from "./CardToolbar.svelte";
+   import { localize } from "../../../services/utilities.js";
+   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+   import { shoppingState } from "../../../svelteStore.js";
+   import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
+   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
 
-    let { actor = {}, config = {}, id = {}, span = {} } = $props();
-    let movement = $state(actor.system.movement);
-    let localization = config.movement;
-    let gridContainer;
+   let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
-    const isShoppingState = false;
+   let storeManager = StoreManager.Subscribe(actor);
+   let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
 
-    $effect(() => {
-        const rem = parseFloat(
-            getComputedStyle(document.documentElement).fontSize,
-        );
+   let runningmodifier = $state(3);
 
-        const result = setupMasonry({
-            container: gridContainer,
-            itemSelector: ".stat-card",
-            gridSizerSelector: ".attribute-grid-sizer",
-            gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
-        });
-        return result.cleanup;
-    });
+   $effect(() => {
+      const metaType = actor.items.find((i) => i.type === "metatype");
+      runningmodifier = metaType.system.movement.modifier;
+   });
+
+   let walking = $state($quickness.sum);
+   let running = $derived($quickness.sum * runningmodifier);
 </script>
 
 <CardToolbar {id} />
 <h1>{localize(config.movement.movement)}</h1>
-<div bind:this={gridContainer} class="attribute-masonry-grid">
-    <div class="attribute-grid-sizer"></div>
-    <div class="attribute-gutter-sizer"></div>
-    {#each Object.entries(movement) as [key, stat]}
-        <AttributeCard {actor} {stat} {localization} {key} {isShoppingState} />
-    {/each}
-</div>
+<MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
+   <StatCard label={config.movement.walking} value={$quickness.sum} />
+   <StatCard label={config.movement.running} value={running} />
+</MasonryGrid>

@@ -1,0 +1,82 @@
+.karma-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .player-handler {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .player-handler > * {
+    flex: 1;
+    max-width: 100%;
+    height: 2rem;
+    margin: 0;
+  }
+
+  .list-box {
+    max-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    table.actor-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      text-align: left;
+
+      thead {
+        background: #222;
+        color: #fff;
+
+        th {
+          padding: 0.5rem;
+          font-weight: bold;
+          border-bottom: 1px solid #444;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid #333;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.05);
+          }
+        }
+
+        td {
+          padding: 0.5rem;
+          vertical-align: middle;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+
+          &.portrait-cell {
+            width: 3rem; // lock the portrait column
+            img {
+              width: 3rem;
+              height: 3rem;
+              object-fit: cover;
+              border-radius: 4px;
+            }
+          }
+        }
+      }
+    }
+
+    .empty {
+      text-align: center;
+      color: #888;
+      padding: 1rem;
+      font-style: italic;
+    }
+  }
+}

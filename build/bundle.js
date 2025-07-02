@@ -8,7 +8,8 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
-var _app, _app2, _neon, _feed, _cart, _creation, _metahuman, _magic, _weapon, _ammunition, _skill, _actor, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
+var _document, _persistentStore, _actorStores, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _footer, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app3, _app4, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -65,7 +66,7 @@ class Profile extends foundry.abstract.TypeDataModel {
           initial: []
         }
       ),
-      metaHumanity: new foundry.data.fields.StringField({
+      metaType: new foundry.data.fields.StringField({
         required: false,
         initial: ""
       }),
@@ -144,7 +145,16 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
       willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+      essence: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 6
+      }),
+      magic: new foundry.data.fields.SchemaField({
+        ...SimpleStat.defineSchema(),
+        isBurnedOut: new foundry.data.fields.BooleanField({
+          initial: false
+        })
+      })
     };
   }
 };
@@ -187,7 +197,28 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
         initial: 1,
         integer: true
       }),
+      //NOTE: Used to calculate the current karma pool reset, not exposed to the player
+      karmaPoolCeiling: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 1,
+        integer: true
+      }),
+      pendingKarmaReward: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true
+      }),
+      readyForCommit: new foundry.data.fields.BooleanField({
+        required: true,
+        initial: false
+      }),
+      //NOTE: Used to calculate the current karmaPoolCeiling, not exposed to the player
       lifetimeKarma: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true
+      }),
+      spentKarma: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
         integer: true
@@ -543,7 +574,7 @@ function proxy(value, parent = null, prev) {
           sources.set(prop2, s);
         }
         if (s !== void 0) {
-          var v = get$1(s);
+          var v = get$2(s);
           return v === UNINITIALIZED ? void 0 : v;
         }
         return Reflect.get(target, prop2, receiver);
@@ -552,7 +583,7 @@ function proxy(value, parent = null, prev) {
         var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
         if (descriptor && "value" in descriptor) {
           var s = sources.get(prop2);
-          if (s) descriptor.value = get$1(s);
+          if (s) descriptor.value = get$2(s);
         } else if (descriptor === void 0) {
           var source2 = sources.get(prop2);
           var value2 = source2 == null ? void 0 : source2.v;
@@ -579,7 +610,7 @@ function proxy(value, parent = null, prev) {
             s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
             sources.set(prop2, s);
           }
-          var value2 = get$1(s);
+          var value2 = get$2(s);
           if (value2 === UNINITIALIZED) {
             return false;
           }
@@ -632,7 +663,7 @@ function proxy(value, parent = null, prev) {
         return true;
       },
       ownKeys(target) {
-        get$1(version);
+        get$2(version);
         var own_keys = Reflect.ownKeys(target).filter((key2) => {
           var source3 = sources.get(key2);
           return source3 === void 0 || source3.v !== UNINITIALIZED;
@@ -724,7 +755,7 @@ function clear_text_content(node) {
   node.textContent = "";
 }
 // @__NO_SIDE_EFFECTS__
-function derived(fn) {
+function derived$1(fn) {
   var flags2 = DERIVED | DIRTY;
   if (active_effect === null) {
     flags2 |= UNOWNED;
@@ -758,7 +789,7 @@ function derived(fn) {
 }
 // @__NO_SIDE_EFFECTS__
 function derived_safe_equal(fn) {
-  const signal = /* @__PURE__ */ derived(fn);
+  const signal = /* @__PURE__ */ derived$1(fn);
   signal.equals = safe_equals;
   return signal;
 }
@@ -941,9 +972,9 @@ function effect(fn) {
 function render_effect(fn) {
   return create_effect(RENDER_EFFECT, fn, true);
 }
-function template_effect(fn, thunks = [], d = derived) {
+function template_effect(fn, thunks = [], d = derived$1) {
   const deriveds = thunks.map(d);
-  const effect2 = () => fn(...deriveds.map(get$1));
+  const effect2 = () => fn(...deriveds.map(get$2));
   return block(effect2);
 }
 function block(fn, flags2 = 0) {
@@ -1596,7 +1627,7 @@ async function tick() {
   await Promise.resolve();
   flush_sync();
 }
-function get$1(signal) {
+function get$2(signal) {
   var _a;
   var flags2 = signal.f;
   var is_derived = (flags2 & DERIVED) !== 0;
@@ -1938,6 +1969,13 @@ function template(content, flags2) {
     return clone;
   };
 }
+function text(value = "") {
+  {
+    var t = create_text(value + "");
+    assign_nodes(t, t);
+    return t;
+  }
+}
 function comment() {
   var frag = document.createDocumentFragment();
   var start = document.createComment("");
@@ -1956,11 +1994,11 @@ function append(anchor, dom) {
   );
 }
 let should_intro = true;
-function set_text(text, value) {
+function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? value + "" : value;
-  if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
-    text.__t = str;
-    text.nodeValue = str == null ? "" : str + "";
+  if (str !== (text2.__t ?? (text2.__t = text2.nodeValue))) {
+    text2.__t = str;
+    text2.nodeValue = str == null ? "" : str + "";
   }
 }
 function mount(component2, options) {
@@ -2141,7 +2179,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
     return is_array(collection) ? collection : collection == null ? [] : array_from(collection);
   });
   block(() => {
-    var array = get$1(each_array);
+    var array = get$2(each_array);
     var length = array.length;
     if (was_empty && length === 0) {
       return;
@@ -2176,7 +2214,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
         });
       }
     }
-    get$1(each_array);
+    get$2(each_array);
   });
 }
 function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
@@ -2436,6 +2474,22 @@ function html(node, get_value, svg, mathml, skip_warning) {
       }
     });
   });
+}
+function snippet(node, get_snippet, ...args) {
+  var anchor = node;
+  var snippet2 = noop;
+  var snippet_effect;
+  block(() => {
+    if (snippet2 === (snippet2 = get_snippet())) return;
+    if (snippet_effect) {
+      destroy_effect(snippet_effect);
+      snippet_effect = null;
+    }
+    snippet_effect = branch(() => (
+      /** @type {SnippetFn} */
+      snippet2(anchor, ...args)
+    ));
+  }, EFFECT_TRANSPARENT);
 }
 function component(node, get_component, render_fn) {
   var anchor = node;
@@ -2840,6 +2894,24 @@ function bind_value(input, get2, set2 = get2) {
     }
   });
 }
+function bind_checked(input, get2, set2 = get2) {
+  listen_to_event_and_reset_event(input, "change", (is_reset) => {
+    var value = is_reset ? input.defaultChecked : input.checked;
+    set2(value);
+  });
+  if (
+    // If we are hydrating and the value has since changed,
+    // then use the update value from the input instead.
+    // If defaultChecked is set, then checked == defaultChecked
+    untrack(get2) == null
+  ) {
+    set2(input.checked);
+  }
+  render_effect(() => {
+    var value = get2();
+    input.checked = Boolean(value);
+  });
+}
 function is_numberlike_input(input) {
   var type = input.type;
   return type === "number" || type === "range";
@@ -2959,22 +3031,6 @@ function bind_this(element_or_component = {}, update, get_value, get_parts) {
   });
   return element_or_component;
 }
-function bind_content_editable(property, element, get2, set2 = get2) {
-  element.addEventListener("input", () => {
-    set2(element[property]);
-  });
-  render_effect(() => {
-    var value = get2();
-    if (element[property] !== value) {
-      if (value == null) {
-        var non_null_value = element[property];
-        set2(non_null_value);
-      } else {
-        element[property] = value + "";
-      }
-    }
-  });
-}
 function onMount(fn) {
   if (component_context === null) {
     lifecycle_outside_component();
@@ -2988,6 +3044,12 @@ function onMount(fn) {
       );
     });
   }
+}
+function onDestroy(fn) {
+  if (component_context === null) {
+    lifecycle_outside_component();
+  }
+  onMount(() => () => untrack(fn));
 }
 function create_custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
   return new CustomEvent(type, { detail, bubbles, cancelable });
@@ -3025,6 +3087,7 @@ function createEventDispatcher() {
 function subscribe_to_store(store, run, invalidate) {
   if (store == null) {
     run(void 0);
+    if (invalidate) invalidate(void 0);
     return noop;
   }
   const unsub = untrack(
@@ -3037,6 +3100,11 @@ function subscribe_to_store(store, run, invalidate) {
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
 const subscriber_queue = [];
+function readable(value, start) {
+  return {
+    subscribe: writable(value, start).subscribe
+  };
+}
 function writable(value, start = noop) {
   let stop = null;
   const subscribers = /* @__PURE__ */ new Set();
@@ -3084,7 +3152,55 @@ function writable(value, start = noop) {
   }
   return { set: set2, update, subscribe };
 }
-function get(store) {
+function derived(stores2, fn, initial_value) {
+  const single = !Array.isArray(stores2);
+  const stores_array = single ? [stores2] : stores2;
+  if (!stores_array.every(Boolean)) {
+    throw new Error("derived() expects stores as input, got a falsy value");
+  }
+  const auto = fn.length < 2;
+  return readable(initial_value, (set2, update) => {
+    let started = false;
+    const values = [];
+    let pending = 0;
+    let cleanup = noop;
+    const sync = () => {
+      if (pending) {
+        return;
+      }
+      cleanup();
+      const result = fn(single ? values[0] : values, set2, update);
+      if (auto) {
+        set2(result);
+      } else {
+        cleanup = typeof result === "function" ? result : noop;
+      }
+    };
+    const unsubscribers = stores_array.map(
+      (store, i) => subscribe_to_store(
+        store,
+        (value) => {
+          values[i] = value;
+          pending &= ~(1 << i);
+          if (started) {
+            sync();
+          }
+        },
+        () => {
+          pending |= 1 << i;
+        }
+      )
+    );
+    started = true;
+    sync();
+    return function stop() {
+      run_all(unsubscribers);
+      cleanup();
+      started = false;
+    };
+  });
+}
+function get$1(store) {
   let value;
   subscribe_to_store(store, (_) => value = _)();
   return value;
@@ -3116,9 +3232,9 @@ function store_get(store, store_name, stores2) {
     }
   }
   if (store && IS_UNMOUNTED in stores2) {
-    return get(store);
+    return get$1(store);
   }
-  return get$1(entry.source);
+  return get$2(entry.source);
 }
 function store_set(store, value) {
   store.set(value);
@@ -3305,9 +3421,9 @@ function prop(props, key, flags2, fallback) {
   var was_from_child = false;
   var inner_current_value = /* @__PURE__ */ mutable_source(prop_value);
   var current_value = with_parent_branch(
-    () => /* @__PURE__ */ derived(() => {
+    () => /* @__PURE__ */ derived$1(() => {
       var parent_value = getter();
-      var child_value = get$1(inner_current_value);
+      var child_value = get$2(inner_current_value);
       if (from_child) {
         from_child = false;
         was_from_child = true;
@@ -3320,18 +3436,18 @@ function prop(props, key, flags2, fallback) {
   if (!immutable) current_value.equals = safe_equals;
   return function(value, mutation) {
     if (arguments.length > 0) {
-      const new_value = mutation ? get$1(current_value) : bindable ? proxy(value) : value;
+      const new_value = mutation ? get$2(current_value) : bindable ? proxy(value) : value;
       if (!current_value.equals(new_value)) {
         from_child = true;
         set(inner_current_value, new_value);
         if (fallback_used && fallback_value !== void 0) {
           fallback_value = new_value;
         }
-        untrack(() => get$1(current_value));
+        untrack(() => get$2(current_value));
       }
       return value;
     }
-    return get$1(current_value);
+    return get$2(current_value);
   };
 }
 function cubic_out(t) {
@@ -3390,7 +3506,10 @@ function moveCardById(id, direction) {
     const newIndex = direction === "up" ? index2 - 1 : index2 + 1;
     if (newIndex < 0 || newIndex >= cards.length) return cards;
     const reordered = [...cards];
-    [reordered[index2], reordered[newIndex]] = [reordered[newIndex], reordered[index2]];
+    [reordered[index2], reordered[newIndex]] = [
+      reordered[newIndex],
+      reordered[index2]
+    ];
     return reordered;
   });
 }
@@ -3431,121 +3550,303 @@ function getRandomBellCurveWithMode(min, max, mode) {
   const int = Math.floor(value);
   return int;
 }
+function lerpColor(hex1, hex2, t) {
+  const parseHex = (hex) => parseInt(hex.slice(1), 16);
+  const c1 = parseHex(hex1);
+  const c2 = parseHex(hex2);
+  const r1 = c1 >> 16 & 255;
+  const g1 = c1 >> 8 & 255;
+  const b1 = c1 & 255;
+  const r2 = c2 >> 16 & 255;
+  const g2 = c2 >> 8 & 255;
+  const b2 = c2 & 255;
+  const lerp = (a, b3, t2) => a + (b3 - a) * t2;
+  const r = Math.round(lerp(r1, r2, t));
+  const g = Math.round(lerp(g1, g2, t));
+  const b = Math.round(lerp(b1, b2, t));
+  const toHex = (n) => n.toString(16).padStart(2, "0");
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$b = (e) => e.stopPropagation();
-var on_keydown$7 = (e) => {
+var on_keydown$8 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
-var on_click_1$1 = (__1, handleMove) => handleMove("up");
-var on_click_2$1 = (__2, handleMove) => handleMove("down");
-var root$C = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var on_click_1$6 = (__1, handleMove) => handleMove("up");
+var on_click_2$2 = (__2, handleMove) => handleMove("down");
+var root$M = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$C();
+  var div = root$M();
   div.__click = [on_click$b];
-  div.__keydown = [on_keydown$7];
+  div.__keydown = [on_keydown$8];
   var button = child(div);
-  button.__click = [on_click_1$1, handleMove];
+  button.__click = [on_click_1$6, handleMove];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$1, handleMove];
+  button_1.__click = [on_click_2$2, handleMove];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [handleToggleSpan, $$props];
   append($$anchor, div);
   pop();
 }
 delegate(["click", "keydown"]);
-const actorStores = {};
-const stores = {
-  intelligence: "intelligence",
-  attributePoints: "attributePoints",
-  activePoints: "activePoints",
-  knowledgePoints: "knowledgePoints",
-  languagePoints: "languagePoints",
-  attributeAssignmentLocked: "attributeAssignmentLocked",
-  actorName: "actorName",
-  isShoppingState: "isShoppingState",
-  activeSkillsIds: "activeSkillsIds",
-  knowledgeSkillsIds: "activeSkillsIds",
-  languageSkillsIds: "languageSkillsIds"
-};
-function getActorStore(actorId, storeName, customValue = null) {
-  actorStores[actorId] ?? (actorStores[actorId] = {});
-  if (!actorStores[actorId][storeName]) {
-    let value = customValue;
-    if (value && typeof value === "object") {
-      value = Array.isArray(value) ? [...value] : { ...value };
-    }
-    actorStores[actorId][storeName] = writable(value);
-  }
-  return actorStores[actorId][storeName];
+async function handleClick(_, entity) {
+  if (entity()) await openFilePicker(entity());
 }
-var root_1$g = /* @__PURE__ */ template(`<div class="version-one image-mask"><img role="presentation" alt="metaTypeName"></div>`);
-var on_click$a = (_, actor) => openFilePicker(actor());
-var root_2$9 = /* @__PURE__ */ template(`<div class="version-two image-mask"><img role="presentation" data-edit="img"></div>`);
-var on_keydown$6 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var on_input$1 = (e, updateStoreName) => updateStoreName(e.target.value);
-var root_3$7 = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">cm</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$B = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$L = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+function Image($$anchor, $$props) {
+  push($$props, true);
+  let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
+  onMount(() => {
+    if (entity()) {
+      src(src() || entity().img);
+      title(title() || entity().name);
+      alt(alt() || entity().name);
+    }
+  });
+  var div = root$L();
+  var img = child(div);
+  img.__click = [handleClick, entity];
+  template_effect(() => {
+    set_attribute(img, "src", src());
+    set_attribute(img, "title", title());
+    set_attribute(img, "alt", alt() || title());
+  });
+  append($$anchor, div);
+  pop();
+}
+delegate(["click"]);
+const hooks = {
+  preCreateActor: "preCreateActor",
+  createActor: "createActor",
+  init: "init",
+  renderApplicationV2: "renderApplicationV2",
+  renderChatMessageHTML: "renderChatMessageHTML"
+};
+const flags = {
+  sr3e: "sr3e",
+  core: "core",
+  actor: {
+    isCharacterCreation: "isCharacterCreation",
+    isShoppingState: "isShoppingState",
+    hasAwakened: "hasAwakened",
+    burntOut: "burntOut",
+    attributeAssignmentLocked: "attributeAssignmentLocked",
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
+  }
+};
+const masonryMinWidthFallbackValue = {
+  skillGrid: 4.5
+};
+const inventory = {
+  arsenal: "arsenal",
+  garage: "garage"
+};
+const storeManagers = /* @__PURE__ */ new Map();
+const stores$1 = {
+  actorName: "actorName",
+  activeSkillsIds: "activeSkillsIds",
+  knowledgeSkillsIds: "knowledgeSkillsIds",
+  languageSkillsIds: "languageSkillsIds",
+  isrollcomposeropen: "isrollcomposeropen"
+};
+const _StoreManager = class _StoreManager {
+  constructor(document2) {
+    __privateAdd(this, _document);
+    __privateAdd(this, _persistentStore, {});
+    __privateAdd(this, _actorStores, {});
+    __privateSet(this, _document, document2);
+  }
+  static Subscribe(document2) {
+    if (storeManagers.has(document2.id)) {
+      const handlerData = storeManagers.get(document2.id);
+      handlerData.subscribers++;
+      return handlerData.handler;
+    }
+    const handler = new _StoreManager(document2);
+    storeManagers.set(document2.id, { handler, subscribers: 1 });
+    return handler;
+  }
+  static Unsubscribe(document2) {
+    const handlerData = storeManagers.get(document2.id);
+    handlerData.subscribers--;
+    if (handlerData.subscribers < 1) {
+      storeManagers.delete(document2.id);
+    }
+  }
+  GetStore(dataPath) {
+    const fullPath = `system.${dataPath}`;
+    const value = foundry.utils.getProperty(__privateGet(this, _document).system, dataPath);
+    if (!__privateGet(this, _persistentStore)[dataPath]) {
+      const clonedValue = value && typeof value === "object" ? Array.isArray(value) ? [...value] : { ...value } : value;
+      const store = writable(clonedValue);
+      store.subscribe((newValue) => {
+        foundry.utils.setProperty(__privateGet(this, _document).system, dataPath, newValue);
+        __privateGet(this, _document).update({ [fullPath]: newValue }, { render: false });
+      });
+      __privateGet(this, _persistentStore)[dataPath] = store;
+    }
+    return __privateGet(this, _persistentStore)[dataPath];
+  }
+  GetShallowStore(docId, storeName, customValue = null) {
+    var _a;
+    (_a = __privateGet(this, _actorStores))[docId] ?? (_a[docId] = {});
+    if (!__privateGet(this, _actorStores)[docId][storeName]) {
+      let value = customValue;
+      if (value && typeof value === "object") {
+        value = Array.isArray(value) ? [...value] : { ...value };
+      }
+      __privateGet(this, _actorStores)[docId][storeName] = writable(value);
+    }
+    return __privateGet(this, _actorStores)[docId][storeName];
+  }
+  GetFlagStore(flag) {
+    if (!__privateGet(this, _persistentStore)[flag]) {
+      const currentValue = __privateGet(this, _document).getFlag(flags.sr3e, flag);
+      const store = writable(currentValue);
+      store.subscribe((newValue) => {
+        __privateGet(this, _document).setFlag(flags.sr3e, flag, newValue);
+      });
+      __privateGet(this, _persistentStore)[flag] = store;
+    }
+    return __privateGet(this, _persistentStore)[flag];
+  }
+  /**
+   * Creates a derived Svelte store that combines multiple stores into a single object.
+   * Each key in the resulting object corresponds to a store value, and an additional `sum` property
+   * contains the sum of all store values.
+   *
+   * @param {string} basePath - The base path used to retrieve individual stores.
+   * @param {string[]} keys - An array of keys to identify which stores to combine.
+   * @returns {import('svelte/store').Readable<Object>} A derived Svelte store object with each key's value and a `sum` property.
+   */
+  GetCompositeStore(basePath, keys) {
+    const stores2 = keys.map((key) => this.GetStore(`${basePath}.${key}`));
+    return derived(stores2, ($stores) => {
+      const obj = {};
+      let sum = 0;
+      keys.forEach((key, i) => {
+        obj[key] = $stores[i];
+        sum += $stores[i];
+      });
+      obj.sum = sum;
+      return obj;
+    });
+  }
+};
+_document = new WeakMap();
+_persistentStore = new WeakMap();
+_actorStores = new WeakMap();
+let StoreManager = _StoreManager;
+var root$K = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+function TextInput($$anchor, $$props) {
+  push($$props, true);
+  let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
+  }), oninput = prop($$props, "oninput", 3, () => {
+  }), onkeydown = prop($$props, "onkeydown", 3, () => {
+  });
+  let editableEl;
+  user_effect(() => {
+    if (editableEl && editableEl.innerText !== text2()) {
+      editableEl.innerText = text2() ?? "";
+    }
+  });
+  function handleInput(e) {
+    text2(editableEl.innerText);
+    oninput()(e);
+  }
+  var div = root$K();
+  var div_1 = sibling(child(div), 2);
+  div_1.__input = handleInput;
+  div_1.__keydown = function(...$$args) {
+    var _a;
+    (_a = onkeydown()) == null ? void 0 : _a.apply(this, $$args);
+  };
+  bind_this(div_1, ($$value) => editableEl = $$value, () => editableEl);
+  var node = sibling(div_1, 2);
+  snippet(node, () => $$props.children ?? noop);
+  event("blur", div_1, function(...$$args) {
+    var _a;
+    (_a = onblur()) == null ? void 0 : _a.apply(this, $$args);
+  });
+  append($$anchor, div);
+  pop();
+}
+delegate(["input", "keydown"]);
+var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var root_3$c = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root$J = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $actorNameStore = () => store_get(actorNameStore, "$actorNameStore", $$stores);
   const $isDetailsOpenStore = () => store_get(isDetailsOpenStore, "$isDetailsOpenStore", $$stores);
+  const $actorNameStore = () => store_get(actorNameStore, "$actorNameStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
   let system = proxy(actor().system);
-  let actorNameStore = getActorStore(actor().id, stores.actorName, actor().name);
-  let isDetailsOpenStore = getActorStore(actor().id, "isDetailsOpen", actor().system.profile.isDetailsOpen ?? false);
-  let actorName = state(proxy($actorNameStore()));
-  let isDetailsOpen = state(proxy($isDetailsOpenStore()));
-  let imgPath = state("");
-  user_effect(() => {
-    const metahuman = actor().items.find((i) => i.type === "metahuman");
-    set(imgPath, proxy((metahuman == null ? void 0 : metahuman.img) ?? ""));
+  let actorNameStore = storeManager2.GetShallowStore(actor().id, stores$1.actorName, actor().name);
+  let isDetailsOpenStore = storeManager2.GetStore("profile.isDetailsOpen");
+  proxy($isDetailsOpenStore());
+  let metatype = /* @__PURE__ */ derived$1(() => actor().items.find((i) => i.type === "metatype"));
+  let imgPath = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return ((_a = get$2(metatype)) == null ? void 0 : _a.img) || "";
   });
-  function triggerMasonryReflow() {
+  let imgName = /* @__PURE__ */ derived$1(() => {
     var _a;
-    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
-  }
-  async function handleOutroEnd() {
-    var _a;
-    await tick();
-    (_a = document.querySelector(".sheet-character-masonry-main")) == null ? void 0 : _a.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
-  }
+    return ((_a = get$2(metatype)) == null ? void 0 : _a.name) || "";
+  });
   function toggleDetails() {
-    var _a, _b;
-    set(isDetailsOpen, !get$1(isDetailsOpen));
-    (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-      _a,
+    store_set(isDetailsOpenStore, !$isDetailsOpenStore());
+  }
+  function handleActorNameChange(event2) {
+    store_set(actorNameStore, proxy(event2.target.value));
+  }
+  function cubicInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) * 0.5;
+  }
+  function updateAge(event2) {
+    actor().update(
       {
-        "system.profile.isDetailsOpen": get$1(isDetailsOpen)
+        "system.profile.age": Number(event2.target.innerText.trim())
       },
       { render: false }
     );
-    isDetailsOpenStore.set(get$1(isDetailsOpen));
   }
-  function saveActorName(event2) {
-    var _a, _b;
-    const newName = event2.target.value;
-    (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(_a, { name: newName }, { render: true });
-    actorNameStore.set(newName);
+  function updateHeight(event2) {
+    actor().update(
+      {
+        "system.profile.height": Number(event2.target.innerText.trim())
+      },
+      { render: false }
+    );
   }
-  function cubicInOut(t) {
-    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  function updateWeight(event2) {
+    actor().update(
+      {
+        "system.profile.weight": Number(event2.target.innerText.trim())
+      },
+      { render: false }
+    );
   }
-  function updateStoreName(newName) {
-    set(actorName, proxy(newName));
-    actorNameStore.set(newName);
+  function updateQuote(event2) {
+    actor().update(
+      {
+        "system.profile.quote": event2.target.innerText.trim()
+      },
+      { render: false }
+    );
   }
-  var fragment = root$B();
+  var fragment = root$J();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3556,70 +3857,70 @@ function Dossier($$anchor, $$props) {
   var node_1 = child(div);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$g();
-      var img = child(div_1);
-      template_effect(() => set_attribute(img, "src", get$1(imgPath)));
-      append($$anchor2, div_1);
+      Image($$anchor2, {
+        get src() {
+          return get$2(imgPath);
+        },
+        get title() {
+          return get$2(imgName);
+        }
+      });
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$9();
-      var img_1 = child(div_2);
-      img_1.__click = [on_click$a, actor];
-      template_effect(() => {
-        set_attribute(img_1, "src", actor().img);
-        set_attribute(img_1, "alt", actor().name + "!");
-        set_attribute(img_1, "title", actor().name);
+      Image($$anchor2, {
+        get entity() {
+          return actor();
+        }
       });
-      append($$anchor2, div_2);
     };
     if_block(node_1, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent);
+      if ($isDetailsOpenStore()) $$render(consequent);
       else $$render(alternate, false);
     });
   }
-  var div_3 = sibling(node_1, 2);
-  var div_4 = child(div_3);
-  div_4.__click = toggleDetails;
-  div_4.__keydown = [on_keydown$6, toggleDetails];
-  var text = sibling(child(div_4));
-  var node_2 = sibling(div_4, 2);
+  var div_1 = sibling(node_1, 2);
+  var div_2 = child(div_1);
+  div_2.__click = toggleDetails;
+  div_2.__keydown = [on_keydown$7, toggleDetails];
+  var text2 = sibling(child(div_2));
+  var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_1 = root_3$7();
-      var div_5 = first_child(fragment_1);
+      var fragment_3 = root_3$c();
+      var div_3 = first_child(fragment_3);
+      var div_4 = child(div_3);
+      var input = child(div_4);
+      input.__input = handleActorNameChange;
+      var div_5 = sibling(div_3, 2);
       var div_6 = child(div_5);
-      var input = child(div_6);
-      input.__input = [on_input$1, updateStoreName];
-      var div_7 = sibling(div_5, 2);
+      var div_7 = child(div_6);
       var div_8 = child(div_7);
-      var div_9 = child(div_8);
+      var text_1 = child(div_8);
+      var div_9 = sibling(div_7, 2);
       var div_10 = child(div_9);
-      var text_1 = child(div_10);
-      var div_11 = sibling(div_9, 2);
+      var text_2 = child(div_10);
+      var div_11 = sibling(div_6, 2);
       var div_12 = child(div_11);
-      var text_2 = child(div_12);
-      var div_13 = sibling(div_8, 2);
-      var div_14 = child(div_13);
+      var div_13 = child(div_12);
+      var text_3 = child(div_13);
+      var div_14 = sibling(div_12, 2);
       var div_15 = child(div_14);
-      var text_3 = child(div_15);
-      var div_16 = sibling(div_14, 2);
+      var text_4 = child(div_15);
+      var div_16 = sibling(div_11, 2);
       var div_17 = child(div_16);
-      var text_4 = child(div_17);
-      var div_18 = sibling(div_13, 2);
-      var div_19 = child(div_18);
+      var div_18 = child(div_17);
+      var text_5 = child(div_18);
+      var div_19 = sibling(div_17, 2);
       var div_20 = child(div_19);
-      var text_5 = child(div_20);
-      var div_21 = sibling(div_19, 2);
-      var div_22 = child(div_21);
-      var text_6 = child(div_22);
-      var div_23 = sibling(div_7, 2);
-      var h4 = child(div_23);
+      var text_6 = child(div_20);
+      var div_21 = sibling(div_5, 2);
+      var h4 = child(div_21);
       var text_7 = child(h4);
-      var div_24 = sibling(h4, 2);
-      var text_8 = child(div_24);
+      var div_22 = sibling(h4, 2);
+      var text_8 = child(div_22);
       template_effect(
         ($0, $1, $2, $3) => {
-          set_value(input, get$1(actorName));
+          set_value(input, $actorNameStore());
           set_text(text_1, $0);
           set_text(text_2, system.profile.age);
           set_text(text_3, $1);
@@ -3636,70 +3937,775 @@ function Dossier($$anchor, $$props) {
           () => localize(config().sheet.quote)
         ]
       );
-      event("introend", div_5, triggerMasonryReflow);
-      event("outroend", div_5, handleOutroEnd);
-      event("blur", input, saveActorName);
-      event("keypress", input, (e) => e.key === "Enter" && saveActorName(e));
-      transition(1, div_5, () => slide, () => ({ duration: 100, easing: cubicInOut }));
-      transition(2, div_5, () => slide, () => ({ duration: 50, easing: cubicInOut }));
-      event("blur", div_12, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.age": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_17, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.height": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_22, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.weight": Number(e.target.innerText.trim())
-          },
-          { render: false }
-        );
-      });
-      event("blur", div_24, (e) => {
-        var _a, _b;
-        return (_b = (_a = actor()) == null ? void 0 : _a.update) == null ? void 0 : _b.call(
-          _a,
-          {
-            "system.profile.quote": e.target.innerText.trim()
-          },
-          { render: false }
-        );
-      });
-      event("keypress", div_24, (e) => {
+      event("blur", input, handleActorNameChange);
+      event("keypress", input, (e) => e.key === "Enter" && handleActorNameChange(e));
+      transition(1, div_3, () => slide, () => ({ duration: 100, easing: cubicInOut }));
+      transition(2, div_3, () => slide, () => ({ duration: 50, easing: cubicInOut }));
+      event("blur", div_10, updateAge);
+      event("blur", div_15, updateHeight);
+      event("blur", div_20, updateWeight);
+      event("blur", div_22, updateQuote);
+      event("keypress", div_22, (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           e.currentTarget.blur();
         }
       });
-      append($$anchor2, fragment_1);
+      append($$anchor2, fragment_3);
     };
     if_block(node_2, ($$render) => {
-      if (get$1(isDetailsOpen)) $$render(consequent_1);
+      if ($isDetailsOpenStore()) $$render(consequent_1);
     });
   }
-  template_effect(($0) => set_text(text, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
+  template_effect(($0) => set_text(text2, ` ${$0 ?? ""}`), [() => localize(config().sheet.details)]);
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
 delegate(["click", "keydown", "input"]);
+function handleKeydown(e, increment2, decrement2) {
+  if (e.key === "ArrowRight" || e.key === "+") {
+    e.preventDefault();
+    increment2();
+  } else if (e.key === "ArrowLeft" || e.key === "-") {
+    e.preventDefault();
+    decrement2();
+  }
+}
+var on_click$a = (_, decrement2, $$props) => {
+  var _a;
+  decrement2();
+  (_a = $$props.onDecrement) == null ? void 0 : _a.call($$props);
+};
+var on_click_1$5 = (__1, increment2, $$props) => {
+  var _a;
+  increment2();
+  (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
+};
+var root$I = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
+function Counter($$anchor, $$props) {
+  push($$props, true);
+  let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
+  let editableDiv;
+  function increment2() {
+    value(clampToLimits(value() + 1));
+  }
+  function decrement2() {
+    value(clampToLimits(value() - 1));
+  }
+  function clampToLimits(val) {
+    if (isNaN(val)) return min();
+    return Math.min(Math.max(val, min()), max());
+  }
+  function handleDivInput(e) {
+    const raw = e.target.textContent.trim();
+    const num = Number(raw);
+    const valid = !isNaN(num);
+    const clamped = clampToLimits(num);
+    if (valid) {
+      value(clamped);
+      e.target.textContent = String(clamped);
+    } else {
+      e.target.textContent = String(value());
+    }
+  }
+  onMount(() => {
+    editableDiv.focus();
+    updateDisplay();
+  });
+  function updateDisplay() {
+    editableDiv.textContent = String(value());
+  }
+  user_effect(() => {
+    updateDisplay();
+  });
+  var div = root$I();
+  div.__keydown = [handleKeydown, increment2, decrement2];
+  var button = child(div);
+  button.__click = [on_click$a, decrement2, $$props];
+  var div_1 = sibling(button, 2);
+  div_1.__input = handleDivInput;
+  var text2 = child(div_1);
+  bind_this(div_1, ($$value) => editableDiv = $$value, () => editableDiv);
+  var button_1 = sibling(div_1, 2);
+  button_1.__click = [on_click_1$5, increment2, $$props];
+  template_effect(() => {
+    set_attribute(div, "aria-valuemin", min());
+    set_attribute(div, "aria-valuemax", max());
+    set_attribute(div, "aria-valuenow", value());
+    button.disabled = value() <= min();
+    set_text(text2, value());
+    button_1.disabled = value() >= max();
+  });
+  append($$anchor, div);
+  pop();
+}
+delegate(["keydown", "click", "input"]);
+class ItemDataService {
+  static getAllItemsOfType(name) {
+    return game.items.filter((item2) => item2.type === name);
+  }
+  static getAllmetatypes(metatypes) {
+    return metatypes.filter((m) => {
+      var _a;
+      return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
+    }).map((metatype) => ({
+      name: metatype.name,
+      foundryitemid: metatype.id,
+      priority: metatype.system.priority
+    }));
+  }
+  static getAllMagics(magics) {
+    return [
+      { priority: "E", name: "Unawakened", foundryitemid: "E-foundryItemId" },
+      { priority: "D", name: "Unawakened", foundryitemid: "D-foundryItemId" },
+      { priority: "C", name: "Unawakened", foundryitemid: "C-foundryItemId" },
+      ...magics.map((magic) => {
+        return {
+          priority: magic.system.awakened.priority,
+          name: magic.name,
+          foundryitemid: magic.id
+        };
+      })
+    ];
+  }
+  static getPriorities() {
+    return {
+      attributes: { A: 30, B: 27, C: 24, D: 21, E: 18 },
+      skills: { A: 50, B: 40, C: 34, D: 30, E: 27 },
+      resources: { A: 1e6, B: 4e5, C: 9e4, D: 2e4, E: 5e3 }
+    };
+  }
+  static getDefaultHumanItem() {
+    return {
+      name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
+      type: "metatype",
+      img: "systems/sr3e/textures/ai-generated/humans.webp",
+      system: {
+        agerange: { min: 0, average: 30, max: 100 },
+        physical: {
+          height: { min: 150, average: 170, max: 220 },
+          weight: { min: 50, average: 70, max: 250 }
+        },
+        modifiers: {
+          strength: 0,
+          quickness: 0,
+          body: 0,
+          charisma: 0,
+          intelligence: 0,
+          willpower: 0
+        },
+        attributeLimits: {
+          strength: 6,
+          quickness: 6,
+          body: 6,
+          charisma: 6,
+          intelligence: 6,
+          willpower: 6
+        },
+        movement: {
+          modifier: 3
+        },
+        karma: {
+          factor: 0.1
+        },
+        vision: {
+          type: ""
+        },
+        priority: "E",
+        journalId: ""
+        // Set to a real JournalEntry ID if needed
+      }
+    };
+  }
+  static getDefaultMagic() {
+    return {
+      name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
+      type: "magic",
+      system: {
+        awakened: {
+          archetype: "magician",
+          priority: "A"
+        },
+        magicianData: {
+          magicianType: "Full",
+          tradition: "Bear",
+          drainResistanceAttribute: "Charisma",
+          aspect: "",
+          canAstrallyProject: true,
+          totem: "Bear",
+          spellPoints: 25
+        },
+        adeptData: {
+          powerPoints: 0
+        }
+      }
+    };
+  }
+  static getDifficultieGradings(config) {
+    let difficulty = [
+      "simple",
+      "routine",
+      "average",
+      "challenging",
+      "hard",
+      "strenuous",
+      "extreme",
+      "nearlyimpossible"
+    ];
+    return Object.fromEntries(difficulty.map((key) => [key, localize(config.difficulty[key])]));
+  }
+}
+function swallowDirectional(e) {
+  if (e.key === "Shift" || e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+    e.stopPropagation();
+  }
+}
+var on_click$9 = (__1, modifiersArray) => {
+  set(modifiersArray, proxy([
+    ...get$2(modifiersArray),
+    { name: "Modifier", value: 0 }
+  ]));
+};
+var root_2$g = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_3$b = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_4$a = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
+var root_1$r = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
+function RollComposerComponent($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  const $penalty = () => store_get(penalty, "$penalty", $$stores);
+  const $associatedDicePoolStore = () => store_get(associatedDicePoolStore, "$associatedDicePoolStore", $$stores);
+  const $linkedAttributeStore = () => store_get(linkedAttributeStore, "$linkedAttributeStore", $$stores);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
+  let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
+  let penalty = actorStoreManager.GetStore("health.penalty");
+  $karmaPoolStore();
+  let targetNumber = state(5);
+  let modifiersArray = state(proxy([]));
+  let karmaCost = state(0);
+  let diceBought = state(0);
+  let poolDiceBought = state(0);
+  let modifiersTotal = state(0);
+  let difficulty = state("");
+  let canSubmit = state(true);
+  let isDefaultingAsString = state("false");
+  let isDefaulting = state(false);
+  let title = state("");
+  let associatedDicePoolString = state("");
+  let associatedDicePoolStore;
+  let containerEl;
+  let selectEl;
+  let rollBtn;
+  let clearBtn;
+  let linkedAttributeString;
+  let linkedAttributeStore;
+  let focusables = [];
+  let difficulties = ItemDataService.getDifficultieGradings($$props.config);
+  onMount(() => {
+    updateFocusables();
+    selectEl == null ? void 0 : selectEl.focus();
+    if ($penalty() > 0) {
+      set(modifiersArray, proxy([
+        {
+          name: localize($$props.config.health.penalty),
+          value: -$penalty()
+        }
+      ]));
+    }
+    if ($$props.caller.type === "attribute") {
+      set(title, proxy(localize($$props.config.attributes[$$props.caller.key])));
+    }
+    if ($$props.caller.skillId) {
+      let skill = $$props.actor.items.get($$props.caller.skillId);
+      set(title, proxy($$props.caller.key));
+      console.log("Resolved skill:", skill);
+      if (skill.system.skillType === "active") {
+        linkedAttributeString = skill.system.activeSkill.linkedAttribute;
+        console.log("linkedAttributeString", linkedAttributeString);
+        set(associatedDicePoolString, proxy(skill.system.activeSkill.associatedDicePool));
+        associatedDicePoolStore = actorStoreManager.GetCompositeStore(`dicePools.${get$2(associatedDicePoolString)}`, ["value", "mod"]);
+        console.log("associatedDicePoolStore", $associatedDicePoolStore());
+      } else if (skill.system.skillType === "knowledge") {
+        linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
+      } else if (skill.system.skillType === "language") {
+        linkedAttributeString = skill.system.languageSkill.linkedAttribute;
+        skill.system.languageSkill.readwrite;
+      }
+      if (linkedAttributeString !== "") {
+        linkedAttributeStore = actorStoreManager.GetCompositeStore(`attributes.${linkedAttributeString}`, ["value", "mod", "meta"]);
+        console.log("linkedAttributeStore", $linkedAttributeStore());
+      }
+    }
+  });
+  function updateFocusables() {
+    const selector = get$2(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
+    focusables = Array.from(containerEl.querySelectorAll(selector));
+  }
+  function KarmaCostCalculator() {
+    set(karmaCost, 0.5 * get$2(diceBought) * (get$2(diceBought) + 1));
+  }
+  function AddDiceFromPool() {
+    if ($associatedDicePoolStore() > 0) {
+      set(poolDiceBought, get$2(poolDiceBought) + 1);
+      store_set(associatedDicePoolStore, $associatedDicePoolStore() - 1);
+    }
+  }
+  function RemoveDiceFromPool() {
+  }
+  user_effect(() => {
+    set(isDefaulting, get$2(isDefaultingAsString) === "true");
+    updateFocusables();
+  });
+  user_effect(() => {
+    const baseModifiers = $penalty() > 0 ? [
+      {
+        name: localize($$props.config.health.penalty),
+        value: -$penalty()
+      }
+    ] : [];
+    if (get$2(isDefaulting)) {
+      switch ($$props.caller.type) {
+        case "attribute":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Skill to attribute", value: 4 }
+          ]));
+          break;
+        case "activeSkill":
+        case "knowledgeSkill":
+        case "languageSkill":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Skill to skill", value: 2 }
+          ]));
+          break;
+        case "specialization":
+          set(modifiersArray, proxy([
+            ...baseModifiers,
+            { name: "Specialization to skill", value: 3 }
+          ]));
+          break;
+        default:
+          console.warn(`Unknown caller type for defaulting: ${$$props.caller.type}`);
+          set(canSubmit, false);
+          break;
+      }
+    } else {
+      set(modifiersArray, proxy(baseModifiers));
+    }
+  });
+  user_effect(() => {
+    const tn = Number(get$2(targetNumber));
+    if (!difficulties) return;
+    if (tn === 2) set(difficulty, proxy(difficulties.simple));
+    else if (tn === 3) set(difficulty, proxy(difficulties.routine));
+    else if (tn === 4) set(difficulty, proxy(difficulties.average));
+    else if (tn === 5) set(difficulty, proxy(difficulties.challenging));
+    else if (tn === 6 || tn === 7) set(difficulty, proxy(difficulties.hard));
+    else if (tn === 8) set(difficulty, proxy(difficulties.strenuous));
+    else if (tn === 9) set(difficulty, proxy(difficulties.extreme));
+    else if (tn >= 10) set(difficulty, proxy(difficulties.nearlyimpossible));
+  });
+  function Reset() {
+    set(targetNumber, 5);
+    set(modifiersArray, proxy($penalty() > 0 ? [
+      {
+        name: localize($$props.config.health.penalty),
+        value: -$penalty()
+      }
+    ] : []));
+    set(diceBought, 0);
+    set(karmaCost, 0);
+    set(isDefaultingAsString, "false");
+    selectEl == null ? void 0 : selectEl.focus();
+  }
+  user_effect(() => {
+    set(modifiersTotal, proxy(get$2(modifiersArray).reduce((acc, val) => acc + val.value, 0)));
+  });
+  user_effect(() => {
+    set(canSubmit, get$2(targetNumber) + get$2(modifiersTotal) < 2);
+  });
+  function Submit() {
+    store_set(karmaPoolStore, $karmaPoolStore() - get$2(karmaCost));
+    $$props.onclose({
+      dice: $$props.caller.dice + get$2(diceBought),
+      attributeName: $$props.caller.key,
+      options: {
+        targetNumber: get$2(targetNumber),
+        modifiers: get$2(modifiersArray),
+        explodes: !get$2(isDefaulting)
+      }
+    });
+  }
+  function getRoot(el) {
+    while (el && !focusables.includes(el)) el = el.parentElement;
+    return el;
+  }
+  function focusNext() {
+    var _a;
+    const idx = focusables.indexOf(getRoot(document.activeElement));
+    if (idx !== -1) (_a = focusables[(idx + 1) % focusables.length]) == null ? void 0 : _a.focus();
+  }
+  function handleKey(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      const root2 = getRoot(document.activeElement);
+      if (root2 === rollBtn) {
+        Submit();
+        return;
+      }
+      if (root2 === clearBtn) {
+        Reset();
+        return;
+      }
+      focusNext();
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      e.stopPropagation();
+      const root2 = getRoot(document.activeElement);
+      if (root2 === rollBtn) {
+        Reset();
+        return;
+      }
+      focusNext();
+    }
+  }
+  function handleSelectKeydown(e) {
+    if (["ArrowUp", "w", "W"].includes(e.key)) {
+      e.preventDefault();
+      selectEl.selectedIndex = 0;
+      set(isDefaultingAsString, proxy(selectEl.value));
+    }
+    if (["ArrowDown", "s", "S"].includes(e.key)) {
+      e.preventDefault();
+      selectEl.selectedIndex = 1;
+      set(isDefaultingAsString, proxy(selectEl.value));
+    }
+  }
+  var div = root_1$r();
+  div.__keydown = [swallowDirectional];
+  var div_1 = child(div);
+  var h1 = child(div_1);
+  var text2 = child(h1);
+  var select = sibling(h1, 4);
+  select.__keydown = handleSelectKeydown;
+  var option = child(select);
+  option.value = null == (option.__value = "false") ? "" : "false";
+  var option_1 = sibling(option);
+  option_1.value = null == (option_1.__value = "true") ? "" : "true";
+  bind_this(select, ($$value) => selectEl = $$value, () => selectEl);
+  var div_2 = sibling(div_1, 2);
+  var h4 = sibling(child(div_2), 2);
+  var text_1 = child(h4);
+  var node = sibling(h4, 2);
+  Counter(node, {
+    min: "2",
+    get value() {
+      return get$2(targetNumber);
+    },
+    set value($$value) {
+      set(targetNumber, proxy($$value));
+    }
+  });
+  var div_3 = sibling(div_2, 2);
+  var button = sibling(child(div_3), 2);
+  button.__click = [on_click$9, modifiersArray];
+  var h4_1 = sibling(button, 2);
+  var text_2 = child(h4_1);
+  var node_1 = sibling(h4_1, 2);
+  each(node_1, 17, () => get$2(modifiersArray), index, ($$anchor2, modifier, i) => {
+    var div_4 = root_2$g();
+    var h4_2 = child(div_4);
+    var text_3 = child(h4_2);
+    var node_2 = sibling(h4_2, 2);
+    Counter(node_2, {
+      get value() {
+        return get$2(modifier).value;
+      },
+      set value($$value) {
+        get$2(modifier).value = $$value;
+      }
+    });
+    var button_1 = sibling(node_2, 2);
+    button_1.__click = () => {
+      set(modifiersArray, proxy(get$2(modifiersArray).filter((_, j) => j !== i)));
+    };
+    template_effect(() => set_text(text_3, get$2(modifier).name));
+    append($$anchor2, div_4);
+  });
+  var node_3 = sibling(div_3, 2);
+  {
+    var consequent = ($$anchor2) => {
+      var div_5 = root_3$b();
+      var h1_1 = child(div_5);
+      var text_4 = child(h1_1);
+      var h4_3 = sibling(h1_1, 2);
+      var text_5 = child(h4_3);
+      var node_4 = sibling(h4_3, 2);
+      Counter(node_4, {
+        class: "karma-counter",
+        min: "0",
+        get max() {
+          return $linkedAttributeStore().sum;
+        },
+        onIncrement: AddDiceFromPool,
+        onDecrement: RemoveDiceFromPool,
+        get value() {
+          return get$2(poolDiceBought);
+        },
+        set value($$value) {
+          set(poolDiceBought, proxy($$value));
+        }
+      });
+      template_effect(
+        ($0) => {
+          set_text(text_4, $0);
+          set_text(text_5, `Dice Added: ${get$2(poolDiceBought) ?? ""}`);
+        },
+        [
+          () => localize($$props.config.dicepools[get$2(associatedDicePoolString)])
+        ]
+      );
+      append($$anchor2, div_5);
+    };
+    if_block(node_3, ($$render) => {
+      if (get$2(associatedDicePoolString) !== "") $$render(consequent);
+    });
+  }
+  var node_5 = sibling(node_3, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div_6 = root_4$a();
+      var h4_4 = sibling(child(div_6), 2);
+      var text_6 = child(h4_4);
+      var node_6 = sibling(h4_4, 2);
+      Counter(node_6, {
+        class: "karma-counter",
+        min: "0",
+        get max() {
+          return $$props.actor.system.karma.karmaPool;
+        },
+        onIncrement: KarmaCostCalculator,
+        onDecrement: KarmaCostCalculator,
+        get value() {
+          return get$2(diceBought);
+        },
+        set value($$value) {
+          set(diceBought, proxy($$value));
+        }
+      });
+      template_effect(() => set_text(text_6, `Extra Dice Cost: ${get$2(karmaCost) ?? ""}`));
+      append($$anchor2, div_6);
+    };
+    if_block(node_5, ($$render) => {
+      if (!get$2(isDefaulting)) $$render(consequent_1);
+    });
+  }
+  var button_2 = sibling(node_5, 2);
+  button_2.__click = Submit;
+  bind_this(button_2, ($$value) => rollBtn = $$value, () => rollBtn);
+  var button_3 = sibling(button_2, 2);
+  button_3.__click = Reset;
+  bind_this(button_3, ($$value) => clearBtn = $$value, () => clearBtn);
+  bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
+  template_effect(() => {
+    set_text(text2, get$2(title));
+    set_text(text_1, get$2(difficulty));
+    set_text(text_2, `Modifiers Total: ${get$2(modifiersTotal) ?? ""}`);
+    button_2.disabled = get$2(canSubmit);
+  });
+  event("keydown", div, handleKey, true);
+  bind_select_value(select, () => get$2(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["keydown", "click"]);
+var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var root_2$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var root_3$a = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$q = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var on_keydown_2$1 = (e, Roll2) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(e);
+};
+var root_4$9 = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+function AttributeCard($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $value = () => store_get(value, "$value", $$stores);
+  const $total = () => store_get(total, "$total", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
+  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
+  const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  let total = storeManager2.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
+  let value = storeManager2.GetStore(`attributes.${$$props.key}.value`);
+  let attributePointStore = storeManager2.GetStore("creation.attributePoints");
+  let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
+  let attributeAssignmentLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let metatype = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metatype") : null;
+  });
+  let attributeLimit = /* @__PURE__ */ derived$1(() => {
+    var _a, _b, _c;
+    return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$2(metatype)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
+  });
+  let isMinLimit = /* @__PURE__ */ derived$1(() => $value() <= 1);
+  let isMaxLimit = /* @__PURE__ */ derived$1(() => get$2(attributeLimit) ? $total().sum >= get$2(attributeLimit) : false);
+  let activeModal = null;
+  let isModalOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
+  function add(change) {
+    if (!$attributeAssignmentLockedStore()) {
+      const newPoints = $attributePointStore() - change;
+      if (newPoints < 0) return;
+      store_set(value, $value() + change);
+      store_set(attributePointStore, newPoints);
+    }
+  }
+  const increment2 = () => {
+    if (!get$2(isMaxLimit)) add(1);
+  };
+  const decrement2 = () => {
+    if (!get$2(isMinLimit)) add(-1);
+  };
+  function handleEscape(e) {
+    if (e.key === "Escape" && activeModal) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      store_set(isModalOpen, false);
+      activeModal = null;
+    }
+  }
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+    if (activeModal) {
+      unmount(activeModal);
+      store_set(isModalOpen, false);
+      activeModal = null;
+    }
+  });
+  async function Roll2(e) {
+    if (e.shiftKey) {
+      if ($isModalOpen()) return;
+      store_set(isModalOpen, true);
+      const options = await new Promise((resolve) => {
+        activeModal = mount(RollComposerComponent, {
+          target: document.querySelector(".composer-position"),
+          props: {
+            actor: $$props.actor,
+            config: CONFIG.sr3e,
+            caller: {
+              key: $$props.key,
+              value: $value(),
+              type: "attribute",
+              dice: $total().sum
+            },
+            onclose: (result) => {
+              unmount(activeModal);
+              store_set(isModalOpen, false);
+              activeModal = null;
+              resolve(result);
+            }
+          }
+        });
+      });
+      if (options) {
+        await $$props.actor.AttributeRoll(options.dice, options.attributeName, options.options);
+      }
+    } else {
+      await $$props.actor.AttributeRoll($total().sum, $$props.key);
+    }
+    e.preventDefault();
+  }
+  var fragment = comment();
+  event("keydown", $window, handleEscape, true);
+  var node = first_child(fragment);
+  {
+    var consequent_2 = ($$anchor2) => {
+      var div = root_1$q();
+      var h4 = child(div);
+      var text2 = child(h4);
+      var div_1 = sibling(h4, 4);
+      var node_1 = child(div_1);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$f();
+          i_1.__click = decrement2;
+          i_1.__keydown = [on_keydown$6, decrement2];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent);
+        });
+      }
+      var h1 = sibling(node_1, 2);
+      var text_1 = child(h1);
+      var node_2 = sibling(h1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i_2 = root_3$a();
+          i_2.__click = increment2;
+          i_2.__keydown = [on_keydown_1$2, increment2];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$2(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_2, ($$render) => {
+          if ("meta" in $$props.stat) $$render(consequent_1);
+        });
+      }
+      template_effect(
+        ($0) => {
+          toggle_class(div, "button", !$isShoppingState());
+          set_text(text2, $0);
+          set_text(text_1, $total().sum);
+        },
+        [
+          () => localize($$props.localization[$$props.key])
+        ]
+      );
+      append($$anchor2, div);
+    };
+    var alternate = ($$anchor2) => {
+      var div_2 = root_4$9();
+      div_2.__click = Roll2;
+      div_2.__keydown = [on_keydown_2$1, Roll2];
+      var h4_1 = child(div_2);
+      var text_2 = child(h4_1);
+      var div_3 = sibling(h4_1, 4);
+      var h1_1 = child(div_3);
+      var text_3 = child(h1_1);
+      template_effect(
+        ($0) => {
+          toggle_class(div_2, "button", !$isShoppingState());
+          set_text(text_2, $0);
+          set_text(text_3, $total().sum);
+        },
+        [
+          () => localize($$props.localization[$$props.key])
+        ]
+      );
+      append($$anchor2, div_2);
+    };
+    if_block(node, ($$render) => {
+      if ($isShoppingState()) $$render(consequent_2);
+      else $$render(alternate, false);
+    });
+  }
+  append($$anchor, fragment);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -5258,333 +6264,124 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-const hooks = {
-  preCreateActor: "preCreateActor",
-  createActor: "createActor",
-  init: "init",
-  renderApplicationV2: "renderApplicationV2"
-};
-const flags = {
-  sr3e: "sr3e",
-  core: "core",
-  actor: {
-    isCharacterCreation: "isCharacterCreation",
-    isShoppingState: "isShoppingState",
-    hasAwakened: "hasAwakened",
-    burntOut: "burntOut",
-    attributeAssignmentLocked: "attributeAssignmentLocked",
-    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
-  }
-};
-const masonryMinWidthFallbackValue = {
-  attributeGrid: 13,
-  skillCategoryGrid: 10,
-  skillGrid: 4.5
-};
-var root$A = /* @__PURE__ */ template(`<div><h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"></h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div></div></div>`);
-function Initiative($$anchor, $$props) {
+var root_1$p = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_3$9 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root$H = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let gridContainer;
-  let attributes = proxy(actor().system.attributes);
-  let intelligenceBaseTotal = /* @__PURE__ */ derived(() => attributes.intelligence.value + attributes.intelligence.mod);
-  let intelligence = /* @__PURE__ */ derived(() => get$1(intelligenceBaseTotal) + (attributes.intelligence.meta ?? 0));
-  let quicknessBaseTotal = /* @__PURE__ */ derived(() => attributes.quickness.value + attributes.quickness.mod);
-  let quickness = /* @__PURE__ */ derived(() => get$1(quicknessBaseTotal) + (attributes.quickness.meta ?? 0));
-  let reaction = /* @__PURE__ */ derived(() => Math.floor(get$1(intelligence) + get$1(quickness) * 0.5));
-  let augmentedReaction = /* @__PURE__ */ derived(() => get$1(reaction));
-  let initiativeDice = 1;
-  user_effect(() => {
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
-    });
-    return result.cleanup;
-  });
-  var div = root$A();
-  var h1 = child(div);
-  var text = child(h1);
-  var div_1 = sibling(h1, 2);
-  var div_2 = sibling(child(div_1), 4);
-  var h4 = sibling(child(div_2), 2);
-  var text_1 = child(h4);
-  var h1_1 = sibling(h4, 2);
-  h1_1.textContent = initiativeDice;
-  var div_3 = sibling(div_2, 2);
-  var h4_1 = sibling(child(div_3), 2);
-  var text_2 = child(h4_1);
-  var h1_2 = sibling(h4_1, 2);
-  var text_3 = child(h1_2);
-  var div_4 = sibling(div_3, 2);
-  var h4_2 = sibling(child(div_4), 2);
-  var text_4 = child(h4_2);
-  var h1_3 = sibling(h4_2, 2);
-  var text_5 = child(h1_3);
-  bind_this(div_1, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(
-    ($0, $1, $2, $3) => {
-      set_text(text, $0);
-      set_text(text_1, $1);
-      set_text(text_2, $2);
-      set_text(text_3, get$1(reaction));
-      set_text(text_4, $3);
-      set_text(text_5, get$1(augmentedReaction));
-    },
-    [
-      () => localize(config().initiative.initiative),
-      () => localize(config().initiative.initiativeDice),
-      () => localize(config().initiative.reaction),
-      () => localize(config().initiative.augmentedReaction)
-    ]
-  );
-  append($$anchor, div);
-  pop();
-}
-var on_keydown$5 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var on_keydown_1$1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_1$f = /* @__PURE__ */ template(`<div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div>`);
-var root_2$8 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$z = /* @__PURE__ */ template(`<div class="stat-card"><h4 class="no-margin"> </h4> <div class="stat-card-background"></div> <!></div>`);
-function AttributeCardCreationState($$anchor, $$props) {
-  var _a, _b;
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  let stat = prop($$props, "stat", 7);
-  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
-  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
-  let total = /* @__PURE__ */ derived(() => {
-    var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
-  });
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence);
-  let metaHuman = /* @__PURE__ */ derived(() => (() => {
-    var _a2;
-    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
-    return $$props.actor.items.find((i) => i.type === "metahuman");
-  })());
-  let attributeLimit = /* @__PURE__ */ derived(() => {
-    var _a2, _b2, _c;
-    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
-  });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
-  function add(change) {
-    if (!$attributeAssignmentLocked()) {
-      const newPoints = $attributePointStore() + change * -1;
-      if (newPoints < 0) return;
-      stat().value += change;
-      store_set(attributePointStore, newPoints);
-      $$props.actor.update(
-        {
-          [`system.attributes.${$$props.key}.value`]: stat().value,
-          "system.creation.attributePoints": $attributePointStore()
-        },
-        { render: false }
-      );
-      intelligenceStore.set($$props.actor.system.attributes.intelligence.value + $$props.actor.system.attributes.intelligence.mod + $$props.actor.system.attributes.intelligence.meta);
-    } else {
-      console.warn("There is an error in charactercreation");
-    }
-  }
-  const increment2 = () => {
-    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
-      add(1);
-    }
-  };
-  const decrement2 = () => {
-    if (get$1(isMinLimit)) return;
-    if (get$1(total) > 0) add(-1);
-  };
-  user_effect(() => {
-    if (stat()) {
-      set(value, proxy(stat().value));
-      set(mod, proxy(stat().mod));
-    }
-  });
-  var div = root$z();
-  var h4 = child(div);
-  var text = child(h4);
-  var node = sibling(h4, 4);
+  var div = root$H();
+  var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
-      var div_1 = root_1$f();
-      var i_1 = child(div_1);
-      i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$5, decrement2];
-      var h1 = sibling(i_1, 2);
-      var text_1 = child(h1);
-      var i_2 = sibling(h1, 2);
-      i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$1, increment2];
-      template_effect(() => {
-        set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
-        set_text(text_1, get$1(total));
-        set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
-      });
-      append($$anchor2, div_1);
-    };
-    var alternate = ($$anchor2) => {
-      var h1_1 = root_2$8();
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, h1_1);
+      var h4 = root_1$p();
+      var text2 = child(h4);
+      template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
+      append($$anchor2, h4);
     };
     if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent);
-      else $$render(alternate, false);
+      var _a;
+      if (((_a = $$props.label) == null ? void 0 : _a.length) > 0) $$render(consequent);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
-    () => localize($$props.localization[$$props.key])
-  ]);
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
-var on_keydown$4 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$7 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$6 = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$e = /* @__PURE__ */ template(`<div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div>`);
-var root_4$3 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$y = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <!></div>`);
-function AttributeCardKarmaState($$anchor, $$props) {
-  var _a, _b;
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  let stat = prop($$props, "stat", 7);
-  let isShoppingState = getActorStore($$props.actor.id, stores.isShoppingState, $$props.actor.getFlag(flags.sr3e, flags.isShoppingState));
-  const attributePointStore = getActorStore($$props.actor.id, stores.attributePoints);
-  let value = state(proxy(((_a = stat()) == null ? void 0 : _a.value) ?? 0));
-  let mod = state(proxy(((_b = stat()) == null ? void 0 : _b.mod) ?? 0));
-  let total = /* @__PURE__ */ derived(() => {
-    var _a2;
-    return get$1(value) + get$1(mod) + (((_a2 = stat()) == null ? void 0 : _a2.meta) ?? 0);
-  });
-  getActorStore($$props.actor.id, stores.intelligence);
-  let metaHuman = /* @__PURE__ */ derived(() => (() => {
-    var _a2;
-    if (!("meta" in stat()) || !((_a2 = $$props.actor) == null ? void 0 : _a2.items)) return null;
-    return $$props.actor.items.find((i) => i.type === "metahuman");
-  })());
-  let attributeLimit = /* @__PURE__ */ derived(() => {
-    var _a2, _b2, _c;
-    return $$props.key === "magic" || !("meta" in stat()) ? null : ((_c = (_b2 = (_a2 = get$1(metaHuman)) == null ? void 0 : _a2.system) == null ? void 0 : _b2.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
-  });
-  let isMinLimit = /* @__PURE__ */ derived(() => get$1(value) <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived(() => get$1(attributeLimit) ? get$1(total) >= get$1(attributeLimit) : false);
-  function add(change) {
-    console.warn("TODO: Implement karma shopping");
-    return;
-  }
-  const increment2 = () => {
-    if (!get$1(attributeLimit) || get$1(total) < get$1(attributeLimit)) {
-      add();
-    }
-  };
-  const decrement2 = () => {
-    if (get$1(isMinLimit)) return;
-    if (get$1(total) > 0) add();
-  };
-  user_effect(() => {
-    if (stat()) {
-      set(value, proxy(stat().value));
-      set(mod, proxy(stat().mod));
-    }
-  });
-  var div = root$y();
-  var h4 = sibling(child(div), 2);
-  var text = child(h4);
-  var node = sibling(h4, 2);
+  var node_1 = sibling(node, 2);
   {
-    var consequent_2 = ($$anchor2) => {
-      var div_1 = root_1$e();
-      var node_1 = child(div_1);
-      {
-        var consequent = ($$anchor3) => {
-          var i_1 = root_2$7();
-          i_1.__click = decrement2;
-          i_1.__keydown = [on_keydown$4, decrement2];
-          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_1);
-        };
-        if_block(node_1, ($$render) => {
-          if ($isShoppingState()) $$render(consequent);
-        });
-      }
-      var h1 = sibling(node_1, 2);
-      var text_1 = child(h1);
-      var node_2 = sibling(h1, 2);
-      {
-        var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$6();
-          i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1, increment2];
-          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$1(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_2);
-        };
-        if_block(node_2, ($$render) => {
-          if ($isShoppingState()) $$render(consequent_1);
-        });
-      }
-      template_effect(() => set_text(text_1, get$1(total)));
-      append($$anchor2, div_1);
+    var consequent_1 = ($$anchor2) => {
+      var fragment = comment();
+      var node_2 = first_child(fragment);
+      snippet(node_2, () => $$props.children ?? noop);
+      append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var h1_1 = root_4$3();
-      var text_2 = child(h1_1);
-      template_effect(() => set_text(text_2, get$1(total)));
-      append($$anchor2, h1_1);
+      var h1 = root_3$9();
+      var text_1 = child(h1);
+      template_effect(() => set_text(text_1, $$props.value));
+      append($$anchor2, h1);
     };
-    if_block(node, ($$render) => {
-      if ("meta" in stat()) $$render(consequent_2);
+    if_block(node_1, ($$render) => {
+      if ($$props.children) $$render(consequent_1);
       else $$render(alternate, false);
     });
   }
-  template_effect(($0) => set_text(text, $0), [
-    () => localize($$props.localization[$$props.key])
-  ]);
   append($$anchor, div);
   pop();
-  $$cleanup();
 }
-delegate(["click", "keydown"]);
-var root$x = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root$G = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+function MasonryGrid($$anchor, $$props) {
+  push($$props, true);
+  let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
+  let gridContainer;
+  let masonryInstance;
+  user_effect(() => {
+    if (!masonryInstance) {
+      parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const result = setupMasonry({
+        container: gridContainer,
+        itemSelector: `.${itemSelector()}`,
+        gridSizerSelector: `.${gridPrefix()}-grid-sizer`,
+        gutterSizerSelector: `.${gridPrefix()}-gutter-sizer`
+        //minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
+      });
+      masonryInstance = result.masonryInstance;
+      return result.cleanup;
+    }
+  });
+  user_effect(async () => {
+    gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  });
+  var div = root$G();
+  var div_1 = child(div);
+  var div_2 = sibling(div_1, 2);
+  var node = sibling(div_2, 2);
+  snippet(node, () => $$props.children ?? noop);
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(() => {
+    set_class(div, `${gridPrefix()}-masonry-grid`);
+    set_class(div_1, `${gridPrefix()}-grid-sizer`);
+    set_class(div_2, `${gridPrefix()}-gutter-sizer`);
+  });
+  event("masonry-reflow", div, () => {
+    masonryInstance.layout();
+  });
+  append($$anchor, div);
+  pop();
+}
+var root_1$o = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  const $essence = () => store_get(essence, "$essence", $$stores);
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
+  const $magic = () => store_get(magic, "$magic", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
-  let gridContainer;
+  proxy(actor().items);
+  let isAwakened = state(false);
   let localization = config().attributes;
-  let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.attributeAssignmentLocked));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  storeManager2.GetFlagStore(flags.attributeAssignmentLocked);
+  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+  let magic = storeManager2.GetCompositeStore("attributes.magic", ["value", "mod"]);
+  let essence = storeManager2.GetStore("attributes.essence");
+  let magicValueStore = storeManager2.GetStore("attributes.magic.value");
+  let magicCap = /* @__PURE__ */ derived$1(() => Math.floor($essence()));
+  let reaction = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum) * 0.5));
+  let augmentedReaction = /* @__PURE__ */ derived$1(() => get$2(reaction) + getTotalModifiersFromItems());
+  function getTotalModifiersFromItems() {
+    ui.notifications.warn("This function is not implemented yet. Attributes.svelte");
+    return 0;
+  }
   user_effect(() => {
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
-    });
-    return result.cleanup;
+    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
+    store_set(magicValueStore, proxy(get$2(magicCap)));
   });
-  var fragment = root$x();
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  var fragment = root$F();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5592,17 +6389,18 @@ function Attributes($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(attributes), index, ($$anchor2, $$item) => {
-    let key = () => get$1($$item)[0];
-    let stat = () => get$1($$item)[1];
-    var fragment_1 = comment();
-    var node_2 = first_child(fragment_1);
-    {
-      var consequent = ($$anchor3) => {
-        AttributeCardCreationState($$anchor3, {
+  var text2 = child(h1);
+  var node_1 = sibling(h1, 2);
+  MasonryGrid(node_1, {
+    itemSelector: "stat-card",
+    gridPrefix: "attribute",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$o();
+      var node_2 = first_child(fragment_1);
+      each(node_2, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor3, $$item) => {
+        let key = () => get$2($$item)[0];
+        let stat = () => get$2($$item)[1];
+        AttributeCard($$anchor3, {
           get actor() {
             return actor();
           },
@@ -5614,57 +6412,87 @@ function Attributes($$anchor, $$props) {
             return key();
           }
         });
-      };
-      var alternate = ($$anchor3) => {
-        AttributeCardKarmaState($$anchor3, {
-          get actor() {
-            return actor();
-          },
-          get stat() {
-            return stat();
-          },
-          localization,
-          get key() {
-            return key();
-          }
-        });
-      };
-      if_block(node_2, ($$render) => {
-        if (!$attributeAssignmentLocked()) $$render(consequent);
-        else $$render(alternate, false);
       });
-    }
-    append($$anchor2, fragment_1);
+      var node_3 = sibling(node_2, 2);
+      {
+        var consequent = ($$anchor3) => {
+          StatCard$1($$anchor3, {
+            get label() {
+              return config().magic.magic;
+            },
+            get value() {
+              return $magic().sum;
+            }
+          });
+        };
+        if_block(node_3, ($$render) => {
+          if (get$2(isAwakened)) $$render(consequent);
+        });
+      }
+      var node_4 = sibling(node_3, 2);
+      StatCard$1(node_4, {
+        get label() {
+          return config().initiative.reaction;
+        },
+        get value() {
+          return get$2(reaction);
+        }
+      });
+      var node_5 = sibling(node_4, 2);
+      StatCard$1(node_5, {
+        get label() {
+          return config().initiative.augmentedReaction;
+        },
+        get value() {
+          return get$2(augmentedReaction);
+        }
+      });
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
   });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
-    () => localize(config().attributes.attributes)
-  ]);
+  template_effect(($0) => set_text(text2, $0), [() => localize(localization.attributes)]);
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-var root$w = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_2$e = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_1$n = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$E = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
+  const $willpower = () => store_get(willpower, "$willpower", $$stores);
+  const $charisma = () => store_get(charisma, "$charisma", $$stores);
+  const $magic = () => store_get(magic, "$magic", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let dicePools = proxy(actor().system.dicePools);
-  let localization = config().dicepools;
-  let gridContainer;
-  const isShoppingState = false;
+  let isAwakened = state(false);
   user_effect(() => {
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
-    });
-    return result.cleanup;
+    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
   });
-  var fragment = root$w();
+  const storeManager2 = StoreManager.Subscribe(actor());
+  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let willpower = storeManager2.GetCompositeStore("attributes.willpower", ["value", "mod", "meta"]);
+  let charisma = storeManager2.GetCompositeStore("attributes.charisma", ["value", "mod", "meta"]);
+  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+  let magic = storeManager2.GetCompositeStore("attributes.magic", ["value", "mod"]);
+  storeManager2.GetStore("dicePools.combat.value");
+  storeManager2.GetStore("dicePools.control.value");
+  storeManager2.GetStore("dicePools.hacking.value");
+  let combatPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5));
+  let controlPool = 999;
+  let hackingPool = 999;
+  storeManager2.GetStore("dicePools.astral.value");
+  storeManager2.GetStore("dicePools.spell.value");
+  let astralPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5));
+  let spellPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5));
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  var fragment = root$E();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5672,54 +6500,93 @@ function DicePools($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(dicePools), index, ($$anchor2, $$item) => {
-    let key = () => get$1($$item)[0];
-    let stat = () => get$1($$item)[1];
-    AttributeCardKarmaState($$anchor2, {
-      get actor() {
-        return actor();
-      },
-      get stat() {
-        return stat();
-      },
-      localization,
-      get key() {
-        return key();
-      },
-      isShoppingState
-    });
+  var text2 = child(h1);
+  var node_1 = sibling(h1, 2);
+  MasonryGrid(node_1, {
+    itemSelector: "stat-card",
+    gridPrefix: "attribute",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$n();
+      var node_2 = first_child(fragment_1);
+      StatCard$1(node_2, {
+        get label() {
+          return config().dicepools.combat;
+        },
+        get value() {
+          return get$2(combatPool);
+        }
+      });
+      var node_3 = sibling(node_2, 2);
+      StatCard$1(node_3, {
+        get label() {
+          return config().dicepools.control;
+        },
+        value: controlPool
+      });
+      var node_4 = sibling(node_3, 2);
+      StatCard$1(node_4, {
+        get label() {
+          return config().dicepools.hacking;
+        },
+        value: hackingPool
+      });
+      var node_5 = sibling(node_4, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var fragment_2 = root_2$e();
+          var node_6 = first_child(fragment_2);
+          StatCard$1(node_6, {
+            get label() {
+              return config().dicepools.astral;
+            },
+            get value() {
+              return get$2(astralPool);
+            }
+          });
+          var node_7 = sibling(node_6, 2);
+          StatCard$1(node_7, {
+            get label() {
+              return config().dicepools.spell;
+            },
+            get value() {
+              return get$2(spellPool);
+            }
+          });
+          append($$anchor3, fragment_2);
+        };
+        if_block(node_5, ($$render) => {
+          if (get$2(isAwakened)) $$render(consequent);
+        });
+      }
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
   });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().dicepools.dicepools)
   ]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
-var root$v = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <!></div>`, 1);
+var root_1$m = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$D = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let movement = proxy(actor().system.movement);
-  let localization = config().movement;
-  let gridContainer;
-  const isShoppingState = false;
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+  let runningmodifier = state(3);
   user_effect(() => {
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
-    });
-    return result.cleanup;
+    const metaType = actor().items.find((i) => i.type === "metatype");
+    set(runningmodifier, proxy(metaType.system.movement.modifier));
   });
-  var fragment = root$v();
+  proxy($quickness().sum);
+  let running = /* @__PURE__ */ derived$1(() => $quickness().sum * get$2(runningmodifier));
+  var fragment = root$D();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -5727,47 +6594,50 @@ function Movement($$anchor, $$props) {
     }
   });
   var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var node_1 = sibling(child(div), 4);
-  each(node_1, 17, () => Object.entries(movement), index, ($$anchor2, $$item) => {
-    let key = () => get$1($$item)[0];
-    let stat = () => get$1($$item)[1];
-    AttributeCardKarmaState($$anchor2, {
-      get actor() {
-        return actor();
-      },
-      get stat() {
-        return stat();
-      },
-      localization,
-      get key() {
-        return key();
-      },
-      isShoppingState
-    });
+  var text2 = child(h1);
+  var node_1 = sibling(h1, 2);
+  MasonryGrid(node_1, {
+    itemSelector: "stat-card",
+    gridPrefix: "attribute",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$m();
+      var node_2 = first_child(fragment_1);
+      StatCard$1(node_2, {
+        get label() {
+          return config().movement.walking;
+        },
+        get value() {
+          return $quickness().sum;
+        }
+      });
+      var node_3 = sibling(node_2, 2);
+      StatCard$1(node_3, {
+        get label() {
+          return config().movement.running;
+        },
+        get value() {
+          return get$2(running);
+        }
+      });
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
   });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
-function handleKeyDown(e) {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.target.blur();
-  }
-}
-function increment$3() {
+function increment$1() {
   console.log("increment Entered");
 }
 function decrement$3() {
   console.log("decrement Entered");
 }
-function deleteThis$3(_, isCharacterCreation, specialization, $baseValue, baseValue, dispatch) {
-  if (isCharacterCreation) {
+function deleteThis$3(_, $isCharacterCreationStore, isCharacterCreationStore, specialization, $baseValue, baseValue, dispatch) {
+  if ($isCharacterCreationStore()) {
     if (specialization().value === $baseValue() + 2) {
       specialization(specialization().value = 0, true);
       store_set(baseValue, $baseValue() + 1);
@@ -5776,25 +6646,23 @@ function deleteThis$3(_, isCharacterCreation, specialization, $baseValue, baseVa
   }
   dispatch("delete", { specialization: specialization() });
 }
-var root$u = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="editable-name" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <h1 class="specialization-value"> </h1></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
+var root_1$l = /* @__PURE__ */ template(`<h1 class="embedded-value no-margin"> </h1>`);
+var root$C = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
 function SpecializationCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
   const $baseValue = () => store_get(baseValue, "$baseValue", $$stores);
-  let specialization = prop($$props, "specialization", 15), actor = prop($$props, "actor", 19, () => ({})), skill = prop($$props, "skill", 19, () => ({}));
+  let specialization = prop($$props, "specialization", 15), actor = prop($$props, "actor", 19, () => ({}));
+  prop($$props, "skill", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
   const dispatch = createEventDispatcher();
-  let isCharacterCreation = proxy(actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation) ?? false);
-  let liveText = specialization().name;
-  let baseValue = getActorStore(actor().id, skill().id, skill().system.activeSkill.value);
-  user_effect(() => {
-    if (isCharacterCreation) {
-      if (specialization().value === 0) {
-        specialization(specialization().value = $baseValue() + 1, true);
-        store_set(baseValue, $baseValue() - 1);
-        dispatch("arrayChanged");
-      }
-    }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
   });
+  let isCharacterCreationStore = storeManager2.GetFlagStore(flags.actor.isCharacterCreation);
+  let baseValue = storeManager2.GetStore("activeSkill.value");
+  let liveText = specialization().name;
   user_effect(() => {
     if (liveText !== specialization().name) {
       liveText = specialization().name;
@@ -5805,424 +6673,337 @@ function SpecializationCard($$anchor, $$props) {
     specialization(specialization().name = liveText, true);
     dispatch("arrayChanged");
   }
-  var fragment = root$u();
-  var div = first_child(fragment);
-  var div_1 = sibling(child(div), 2);
-  div_1.__input = handleInput;
-  div_1.__keydown = [handleKeyDown];
-  var h1 = sibling(div_1, 2);
-  var text = child(h1);
-  var div_2 = sibling(div, 2);
-  var button = child(div_2);
-  button.__click = [increment$3];
+  function handleKeyDown2(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.target.blur();
+    }
+  }
+  var fragment = root$C();
+  var node = first_child(fragment);
+  TextInput(node, {
+    text: liveText,
+    oninput: handleInput,
+    onkeydown: handleKeyDown2,
+    children: ($$anchor2, $$slotProps) => {
+      var h1 = root_1$l();
+      var text2 = child(h1);
+      template_effect(() => set_text(text2, specialization().value));
+      append($$anchor2, h1);
+    },
+    $$slots: { default: true }
+  });
+  var div = sibling(node, 2);
+  var button = child(div);
+  button.__click = [increment$1];
   var button_1 = sibling(button, 2);
   button_1.__click = [decrement$3];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
     deleteThis$3,
-    isCharacterCreation,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     specialization,
     $baseValue,
     baseValue,
     dispatch
   ];
   template_effect(() => {
-    set_text(text, specialization().value);
-    button.disabled = isCharacterCreation;
-    button_1.disabled = isCharacterCreation;
+    button.disabled = $isCharacterCreationStore();
+    button_1.disabled = $isCharacterCreationStore();
   });
-  bind_content_editable("innerText", div_1, () => liveText, ($$value) => liveText = $$value);
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-delegate(["input", "keydown", "click"]);
-async function addNewSpecialization$2(_, $$props, $specializations, specializations) {
-  if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-    if ($specializations().length > 0) {
-      ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
-      return;
+delegate(["click"]);
+class KarmaShoppingService {
+  constructor(skill) {
+    __publicField(this, "currentFloor", -1);
+    __publicField(this, "specFloor", /* @__PURE__ */ new Map());
+    // Map<string, number>
+    __publicField(this, "baseSkillType", null);
+    __publicField(this, "baseAttribute", null);
+    const system = skill.system;
+    this.baseSkillType = system.skillType;
+    const fieldName = `${this.baseSkillType}Skill`;
+    const skillData = system[fieldName];
+    this.currentFloor = (skillData == null ? void 0 : skillData.value) ?? 0;
+    this.baseAttribute = (skillData == null ? void 0 : skillData.linkedAttribute) ?? null;
+    for (const spec of (skillData == null ? void 0 : skillData.specializations) ?? []) {
+      if (spec.name) this.specFloor.set(spec.name, spec.value);
+    }
+    if (this.baseSkillType === "language") {
+      const readwrite = system.languageSkill.readwrite;
+      if (readwrite) {
+        this.specFloor.set("Read/Write", readwrite.value ?? 0);
+      }
     }
   }
-  let newSkill = {
-    name: localize($$props.config.skill.newspecialization),
-    value: 0
-  };
-  $specializations().push(newSkill);
-  store_set(specializations, proxy([...$specializations()]));
-  await $$props.skill.update(
-    {
-      "system.activeSkill.specializations": $specializations()
-    },
-    { render: false }
-  );
-}
-async function increment$2(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
-      }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+  getSkillPrice(attributeRating, skillRating, isActive) {
+    const nextRating = skillRating + 1;
+    const doubleAttr = attributeRating * 2;
+    if (nextRating <= attributeRating) {
+      return isActive ? 1.5 : 1;
+    } else if (nextRating <= doubleAttr) {
+      return isActive ? 2 : 1.5;
+    } else {
+      return isActive ? 2.5 : 2;
     }
-  } else {
-    assignFirstMessage();
   }
-  silentUpdate();
-}
-async function decrement$2(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
-      }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
+  getSpecializationPrice(attributeRating, specRating, isActive) {
+    const nextRating = specRating + 1;
+    const doubleAttr = attributeRating * 2;
+    if (nextRating <= attributeRating) {
+      return 0.5;
+    } else if (nextRating <= doubleAttr) {
+      return 1.5;
+    } else {
+      return 2;
     }
-  } else {
-    assignFirstMessage();
   }
-  silentUpdate();
-}
-async function deleteThis$2(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
-  const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
-    modal: true,
-    rejectClose: true
-  });
-  if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-      if ($specializations().length > 0) {
-        store_set(specializations, proxy([]));
-        await tick();
-        store_set(value, $value() + 1);
-      }
-      let refund = 0;
-      for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
-      }
-      store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
-    }
-    if ($$props.skill) {
-      const id = $$props.skill.id;
-      await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.activeSkillsIds);
-      const current = get(store);
-      store.set(current.filter((sid) => sid !== id));
-    }
-    $$props.app.close();
+  returnKarmaForSkill(attributeRating, skillRating, isActive) {
+    if (skillRating > 0 && skillRating > currentFloor)
+      return this.getSkillPrice(attributeRating, skillRating - 1, isActive);
+    return 0;
+  }
+  returnKarmaForSpec(attributeRating, specRating, isActive) {
+    if (specRating > 0)
+      return this.getSpecializationPrice(attributeRating, specRating - 1, isActive);
+    return 0;
   }
 }
-var on_click$9 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$t = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
-function ActiveSkillEditorApp($$anchor, $$props) {
+var root_2$d = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
+var root_1$k = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$B = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+function Karma($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.activeSkill.specializations);
-  getActorStore($$props.actor.id, stores.activeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
-  user_effect(() => {
-    $$props.skill.update(
-      {
-        "system.activeSkill.specializations": $specializations()
-      },
-      { render: false }
-    );
+  const $goodKarmaStore = () => store_get(goodKarmaStore, "$goodKarmaStore", $$stores);
+  const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  const $essenceStore = () => store_get(essenceStore, "$essenceStore", $$stores);
+  const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let karmaPoolStore = storeManager2.GetStore("karma.karmaPool");
+  let goodKarmaStore = storeManager2.GetStore("karma.goodKarma");
+  let essenceStore = storeManager2.GetStore("attributes.essence");
+  let miraculousSurvivalStore = storeManager2.GetStore("karma.miraculousSurvival");
+  var fragment = root$B();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
   });
-  let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.activeSkill.value);
-  let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
-  let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, $$props.actor.system.creation.activePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  async function silentUpdate() {
-    await $$props.skill.update({ "system.activeSkill.value": $value() }, { render: false });
-    await $$props.actor.update(
-      {
-        "system.creation.activePoints": $skillPointStore()
-      },
-      { render: false }
-    );
-  }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
-  }
-  user_effect(() => {
-    console.log("VALUE CHANGED", $value());
-  });
-  function deleteSpecialization(event2) {
-    const toDelete = event2.detail.specialization;
-    store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
-  }
-  var div = root$t();
-  var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var div_4 = sibling(child(div_3), 2);
-  var div_5 = child(div_4);
-  var img = child(div_5);
-  img.__click = [on_click$9, $$props];
-  var div_6 = sibling(div_5, 2);
-  var div_7 = child(div_6);
-  var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
-  var div_8 = sibling(div_7, 2);
-  var h1_1 = sibling(child(div_8), 2);
-  var text_1 = child(h1_1);
-  var div_9 = sibling(div_8, 2);
-  var div_10 = sibling(child(div_9), 2);
-  var button = child(div_10);
-  button.__click = [
-    increment$2,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
-    linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
-  ];
-  var button_1 = sibling(button, 2);
-  button_1.__click = [
-    decrement$2,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
-    linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
-  ];
-  var button_2 = sibling(button_1, 2);
-  button_2.__click = [
-    deleteThis$2,
-    $$props,
-    $specializations,
-    specializations,
-    $value,
-    value,
-    linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
-  ];
-  var button_3 = sibling(button_2, 2);
-  button_3.__click = [
-    addNewSpecialization$2,
-    $$props,
-    $specializations,
-    specializations
-  ];
-  var text_2 = child(button_3);
-  var div_11 = sibling(div_2, 2);
-  var div_12 = child(div_11);
-  var div_13 = sibling(child(div_12), 2);
-  var h1_2 = child(div_13);
-  var text_3 = child(h1_2);
-  var div_14 = sibling(h1_2, 2);
-  each(div_14, 5, $specializations, index, ($$anchor2, specialization, i) => {
-    SpecializationCard($$anchor2, {
-      get actor() {
-        return $$props.actor;
-      },
-      get skill() {
-        return $$props.skill;
-      },
-      get specialization() {
-        return $specializations()[i];
-      },
-      set specialization($$value) {
-        store_mutate(specializations, untrack($specializations)[i] = $$value, untrack($specializations));
-      },
-      $$events: {
-        arrayChanged: () => {
-          store_set(specializations, proxy([...$specializations()]));
-          console.log("array was reassigned");
+  var h1 = sibling(node, 2);
+  var text2 = child(h1);
+  var node_1 = sibling(h1, 2);
+  MasonryGrid(node_1, {
+    itemSelector: "stat-card",
+    gridPrefix: "attribute",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$k();
+      var node_2 = first_child(fragment_1);
+      const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
+      StatCard$1(node_2, {
+        get label() {
+          return get$2(expression);
         },
-        delete: deleteSpecialization
+        get value() {
+          return $goodKarmaStore();
+        }
+      });
+      var node_3 = sibling(node_2, 2);
+      const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
+      StatCard$1(node_3, {
+        get label() {
+          return get$2(expression_1);
+        },
+        get value() {
+          return $karmaPoolStore();
+        }
+      });
+      var node_4 = sibling(node_3, 2);
+      const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
+      StatCard$1(node_4, {
+        get label() {
+          return get$2(expression_2);
+        },
+        get value() {
+          return $essenceStore();
+        }
+      });
+      var node_5 = sibling(node_4, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var div = root_2$d();
+          var h4 = sibling(child(div), 2);
+          var text_1 = child(h4);
+          template_effect(($0) => set_text(text_1, $0), [
+            () => localize(config().karma.miraculoussurvival)
+          ]);
+          append($$anchor3, div);
+        };
+        var alternate = ($$anchor3) => {
+        };
+        if_block(node_5, ($$render) => {
+          if (!$miraculousSurvivalStore()) $$render(consequent);
+          else $$render(alternate, false);
+        });
       }
-    });
-  });
-  template_effect(
-    ($0, $1) => {
-      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-      set_attribute(img, "src", $$props.skill.img);
-      set_attribute(img, "title", $$props.skill.name);
-      set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
-      set_text(text_1, $value());
-      button.disabled = get$1(disableValueControls);
-      button_1.disabled = get$1(disableValueControls);
-      button_3.disabled = $value() <= 1;
-      set_text(text_2, $0);
-      set_text(text_3, $1);
+      append($$anchor2, fragment_1);
     },
-    [
-      () => localize($$props.config.skill.addspecialization),
-      () => localize($$props.config.skill.specializations)
-    ]
-  );
-  append($$anchor, div);
+    $$slots: { default: true }
+  });
+  template_effect(($0) => set_text(text2, $0), [() => localize(config().karma.karma)]);
+  append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-delegate(["click"]);
-async function addNewSpecialization$1(_, $$props, $specializations, specializations) {
-  if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-    if ($specializations().length > 0) {
-      ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
-      return;
-    }
-  }
-  let newSkill = {
-    name: localize($$props.config.skill.newspecialization),
-    value: 0
-  };
-  $specializations().push(newSkill);
-  store_set(specializations, proxy([...$specializations()]));
-  await $$props.skill.update(
-    {
-      "system.knowledgeSkill.specializations": $specializations()
-    },
-    { render: false }
-  );
-}
-async function increment$1(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
+async function decrement$2(_, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore, $$props) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
+      if ($valueStore() > 0) {
+        let refundForCurrentLevel;
+        if ($valueStore() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(valueStore, $valueStore() - 1);
+        store_set(activeSkillPointsStore, $activeSkillPointsStore() + refundForCurrentLevel);
       }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
-  silentUpdate();
 }
-async function decrement$1(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
-      }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
-    }
-  } else {
-    assignFirstMessage();
-  }
-  silentUpdate();
-}
-async function deleteThis$1(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacterCreationStore, $specializationsStore, specializationsStore, $valueStore, valueStore, linkedAttributeRating, $activeSkillPointsStore, activeSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
     modal: true,
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-      if ($specializations().length > 0) {
-        store_set(specializations, proxy([]));
+    if ($isCharacterCreationStore()) {
+      if ($specializationsStore().length > 0) {
+        store_set(specializationsStore, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(valueStore, $valueStore() + 1);
       }
       let refund = 0;
-      for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
+      for (let i = 1; i <= $valueStore(); i++) {
+        refund += i <= linkedAttributeRating ? 1 : 2;
       }
-      store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
+      store_set(activeSkillPointsStore, $activeSkillPointsStore() + refund);
+      store_set(valueStore, 0);
+      ui.notifications.info(localize($$props.config.notifications.skillpointsrefund));
     }
+    await tick();
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.knowledgeSkillsIds);
-      const current = get(store);
+      const store = storeManager.getActorStore($$props.actor.id, stores.activeSkillsIds);
+      const current = get$1(store);
       store.set(current.filter((sid) => sid !== id));
     }
     $$props.app.close();
   }
 }
-var on_click$8 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$s = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
-function KnowledgeSkillEditorApp($$anchor, $$props) {
+var on_click$8 = async (__2, $$props) => openFilePicker($$props.actor);
+var root$A = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.knowledgeSkill.specializations);
-  getActorStore($$props.actor.id, stores.knowledgeSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
-  user_effect(() => {
-    $$props.skill.update(
-      {
-        "system.knowledgeSkill.specializations": $specializations()
-      },
-      { render: false }
-    );
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
+  const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
+  const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  let itemStoreManager = StoreManager.Subscribe($$props.skill);
+  let specializationsStore = itemStoreManager.GetStore("activeSkill.specializations");
+  let activeSkillPointsStore = actorStoreManager.GetStore("creation.activePoints");
+  let valueStore = itemStoreManager.GetStore("activeSkill.value");
+  let karmaShoppingService = null;
+  onMount(() => {
+    karmaShoppingService ?? (karmaShoppingService = new KarmaShoppingService($$props.skill));
   });
+  onDestroy(() => {
+    karmaShoppingService = null;
+  });
+  let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreationStore() && $specializationsStore().length > 0);
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.knowledgeSkill.value);
-  let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
+  let linkedAttribute = $$props.skill.system.activeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.knowledgePoints, $$props.actor.system.creation.knowledgePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  async function silentUpdate() {
-    await $$props.skill.update({ "system.knowledgeSkill.value": $value() }, { render: false });
-    await $$props.actor.update(
-      {
-        "system.creation.knowledgePoints": $skillPointStore()
-      },
-      { render: false }
-    );
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  async function addNewSpecialization2() {
+    let newSkillSpecialization;
+    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+      if ($specializationsStore().length > 0) {
+        ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
+        return;
+      }
+      newSkillSpecialization = {
+        name: localize($$props.config.skill.newspecialization),
+        value: $valueStore() + 1
+      };
+      store_set(valueStore, $valueStore() - 1);
+    } else {
+      console.log("TODO: create a addSpecialization procedure for Karma");
+    }
+    if (newSkillSpecialization) {
+      $specializationsStore().push(newSkillSpecialization);
+      store_set(specializationsStore, proxy([...$specializationsStore()]));
+    }
   }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
+  async function increment2() {
+    if ($attributeAssignmentLockedStore()) {
+      if ($isCharacterCreationStore()) {
+        if ($valueStore() < 6) {
+          let costForNextLevel;
+          if ($valueStore() < linkedAttributeRating) {
+            costForNextLevel = 1;
+          } else {
+            costForNextLevel = 2;
+          }
+          if ($activeSkillPointsStore() >= costForNextLevel) {
+            store_set(valueStore, $valueStore() + 1);
+            store_set(activeSkillPointsStore, $activeSkillPointsStore() - costForNextLevel);
+            if ($valueStore() === linkedAttributeRating) {
+              ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+            }
+          }
+        }
+      } else {
+        karmaShoppingService = new KarmaShoppingService($$props.skill);
+        console.log("TODO: implement karma based shopping");
+      }
+    } else {
+      ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
+    }
   }
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
-    store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
+    store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
+    store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$s();
+  var div = root$A();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -6233,57 +7014,44 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_8 = sibling(div_7, 2);
   var h1_1 = sibling(child(div_8), 2);
   var text_1 = child(h1_1);
   var div_9 = sibling(div_8, 2);
   var div_10 = sibling(child(div_9), 2);
   var button = child(div_10);
-  button.__click = [
-    increment$1,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
-    linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
-  ];
+  button.__click = increment2;
   var button_1 = sibling(button, 2);
   button_1.__click = [
-    decrement$1,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
+    decrement$2,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
+    $activeSkillPointsStore,
+    activeSkillPointsStore,
+    $$props
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
-    deleteThis$1,
+    deleteThis$2,
     $$props,
-    $specializations,
-    specializations,
-    $value,
-    value,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $specializationsStore,
+    specializationsStore,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
+    $activeSkillPointsStore,
+    activeSkillPointsStore
   ];
   var button_3 = sibling(button_2, 2);
-  button_3.__click = [
-    addNewSpecialization$1,
-    $$props,
-    $specializations,
-    specializations
-  ];
+  button_3.__click = addNewSpecialization2;
   var text_2 = child(button_3);
   var div_11 = sibling(div_2, 2);
   var div_12 = child(div_11);
@@ -6291,7 +7059,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var h1_2 = child(div_13);
   var text_3 = child(h1_2);
   var div_14 = sibling(h1_2, 2);
-  each(div_14, 5, $specializations, index, ($$anchor2, specialization, i) => {
+  each(div_14, 5, $specializationsStore, index, ($$anchor2, specialization, i) => {
     SpecializationCard($$anchor2, {
       get actor() {
         return $$props.actor;
@@ -6300,14 +7068,14 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
         return $$props.skill;
       },
       get specialization() {
-        return $specializations()[i];
+        return $specializationsStore()[i];
       },
       set specialization($$value) {
-        store_mutate(specializations, untrack($specializations)[i] = $$value, untrack($specializations));
+        store_mutate(specializationsStore, untrack($specializationsStore)[i] = $$value, untrack($specializationsStore));
       },
       $$events: {
         arrayChanged: () => {
-          store_set(specializations, proxy([...$specializations()]));
+          store_set(specializationsStore, proxy([...$specializationsStore()]));
           console.log("array was reassigned");
         },
         delete: deleteSpecialization
@@ -6320,11 +7088,11 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
-      set_text(text_1, $value());
-      button.disabled = get$1(disableValueControls);
-      button_1.disabled = get$1(disableValueControls);
-      button_3.disabled = $value() <= 1;
+      set_text(text2, $$props.skill.name);
+      set_text(text_1, $valueStore());
+      button.disabled = get$2(disableValueControls);
+      button_1.disabled = get$2(disableValueControls);
+      button_3.disabled = $valueStore() <= 1;
       set_text(text_2, $0);
       set_text(text_3, $1);
     },
@@ -6338,140 +7106,148 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addNewSpecialization(_, $$props, $specializations, specializations) {
-  if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-    if ($specializations().length > 0) {
-      ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
-      return;
-    }
-  }
-  let newSkill = {
-    name: localize($$props.config.skill.newspecialization),
-    value: 0
-  };
-  $specializations().push(newSkill);
-  store_set(specializations, proxy([...$specializations()]));
-  await $$props.skill.update(
-    {
-      "system.languageSkill.specializations": $specializations()
-    },
-    { render: false }
-  );
-}
-async function increment(__1, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() < 6) {
-      let costForNextLevel;
-      if ($value() < linkedAttributeRating) {
-        costForNextLevel = 1;
-      } else {
-        costForNextLevel = 2;
+async function decrement$1(_, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore, $$props) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
+      if ($valueStore() > 0) {
+        let refundForCurrentLevel;
+        if ($valueStore() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(valueStore, $valueStore() - 1);
+        store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() + refundForCurrentLevel);
       }
-      if ($skillPointStore() >= costForNextLevel) {
-        store_set(value, $value() + 1);
-        store_set(skillPointStore, $skillPointStore() - costForNextLevel);
-      }
+    } else {
+      console.log("TODO: implement karma based shopping");
     }
   } else {
-    assignFirstMessage();
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
   }
-  silentUpdate();
 }
-async function decrement(__2, $attributeAssignmentLocked, attributeAssignmentLocked, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore, assignFirstMessage, silentUpdate) {
-  if ($attributeAssignmentLocked()) {
-    if ($value() > 0) {
-      let refundForCurrentLevel;
-      if ($value() > linkedAttributeRating) {
-        refundForCurrentLevel = 2;
-      } else {
-        refundForCurrentLevel = 1;
-      }
-      store_set(value, $value() - 1);
-      store_set(skillPointStore, $skillPointStore() + refundForCurrentLevel);
-    }
-  } else {
-    assignFirstMessage();
-  }
-  silentUpdate();
-}
-async function deleteThis(__3, $$props, $specializations, specializations, $value, value, linkedAttributeRating, $skillPointStore, skillPointStore) {
+async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacterCreationStore, $specializations, specializations, $valueStore, valueStore, linkedAttributeRating, $knowledgeSkillPointsStore, knowledgeSkillPointsStore) {
   const confirmed = await foundry.applications.api.DialogV2.confirm({
-    window: { title: "Delete This Skill?" },
-    content: "Do you want to delete this skill?",
-    yes: { label: "Yes!", default: true },
-    no: { label: "Nope!" },
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
     modal: true,
     rejectClose: true
   });
   if (confirmed) {
-    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+    if ($isCharacterCreationStore()) {
       if ($specializations().length > 0) {
         store_set(specializations, proxy([]));
         await tick();
-        store_set(value, $value() + 1);
+        store_set(valueStore, $valueStore() + 1);
       }
       let refund = 0;
-      for (let i = 1; i <= $value(); i++) {
-        if (i <= linkedAttributeRating) refund += 1;
-        else refund += 2;
+      for (let i = 1; i <= $valueStore(); i++) {
+        refund += i <= linkedAttributeRating ? 1 : 2;
       }
-      store_set(skillPointStore, $skillPointStore() + refund);
-      store_set(value, 0);
-      ui.notifications.info(localize($$props.config.skill.skillpointsrestored));
+      store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() + refund);
+      store_set(valueStore, 0);
+      ui.notifications.info(localize($$props.config.notifications.skillpointsrefund));
     }
+    await tick();
     if ($$props.skill) {
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
-      const store = getActorStore($$props.actor.id, stores.languageSkillsIds);
-      const current = get(store);
+      const store = storeManager.getActorStore($$props.actor.id, stores$1.knowledgeSkillsIds);
+      const current = get$1(store);
       store.set(current.filter((sid) => sid !== id));
     }
     $$props.app.close();
   }
 }
-var on_click$7 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$r = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
-function LanguageSkillEditorApp($$anchor, $$props) {
+var on_click$7 = async (__2, $$props) => openFilePicker($$props.actor);
+var root$z = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  let specializations = getActorStore($$props.skill.id, $$props.actor.id, $$props.skill.system.languageSkill.specializations);
-  getActorStore($$props.actor.id, stores.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
-  let disableValueControls = /* @__PURE__ */ derived(() => $specializations().length > 0);
-  user_effect(() => {
-    $$props.skill.update(
-      {
-        "system.languageSkill.specializations": $specializations()
-      },
-      { render: false }
-    );
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
+  const $knowledgeSkillPointsStore = () => store_get(knowledgeSkillPointsStore, "$knowledgeSkillPointsStore", $$stores);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  let itemStoreManager = StoreManager.Subscribe($$props.skill);
+  let specializations = itemStoreManager.GetStore("knowledgeSkill.specializations");
+  let knowledgeSkillPointsStore = actorStoreManager.GetStore("creation.knowledgePoints");
+  let valueStore = itemStoreManager.GetStore("knowledgeSkill.value");
+  let karmaShoppingService = null;
+  onMount(() => {
+    karmaShoppingService ?? (karmaShoppingService = new KarmaShoppingService($$props.skill));
   });
+  onDestroy(() => {
+    karmaShoppingService = null;
+  });
+  let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreationStore() && $specializations().length > 0);
   let layoutMode = "single";
-  let value = getActorStore($$props.actor.id, $$props.skill.id, $$props.skill.system.languageSkill.value);
-  let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
+  let linkedAttribute = $$props.skill.system.knowledgeSkill.linkedAttribute;
   let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
-  let skillPointStore = getActorStore($$props.actor.id, stores.languagePoints, $$props.actor.system.creation.languagePoints);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  async function silentUpdate() {
-    await $$props.skill.update({ "system.languageSkill.value": $value() }, { render: false });
-    await $$props.actor.update(
-      {
-        "system.creation.languagePoints": $skillPointStore()
-      },
-      { render: false }
-    );
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  async function addNewSpecialization2() {
+    let newSkillSpecialization;
+    if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+      if ($specializations().length > 0) {
+        ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
+        return;
+      }
+      newSkillSpecialization = {
+        name: localize($$props.config.skill.newspecialization),
+        value: $valueStore() + 1
+      };
+      store_set(valueStore, $valueStore() - 1);
+    } else {
+      console.log("TODO: create a addSpecialization procedure for Karma");
+    }
+    if (newSkillSpecialization) {
+      $specializations().push(newSkillSpecialization);
+      store_set(specializations, proxy([...$specializations()]));
+    }
   }
-  function assignFirstMessage() {
-    ui.notifications.warn("You need to assign all attributes before assigning skills");
+  async function increment2() {
+    if ($attributeAssignmentLockedStore()) {
+      if ($isCharacterCreationStore()) {
+        if ($valueStore() < 6) {
+          let costForNextLevel;
+          if ($valueStore() < linkedAttributeRating) {
+            costForNextLevel = 1;
+          } else {
+            costForNextLevel = 2;
+          }
+          if ($knowledgeSkillPointsStore() >= costForNextLevel) {
+            store_set(valueStore, $valueStore() + 1);
+            store_set(knowledgeSkillPointsStore, $knowledgeSkillPointsStore() - costForNextLevel);
+            if ($valueStore() === linkedAttributeRating) {
+              ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+            }
+          }
+        }
+      } else {
+        karmaShoppingService = new KarmaShoppingService($$props.skill);
+        console.log("TODO: implement karma based shopping");
+      }
+    } else {
+      ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
+    }
   }
   function deleteSpecialization(event2) {
     const toDelete = event2.detail.specialization;
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
+    store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$r();
+  var div = root$z();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -6482,57 +7258,44 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_8 = sibling(div_7, 2);
   var h1_1 = sibling(child(div_8), 2);
   var text_1 = child(h1_1);
   var div_9 = sibling(div_8, 2);
   var div_10 = sibling(child(div_9), 2);
   var button = child(div_10);
-  button.__click = [
-    increment,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
-    linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
-  ];
+  button.__click = increment2;
   var button_1 = sibling(button, 2);
   button_1.__click = [
-    decrement,
-    $attributeAssignmentLocked,
-    attributeAssignmentLocked,
-    $value,
-    value,
+    decrement$1,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore,
-    assignFirstMessage,
-    silentUpdate
+    $knowledgeSkillPointsStore,
+    knowledgeSkillPointsStore,
+    $$props
   ];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [
-    deleteThis,
+    deleteThis$1,
     $$props,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
     $specializations,
     specializations,
-    $value,
-    value,
+    $valueStore,
+    valueStore,
     linkedAttributeRating,
-    $skillPointStore,
-    skillPointStore
+    $knowledgeSkillPointsStore,
+    knowledgeSkillPointsStore
   ];
   var button_3 = sibling(button_2, 2);
-  button_3.__click = [
-    addNewSpecialization,
-    $$props,
-    $specializations,
-    specializations
-  ];
+  button_3.__click = addNewSpecialization2;
   var text_2 = child(button_3);
   var div_11 = sibling(div_2, 2);
   var div_12 = child(div_11);
@@ -6569,17 +7332,318 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "src", $$props.skill.img);
       set_attribute(img, "title", $$props.skill.name);
       set_attribute(img, "alt", $$props.skill.name);
-      set_text(text, $$props.skill.name);
-      set_text(text_1, $value());
-      button.disabled = get$1(disableValueControls);
-      button_1.disabled = get$1(disableValueControls);
-      button_3.disabled = $value() <= 1;
+      set_text(text2, $$props.skill.name);
+      set_text(text_1, $valueStore());
+      button.disabled = get$2(disableValueControls);
+      button_1.disabled = get$2(disableValueControls);
+      button_3.disabled = $valueStore() <= 1;
       set_text(text_2, $0);
       set_text(text_3, $1);
     },
     [
       () => localize($$props.config.skill.addspecialization),
       () => localize($$props.config.skill.specializations)
+    ]
+  );
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click"]);
+async function addNewSpecialization(_, $specializationsStore, specializationsStore, $$props, $valueStore, valueStore) {
+  if (!$specializationsStore()) throw new Error("Cannot add lingo: specialization store is null");
+  if ($$props.actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+    if ($specializationsStore().length > 0) {
+      ui.notifications.info(localize($$props.config.skill.onlyonespecializationatcreation));
+      return;
+    }
+    $specializationsStore().push({
+      name: localize($$props.config.skill.newspecialization),
+      value: $valueStore() + 1
+    });
+    store_set(valueStore, $valueStore() - 1);
+  } else {
+    $specializationsStore().push({
+      name: localize($$props.config.skill.newspecialization),
+      value: 0
+    });
+  }
+  store_set(specializationsStore, proxy([...$specializationsStore()]));
+  await $$props.skill.update(
+    {
+      "system.languageSkill.specializations": $specializationsStore()
+    },
+    { render: false }
+  );
+}
+async function increment(__1, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
+      if ($valueStore() < 6) {
+        let costForNextLevel;
+        if ($valueStore() < linkedAttributeRating) {
+          costForNextLevel = 1;
+        } else {
+          costForNextLevel = 2;
+        }
+        if ($languageSkillPointsStore() >= costForNextLevel) {
+          store_set(valueStore, $valueStore() + 1);
+          store_set(languageSkillPointsStore, $languageSkillPointsStore() - costForNextLevel);
+          if ($valueStore() === linkedAttributeRating) {
+            ui.notifications.info($$props.config.notifications.skillpricecrossedthreshold);
+          }
+        }
+      }
+    } else {
+      console.log("TODO: implement karma based shopping");
+    }
+  } else {
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
+  }
+  silentUpdate();
+}
+async function decrement(__2, $attributeAssignmentLockedStore, attributeAssignmentLockedStore, $isCharacterCreationStore, isCharacterCreationStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore, $$props, silentUpdate) {
+  if ($attributeAssignmentLockedStore()) {
+    if ($isCharacterCreationStore()) {
+      if ($valueStore() > 0) {
+        let refundForCurrentLevel;
+        if ($valueStore() > linkedAttributeRating) {
+          refundForCurrentLevel = 2;
+        } else {
+          refundForCurrentLevel = 1;
+        }
+        store_set(valueStore, $valueStore() - 1);
+        store_set(languageSkillPointsStore, $languageSkillPointsStore() + refundForCurrentLevel);
+      }
+    } else {
+      console.log("TODO: implement karma based shopping");
+    }
+  } else {
+    ui.notifications.warn(localize($$props.config.notifications.assignattributesfirst));
+  }
+  await silentUpdate();
+}
+async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCreationStore, $specializationsStore, specializationsStore, $valueStore, valueStore, linkedAttributeRating, $languageSkillPointsStore, languageSkillPointsStore) {
+  const confirmed = await foundry.applications.api.DialogV2.confirm({
+    window: {
+      title: localize($$props.config.modal.deleteskilltitle)
+    },
+    content: localize($$props.config.modal.deleteskill),
+    yes: {
+      label: localize($$props.config.modal.confirm),
+      default: true
+    },
+    no: {
+      label: localize($$props.config.modal.decline)
+    },
+    modal: true,
+    rejectClose: true
+  });
+  if (confirmed) {
+    if ($isCharacterCreationStore()) {
+      if ($specializationsStore().length > 0) {
+        store_set(specializationsStore, proxy([]));
+        await tick();
+        store_set(valueStore, $valueStore() + 1);
+      }
+      let refund = 0;
+      for (let i = 1; i <= $valueStore(); i++) {
+        refund += i <= linkedAttributeRating ? 1 : 2;
+      }
+      store_set(languageSkillPointsStore, $languageSkillPointsStore() + refund);
+      store_set(valueStore, 0);
+      ui.notifications.info(localize($$props.config.skill.skillpointsrefund));
+    }
+    await tick();
+    const id = $$props.skill.id;
+    await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
+    const store = storeManager.getActorStore($$props.actor.id, stores$1.languageSkillsIds);
+    store.set(get$1(store).filter((sid) => sid !== id));
+    $$props.app.close();
+  }
+}
+var on_click$6 = async (__4, $$props) => openFilePicker($$props.actor);
+var root$y = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+function LanguageSkillEditorApp($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
+  const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
+  const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
+  const $languageSkillPointsStore = () => store_get(languageSkillPointsStore, "$languageSkillPointsStore", $$stores);
+  let actorStoreManager = StoreManager.Subscribe($$props.actor);
+  let itemStoreManager = StoreManager.Subscribe($$props.skill);
+  let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
+  let valueStore = itemStoreManager.GetStore("languageSkill.value");
+  let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
+  let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+  actorStoreManager.GetShallowStore($$props.actor.id, stores$1.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  let layoutMode = "single";
+  let linkedAttribute = $$props.skill.system.languageSkill.linkedAttribute;
+  let linkedAttributeRating = Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.value`)) + Number(foundry.utils.getProperty($$props.actor, `system.attributes.${linkedAttribute}.mod`));
+  let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let readWrite = /* @__PURE__ */ derived$1(() => $valueStore() <= 1 ? 0 : Math.floor($valueStore() / 2));
+  let disableValueControls = /* @__PURE__ */ derived$1(() => $isCharacterCreationStore() && $specializationsStore().length > 0);
+  user_effect(() => {
+    $$props.skill.update(
+      {
+        "system.languageSkill.specializations": $specializationsStore()
+      },
+      { render: false }
+    );
+    $$props.skill.update(
+      {
+        "system.languageSkill.readwrite.value": get$2(readWrite)
+      },
+      { render: false }
+    );
+  });
+  async function silentUpdate() {
+    await $$props.skill.update(
+      {
+        "system.languageSkill.value": $valueStore(),
+        "system.languageSkill.readwrite.value": get$2(readWrite)
+      },
+      { render: false }
+    );
+    await $$props.actor.update(
+      {
+        "system.creation.languagePoints": $languageSkillPointsStore()
+      },
+      { render: false }
+    );
+  }
+  function deleteSpecialization(event2) {
+    const toDelete = event2.detail.specialization;
+    store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
+    store_set(valueStore, $valueStore() + 1);
+  }
+  var div = root$y();
+  var div_1 = child(div);
+  var div_2 = child(div_1);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var div_5 = child(div_4);
+  var img = child(div_5);
+  img.__click = [on_click$6, $$props];
+  var div_6 = sibling(div_5, 2);
+  var div_7 = child(div_6);
+  var h1 = sibling(child(div_7), 2);
+  var text2 = child(h1);
+  var div_8 = sibling(div_7, 2);
+  var h1_1 = sibling(child(div_8), 2);
+  var text_1 = child(h1_1);
+  var div_9 = sibling(div_8, 2);
+  var div_10 = sibling(child(div_9), 2);
+  var h6 = sibling(child(div_10), 2);
+  var text_2 = child(h6);
+  var h1_2 = sibling(h6, 2);
+  var text_3 = child(h1_2);
+  var div_11 = sibling(div_9, 2);
+  var div_12 = sibling(child(div_11), 2);
+  var button = child(div_12);
+  button.__click = [
+    increment,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $valueStore,
+    valueStore,
+    linkedAttributeRating,
+    $languageSkillPointsStore,
+    languageSkillPointsStore,
+    $$props,
+    silentUpdate
+  ];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [
+    decrement,
+    $attributeAssignmentLockedStore,
+    attributeAssignmentLockedStore,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $valueStore,
+    valueStore,
+    linkedAttributeRating,
+    $languageSkillPointsStore,
+    languageSkillPointsStore,
+    $$props,
+    silentUpdate
+  ];
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [
+    deleteThis,
+    $$props,
+    $isCharacterCreationStore,
+    isCharacterCreationStore,
+    $specializationsStore,
+    specializationsStore,
+    $valueStore,
+    valueStore,
+    linkedAttributeRating,
+    $languageSkillPointsStore,
+    languageSkillPointsStore
+  ];
+  var button_3 = sibling(button_2, 2);
+  button_3.__click = [
+    addNewSpecialization,
+    $specializationsStore,
+    specializationsStore,
+    $$props,
+    $valueStore,
+    valueStore
+  ];
+  var text_4 = child(button_3);
+  var div_13 = sibling(div_2, 2);
+  var div_14 = child(div_13);
+  var div_15 = sibling(child(div_14), 2);
+  var h1_3 = child(div_15);
+  var text_5 = child(h1_3);
+  var div_16 = sibling(h1_3, 2);
+  each(div_16, 5, $specializationsStore, index, ($$anchor2, specialization, i) => {
+    SpecializationCard($$anchor2, {
+      get actor() {
+        return $$props.actor;
+      },
+      get skill() {
+        return $$props.skill;
+      },
+      get specialization() {
+        return $specializationsStore()[i];
+      },
+      set specialization($$value) {
+        store_mutate(specializationsStore, untrack($specializationsStore)[i] = $$value, untrack($specializationsStore));
+      },
+      $$events: {
+        arrayChanged: () => {
+          store_set(specializationsStore, proxy([...$specializationsStore()]));
+        },
+        delete: deleteSpecialization
+      }
+    });
+  });
+  template_effect(
+    ($0, $1, $2) => {
+      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
+      set_attribute(img, "src", $$props.skill.img);
+      set_attribute(img, "title", $$props.skill.name);
+      set_attribute(img, "alt", $$props.skill.name);
+      set_text(text2, $$props.skill.name);
+      set_text(text_1, $valueStore());
+      set_text(text_2, `${$0 ?? ""}:`);
+      set_text(text_3, get$2(readWrite));
+      button.disabled = get$2(disableValueControls);
+      button_1.disabled = get$2(disableValueControls);
+      button_3.disabled = $valueStore() <= 1;
+      set_text(text_4, $1);
+      set_text(text_5, $2);
+    },
+    [
+      () => localize($$props.config.skill.readwrite),
+      () => localize($$props.config.skill.addlingo),
+      () => localize($$props.config.skill.lingos)
     ]
   );
   append($$anchor, div);
@@ -6674,29 +7738,284 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
   }
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
-var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$d = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$6 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$q = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
+var root_3$8 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
+var on_click$5 = (e, Roll2, skill) => Roll2(e, skill().id);
+var on_keydown_1$1 = (e, Roll2, skill) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
+};
+var on_click_1$4 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$2(specialization).name);
+var on_keydown_2 = (e, Roll2, skill, specialization) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$2(specialization).name);
+};
+var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_5$5 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_4$8 = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
+var root$x = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $specializationsStore = () => store_get(specializationsStore, "$specializationsStore", $$stores);
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
+  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let skillStoreManager = StoreManager.Subscribe(skill());
+  let actorStoreManager = StoreManager.Subscribe(actor());
+  let valueStore = skillStoreManager.GetStore("activeSkill.value");
+  let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+  let isModalOpen = state(false);
+  let activeModal = null;
+  function openSkill() {
+    ActiveSkillEditorSheet.launch(actor(), skill(), config());
+  }
+  async function Roll2(e, skillId, specializationName2 = null) {
+    var _a, _b;
+    if (e.shiftKey) {
+      if (get$2(isModalOpen)) return;
+      set(isModalOpen, true);
+      const rollType = specializationName2 ? "specialization" : "skill";
+      const rollName = specializationName2 || skill().name;
+      const dice = specializationName2 ? (_a = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _a.value : $valueStore();
+      const options = await new Promise((resolve) => {
+        activeModal = mount(RollComposerComponent, {
+          target: document.querySelector(".composer-position"),
+          props: {
+            actor: actor(),
+            config: config(),
+            caller: {
+              key: rollName,
+              type: rollType,
+              dice,
+              skillId
+            },
+            onclose: (result) => {
+              unmount(activeModal);
+              set(isModalOpen, false);
+              activeModal = null;
+              resolve(result);
+            }
+          }
+        });
+      });
+      if (options) {
+        if (specializationName2) {
+          await actor().SpecializationRoll(options.dice, specializationName2.name, options.options);
+        } else {
+          await actor().SkillRoll(options.dice, skill().name, options.options);
+        }
+      }
+    } else {
+      if (specializationName2) {
+        const specValue = (_b = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _b.value;
+        await actor().SpecializationRoll(specValue, skill().name);
+      } else {
+        await actor().SkillRoll($valueStore(), skill().name);
+      }
+    }
+    e.preventDefault();
+  }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
+  var div = root$x();
+  var node = child(div);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var fragment = root_1$j();
+      var i = first_child(fragment);
+      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
+      i.__click = openSkill;
+      i.__keydown = [on_keydown$5, openSkill];
+      var div_1 = sibling(i, 2);
+      var h6 = sibling(child(div_1), 2);
+      var text2 = child(h6);
+      var div_2 = sibling(h6, 2);
+      var h1 = child(div_2);
+      var text_1 = child(h1);
+      var node_1 = sibling(div_2, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var div_3 = root_2$c();
+          each(div_3, 5, $specializationsStore, index, ($$anchor4, specialization) => {
+            var div_4 = root_3$8();
+            var div_5 = sibling(child(div_4), 2);
+            var text_2 = child(div_5);
+            var h1_1 = sibling(div_5, 2);
+            var text_3 = child(h1_1);
+            template_effect(() => {
+              set_text(text_2, get$2(specialization).name);
+              set_text(text_3, get$2(specialization).value);
+            });
+            append($$anchor4, div_4);
+          });
+          append($$anchor3, div_3);
+        };
+        if_block(node_1, ($$render) => {
+          if ($specializationsStore().length > 0) $$render(consequent);
+        });
+      }
+      template_effect(
+        ($0) => {
+          set_attribute(i, "aria-label", $0);
+          set_text(text2, skill().name);
+          set_text(text_1, $valueStore());
+        },
+        [
+          () => localize(config().sheet.buyupgrades)
+        ]
+      );
+      append($$anchor2, fragment);
+    };
+    var alternate = ($$anchor2) => {
+      var div_6 = root_4$8();
+      var h6_1 = sibling(child(div_6), 2);
+      var text_4 = child(h6_1);
+      var div_7 = sibling(h6_1, 2);
+      div_7.__click = [on_click$5, Roll2, skill];
+      div_7.__keydown = [on_keydown_1$1, Roll2, skill];
+      var h1_2 = child(div_7);
+      var text_5 = child(h1_2);
+      var node_2 = sibling(div_7, 2);
+      {
+        var consequent_2 = ($$anchor3) => {
+          var div_8 = root_5$5();
+          each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
+            var div_9 = root_6$3();
+            div_9.__click = [on_click_1$4, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2, Roll2, skill, specialization];
+            var div_10 = sibling(child(div_9), 2);
+            var text_6 = child(div_10);
+            var h1_3 = sibling(div_10, 2);
+            var text_7 = child(h1_3);
+            template_effect(() => {
+              toggle_class(div_9, "button", !$isShoppingState());
+              set_text(text_6, get$2(specialization).name);
+              set_text(text_7, get$2(specialization).value);
+            });
+            append($$anchor4, div_9);
+          });
+          append($$anchor3, div_8);
+        };
+        if_block(node_2, ($$render) => {
+          if ($specializationsStore().length > 0) $$render(consequent_2);
+        });
+      }
+      template_effect(() => {
+        set_text(text_4, skill().name);
+        set_text(text_5, $valueStore());
+      });
+      append($$anchor2, div_6);
+    };
+    if_block(node, ($$render) => {
+      if ($isShoppingState()) $$render(consequent_1);
+      else $$render(alternate, false);
+    });
+  }
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
+var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
+var root_1$i = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root$w = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const $value = () => store_get(value, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let activeSkill = proxy(skill().system.activeSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.activeSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, activeSkill.value);
+  let skillStoreManager = StoreManager.Subscribe(skill());
+  let actorStoreManager = StoreManager.Subscribe(actor());
+  let value = skillStoreManager.GetStore("knowledgeSkill.value");
+  let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
-  var div = root$q();
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
+  var div = root$w();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$d();
+      var i = root_1$i();
+      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
+      i.__click = openSkill;
+      i.__keydown = [on_keydown$4, openSkill];
+      template_effect(($0) => set_attribute(i, "aria-label", $0), [
+        () => localize(config().sheet.buyupgrades)
+      ]);
+      append($$anchor2, i);
+    };
+    if_block(node, ($$render) => {
+      if ($isShoppingState()) $$render(consequent);
+    });
+  }
+  var div_1 = sibling(node, 2);
+  var div_2 = child(div_1);
+  var h6 = sibling(child(div_2), 2);
+  var text2 = child(h6);
+  var h1 = sibling(h6, 2);
+  var text_1 = child(h1);
+  var div_3 = sibling(div_2, 2);
+  each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
+    var div_4 = root_2$b();
+    var div_5 = sibling(child(div_4), 2);
+    var text_2 = child(div_5);
+    var h1_1 = sibling(div_5, 2);
+    var text_3 = child(h1_1);
+    template_effect(() => {
+      set_text(text_2, get$2(specialization).name);
+      set_text(text_3, get$2(specialization).value);
+    });
+    append($$anchor2, div_4);
+  });
+  template_effect(() => {
+    set_text(text2, skill().name);
+    set_text(text_1, $value());
+  });
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click", "keydown"]);
+var on_keydown$3 = (e, openSkill) => e.key === "Enter" && openSkill();
+var root_1$h = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_2$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root$v = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
+function LanguageSkillCard($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
+  const $value = () => store_get(value, "$value", $$stores);
+  const $readWriteValue = () => store_get(readWriteValue, "$readWriteValue", $$stores);
+  const $specializations = () => store_get(specializations, "$specializations", $$stores);
+  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let skillStoreManager = StoreManager.Subscribe(skill());
+  let actorStoreManager = StoreManager.Subscribe(actor());
+  proxy(skill().system.languageSkill);
+  let specializations = skillStoreManager.GetStore("skill.system.languageSkill.specializations");
+  let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+  let value = skillStoreManager.GetStore("languageSkill.value");
+  let readWriteValue = skillStoreManager.GetStore("languageSkill.readwrite.value");
+  function openSkill() {
+    ActiveSkillEditorSheet.launch(actor(), skill(), config());
+  }
+  onDestroy(() => {
+    StoreManager.Unsubscribe(skill());
+  });
+  var div = root$v();
+  var node = child(div);
+  {
+    var consequent = ($$anchor2) => {
+      var i = root_1$h();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$3, openSkill];
@@ -6712,199 +8031,39 @@ function ActiveSkillCard($$anchor, $$props) {
   var div_1 = sibling(node, 2);
   var div_2 = child(div_1);
   var h6 = sibling(child(div_2), 2);
-  var text = child(h6);
+  var text2 = child(h6);
   var h1 = sibling(h6, 2);
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
-  each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$6();
-    var div_5 = sibling(child(div_4), 2);
-    var text_2 = child(div_5);
-    var h1_1 = sibling(div_5, 2);
-    var text_3 = child(h1_1);
+  var div_4 = child(div_3);
+  var h1_1 = sibling(child(div_4), 4);
+  var text_2 = child(h1_1);
+  var div_5 = sibling(div_3, 2);
+  each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
+    var div_6 = root_2$a();
+    var div_7 = sibling(child(div_6), 2);
+    var text_3 = child(div_7);
+    var h1_2 = sibling(div_7, 2);
+    var text_4 = child(h1_2);
     template_effect(() => {
-      set_text(text_2, get$1(specialization).name);
-      set_text(text_3, get$1(specialization).value);
+      set_text(text_3, get$2(specialization).name);
+      set_text(text_4, get$2(specialization).value);
     });
-    append($$anchor2, div_4);
+    append($$anchor2, div_6);
   });
   template_effect(() => {
-    set_text(text, skill().name);
+    set_text(text2, skill().name);
     set_text(text_1, $value());
+    set_text(text_2, $readWriteValue());
   });
   append($$anchor, div);
   pop();
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$2 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$c = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$5 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root$p = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
-function KnowledgeSkillCard($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
-  const $specializations = () => store_get(specializations, "$specializations", $$stores);
-  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let knowledgeSkill = proxy(skill().system.knowledgeSkill);
-  let specializations = getActorStore(skill().id, actor().id, skill().system.knowledgeSkill.specializations);
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let value = getActorStore(actor().id, skill().id, knowledgeSkill.value);
-  function openSkill() {
-    ActiveSkillEditorSheet.launch(actor(), skill(), config());
-  }
-  var div = root$p();
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var i = root_1$c();
-      set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
-      i.__click = openSkill;
-      i.__keydown = [on_keydown$2, openSkill];
-      template_effect(($0) => set_attribute(i, "aria-label", $0), [
-        () => localize(config().sheet.buyupgrades)
-      ]);
-      append($$anchor2, i);
-    };
-    if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
-    });
-  }
-  var div_1 = sibling(node, 2);
-  var div_2 = child(div_1);
-  var h6 = sibling(child(div_2), 2);
-  var text = child(h6);
-  var h1 = sibling(h6, 2);
-  var text_1 = child(h1);
-  var div_3 = sibling(div_2, 2);
-  each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$5();
-    var div_5 = sibling(child(div_4), 2);
-    var text_2 = child(div_5);
-    var h1_1 = sibling(div_5, 2);
-    var text_3 = child(h1_1);
-    template_effect(() => {
-      set_text(text_2, get$1(specialization).name);
-      set_text(text_3, get$1(specialization).value);
-    });
-    append($$anchor2, div_4);
-  });
-  template_effect(() => {
-    set_text(text, skill().name);
-    set_text(text_1, $value());
-  });
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
-var on_keydown$1 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$b = /* @__PURE__ */ template(`<i class="header-control icon fa-solid fa-pen-to-square pulsing-green-cart" tabindex="0" role="button"></i>`);
-var root_3$5 = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="specialization-value"> </h1></div>`);
-var root_2$4 = /* @__PURE__ */ template(`<div class="language-mode-block"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div>`);
-var root$o = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card language-skill"></div></div>`);
-function LanguageSkillCard($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $speakValue = () => store_get(speakValue, "$speakValue", $$stores);
-  const $speakSpecs = () => store_get(speakSpecs, "$speakSpecs", $$stores);
-  const $readValue = () => store_get(readValue, "$readValue", $$stores);
-  const $readSpecs = () => store_get(readSpecs, "$readSpecs", $$stores);
-  const $writeValue = () => store_get(writeValue, "$writeValue", $$stores);
-  const $writeSpecs = () => store_get(writeSpecs, "$writeSpecs", $$stores);
-  let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.isShoppingState));
-  let languageSkill = proxy(skill().system.languageSkill);
-  getActorStore(actor().id, skill().id, languageSkill.value);
-  getActorStore(skill().id, actor().id, skill().system.languageSkill.specializations);
-  let speakValue = getActorStore(actor().id, skill().id, languageSkill.speak.value);
-  let readValue = getActorStore(actor().id, skill().id, languageSkill.read.value);
-  let writeValue = getActorStore(actor().id, skill().id, languageSkill.write.value);
-  let speakSpecs = getActorStore(skill().id, actor().id, languageSkill.speak.specializations);
-  let readSpecs = getActorStore(skill().id, actor().id, languageSkill.read.specializations);
-  let writeSpecs = getActorStore(skill().id, actor().id, languageSkill.write.specializations);
-  function openSkill() {
-    ActiveSkillEditorSheet.launch(actor(), skill(), config());
-  }
-  var div = root$o();
-  var node = child(div);
-  {
-    var consequent = ($$anchor2) => {
-      var i = root_1$b();
-      i.__click = openSkill;
-      i.__keydown = [on_keydown$1, openSkill];
-      template_effect(($0) => set_attribute(i, "aria-label", $0), [
-        () => localize(config().sheet.buyupgrades)
-      ]);
-      append($$anchor2, i);
-    };
-    if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
-    });
-  }
-  var div_1 = sibling(node, 2);
-  each(
-    div_1,
-    5,
-    () => [
-      {
-        key: "speak",
-        label: "Speak",
-        value: $speakValue(),
-        specs: $speakSpecs()
-      },
-      {
-        key: "read",
-        label: "Read",
-        value: $readValue(),
-        specs: $readSpecs()
-      },
-      {
-        key: "write",
-        label: "Write",
-        value: $writeValue(),
-        specs: $writeSpecs()
-      }
-    ],
-    index,
-    ($$anchor2, mode) => {
-      var div_2 = root_2$4();
-      var div_3 = child(div_2);
-      var h6 = sibling(child(div_3), 2);
-      var text = child(h6);
-      var h1 = sibling(h6, 2);
-      var text_1 = child(h1);
-      var div_4 = sibling(div_3, 2);
-      each(div_4, 21, () => get$1(mode).specs, index, ($$anchor3, specialization) => {
-        var div_5 = root_3$5();
-        var div_6 = sibling(child(div_5), 2);
-        var text_2 = child(div_6);
-        var h1_1 = sibling(div_6, 2);
-        var text_3 = child(h1_1);
-        template_effect(() => {
-          set_text(text_2, get$1(specialization).name);
-          set_text(text_3, get$1(specialization).value);
-        });
-        append($$anchor3, div_5);
-      });
-      template_effect(() => {
-        set_text(text, get$1(mode).label);
-        set_text(text_1, get$1(mode).value);
-      });
-      append($$anchor2, div_2);
-    }
-  );
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-delegate(["click", "keydown"]);
-var root_7 = /* @__PURE__ */ template(`<div class="debug-unknown"> </div>`);
-var root_1$a = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$n = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+var root_7$1 = /* @__PURE__ */ template(`<div class="debug-unknown"> </div>`);
+var root_1$g = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$u = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
   let categoryOfSkills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -6920,22 +8079,22 @@ function SkillCategory($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$n();
+  var div = root$u();
   var div_1 = sibling(child(div), 2);
   var h1 = child(div_1);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_2 = sibling(div_1, 2);
   var node = sibling(child(div_2), 4);
   each(node, 17, categoryOfSkills, (skill) => skill._id, ($$anchor2, skill) => {
-    var fragment = root_1$a();
+    var fragment = root_1$g();
     var node_1 = first_child(fragment);
-    html(node_1, () => `<script>console.log(${JSON.stringify(get$1(skill))})<\/script>`);
+    html(node_1, () => `<script>console.log(${JSON.stringify(get$2(skill))})<\/script>`);
     var node_2 = sibling(node_1, 2);
     {
       var consequent = ($$anchor3) => {
         ActiveSkillCard($$anchor3, {
           get skill() {
-            return get$1(skill);
+            return get$2(skill);
           },
           get actor() {
             return actor();
@@ -6952,7 +8111,7 @@ function SkillCategory($$anchor, $$props) {
           var consequent_1 = ($$anchor4) => {
             KnowledgeSkillCard($$anchor4, {
               get skill() {
-                return get$1(skill);
+                return get$2(skill);
               },
               get actor() {
                 return actor();
@@ -6969,7 +8128,7 @@ function SkillCategory($$anchor, $$props) {
               var consequent_2 = ($$anchor5) => {
                 LanguageSkillCard($$anchor5, {
                   get skill() {
-                    return get$1(skill);
+                    return get$2(skill);
                   },
                   get actor() {
                     return actor();
@@ -6980,15 +8139,15 @@ function SkillCategory($$anchor, $$props) {
                 });
               };
               var alternate = ($$anchor5) => {
-                var div_3 = root_7();
+                var div_3 = root_7$1();
                 var text_1 = child(div_3);
-                template_effect(() => set_text(text_1, `Unknown skill type: ${get$1(skill).name ?? ""}`));
+                template_effect(() => set_text(text_1, `Unknown skill type: ${get$2(skill).name ?? ""}`));
                 append($$anchor5, div_3);
               };
               if_block(
                 node_4,
                 ($$render) => {
-                  if (get$1(skill).system.skillType === "language") $$render(consequent_2);
+                  if (get$2(skill).system.skillType === "language") $$render(consequent_2);
                   else $$render(alternate, false);
                 },
                 true
@@ -6999,7 +8158,7 @@ function SkillCategory($$anchor, $$props) {
           if_block(
             node_3,
             ($$render) => {
-              if (get$1(skill).system.skillType === "knowledge") $$render(consequent_1);
+              if (get$2(skill).system.skillType === "knowledge") $$render(consequent_1);
               else $$render(alternate_1, false);
             },
             true
@@ -7008,34 +8167,38 @@ function SkillCategory($$anchor, $$props) {
         append($$anchor3, fragment_2);
       };
       if_block(node_2, ($$render) => {
-        if (get$1(skill).system.skillType === "active") $$render(consequent);
+        if (get$2(skill).system.skillType === "active") $$render(consequent);
         else $$render(alternate_2, false);
       });
     }
     append($$anchor2, fragment);
   });
   bind_this(div_2, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(($0) => set_text(text, $0), [
+  template_effect(($0) => set_text(text2, $0), [
     () => localize(config().attributes[$$props.attribute])
   ]);
   append($$anchor, div);
   pop();
 }
-var root$m = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$t = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsLanguage($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $languageSkillsIdArrayStore = () => store_get(languageSkillsIdArrayStore, "$languageSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  const languageSkillsIdArrayStore = getActorStore(actor().id, stores.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
-  let languageSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
-  var div = root$m();
+  let storeManager2 = StoreManager.Subscribe(actor());
+  const languageSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores$1.languageSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
+  let languageSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $languageSkillsIdArrayStore().includes(item2.id)));
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  var div = root$t();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
     get skills() {
-      return get$1(languageSkills);
+      return get$2(languageSkills);
     },
     get actor() {
       return actor();
@@ -7049,21 +8212,25 @@ function SkillsLanguage($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$l = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$s = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsKnowledge($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $knowledgeSkillsIdArrayStore = () => store_get(knowledgeSkillsIdArrayStore, "$knowledgeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let gridContainer;
-  const knowledgeSkillsIdArrayStore = getActorStore(actor().id, stores.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
-  let knowledgeSkills = /* @__PURE__ */ derived(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
-  var div = root$l();
+  let storeManager2 = StoreManager.Subscribe(actor());
+  const knowledgeSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores$1.knowledgeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledge").map((item2) => item2.id));
+  let knowledgeSkills = /* @__PURE__ */ derived$1(() => actor().items.filter((item2) => $knowledgeSkillsIdArrayStore().includes(item2.id)));
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  var div = root$s();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
     get skills() {
-      return get$1(knowledgeSkills);
+      return get$2(knowledgeSkills);
     },
     get actor() {
       return actor();
@@ -7077,16 +8244,14 @@ function SkillsKnowledge($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$k = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><div class="skill-container-grid-sizer"></div> <div class="skill-container-gutter-sizer"></div> <!></div>`);
 function SkillsActive($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $activeSkillsIdArrayStore = () => store_get(activeSkillsIdArrayStore, "$activeSkillsIdArrayStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let gridContainer;
-  let masonryInstance = null;
-  const activeSkillsIdArrayStore = getActorStore(actor().id, stores.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
-  let attributeSortedSkills = /* @__PURE__ */ derived(() => [
+  let storeManager2 = StoreManager.Subscribe(actor());
+  const activeSkillsIdArrayStore = storeManager2.GetShallowStore(actor().id, stores$1.activeSkillsIds, actor().items.filter((item2) => item2.type === "skill" && item2.system.skillType === "active").map((item2) => item2.id));
+  let attributeSortedSkills = /* @__PURE__ */ derived$1(() => [
     "body",
     "quickness",
     "strength",
@@ -7098,46 +8263,49 @@ function SkillsActive($$anchor, $$props) {
     attribute,
     skills: actor().items.filter((item2) => $activeSkillsIdArrayStore().includes(item2.id) && item2.system.activeSkill.linkedAttribute === attribute)
   })));
-  user_effect(() => {
-    if (masonryInstance) return;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".skill-category-container",
-      gridSizerSelector: ".skill-container-grid-sizer",
-      gutterSizerSelector: ".skill-container-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem
-    });
-    masonryInstance = result.masonryInstance;
-    return result.cleanup;
+  MasonryGrid($$anchor, {
+    itemSelector: "skill-category-container",
+    gridPrefix: "skill-container",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = comment();
+      var node = first_child(fragment_1);
+      each(node, 17, () => get$2(attributeSortedSkills), index, ($$anchor3, category) => {
+        var fragment_2 = comment();
+        var node_1 = first_child(fragment_2);
+        {
+          var consequent = ($$anchor4) => {
+            SkillCategory($$anchor4, spread_props(() => get$2(category), {
+              get actor() {
+                return actor();
+              },
+              get config() {
+                return config();
+              }
+            }));
+          };
+          if_block(node_1, ($$render) => {
+            if (get$2(category).skills.length > 0) $$render(consequent);
+          });
+        }
+        append($$anchor3, fragment_2);
+      });
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
   });
-  var div = root$k();
-  var node = sibling(child(div), 4);
-  each(node, 17, () => get$1(attributeSortedSkills), index, ($$anchor2, category) => {
-    SkillCategory($$anchor2, spread_props(() => get$1(category), {
-      get actor() {
-        return actor();
-      },
-      get config() {
-        return config();
-      }
-    }));
-  });
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  append($$anchor, div);
   pop();
   $$cleanup();
 }
-var on_click$6 = (_, activeTab) => set(activeTab, "active");
-var on_click_1 = (__1, activeTab) => set(activeTab, "knowledge");
-var on_click_2 = (__2, activeTab) => set(activeTab, "language");
-var root$j = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var on_click$4 = (_, activeTab) => set(activeTab, "active");
+var on_click_1$3 = (__1, activeTab) => set(activeTab, "knowledge");
+var on_click_2$1 = (__2, activeTab) => set(activeTab, "language");
+var root$r = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
-  var fragment = root$j();
+  var fragment = root$r();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -7146,14 +8314,14 @@ function Skills($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var h1 = child(div);
-  var text = child(h1);
+  var text2 = child(h1);
   var div_1 = sibling(h1, 2);
   var button = child(div_1);
-  button.__click = [on_click$6, activeTab];
+  button.__click = [on_click$4, activeTab];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_1, activeTab];
+  button_1.__click = [on_click_1$3, activeTab];
   var button_2 = sibling(button_1, 2);
-  button_2.__click = [on_click_2, activeTab];
+  button_2.__click = [on_click_2$1, activeTab];
   var div_2 = sibling(div_1, 2);
   var node_1 = child(div_2);
   {
@@ -7198,7 +8366,7 @@ function Skills($$anchor, $$props) {
             if_block(
               node_3,
               ($$render) => {
-                if (get$1(activeTab) === "language") $$render(consequent_2);
+                if (get$2(activeTab) === "language") $$render(consequent_2);
               },
               true
             );
@@ -7208,7 +8376,7 @@ function Skills($$anchor, $$props) {
         if_block(
           node_2,
           ($$render) => {
-            if (get$1(activeTab) === "knowledge") $$render(consequent_1);
+            if (get$2(activeTab) === "knowledge") $$render(consequent_1);
             else $$render(alternate, false);
           },
           true
@@ -7217,16 +8385,16 @@ function Skills($$anchor, $$props) {
       append($$anchor2, fragment_2);
     };
     if_block(node_1, ($$render) => {
-      if (get$1(activeTab) === "active") $$render(consequent);
+      if (get$2(activeTab) === "active") $$render(consequent);
       else $$render(alternate_1, false);
     });
   }
   template_effect(
     ($0) => {
-      set_text(text, $0);
-      toggle_class(button, "active", get$1(activeTab) === "active");
-      toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
-      toggle_class(button_2, "active", get$1(activeTab) === "language");
+      set_text(text2, $0);
+      toggle_class(button, "active", get$2(activeTab) === "active");
+      toggle_class(button_1, "active", get$2(activeTab) === "knowledge");
+      toggle_class(button_2, "active", get$2(activeTab) === "language");
     },
     [() => localize(config().skill.skill)]
   );
@@ -7234,645 +8402,508 @@ function Skills($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$i = /* @__PURE__ */ template(`<!> <div class="health"><h1> </h1> <span> </span></div>`, 1);
+class EcgAnimator {
+  constructor(lineCanvas, pointCanvas, { freq = 1.5, amp = 20, lineWidth = 2, bottomColor = "#00FFFF", topColor = "#0000FF" } = {}) {
+    __publicField(this, "_animate", () => {
+      if (!this._isAnimating) return;
+      this._drawEcg();
+      this._animFrame = requestAnimationFrame(this._animate);
+    });
+    this.lineCanvas = lineCanvas;
+    this.lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true });
+    this.pointCanvas = pointCanvas;
+    this.pointCtx = pointCanvas.getContext("2d", { willReadFrequently: true });
+    this.width = lineCanvas.width;
+    this.height = lineCanvas.height;
+    this.phase = 0;
+    this.freq = freq;
+    this.amp = amp;
+    this.lineWidth = lineWidth;
+    this._isAnimating = false;
+    this._animFrame = null;
+    this.bottomColor = bottomColor;
+    this.topColor = topColor;
+  }
+  start() {
+    if (this._isAnimating) return;
+    this._isAnimating = true;
+    this._animate();
+  }
+  stop() {
+    this._isAnimating = false;
+    if (this._animFrame) cancelAnimationFrame(this._animFrame);
+  }
+  setFrequency(freq) {
+    this.freq = freq;
+  }
+  setAmplitude(amp) {
+    this.amp = amp;
+  }
+  setTopColor(color) {
+    this.topColor = color;
+  }
+  setBottomColor(color) {
+    this.bottomColor = color;
+  }
+  updateDimensions(width, height) {
+    this.width = Math.floor(width);
+    this.height = Math.floor(height);
+  }
+  _drawEcg() {
+    if (this.width <= 0 || this.height <= 0) return;
+    const offsetX = 10;
+    const offsetY = 10;
+    const radius = 4;
+    const x = this.width - offsetX - radius;
+    const imageData = this.lineCtx.getImageData(1, 0, this.width - 1, this.height);
+    this.lineCtx.clearRect(0, 0, this.width, this.height);
+    this.lineCtx.putImageData(imageData, 0, 0);
+    const heartY = this._getHeartY(this.phase);
+    const centerY = this.height / 2 + offsetY;
+    const y = centerY - heartY;
+    if (this.prevY === void 0) {
+      this.prevY = y;
+      this.prevHeartY = heartY;
+      this.prevPhase = this.phase;
+    }
+    const prevHeartY = this.prevHeartY;
+    const t1 = Math.min(1, Math.abs(prevHeartY) / this.amp);
+    const t2 = Math.min(1, Math.abs(heartY) / this.amp);
+    const gradient = this.lineCtx.createLinearGradient(x - 1, this.prevY, x, y);
+    gradient.addColorStop(0, lerpColor(this.bottomColor, this.topColor, t1));
+    gradient.addColorStop(1, lerpColor(this.bottomColor, this.topColor, t2));
+    this.lineCtx.beginPath();
+    this.lineCtx.moveTo(x - 1, this.prevY);
+    this.lineCtx.lineTo(x, y);
+    this.lineCtx.strokeStyle = gradient;
+    this.lineCtx.lineWidth = this.lineWidth;
+    this.lineCtx.stroke();
+    this.lineCtx.fillStyle = lerpColor(this.bottomColor, this.topColor, t2);
+    this.lineCtx.fillRect(x, y, 1, 1);
+    this.pointCtx.clearRect(0, 0, this.width, this.height);
+    this.pointCtx.beginPath();
+    this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
+    this.pointCtx.fillStyle = this.topColor;
+    this.pointCtx.shadowBlur = 5;
+    this.pointCtx.shadowColor = this.topColor;
+    this.pointCtx.fill();
+    this.pointCtx.shadowBlur = 0;
+    this.prevY = y;
+    this.prevHeartY = heartY;
+    this.prevPhase = this.phase;
+    this.phase += 0.04 * this.freq;
+  }
+  _getHeartY(phase) {
+    const t = phase;
+    const cycle = t % (2 * Math.PI) / (2 * Math.PI);
+    let y = 0;
+    if (cycle < 0.1) {
+      const alpha = cycle / 0.1;
+      y = 0.1 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.15) {
+      const alpha = (cycle - 0.1) / 0.05;
+      y = -0.2 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.2) {
+      const alpha = (cycle - 0.15) / 0.05;
+      y = 0.8 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.25) {
+      const alpha = (cycle - 0.2) / 0.05;
+      y = -0.2 * Math.sin(alpha * Math.PI) * this.amp;
+    } else if (cycle < 0.55) {
+      const alpha = (cycle - 0.4) / 0.15;
+      y = 0.3 * Math.sin(alpha * Math.PI) * this.amp;
+    }
+    return y;
+  }
+}
+class ElectroCardiogramService {
+  constructor(actor, { find, html: html2 }) {
+    __privateAdd(this, _ElectroCardiogramService_instances);
+    __privateAdd(this, _ecgCanvas);
+    __privateAdd(this, _ecgPointCanvas);
+    __privateAdd(this, _ctxLine);
+    __privateAdd(this, _ctxPoint);
+    __privateAdd(this, _actor);
+    __privateAdd(this, _html);
+    __privateAdd(this, _resizeObserver);
+    __publicField(this, "ecgAnimator");
+    __privateAdd(this, _isResizing, false);
+    __privateSet(this, _actor, actor);
+    __privateSet(this, _html, { find });
+    __privateSet(this, _ecgCanvas, __privateGet(this, _html).find("#ecg-canvas")[0]);
+    __privateSet(this, _ecgPointCanvas, __privateGet(this, _html).find("#ecg-point-canvas")[0]);
+    __privateSet(this, _ctxLine, __privateGet(this, _ecgCanvas).getContext("2d", {
+      willReadFrequently: true
+    }));
+    __privateSet(this, _ctxPoint, __privateGet(this, _ecgPointCanvas).getContext("2d", {
+      willReadFrequently: true
+    }));
+    __privateSet(this, _resizeObserver, new ResizeObserver((entries) => {
+      if (__privateGet(this, _isResizing)) return;
+      __privateSet(this, _isResizing, true);
+      requestAnimationFrame(() => {
+        __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
+        __privateSet(this, _isResizing, false);
+      });
+    }));
+    console.log(html2);
+    __privateGet(this, _resizeObserver).observe(html2);
+    __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
+    const highlightColorPrimary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-primary").trim();
+    const highlightColorTertiary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-tertiary").trim();
+    this.ecgAnimator = new EcgAnimator(__privateGet(this, _ecgCanvas), __privateGet(this, _ecgPointCanvas), {
+      freq: 2,
+      amp: 30,
+      lineWidth: 2,
+      bottomColor: highlightColorPrimary,
+      topColor: highlightColorTertiary
+    });
+    this.ecgAnimator.start();
+  }
+  async onHealthBoxChange(event2) {
+    const clicked = event2.currentTarget;
+    const clickedIndex = parseInt(clicked.id.replace("healthBox", ""), 10);
+    const isStun = clickedIndex <= 10;
+    const localIndex = isStun ? clickedIndex - 1 : clickedIndex - 11;
+    const stunArray = [...__privateGet(this, _actor).system.health.stun];
+    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
+    const currentArray = isStun ? stunArray : physicalArray;
+    const wasChecked = currentArray[localIndex];
+    const willBeChecked = clicked.checked;
+    const checkedCount = currentArray.filter(Boolean).length;
+    if (wasChecked && !willBeChecked && checkedCount === 1) {
+      currentArray[localIndex] = false;
+      clicked.checked = false;
+      const siblingH4 = $(clicked).closest(".damage-input").find("h4");
+      siblingH4.removeClass("lit").addClass("unlit");
+    } else {
+      for (let i = 0; i < 10; i++) {
+        const shouldCheck = i <= localIndex;
+        currentArray[i] = shouldCheck;
+        const globalId = isStun ? i + 1 : i + 11;
+        const box = __privateGet(this, _html).find(`#healthBox${globalId}`);
+        box.prop("checked", shouldCheck);
+        const siblingH4 = box.closest(".damage-input").find("h4");
+        if (siblingH4.length) {
+          siblingH4.toggleClass("lit", shouldCheck);
+          siblingH4.toggleClass("unlit", !shouldCheck);
+        }
+      }
+    }
+    if (isStun) {
+      __privateGet(this, _actor).system.health.stun = stunArray;
+    } else {
+      __privateGet(this, _actor).system.health.physical = physicalArray;
+    }
+    const penalty = this.calculatePenalty(stunArray, physicalArray);
+    __privateGet(this, _html).find(".health-penalty").text(penalty);
+    await __privateGet(this, _actor).update(
+      {
+        ["system.health.stun"]: stunArray,
+        ["system.health.physical"]: physicalArray,
+        ["system.health.penalty"]: penalty
+      },
+      { render: false }
+    );
+  }
+  updateHealthOnStart() {
+    const stunArray = [...__privateGet(this, _actor).system.health.stun];
+    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
+    const penalty = this.calculatePenalty(stunArray, physicalArray);
+    __privateGet(this, _html).find(".health-penalty").text(penalty);
+  }
+  calculatePenalty(stunArray, physicalArray) {
+    const degreeStun = stunArray.filter(Boolean).length;
+    const degreePhysical = physicalArray.filter(Boolean).length;
+    const maxDegree = Math.max(degreeStun, degreePhysical);
+    return this._calculateSeverity(maxDegree);
+  }
+  _calculateSeverity(degree = 0) {
+    if (degree === 0) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 1.5, 20), 0;
+    if (degree < 3) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 2, 20), 1;
+    if (degree < 6) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 4, 25), 2;
+    if (degree < 9) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 8, 35), 3;
+    if (degree === 9) return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 10, 40), 4;
+    return __privateMethod(this, _ElectroCardiogramService_instances, setPace_fn).call(this, 1, 8), 4;
+  }
+}
+_ecgCanvas = new WeakMap();
+_ecgPointCanvas = new WeakMap();
+_ctxLine = new WeakMap();
+_ctxPoint = new WeakMap();
+_actor = new WeakMap();
+_html = new WeakMap();
+_resizeObserver = new WeakMap();
+_isResizing = new WeakMap();
+_ElectroCardiogramService_instances = new WeakSet();
+resizeCanvas_fn = function() {
+  var _a;
+  const wRatio = window.devicePixelRatio;
+  const wasAnimating = (_a = this.ecgAnimator) == null ? void 0 : _a._isAnimating;
+  if (this.ecgAnimator && wasAnimating) {
+    this.ecgAnimator.stop();
+  }
+  const resize = (canvas, ctx) => {
+    const displayWidth = canvas.offsetWidth;
+    const displayHeight = canvas.offsetHeight;
+    const width = displayWidth * wRatio;
+    const height = displayHeight * wRatio;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(wRatio, wRatio);
+  };
+  resize(__privateGet(this, _ecgCanvas), __privateGet(this, _ctxLine));
+  resize(__privateGet(this, _ecgPointCanvas), __privateGet(this, _ctxPoint));
+  if (this.ecgAnimator) {
+    this.ecgAnimator.updateDimensions(
+      __privateGet(this, _ecgCanvas).offsetWidth,
+      __privateGet(this, _ecgCanvas).offsetHeight
+    );
+    if (wasAnimating) {
+      setTimeout(() => {
+        this.ecgAnimator.start();
+      }, 10);
+    }
+  }
+};
+setPace_fn = function(freq, amp) {
+  if (this.ecgAnimator) {
+    this.ecgAnimator.setFrequency(freq);
+    this.ecgAnimator.setAmplitude(amp);
+  }
+};
+var root_2$9 = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_1$f = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var root_4$7 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
+var root_3$7 = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var on_keydown$2 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
+var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
+var root$q = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  var fragment = root$i();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var div = sibling(node, 2);
-  var h1 = child(div);
-  var text = child(h1);
-  var span = sibling(h1, 2);
-  var text_1 = child(span);
-  template_effect(
-    ($0) => {
-      set_text(text, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
-    },
-    [() => localize(config().health.health)]
-  );
-  append($$anchor, fragment);
-  pop();
-}
-var root_1$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h5 class="stat-value"><i class="fa-solid fa-heart-circle-bolt"></i></h5></div>`);
-var root$h = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="attribute-masonry-grid"><div class="attribute-grid-sizer"></div> <div class="attribute-gutter-sizer"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <h1 class="stat-value"> </h1></div> <!></div>`, 1);
-function Karma($$anchor, $$props) {
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let karma = proxy(actor().system.karma);
-  let essence = proxy(actor().system.attributes.essence ?? 0);
-  let gridContainer;
-  let survivor = /* @__PURE__ */ derived(() => karma.miraculousSurvival);
-  user_effect(() => {
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container: gridContainer,
-      itemSelector: ".stat-card",
-      gridSizerSelector: ".attribute-grid-sizer",
-      gutterSizerSelector: ".attribute-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem
-    });
-    return result.cleanup;
-  });
-  var fragment = root$h();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var h1 = sibling(node, 2);
-  var text = child(h1);
-  var div = sibling(h1, 2);
-  var div_1 = sibling(child(div), 4);
-  var h4 = sibling(child(div_1), 2);
-  var text_1 = child(h4);
-  var h1_1 = sibling(h4, 2);
-  var text_2 = child(h1_1);
-  var div_2 = sibling(div_1, 2);
-  var h4_1 = sibling(child(div_2), 2);
-  var text_3 = child(h4_1);
-  var h1_2 = sibling(h4_1, 2);
-  var text_4 = child(h1_2);
-  var div_3 = sibling(div_2, 2);
-  var h4_2 = sibling(child(div_3), 2);
-  var text_5 = child(h4_2);
-  var h1_3 = sibling(h4_2, 2);
-  var text_6 = child(h1_3);
-  var div_4 = sibling(div_3, 2);
-  var h4_3 = sibling(child(div_4), 2);
-  var text_7 = child(h4_3);
-  var h1_4 = sibling(h4_3, 2);
-  var text_8 = child(h1_4);
-  var node_1 = sibling(div_4, 2);
-  {
-    var consequent = ($$anchor2) => {
-      var div_5 = root_1$9();
-      var h4_4 = sibling(child(div_5), 2);
-      var text_9 = child(h4_4);
-      template_effect(($0) => set_text(text_9, $0), [
-        () => localize(config().karma.miraculousSurvival)
-      ]);
-      append($$anchor2, div_5);
-    };
-    var alternate = ($$anchor2) => {
-    };
-    if_block(node_1, ($$render) => {
-      if (!get$1(survivor)) $$render(consequent);
-      else $$render(alternate, false);
-    });
-  }
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(
-    ($0, $1, $2, $3) => {
-      set_text(text, $0);
-      set_text(text_1, $1);
-      set_text(text_2, karma.goodKarma);
-      set_text(text_3, $2);
-      set_text(text_4, karma.karmaPool);
-      set_text(text_5, $2);
-      set_text(text_6, karma.lifetimeKarma);
-      set_text(text_7, $3);
-      set_text(text_8, essence);
-    },
-    [
-      () => localize(config().karma.karma),
-      () => localize(config().karma.goodKarma),
-      () => localize(config().karma.lifetimeKarma),
-      () => localize(config().attributes.essence)
-    ]
-  );
-  append($$anchor, fragment);
-  pop();
-}
-var root$g = /* @__PURE__ */ template(`<!> <div class="inventory"><h1> </h1> <span> </span></div>`, 1);
-function Inventory($$anchor, $$props) {
-  push($$props, true);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  var fragment = root$g();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var div = sibling(node, 2);
-  var h1 = child(div);
-  var text = child(h1);
-  var span_1 = sibling(h1, 2);
-  var text_1 = child(span_1);
-  template_effect(
-    ($0) => {
-      set_text(text, $0);
-      set_text(text_1, actor().system.profile.metaHumanity ?? "Fluffy Dog Lasagna");
-    },
-    [
-      () => localize(config().inventory.inventory)
-    ]
-  );
-  append($$anchor, fragment);
-  pop();
-}
-var root_1$8 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$f = /* @__PURE__ */ template(`<div class="sheet-character-masonry-main"><div class="layout-grid-sizer"></div> <div class="layout-gutter-sizer"></div> <!></div>`);
-function CharacterSheetApp($$anchor, $$props) {
-  push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $cardLayout = () => store_get(cardLayout, "$cardLayout", $$stores);
-  const defaultCardArray = [
-    {
-      comp: Dossier,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 0,
-        span: 1
-      }
-    },
-    {
-      comp: Initiative,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 1,
-        span: 1
-      }
-    },
-    {
-      comp: Attributes,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 2,
-        span: 1
-      }
-    },
-    {
-      comp: DicePools,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 3,
-        span: 1
-      }
-    },
-    {
-      comp: Movement,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 4,
-        span: 1
-      }
-    },
-    {
-      comp: Karma,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 5,
-        span: 1
-      }
-    },
-    {
-      comp: Skills,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 6,
-        span: 2
-      }
-    },
-    {
-      comp: Health,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 7,
-        span: 1
-      }
-    },
-    {
-      comp: Inventory,
-      props: {
-        actor: $$props.actor,
-        config: $$props.config,
-        id: 8,
-        span: 1
-      }
+  const $stunArray = () => store_get(stunArray, "$stunArray", $$stores);
+  const $physicalArray = () => store_get(physicalArray, "$physicalArray", $$stores);
+  const $penalty = () => store_get(penalty, "$penalty", $$stores);
+  const $overflow = () => store_get(overflow, "$overflow", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let stunArray = storeManager2.GetStore("health.stun");
+  let physicalArray = storeManager2.GetStore("health.physical");
+  let penalty = storeManager2.GetStore("health.penalty");
+  let overflow = storeManager2.GetStore("health.overflow");
+  let maxDegree = state(0);
+  let ecgCanvas = state(void 0);
+  let ecgPointCanvas = state(void 0);
+  let ecgService = state(void 0);
+  function toggle(localIndex, isStun, willBeChecked) {
+    const currentArray = isStun ? $stunArray().slice() : $physicalArray().slice();
+    if (willBeChecked) {
+      for (let i = 0; i <= localIndex; i++) currentArray[i] = true;
+      for (let i = localIndex + 1; i < 10; i++) currentArray[i] = false;
+    } else {
+      for (let i = localIndex; i < 10; i++) currentArray[i] = false;
     }
-  ];
-  user_effect(async () => {
+    if (isStun) {
+      store_set(stunArray, proxy(currentArray));
+    } else {
+      store_set(physicalArray, proxy(currentArray));
+    }
+    set(maxDegree, proxy(Math.max($stunArray().filter(Boolean).length, $physicalArray().filter(Boolean).length)));
+  }
+  user_effect(() => {
     var _a;
-    console.log("Actor ID " + $$props.actor.id);
-    if (!((_a = $$props.actor) == null ? void 0 : _a.id)) return;
-    const layout = await $$props.actor.getFlag("sr3e", "customLayout");
-    const defaultLayout = defaultCardArray.map((c) => ({ id: c.props.id, span: c.props.span }));
-    if (!Array.isArray(layout) || layout.length === 0) {
-      cardLayout.set(defaultLayout);
-      await $$props.actor.setFlag("sr3e", "customLayout", defaultLayout);
-    } else {
-      cardLayout.set(layout);
-    }
+    store_set(penalty, proxy((_a = get$2(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
   });
-  let cards = state(proxy([]));
-  user_effect(() => {
-    set(cards, proxy($cardLayout().map(({ id, span }) => {
-      const match = defaultCardArray.find((c) => c.props.id === id);
-      if (!match) return null;
-      return {
-        ...match,
-        props: {
-          ...match.props,
-          span: span ?? match.props.span
-        }
-      };
-    }).filter(Boolean)));
-  });
-  let container = null;
-  user_effect(async () => {
-    await tick();
-    container == null ? void 0 : container.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
-  });
-  let saveTimeout = null;
-  user_effect(() => {
-    const layout = $cardLayout();
-    clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(
-      () => {
-        $$props.actor.setFlag("sr3e", "customLayout", layout);
+  let ecg;
+  onMount(() => {
+    set(ecgService, proxy(new ElectroCardiogramService(actor(), {
+      find: (selector) => {
+        if (selector === "#ecg-canvas") return [get$2(ecgCanvas)];
+        if (selector === "#ecg-point-canvas") return [get$2(ecgPointCanvas)];
+        return [];
       },
-      200
-    );
+      html: ecg.parentElement
+    })));
   });
-  let layoutState = state("small");
-  let masonryInstance = null;
-  user_effect(() => {
-    if (!container) return;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-    const result = setupMasonry({
-      container,
-      itemSelector: ".sheet-component",
-      gridSizerSelector: ".layout-grid-sizer",
-      gutterSizerSelector: ".layout-gutter-sizer",
-      minItemWidth: masonryMinWidthFallbackValue.charaterSheet * rem,
-      onLayoutStateChange: (state2) => {
-        set(layoutState, proxy(state2));
-      }
-    });
-    masonryInstance = result.masonryInstance;
-    return result.cleanup;
-  });
-  var div = root$f();
-  var node = sibling(child(div), 4);
-  each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor2, $$item) => {
-    let Comp = () => get$1($$item).comp;
-    let props = () => get$1($$item).props;
-    var div_1 = root_1$8();
-    var div_2 = child(div_1);
-    var div_3 = sibling(child(div_2), 2);
-    var node_1 = child(div_3);
-    component(node_1, Comp, ($$anchor3, $$component) => {
-      $$component($$anchor3, spread_props(props));
-    });
-    template_effect(() => set_class(div_1, "sheet-component span-" + (props().span ?? 1)));
-    append($$anchor2, div_1);
-  });
-  bind_this(div, ($$value) => container = $$value, () => container);
-  event("masonry-reflow", div, () => {
-    masonryInstance.layout();
-  });
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-var root$e = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
-function NeonName($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $actorName = () => store_get(actorName, "$actorName", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({}));
-  let malfunctioningIndexes = [];
-  const actorName = getActorStore(actor().id, stores.actorName, actor().name);
-  let name = /* @__PURE__ */ derived($actorName);
-  let neonHTML = /* @__PURE__ */ derived(() => getNeonHtml(get$1(name)));
-  const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  function getNeonHtml(name2) {
-    malfunctioningIndexes = [];
-    if (name2.length < 4) {
-      malfunctioningIndexes.push(randomInRange(0, name2.length - 1));
-    } else {
-      const malfunctionInNplaces = name2.length % 4;
-      for (let i = 0; i < malfunctionInNplaces; i++) {
-        let index2;
-        do {
-          index2 = randomInRange(0, name2.length - 1);
-        } while (malfunctioningIndexes.includes(index2));
-        malfunctioningIndexes.push(index2);
-      }
-    }
-    return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
+  function incrementOverflow() {
+    store_set(overflow, proxy(Math.min($overflow() + 1, 10)));
   }
-  var div = root$e();
-  var node = child(div);
-  html(node, () => get$1(neonHTML));
-  append($$anchor, div);
-  pop();
-  $$cleanup();
-}
-var root$d = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
-function NewsFeed($$anchor) {
-  var div = root$d();
-  append($$anchor, div);
-}
-var root_1$7 = /* @__PURE__ */ template(`<div class="point-container"><h1> </h1> <div> </div></div>`);
-var root$c = /* @__PURE__ */ template(`<div></div>`);
-function CreationPointList($$anchor, $$props) {
-  let points = prop($$props, "points", 19, () => []), containerCSS = prop($$props, "containerCSS", 3, "");
-  var div = root$c();
-  each(div, 21, points, index, ($$anchor2, point, i) => {
-    var div_1 = root_1$7();
-    set_attribute(div_1, "style", `top: ${i * 8}rem`);
-    var h1 = child(div_1);
-    var text = child(h1);
-    var div_2 = sibling(h1, 2);
-    var text_1 = child(div_2);
-    template_effect(() => {
-      set_text(text, get$1(point).value);
-      set_text(text_1, get$1(point).text);
-    });
-    append($$anchor2, div_1);
-  });
-  template_effect(() => set_class(div, containerCSS()));
-  append($$anchor, div);
-}
-function AttributePointsState($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
-  const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  let system = proxy($$props.actor.system);
-  let attributeAssignmentLocked = getActorStore($$props.actor.id, stores.attributeAssignmentLocked, $$props.actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  let intelligenceStore = getActorStore($$props.actor.id, stores.intelligence, system.attributes.intelligence.value + system.attributes.intelligence.mod + system.attributes.intelligence.meta);
-  let attributePointStore = getActorStore($$props.actor.id, stores.attributePoints, system.creation.attributePoints);
-  let skillPointStore = getActorStore($$props.actor.id, stores.activePoints, system.creation.activePoints);
-  let knowledgePointStore = getActorStore($$props.actor.id, stores.knowledgePoints, system.creation.knowledgePoints);
-  let languagePointStore = getActorStore($$props.actor.id, stores.languagePoints, system.creation.languagePoints);
-  let intelligence = state(0);
-  let attributePointsText = localize($$props.config.attributes.attributes);
-  let activePointsText = localize($$props.config.skill.active);
-  let knowledgePointsText = localize($$props.config.skill.knowledge);
-  let languagePointsText = localize($$props.config.skill.language);
-  let pointList = /* @__PURE__ */ derived(() => [
-    {
-      value: $attributePointStore(),
-      text: attributePointsText
-    },
-    {
-      value: $skillPointStore(),
-      text: activePointsText
-    },
-    {
-      value: $knowledgePointStore(),
-      text: knowledgePointsText
-    },
-    {
-      value: $languagePointStore(),
-      text: languagePointsText
-    }
-  ]);
-  user_effect(() => {
-    const unsubscribe = intelligenceStore.subscribe((v) => {
-      if (typeof v === "number") {
-        set(intelligence, proxy(v));
-      }
-    });
-    return unsubscribe;
-  });
-  user_effect(() => {
-    knowledgePointStore.set(get$1(intelligence) * 5);
-    languagePointStore.set(Math.floor(get$1(intelligence) * 1.5));
-  });
-  user_effect(() => {
-    const value = $attributePointStore();
-    $$props.actor.update({ "system.creation.attributePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $skillPointStore();
-    $$props.actor.update({ "system.creation.activePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $knowledgePointStore();
-    $$props.actor.update({ "system.creation.knowledgePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    const value = $languagePointStore();
-    $$props.actor.update({ "system.creation.languagePoints": value }, { render: false });
-  });
-  user_effect(() => {
-    if ($attributePointStore() === 0 && $attributeAssignmentLocked() === false) {
-      (async () => {
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: "Finish Attribute Point Assignement?" },
-          content: "You've used all your attribute points. Are you ready to continue with skill assignment?",
-          yes: { label: "Yes, finish", default: true },
-          no: { label: "Not yet" },
-          modal: true,
-          rejectClose: true
-        });
-        if (confirmed) {
-          $$props.actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, true);
-          store_set(attributeAssignmentLocked, true);
-        }
-      })();
-    }
-  });
-  CreationPointList($$anchor, {
-    get points() {
-      return get$1(pointList);
-    },
-    containerCSS: "attribute-point-assignment"
-  });
-  pop();
-  $$cleanup();
-}
-function SkillPointsState($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $skillPointStore = () => store_get(skillPointStore, "$skillPointStore", $$stores);
-  const $knowledgePointStore = () => store_get(knowledgePointStore, "$knowledgePointStore", $$stores);
-  const $languagePointStore = () => store_get(languagePointStore, "$languagePointStore", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), isCharacterCreation = prop($$props, "isCharacterCreation", 15, true);
-  let system = proxy(actor().system);
-  let attributePointStore = getActorStore(actor().id, stores.attributePoints, system.creation.attributePoints);
-  let skillPointStore = getActorStore(actor().id, stores.activePoints, system.creation.activePoints);
-  let knowledgePointStore = getActorStore(actor().id, stores.knowledgePoints, system.creation.knowledgePoints);
-  let languagePointStore = getActorStore(actor().id, stores.languagePoints, system.creation.languagePoints);
-  let attributePointsText = localize(config().attributes.attributes);
-  let activePointsText = localize(config().skill.active);
-  let knowledgePointsText = localize(config().skill.knowledge);
-  let languagePointsText = localize(config().skill.language);
-  let pointList = /* @__PURE__ */ derived(() => [
-    {
-      value: $attributePointStore(),
-      text: attributePointsText
-    },
-    {
-      value: $skillPointStore(),
-      text: activePointsText
-    },
-    {
-      value: $knowledgePointStore(),
-      text: knowledgePointsText
-    },
-    {
-      value: $languagePointStore(),
-      text: languagePointsText
-    }
-  ]);
-  user_effect(() => {
-    if ($skillPointStore() === 0 && $knowledgePointStore() === 0 && $languagePointStore() === 0) {
-      (async () => {
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: "Finish Character Creation?" },
-          content: "You've used all your skill points. Done Creating?",
-          yes: { label: "Yes, finish", default: true },
-          no: { label: "Not yet" },
-          modal: true,
-          rejectClose: true
-        });
-        if (confirmed) {
-          actor().setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
-          isCharacterCreation(false);
-        }
-      })();
-    }
-  });
-  CreationPointList($$anchor, {
-    get points() {
-      return get$1(pointList);
-    },
-    containerCSS: "skill-point-assignment"
-  });
-  pop();
-  $$cleanup();
-}
-var root_1$6 = /* @__PURE__ */ template(`<div><!></div>`);
-function CharacterCreationManager($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let attributeAssignmentLocked = getActorStore(actor().id, stores.attributeAssignmentLocked, actor().getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked));
-  console.log("attributeAssignmentLocked", $attributeAssignmentLocked());
-  let isCharacterCreation = state(proxy(actor().getFlag(flags.sr3e, flags.actor.isCharacterCreation)));
-  var fragment = comment();
+  function decrementOverflow() {
+    store_set(overflow, proxy(Math.max($overflow() - 1, 0)));
+  }
+  var fragment = root$q();
   var node = first_child(fragment);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var div = root_1$6();
-      var node_1 = child(div);
-      {
-        var consequent = ($$anchor3) => {
-          SkillPointsState($$anchor3, {
-            get actor() {
-              return actor();
-            },
-            get config() {
-              return config();
-            },
-            get isCharacterCreation() {
-              return get$1(isCharacterCreation);
-            },
-            set isCharacterCreation($$value) {
-              set(isCharacterCreation, proxy($$value));
-            }
-          });
-        };
-        var alternate = ($$anchor3) => {
-          AttributePointsState($$anchor3, {
-            get actor() {
-              return actor();
-            },
-            get config() {
-              return config();
-            }
-          });
-        };
-        if_block(node_1, ($$render) => {
-          if ($attributeAssignmentLocked()) $$render(consequent);
-          else $$render(alternate, false);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var div = sibling(node, 2);
+  var canvas = child(div);
+  bind_this(canvas, ($$value) => set(ecgCanvas, $$value), () => get$2(ecgCanvas));
+  var canvas_1 = sibling(canvas, 2);
+  bind_this(canvas_1, ($$value) => set(ecgPointCanvas, $$value), () => get$2(ecgPointCanvas));
+  bind_this(div, ($$value) => ecg = $$value, () => ecg);
+  var div_1 = sibling(div, 2);
+  var div_2 = child(div_1);
+  var div_3 = child(div_2);
+  var node_1 = sibling(child(div_3), 2);
+  each(node_1, 16, () => Array(10), index, ($$anchor2, _, i) => {
+    var div_4 = root_1$f();
+    var input = child(div_4);
+    set_attribute(input, "id", `healthBox${i + 1}`);
+    input.__change = (e) => toggle(i, true, e.target.checked);
+    var node_2 = sibling(input, 2);
+    {
+      var consequent = ($$anchor3) => {
+        var div_5 = root_2$9();
+        var h4 = child(div_5);
+        var text2 = child(h4);
+        template_effect(() => {
+          set_class(h4, `no-margin ${($stunArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_text(text2, [
+            "Light",
+            "",
+            "Moderate",
+            "",
+            "",
+            "Serious",
+            "",
+            "",
+            "",
+            "Deadly"
+          ][i]);
         });
-      }
-      append($$anchor2, div);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(isCharacterCreation)) $$render(consequent_1);
-    });
-  }
+        append($$anchor3, div_5);
+      };
+      if_block(node_2, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent);
+      });
+    }
+    template_effect(() => set_checked(input, $stunArray()[i]));
+    append($$anchor2, div_4);
+  });
+  var div_6 = sibling(div_3, 2);
+  var node_3 = sibling(child(div_6), 2);
+  each(node_3, 16, () => Array(10), index, ($$anchor2, _, i) => {
+    var div_7 = root_3$7();
+    var input_1 = child(div_7);
+    set_attribute(input_1, "id", `healthBox${i + 11}`);
+    input_1.__change = (e) => toggle(i, false, e.target.checked);
+    var node_4 = sibling(input_1, 2);
+    {
+      var consequent_1 = ($$anchor3) => {
+        var div_8 = root_4$7();
+        var h4_1 = child(div_8);
+        var text_1 = child(h4_1);
+        template_effect(() => {
+          set_class(h4_1, `no-margin ${($physicalArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_text(text_1, [
+            "Light",
+            "",
+            "Moderate",
+            "",
+            "",
+            "Serious",
+            "",
+            "",
+            "",
+            "Deadly"
+          ][i]);
+        });
+        append($$anchor3, div_8);
+      };
+      if_block(node_4, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_1);
+      });
+    }
+    template_effect(() => set_checked(input_1, $physicalArray()[i]));
+    append($$anchor2, div_7);
+  });
+  var a = sibling(node_3, 2);
+  a.__click = incrementOverflow;
+  a.__keydown = [on_keydown$2, incrementOverflow];
+  var a_1 = sibling(a, 2);
+  a_1.__click = decrementOverflow;
+  a_1.__keydown = [on_keydown_1, decrementOverflow];
+  var div_9 = sibling(div_2, 2);
+  var div_10 = child(div_9);
+  var node_5 = child(div_10);
+  const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
+  StatCard$1(node_5, {
+    get value() {
+      return $penalty();
+    },
+    get label() {
+      return get$2(expression);
+    }
+  });
+  var node_6 = sibling(node_5, 2);
+  const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().health.overflow));
+  StatCard$1(node_6, {
+    get value() {
+      return $overflow();
+    },
+    get label() {
+      return get$2(expression_1);
+    }
+  });
   append($$anchor, fragment);
   pop();
   $$cleanup();
 }
-var root$b = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
-function ShoppingCart($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  let isShoppingState = getActorStore(actor().id, stores.isShoppingState, actor().getFlag(flags.sr3e, flags.actor.isShoppingState));
-  function toggleShoppingState() {
-    store_set(isShoppingState, !$isShoppingState());
-    actor().setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
-    console.log("shoppingState", $isShoppingState());
-  }
-  var div = root$b();
-  var button = child(div);
-  button.__click = toggleShoppingState;
-  template_effect(
-    ($0) => {
-      set_attribute(button, "aria-label", $0);
-      set_class(button, `header-control icon fa-solid fa-cart-shopping ${$isShoppingState() ? "pulsing-green-cart" : ""}`);
-    },
-    [
-      () => localize(config().sheet.buyupgrades)
-    ]
-  );
-  append($$anchor, div);
-  pop();
-  $$cleanup();
+delegate(["change", "click", "keydown"]);
+function Garage($$anchor) {
+  var text$1 = text("Hello garage!");
+  append($$anchor, text$1);
 }
-delegate(["click"]);
+var root_1$e = /* @__PURE__ */ template(`<div><div> </div></div>`);
+var root$p = /* @__PURE__ */ template(`<div></div>`);
+function Arsenal($$anchor, $$props) {
+  let arsenal = prop($$props, "arsenal", 19, () => []);
+  var div = root$p();
+  each(div, 21, arsenal, index, ($$anchor2, item2) => {
+    var div_1 = root_1$e();
+    var div_2 = child(div_1);
+    var text2 = child(div_2);
+    template_effect(() => {
+      set_value(div_1, get$2(item2).id);
+      set_text(text2, get$2(item2).name);
+    });
+    append($$anchor2, div_1);
+  });
+  append($$anchor, div);
+}
 class ActorDataService {
   static prepareSkills(items) {
     return {
       active: this._categorizeAndSortSkills(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "activeSkill"),
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "activeSkill"
+        ),
         (item2) => item2.system.activeSkill.linkedAttribute
       ),
       knowledge: this._categorizeAndSortSkills(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "knowledgeSkill"),
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "knowledgeSkill"
+        ),
         (item2) => item2.system.knowledgeSkill.linkedAttribute
       ),
       language: this._sortSkillsByName(
-        items.filter((item2) => item2.type === "skill" && item2.system.skillType === "languageSkill")
+        items.filter(
+          (item2) => item2.type === "skill" && item2.system.skillType === "languageSkill"
+        )
       )
     };
   }
   static prepareLanguages(items) {
-    return items.filter((item2) => item2.type === "skill" && item2.system.skillType === "languageSkill").map((item2) => {
+    return items.filter(
+      (item2) => item2.type === "skill" && item2.system.skillType === "languageSkill"
+    ).map((item2) => {
       var _a, _b, _c;
       const languageData = {
         id: item2.id,
@@ -7905,7 +8936,9 @@ class ActorDataService {
       acc[category].push(skill);
       return acc;
     }, {});
-    Object.keys(categories).forEach((key) => categories[key].sort((a, b) => a.name.localeCompare(b.name)));
+    Object.keys(categories).forEach(
+      (key) => categories[key].sort((a, b) => a.name.localeCompare(b.name))
+    );
     return categories;
   }
   static _sortSkillsByName(skills) {
@@ -7959,7 +8992,534 @@ class ActorDataService {
       { text: localize(CONFIG.sr3e.traits.ancient), from: 0.8, to: 1 }
     ];
   }
+  static getInventoryCategory(actor, types) {
+    if (!(types == null ? void 0 : types.length)) return [];
+    let all = [];
+    types.forEach((type) => {
+      const matches = actor.items.filter((item2) => item2.type === type).map((item2) => ({
+        id: item2.id,
+        // or item._id, both work in Foundry
+        name: item2.name,
+        type: item2.type,
+        isSelected: false
+      }));
+      all.push(...matches);
+    });
+    return all;
+  }
 }
+var on_click$3 = (_, activeTab) => set(activeTab, proxy(inventory.arsenal));
+var on_click_1$2 = (__1, activeTab) => set(activeTab, proxy(inventory.garage));
+var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="sr3e-tabs"><button>Arsenal</button> <button>Garage</button></div> <div class="sr3e-inner-background"><!></div>`, 1);
+function Inventory($$anchor, $$props) {
+  push($$props, true);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
+  prop($$props, "span", 19, () => ({}));
+  let activeTab = state(proxy(inventory.arsenal));
+  let arsenal = ActorDataService.getInventoryCategory(actor(), ["weapon", "ammunition"]);
+  var fragment = root$o();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return id();
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text2 = child(h1);
+  var div = sibling(h1, 2);
+  var button = child(div);
+  button.__click = [on_click$3, activeTab];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_1$2, activeTab];
+  var div_1 = sibling(div, 2);
+  var node_1 = child(div_1);
+  {
+    var consequent = ($$anchor2) => {
+      Arsenal($$anchor2, {
+        arsenal,
+        get actor() {
+          return actor();
+        },
+        get config() {
+          return config();
+        }
+      });
+    };
+    var alternate = ($$anchor2) => {
+      var fragment_2 = comment();
+      var node_2 = first_child(fragment_2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          Garage($$anchor3);
+        };
+        if_block(
+          node_2,
+          ($$render) => {
+            if (get$2(activeTab) === inventory.garage) $$render(consequent_1);
+          },
+          true
+        );
+      }
+      append($$anchor2, fragment_2);
+    };
+    if_block(node_1, ($$render) => {
+      if (get$2(activeTab) === inventory.arsenal) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(
+    ($0) => {
+      set_text(text2, $0);
+      toggle_class(button, "active", get$2(activeTab) === inventory.arsenal);
+      toggle_class(button_1, "active", get$2(activeTab) === inventory.garage);
+    },
+    [
+      () => localize(config().inventory.inventory)
+    ]
+  );
+  append($$anchor, fragment);
+  pop();
+}
+delegate(["click"]);
+var root_2$8 = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+function CharacterSheetApp($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $cardLayout = () => store_get(cardLayout, "$cardLayout", $$stores);
+  const defaultCardArray = [
+    {
+      comp: Dossier,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 0,
+        span: 1
+      }
+    },
+    {
+      comp: Attributes,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 1,
+        span: 1
+      }
+    },
+    {
+      comp: DicePools,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 2,
+        span: 1
+      }
+    },
+    {
+      comp: Movement,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 3,
+        span: 1
+      }
+    },
+    {
+      comp: Karma,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 4,
+        span: 1
+      }
+    },
+    {
+      comp: Skills,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 5,
+        span: 2
+      }
+    },
+    {
+      comp: Health,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 6,
+        span: 2
+      }
+    },
+    {
+      comp: Inventory,
+      props: {
+        actor: $$props.actor,
+        config: $$props.config,
+        id: 7,
+        span: 2
+      }
+    }
+  ];
+  user_effect(async () => {
+    var _a;
+    if (!((_a = $$props.actor) == null ? void 0 : _a.id)) return;
+    const layout = await $$props.actor.getFlag("sr3e", "customLayout");
+    const defaultLayout = defaultCardArray.map((c) => ({ id: c.props.id, span: c.props.span }));
+    if (!Array.isArray(layout) || layout.length === 0) {
+      cardLayout.set(defaultLayout);
+      await $$props.actor.setFlag("sr3e", "customLayout", defaultLayout);
+    } else {
+      cardLayout.set(layout);
+    }
+  });
+  let cards = state(proxy([]));
+  user_effect(() => {
+    set(cards, proxy($cardLayout().map(({ id, span }) => {
+      const match = defaultCardArray.find((c) => c.props.id === id);
+      if (!match) return null;
+      return {
+        ...match,
+        props: {
+          ...match.props,
+          span: span ?? match.props.span
+        }
+      };
+    }).filter(Boolean)));
+  });
+  let saveTimeout = null;
+  user_effect(() => {
+    const layout = $cardLayout();
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(
+      () => {
+        $$props.actor.setFlag("sr3e", "customLayout", layout);
+      },
+      200
+    );
+  });
+  MasonryGrid($$anchor, {
+    itemSelector: "sheet-component",
+    gridPrefix: "sheet",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = comment();
+      var node = first_child(fragment_1);
+      each(node, 17, () => get$2(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
+        let Comp = () => get$2($$item).comp;
+        let props = () => get$2($$item).props;
+        var div = root_2$8();
+        var div_1 = child(div);
+        var div_2 = sibling(child(div_1), 2);
+        var node_1 = child(div_2);
+        component(node_1, Comp, ($$anchor4, $$component) => {
+          $$component($$anchor4, spread_props(props));
+        });
+        template_effect(() => set_class(div, "sheet-component span-" + (props().span ?? 1)));
+        append($$anchor3, div);
+      });
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
+  });
+  pop();
+  $$cleanup();
+}
+var root$n = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+function NeonName($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $actorName = () => store_get(actorName, "$actorName", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  let malfunctioningIndexes = [];
+  const actorName = storeManager2.GetShallowStore(actor().id, stores$1.actorName, actor().name);
+  let name = /* @__PURE__ */ derived$1($actorName);
+  let neonHTML = /* @__PURE__ */ derived$1(() => getNeonHtml(get$2(name)));
+  const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  function getNeonHtml(name2) {
+    malfunctioningIndexes = [];
+    if (name2.length < 4) {
+      malfunctioningIndexes.push(randomInRange(0, name2.length - 1));
+    } else {
+      const malfunctionInNplaces = name2.length % 4;
+      for (let i = 0; i < malfunctionInNplaces; i++) {
+        let index2;
+        do {
+          index2 = randomInRange(0, name2.length - 1);
+        } while (malfunctioningIndexes.includes(index2));
+        malfunctioningIndexes.push(index2);
+      }
+    }
+    return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
+  }
+  var div = root$n();
+  var node = child(div);
+  html(node, () => get$2(neonHTML));
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+var root$m = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner"><h1>This should scroll from right to left and disappear on the left.</h1></div></div> <div class="right-gradient"></div></div>`);
+function NewsFeed($$anchor) {
+  var div = root$m();
+  append($$anchor, div);
+}
+var root_1$d = /* @__PURE__ */ template(`<div class="point-container"><h1> </h1> <div> </div></div>`);
+var root$l = /* @__PURE__ */ template(`<div></div>`);
+function CreationPointList($$anchor, $$props) {
+  let points = prop($$props, "points", 19, () => []), containerCSS = prop($$props, "containerCSS", 3, "");
+  var div = root$l();
+  each(div, 21, points, index, ($$anchor2, point, i) => {
+    var div_1 = root_1$d();
+    set_attribute(div_1, "style", `top: ${i * 8}rem`);
+    var h1 = child(div_1);
+    var text2 = child(h1);
+    var div_2 = sibling(h1, 2);
+    var text_1 = child(div_2);
+    template_effect(() => {
+      set_text(text2, get$2(point).value);
+      set_text(text_1, get$2(point).text);
+    });
+    append($$anchor2, div_1);
+  });
+  template_effect(() => set_class(div, containerCSS()));
+  append($$anchor, div);
+}
+function AttributePointsState($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $attributePointsStore = () => store_get(attributePointsStore, "$attributePointsStore", $$stores);
+  const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
+  const $knowledgePointsStore = () => store_get(knowledgePointsStore, "$knowledgePointsStore", $$stores);
+  const $languagePointsStore = () => store_get(languagePointsStore, "$languagePointsStore", $$stores);
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
+  let attributePointsText = localize($$props.config.attributes.attributes);
+  let activePointsText = localize($$props.config.skill.active);
+  let knowledgePointsText = localize($$props.config.skill.knowledge);
+  let languagePointsText = localize($$props.config.skill.language);
+  let storeManager2 = StoreManager.Subscribe($$props.actor);
+  let attributeAssignmentLocked = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
+  let attributePointsStore = storeManager2.GetStore("creation.attributePoints");
+  let activeSkillPointsStore = storeManager2.GetStore("creation.activePoints");
+  let knowledgePointsStore = storeManager2.GetStore("creation.knowledgePoints");
+  let languagePointsStore = storeManager2.GetStore("creation.languagePoints");
+  let pointList = /* @__PURE__ */ derived$1(() => [
+    {
+      value: $attributePointsStore(),
+      text: attributePointsText
+    },
+    {
+      value: $activeSkillPointsStore(),
+      text: activePointsText
+    },
+    {
+      value: $knowledgePointsStore(),
+      text: knowledgePointsText
+    },
+    {
+      value: $languagePointsStore(),
+      text: languagePointsText
+    }
+  ]);
+  user_effect(() => {
+    knowledgePointsStore.set($intelligence().sum * 5);
+    languagePointsStore.set(Math.floor($intelligence().sum * 1.5));
+  });
+  user_effect(() => {
+    if ($attributePointsStore() === 0 && $attributeAssignmentLocked() === false) {
+      (async () => {
+        const confirmed = await foundry.applications.api.DialogV2.confirm({
+          window: {
+            title: localize($$props.config.modal.exitattributesassignment)
+          },
+          content: localize($$props.config.modal.exitattributesassignment),
+          yes: {
+            label: localize($$props.config.modal.confirm),
+            default: true
+          },
+          no: {
+            label: localize($$props.config.modal.decline)
+          },
+          modal: true,
+          rejectClose: true
+        });
+        if (confirmed) {
+          $$props.actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, true);
+          store_set(attributeAssignmentLocked, true);
+        }
+      })();
+    }
+  });
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  CreationPointList($$anchor, {
+    get points() {
+      return get$2(pointList);
+    },
+    containerCSS: "attribute-point-assignment"
+  });
+  pop();
+  $$cleanup();
+}
+function SkillPointsState($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
+  const $knowledgePointsStore = () => store_get(knowledgePointsStore, "$knowledgePointsStore", $$stores);
+  const $languagePointsStore = () => store_get(languagePointsStore, "$languagePointsStore", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let attributePointsText = localize(config().attributes.attributes);
+  let activePointsText = localize(config().skill.active);
+  let knowledgePointsText = localize(config().skill.knowledge);
+  let languagePointsText = localize(config().skill.language);
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let activeSkillPointsStore = storeManager2.GetStore("creation.activePoints");
+  let knowledgePointsStore = storeManager2.GetStore("creation.knowledgePoints");
+  let languagePointsStore = storeManager2.GetStore("creation.languagePoints");
+  let isCharacterCreationStore = storeManager2.GetFlagStore(flags.actor.isCharacterCreation);
+  let pointList = /* @__PURE__ */ derived$1(() => [
+    { value: 0, text: attributePointsText },
+    {
+      value: $activeSkillPointsStore(),
+      text: activePointsText
+    },
+    {
+      value: $knowledgePointsStore(),
+      text: knowledgePointsText
+    },
+    {
+      value: $languagePointsStore(),
+      text: languagePointsText
+    }
+  ]);
+  user_effect(() => {
+    if ($activeSkillPointsStore() === 0 && $knowledgePointsStore() === 0 && $languagePointsStore() === 0) {
+      (async () => {
+        const confirmed = await foundry.applications.api.DialogV2.confirm({
+          window: {
+            title: localize(config().modal.exitcreationmodetitle)
+          },
+          content: localize(config().modal.exitcreationmode),
+          yes: {
+            label: localize(config().modal.confirm),
+            default: true
+          },
+          no: {
+            label: localize(config().modal.decline)
+          },
+          modal: true,
+          rejectClose: true
+        });
+        if (confirmed) {
+          actor().setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
+          store_set(isCharacterCreationStore, false);
+        }
+      })();
+    }
+  });
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  CreationPointList($$anchor, {
+    get points() {
+      return get$2(pointList);
+    },
+    containerCSS: "skill-point-assignment"
+  });
+  pop();
+  $$cleanup();
+}
+var root_1$c = /* @__PURE__ */ template(`<div><!></div>`);
+function CharacterCreationManager($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isCharacterCreationStore = () => store_get(isCharacterCreationStore, "$isCharacterCreationStore", $$stores);
+  const $attributeAssignementLockedStore = () => store_get(attributeAssignementLockedStore, "$attributeAssignementLockedStore", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  let attributeAssignementLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  let isCharacterCreationStore = storeManager2.GetFlagStore(flags.actor.isCharacterCreation);
+  var fragment = comment();
+  var node = first_child(fragment);
+  {
+    var consequent_1 = ($$anchor2) => {
+      var div = root_1$c();
+      var node_1 = child(div);
+      {
+        var consequent = ($$anchor3) => {
+          SkillPointsState($$anchor3, {
+            get actor() {
+              return actor();
+            },
+            get config() {
+              return config();
+            }
+          });
+        };
+        var alternate = ($$anchor3) => {
+          AttributePointsState($$anchor3, {
+            get actor() {
+              return actor();
+            },
+            get config() {
+              return config();
+            }
+          });
+        };
+        if_block(node_1, ($$render) => {
+          if ($attributeAssignementLockedStore()) $$render(consequent);
+          else $$render(alternate, false);
+        });
+      }
+      append($$anchor2, div);
+    };
+    if_block(node, ($$render) => {
+      if ($isCharacterCreationStore()) $$render(consequent_1);
+    });
+  }
+  append($$anchor, fragment);
+  pop();
+  $$cleanup();
+}
+var root$k = /* @__PURE__ */ template(`<div><button type="button"></button></div>`);
+function ShoppingCart($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
+  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  let storeManager2 = StoreManager.Subscribe(actor());
+  let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  var div = root$k();
+  var button = child(div);
+  button.__click = function(...$$args) {
+    var _a;
+    (_a = store_set(isShoppingState, !$isShoppingState())) == null ? void 0 : _a.apply(this, $$args);
+  };
+  template_effect(
+    ($0) => {
+      set_attribute(button, "aria-label", $0);
+      set_class(button, `header-control icon fa-solid fa-cart-shopping ${$isShoppingState() ? "pulsing-green-cart" : ""}`);
+    },
+    [
+      () => localize(config().sheet.buyupgrades)
+    ]
+  );
+  append($$anchor, div);
+  pop();
+  $$cleanup();
+}
+delegate(["click"]);
 class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
   constructor() {
     super(...arguments);
@@ -7968,6 +9528,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     __privateAdd(this, _feed);
     __privateAdd(this, _cart);
     __privateAdd(this, _creation);
+    __privateAdd(this, _footer);
   }
   static get DEFAULT_OPTIONS() {
     return {
@@ -8008,6 +9569,10 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       unmount(__privateGet(this, _creation));
       __privateSet(this, _creation, null);
     }
+    if (__privateGet(this, _footer)) {
+      unmount(__privateGet(this, _footer));
+      __privateSet(this, _creation, null);
+    }
     windowContent.innerHTML = "";
     const form = windowContent.parentNode;
     __privateSet(this, _app2, mount(CharacterSheetApp, {
@@ -8022,14 +9587,37 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     this._injectNeonName(header);
     this._injectShoppingCart(header);
     this._injectNewsFeed(form, header);
+    this._injectFooter(form);
+    this._injectRollComposer(header);
     let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
     if (isCharacterCreation) {
-      this._injectCharachterCreationPointsApp(header);
+      this._injectCharacterCreationPointsApp(header);
     }
     Log.success("Svelte mounted", this.constructor.name);
     return windowContent;
   }
-  _injectCharachterCreationPointsApp(header) {
+  // Injects from the svelte component later
+  _injectRollComposer(header) {
+    var _a;
+    let anchor = header == null ? void 0 : header.previousElementSibling;
+    if (!((_a = anchor == null ? void 0 : anchor.classList) == null ? void 0 : _a.contains("composer-position"))) {
+      anchor = document.createElement("div");
+      anchor.classList.add("composer-position");
+      header.parentElement.insertBefore(anchor, header);
+    }
+  }
+  _injectFooter(form) {
+    if (form.querySelector(".actor-footer")) return;
+    const footer = document.createElement("div");
+    footer.classList.add("actor-footer");
+    const resizeHandle = form.querySelector(".window-resize-handle");
+    if (resizeHandle == null ? void 0 : resizeHandle.parentNode) {
+      resizeHandle.parentNode.insertBefore(footer, resizeHandle.nextSibling);
+    } else {
+      form.appendChild(footer);
+    }
+  }
+  _injectCharacterCreationPointsApp(header) {
     var _a;
     let anchor = header == null ? void 0 : header.previousElementSibling;
     if (!((_a = anchor == null ? void 0 : anchor.classList) == null ? void 0 : _a.contains("points-position"))) {
@@ -8046,12 +9634,13 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     }
   }
   _injectNeonName(header) {
-    var _a;
     let neonSlot = header == null ? void 0 : header.previousElementSibling;
-    if (!((_a = neonSlot == null ? void 0 : neonSlot.classList) == null ? void 0 : _a.contains("neon-name-position"))) {
+    if (!neonSlot || !neonSlot.classList.contains("neon-name-position")) {
       neonSlot = document.createElement("div");
       neonSlot.classList.add("neon-name-position");
       header.parentElement.insertBefore(neonSlot, header);
+    }
+    if (neonSlot.childNodes.length === 0) {
       __privateSet(this, _neon, mount(NeonName, {
         target: neonSlot,
         props: { actor: this.document }
@@ -8095,7 +9684,7 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
     if (__privateGet(this, _feed)) await unmount(__privateGet(this, _feed));
     if (__privateGet(this, _cart)) await unmount(__privateGet(this, _cart));
     if (__privateGet(this, _creation)) await unmount(__privateGet(this, _creation));
-    __privateSet(this, _app2, __privateSet(this, _neon, __privateSet(this, _feed, __privateSet(this, _cart, null))));
+    __privateSet(this, _app2, __privateSet(this, _neon, __privateSet(this, _feed, __privateSet(this, _cart, __privateSet(this, _creation, __privateSet(this, _footer, null))))));
     return super._tearDown();
   }
   _onSubmit() {
@@ -8110,14 +9699,15 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       this.handleSkill(droppedItem);
       return;
     }
-    if (droppedItem.type === "metahuman") {
-      this.handleMetahuman(droppedItem);
+    if (droppedItem.type === "metatype") {
+      this.handlemetatype(droppedItem);
       return super._onDrop(event2);
     }
     return super._onDrop(event2);
   }
   async handleSkill(droppedItem) {
     var _a;
+    let storeManager2 = StoreManager.Subscribe(this.document);
     const skillType = droppedItem.system.skillType;
     const itemData = droppedItem.toObject();
     if (skillType === "active" && !((_a = droppedItem.system.activeSkill) == null ? void 0 : _a.linkedAttribute)) {
@@ -8125,9 +9715,9 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     const storeKeyByType = {
-      active: stores.activeSkillsIds,
-      knowledge: stores.knowledgeSkillsIds,
-      language: stores.languageSkillsIds
+      active: stores$1.activeSkillsIds,
+      knowledge: stores$1.knowledgeSkillsIds,
+      language: stores$1.languageSkillsIds
     };
     const storeKey = storeKeyByType[skillType];
     if (!storeKey) {
@@ -8142,13 +9732,14 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.warn("Skill creation failed or returned no result.");
       return;
     }
-    const targetStore = getActorStore(this.document.id, storeKey, []);
+    const targetStore = storeManager2.GetShallowStore(this.document.id, storeKey, []);
     targetStore.update((current) => [...current, createdItem.id]);
+    StoreManager.Unsubscribe(this.document);
   }
-  async handleMetahuman(droppedItem) {
-    const result = await this.actor.canAcceptMetahuman(droppedItem);
+  async handlemetatype(droppedItem) {
+    const result = await this.actor.canAcceptmetatype(droppedItem);
     if (result === "accept") {
-      await this.actor.replaceMetahuman(droppedItem);
+      await this.actor.replacemetatype(droppedItem);
     } else if (result === "goblinize") {
       const confirmed = await foundry.applications.api.DialogV2.confirm({
         title: "Goblinization",
@@ -8158,10 +9749,10 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
         defaultYes: false
       });
       if (confirmed) {
-        await this.actor.replaceMetahuman(droppedItem);
+        await this.actor.replacemetatype(droppedItem);
       }
     } else {
-      ui.notifications.info("Only one metahuman type allowed.");
+      ui.notifications.info("Only one metatype type allowed.");
     }
   }
 }
@@ -8170,6 +9761,7 @@ _neon = new WeakMap();
 _feed = new WeakMap();
 _cart = new WeakMap();
 _creation = new WeakMap();
+_footer = new WeakMap();
 const sr3e = {};
 sr3e.ammunition = {
   ammunition: "sr3e.ammunition.ammunition",
@@ -8188,25 +9780,47 @@ sr3e.attributes = {
   initiative: "sr3e.attributes.initiative",
   modifiers: "sr3e.attributes.modifiers",
   limits: "sr3e.attributes.limits",
-  essence: "sr3e.attributes.essence"
+  essence: "sr3e.attributes.essence",
+  reaction: "sr3e.attributes.reaction"
+};
+sr3e.difficulty = {
+  simple: "sr3e.difficulty.simple",
+  routine: "sr3e.difficulty.routine",
+  average: "sr3e.difficulty.average",
+  challenging: "sr3e.difficulty.challenging",
+  hard: "sr3e.difficulty.hard",
+  strenuous: "sr3e.difficulty.strenuous",
+  extreme: "sr3e.difficulty.extreme",
+  nearlyimpossible: "sr3e.difficulty.nearlyimpossible"
 };
 sr3e.health = {
-  health: "sr3e.health.health"
+  health: "sr3e.health.health",
+  overflow: "sr3e.health.overflow",
+  penalty: "sr3e.health.penalty"
+};
+sr3e.modal = {
+  confirm: "sr3e.modal.confirm",
+  decline: "sr3e.modal.decline",
+  deleteskill: "sr3e.modal.deleteskill",
+  deleteskilltitle: "sr3e.modal.deleteskilltitle",
+  exitattributesassignment: "sr3e.modal.exitattributesassignment",
+  exitcreationmode: "sr3e.modal.exitcreationmode",
+  exitattributesassignmenttitle: "sr3e.modal.exitattributesassignmenttitle",
+  exitcreationmodetitle: "sr3e.modal.exitcreationmodetitle"
 };
 sr3e.skill = {
   active: "sr3e.skill.active",
+  addlingo: "sr3e.skill.addlingo",
   addspecialization: "sr3e.skill.addspecialization",
   knowledge: "sr3e.skill.knowledge",
   language: "sr3e.skill.language",
+  lingos: "sr3e.skill.lingos",
   linkedAttribute: "sr3e.skill.linkedAttribute",
   newspecialization: "sr3e.skill.newspecialization",
   onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
-  read: "sr3e.skills.read",
+  readwrite: "sr3e.skill.readwrite",
   skill: "sr3e.skill.skill",
-  skillpointsrestored: "sr3e.skills.skillpointsrestored",
-  speak: "sr3e.skills.speak",
-  specializations: "sr3e.skill.specializations",
-  write: "sr3e.skills.write"
+  specializations: "sr3e.skill.specializations"
 };
 sr3e.initiative = {
   augmentedReaction: "sr3e.initiative.augmentedReaction",
@@ -8235,15 +9849,20 @@ sr3e.dicepools = {
   combat: "sr3e.dicepools.combat",
   control: "sr3e.dicepools.control",
   hacking: "sr3e.dicepools.hacking",
-  spell: "sr3e.dicepools.spell"
+  spell: "sr3e.dicepools.spell",
+  associateselect: "sr3e.dicepools.associateselect"
 };
 sr3e.karma = {
   karma: "sr3e.karma.karma",
-  goodKarma: "sr3e.karma.goodKarma",
-  karmaPool: "sr3e.karma.karmaPool",
-  advancementRatio: "sr3e.karma.advancementRatio",
-  miraculousSurvival: "sr3e.karma.miraculousSurvival",
-  lifetimeKarma: "sr3e.karma.lifetimeKarma"
+  goodkarma: "sr3e.karma.goodkarma",
+  karmapool: "sr3e.karma.karmapool",
+  advancementratio: "sr3e.karma.advancementratio",
+  miraculoussurvival: "sr3e.karma.miraculoussurvival",
+  lifetimekarma: "sr3e.karma.lifetimekarma",
+  commitselected: "sr3e.karma.commitselected",
+  selectall: "sr3e.karma.selectall",
+  deselectall: "sr3e.karma.deselectall",
+  commit: "sr3e.karma.commit"
 };
 sr3e.movement = {
   movement: "sr3e.movement.movement",
@@ -8254,6 +9873,10 @@ sr3e.movement = {
 sr3e.placeholders = {
   human: "sr3e.placeholders.human",
   fullshaman: "sr3e.placeholders.fullshaman"
+};
+sr3e.karmamanager = {
+  character: "sr3e.karmamanager.character",
+  npc: "sr3e.karmamanager.npc"
 };
 sr3e.sheet = {
   playercharacter: "sr3e.sheet.playercharacter",
@@ -8276,9 +9899,8 @@ sr3e.traits = {
   height: "sr3e.traits.height",
   weight: "sr3e.traits.weight",
   agerange: "sr3e.traits.agerange",
-  metahuman: "sr3e.traits.metahuman",
-  metahumanity: "sr3e.traits.metahumanity",
-  ancient: "sr3e.traits.metahumanity",
+  metatype: "sr3e.traits.metatype",
+  metaType: "sr3e.traits.metaType",
   child: "sr3e.traits.child",
   adolecent: "sr3e.traits.adolecent",
   youngadult: "sr3e.traits.youngadult",
@@ -8306,6 +9928,16 @@ sr3e.userconfig = {
   saveSettings: "sr3e.userconfig.saveSettings",
   saveUserSettings: "sr3e.userconfig.saveUserSettings"
 };
+sr3e.storytellerscreen = {
+  storytellerscreen: "sr3e.storytellerscreen.storytellerscreen",
+  refreshcombatpool: "sr3e.storytellerscreen.refreshcombatpool",
+  refreshastralpool: "sr3e.storytellerscreen.refreshastralpool",
+  refreshhackingpool: "sr3e.storytellerscreen.refreshhackingpool",
+  refreshcontrolpool: "sr3e.storytellerscreen.refreshcontrolpool",
+  refreshspellpool: "sr3e.storytellerscreen.refreshspellpool",
+  refreshkarma: "sr3e.storytellerscreen.refreshkarmapool",
+  refresh: "sr3e.storytellerscreen.refresh"
+};
 sr3e.magic = {
   magic: "sr3e.magic.magic",
   adept: "sr3e.magic.adept",
@@ -8331,6 +9963,33 @@ sr3e.magic = {
   priority: "sr3e.magic.priority",
   spellPoints: "sr3e.magic.spellPoints",
   powerPoints: "sr3e.magic.powerPoints"
+};
+sr3e.notifications = {
+  assignattributesfirst: "sr3e.notifications.assignattributesfirst",
+  skillpointsrefund: "sr3e.notifications.skillpointsrefund",
+  skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold"
+};
+sr3e.time = {
+  year: "sr3e.time.year",
+  month: "sr3e.time.month",
+  day: "sr3e.time.day",
+  hours: "sr3e.time.hours",
+  minutes: "sr3e.time.minutes",
+  seconds: "sr3e.time.seconds"
+};
+sr3e.combosearch = {
+  noresult: "sr3e.combosearch.noresult",
+  search: "sr3e.combosearch.search"
+};
+sr3e.transaction = {
+  transaction: "sr3e.transaction.transaction",
+  creditstick: "sr3e.transaction.creditstick",
+  recurrent: "sr3e.transaction.recurrent",
+  asset: "sr3e.transaction.asset",
+  income: "sr3e.transaction.income",
+  debt: "sr3e.transaction.debt",
+  expense: "sr3e.transaction.expense",
+  select: "sr3e.transaction.select"
 };
 sr3e.weapon = {
   weapon: "sr3e.weapon.weapon",
@@ -8363,29 +10022,6 @@ sr3e.portability = {
   concealability: "sr3e.portability.portability",
   weight: "sr3e.portability.weight"
 };
-function injectFooterIntoWindowApp(app, element, ctx, data) {
-  var _a;
-  const typeSelectors = [
-    { type: foundry.applications.sheets.ActorSheetV2, selector: ".actor-footer" },
-    { type: foundry.applications.sheets.ItemSheetV2, selector: ".item-footer" }
-    //{ type: foundry.applications.api.DocumentSheetV2, selector: ".document-footer" }
-  ];
-  const match = typeSelectors.find((entry) => app instanceof entry.type);
-  if (!match) return;
-  const el = (element == null ? void 0 : element.nodeType) === 1 ? element : element == null ? void 0 : element[0];
-  if (!el) return;
-  if (el.querySelector(match.selector)) return;
-  const isNested = ((_a = el.parentElement) == null ? void 0 : _a.closest(".application")) !== null;
-  if (isNested) return;
-  const footer = document.createElement("div");
-  footer.classList.add(match.selector.replace(".", ""));
-  const resizeHandle = el.querySelector(".window-resize-handle");
-  if (resizeHandle == null ? void 0 : resizeHandle.parentNode) {
-    resizeHandle.parentNode.insertBefore(footer, resizeHandle.nextSibling);
-  } else {
-    el.appendChild(footer);
-  }
-}
 function injectCssSelectors(app, element, ctx, data) {
   const header = element.querySelector(".window-header");
   if (!header) return;
@@ -8404,7 +10040,7 @@ function injectCssSelectors(app, element, ctx, data) {
     header.classList.add("sr3e-document-header");
   }
 }
-class MetahumanModel extends foundry.abstract.TypeDataModel {
+class MetatypeModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
       // agerange
@@ -8571,7 +10207,7 @@ class MetahumanModel extends foundry.abstract.TypeDataModel {
 function ok(_, visible, $$props, selected) {
   var _a;
   set(visible, false);
-  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$1(selected));
+  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$2(selected));
 }
 function cancel(__1, visible, $$props) {
   var _a;
@@ -8582,11 +10218,11 @@ var on_input = (__2, showDropdown, selected) => {
   set(showDropdown, true);
   set(selected, null);
 };
-var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
-var root_4$2 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
-var root_5$3 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
-var root_2$3 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
-var root_1$5 = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
+var on_mousedown = (__3, selectJournal, option) => selectJournal(get$2(option));
+var root_4$6 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
+var root_5$4 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
+var root_2$7 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
+var root_1$b = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
   push($$props, true);
   let visible = state(true);
@@ -8618,9 +10254,9 @@ function JournalSearchModal($$anchor, $$props) {
     })));
   });
   user_effect(() => {
-    if (get$1(showDropdown) && get$1(inputEl)) {
+    if (get$2(showDropdown) && get$2(inputEl)) {
       requestAnimationFrame(() => {
-        const rect = get$1(inputEl).getBoundingClientRect();
+        const rect = get$2(inputEl).getBoundingClientRect();
         set(dropdownStyle, `
                 position: fixed;
                 top: ${rect.bottom + 2}px;
@@ -8632,8 +10268,8 @@ function JournalSearchModal($$anchor, $$props) {
     }
   });
   function filteredOptions() {
-    const q = get$1(search).toLowerCase().trim();
-    return q ? get$1(options).filter((o) => o.label.toLowerCase().includes(q)) : get$1(options);
+    const q = get$2(search).toLowerCase().trim();
+    return q ? get$2(options).filter((o) => o.label.toLowerCase().includes(q)) : get$2(options);
   }
   function selectJournal(option) {
     set(selected, proxy(option));
@@ -8644,12 +10280,12 @@ function JournalSearchModal($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$5();
+      var div = root_1$b();
       var div_1 = child(div);
       var div_2 = child(div_1);
       var input = child(div_2);
       input.__input = [on_input, showDropdown, selected];
-      bind_this(input, ($$value) => set(inputEl, $$value), () => get$1(inputEl));
+      bind_this(input, ($$value) => set(inputEl, $$value), () => get$2(inputEl));
       var div_3 = sibling(div_2, 2);
       var button = child(div_3);
       button.__click = [ok, visible, $$props, selected];
@@ -8658,27 +10294,27 @@ function JournalSearchModal($$anchor, $$props) {
       var node_1 = sibling(div_1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var ul = root_2$3();
+          var ul = root_2$7();
           var node_2 = child(ul);
           {
             var consequent = ($$anchor4) => {
               var fragment_1 = comment();
               var node_3 = first_child(fragment_1);
               each(node_3, 17, filteredOptions, (option) => option.value, ($$anchor5, option) => {
-                var li = root_4$2();
+                var li = root_4$6();
                 var div_4 = child(li);
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
-                var text = sibling(child(div_4));
+                var text2 = sibling(child(div_4));
                 template_effect(() => {
-                  set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
-                  set_text(text, ` ${get$1(option).label ?? ""}`);
+                  set_attribute(div_4, "aria-selected", get$2(selected) && get$2(selected).value === get$2(option).value);
+                  set_text(text2, ` ${get$2(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
               append($$anchor4, fragment_1);
             };
             var alternate = ($$anchor4) => {
-              var li_1 = root_5$3();
+              var li_1 = root_5$4();
               append($$anchor4, li_1);
             };
             if_block(node_2, ($$render) => {
@@ -8686,17 +10322,17 @@ function JournalSearchModal($$anchor, $$props) {
               else $$render(alternate, false);
             });
           }
-          template_effect(() => set_attribute(ul, "style", get$1(dropdownStyle)));
+          template_effect(() => set_attribute(ul, "style", get$2(dropdownStyle)));
           append($$anchor3, ul);
         };
         if_block(node_1, ($$render) => {
-          if (get$1(showDropdown)) $$render(consequent_1);
+          if (get$2(showDropdown)) $$render(consequent_1);
         });
       }
       template_effect(
         ($0) => {
           set_attribute(input, "placeholder", $0);
-          button.disabled = !get$1(selected);
+          button.disabled = !get$2(selected);
         },
         [
           () => localize($$props.config.sheet.searchJournals)
@@ -8704,11 +10340,11 @@ function JournalSearchModal($$anchor, $$props) {
       );
       event("focus", input, () => set(showDropdown, true));
       event("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
-      bind_value(input, () => get$1(search), ($$value) => set(search, $$value));
+      bind_value(input, () => get$2(search), ($$value) => set(search, $$value));
       append($$anchor2, div);
     };
     if_block(node, ($$render) => {
-      if (get$1(visible)) $$render(consequent_2);
+      if (get$2(visible)) $$render(consequent_2);
     });
   }
   append($$anchor, fragment);
@@ -8717,8 +10353,8 @@ function JournalSearchModal($$anchor, $$props) {
 delegate(["input", "click", "mousedown"]);
 function handleOpen(_, journalId) {
   var _a;
-  if (!get$1(journalId)) return;
-  const entry = game.journal.get(get$1(journalId));
+  if (!get$2(journalId)) return;
+  const entry = game.journal.get(get$2(journalId));
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
 }
 function handleSearch(__1, config, journalId, $$props) {
@@ -8740,20 +10376,20 @@ function handleSearch(__1, config, journalId, $$props) {
     }
   });
 }
-var on_click$5 = (e) => e.stopPropagation();
-var on_keydown = (e) => {
+var on_click$2 = (e) => e.stopPropagation();
+var on_keydown$1 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
-var root$a = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
+var root$j = /* @__PURE__ */ template(`<div class="toolbar searchbuttons" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Open journal entry"><i class="fa-solid fa-book-open"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Search journal entries"><i class="fa-solid fa-magnifying-glass"></i></button></div>`);
 function JournalViewerToolbar($$anchor, $$props) {
   push($$props, true);
   const config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let journalId = state(proxy(id() ?? null));
-  var div = root$a();
-  div.__click = [on_click$5];
-  div.__keydown = [on_keydown];
+  var div = root$j();
+  div.__click = [on_click$2];
+  div.__keydown = [on_keydown$1];
   var button = child(div);
   button.__click = [handleOpen, journalId];
   var button_1 = sibling(button, 2);
@@ -8762,7 +10398,7 @@ function JournalViewerToolbar($$anchor, $$props) {
   pop();
 }
 delegate(["click", "keydown"]);
-var root$9 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
+var root$i = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!> <div class="preview journal-content"><!></div></div></div></div>`);
 function JournalViewer($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8771,11 +10407,11 @@ function JournalViewer($$anchor, $$props) {
   let previewContent = state("");
   user_effect(async () => {
     var _a, _b, _c;
-    if (!get$1(journalId)) {
+    if (!get$2(journalId)) {
       set(previewContent, "");
       return;
     }
-    const journal = game.journal.get(get$1(journalId));
+    const journal = game.journal.get(get$2(journalId));
     const page = (_b = (_a = journal == null ? void 0 : journal.pages) == null ? void 0 : _a.contents) == null ? void 0 : _b[0];
     const content = ((_c = page == null ? void 0 : page.text) == null ? void 0 : _c.content) || "";
     set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, {
@@ -8789,7 +10425,7 @@ function JournalViewer($$anchor, $$props) {
     set(journalId, proxy(result.value));
     await item2().update({ "system.journalId": result.value });
   }
-  var div = root$9();
+  var div = root$i();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var node = child(div_2);
@@ -8800,7 +10436,7 @@ function JournalViewer($$anchor, $$props) {
         return config();
       },
       get id() {
-        return get$1(journalId);
+        return get$2(journalId);
       }
     }),
     ($$value) => toolbar = $$value,
@@ -8808,15 +10444,24 @@ function JournalViewer($$anchor, $$props) {
   );
   var div_3 = sibling(node, 2);
   var node_1 = child(div_3);
-  html(node_1, () => get$1(previewContent));
+  html(node_1, () => get$2(previewContent));
   append($$anchor, div);
   pop();
 }
-var root_1$4 = /* @__PURE__ */ template(`<input type="checkbox">`);
-var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3$4 = /* @__PURE__ */ template(`<select></select>`);
-var root_5$2 = /* @__PURE__ */ template(`<input>`);
-var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4> </h4></div> <!></div>`);
+var root$h = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+function ItemSheetComponent($$anchor, $$props) {
+  var div = root$h();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var node = child(div_2);
+  snippet(node, () => $$props.children ?? noop);
+  append($$anchor, div);
+}
+var root_1$a = /* @__PURE__ */ template(`<input type="checkbox">`);
+var root_4$5 = /* @__PURE__ */ template(`<option> </option>`);
+var root_3$6 = /* @__PURE__ */ template(`<select></select>`);
+var root_5$3 = /* @__PURE__ */ template(`<input>`);
+var root$g = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4 class="no-margin uppercase"> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
   let type = prop($$props, "type", 3, "text"), options = prop($$props, "options", 19, () => []);
@@ -8831,14 +10476,14 @@ function StatCard($$anchor, $$props) {
     $$props.item.update({ [`${$$props.path}.${$$props.key}`]: val });
     console.log(`Updated ${$$props.path}.${$$props.key} to`, val);
   }
-  var div = root$8();
+  var div = root$g();
   var div_1 = sibling(child(div), 2);
   var h4 = child(div_1);
-  var text = child(h4);
+  var text2 = child(h4);
   var node = sibling(div_1, 2);
   {
     var consequent = ($$anchor2) => {
-      var input = root_1$4();
+      var input = root_1$a();
       input.__change = update;
       template_effect(() => set_checked(input, $$props.value));
       append($$anchor2, input);
@@ -8848,20 +10493,20 @@ function StatCard($$anchor, $$props) {
       var node_1 = first_child(fragment);
       {
         var consequent_1 = ($$anchor3) => {
-          var select = root_3$4();
+          var select = root_3$6();
           init_select(select, () => $$props.value);
           var select_value;
           select.__change = update;
           each(select, 21, options, index, ($$anchor4, option) => {
-            var option_1 = root_4$1();
+            var option_1 = root_4$5();
             var option_1_value = {};
             var text_1 = child(option_1);
             template_effect(() => {
-              if (option_1_value !== (option_1_value = get$1(option))) {
-                option_1.value = null == (option_1.__value = get$1(option)) ? "" : get$1(option);
+              if (option_1_value !== (option_1_value = get$2(option))) {
+                option_1.value = null == (option_1.__value = get$2(option)) ? "" : get$2(option);
               }
-              set_selected(option_1, $$props.value === get$1(option));
-              set_text(text_1, get$1(option));
+              set_selected(option_1, $$props.value === get$2(option));
+              set_text(text_1, get$2(option));
             });
             append($$anchor4, option_1);
           });
@@ -8873,7 +10518,7 @@ function StatCard($$anchor, $$props) {
           append($$anchor3, select);
         };
         var alternate = ($$anchor3) => {
-          var input_1 = root_5$2();
+          var input_1 = root_5$3();
           input_1.__change = update;
           template_effect(() => {
             set_attribute(input_1, "type", type());
@@ -8897,18 +10542,23 @@ function StatCard($$anchor, $$props) {
       else $$render(alternate_1, false);
     });
   }
-  template_effect(() => set_text(text, $$props.label));
+  template_effect(() => set_text(text2, $$props.label));
   append($$anchor, div);
   pop();
 }
 delegate(["change"]);
-var on_click$4 = async (_, item2) => openFilePicker(item2());
-var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
-var root_1$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root_3$3 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root_5$1 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div>`);
-var root$7 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img data-edit="img" role="presentation"></div> <input class="large" name="name" type="text"> <!></div></div></div> <!> <!> <!> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <div class="stat-grid two-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container slim"><div class="fake-shadow"></div> <div class="sr3e-inner-background slim"><h3 class="item"> </h3> <div class="stat-grid one-column"></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3 class="item"> </h3> <!></div></div></div> <!></div></div>`);
-function MetahumanApp($$anchor, $$props) {
+var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
+var root_1$9 = /* @__PURE__ */ template(`<!> <input class="large" name="name" type="text"> <!>`, 1);
+var root_3$5 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
+var root_6$2 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
+var root_9$1 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
+var root_11 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
+var root_13 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
+var root_15 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
+var root_17 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
+var root_19 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <!>`, 1);
+var root$f = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
+function MetatypeApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
@@ -8919,7 +10569,7 @@ function MetahumanApp($$anchor, $$props) {
   const visionConfig = config().vision;
   const traits = config().traits;
   let layoutMode = "double";
-  const agerange = /* @__PURE__ */ derived(() => [
+  const agerange = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -8948,7 +10598,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const height = /* @__PURE__ */ derived(() => [
+  const height = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -8977,7 +10627,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const weight = /* @__PURE__ */ derived(() => [
+  const weight = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "min",
@@ -9006,16 +10656,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const movement = /* @__PURE__ */ derived(() => [
-    {
-      item: item2(),
-      key: "base",
-      label: localize(movementConfig.walking),
-      value: system.movement.base,
-      path: "system.movement",
-      type: "number",
-      options: []
-    },
+  const movement = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "modifier",
@@ -9026,18 +10667,18 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const karma = /* @__PURE__ */ derived(() => [
+  const karma = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "factor",
-      label: localize(karmaConfig.advancementRatio),
+      label: localize(karmaConfig.advancementratio),
       value: system.karma.factor,
       path: "system.karma",
       type: "number",
       options: []
     }
   ]);
-  const attributeModifiers = /* @__PURE__ */ derived(() => [
+  const attributeModifiers = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "strength",
@@ -9093,7 +10734,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const attributeLimits = /* @__PURE__ */ derived(() => [
+  const attributeLimits = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "strength",
@@ -9149,7 +10790,7 @@ function MetahumanApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const vision = /* @__PURE__ */ derived(() => [
+  const vision = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "type",
@@ -9164,7 +10805,7 @@ function MetahumanApp($$anchor, $$props) {
       ]
     }
   ]);
-  const priorityEntry = /* @__PURE__ */ derived(() => ({
+  const priorityEntry = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "priority",
     label: "Select Priority",
@@ -9173,122 +10814,166 @@ function MetahumanApp($$anchor, $$props) {
     type: "select",
     options: ["C", "D", "E"]
   }));
-  var div = root$7();
+  var div = root$f();
   var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var div_4 = sibling(child(div_3), 2);
-  var div_5 = child(div_4);
-  var img = child(div_5);
-  img.__click = [on_click$4, item2];
-  var input = sibling(div_5, 2);
-  input.__change = [on_change$4, item2];
-  var node = sibling(input, 2);
-  StatCard(node, spread_props(() => get$1(priorityEntry)));
-  var node_1 = sibling(div_2, 2);
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1$9();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get src() {
+          return item2().img;
+        },
+        get title() {
+          return item2().name;
+        }
+      });
+      var input = sibling(node_1, 2);
+      input.__change = [on_change$5, item2];
+      var node_2 = sibling(input, 2);
+      StatCard(node_2, spread_props(() => get$2(priorityEntry)));
+      bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+      append($$anchor2, fragment);
+    }
+  });
+  var node_3 = sibling(node, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_6 = root_1$3();
-      var div_7 = child(div_6);
-      var div_8 = sibling(child(div_7), 2);
-      var h3 = child(div_8);
-      var text = child(h3);
-      var div_9 = sibling(h3, 2);
-      each(div_9, 21, () => get$1(agerange), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$1(entry)));
+      ItemSheetComponent($$anchor2, {
+        children: ($$anchor3, $$slotProps) => {
+          var fragment_2 = root_3$5();
+          var h3 = first_child(fragment_2);
+          var text2 = child(h3);
+          var div_2 = sibling(h3, 2);
+          each(div_2, 21, () => get$2(agerange), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          });
+          template_effect(($0) => set_text(text2, $0), [() => localize(traits.agerange)]);
+          append($$anchor3, fragment_2);
+        }
       });
-      template_effect(($0) => set_text(text, $0), [() => localize(traits.agerange)]);
-      append($$anchor2, div_6);
-    };
-    if_block(node_1, ($$render) => {
-      if (get$1(agerange)) $$render(consequent);
-    });
-  }
-  var node_2 = sibling(node_1, 2);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var div_10 = root_3$3();
-      var div_11 = child(div_10);
-      var div_12 = sibling(child(div_11), 2);
-      var h3_1 = child(div_12);
-      var text_1 = child(h3_1);
-      var div_13 = sibling(h3_1, 2);
-      each(div_13, 21, () => get$1(height), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$1(entry)));
-      });
-      template_effect(($0) => set_text(text_1, $0), [() => localize(traits.height)]);
-      append($$anchor2, div_10);
-    };
-    if_block(node_2, ($$render) => {
-      if (get$1(height)) $$render(consequent_1);
-    });
-  }
-  var node_3 = sibling(node_2, 2);
-  {
-    var consequent_2 = ($$anchor2) => {
-      var div_14 = root_5$1();
-      var div_15 = child(div_14);
-      var div_16 = sibling(child(div_15), 2);
-      var h3_2 = child(div_16);
-      var text_2 = child(h3_2);
-      var div_17 = sibling(h3_2, 2);
-      each(div_17, 21, () => get$1(weight), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$1(entry)));
-      });
-      template_effect(($0) => set_text(text_2, $0), [() => localize(traits.weight)]);
-      append($$anchor2, div_14);
     };
     if_block(node_3, ($$render) => {
-      if (get$1(weight)) $$render(consequent_2);
+      if (get$2(agerange)) $$render(consequent);
     });
   }
-  var div_18 = sibling(node_3, 2);
-  var div_19 = child(div_18);
-  var div_20 = sibling(child(div_19), 2);
-  var h3_3 = child(div_20);
-  var text_3 = child(h3_3);
-  var div_21 = sibling(h3_3, 2);
-  each(div_21, 21, () => get$1(attributeModifiers), index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node_4 = sibling(node_3, 2);
+  {
+    var consequent_1 = ($$anchor2) => {
+      ItemSheetComponent($$anchor2, {
+        children: ($$anchor3, $$slotProps) => {
+          var fragment_5 = root_6$2();
+          var h3_1 = first_child(fragment_5);
+          var text_1 = child(h3_1);
+          var div_3 = sibling(h3_1, 2);
+          each(div_3, 21, () => get$2(height), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          });
+          template_effect(($0) => set_text(text_1, $0), [() => localize(traits.height)]);
+          append($$anchor3, fragment_5);
+        }
+      });
+    };
+    if_block(node_4, ($$render) => {
+      if (get$2(height)) $$render(consequent_1);
+    });
+  }
+  var node_5 = sibling(node_4, 2);
+  {
+    var consequent_2 = ($$anchor2) => {
+      ItemSheetComponent($$anchor2, {
+        children: ($$anchor3, $$slotProps) => {
+          var fragment_8 = root_9$1();
+          var h3_2 = first_child(fragment_8);
+          var text_2 = child(h3_2);
+          var div_4 = sibling(h3_2, 2);
+          each(div_4, 21, () => get$2(weight), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          });
+          template_effect(($0) => set_text(text_2, $0), [() => localize(traits.weight)]);
+          append($$anchor3, fragment_8);
+        }
+      });
+    };
+    if_block(node_5, ($$render) => {
+      if (get$2(weight)) $$render(consequent_2);
+    });
+  }
+  var node_6 = sibling(node_5, 2);
+  ItemSheetComponent(node_6, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_10 = root_11();
+      var h3_3 = first_child(fragment_10);
+      var text_3 = child(h3_3);
+      var div_5 = sibling(h3_3, 2);
+      each(div_5, 21, () => get$2(attributeModifiers), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text_3, $0), [() => localize(attributes.modifiers)]);
+      append($$anchor2, fragment_10);
+    }
   });
-  var div_22 = sibling(div_18, 2);
-  var div_23 = child(div_22);
-  var div_24 = sibling(child(div_23), 2);
-  var h3_4 = child(div_24);
-  var text_4 = child(h3_4);
-  var div_25 = sibling(h3_4, 2);
-  each(div_25, 21, () => get$1(attributeLimits), index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node_7 = sibling(node_6, 2);
+  ItemSheetComponent(node_7, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_12 = root_13();
+      var h3_4 = first_child(fragment_12);
+      var text_4 = child(h3_4);
+      var div_6 = sibling(h3_4, 2);
+      each(div_6, 21, () => get$2(attributeLimits), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text_4, $0), [() => localize(attributes.limits)]);
+      append($$anchor2, fragment_12);
+    }
   });
-  var div_26 = sibling(div_22, 2);
-  var div_27 = child(div_26);
-  var div_28 = sibling(child(div_27), 2);
-  var h3_5 = child(div_28);
-  var text_5 = child(h3_5);
-  var div_29 = sibling(h3_5, 2);
-  each(div_29, 21, () => get$1(movement), index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node_8 = sibling(node_7, 2);
+  ItemSheetComponent(node_8, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_14 = root_15();
+      var h3_5 = first_child(fragment_14);
+      var text_5 = child(h3_5);
+      var div_7 = sibling(h3_5, 2);
+      each(div_7, 21, () => get$2(movement), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text_5, $0), [
+        () => localize(config().movement.movement)
+      ]);
+      append($$anchor2, fragment_14);
+    }
   });
-  var div_30 = sibling(div_26, 2);
-  var div_31 = child(div_30);
-  var div_32 = sibling(child(div_31), 2);
-  var h3_6 = child(div_32);
-  var text_6 = child(h3_6);
-  var div_33 = sibling(h3_6, 2);
-  each(div_33, 21, () => get$1(karma), index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node_9 = sibling(node_8, 2);
+  ItemSheetComponent(node_9, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_16 = root_17();
+      var h3_6 = first_child(fragment_16);
+      var text_6 = child(h3_6);
+      var div_8 = sibling(h3_6, 2);
+      each(div_8, 21, () => get$2(karma), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text_6, $0), [() => localize(config().karma.karma)]);
+      append($$anchor2, fragment_16);
+    }
   });
-  var div_34 = sibling(div_30, 2);
-  var div_35 = child(div_34);
-  var div_36 = sibling(child(div_35), 2);
-  var h3_7 = child(div_36);
-  var text_7 = child(h3_7);
-  var node_4 = sibling(h3_7, 2);
-  each(node_4, 17, () => get$1(vision), index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node_10 = sibling(node_9, 2);
+  ItemSheetComponent(node_10, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_18 = root_19();
+      var h3_7 = first_child(fragment_18);
+      var text_7 = child(h3_7);
+      var node_11 = sibling(h3_7, 2);
+      each(node_11, 17, () => get$2(vision), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text_7, $0), [() => localize(config().vision.vision)]);
+      append($$anchor2, fragment_18);
+    }
   });
-  var node_5 = sibling(div_34, 2);
-  JournalViewer(node_5, {
+  var node_12 = sibling(node_10, 2);
+  JournalViewer(node_12, {
     get item() {
       return item2();
     },
@@ -9296,44 +10981,24 @@ function MetahumanApp($$anchor, $$props) {
       return config();
     }
   });
-  template_effect(
-    ($0, $1, $2, $3, $4) => {
-      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-      set_attribute(img, "src", item2().img);
-      set_attribute(img, "title", item2().name);
-      set_attribute(img, "alt", item2().name);
-      set_text(text_3, $0);
-      set_text(text_4, $1);
-      set_text(text_5, $2);
-      set_text(text_6, $3);
-      set_text(text_7, $4);
-    },
-    [
-      () => localize(attributes.modifiers),
-      () => localize(attributes.limits),
-      () => localize(config().movement.movement),
-      () => localize(config().karma.karma),
-      () => localize(config().vision.vision)
-    ]
-  );
-  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
-class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+delegate(["change"]);
+class MetatypeItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
-    __privateAdd(this, _metahuman);
+    __privateAdd(this, _metatype);
   }
   get title() {
-    return `${localize(CONFIG.sr3e.traits.metahuman)}: ${this.item.name}`;
+    return `${localize(CONFIG.sr3e.traits.metatype)}: ${this.item.name}`;
   }
   static get DEFAULT_OPTIONS() {
     return {
       ...super.DEFAULT_OPTIONS,
       id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
-      classes: ["sr3e", "sheet", "item", "metahuman"],
+      classes: ["sr3e", "sheet", "item", "metatype"],
       template: null,
       position: { width: "auto", height: "auto" },
       window: {
@@ -9348,11 +11013,11 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     return null;
   }
   _replaceHTML(_, windowContent) {
-    if (__privateGet(this, _metahuman)) {
-      unmount(__privateGet(this, _metahuman));
-      __privateSet(this, _metahuman, null);
+    if (__privateGet(this, _metatype)) {
+      unmount(__privateGet(this, _metatype));
+      __privateSet(this, _metatype, null);
     }
-    __privateSet(this, _metahuman, mount(MetahumanApp, {
+    __privateSet(this, _metatype, mount(MetatypeApp, {
       target: windowContent,
       props: {
         item: this.document,
@@ -9362,8 +11027,8 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     return windowContent;
   }
   async _tearDown() {
-    if (__privateGet(this, _metahuman)) await unmount(__privateGet(this, _metahuman));
-    __privateSet(this, _metahuman, null);
+    if (__privateGet(this, _metatype)) await unmount(__privateGet(this, _metatype));
+    __privateSet(this, _metatype, null);
     return super._tearDown();
   }
   /** @override prevent submission, since Svelte is managing state */
@@ -9371,14 +11036,12 @@ class MetahumanItemSheet extends foundry.applications.sheets.ItemSheetV2 {
     return;
   }
 }
-_metahuman = new WeakMap();
-var on_click$3 = async (_, item2) => openFilePicker(item2());
-var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
-var root_2$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root_3$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root_1$2 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div> <!> <!>`, 1);
-var root_6 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
-var root$6 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <!> <!></div></div></div> <!> <!></div></div>`);
+_metatype = new WeakMap();
+var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
+var root_2$6 = /* @__PURE__ */ template(`<input>`);
+var root_1$8 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
+var root_3$4 = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
+var root$e = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!></div></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -9412,7 +11075,7 @@ function MagicApp($$anchor, $$props) {
     localize(labels.shamanic),
     localize(config().common.other)
   ];
-  const archetype = /* @__PURE__ */ derived(() => ({
+  const archetype = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "archetype",
     label: localize(labels.archetype),
@@ -9421,7 +11084,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: archetypeOptions
   }));
-  const priority = /* @__PURE__ */ derived(() => ({
+  const priority = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "priority",
     label: localize(labels.priority),
@@ -9430,7 +11093,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: ["A", "B"]
   }));
-  const magicianType = /* @__PURE__ */ derived(() => ({
+  const magicianType = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "magicianType",
     label: localize(labels.magicianType),
@@ -9439,7 +11102,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: magicianTypeOptions
   }));
-  const aspect = /* @__PURE__ */ derived(() => ({
+  const aspect = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "aspect",
     label: localize(labels.aspect),
@@ -9448,7 +11111,7 @@ function MagicApp($$anchor, $$props) {
     type: "select",
     options: aspectsOptions
   }));
-  const magicianFields = /* @__PURE__ */ derived(() => [
+  const magicianFields = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
       key: "tradition",
@@ -9486,92 +11149,109 @@ function MagicApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const adeptFields = /* @__PURE__ */ derived(() => []);
+  const adeptFields = /* @__PURE__ */ derived$1(() => []);
   let isAspected = state(false);
   user_effect(() => {
-    set(isAspected, get$1(magicianType).value === localize(labels.aspectedmage));
+    set(isAspected, get$2(magicianType).value === localize(labels.aspectedmage));
   });
-  var div = root$6();
+  var div = root$e();
   var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var div_4 = sibling(child(div_3), 2);
-  var div_5 = child(div_4);
-  var img = child(div_5);
-  img.__click = [on_click$3, item2];
-  var input = sibling(div_5, 2);
-  input.__change = [on_change$3, item2];
-  var node = sibling(input, 2);
-  StatCard(node, spread_props(() => get$1(archetype)));
-  var node_1 = sibling(node, 2);
-  StatCard(node_1, spread_props(() => get$1(priority)));
-  var node_2 = sibling(div_2, 2);
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1$8();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get src() {
+          return item2().img;
+        },
+        get title() {
+          return item2().name;
+        }
+      });
+      var div_2 = sibling(node_1, 2);
+      var node_2 = child(div_2);
+      StatCard(node_2, {
+        children: ($$anchor3, $$slotProps2) => {
+          var input = root_2$6();
+          input.__change = [on_change$4, item2];
+          bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+          append($$anchor3, input);
+        },
+        $$slots: { default: true }
+      });
+      var node_3 = sibling(node_2, 2);
+      StatCard(node_3, spread_props(() => get$2(archetype)));
+      var node_4 = sibling(node_3, 2);
+      StatCard(node_4, spread_props(() => get$2(priority)));
+      append($$anchor2, fragment);
+    }
+  });
+  var node_5 = sibling(node, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment = root_1$2();
-      var div_6 = first_child(fragment);
-      var div_7 = child(div_6);
-      var div_8 = sibling(child(div_7), 2);
-      var node_3 = child(div_8);
-      StatCard(node_3, spread_props(() => get$1(magicianType)));
-      var node_4 = sibling(div_6, 2);
+      var fragment_1 = root_3$4();
+      var node_6 = first_child(fragment_1);
+      ItemSheetComponent(node_6, {
+        children: ($$anchor3, $$slotProps) => {
+          StatCard($$anchor3, spread_props(() => get$2(magicianType)));
+        }
+      });
+      var node_7 = sibling(node_6, 2);
       {
         var consequent = ($$anchor3) => {
-          var div_9 = root_2$2();
-          var div_10 = child(div_9);
-          var div_11 = sibling(child(div_10), 2);
-          var node_5 = child(div_11);
-          StatCard(node_5, spread_props(() => get$1(aspect)));
-          append($$anchor3, div_9);
+          ItemSheetComponent($$anchor3, {
+            children: ($$anchor4, $$slotProps) => {
+              StatCard($$anchor4, spread_props(() => get$2(aspect)));
+            }
+          });
         };
-        if_block(node_4, ($$render) => {
-          if (get$1(isAspected)) $$render(consequent);
+        if_block(node_7, ($$render) => {
+          if (get$2(isAspected)) $$render(consequent);
         });
       }
-      var node_6 = sibling(node_4, 2);
-      each(node_6, 17, () => get$1(magicianFields), index, ($$anchor3, entry) => {
-        var div_12 = root_3$2();
-        var div_13 = child(div_12);
-        var div_14 = sibling(child(div_13), 2);
-        var node_7 = child(div_14);
-        StatCard(node_7, spread_props(() => get$1(entry)));
-        append($$anchor3, div_12);
+      var node_8 = sibling(node_7, 2);
+      each(node_8, 17, () => get$2(magicianFields), index, ($$anchor3, entry) => {
+        ItemSheetComponent($$anchor3, {
+          children: ($$anchor4, $$slotProps) => {
+            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          }
+        });
       });
-      append($$anchor2, fragment);
+      append($$anchor2, fragment_1);
     };
     var alternate = ($$anchor2) => {
-      var fragment_1 = comment();
-      var node_8 = first_child(fragment_1);
+      var fragment_7 = comment();
+      var node_9 = first_child(fragment_7);
       {
         var consequent_2 = ($$anchor3) => {
-          var fragment_2 = comment();
-          var node_9 = first_child(fragment_2);
-          each(node_9, 17, () => get$1(adeptFields), index, ($$anchor4, entry) => {
-            var div_15 = root_6();
-            var div_16 = child(div_15);
-            var div_17 = sibling(child(div_16), 2);
-            var node_10 = child(div_17);
-            StatCard(node_10, spread_props(() => get$1(entry)));
-            append($$anchor4, div_15);
+          var fragment_8 = comment();
+          var node_10 = first_child(fragment_8);
+          each(node_10, 17, () => get$2(adeptFields), index, ($$anchor4, entry) => {
+            ItemSheetComponent($$anchor4, {
+              children: ($$anchor5, $$slotProps) => {
+                StatCard($$anchor5, spread_props(() => get$2(entry)));
+              }
+            });
           });
-          append($$anchor3, fragment_2);
+          append($$anchor3, fragment_8);
         };
         if_block(
-          node_8,
+          node_9,
           ($$render) => {
-            if (awakened.archetype === get$1(archetype).options[0]) $$render(consequent_2);
+            if (awakened.archetype === get$2(archetype).options[0]) $$render(consequent_2);
           },
           true
         );
       }
-      append($$anchor2, fragment_1);
+      append($$anchor2, fragment_7);
     };
-    if_block(node_2, ($$render) => {
-      if (awakened.archetype === get$1(archetype).options[1]) $$render(consequent_1);
+    if_block(node_5, ($$render) => {
+      if (awakened.archetype === get$2(archetype).options[1]) $$render(consequent_1);
       else $$render(alternate, false);
     });
   }
-  var node_11 = sibling(node_2, 2);
+  var node_11 = sibling(node_5, 2);
   JournalViewer(node_11, {
     get item() {
       return item2();
@@ -9580,17 +11260,11 @@ function MagicApp($$anchor, $$props) {
       return config();
     }
   });
-  template_effect(() => {
-    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-    set_attribute(img, "src", item2().img);
-    set_attribute(img, "title", item2().name);
-    set_attribute(img, "alt", item2().name);
-  });
-  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["change"]);
 class MagicItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
@@ -9692,7 +11366,7 @@ class MagicModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var root$5 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
+var root_1$7 = /* @__PURE__ */ template(`<h3> </h3> <div></div>`, 1);
 function Commodity($$anchor, $$props) {
   push($$props, true);
   let gridCss = prop($$props, "gridCss", 3, "");
@@ -9756,28 +11430,30 @@ function Commodity($$anchor, $$props) {
       type: "checkbox"
     }
   ];
-  var div = root$5();
-  var div_1 = child(div);
-  var div_2 = sibling(child(div_1), 2);
-  var h3 = child(div_2);
-  var text = child(h3);
-  var div_3 = sibling(h3, 2);
-  each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  ItemSheetComponent($$anchor, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$7();
+      var h3 = first_child(fragment_1);
+      var text2 = child(h3);
+      var div = sibling(h3, 2);
+      each(div, 21, () => entries, index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(
+        ($0) => {
+          set_text(text2, $0);
+          set_class(div, `stat-grid ${gridCss() ?? ""}`);
+        },
+        [
+          () => localize($$props.config.commodity.commodity)
+        ]
+      );
+      append($$anchor2, fragment_1);
+    }
   });
-  template_effect(
-    ($0) => {
-      set_text(text, $0);
-      set_class(div_3, `stat-grid ${gridCss() ?? ""}`);
-    },
-    [
-      () => localize($$props.config.commodity.commodity)
-    ]
-  );
-  append($$anchor, div);
   pop();
 }
-var root$4 = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
+var root$d = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
 function Portability($$anchor, $$props) {
   push($$props, true);
   const system = proxy($$props.item.system);
@@ -9800,18 +11476,18 @@ function Portability($$anchor, $$props) {
       type: "number"
     }
   ];
-  var div = root$4();
+  var div = root$d();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
-  var text = child(h3);
+  var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+    StatCard($$anchor2, spread_props(() => get$2(entry)));
   });
   template_effect(
     ($0) => {
-      set_text(text, $0);
+      set_text(text2, $0);
       set_class(div_3, `stat-grid ${$$props.gridCss ?? ""}`);
     },
     [
@@ -9821,9 +11497,11 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_click$2 = async (_, item2) => openFilePicker(item2());
-var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root$3 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="details"><h3> </h3></div> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div></div>`);
+var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
+var root_2$5 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
+var root_1$6 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
+var root_3$3 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
+var root$c = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let layoutMode = "double";
@@ -9881,31 +11559,56 @@ function WeaponApp($$anchor, $$props) {
       type: "text"
     }
   ];
-  var div = root$3();
+  var div = root$c();
   var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var div_4 = sibling(child(div_3), 2);
-  var div_5 = child(div_4);
-  var img = child(div_5);
-  img.__click = [on_click$2, item2];
-  var input = sibling(div_5, 2);
-  input.__change = [on_change$2, item2];
-  var div_6 = sibling(div_2, 2);
-  var div_7 = child(div_6);
-  var div_8 = sibling(child(div_7), 2);
-  var div_9 = child(div_8);
-  var h3 = child(div_9);
-  var text = child(h3);
-  var div_10 = sibling(div_9, 2);
-  var node = child(div_10);
-  StatCard(node, spread_props(weaponMode));
-  var div_11 = sibling(div_10, 2);
-  each(div_11, 21, () => weaponEntries, index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1$6();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get src() {
+          return item2().img;
+        },
+        get title() {
+          return item2().name;
+        }
+      });
+      var div_2 = sibling(node_1, 2);
+      var node_2 = child(div_2);
+      StatCard(node_2, {
+        children: ($$anchor3, $$slotProps2) => {
+          var input = root_2$5();
+          input.__change = [on_change$3, item2];
+          bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+          append($$anchor3, input);
+        },
+        $$slots: { default: true }
+      });
+      append($$anchor2, fragment);
+    }
   });
-  var node_1 = sibling(div_6, 2);
-  Commodity(node_1, {
+  var node_3 = sibling(node, 2);
+  ItemSheetComponent(node_3, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_3$3();
+      var h3 = first_child(fragment_1);
+      var text2 = child(h3);
+      var div_3 = sibling(h3, 2);
+      var node_4 = child(div_3);
+      StatCard(node_4, spread_props(weaponMode));
+      var div_4 = sibling(div_3, 2);
+      each(div_4, 21, () => weaponEntries, index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      template_effect(($0) => set_text(text2, $0), [
+        () => localize(config().common.details)
+      ]);
+      append($$anchor2, fragment_1);
+    }
+  });
+  var node_5 = sibling(node_3, 2);
+  Commodity(node_5, {
     get item() {
       return item2();
     },
@@ -9914,8 +11617,8 @@ function WeaponApp($$anchor, $$props) {
     },
     gridCss: "two-column"
   });
-  var node_2 = sibling(node_1, 2);
-  Portability(node_2, {
+  var node_6 = sibling(node_5, 2);
+  Portability(node_6, {
     get item() {
       return item2();
     },
@@ -9924,8 +11627,8 @@ function WeaponApp($$anchor, $$props) {
     },
     gridCss: "two-column"
   });
-  var node_3 = sibling(node_2, 2);
-  JournalViewer(node_3, {
+  var node_7 = sibling(node_6, 2);
+  JournalViewer(node_7, {
     get item() {
       return item2();
     },
@@ -9933,23 +11636,11 @@ function WeaponApp($$anchor, $$props) {
       return config();
     }
   });
-  template_effect(
-    ($0) => {
-      set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-      set_attribute(img, "src", item2().img);
-      set_attribute(img, "title", item2().name);
-      set_attribute(img, "alt", item2().name);
-      set_text(text, $0);
-    },
-    [
-      () => localize(config().common.details)
-    ]
-  );
-  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["change"]);
 class WeaponItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
@@ -10092,13 +11783,14 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_click$1 = async (_, item2) => openFilePicker(item2());
-var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
-var root$2 = /* @__PURE__ */ template(`<div class="sr3e-waterfall"><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input class="large" name="name" type="text"> <div class="stat-grid two-column"></div></div></div></div> <!> <!> <!></div>`);
+var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
+var root_1$5 = /* @__PURE__ */ template(`<!> <input> <div class="stat-grid two-column"></div>`, 1);
+var root$b = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const ammunition = item2().system;
+  let layoutMode = "single";
   const ammoEntries = [
     {
       item: item2(),
@@ -10117,21 +11809,33 @@ function AmmunitionApp($$anchor, $$props) {
       type: "number"
     }
   ];
-  var div = root$2();
+  var div = root$b();
   var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = sibling(child(div_2), 2);
-  var div_4 = child(div_3);
-  var img = child(div_4);
-  img.__click = [on_click$1, item2];
-  var input = sibling(div_4, 2);
-  input.__change = [on_change$1, item2];
-  var div_5 = sibling(input, 2);
-  each(div_5, 21, () => ammoEntries, index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$1(entry)));
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1$5();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get src() {
+          return item2().img;
+        },
+        get title() {
+          return item2().name;
+        }
+      });
+      var input = sibling(node_1, 2);
+      input.__change = [on_change$2, item2];
+      var div_2 = sibling(input, 2);
+      each(div_2, 21, () => ammoEntries, index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      });
+      bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+      append($$anchor2, fragment);
+    }
   });
-  var node = sibling(div_1, 2);
-  Commodity(node, {
+  var node_2 = sibling(node, 2);
+  Commodity(node_2, {
     get item() {
       return item2();
     },
@@ -10140,8 +11844,8 @@ function AmmunitionApp($$anchor, $$props) {
     },
     gridCss: "two-column"
   });
-  var node_1 = sibling(node, 2);
-  Portability(node_1, {
+  var node_3 = sibling(node_2, 2);
+  Portability(node_3, {
     get item() {
       return item2();
     },
@@ -10150,8 +11854,8 @@ function AmmunitionApp($$anchor, $$props) {
     },
     gridCss: "two-column"
   });
-  var node_2 = sibling(node_1, 2);
-  JournalViewer(node_2, {
+  var node_4 = sibling(node_3, 2);
+  JournalViewer(node_4, {
     get item() {
       return item2();
     },
@@ -10159,16 +11863,11 @@ function AmmunitionApp($$anchor, $$props) {
       return config();
     }
   });
-  template_effect(() => {
-    set_attribute(img, "src", item2().img);
-    set_attribute(img, "title", item2().name);
-    set_attribute(img, "alt", item2().name);
-  });
-  bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["change"]);
 class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
@@ -10215,21 +11914,31 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_click = async (_, $$props) => openFilePicker($$props.item);
-var on_change = (e, $$props) => $$props.item.update({ name: e.target.value });
-var on_change_1 = (e, updateSkillType) => updateSkillType(e.target.value);
-var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
-var on_change_2 = (e, $$props) => $$props.item.update({
+var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
+var root_2$4 = /* @__PURE__ */ template(`<div class="stat-card-background"></div> <input class="large" name="name" type="text">`, 1);
+var on_change_1$1 = (e, updateSkillType) => updateSkillType(e.target.value);
+var root_4$4 = /* @__PURE__ */ template(`<option> </option>`);
+var root_3$2 = /* @__PURE__ */ template(`<select></select>`);
+var on_change_2 = (e, item2) => item2().update({
   "system.activeSkill.linkedAttribute": e.target.value
 });
-var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2$1 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <select><option disabled> </option><!></select></div>`);
-var root$1 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <select></select></div> <!></div></div></div></div> <!></div></div>`);
+var root_7 = /* @__PURE__ */ template(`<option> </option>`);
+var root_6$1 = /* @__PURE__ */ template(`<select><option disabled> </option><!></select>`);
+var on_change_3 = (e, item2) => item2().update({
+  "system.activeSkill.associatedDicePool": e.target.value
+});
+var root_9 = /* @__PURE__ */ template(`<option> </option>`);
+var root_8$1 = /* @__PURE__ */ template(`<select><option disabled selected> </option><option> </option><!></select>`);
+var root_5$2 = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_1$4 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
+var root$a = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!></div></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
+  let item2 = prop($$props, "item", 7);
   let layoutMode = "single";
-  let value = /* @__PURE__ */ derived(() => $$props.item.system.skillType);
-  const selectOptions = [
+  let value = state(proxy(item2().system.skillType));
+  state(`${item2().system.amount} ¥`);
+  const typeOfSkillSelectOptions = [
     {
       value: "active",
       label: localize($$props.config.skill.active)
@@ -10243,107 +11952,195 @@ function SkillApp($$anchor, $$props) {
       label: localize($$props.config.skill.language)
     }
   ];
-  const rawAttributes = ActorDataService.getLocalizedLinkingAttributes();
-  const attributeOptions = Object.entries(rawAttributes).map(([key, label]) => ({ value: key, label }));
-  async function updateSkillType(newValue) {
-    await $$props.item.update({ "system.skillType": newValue });
-    $$props.onTitleChange(`${localize($$props.config.skill[newValue])}: ${$$props.item.name}`);
-    await $$props.item._preloadData();
-    console.log("🔍 Skill created:", duplicate($$props.item.toObject()));
+  const baseAttributeKeys = [
+    "body",
+    "quickness",
+    "strength",
+    "charisma",
+    "intelligence",
+    "willpower",
+    "reaction"
+  ];
+  const attributeOptions = baseAttributeKeys.map((key) => ({
+    value: key,
+    label: localize($$props.config.attributes[key])
+  }));
+  const associatedDicepoolKeys = [
+    "astral",
+    "combat",
+    "hacking",
+    "control",
+    "spell"
+  ];
+  const dicePoolOptions = associatedDicepoolKeys.map((key) => ({
+    value: key,
+    label: localize($$props.config.dicepools[key])
+  }));
+  function updateSkillType(type) {
+    set(value, proxy(type));
+    item2().update({ "system.skillType": type });
   }
-  var div = root$1();
+  var div = root$a();
   var div_1 = child(div);
-  var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var div_4 = sibling(child(div_3), 2);
-  var div_5 = child(div_4);
-  var img = child(div_5);
-  img.__click = [on_click, $$props];
-  var div_6 = sibling(div_5, 2);
-  var div_7 = child(div_6);
-  var input = sibling(child(div_7), 2);
-  input.__change = [on_change, $$props];
-  var div_8 = sibling(div_7, 2);
-  var select = sibling(child(div_8), 2);
-  init_select(select, () => get$1(value));
-  var select_value;
-  select.__change = [on_change_1, updateSkillType];
-  each(select, 21, () => selectOptions, index, ($$anchor2, option) => {
-    var option_1 = root_1$1();
-    var option_1_value = {};
-    var text = child(option_1);
-    template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(option).value)) {
-        option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
-      }
-      set_text(text, get$1(option).label);
-    });
-    append($$anchor2, option_1);
-  });
-  var node = sibling(div_8, 2);
-  {
-    var consequent = ($$anchor2) => {
-      var div_9 = root_2$1();
-      var select_1 = sibling(child(div_9), 2);
-      init_select(select_1, () => $$props.item.system.activeSkill.linkedAttribute);
-      var select_1_value;
-      select_1.__change = [on_change_2, $$props];
-      var option_2 = child(select_1);
-      option_2.value = null == (option_2.__value = "") ? "" : "";
-      var text_1 = child(option_2);
-      var node_1 = sibling(option_2);
-      each(node_1, 17, () => attributeOptions, index, ($$anchor3, option) => {
-        var option_3 = root_3$1();
-        var option_3_value = {};
-        var text_2 = child(option_3);
-        template_effect(() => {
-          if (option_3_value !== (option_3_value = get$1(option).value)) {
-            option_3.value = null == (option_3.__value = get$1(option).value) ? "" : get$1(option).value;
-          }
-          set_text(text_2, get$1(option).label);
-        });
-        append($$anchor3, option_3);
-      });
-      template_effect(
-        ($0) => {
-          if (select_1_value !== (select_1_value = $$props.item.system.activeSkill.linkedAttribute)) {
-            select_1.value = null == (select_1.__value = $$props.item.system.activeSkill.linkedAttribute) ? "" : $$props.item.system.activeSkill.linkedAttribute, select_option(select_1, $$props.item.system.activeSkill.linkedAttribute);
-          }
-          set_text(text_1, $0);
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1$4();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get src() {
+          return item2().img;
         },
-        [
-          () => localize($$props.config.skill.linkedAttribute)
-        ]
-      );
-      append($$anchor2, div_9);
-    };
-    if_block(node, ($$render) => {
-      if (get$1(value) === "active") $$render(consequent);
-    });
-  }
-  var node_2 = sibling(div_2, 2);
-  JournalViewer(node_2, {
+        get title() {
+          return item2().name;
+        }
+      });
+      var div_2 = sibling(node_1, 2);
+      var node_2 = child(div_2);
+      StatCard$1(node_2, {
+        children: ($$anchor3, $$slotProps2) => {
+          var fragment_1 = root_2$4();
+          var input = sibling(first_child(fragment_1), 2);
+          input.__change = [on_change$1, item2];
+          template_effect(() => set_value(input, item2().name));
+          append($$anchor3, fragment_1);
+        },
+        $$slots: { default: true }
+      });
+      var node_3 = sibling(node_2, 2);
+      StatCard$1(node_3, {
+        children: ($$anchor3, $$slotProps2) => {
+          var select = root_3$2();
+          init_select(select, () => get$2(value));
+          var select_value;
+          select.__change = [on_change_1$1, updateSkillType];
+          each(select, 21, () => typeOfSkillSelectOptions, index, ($$anchor4, option) => {
+            var option_1 = root_4$4();
+            var option_1_value = {};
+            var text2 = child(option_1);
+            template_effect(() => {
+              if (option_1_value !== (option_1_value = get$2(option).value)) {
+                option_1.value = null == (option_1.__value = get$2(option).value) ? "" : get$2(option).value;
+              }
+              set_text(text2, get$2(option).label);
+            });
+            append($$anchor4, option_1);
+          });
+          template_effect(() => {
+            if (select_value !== (select_value = get$2(value))) {
+              select.value = null == (select.__value = get$2(value)) ? "" : get$2(value), select_option(select, get$2(value));
+            }
+          });
+          append($$anchor3, select);
+        },
+        $$slots: { default: true }
+      });
+      var node_4 = sibling(node_3, 2);
+      {
+        var consequent = ($$anchor3) => {
+          var fragment_2 = root_5$2();
+          var node_5 = first_child(fragment_2);
+          StatCard$1(node_5, {
+            children: ($$anchor4, $$slotProps2) => {
+              var select_1 = root_6$1();
+              init_select(select_1, () => item2().system.activeSkill.linkedAttribute);
+              var select_1_value;
+              select_1.__change = [on_change_2, item2];
+              var option_2 = child(select_1);
+              option_2.value = null == (option_2.__value = "") ? "" : "";
+              var text_1 = child(option_2);
+              var node_6 = sibling(option_2);
+              each(node_6, 17, () => attributeOptions, index, ($$anchor5, option) => {
+                var option_3 = root_7();
+                var option_3_value = {};
+                var text_2 = child(option_3);
+                template_effect(() => {
+                  if (option_3_value !== (option_3_value = get$2(option).value)) {
+                    option_3.value = null == (option_3.__value = get$2(option).value) ? "" : get$2(option).value;
+                  }
+                  set_text(text_2, get$2(option).label);
+                });
+                append($$anchor5, option_3);
+              });
+              template_effect(
+                ($0) => {
+                  if (select_1_value !== (select_1_value = item2().system.activeSkill.linkedAttribute)) {
+                    select_1.value = null == (select_1.__value = item2().system.activeSkill.linkedAttribute) ? "" : item2().system.activeSkill.linkedAttribute, select_option(select_1, item2().system.activeSkill.linkedAttribute);
+                  }
+                  set_text(text_1, $0);
+                },
+                [
+                  () => localize($$props.config.skill.linkedAttribute)
+                ]
+              );
+              append($$anchor4, select_1);
+            },
+            $$slots: { default: true }
+          });
+          var node_7 = sibling(node_5, 2);
+          StatCard$1(node_7, {
+            children: ($$anchor4, $$slotProps2) => {
+              var select_2 = root_8$1();
+              init_select(select_2, () => item2().system.activeSkill.associatedDicePool);
+              var select_2_value;
+              select_2.__change = [on_change_3, item2];
+              var option_4 = child(select_2);
+              var text_3 = child(option_4);
+              var option_5 = sibling(option_4);
+              option_5.value = null == (option_5.__value = "") ? "" : "";
+              var text_4 = child(option_5);
+              var node_8 = sibling(option_5);
+              each(node_8, 17, () => dicePoolOptions, index, ($$anchor5, option) => {
+                var option_6 = root_9();
+                var option_6_value = {};
+                var text_5 = child(option_6);
+                template_effect(() => {
+                  if (option_6_value !== (option_6_value = get$2(option).value)) {
+                    option_6.value = null == (option_6.__value = get$2(option).value) ? "" : get$2(option).value;
+                  }
+                  set_text(text_5, get$2(option).label);
+                });
+                append($$anchor5, option_6);
+              });
+              template_effect(
+                ($0) => {
+                  if (select_2_value !== (select_2_value = item2().system.activeSkill.associatedDicePool)) {
+                    select_2.value = null == (select_2.__value = item2().system.activeSkill.associatedDicePool) ? "" : item2().system.activeSkill.associatedDicePool, select_option(select_2, item2().system.activeSkill.associatedDicePool);
+                  }
+                  set_text(text_3, $0);
+                  set_text(text_4, $0);
+                },
+                [
+                  () => localize($$props.config.dicepools.associateselect)
+                ]
+              );
+              append($$anchor4, select_2);
+            },
+            $$slots: { default: true }
+          });
+          append($$anchor3, fragment_2);
+        };
+        if_block(node_4, ($$render) => {
+          if (get$2(value) === "active") $$render(consequent);
+        });
+      }
+      append($$anchor2, fragment);
+    }
+  });
+  var node_9 = sibling(node, 2);
+  JournalViewer(node_9, {
     get item() {
-      return $$props.item;
+      return item2();
     },
     get config() {
       return $$props.config;
     }
   });
-  template_effect(() => {
-    set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-    set_attribute(img, "src", $$props.item.img);
-    set_attribute(img, "title", $$props.item.name);
-    set_attribute(img, "alt", $$props.item.name);
-    set_value(input, $$props.item.name);
-    if (select_value !== (select_value = get$1(value))) {
-      select.value = null == (select.__value = get$1(value)) ? "" : get$1(value), select_option(select, get$1(value));
-    }
-  });
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change"]);
+delegate(["change"]);
 class SkillItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   constructor() {
     super(...arguments);
@@ -10430,6 +12227,10 @@ class SkillModel extends foundry.abstract.TypeDataModel {
           required: true,
           initial: ""
         }),
+        associatedDicePool: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
+        }),
         specializations: new foundry.data.fields.ArrayField(
           new foundry.data.fields.SchemaField({
             ...SkillSpecialization.defineSchema()
@@ -10459,180 +12260,51 @@ class SkillModel extends foundry.abstract.TypeDataModel {
         )
       }),
       languageSkill: new foundry.data.fields.SchemaField({
-        speak: new foundry.data.fields.SchemaField({
-          value: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          linkedAttribute: new foundry.data.fields.StringField({
-            required: true,
-            initial: "intelligence"
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+        value: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0,
+          integer: true
         }),
-        read: new foundry.data.fields.SchemaField({
-          value: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 0,
-            integer: true
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+        linkedAttribute: new foundry.data.fields.StringField({
+          required: true,
+          initial: "intelligence"
         }),
-        write: new foundry.data.fields.SchemaField({
+        //lingos
+        specializations: new foundry.data.fields.ArrayField(
+          new foundry.data.fields.SchemaField({
+            ...SkillSpecialization.defineSchema()
+          }),
+          {
+            initial: []
+          }
+        ),
+        readwrite: new foundry.data.fields.SchemaField({
           value: new foundry.data.fields.NumberField({
             required: true,
             initial: 0,
             integer: true
-          }),
-          specializations: new foundry.data.fields.ArrayField(
-            new foundry.data.fields.SchemaField({
-              ...SkillSpecialization.defineSchema()
-            }),
-            {
-              initial: []
-            }
-          )
+          })
+        }),
+        journalId: new foundry.data.fields.StringField({
+          required: true,
+          initial: ""
         })
-      }),
-      journalId: new foundry.data.fields.StringField({
-        required: true,
-        initial: ""
       })
-    };
-  }
-}
-class ItemDataService {
-  static getAllItemsOfType(name) {
-    return game.items.filter((item2) => item2.type === name);
-  }
-  static getAllMetaHumans(metahumans) {
-    return metahumans.filter(
-      (m) => {
-        var _a;
-        return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
-      }
-    ).map((metahuman) => ({
-      name: metahuman.name,
-      foundryitemid: metahuman.id,
-      priority: metahuman.system.priority
-    }));
-  }
-  static getAllMagics(magics) {
-    return [
-      { priority: "E", name: "Unawakened", foundryitemid: "E-foundryItemId" },
-      { priority: "D", name: "Unawakened", foundryitemid: "D-foundryItemId" },
-      { priority: "C", name: "Unawakened", foundryitemid: "C-foundryItemId" },
-      ...magics.map((magic) => {
-        return {
-          priority: magic.system.awakened.priority,
-          name: magic.name,
-          foundryitemid: magic.id
-        };
-      })
-    ];
-  }
-  static getPriorities() {
-    return {
-      attributes: { A: 30, B: 27, C: 24, D: 21, E: 18 },
-      skills: { A: 50, B: 40, C: 34, D: 30, E: 27 },
-      resources: { A: 1e6, B: 4e5, C: 9e4, D: 2e4, E: 5e3 }
-    };
-  }
-  static getDefaultHumanItem() {
-    return {
-      name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in Metahuman",
-      type: "metahuman",
-      img: "systems/sr3e/textures/ai-generated/humans.webp",
-      system: {
-        agerange: { min: 0, average: 30, max: 100 },
-        physical: {
-          height: { min: 150, average: 170, max: 220 },
-          weight: { min: 50, average: 70, max: 250 }
-        },
-        modifiers: {
-          strength: 0,
-          quickness: 0,
-          body: 0,
-          charisma: 0,
-          intelligence: 0,
-          willpower: 0
-        },
-        attributeLimits: {
-          strength: 6,
-          quickness: 6,
-          body: 6,
-          charisma: 6,
-          intelligence: 6,
-          willpower: 6
-        },
-        movement: {
-          base: 5,
-          modifier: 0
-        },
-        karma: {
-          factor: 0.1
-        },
-        vision: {
-          type: ""
-        },
-        priority: "E",
-        journalId: ""
-        // Set to a real JournalEntry ID if needed
-      }
-    };
-  }
-  static getDefaultMagic() {
-    return {
-      name: localize(CONFIG.sr3e.placeholders.fullshaman) ?? "Localization Error in Magic",
-      type: "magic",
-      system: {
-        awakened: {
-          archetype: "magician",
-          priority: "A"
-        },
-        magicianData: {
-          magicianType: "Full",
-          tradition: "Bear",
-          drainResistanceAttribute: "Charisma",
-          aspect: "",
-          canAstrallyProject: true,
-          totem: "Bear",
-          spellPoints: 25
-        },
-        adeptData: {
-          powerPoints: 0
-        }
-      }
     };
   }
 }
 class CharacterGeneratorService {
-  static generatePriorityCombination({ metahumanOptions = [], magicOptions = [] } = {}) {
+  static generatePriorityCombination({ metatypeOptions = [], magicOptions = [] } = {}) {
     const priorities = [...this.VALID_PRIORITIES];
     console.log(`sr3d | Randomizer | Initial Priorities: ${priorities.join(", ")}`);
     const weights = {
-      metahuman: { E: 64, C: 18, D: 18 },
+      metatype: { E: 64, C: 18, D: 18 },
       magic: { A: 2, B: 2, C: 32, D: 32, E: 32 }
     };
     const combination = {};
-    const isOnlyOneMeta = metahumanOptions.length === 1;
-    combination.metahuman = isOnlyOneMeta ? this._forcePriority(priorities, metahumanOptions[0].priority) : this._draw(priorities, weights.metahuman);
-    console.log(`sr3d | Randomizer | Metahuman Priority: ${combination.metahuman}`);
+    const isOnlyOneMeta = metatypeOptions.length === 1;
+    combination.metatype = isOnlyOneMeta ? this._forcePriority(priorities, metatypeOptions[0].priority) : this._draw(priorities, weights.metatype);
+    console.log(`sr3d | Randomizer | metatype Priority: ${combination.metatype}`);
     const isOnlyOneMagic = magicOptions.length === 1;
     combination.magic = isOnlyOneMagic ? this._forcePriority(priorities, magicOptions[0].priority) : this._draw(priorities, weights.magic);
     console.log(`sr3d | Randomizer | Magic Priority: ${combination.magic}`);
@@ -10663,8 +12335,8 @@ class CharacterGeneratorService {
   }
 }
 __publicField(CharacterGeneratorService, "VALID_PRIORITIES", ["A", "B", "C", "D", "E"]);
-function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metahumanItem, metahumans) {
-  set(selectedMetahuman, "");
+function handleClear(_, selectedmetatype, selectedMagic, selectedAttribute, selectedSkill, selectedResource, characterAge, characterHeight, characterWeight, metatypeItem, metatypes) {
+  set(selectedmetatype, "");
   set(selectedMagic, "");
   set(selectedAttribute, "");
   set(selectedSkill, "");
@@ -10672,14 +12344,14 @@ function handleClear(_, selectedMetahuman, selectedMagic, selectedAttribute, sel
   set(characterAge, 25);
   set(characterHeight, 175);
   set(characterWeight, 75);
-  set(metahumanItem, proxy(get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0]));
+  set(metatypeItem, proxy(get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0]));
 }
-var root_1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3 = /* @__PURE__ */ template(`<option> </option>`);
-var root_4 = /* @__PURE__ */ template(`<option> </option>`);
-var root_5 = /* @__PURE__ */ template(`<option> </option>`);
-var root = /* @__PURE__ */ template(`<form><div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metahuman-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></div></form>`);
+var root_1$3 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2$3 = /* @__PURE__ */ template(`<option> </option>`);
+var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_4$3 = /* @__PURE__ */ template(`<option> </option>`);
+var root_5$1 = /* @__PURE__ */ template(`<option> </option>`);
+var root$9 = /* @__PURE__ */ template(`<form><div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metatype-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 7);
@@ -10689,124 +12361,124 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   let characterAge = state(25);
   let characterWeight = state(75);
   let characterHeight = state(175);
-  let selectedMetahuman = state("");
+  let selectedmetatype = state("");
   let selectedMagic = state("");
   let selectedAttribute = state("");
   let selectedSkill = state("");
   let selectedResource = state("");
   let chooseAnOption = localize($$props.config.sheet.chooseanoption);
-  let metahumanItem = state(null);
-  let metahumans = state(proxy([]));
+  let metatypeItem = state(null);
+  let metatypes = state(proxy([]));
   let magics = state(proxy([]));
   onMount(async () => {
     var _a;
-    set(metahumans, proxy(ItemDataService.getAllItemsOfType("metahuman")));
-    if (get$1(metahumans).length === 0) {
+    set(metatypes, proxy(ItemDataService.getAllItemsOfType("metatype")));
+    if (get$2(metatypes).length === 0) {
       const humanItem = ItemDataService.getDefaultHumanItem();
       await Item.create(humanItem);
-      set(metahumans, proxy(ItemDataService.getAllItemsOfType("metahuman")));
+      set(metatypes, proxy(ItemDataService.getAllItemsOfType("metatype")));
     }
     set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
-    if (get$1(magics).length === 0) {
+    if (get$2(magics).length === 0) {
       const magicItem = ItemDataService.getDefaultMagic();
       await Item.create(magicItem);
       set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
     }
-    set(metahumanItem, proxy(get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0]));
-    console.log("Available metahumans:", get$1(metahumans).map((m) => m.name));
-    console.log("Selected default metahuman:", (_a = get$1(metahumanItem)) == null ? void 0 : _a.name);
+    set(metatypeItem, proxy(get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0]));
+    console.log("Available metatypes:", get$2(metatypes).map((m) => m.name));
+    console.log("Selected default metatype:", (_a = get$2(metatypeItem)) == null ? void 0 : _a.name);
   });
-  const metahumanDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMetaHumans(get$1(metahumans)));
-  const magicsDropdownOptions = /* @__PURE__ */ derived(() => ItemDataService.getAllMagics(get$1(magics)));
+  const metatypeDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllmetatypes(get$2(metatypes)));
+  const magicsDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMagics(get$2(magics)));
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
   const skillPointDropdownOptions = priorities.skills;
   const resourcesDropdownOptions = priorities.resources;
   CharacterGeneratorService.generatePriorityCombination(
     // svelte-ignore state_referenced_locally
-    get$1(metahumans)[0],
+    get$2(metatypes)[0],
     // svelte-ignore state_referenced_locally
-    get$1(magics)[0]
+    get$2(magics)[0]
   );
   console.log("CHARACTER", actor());
   user_effect(() => {
-    if (get$1(selectedMetahuman)) {
-      const foundItem = get$1(metahumans).find((i) => i.id === get$1(selectedMetahuman));
+    if (get$2(selectedmetatype)) {
+      const foundItem = get$2(metatypes).find((i) => i.id === get$2(selectedmetatype));
       if (foundItem) {
-        set(metahumanItem, proxy(foundItem));
+        set(metatypeItem, proxy(foundItem));
       }
     } else {
-      const fallback = get$1(metahumans).find((m) => m.name === "Human") || get$1(metahumans)[0];
+      const fallback = get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0];
       if (fallback) {
-        set(metahumanItem, proxy(fallback));
+        set(metatypeItem, proxy(fallback));
       }
     }
   });
   user_effect(() => {
-    if (actor() && get$1(characterName) !== actor().name) {
-      actor().name = get$1(characterName);
-      if (get$1(characterName).length > 0) {
-        actor().update({ name: get$1(characterName) });
+    if (actor() && get$2(characterName) !== actor().name) {
+      actor().name = get$2(characterName);
+      if (get$2(characterName).length > 0) {
+        actor().update({ name: get$2(characterName) });
       }
     }
   });
-  let canCreate = /* @__PURE__ */ derived(() => get$1(selectedMetahuman) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
+  let canCreate = /* @__PURE__ */ derived$1(() => get$2(selectedmetatype) && get$2(selectedMagic) && get$2(selectedAttribute) && get$2(selectedSkill) && get$2(selectedResource));
   let ageMin = 0;
-  let ageMax = /* @__PURE__ */ derived(() => {
+  let ageMax = /* @__PURE__ */ derived$1(() => {
     var _a, _b, _c;
-    return ((_c = (_b = (_a = get$1(metahumanItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
+    return ((_c = (_b = (_a = get$2(metatypeItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
   });
-  let lifespan = /* @__PURE__ */ derived(() => get$1(ageMax) - ageMin);
+  let lifespan = /* @__PURE__ */ derived$1(() => get$2(ageMax) - ageMin);
   let phaseTemplate = ActorDataService.getPhaseTemplate();
-  let agePhases = /* @__PURE__ */ derived(() => phaseTemplate.map((p) => {
-    const from = ageMin + p.from * get$1(lifespan);
-    const to = ageMin + p.to * get$1(lifespan);
+  let agePhases = /* @__PURE__ */ derived$1(() => phaseTemplate.map((p) => {
+    const from = ageMin + p.from * get$2(lifespan);
+    const to = ageMin + p.to * get$2(lifespan);
     const midpoint = (from + to) / 2;
     return {
       text: p.text,
       from,
       to,
       midpoint,
-      percent: (midpoint - ageMin) / get$1(lifespan) * 100
+      percent: (midpoint - ageMin) / get$2(lifespan) * 100
     };
   }));
-  let currentPhase = /* @__PURE__ */ derived(() => {
+  let currentPhase = /* @__PURE__ */ derived$1(() => {
     var _a;
-    return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
+    return ((_a = get$2(agePhases).find((p) => get$2(characterAge) >= p.from && get$2(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
   });
   let usedPriorities = state(proxy([]));
   user_effect(() => {
     const arr = [];
-    const m = get$1(metahumanDropdownOptions).find((o) => o.foundryitemid === get$1(selectedMetahuman));
+    const m = get$2(metatypeDropdownOptions).find((o) => o.foundryitemid === get$2(selectedmetatype));
     if (m) arr.push(m.priority);
-    const g = get$1(magicsDropdownOptions).find((o) => o.foundryitemid === get$1(selectedMagic));
+    const g = get$2(magicsDropdownOptions).find((o) => o.foundryitemid === get$2(selectedMagic));
     if (g) arr.push(g.priority);
-    if (get$1(selectedAttribute)) arr.push(get$1(selectedAttribute));
-    if (get$1(selectedSkill)) arr.push(get$1(selectedSkill));
-    if (get$1(selectedResource)) arr.push(get$1(selectedResource));
+    if (get$2(selectedAttribute)) arr.push(get$2(selectedAttribute));
+    if (get$2(selectedSkill)) arr.push(get$2(selectedSkill));
+    if (get$2(selectedResource)) arr.push(get$2(selectedResource));
     set(usedPriorities, proxy(arr));
   });
   async function handleSubmit(event2) {
     var _a;
     event2.preventDefault();
     console.log("Handle submit was entered");
-    const metahuman = get$1(metahumans).find((m) => m.id === get$1(selectedMetahuman));
-    const worldMetahuman = game.items.get(metahuman.id);
-    const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$1(selectedAttribute));
-    const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$1(selectedSkill));
-    let initBody = metahuman.system.modifiers.body < 0 ? -metahuman.system.modifiers.body + 1 : 1;
-    let initStrength = metahuman.system.modifiers.strength < 0 ? -metahuman.system.modifiers.strength + 1 : 1;
-    let initQuickness = metahuman.system.modifiers.quickness < 0 ? -metahuman.system.modifiers.quickness + 1 : 1;
-    let initIntelligence = metahuman.system.modifiers.intelligence < 0 ? -metahuman.system.modifiers.intelligence + 1 : 1;
-    let initWillpower = metahuman.system.modifiers.willpower < 0 ? -metahuman.system.modifiers.willpower + 1 : 1;
-    let initCharisma = metahuman.system.modifiers.charisma < 0 ? -metahuman.system.modifiers.charisma + 1 : 1;
+    const metatype = get$2(metatypes).find((m) => m.id === get$2(selectedmetatype));
+    const worldmetatype = game.items.get(metatype.id);
+    const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$2(selectedAttribute));
+    const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$2(selectedSkill));
+    let initBody = metatype.system.modifiers.body < 0 ? -metatype.system.modifiers.body + 1 : 1;
+    let initStrength = metatype.system.modifiers.strength < 0 ? -metatype.system.modifiers.strength + 1 : 1;
+    let initQuickness = metatype.system.modifiers.quickness < 0 ? -metatype.system.modifiers.quickness + 1 : 1;
+    let initIntelligence = metatype.system.modifiers.intelligence < 0 ? -metatype.system.modifiers.intelligence + 1 : 1;
+    let initWillpower = metatype.system.modifiers.willpower < 0 ? -metatype.system.modifiers.willpower + 1 : 1;
+    let initCharisma = metatype.system.modifiers.charisma < 0 ? -metatype.system.modifiers.charisma + 1 : 1;
     let initTotal = initBody + initStrength + initQuickness + initIntelligence + initWillpower + initCharisma;
-    if (initTotal > selectedAttributeObj.points) throw new Error("The metahuman has excessive negative modifiers");
+    if (initTotal > selectedAttributeObj.points) throw new Error("The metatype has excessive negative modifiers");
     let remainingPoints = selectedAttributeObj.points - initTotal;
     await actor().update({
-      "system.profile.age": get$1(characterAge),
-      "system.profile.height": get$1(characterHeight),
-      "system.profile.weight": get$1(characterWeight),
+      "system.profile.age": get$2(characterAge),
+      "system.profile.height": get$2(characterHeight),
+      "system.profile.weight": get$2(characterWeight),
       "system.creation.attributePoints": remainingPoints,
       "system.creation.activePoints": selectedSkillObj.points,
       "system.attributes.body.value": initBody,
@@ -10815,16 +12487,16 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.attributes.charisma.value": initCharisma,
       "system.attributes.intelligence.value": initIntelligence,
       "system.attributes.willpower.value": initWillpower,
-      "system.attributes.body.meta": metahuman.system.modifiers.body,
-      "system.attributes.quickness.meta": metahuman.system.modifiers.quickness,
-      "system.attributes.strength.meta": metahuman.system.modifiers.strength,
-      "system.attributes.charisma.meta": metahuman.system.modifiers.charisma,
-      "system.attributes.intelligence.meta": metahuman.system.modifiers.intelligence,
-      "system.attributes.willpower.meta": metahuman.system.modifiers.willpower
+      "system.attributes.body.meta": metatype.system.modifiers.body,
+      "system.attributes.quickness.meta": metatype.system.modifiers.quickness,
+      "system.attributes.strength.meta": metatype.system.modifiers.strength,
+      "system.attributes.charisma.meta": metatype.system.modifiers.charisma,
+      "system.attributes.intelligence.meta": metatype.system.modifiers.intelligence,
+      "system.attributes.willpower.meta": metatype.system.modifiers.willpower
     });
-    await actor().createEmbeddedDocuments("Item", [worldMetahuman.toObject()]);
-    const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
-    if (["A", "B"].includes(get$1(selectedMagic).priority)) {
+    await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
+    const magic = get$2(magics).find((m) => m.id === get$2(selectedMagic));
+    if (["A", "B"].includes(get$2(selectedMagic).priority)) {
       const worldMagic = game.items.get(magic.id);
       await actor().createEmbeddedDocuments("Item", [worldMagic.toObject()]);
       actor().setFlag(flags.sr3e, flags.actor.hasAwakened, true);
@@ -10837,26 +12509,26 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     let combo, metaOpts, magicOpts;
     do {
       combo = CharacterGeneratorService.generatePriorityCombination({
-        metahumanOptions: get$1(metahumanDropdownOptions),
-        magicOptions: get$1(magicsDropdownOptions)
+        metatypeOptions: get$2(metatypeDropdownOptions),
+        magicOptions: get$2(magicsDropdownOptions)
       });
-      metaOpts = get$1(metahumanDropdownOptions).filter((i) => i.priority === combo.metahuman);
-      magicOpts = get$1(magicsDropdownOptions).filter((i) => i.priority === combo.magic);
+      metaOpts = get$2(metatypeDropdownOptions).filter((i) => i.priority === combo.metatype);
+      magicOpts = get$2(magicsDropdownOptions).filter((i) => i.priority === combo.magic);
     } while (!metaOpts.length || !magicOpts.length);
-    set(selectedMetahuman, proxy(metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid));
+    set(selectedmetatype, proxy(metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid));
     set(selectedMagic, proxy(magicOpts[getRandomIntinRange(0, magicOpts.length - 1)].foundryitemid));
-    set(metahumanItem, proxy(get$1(metahumans).find((i) => i.id === get$1(selectedMetahuman))));
-    const ageSrc = get$1(metahumanItem).system.agerange ?? get$1(metahumanItem).system.lifespan;
+    set(metatypeItem, proxy(get$2(metatypes).find((i) => i.id === get$2(selectedmetatype))));
+    const ageSrc = get$2(metatypeItem).system.agerange ?? get$2(metatypeItem).system.lifespan;
     set(characterAge, proxy(getRandomBellCurveWithMode(ageSrc.min, ageSrc.max, ageSrc.average)));
-    const h = get$1(metahumanItem).system.physical.height;
+    const h = get$2(metatypeItem).system.physical.height;
     set(characterHeight, proxy(getRandomBellCurveWithMode(h.min, h.max, h.average)));
-    const w = get$1(metahumanItem).system.physical.weight;
+    const w = get$2(metatypeItem).system.physical.weight;
     set(characterWeight, proxy(getRandomBellCurveWithMode(w.min, w.max, w.average)));
     set(selectedAttribute, proxy(combo.attribute));
     set(selectedSkill, proxy(combo.skills));
     set(selectedResource, proxy(combo.resources));
   }
-  var form = root();
+  var form = root$9();
   var div = child(form);
   var div_1 = child(div);
   var div_2 = child(div_1);
@@ -10869,7 +12541,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var div_7 = child(div_6);
   var div_8 = sibling(child(div_7), 2);
   var div_9 = child(div_8);
-  var text = child(div_9);
+  var text2 = child(div_9);
   var input_1 = sibling(div_9, 2);
   var div_10 = sibling(input_1, 2);
   var text_1 = child(div_10);
@@ -10889,15 +12561,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option.value = null == (option.__value = "") ? "" : "";
   option.textContent = chooseAnOption;
   var node = sibling(option);
-  each(node, 17, () => get$1(metahumanDropdownOptions), index, ($$anchor2, metahuman) => {
-    var option_1 = root_1();
+  each(node, 17, () => get$2(metatypeDropdownOptions), index, ($$anchor2, metatype) => {
+    var option_1 = root_1$3();
     var option_1_value = {};
     var text_4 = child(option_1);
     template_effect(() => {
-      if (option_1_value !== (option_1_value = get$1(metahuman).foundryitemid)) {
-        option_1.value = null == (option_1.__value = get$1(metahuman).foundryitemid) ? "" : get$1(metahuman).foundryitemid;
+      if (option_1_value !== (option_1_value = get$2(metatype).foundryitemid)) {
+        option_1.value = null == (option_1.__value = get$2(metatype).foundryitemid) ? "" : get$2(metatype).foundryitemid;
       }
-      set_text(text_4, `${get$1(metahuman).priority ?? ""}: ${get$1(metahuman).name ?? ""}`);
+      set_text(text_4, `${get$2(metatype).priority ?? ""}: ${get$2(metatype).name ?? ""}`);
     });
     append($$anchor2, option_1);
   });
@@ -10909,20 +12581,20 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_2.value = null == (option_2.__value = "") ? "" : "";
   option_2.textContent = chooseAnOption;
   var node_1 = sibling(option_2);
-  each(node_1, 17, () => get$1(magicsDropdownOptions), index, ($$anchor2, magic) => {
-    var option_3 = root_2();
+  each(node_1, 17, () => get$2(magicsDropdownOptions), index, ($$anchor2, magic) => {
+    var option_3 = root_2$3();
     var option_3_value = {};
     var text_6 = child(option_3);
     template_effect(
       ($0) => {
-        if (option_3_value !== (option_3_value = get$1(magic).foundryitemid)) {
-          option_3.value = null == (option_3.__value = get$1(magic).foundryitemid) ? "" : get$1(magic).foundryitemid;
+        if (option_3_value !== (option_3_value = get$2(magic).foundryitemid)) {
+          option_3.value = null == (option_3.__value = get$2(magic).foundryitemid) ? "" : get$2(magic).foundryitemid;
         }
         option_3.disabled = $0;
-        set_text(text_6, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
+        set_text(text_6, `${get$2(magic).priority ?? ""}: ${get$2(magic).name ?? ""}`);
       },
       [
-        () => get$1(usedPriorities).includes(get$1(magic).priority) && get$1(magic).foundryitemid !== get$1(selectedMagic)
+        () => get$2(usedPriorities).includes(get$2(magic).priority) && get$2(magic).foundryitemid !== get$2(selectedMagic)
       ]
     );
     append($$anchor2, option_3);
@@ -10936,19 +12608,19 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_4.textContent = chooseAnOption;
   var node_2 = sibling(option_4);
   each(node_2, 17, () => attributPointDropdownOptions, index, ($$anchor2, attribute) => {
-    var option_5 = root_3();
+    var option_5 = root_3$1();
     var option_5_value = {};
     var text_8 = child(option_5);
     template_effect(
       ($0) => {
-        if (option_5_value !== (option_5_value = get$1(attribute).priority)) {
-          option_5.value = null == (option_5.__value = get$1(attribute).priority) ? "" : get$1(attribute).priority;
+        if (option_5_value !== (option_5_value = get$2(attribute).priority)) {
+          option_5.value = null == (option_5.__value = get$2(attribute).priority) ? "" : get$2(attribute).priority;
         }
         option_5.disabled = $0;
-        set_text(text_8, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
+        set_text(text_8, `${get$2(attribute).priority ?? ""}: ${get$2(attribute).points ?? ""}`);
       },
       [
-        () => get$1(usedPriorities).includes(get$1(attribute).priority) && get$1(attribute).priority !== get$1(selectedAttribute)
+        () => get$2(usedPriorities).includes(get$2(attribute).priority) && get$2(attribute).priority !== get$2(selectedAttribute)
       ]
     );
     append($$anchor2, option_5);
@@ -10962,19 +12634,19 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_6.textContent = chooseAnOption;
   var node_3 = sibling(option_6);
   each(node_3, 17, () => skillPointDropdownOptions, index, ($$anchor2, skill) => {
-    var option_7 = root_4();
+    var option_7 = root_4$3();
     var option_7_value = {};
     var text_10 = child(option_7);
     template_effect(
       ($0) => {
-        if (option_7_value !== (option_7_value = get$1(skill).priority)) {
-          option_7.value = null == (option_7.__value = get$1(skill).priority) ? "" : get$1(skill).priority;
+        if (option_7_value !== (option_7_value = get$2(skill).priority)) {
+          option_7.value = null == (option_7.__value = get$2(skill).priority) ? "" : get$2(skill).priority;
         }
         option_7.disabled = $0;
-        set_text(text_10, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
+        set_text(text_10, `${get$2(skill).priority ?? ""}: ${get$2(skill).points ?? ""}`);
       },
       [
-        () => get$1(usedPriorities).includes(get$1(skill).priority) && get$1(skill).priority !== get$1(selectedSkill)
+        () => get$2(usedPriorities).includes(get$2(skill).priority) && get$2(skill).priority !== get$2(selectedSkill)
       ]
     );
     append($$anchor2, option_7);
@@ -10988,19 +12660,19 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_8.textContent = chooseAnOption;
   var node_4 = sibling(option_8);
   each(node_4, 17, () => resourcesDropdownOptions, index, ($$anchor2, resource) => {
-    var option_9 = root_5();
+    var option_9 = root_5$1();
     var option_9_value = {};
     var text_12 = child(option_9);
     template_effect(
       ($0) => {
-        if (option_9_value !== (option_9_value = get$1(resource).priority)) {
-          option_9.value = null == (option_9.__value = get$1(resource).priority) ? "" : get$1(resource).priority;
+        if (option_9_value !== (option_9_value = get$2(resource).priority)) {
+          option_9.value = null == (option_9.__value = get$2(resource).priority) ? "" : get$2(resource).priority;
         }
         option_9.disabled = $0;
-        set_text(text_12, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
+        set_text(text_12, `${get$2(resource).priority ?? ""}: ${get$2(resource).points ?? ""}`);
       },
       [
-        () => get$1(usedPriorities).includes(get$1(resource).priority) && get$1(resource).priority !== get$1(selectedResource)
+        () => get$2(usedPriorities).includes(get$2(resource).priority) && get$2(resource).priority !== get$2(selectedResource)
       ]
     );
     append($$anchor2, option_9);
@@ -11015,7 +12687,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   var button_1 = sibling(button, 2);
   button_1.__click = [
     handleClear,
-    selectedMetahuman,
+    selectedmetatype,
     selectedMagic,
     selectedAttribute,
     selectedSkill,
@@ -11023,8 +12695,8 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     characterAge,
     characterHeight,
     characterWeight,
-    metahumanItem,
-    metahumans
+    metatypeItem,
+    metatypes
   ];
   var text_14 = sibling(child(button_1));
   var button_2 = sibling(button_1, 2);
@@ -11033,18 +12705,18 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
       var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
       set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-      set_attribute(img, "src", ((_a = get$1(metahumanItem)) == null ? void 0 : _a.img) ?? "");
-      set_attribute(img, "title", ((_b = get$1(metahumanItem)) == null ? void 0 : _b.name) ?? "");
-      set_attribute(img, "alt", ((_c = get$1(metahumanItem)) == null ? void 0 : _c.name) ?? "");
-      set_text(text, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} (${get$1(currentPhase) ?? ""})`);
-      set_attribute(input_1, "min", ((_f = (_e = (_d = get$1(metahumanItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
-      set_attribute(input_1, "max", ((_i = (_h = (_g = get$1(metahumanItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
-      set_text(text_1, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
-      set_attribute(input_2, "min", ((_m = (_l = (_k = (_j = get$1(metahumanItem)) == null ? void 0 : _j.system) == null ? void 0 : _k.physical) == null ? void 0 : _l.height) == null ? void 0 : _m.min) ?? 0);
-      set_attribute(input_2, "max", ((_q = (_p = (_o = (_n = get$1(metahumanItem)) == null ? void 0 : _n.system) == null ? void 0 : _o.physical) == null ? void 0 : _p.height) == null ? void 0 : _q.max) ?? 200);
-      set_text(text_2, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
-      set_attribute(input_3, "min", ((_u = (_t = (_s = (_r = get$1(metahumanItem)) == null ? void 0 : _r.system) == null ? void 0 : _s.physical) == null ? void 0 : _t.weight) == null ? void 0 : _u.min) ?? 0);
-      set_attribute(input_3, "max", ((_y = (_x = (_w = (_v = get$1(metahumanItem)) == null ? void 0 : _v.system) == null ? void 0 : _w.physical) == null ? void 0 : _x.weight) == null ? void 0 : _y.max) ?? 200);
+      set_attribute(img, "src", ((_a = get$2(metatypeItem)) == null ? void 0 : _a.img) ?? "");
+      set_attribute(img, "title", ((_b = get$2(metatypeItem)) == null ? void 0 : _b.name) ?? "");
+      set_attribute(img, "alt", ((_c = get$2(metatypeItem)) == null ? void 0 : _c.name) ?? "");
+      set_text(text2, `${$0 ?? ""}: ${get$2(characterAge) ?? ""} (${get$2(currentPhase) ?? ""})`);
+      set_attribute(input_1, "min", ((_f = (_e = (_d = get$2(metatypeItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
+      set_attribute(input_1, "max", ((_i = (_h = (_g = get$2(metatypeItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
+      set_text(text_1, `${$1 ?? ""}: ${get$2(characterHeight) ?? ""}`);
+      set_attribute(input_2, "min", ((_m = (_l = (_k = (_j = get$2(metatypeItem)) == null ? void 0 : _j.system) == null ? void 0 : _k.physical) == null ? void 0 : _l.height) == null ? void 0 : _m.min) ?? 0);
+      set_attribute(input_2, "max", ((_q = (_p = (_o = (_n = get$2(metatypeItem)) == null ? void 0 : _n.system) == null ? void 0 : _o.physical) == null ? void 0 : _p.height) == null ? void 0 : _q.max) ?? 200);
+      set_text(text_2, `${$2 ?? ""}: ${get$2(characterWeight) ?? ""}`);
+      set_attribute(input_3, "min", ((_u = (_t = (_s = (_r = get$2(metatypeItem)) == null ? void 0 : _r.system) == null ? void 0 : _s.physical) == null ? void 0 : _t.weight) == null ? void 0 : _u.min) ?? 0);
+      set_attribute(input_3, "max", ((_y = (_x = (_w = (_v = get$2(metatypeItem)) == null ? void 0 : _v.system) == null ? void 0 : _w.physical) == null ? void 0 : _x.weight) == null ? void 0 : _y.max) ?? 200);
       set_text(text_3, $3);
       set_text(text_5, $4);
       set_text(text_7, $5);
@@ -11052,14 +12724,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       set_text(text_11, $7);
       set_text(text_13, ` ${$8 ?? ""}`);
       set_text(text_14, ` ${$9 ?? ""}`);
-      button_2.disabled = !get$1(canCreate);
+      button_2.disabled = !get$2(canCreate);
       set_text(text_15, ` ${$10 ?? ""}`);
     },
     [
       () => localize($$props.config.traits.age),
       () => localize($$props.config.traits.height),
       () => localize($$props.config.traits.weight),
-      () => localize($$props.config.traits.metahumanity),
+      () => localize($$props.config.traits.metaType),
       () => localize($$props.config.magic.tradition),
       () => localize($$props.config.sheet.attributepoints),
       () => localize($$props.config.sheet.skillpoints),
@@ -11070,15 +12742,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     ]
   );
   event("submit", form, handleSubmit);
-  bind_value(input, () => get$1(characterName), ($$value) => set(characterName, $$value));
-  bind_value(input_1, () => get$1(characterAge), ($$value) => set(characterAge, $$value));
-  bind_value(input_2, () => get$1(characterHeight), ($$value) => set(characterHeight, $$value));
-  bind_value(input_3, () => get$1(characterWeight), ($$value) => set(characterWeight, $$value));
-  bind_select_value(select, () => get$1(selectedMetahuman), ($$value) => set(selectedMetahuman, $$value));
-  bind_select_value(select_1, () => get$1(selectedMagic), ($$value) => set(selectedMagic, $$value));
-  bind_select_value(select_2, () => get$1(selectedAttribute), ($$value) => set(selectedAttribute, $$value));
-  bind_select_value(select_3, () => get$1(selectedSkill), ($$value) => set(selectedSkill, $$value));
-  bind_select_value(select_4, () => get$1(selectedResource), ($$value) => set(selectedResource, $$value));
+  bind_value(input, () => get$2(characterName), ($$value) => set(characterName, $$value));
+  bind_value(input_1, () => get$2(characterAge), ($$value) => set(characterAge, $$value));
+  bind_value(input_2, () => get$2(characterHeight), ($$value) => set(characterHeight, $$value));
+  bind_value(input_3, () => get$2(characterWeight), ($$value) => set(characterWeight, $$value));
+  bind_select_value(select, () => get$2(selectedmetatype), ($$value) => set(selectedmetatype, $$value));
+  bind_select_value(select_1, () => get$2(selectedMagic), ($$value) => set(selectedMagic, $$value));
+  bind_select_value(select_2, () => get$2(selectedAttribute), ($$value) => set(selectedAttribute, $$value));
+  bind_select_value(select_3, () => get$2(selectedSkill), ($$value) => set(selectedSkill, $$value));
+  bind_select_value(select_4, () => get$2(selectedResource), ($$value) => set(selectedResource, $$value));
   append($$anchor, form);
   pop();
 }
@@ -11090,12 +12762,12 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
       onCancel: null
     }, options);
     super(mergedOptions);
-    __privateAdd(this, _actor);
+    __privateAdd(this, _actor2);
     __privateAdd(this, _onSubmit);
     __privateAdd(this, _onCancel);
     __privateAdd(this, _svelteApp);
     __privateAdd(this, _wasSubmitted, false);
-    __privateSet(this, _actor, actor);
+    __privateSet(this, _actor2, actor);
     __privateSet(this, _onSubmit, mergedOptions.onSubmit);
     __privateSet(this, _onCancel, mergedOptions.onCancel);
   }
@@ -11107,7 +12779,7 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
     __privateSet(this, _svelteApp, mount(CharacterCreationDialogApp, {
       target: windowContent,
       props: {
-        actor: __privateGet(this, _actor),
+        actor: __privateGet(this, _actor2),
         config: CONFIG.sr3e,
         onSubmit: (result) => {
           var _a;
@@ -11135,7 +12807,7 @@ class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
     return super.close(options);
   }
 }
-_actor = new WeakMap();
+_actor2 = new WeakMap();
 _onSubmit = new WeakMap();
 _onCancel = new WeakMap();
 _svelteApp = new WeakMap();
@@ -11192,15 +12864,134 @@ async function stopDefaultCharacterSheetRenderOnCreation(_docs, actor, options, 
   if (actor.type !== "character") return true;
   options.renderSheet = false;
 }
+class RollService {
+  static async AttributeRoll(actor, attributeName, dice, options = {
+    targetNumber: 0,
+    //Target number 0 is forbidden in shadowrun, so we can know that thw roll has no target if target < 2
+    explodes: true,
+    defaulted: false,
+    modifiers: 0
+  }) {
+    let formula = "";
+    if (options.explodes) {
+      formula = `${dice}d6x`;
+      if (options.targetNumber && options.targetNumber > 1) {
+        formula += (options.targetNumber + options.modifiers).toString();
+      }
+    } else {
+      formula = `${dice}d6`;
+    }
+    const roll = new Roll(formula);
+    await roll.evaluate();
+    const term = roll.terms.find((t) => t instanceof foundry.dice.terms.Die);
+    const isSR3 = term instanceof CONFIG.Dice.terms["d"];
+    let resultSummary = "";
+    if (isSR3 && typeof term.successes === "number") {
+      if (term.successes > 0) {
+        resultSummary = `${term.successes} success${term.successes > 1 ? "es" : ""}`;
+      } else if (term.isBotch) {
+        resultSummary = `Oopsie! Disastrous mistake! ${term.ones} ones and no successes.`;
+      } else {
+        resultSummary = "No successes.";
+      }
+    }
+    let flavor = "";
+    if (options.defaulted) {
+      flavor = `${actor.name} rolls a skill default on linked attribute ${attributeName} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
+    } else if (options.modifier > 0) {
+      flavor = `${actor.name} rolls ${attributeName} (${formula}) with ${options.modifiers} modifier${resultSummary ? `<br>${resultSummary}` : ""}`;
+    } else {
+      flavor = `${actor.name} rolls ${attributeName} (${formula})${resultSummary ? `<br>${resultSummary}` : ""}`;
+    }
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      flavor,
+      rollMode: options.rollMode ?? game.settings.get("core", "rollMode")
+    });
+  }
+  static async SkillRoll(actor, skillName, dice, options) {
+    console.log("[SkillRoll]", {
+      skillName,
+      dice,
+      options
+    });
+  }
+  static async SpecializationRoll(actor, skillName, dice, options) {
+    console.log("[SpecializationRoll]", {
+      skillName,
+      dice,
+      options
+    });
+  }
+  static async Initiaitve(actor) {
+    const initiativeDice = get(storeManager.getActorStore(actor.id, stores.initiativeDice, 1));
+    const augmentedReaction = get(storeManager.getActorStore(actor.id, stores.augmentedReaction));
+    const roll = await new Roll(`${initiativeDice}d6`).evaluate();
+    const totalInit = roll.total + augmentedReaction;
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor }),
+      flavor: `${actor.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`
+    });
+    if (actor.combatant) {
+      await actor.combatant.update({ initiative: totalInit });
+    } else if (game.combat) {
+      const combatant = game.combat.combatants.find((c) => c.actor.id === actor.id);
+      if (combatant) {
+        await game.combat.setInitiative(combatant.id, totalInit);
+      }
+    }
+    return totalInit;
+  }
+}
 class SR3EActor extends Actor {
-  async canAcceptMetahuman(incomingItem) {
-    const existing = this.items.filter((i) => i.type === "metahuman");
+  get getInitiativeDice() {
+    let dice = 1;
+    console.warn("SR3EActor.getInitiativeDice is not implemented. Returning 1 by default.");
+    return dice;
+  }
+  get AugumentedReaction() {
+    let augmentedReaction = 0;
+    console.warn("SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default.");
+    return augmentedReaction;
+  }
+  async InitiativeRoll(dice, options) {
+    await RollService.Initiative(this, dice, options);
+  }
+  async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+    await RollService.AttributeRoll(this, attributeName, dice, options);
+  }
+  async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+    await RollService.SkillRoll(this, skillName, dice, options);
+  }
+  async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+    await RollService.SpecializationRoll(this, specializationName, dice, options);
+  }
+  RefreshKarmaPool() {
+    console.log("SR3EActor.RefreshKarmaPool is not implemented.");
+  }
+  RefreshCombatPool() {
+    console.log("SR3EActor.RefreshCombatPool is not implemented.");
+  }
+  RefreshAstralPool() {
+    console.log("SR3EActor.RefreshAstralPool is not implemented.");
+  }
+  RefreshHackingPool() {
+    console.log("SR3EActor.RefreshHackingPool is not implemented.");
+  }
+  RefreshControlPool() {
+    console.log("SR3EActor.RefreshControlPool is not implemented.");
+  }
+  RefreshSpellPool() {
+    console.log("SR3EActor.RefreshSpellPool is not implemented.");
+  }
+  async canAcceptmetatype(incomingItem) {
+    const existing = this.items.filter((i) => i.type === "metatype");
     if (existing.length > 1) {
       const [oldest, ...rest] = existing.sort((a, b) => a.id.localeCompare(b.id));
       const toDelete = rest.map((i) => i.id);
       await this.deleteEmbeddedDocuments("Item", toDelete);
     }
-    const current = this.items.find((i) => i.type === "metahuman");
+    const current = this.items.find((i) => i.type === "metatype");
     if (!current) return "accept";
     const incomingName = incomingItem.name.toLowerCase();
     const currentName = current.name.toLowerCase();
@@ -11211,14 +13002,17 @@ class SR3EActor extends Actor {
     if (incomingName === currentName) return "reject";
     return "reject";
   }
-  async replaceMetahuman(newItem) {
-    const current = this.items.find((i) => i.type === "metahuman");
+  async replacemetatype(newItem) {
+    const current = this.items.find((i) => i.type === "metatype");
     if (current) await this.deleteEmbeddedDocuments("Item", [current.id]);
     await this.createEmbeddedDocuments("Item", [newItem.toObject()]);
     await this.update({
-      "system.profile.metaHumanity": newItem.name,
+      "system.profile.metaType": newItem.name,
       "system.profile.img": newItem.img
     });
+  }
+  static Register() {
+    CONFIG.Actor.documentClass = SR3EActor;
   }
 }
 function attachLightEffect(html2, activeTheme) {
@@ -11234,10 +13028,10 @@ function attachLightEffect(html2, activeTheme) {
       // soft cherry blossom
     },
     dark: {
-      silver: rgb(130, 130, 130),
-      lightGray: rgb(92, 92, 92),
-      darkGray: rgb(41, 41, 41),
-      highlight: rgb(255, 192, 203)
+      silver: rgb(77, 77, 77),
+      lightGray: rgb(31, 31, 32),
+      darkGray: rgb(23, 22, 22),
+      highlight: rgb(102, 119, 115)
     }
   };
   const isDark = activeTheme.toLowerCase().includes("dark");
@@ -11277,6 +13071,1500 @@ function attachLightEffect(html2, activeTheme) {
     });
   });
 }
+class StorytellerScreenModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      attributes: new foundry.data.fields.SchemaField(AttributesModel$1.defineSchema()),
+      dicePools: new foundry.data.fields.SchemaField(DicePoolsModel.defineSchema()),
+      movement: new foundry.data.fields.SchemaField(AttributesModel2.defineSchema()),
+      profile: new foundry.data.fields.SchemaField(Profile.defineSchema()),
+      creation: new foundry.data.fields.SchemaField(Creation.defineSchema()),
+      karma: new foundry.data.fields.SchemaField(KarmaModel.defineSchema()),
+      health: new foundry.data.fields.SchemaField(HealthModel.defineSchema()),
+      journalEntryUuid: new foundry.data.fields.StringField({
+        required: false,
+        initial: ""
+      })
+    };
+  }
+}
+var on_click$1 = (_, onDelta) => onDelta()(-1);
+var on_keydown = (e) => {
+  if (e.key === "Enter") e.target.blur();
+};
+var on_click_1$1 = (__1, onDelta) => onDelta()(1);
+var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h1> </h1> <div class="time-editor-component"><button type="button"><i class="fa-solid fa-circle-left"></i></button> <input class="time-display" type="number"> <button type="button"><i class="fa-solid fa-circle-right"></i></button></div></div>`);
+function TimeActuatorInput($$anchor, $$props) {
+  push($$props, true);
+  const label = prop($$props, "label", 3, "Seconds"), onDelta = prop($$props, "onDelta", 3, () => {
+  });
+  let input = state("");
+  var div = root$8();
+  var h1 = sibling(child(div), 2);
+  var text2 = child(h1);
+  var div_1 = sibling(h1, 2);
+  var button = child(div_1);
+  button.__click = [on_click$1, onDelta];
+  var input_1 = sibling(button, 2);
+  input_1.__keydown = [on_keydown];
+  var button_1 = sibling(input_1, 2);
+  button_1.__click = [on_click_1$1, onDelta];
+  template_effect(
+    ($0) => {
+      set_text(text2, label());
+      set_attribute(button, "aria-label", `Decrement ${label()}`);
+      set_attribute(input_1, "placeholder", $0);
+      set_attribute(button_1, "aria-label", `Increment ${label()}`);
+    },
+    [() => `± ${label().toLowerCase()}`]
+  );
+  event("blur", input_1, (e) => {
+    const delta = e.target.valueAsNumber;
+    if (!Number.isNaN(delta) && delta !== 0) {
+      onDelta()(delta);
+    }
+    set(input, "");
+  });
+  bind_value(input_1, () => get$2(input), ($$value) => set(input, $$value));
+  append($$anchor, div);
+  pop();
+}
+delegate(["click", "keydown"]);
+class TimeService {
+  static update(ms) {
+    game.time.advance(ms);
+  }
+  static updateSeconds(n = 1) {
+    this.update(n * 1e3);
+  }
+  static updateMinutes(n = 1) {
+    this.update(n * 60 * 1e3);
+  }
+  static updateHours(n = 1) {
+    this.update(n * 60 * 60 * 1e3);
+  }
+  static updateDays(n = 1) {
+    const date = new Date(game.time.worldTime);
+    date.setDate(date.getDate() + n);
+    game.time.set(date.getTime());
+  }
+  static updateMonths(n = 1) {
+    const date = new Date(game.time.worldTime);
+    date.setMonth(date.getMonth() + n);
+    game.time.set(date.getTime());
+  }
+  static updateYears(n = 1) {
+    const date = new Date(game.time.worldTime);
+    date.setFullYear(date.getFullYear() + n);
+    game.time.set(date.getTime());
+  }
+  static dateToGameTime(date) {
+    if (!(date instanceof Date)) throw new Error("Expected Date instance");
+    return date.getTime();
+  }
+  static gameTimeToDate(ms) {
+    if (typeof ms !== "number") throw new Error("Expected number");
+    return new Date(ms);
+  }
+}
+__publicField(TimeService, "unit", {
+  seconds: "Seconds",
+  minutes: "Minutes",
+  hours: "Hours",
+  days: "Days",
+  months: "Months",
+  years: "Years"
+});
+var root$7 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="counter-bar"><h1 class="text-display"><div> </div> <div> </div> - <div> </div> <div> </div> - <div class="clock"> </div> : <div class="clock"> </div> : <div class="clock"> </div></h1> <div class="time-editor"><!> <!> <!> <!> <!> <!></div></div></div></div></div>`);
+function TimeManager($$anchor, $$props) {
+  push($$props, true);
+  let config = prop($$props, "config", 19, () => ({}));
+  let currentDate = state(proxy(new Date(game.time.worldTime)));
+  onMount(() => {
+    const handler = () => {
+      set(currentDate, proxy(new Date(game.time.worldTime)));
+    };
+    Hooks.on("updateWorldTime", handler);
+    return () => Hooks.off("updateWorldTime", handler);
+  });
+  const year = /* @__PURE__ */ derived$1(() => get$2(currentDate).getFullYear());
+  const day = /* @__PURE__ */ derived$1(() => get$2(currentDate).getDate());
+  const hours = /* @__PURE__ */ derived$1(() => get$2(currentDate).getHours());
+  const minutes = /* @__PURE__ */ derived$1(() => get$2(currentDate).getMinutes());
+  const seconds = /* @__PURE__ */ derived$1(() => get$2(currentDate).getSeconds());
+  const weekdayAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
+  const monthAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { month: "long" }));
+  var div = root$7();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var div_3 = child(div_2);
+  var h1 = child(div_3);
+  var div_4 = child(h1);
+  var text2 = child(div_4);
+  var div_5 = sibling(div_4, 2);
+  var text_1 = child(div_5);
+  var div_6 = sibling(div_5, 2);
+  var text_2 = child(div_6);
+  var div_7 = sibling(div_6, 2);
+  var text_3 = child(div_7);
+  var div_8 = sibling(div_7, 2);
+  var text_4 = child(div_8);
+  var div_9 = sibling(div_8, 2);
+  var text_5 = child(div_9);
+  var div_10 = sibling(div_9, 2);
+  var text_6 = child(div_10);
+  var div_11 = sibling(h1, 2);
+  var node = child(div_11);
+  const expression = /* @__PURE__ */ derived$1(() => localize(config().time.year));
+  TimeActuatorInput(node, {
+    get label() {
+      return get$2(expression);
+    },
+    onDelta: (n) => {
+      TimeService.updateYears(n);
+    }
+  });
+  var node_1 = sibling(node, 2);
+  const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().time.month));
+  TimeActuatorInput(node_1, {
+    get label() {
+      return get$2(expression_1);
+    },
+    onDelta: (n) => {
+      TimeService.updateMonths(n);
+    }
+  });
+  var node_2 = sibling(node_1, 2);
+  const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().time.day));
+  TimeActuatorInput(node_2, {
+    get label() {
+      return get$2(expression_2);
+    },
+    onDelta: (n) => {
+      TimeService.updateDays(n);
+    }
+  });
+  var node_3 = sibling(node_2, 2);
+  const expression_3 = /* @__PURE__ */ derived$1(() => localize(config().time.hours));
+  TimeActuatorInput(node_3, {
+    get label() {
+      return get$2(expression_3);
+    },
+    onDelta: (n) => {
+      TimeService.updateHours(n);
+    }
+  });
+  var node_4 = sibling(node_3, 2);
+  const expression_4 = /* @__PURE__ */ derived$1(() => localize(config().time.minutes));
+  TimeActuatorInput(node_4, {
+    get label() {
+      return get$2(expression_4);
+    },
+    onDelta: (n) => {
+      TimeService.updateMinutes(n);
+    }
+  });
+  var node_5 = sibling(node_4, 2);
+  const expression_5 = /* @__PURE__ */ derived$1(() => localize(config().time.seconds));
+  TimeActuatorInput(node_5, {
+    get label() {
+      return get$2(expression_5);
+    },
+    onDelta: (n) => {
+      TimeService.updateSeconds(n);
+    }
+  });
+  template_effect(
+    ($0, $1, $2, $3) => {
+      set_text(text2, get$2(weekdayAsString));
+      set_text(text_1, $0);
+      set_text(text_2, get$2(monthAsString));
+      set_text(text_3, get$2(year));
+      set_text(text_4, $1);
+      set_text(text_5, $2);
+      set_text(text_6, $3);
+    },
+    [
+      () => get$2(day).toString().padStart(2, "0"),
+      () => get$2(hours).toString().padStart(2, "0"),
+      () => get$2(minutes).toString().padStart(2, "0"),
+      () => get$2(seconds).toString().padStart(2, "0")
+    ]
+  );
+  append($$anchor, div);
+  pop();
+}
+var root$6 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
+function KarmaRow($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $readyForCommit = () => store_get(readyForCommit, "$readyForCommit", $$stores);
+  const $lifetimeKarma = () => store_get(lifetimeKarma, "$lifetimeKarma", $$stores);
+  const $pendingKarmaReward = () => store_get(pendingKarmaReward, "$pendingKarmaReward", $$stores);
+  const $karmaPoolCeiling = () => store_get(karmaPoolCeiling, "$karmaPoolCeiling", $$stores);
+  const $goodKarma = () => store_get(goodKarma, "$goodKarma", $$stores);
+  const $spentKarma = () => store_get(spentKarma, "$spentKarma", $$stores);
+  onMount(() => {
+    if ($$props.onmount) {
+      $$props.onmount({
+        CommitSelected,
+        Select,
+        Deselect,
+        get readyForCommit() {
+          return $readyForCommit();
+        }
+      });
+    }
+  });
+  let storeManager2 = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  let pendingKarmaReward = storeManager2.GetStore("karma.pendingKarmaReward");
+  let goodKarma = storeManager2.GetStore("karma.goodKarma");
+  let karmaPoolCeiling = storeManager2.GetStore("karma.karmaPoolCeiling");
+  let spentKarma = storeManager2.GetStore("karma.spentKarma");
+  let lifetimeKarma = storeManager2.GetStore("karma.lifetimeKarma");
+  let readyForCommit = storeManager2.GetStore("karma.readyForCommit");
+  async function CommitSelected() {
+    if ($readyForCommit()) {
+      const metatypeItem = $$props.actor.items.find((i) => i.type === "metatype");
+      store_set(lifetimeKarma, $lifetimeKarma() + $pendingKarmaReward());
+      if (metatypeItem.system.karma.factor) {
+        store_set(karmaPoolCeiling, proxy(Math.floor($lifetimeKarma() * metatypeItem.system.karma.factor)));
+      }
+      store_set(goodKarma, $lifetimeKarma() - $spentKarma() - $karmaPoolCeiling());
+      store_set(pendingKarmaReward, 0);
+      store_set(readyForCommit, false);
+      $$props.OnCommitStatusChange();
+    }
+  }
+  user_effect(() => {
+    $readyForCommit();
+    $$props.OnCommitStatusChange();
+  });
+  function Select() {
+    store_set(readyForCommit, true);
+    $$props.OnCommitStatusChange();
+  }
+  function Deselect() {
+    store_set(readyForCommit, false);
+    $$props.OnCommitStatusChange();
+  }
+  var tr = root$6();
+  var td = child(tr);
+  var img = child(td);
+  var td_1 = sibling(td);
+  var h3 = child(td_1);
+  var text2 = child(h3);
+  var td_2 = sibling(td_1);
+  var input = child(td_2);
+  var td_3 = sibling(td_2);
+  var h3_1 = child(td_3);
+  var text_1 = child(h3_1);
+  var td_4 = sibling(td_3);
+  var h3_2 = child(td_4);
+  var text_2 = child(h3_2);
+  var td_5 = sibling(td_4);
+  var h3_3 = child(td_5);
+  var text_3 = child(h3_3);
+  var td_6 = sibling(td_5);
+  var input_1 = child(td_6);
+  template_effect(() => {
+    set_attribute(img, "src", $$props.actor.img);
+    set_text(text2, $$props.actor.name);
+    set_attribute(input, "id", $$props.actor.id);
+    set_text(text_1, $goodKarma());
+    set_text(text_2, $karmaPoolCeiling());
+    set_text(text_3, $lifetimeKarma());
+  });
+  bind_value(input, $pendingKarmaReward, ($$value) => store_set(pendingKarmaReward, $$value));
+  bind_checked(input_1, $readyForCommit, ($$value) => store_set(readyForCommit, $$value));
+  append($$anchor, tr);
+  pop();
+  $$cleanup();
+}
+async function commitSelected$1(_, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.CommitSelected) await row.CommitSelected();
+  }
+}
+function selectAll$1(__1, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.Select) row.Select();
+  }
+}
+function deselectAll$1(__2, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.Deselect) row.Deselect();
+  }
+}
+var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2$2 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
+var root_4$2 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
+var root$5 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+function KarmaManager($$anchor, $$props) {
+  push($$props, true);
+  let delimiter = state("");
+  let filter = state("character");
+  let listboxContent = state(null);
+  const rowRefs = /* @__PURE__ */ new Map();
+  const options = [
+    {
+      value: "character",
+      label: localize($$props.config.karmamanager.character)
+    },
+    {
+      value: "npc",
+      label: localize($$props.config.karmamanager.npc)
+    }
+  ];
+  let anyReady = state(proxy([]));
+  function OnCommitStatusChange() {
+    set(anyReady, proxy(Array.from(rowRefs.values()).some((row) => row.readyForCommit)));
+  }
+  user_effect(() => {
+    var _a;
+    let baseList = [];
+    switch (get$2(filter)) {
+      case "character":
+        baseList = game.actors.filter((a) => a.type === "character");
+        break;
+      case "npc":
+        baseList = game.actors.filter((a) => a.type === "npc");
+        break;
+      default:
+        baseList = game.actors.filter((a) => {
+          var _a2;
+          return (_a2 = a.system) == null ? void 0 : _a2.karma;
+        });
+        break;
+    }
+    set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
+  });
+  var div = root$5();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var select = child(div_4);
+  each(select, 21, () => options, index, ($$anchor2, $$item) => {
+    let value = () => get$2($$item).value;
+    let label = () => get$2($$item).label;
+    var option = root_1$2();
+    var option_value = {};
+    var text2 = child(option);
+    template_effect(() => {
+      if (option_value !== (option_value = value())) {
+        option.value = null == (option.__value = value()) ? "" : value();
+      }
+      set_text(text2, label());
+    });
+    append($$anchor2, option);
+  });
+  var input = sibling(select, 2);
+  var button = sibling(input, 2);
+  button.__click = [selectAll$1, listboxContent, rowRefs];
+  var text_1 = child(button);
+  var button_1 = sibling(button, 2);
+  button_1.__click = [deselectAll$1, listboxContent, rowRefs];
+  var text_2 = child(button_1);
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [commitSelected$1, listboxContent, rowRefs];
+  var text_3 = child(button_2);
+  var div_5 = sibling(div_4, 2);
+  var node = child(div_5);
+  {
+    var consequent = ($$anchor2) => {
+      var table = root_2$2();
+      var thead = child(table);
+      var tr = child(thead);
+      var th = sibling(child(tr), 3);
+      var text_4 = child(th);
+      var th_1 = sibling(th);
+      var text_5 = child(th_1);
+      var th_2 = sibling(th_1);
+      var text_6 = child(th_2);
+      var th_3 = sibling(th_2);
+      var text_7 = child(th_3);
+      var tbody = sibling(thead);
+      each(tbody, 21, () => get$2(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
+        KarmaRow($$anchor3, {
+          get actor() {
+            return get$2(actor);
+          },
+          get config() {
+            return $$props.config;
+          },
+          OnCommitStatusChange,
+          onmount: (el) => rowRefs.set(get$2(actor).id, el)
+        });
+      });
+      template_effect(
+        ($0, $1, $2, $3) => {
+          set_text(text_4, $0);
+          set_text(text_5, $1);
+          set_text(text_6, $2);
+          set_text(text_7, $3);
+        },
+        [
+          () => localize($$props.config.karma.goodkarma),
+          () => localize($$props.config.karma.karmapool),
+          () => localize($$props.config.karma.lifetimekarma),
+          () => localize($$props.config.karma.commit)
+        ]
+      );
+      append($$anchor2, table);
+    };
+    var alternate = ($$anchor2) => {
+      var div_6 = root_4$2();
+      append($$anchor2, div_6);
+    };
+    if_block(node, ($$render) => {
+      var _a;
+      if ((_a = get$2(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(
+    ($0, $1, $2) => {
+      set_text(text_1, $0);
+      set_text(text_2, $1);
+      button_2.disabled = !get$2(anyReady);
+      set_text(text_3, $2);
+    },
+    [
+      () => localize($$props.config.karma.selectall),
+      () => localize($$props.config.karma.deselectall),
+      () => localize($$props.config.karma.commitselected)
+    ]
+  );
+  bind_select_value(select, () => get$2(filter), ($$value) => set(filter, $$value));
+  bind_value(input, () => get$2(delimiter), ($$value) => set(delimiter, $$value));
+  append($$anchor, div);
+  pop();
+}
+delegate(["click"]);
+var on_click = (__1, $$props) => $$props.actor.RefreshKarmaPool();
+var on_click_1 = (__2, $$props) => $$props.actor.RefreshCombatPool();
+var on_click_2 = (__3, $$props) => $$props.actor.RefreshAstralPool();
+var on_click_3 = (__4, $$props) => $$props.actor.RefreshSpellPool();
+var on_click_4 = (__5, $$props) => $$props.actor.RefreshControlPool();
+var on_click_5 = (__6, $$props) => $$props.actor.RefreshHackingPool();
+var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fas fa-karma"></i></button></td><td><h3> </h3> <button> <i class="fas fa-fist-raised"></i></button></td><td><h3> </h3> <button> <i class="fas fa-star"></i></button></td><td><h3> </h3> <button> <i class="fas fa-hat-wizard"></i></button></td><td><h3> </h3> <button> <i class="fas fa-gamepad"></i></button></td><td><h3> </h3> <button> <i class="fas fa-laptop-code"></i></button></td><td><input type="checkbox"></td></tr>`);
+function DicePoolRow($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $readyForCommit = () => store_get(readyForCommit, "$readyForCommit", $$stores);
+  const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
+  const $karmaPoolCeilingStore = () => store_get(karmaPoolCeilingStore, "$karmaPoolCeilingStore", $$stores);
+  const $combatPoolStore = () => store_get(combatPoolStore, "$combatPoolStore", $$stores);
+  const $quicknessStore = () => store_get(quicknessStore, "$quicknessStore", $$stores);
+  const $intelligenceStore = () => store_get(intelligenceStore, "$intelligenceStore", $$stores);
+  const $willpowerStore = () => store_get(willpowerStore, "$willpowerStore", $$stores);
+  const $astralPoolStore = () => store_get(astralPoolStore, "$astralPoolStore", $$stores);
+  const $spellPoolStore = () => store_get(spellPoolStore, "$spellPoolStore", $$stores);
+  const $controlPoolStore = () => store_get(controlPoolStore, "$controlPoolStore", $$stores);
+  const $hackingPoolStore = () => store_get(hackingPoolStore, "$hackingPoolStore", $$stores);
+  const isMagician = $$props.actor.items.some((i) => i.type === "metatype") && $$props.actor.system.attributes.magic.isBurnedOut;
+  $$props.actor.system.attributes;
+  onMount(() => {
+    if ($$props.onmount) {
+      $$props.onmount({
+        CommitSelected,
+        Select,
+        Deselect,
+        get readyForCommit() {
+          return $readyForCommit();
+        }
+      });
+    }
+  });
+  let storeManager2 = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  let intelligenceStore = storeManager2.GetCompositeStore("attributes.intelligence", ["mod", "value", "meta"]);
+  let quicknessStore = storeManager2.GetCompositeStore("attributes.quickness", ["mod", "value", "meta"]);
+  let willpowerStore = storeManager2.GetCompositeStore("attributes.willpower", ["mod", "value", "meta"]);
+  storeManager2.GetCompositeStore("attributes.charisma", ["mod", "value", "meta"]);
+  let karmaPoolCeilingStore = storeManager2.GetStore("karma.karmaPoolCeiling");
+  let karmaPoolStore = storeManager2.GetStore("karma.karmaPool");
+  let combatPoolStore = storeManager2.GetStore("dicePools.combat.value");
+  let astralPoolStore = storeManager2.GetStore("dicePools.astral.value");
+  let hackingPoolStore = storeManager2.GetStore("dicePools.hacking.value");
+  let controlPoolStore = storeManager2.GetStore("dicePools.control.value");
+  let spellPoolStore = storeManager2.GetStore("dicePools.spell.value");
+  let readyForCommit = storeManager2.GetFlagStore($$props.actor.id, "sr3e.actor.poolcommit");
+  async function CommitSelected() {
+    if ($readyForCommit()) {
+      $$props.actor.RefreshKarmaPool();
+      $$props.actor.RefreshCombatPool();
+      $$props.actor.RefreshHackingPool();
+      if (isMagician) {
+        $$props.actor.RefreshAstralPool();
+        $$props.actor.RefreshSpellPool();
+      }
+      $$props.OnCommitStatusChange();
+    }
+  }
+  user_effect(() => {
+    $readyForCommit();
+    $$props.OnCommitStatusChange();
+  });
+  function Select() {
+    store_set(readyForCommit, true);
+    $$props.OnCommitStatusChange();
+  }
+  function Deselect() {
+    store_set(readyForCommit, false);
+    $$props.OnCommitStatusChange();
+  }
+  var tr = root$4();
+  var td = child(tr);
+  var img = child(td);
+  var td_1 = sibling(td);
+  var h3 = child(td_1);
+  var text2 = child(h3);
+  var td_2 = sibling(td_1);
+  var h3_1 = child(td_2);
+  var text_1 = child(h3_1);
+  var button = sibling(h3_1, 2);
+  button.__click = [on_click, $$props];
+  var text_2 = child(button);
+  var td_3 = sibling(td_2);
+  var h3_2 = child(td_3);
+  var text_3 = child(h3_2);
+  var button_1 = sibling(h3_2, 2);
+  button_1.__click = [on_click_1, $$props];
+  var text_4 = child(button_1);
+  var td_4 = sibling(td_3);
+  var h3_3 = child(td_4);
+  var text_5 = child(h3_3);
+  var button_2 = sibling(h3_3, 2);
+  button_2.__click = [on_click_2, $$props];
+  var text_6 = child(button_2);
+  var td_5 = sibling(td_4);
+  var h3_4 = child(td_5);
+  var text_7 = child(h3_4);
+  var button_3 = sibling(h3_4, 2);
+  button_3.__click = [on_click_3, $$props];
+  var text_8 = child(button_3);
+  var td_6 = sibling(td_5);
+  var h3_5 = child(td_6);
+  var text_9 = child(h3_5);
+  var button_4 = sibling(h3_5, 2);
+  button_4.__click = [on_click_4, $$props];
+  var text_10 = child(button_4);
+  var td_7 = sibling(td_6);
+  var h3_6 = child(td_7);
+  var text_11 = child(h3_6);
+  var button_5 = sibling(h3_6, 2);
+  button_5.__click = [on_click_5, $$props];
+  var text_12 = child(button_5);
+  var td_8 = sibling(td_7);
+  var input = child(td_8);
+  template_effect(
+    ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
+      set_attribute(img, "src", $$props.actor.img);
+      set_text(text2, $$props.actor.name);
+      set_text(text_1, `${$karmaPoolStore() ?? ""} / ${$karmaPoolCeilingStore() ?? ""}`);
+      set_attribute(button, "aria-label", $0);
+      set_text(text_2, `${$1 ?? ""} `);
+      set_text(text_3, `${$combatPoolStore() ?? ""} / ${$2 ?? ""}`);
+      set_attribute(button_1, "aria-label", $3);
+      set_text(text_4, `${$1 ?? ""} `);
+      set_text(text_5, `${$astralPoolStore() ?? ""} / ${$4 ?? ""}`);
+      set_attribute(button_2, "aria-label", $5);
+      set_text(text_6, `${$1 ?? ""} `);
+      set_text(text_7, `${$spellPoolStore() ?? ""} / ${$4 ?? ""}`);
+      set_attribute(button_3, "aria-label", $6);
+      set_text(text_8, `${$1 ?? ""} `);
+      set_text(text_9, `${$controlPoolStore() ?? ""} / TODO`);
+      set_attribute(button_4, "aria-label", $7);
+      set_text(text_10, `${$1 ?? ""} `);
+      set_text(text_11, `${$hackingPoolStore() ?? ""} / TODO`);
+      set_attribute(button_5, "aria-label", $8);
+      set_text(text_12, `${$1 ?? ""} `);
+    },
+    [
+      () => localize($$props.config.storytellerscreen.refreshkarmapool),
+      () => localize($$props.config.storytellerscreen.refresh),
+      () => Math.floor(($quicknessStore().sum + $intelligenceStore().sum + $willpowerStore().sum) * 0.5),
+      () => localize($$props.config.storytellerscreen.refreshcombatpool),
+      () => Math.floor(($intelligenceStore().sum + $willpowerStore().sum) * 0.5),
+      () => localize($$props.config.storytellerscreen.refreshastralpool),
+      () => localize($$props.config.storytellerscreen.refreshspellpool),
+      () => localize($$props.config.storytellerscreen.refreshcontrolpool),
+      () => localize($$props.config.storytellerscreen.refreshhackingpool)
+    ]
+  );
+  bind_checked(input, $readyForCommit, ($$value) => store_set(readyForCommit, $$value));
+  append($$anchor, tr);
+  pop();
+  $$cleanup();
+}
+delegate(["click"]);
+async function commitSelected(_, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.CommitSelected) await row.CommitSelected();
+  }
+}
+function selectAll(__1, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.Select) row.Select();
+  }
+}
+function deselectAll(__2, listboxContent, rowRefs) {
+  for (const actor of get$2(listboxContent)) {
+    const row = rowRefs.get(actor.id);
+    if (row == null ? void 0 : row.Deselect) row.Deselect();
+  }
+}
+var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
+var root_2$1 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th> </th><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
+var root_4$1 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
+var root$3 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+function DicePoolManager($$anchor, $$props) {
+  push($$props, true);
+  let delimiter = state("");
+  let filter = state("character");
+  let listboxContent = state(null);
+  const rowRefs = /* @__PURE__ */ new Map();
+  const options = [
+    {
+      value: "character",
+      label: localize($$props.config.karmamanager.character)
+    },
+    {
+      value: "npc",
+      label: localize($$props.config.karmamanager.npc)
+    }
+  ];
+  let anyReady = state(proxy([]));
+  function OnCommitStatusChange() {
+    set(anyReady, proxy(Array.from(rowRefs.values()).some((row) => row.readyForCommit)));
+  }
+  user_effect(() => {
+    var _a;
+    let baseList = [];
+    switch (get$2(filter)) {
+      case "character":
+        baseList = game.actors.filter((a) => {
+          var _a2, _b;
+          return a.type === "character" && ((_a2 = a.system) == null ? void 0 : _a2.karma) && ((_b = a.system) == null ? void 0 : _b.dicePools);
+        });
+        break;
+      case "npc":
+        baseList = game.actors.filter((a) => {
+          var _a2, _b;
+          return a.type === "npc" && ((_a2 = a.system) == null ? void 0 : _a2.karma) && ((_b = a.system) == null ? void 0 : _b.dicePools);
+        });
+        break;
+      default:
+        baseList = game.actors.filter((a) => {
+          var _a2;
+          return (_a2 = a.system) == null ? void 0 : _a2.karma;
+        });
+        break;
+    }
+    set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
+  });
+  var div = root$3();
+  var div_1 = child(div);
+  var div_2 = sibling(child(div_1), 2);
+  var div_3 = child(div_2);
+  var div_4 = sibling(child(div_3), 2);
+  var select = child(div_4);
+  each(select, 21, () => options, index, ($$anchor2, $$item) => {
+    let value = () => get$2($$item).value;
+    let label = () => get$2($$item).label;
+    var option = root_1$1();
+    var option_value = {};
+    var text2 = child(option);
+    template_effect(() => {
+      if (option_value !== (option_value = value())) {
+        option.value = null == (option.__value = value()) ? "" : value();
+      }
+      set_text(text2, label());
+    });
+    append($$anchor2, option);
+  });
+  var input = sibling(select, 2);
+  var button = sibling(input, 2);
+  button.__click = [selectAll, listboxContent, rowRefs];
+  var text_1 = child(button);
+  var button_1 = sibling(button, 2);
+  button_1.__click = [deselectAll, listboxContent, rowRefs];
+  var text_2 = child(button_1);
+  var button_2 = sibling(button_1, 2);
+  button_2.__click = [commitSelected, listboxContent, rowRefs];
+  var text_3 = child(button_2);
+  var div_5 = sibling(div_4, 2);
+  var node = child(div_5);
+  {
+    var consequent = ($$anchor2) => {
+      var table = root_2$1();
+      var thead = child(table);
+      var tr = child(thead);
+      var th = sibling(child(tr), 2);
+      var text_4 = child(th);
+      var th_1 = sibling(th);
+      var text_5 = child(th_1);
+      var th_2 = sibling(th_1);
+      var text_6 = child(th_2);
+      var th_3 = sibling(th_2);
+      var text_7 = child(th_3);
+      var th_4 = sibling(th_3);
+      var text_8 = child(th_4);
+      var th_5 = sibling(th_4);
+      var text_9 = child(th_5);
+      var tbody = sibling(thead);
+      each(tbody, 21, () => get$2(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
+        DicePoolRow($$anchor3, {
+          get actor() {
+            return get$2(actor);
+          },
+          get config() {
+            return $$props.config;
+          },
+          OnCommitStatusChange,
+          onmount: (el) => rowRefs.set(get$2(actor).id, el)
+        });
+      });
+      template_effect(
+        ($0, $1, $2, $3, $4, $5) => {
+          set_text(text_4, $0);
+          set_text(text_5, $1);
+          set_text(text_6, $2);
+          set_text(text_7, $3);
+          set_text(text_8, $4);
+          set_text(text_9, $5);
+        },
+        [
+          () => localize($$props.config.karma.karmapool),
+          () => localize($$props.config.dicepools.combat),
+          () => localize($$props.config.dicepools.astral),
+          () => localize($$props.config.dicepools.hacking),
+          () => localize($$props.config.dicepools.control),
+          () => localize($$props.config.dicepools.spell)
+        ]
+      );
+      append($$anchor2, table);
+    };
+    var alternate = ($$anchor2) => {
+      var div_6 = root_4$1();
+      append($$anchor2, div_6);
+    };
+    if_block(node, ($$render) => {
+      var _a;
+      if ((_a = get$2(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  template_effect(
+    ($0, $1, $2) => {
+      set_text(text_1, $0);
+      set_text(text_2, $1);
+      button_2.disabled = !get$2(anyReady);
+      set_text(text_3, $2);
+    },
+    [
+      () => localize($$props.config.karma.selectall),
+      () => localize($$props.config.karma.deselectall),
+      () => localize($$props.config.karma.commitselected)
+    ]
+  );
+  bind_select_value(select, () => get$2(filter), ($$value) => set(filter, $$value));
+  bind_value(input, () => get$2(delimiter), ($$value) => set(delimiter, $$value));
+  append($$anchor, div);
+  pop();
+}
+delegate(["click"]);
+var root$2 = /* @__PURE__ */ template(`<div><!> <!> <!></div>`);
+function StorytellerScreenApp($$anchor, $$props) {
+  prop($$props, "actor", 19, () => ({}));
+  let config = prop($$props, "config", 19, () => ({}));
+  var div = root$2();
+  var node = child(div);
+  TimeManager(node, {
+    get config() {
+      return config();
+    }
+  });
+  var node_1 = sibling(node, 2);
+  KarmaManager(node_1, {
+    get config() {
+      return config();
+    }
+  });
+  var node_2 = sibling(node_1, 2);
+  DicePoolManager(node_2, {
+    get config() {
+      return config();
+    }
+  });
+  append($$anchor, div);
+}
+class StorytellerScreenActorSheet extends foundry.applications.sheets.ActorSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _app3);
+  }
+  get title() {
+    return `${localize(CONFIG.sr3e.storytellerscreen.storytellerscreen)}`;
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "storytellerscreen", "ActorSheetV2"],
+      template: null,
+      position: { width: 820, height: 820 },
+      window: {
+        resizable: true
+      },
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _app3)) {
+      unmount(__privateGet(this, _app3));
+      __privateSet(this, _app3, null);
+    }
+    __privateSet(this, _app3, mount(StorytellerScreenApp, {
+      target: windowContent,
+      props: {
+        actor: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+  }
+  async _tearDown() {
+    if (__privateGet(this, _app3)) await unmount(__privateGet(this, _app3));
+    __privateSet(this, _app3, null);
+    return super._tearDown();
+  }
+}
+_app3 = new WeakMap();
+class TransactionModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      amount: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      recurrent: new foundry.data.fields.BooleanField({
+        //Expose
+        required: true,
+        initial: false
+      }),
+      isCreditStick: new foundry.data.fields.BooleanField({
+        //Expose
+        required: true,
+        initial: false
+      }),
+      type: new foundry.data.fields.StringField({
+        //Expose, is a select with Asset, Debt, Expense as options will be localized later
+        required: true,
+        initial: ""
+      }),
+      creditorId: new foundry.data.fields.StringField({
+        // If it is a debt, who is owed to, not exposed
+        required: false,
+        initial: ""
+      }),
+      interestPerMonth: new foundry.data.fields.NumberField({
+        //Expose
+        required: true,
+        initial: 0
+      }),
+      journalId: new foundry.data.fields.StringField({
+        //Exposed already
+        required: true,
+        initial: ""
+      })
+    };
+  }
+}
+function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, searchTerm, displayValue, inputElement) {
+  var _a;
+  if (disabled()) return;
+  switch (event2.key) {
+    case "ArrowDown":
+      event2.preventDefault();
+      if (!get$2(isOpen)) {
+        set(isOpen, true);
+        updateDropdown();
+      } else {
+        set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
+        scrollToHighlighted();
+      }
+      break;
+    case "ArrowUp":
+      event2.preventDefault();
+      set(highlightedIndex, proxy(Math.max(get$2(highlightedIndex) - 1, 0)));
+      scrollToHighlighted();
+      break;
+    case "Enter":
+      event2.preventDefault();
+      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) {
+        selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
+      }
+      break;
+    case "Escape":
+      event2.preventDefault();
+      set(isOpen, false);
+      set(searchTerm, proxy(get$2(displayValue)));
+      (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
+      updateDropdown();
+      break;
+    case "Tab":
+      set(isOpen, false);
+      set(searchTerm, proxy(get$2(displayValue)));
+      updateDropdown();
+      break;
+  }
+}
+var root$1 = /* @__PURE__ */ template(`<div class="combobox-container"><div class="combobox-wrapper"><input class="combobox-input" role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
+function ComboSearch($$anchor, $$props) {
+  push($$props, true);
+  const dispatch = createEventDispatcher();
+  let options = prop($$props, "options", 19, () => []), value = prop($$props, "value", 15, ""), placeholder = prop($$props, "placeholder", 3, "Search..."), nomatchplaceholder = prop($$props, "nomatchplaceholder", 3, "No matches found..."), disabled = prop($$props, "disabled", 3, false), maxHeight = prop($$props, "maxHeight", 3, "200px");
+  let isOpen = state(false);
+  let searchTerm = state("");
+  let filteredOptions = state(proxy([]));
+  let highlightedIndex = state(-1);
+  let inputElement = state(void 0);
+  let wrapperElement = state(void 0);
+  let dropdownElement;
+  let displayValue = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return ((_a = options().find((opt) => opt.value === value())) == null ? void 0 : _a.label) ?? "";
+  });
+  user_effect(() => {
+    if (!get$2(isOpen)) {
+      set(searchTerm, proxy(get$2(displayValue)));
+    }
+  });
+  user_effect(() => {
+    if (get$2(searchTerm).trim() === "") {
+      set(filteredOptions, proxy(options()));
+    } else {
+      set(filteredOptions, proxy(options().filter((opt) => opt.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
+    }
+    set(highlightedIndex, -1);
+    updateDropdown();
+  });
+  onMount(() => {
+    dropdownElement = document.createElement("div");
+    dropdownElement.classList.add("combobox-dropdown");
+    dropdownElement.id = "combobox-dropdown-list";
+    dropdownElement.style.position = "absolute";
+    dropdownElement.style.zIndex = "9999";
+    const anchor = get$2(wrapperElement).closest(".item-sheet-component") ?? document.body;
+    if (getComputedStyle(anchor).position === "static") {
+      anchor.style.position = "relative";
+    }
+    anchor.appendChild(dropdownElement);
+  });
+  onDestroy(() => {
+    dropdownElement == null ? void 0 : dropdownElement.remove();
+  });
+  function updateDropdown() {
+    if (!get$2(isOpen) || !get$2(wrapperElement) || !dropdownElement) return;
+    tick().then(() => {
+      const anchor = get$2(wrapperElement).closest(".item-sheet-component");
+      if (!anchor) return;
+      const anchorRect = anchor.getBoundingClientRect();
+      const wrapperRect = get$2(wrapperElement).getBoundingClientRect();
+      const top = wrapperRect.bottom - anchorRect.top;
+      const left = wrapperRect.left - anchorRect.left;
+      dropdownElement.style.top = `${top}px`;
+      dropdownElement.style.left = `${left}px`;
+      dropdownElement.style.width = `${wrapperRect.width}px`;
+      dropdownElement.innerHTML = "";
+      const content = document.createElement("div");
+      content.style.maxHeight = maxHeight();
+      content.setAttribute("role", "listbox");
+      if (get$2(filteredOptions).length > 0) {
+        get$2(filteredOptions).forEach((option, i) => {
+          const el = document.createElement("div");
+          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (option.value === value() ? " selected" : "");
+          el.setAttribute("role", "option");
+          el.setAttribute("aria-selected", option.value === value());
+          el.textContent = option.label;
+          el.onmousedown = () => handleOptionMousedown(option);
+          content.appendChild(el);
+        });
+      } else if (get$2(searchTerm).trim() !== "") {
+        const el = document.createElement("div");
+        el.className = "combobox-option no-results";
+        el.textContent = nomatchplaceholder();
+        content.appendChild(el);
+      }
+      dropdownElement.appendChild(content);
+    });
+  }
+  function handleInputFocus() {
+    if (!disabled()) {
+      set(isOpen, true);
+      set(searchTerm, "");
+      updateDropdown();
+    }
+  }
+  function handleInputBlur() {
+    setTimeout(
+      () => {
+        set(isOpen, false);
+        set(searchTerm, proxy(get$2(displayValue)));
+        updateDropdown();
+      },
+      150
+    );
+  }
+  function selectOption(option) {
+    var _a;
+    value(option.value);
+    set(searchTerm, proxy(option.label));
+    set(isOpen, false);
+    (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
+    dispatch("select", { value: option.value });
+    updateDropdown();
+  }
+  async function scrollToHighlighted() {
+    var _a, _b;
+    await tick();
+    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
+    el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
+  }
+  function handleOptionMousedown(option) {
+    selectOption(option);
+  }
+  var div = root$1();
+  var div_1 = child(div);
+  var input = child(div_1);
+  input.__keydown = [
+    handleInputKeydown,
+    disabled,
+    isOpen,
+    updateDropdown,
+    highlightedIndex,
+    filteredOptions,
+    scrollToHighlighted,
+    selectOption,
+    searchTerm,
+    displayValue,
+    inputElement
+  ];
+  bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
+  var i_1 = sibling(input, 2);
+  bind_this(div_1, ($$value) => set(wrapperElement, $$value), () => get$2(wrapperElement));
+  template_effect(() => {
+    toggle_class(div_1, "disabled", disabled());
+    set_attribute(input, "placeholder", placeholder());
+    input.disabled = disabled();
+    set_attribute(input, "aria-expanded", get$2(isOpen));
+    toggle_class(input, "open", get$2(isOpen));
+    toggle_class(i_1, "rotated", get$2(isOpen));
+  });
+  event("focus", input, handleInputFocus);
+  event("blur", input, handleInputBlur);
+  bind_value(input, () => get$2(searchTerm), ($$value) => set(searchTerm, $$value));
+  append($$anchor, div);
+  pop();
+}
+delegate(["keydown"]);
+function handleKeyDown(e) {
+  if ([8, 9, 27, 13, 46].includes(e.keyCode) || e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode) || e.keyCode >= 35 && e.keyCode <= 39) return;
+  if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+    e.preventDefault();
+  }
+}
+var on_change = (e, item2) => item2().update({ name: e.target.value });
+var root_2 = /* @__PURE__ */ template(`<input name="amount" type="text">`);
+var on_change_1 = (e, item2) => item2().update({ "system.type": e.target.value });
+var root_3 = /* @__PURE__ */ template(`<select name="type"><option disabled> </option><option> </option><option> </option><option> </option><option> </option></select>`);
+var root_4 = /* @__PURE__ */ template(`<input type="text" placeholder="0.00%">`);
+var root_5 = /* @__PURE__ */ template(`<input type="checkbox">`);
+var root_6 = /* @__PURE__ */ template(`<input type="checkbox">`);
+var root_1 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <input class="large" name="name" type="text"></div> <!> <!> <!> <div class="stat-grid two-column"><!> <!></div></div>`, 1);
+var root_8 = /* @__PURE__ */ template(`<div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h3>Creditor</h3></div> <!></div>`);
+var root = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!></div> <!></div>`);
+function TransactionApp($$anchor, $$props) {
+  push($$props, true);
+  let item2 = prop($$props, "item", 7);
+  let layoutMode = "single";
+  let formattedAmount = state(`${item2().system.amount} ¥`);
+  let creditorOptions = state(proxy([]));
+  let selectedId = state(proxy(item2().system.creditorId ?? ""));
+  let interest = state("");
+  let delimiter = "";
+  user_effect(() => {
+    set(formattedAmount, `${formatNumber(item2().system.amount)} ¥`);
+  });
+  user_effect(() => {
+    const actors = game.actors.filter((actor) => game.user.isGM || actor.testUserPermission(game.user, "OBSERVER"));
+    const filtered = delimiter.trim().length > 0 ? actors.filter((a) => a.name.toLowerCase().includes(delimiter.toLowerCase())) : actors;
+    set(creditorOptions, proxy(filtered.map((a) => ({ value: a.id, label: a.name }))));
+  });
+  function handleSelection(event2) {
+    const id = event2.detail.value;
+    set(selectedId, proxy(id));
+    item2().update({ "system.creditorId": id });
+  }
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+  function handleInput(e) {
+    const inputValue = e.target.value.trim();
+    const raw = inputValue.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    e.target.value = `${formatNumber(parsed)} ¥`;
+  }
+  function handleFocus(e) {
+    e.target.select();
+  }
+  function handleBlur(e) {
+    const raw = e.target.value.replace(/[^\d]/g, "");
+    const parsed = parseInt(raw, 10) || 0;
+    item2().system.amount = parsed;
+    item2().update({ "system.amount": parsed }, { render: false });
+    e.target.value = `${formatNumber(parsed)} ¥`;
+  }
+  var div = root();
+  var div_1 = child(div);
+  var node = child(div_1);
+  ItemSheetComponent(node, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment = root_1();
+      var node_1 = first_child(fragment);
+      Image(node_1, {
+        get entity() {
+          return item2();
+        }
+      });
+      var div_2 = sibling(node_1, 2);
+      var div_3 = child(div_2);
+      var input = sibling(child(div_3), 2);
+      input.__change = [on_change, item2];
+      var node_2 = sibling(div_3, 2);
+      StatCard$1(node_2, {
+        children: ($$anchor3, $$slotProps2) => {
+          var input_1 = root_2();
+          input_1.__input = handleInput;
+          input_1.__keydown = [handleKeyDown];
+          template_effect(() => set_value(input_1, get$2(formattedAmount)));
+          event("focus", input_1, handleFocus);
+          event("blur", input_1, handleBlur);
+          append($$anchor3, input_1);
+        },
+        $$slots: { default: true }
+      });
+      var node_3 = sibling(node_2, 2);
+      StatCard$1(node_3, {
+        children: ($$anchor3, $$slotProps2) => {
+          var select = root_3();
+          select.__change = [on_change_1, item2];
+          var option = child(select);
+          option.value = null == (option.__value = "") ? "" : "";
+          var text2 = child(option);
+          var option_1 = sibling(option);
+          option_1.value = null == (option_1.__value = "income") ? "" : "income";
+          var text_1 = child(option_1);
+          var option_2 = sibling(option_1);
+          option_2.value = null == (option_2.__value = "asset") ? "" : "asset";
+          var text_2 = child(option_2);
+          var option_3 = sibling(option_2);
+          option_3.value = null == (option_3.__value = "debt") ? "" : "debt";
+          var text_3 = child(option_3);
+          var option_4 = sibling(option_3);
+          option_4.value = null == (option_4.__value = "expense") ? "" : "expense";
+          var text_4 = child(option_4);
+          template_effect(
+            ($0, $1, $2, $3, $4) => {
+              set_text(text2, $0);
+              set_text(text_1, $1);
+              set_text(text_2, $2);
+              set_text(text_3, $3);
+              set_text(text_4, $4);
+            },
+            [
+              () => localize($$props.config.transaction.select),
+              () => localize($$props.config.transaction.income),
+              () => localize($$props.config.transaction.asset),
+              () => localize($$props.config.transaction.debt),
+              () => localize($$props.config.transaction.expense)
+            ]
+          );
+          bind_select_value(select, () => item2().system.type, ($$value) => item2().system.type = $$value);
+          append($$anchor3, select);
+        },
+        $$slots: { default: true }
+      });
+      var node_4 = sibling(node_3, 2);
+      StatCard$1(node_4, {
+        children: ($$anchor3, $$slotProps2) => {
+          var input_2 = root_4();
+          bind_value(input_2, () => get$2(interest), ($$value) => set(interest, $$value));
+          append($$anchor3, input_2);
+        },
+        $$slots: { default: true }
+      });
+      var div_4 = sibling(node_4, 2);
+      var node_5 = child(div_4);
+      StatCard$1(node_5, {
+        get label() {
+          return $$props.config.transaction.recurrent;
+        },
+        children: ($$anchor3, $$slotProps2) => {
+          var input_3 = root_5();
+          bind_value(input_3, () => item2().isRecurrent, ($$value) => item2().isRecurrent = $$value);
+          append($$anchor3, input_3);
+        },
+        $$slots: { default: true }
+      });
+      var node_6 = sibling(node_5, 2);
+      StatCard$1(node_6, {
+        get label() {
+          return $$props.config.transaction.creditstick;
+        },
+        children: ($$anchor3, $$slotProps2) => {
+          var input_4 = root_6();
+          bind_value(input_4, () => item2().isCreditStick, ($$value) => item2().isCreditStick = $$value);
+          append($$anchor3, input_4);
+        },
+        $$slots: { default: true }
+      });
+      template_effect(() => set_value(input, item2().name));
+      append($$anchor2, fragment);
+    }
+  });
+  var node_7 = sibling(node, 2);
+  {
+    var consequent = ($$anchor2) => {
+      ItemSheetComponent($$anchor2, {
+        children: ($$anchor3, $$slotProps) => {
+          var div_5 = root_8();
+          var node_8 = sibling(child(div_5), 2);
+          const expression = /* @__PURE__ */ derived$1(() => localize($$props.config.combosearch.search));
+          const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.combosearch.noresult));
+          ComboSearch(node_8, {
+            get options() {
+              return get$2(creditorOptions);
+            },
+            get placeholder() {
+              return get$2(expression);
+            },
+            get nomatchplaceholder() {
+              return get$2(expression_1);
+            },
+            get value() {
+              return get$2(selectedId);
+            },
+            set value($$value) {
+              set(selectedId, proxy($$value));
+            },
+            $$events: { select: handleSelection }
+          });
+          append($$anchor3, div_5);
+        }
+      });
+    };
+    if_block(node_7, ($$render) => {
+      if (item2().system.type !== "asset") $$render(consequent);
+    });
+  }
+  var node_9 = sibling(div_1, 2);
+  JournalViewer(node_9, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return $$props.config;
+    }
+  });
+  template_effect(() => set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`));
+  append($$anchor, div);
+  pop();
+}
+delegate(["change", "input", "keydown"]);
+class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _app4);
+  }
+  get title() {
+    return `${localize(CONFIG.sr3e.transaction.transaction)}: ${this.item.name}`;
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item", "transaction"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: true,
+      closeOnSubmit: false
+    };
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    if (__privateGet(this, _app4)) {
+      unmount(__privateGet(this, _app4));
+      __privateSet(this, _app4, null);
+    }
+    __privateSet(this, _app4, mount(TransactionApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_app4 = new WeakMap();
+function Print(message = "Combat Service Print Function") {
+  ui.notifications.info(message);
+  console.log(message);
+}
+const _SR3ECombat = class _SR3ECombat extends foundry.documents.Combat {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _SR3ECombat_instances);
+  }
+  async startCombat() {
+    Print("Combat Started");
+    await this._refreshDicePools();
+  }
+  _refreshDicePools() {
+    for (const combatant of this.combatants) {
+      const actor = combatant.actor;
+      if (!actor) continue;
+      actor.getWoundModifier();
+    }
+  }
+  nextTurn() {
+    throw new NotImplementedError("nextInitiativePass");
+  }
+  nextRound() {
+    throw new NotImplementedError("nextInitiativePass");
+  }
+  static Register() {
+    CONFIG.Combat.documentClass = _SR3ECombat;
+  }
+};
+_SR3ECombat_instances = new WeakSet();
+nextInitiativePass_fn = function() {
+  throw new NotImplementedError("nextInitiativePass");
+};
+startNewCombatTurn_fn = function() {
+  throw new NotImplementedError("startNewCombatTurn");
+};
+recordAction_fn = function() {
+  throw new NotImplementedError("recordAction");
+};
+resetCombatantActions_fn = function() {
+  throw new NotImplementedError("resetCombatantActions");
+};
+handleDelayedAction_fn = function() {
+  throw new NotImplementedError("handleDelayedAction");
+};
+handleIntervention_fn = function() {
+  throw new NotImplementedError("handleIntervention");
+};
+let SR3ECombat = _SR3ECombat;
+const _SR3Edie = class _SR3Edie extends foundry.dice.terms.Die {
+  /* ------------------------------------------------------------------ */
+  /*  Evaluation                                                        */
+  /* ------------------------------------------------------------------ */
+  // INFO:
+  // Must support 1d6 for non exploding rolls
+  // Must support 1d6x for uncapped exploding rolls (infinte recursion)
+  // Must support 1d6xN where N is a positive number higher than 2 (If lower than two, use two anyway). N is the cap of the roll. When any individual die reaches the cap, the explosion ends and the accumulative result of the die is reported, just like with uncapped
+  // Must not support xo or xo N, as they are not a part of Shadowrun Third Editionrules.
+  // Must No dice generate new dice. Instead they accumulate their value. So if I roll six, it explodes, then I roll again and get value, the six sided die should report 11, and not spawn a new die.
+  async _evaluate(opts = {}) {
+    return this._evaluateSync(opts);
+  }
+  _evaluateSync({ maximize = false, minimize = false } = {}) {
+    this.results = [];
+    const randomFace = () => super.randomFace({ maximize, minimize });
+    const explodeMod = this.modifiers.find((m) => /^x\d*$/.test(m));
+    if (!explodeMod) {
+      for (let i = 0; i < this.number; i++)
+        this.results.push({ result: randomFace(), active: true, exploded: false });
+      return this;
+    }
+    const cap = explodeMod === "x" ? Infinity : Math.max(2, parseInt(explodeMod.slice(1)));
+    this._targetNumber = cap === Infinity ? null : cap;
+    const canExplode = !(maximize || minimize);
+    for (let i = 0; i < this.number; i++) {
+      let total = 0;
+      let didExplode = false;
+      while (true) {
+        const roll = randomFace();
+        total += roll;
+        if (roll === 6 && canExplode && total < cap) {
+          didExplode = true;
+        } else {
+          break;
+        }
+      }
+      this.results.push({ result: total, active: true, exploded: didExplode });
+    }
+    return this;
+  }
+  get successes() {
+    if (this._targetNumber == null) return null;
+    return this.results.filter((r) => r.active && r.result >= this._targetNumber).length;
+  }
+  get isBotch() {
+    const active = this.results.filter((r) => r.active);
+    return active.length && !this.successes && active.every((r) => r.result === 1);
+  }
+  get isFailure() {
+    return !this.successes && !this.isBotch;
+  }
+  static Register() {
+    CONFIG.Dice.terms.d = _SR3Edie;
+    CONFIG.Dice.terms.SR3Edie = _SR3Edie;
+  }
+};
+/** Keep the normal “d” so 10d still parses */
+__publicField(_SR3Edie, "DENOMINATION", "d");
+/* ------------------------------------------------------------------ */
+/*  Declare custom modifiers so the parser accepts ! and !o            */
+/* ------------------------------------------------------------------ */
+__publicField(_SR3Edie, "MODIFIERS", {
+  ...foundry.dice.terms.Die.MODIFIERS,
+  x(mod) {
+    return this;
+  }
+  // disable core explode
+});
+let SR3Edie = _SR3Edie;
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -11284,19 +14572,17 @@ function registerDocumentTypes({ args }) {
     const docName = docClass.documentName;
     (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
     CONFIG[docName].dataModels[type] = model;
-    DocumentSheetConfig.registerSheet(
-      docClass,
-      flags.sr3e,
-      sheet,
-      { types: [type], makeDefault: true }
-    );
+    DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
+      types: [type],
+      makeDefault: true
+    });
   });
 }
 function configureProject() {
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
-  CONFIG.Actor.documentClass = SR3EActor;
+  CONFIG.Combat.documentClass = SR3ECombat;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -11323,14 +14609,19 @@ function configureProject() {
     character: localize(CONFIG.sr3e.sheet.playercharacter)
   };
   CONFIG.Item.typeLabels = {
-    metahuman: localize(CONFIG.sr3e.traits.metahuman),
+    metatype: localize(CONFIG.sr3e.traits.metatype),
     magic: localize(CONFIG.sr3e.magic.magic),
     weapon: localize(CONFIG.sr3e.weapon.weapon),
     ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
-    skill: localize(CONFIG.sr3e.skill.skill)
+    skill: localize(CONFIG.sr3e.skill.skill),
+    storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+    transaction: localize(CONFIG.sr3e.transaction.transaction)
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
+  SR3EActor.Register();
+  SR3ECombat.Register();
+  SR3Edie.Register();
 }
 function setupMouseLightSourceEffect(includedThemes) {
   Hooks.on(hooks.renderApplicationV2, (app, html2) => {
@@ -11377,11 +14668,23 @@ function wrapContent(root2) {
 }
 function setFlagsOnCharacterPreCreate(document2, data, options, userId) {
   const flagsToSet = [
-    { namespace: flags.sr3e, flag: flags.actor.isCharacterCreation, value: true },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.isCharacterCreation,
+      value: true
+    },
     { namespace: flags.sr3e, flag: flags.actor.hasAwakened, value: false },
     { namespace: flags.sr3e, flag: flags.actor.burntOut, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.attributeAssignmentLocked, value: false },
-    { namespace: flags.sr3e, flag: flags.actor.persistanceBlobCharacterSheetSize, value: {} },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.attributeAssignmentLocked,
+      value: false
+    },
+    {
+      namespace: flags.sr3e,
+      flag: flags.actor.persistanceBlobCharacterSheetSize,
+      value: {}
+    },
     { namespace: flags.sr3e, flag: flags.actor.isShoppingState, value: true }
   ];
   const updateData = {};
@@ -11400,25 +14703,82 @@ function debugFlagsOnActor(actor, options, userId) {
   }
   console.groupEnd();
 }
+function wrapChatMessage(message, html2, context) {
+  const wrapper = document.createElement("div");
+  const dynamicBackground = document.createElement("div");
+  const dynamicMessage = document.createElement("div");
+  wrapper.classList.add("chat-message-wrapper");
+  dynamicBackground.classList.add("chat-message-dynamic-background");
+  dynamicMessage.classList.add("chat-message-dynamic");
+  dynamicMessage.append(...html2.childNodes);
+  wrapper.append(dynamicBackground);
+  wrapper.append(dynamicMessage);
+  html2.innerHTML = "";
+  html2.appendChild(wrapper);
+}
+function applyAuthorColorToChatMessage(message, html2, context) {
+  var _a;
+  const color = (_a = message.author) == null ? void 0 : _a.color;
+  if (color) {
+    html2.style.setProperty("--author-color", color);
+  }
+}
 function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, (app, element) => {
     var _a;
     if ((_a = element.firstElementChild) == null ? void 0 : _a.classList.contains("sheet-component")) return;
     const typeSelectors = [
       { type: foundry.applications.api.DialogV2 },
+      { type: foundry.applications.api.CategoryBrowser },
+      { type: foundry.applications.api.DocumentSheetV2 },
+      { type: foundry.applications.api.CategoryBrowser },
       { type: foundry.applications.sheets.journal.JournalEntryPageSheet },
+      { type: foundry.applications.sheets.ActiveEffectConfig },
+      { type: foundry.applications.sheets.AdventureImporterV2 },
+      { type: foundry.applications.sheets.AmbientLightConfig },
+      { type: foundry.applications.sheets.AmbientSoundConfig },
+      { type: foundry.applications.sheets.CardConfig },
+      { type: foundry.applications.sheets.CardDeckConfig },
+      { type: foundry.applications.sheets.CardHandConfig },
+      { type: foundry.applications.sheets.CardPileConfig },
+      { type: foundry.applications.sheets.CardsConfig },
+      { type: foundry.applications.sheets.CombatantConfig },
+      { type: foundry.applications.sheets.DrawingConfig },
+      { type: foundry.applications.sheets.FolderConfig },
+      { type: foundry.applications.sheets.MacroConfig },
+      { type: foundry.applications.sheets.MeasuredTemplateConfig },
+      { type: foundry.applications.sheets.NoteConfig },
+      { type: foundry.applications.sheets.PlaylistConfig },
+      { type: foundry.applications.sheets.PlaylistSoundConfig },
+      { type: foundry.applications.sheets.PrototypeTokenConfig },
+      { type: foundry.applications.sheets.RegionBehaviorConfig },
+      { type: foundry.applications.sheets.RegionConfig },
+      { type: foundry.applications.sheets.RollTableSheet },
+      { type: foundry.applications.sheets.SceneConfig },
+      { type: foundry.applications.sheets.TableResultConfig },
+      { type: foundry.applications.sheets.TileConfig },
+      { type: foundry.applications.sheets.TokenConfig },
+      { type: foundry.applications.sheets.UserConfig },
+      { type: foundry.applications.sheets.WallConfig },
       { type: foundry.applications.apps.CombatTrackerConfig },
+      { type: foundry.applications.apps.FilePicker },
+      { type: foundry.applications.apps.PermissionConfig },
+      { type: foundry.applications.apps.ImagePopout },
+      { type: foundry.applications.apps.DocumentOwnershipConfig },
+      { type: foundry.applications.apps.CombatTrackerConfig },
+      { type: foundry.applications.apps.CompendiumArtConfig },
+      { type: foundry.applications.apps.DocumentSheetConfig },
+      { type: foundry.applications.apps.GridConfig },
+      { type: foundry.applications.apps.av.CameraPopout },
+      { type: foundry.applications.apps.av.CameraViews },
       { type: foundry.applications.sidebar.apps.ControlsConfig },
       { type: foundry.applications.sidebar.apps.ModuleManagement },
       { type: foundry.applications.sidebar.apps.WorldConfig },
       { type: foundry.applications.sidebar.apps.ToursManagement },
       { type: foundry.applications.sidebar.apps.SupportDetails },
       { type: foundry.applications.sidebar.apps.InvitationLinks },
-      { type: foundry.applications.sheets.FolderConfig },
-      { type: foundry.applications.settings.SettingsConfig },
-      { type: foundry.applications.sheets.UserConfig },
-      { type: foundry.applications.api.DocumentSheetV2 },
-      { type: foundry.applications.apps.FilePicker }
+      { type: foundry.applications.sidebar.apps.FolderExport },
+      { type: foundry.applications.settings.SettingsConfig }
     ];
     const typeDeselectors = [
       { type: foundry.applications.sheets.ActorSheetV2 },
@@ -11432,19 +14792,62 @@ function registerHooks() {
   Hooks.on(hooks.createActor, debugFlagsOnActor);
   Hooks.on(hooks.preCreateActor, stopDefaultCharacterSheetRenderOnCreation);
   Hooks.on(hooks.createActor, displayCreationDialog);
-  Hooks.on(hooks.renderApplicationV2, injectFooterIntoWindowApp);
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
+  Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
+  Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
   Hooks.once(hooks.init, () => {
     configureProject();
     configureThemes();
     registerDocumentTypes({
       args: [
-        { docClass: Actor, type: "character", model: CharacterModel, sheet: CharacterActorSheet },
-        { docClass: Item, type: "metahuman", model: MetahumanModel, sheet: MetahumanItemSheet },
-        { docClass: Item, type: "magic", model: MagicModel, sheet: MagicItemSheet },
-        { docClass: Item, type: "weapon", model: WeaponModel, sheet: WeaponItemSheet },
-        { docClass: Item, type: "ammunition", model: AmmunitionModel, sheet: AmmunitionItemSheet },
-        { docClass: Item, type: "skill", model: SkillModel, sheet: SkillItemSheet }
+        {
+          docClass: Actor,
+          type: "character",
+          model: CharacterModel,
+          sheet: CharacterActorSheet
+        },
+        {
+          docClass: Actor,
+          type: "storytellerscreen",
+          model: StorytellerScreenModel,
+          sheet: StorytellerScreenActorSheet
+        },
+        {
+          docClass: Item,
+          type: "metatype",
+          model: MetatypeModel,
+          sheet: MetatypeItemSheet
+        },
+        {
+          docClass: Item,
+          type: "magic",
+          model: MagicModel,
+          sheet: MagicItemSheet
+        },
+        {
+          docClass: Item,
+          type: "weapon",
+          model: WeaponModel,
+          sheet: WeaponItemSheet
+        },
+        {
+          docClass: Item,
+          type: "ammunition",
+          model: AmmunitionModel,
+          sheet: AmmunitionItemSheet
+        },
+        {
+          docClass: Item,
+          type: "skill",
+          model: SkillModel,
+          sheet: SkillItemSheet
+        },
+        {
+          docClass: Item,
+          type: "transaction",
+          model: TransactionModel,
+          sheet: TransactionItemSheet
+        }
       ]
     });
     Log.success("Initialization Completed", "sr3e.js");

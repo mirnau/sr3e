@@ -1,6 +1,6 @@
 import WeaponApp from "../../svelte/apps/WeaponApp.svelte";
 import { mount, unmount } from "svelte";
-import { localize } from "../../svelteHelpers.js";
+import { localize } from "../../services/utilities.js";
 
 export default class WeaponItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 

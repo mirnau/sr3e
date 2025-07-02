@@ -1,311 +1,287 @@
 <script>
-    import { openFilePicker, localize } from "../../../../svelteHelpers.js";
-    import SpecializationCard from "./SpecializationCard.svelte";
-    import { onDestroy, tick } from "svelte";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
-    import { get, set } from "svelte/store";
+   import { openFilePicker, localize } from "../../../../services/utilities.js";
+   import SpecializationCard from "./SpecializationCard.svelte";
+   import { onDestroy, tick } from "svelte";
+   import { flags } from "../../../../services/commonConsts.js";
+   import { get, set } from "svelte/store";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
 
-    let { skill, actor, config, app } = $props();
+   let { skill, actor, config, app } = $props();
 
-    let specializations = getActorStore(
-        skill.id,
-        actor.id,
-        skill.system.languageSkill.specializations,
-    );
+   let actorStoreManager = StoreManager.Subscribe(actor);
+   let itemStoreManager = StoreManager.Subscribe(skill);
 
-    const languageSkillsIdArrayStore = getActorStore(
-        actor.id,
-        stores.languageSkillsIds,
-        actor.items
-            .filter(
-                (item) =>
-                    item.type === "skill" && item.system.skillType === "language",
-            )
-            .map((item) => item.id),
-    );
+   let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
+   let valueStore = itemStoreManager.GetStore("languageSkill.value");
+   let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
 
-    let disableValueControls = $derived($specializations.length > 0);
+   let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-    $effect(() => {
-        skill.update(
-            { "system.languageSkill.specializations": $specializations },
-            { render: false },
-        );
-    });
+   const languageSkillsIdArrayStore = actorStoreManager.GetShallowStore(
+      actor.id,
+      stores.languageSkillsIds,
+      actor.items.filter((item) => item.type === "skill" && item.system.skillType === "language").map((item) => item.id)
+   );
 
-    let layoutMode = $state("single");
+   let layoutMode = $state("single");
 
-    let value = getActorStore(
-        actor.id,
-        skill.id,
-        skill.system.languageSkill.value,
-    );
+   let linkedAttribute = skill.system.languageSkill.linkedAttribute;
+   let linkedAttributeRating = $state(
+      Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.value`)) +
+         Number(foundry.utils.getProperty(actor, `system.attributes.${linkedAttribute}.mod`))
+   );
 
-    let linkedAttribute = skill.system.languageSkill.linkedAttribute;
-    let linkedAttributeRating = $state(
-        Number(
-            foundry.utils.getProperty(
-                actor,
-                `system.attributes.${linkedAttribute}.value`,
-            ),
-        ) +
-            Number(
-                foundry.utils.getProperty(
-                    actor,
-                    `system.attributes.${linkedAttribute}.mod`,
-                ),
-            ),
-    );
+   let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
-    let skillPointStore = getActorStore(
-        actor.id,
-        stores.languagePoints,
-        actor.system.creation.languagePoints,
-    );
+   let readWrite = $derived($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
+   let disableValueControls = $derived($isCharacterCreationStore && $specializationsStore.length > 0);
 
-    let attributeAssignmentLocked = getActorStore(
-        actor.id,
-        stores.attributeAssignmentLocked,
-        actor.getFlag(flags.sr3e, flags.actor.attributeAssignmentLocked),
-    );
+   $effect(() => {
+      skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
+      skill.update({ "system.languageSkill.readwrite.value": readWrite }, { render: false });
+   });
 
-    async function addNewSpecialization() {
-        if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-            if ($specializations.length > 0) {
-                ui.notifications.info(
-                    localize(config.skill.onlyonespecializationatcreation),
-                );
-                return;
-            }
-        }
+   async function addNewSpecialization() {
+      if (!$specializationsStore) throw new Error("Cannot add lingo: specialization store is null");
 
-        let newSkill = {
+      if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+         if ($specializationsStore.length > 0) {
+            ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
+            return;
+         }
+         $specializationsStore.push({
+            name: localize(config.skill.newspecialization),
+            value: $valueStore + 1,
+         });
+         $valueStore -= 1;
+      } else {
+         $specializationsStore.push({
             name: localize(config.skill.newspecialization),
             value: 0,
-        };
+         });
+      }
+      $specializationsStore = [...$specializationsStore];
+      await skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
+   }
 
-        $specializations.push(newSkill);
-        $specializations = [...$specializations];
+   async function increment() {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
+            if ($valueStore < 6) {
+               let costForNextLevel;
 
-        await skill.update(
-            {
-                "system.languageSkill.specializations": $specializations,
-            },
-            { render: false },
-        );
-    }
+               if ($valueStore < linkedAttributeRating) {
+                  costForNextLevel = 1;
+               } else {
+                  costForNextLevel = 2;
+               }
 
-    async function increment() {
-        if ($attributeAssignmentLocked) {
-            if ($value < 6) {
-                let costForNextLevel;
+               if ($languageSkillPointsStore >= costForNextLevel) {
+                  $valueStore += 1;
+                  $languageSkillPointsStore -= costForNextLevel;
 
-                if ($value < linkedAttributeRating) {
-                    costForNextLevel = 1;
-                } else {
-                    costForNextLevel = 2;
-                }
-
-                if ($skillPointStore >= costForNextLevel) {
-                    $value += 1;
-                    $skillPointStore -= costForNextLevel;
-                }
+                  if ($valueStore === linkedAttributeRating) {
+                     ui.notifications.info(config.notifications.skillpricecrossedthreshold);
+                  }
+               }
             }
-        } else {
-            assignFirstMessage();
-        }
-        silentUpdate();
-    }
+         } else {
+            console.log("TODO: implement karma based shopping");
+         }
+      } else {
+         ui.notifications.warn(localize(config.notifications.assignattributesfirst));
+      }
 
-    async function decrement() {
-        if ($attributeAssignmentLocked) {
-            if ($value > 0) {
-                let refundForCurrentLevel;
+      silentUpdate();
+   }
 
-                if ($value > linkedAttributeRating) {
-                    refundForCurrentLevel = 2;
-                } else {
-                    refundForCurrentLevel = 1;
-                }
+   async function decrement() {
+      if ($attributeAssignmentLockedStore) {
+         if ($isCharacterCreationStore) {
+            if ($valueStore > 0) {
+               let refundForCurrentLevel;
 
-                $value -= 1;
-                $skillPointStore += refundForCurrentLevel;
+               if ($valueStore > linkedAttributeRating) {
+                  refundForCurrentLevel = 2;
+               } else {
+                  refundForCurrentLevel = 1;
+               }
+
+               $valueStore -= 1;
+               $languageSkillPointsStore += refundForCurrentLevel;
             }
-        } else {
-            assignFirstMessage();
-        }
+         } else {
+            console.log("TODO: implement karma based shopping");
+         }
+      } else {
+         ui.notifications.warn(localize(config.notifications.assignattributesfirst));
+      }
 
-        silentUpdate();
-    }
+      await silentUpdate();
+   }
 
-    async function silentUpdate() {
-        await skill.update(
-            { "system.languageSkill.value": $value },
-            { render: false },
-        );
+   async function silentUpdate() {
+      await skill.update(
+         {
+            "system.languageSkill.value": $valueStore,
+            "system.languageSkill.readwrite.value": readWrite,
+         },
+         { render: false }
+      );
 
-        await actor.update(
-            { "system.creation.languagePoints": $skillPointStore },
-            { render: false },
-        );
-    }
+      await actor.update({ "system.creation.languagePoints": $languageSkillPointsStore }, { render: false });
+   }
 
-    function assignFirstMessage() {
-        ui.notifications.warn(
-            "You need to assign all attributes before assigning skills",
-        );
-    }
+   async function deleteThis() {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: {
+            title: localize(config.modal.deleteskilltitle),
+         },
+         content: localize(config.modal.deleteskill),
+         yes: {
+            label: localize(config.modal.confirm),
+            default: true,
+         },
+         no: {
+            label: localize(config.modal.decline),
+         },
+         modal: true,
+         rejectClose: true,
+      });
 
-    async function deleteThis() {
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: {
-                title: "Delete This Skill?",
-            },
-            content: "Do you want to delete this skill?",
-            yes: {
-                label: "Yes!",
-                default: true,
-            },
-            no: {
-                label: "Nope!",
-            },
-            modal: true,
-            rejectClose: true,
-        });
-
-        if (confirmed) {
-            if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
-                if ($specializations.length > 0) {
-                    $specializations = [];
-                    await tick(); // import { tick } from "svelte";
-                    $value += 1;
-                }
-
-                let refund = 0;
-                for (let i = 1; i <= $value; i++) {
-                    if (i <= linkedAttributeRating) refund += 1;
-                    else refund += 2;
-                }
-
-                $skillPointStore += refund;
-                $value = 0;
-
-                ui.notifications.info(
-                    localize(config.skill.skillpointsrestored),
-                );
+      if (confirmed) {
+         if ($isCharacterCreationStore) {
+            if ($specializationsStore.length > 0) {
+               $specializationsStore = [];
+               await tick();
+               $valueStore += 1;
             }
 
-            if (skill) {
-                const id = skill.id;
-                await actor.deleteEmbeddedDocuments("Item", [id], {
-                    render: false,
-                });
-
-                const store = getActorStore(actor.id, stores.languageSkillsIds);
-                const current = get(store);
-                store.set(current.filter((sid) => sid !== id));
+            let refund = 0;
+            for (let i = 1; i <= $valueStore; i++) {
+               refund += i <= linkedAttributeRating ? 1 : 2;
             }
 
-            app.close();
-        }
-    }
+            $languageSkillPointsStore += refund;
+            $valueStore = 0;
 
-    function deleteSpecialization(event) {
-        const toDelete = event.detail.specialization;
-        $specializations = $specializations.filter((s) => s !== toDelete);
-    }
+            ui.notifications.info(localize(config.skill.skillpointsrefund));
+         }
+
+         await tick();
+
+         const id = skill.id;
+         await actor.deleteEmbeddedDocuments("Item", [id], {
+            render: false,
+         });
+
+         const store = storeManager.getActorStore(actor.id, stores.languageSkillsIds);
+         store.set(get(store).filter((sid) => sid !== id));
+
+         app.close();
+      }
+   }
+
+   function deleteSpecialization(event) {
+      const toDelete = event.detail.specialization;
+      $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
+      $valueStore += 1;
+   }
 </script>
 
 <div class="sr3e-waterfall-wrapper">
-    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="image-mask">
-                        <img
-                            src={skill.img}
-                            role="presentation"
-                            data-edit="img"
-                            title={skill.name}
-                            alt={skill.name}
-                            onclick={async () => openFilePicker(actor)}
-                        />
-                    </div>
-                    <div class="stat-grid single-column">
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <h1>{skill.name}</h1>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <h1>{$value}</h1>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <div class="buttons-vertical-distribution">
-                                <button
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Toggle card span"
-                                    onclick={increment}
-                                    disabled={disableValueControls}
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                                <button
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Toggle card span"
-                                    onclick={decrement}
-                                    disabled={disableValueControls}
-                                >
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
+   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+      <div class="item-sheet-component">
+         <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+               <div class="image-mask">
+                  <img
+                     src={skill.img}
+                     role="presentation"
+                     data-edit="img"
+                     title={skill.name}
+                     alt={skill.name}
+                     onclick={async () => openFilePicker(actor)}
+                  />
+               </div>
+               <div class="stat-grid single-column">
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <h1>{skill.name}</h1>
+                  </div>
 
-                                <button
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Toggle card span"
-                                    onclick={deleteThis}
-                                >
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                                <button
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Toggle card span"
-                                    onclick={addNewSpecialization}
-                                    disabled={$value <= 1}
-                                >
-                                    {localize(config.skill.addspecialization)}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <h1>{$valueStore}</h1>
+                  </div>
+
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <div class="skill-specialization-card">
+                        <div class="specialization-background"></div>
+                        <h6>
+                           {localize(config.skill.readwrite)}:
+                        </h6>
+                        <h1 class="embedded-value">
+                           {readWrite}
+                        </h1>
+                     </div>
+                  </div>
+
+                  <div class="stat-card">
+                     <div class="stat-card-background"></div>
+                     <div class="buttons-vertical-distribution">
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Increase"
+                           onclick={increment}
+                           disabled={disableValueControls}><i class="fa-solid fa-plus"></i></button
+                        >
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Decrease"
+                           onclick={decrement}
+                           disabled={disableValueControls}><i class="fa-solid fa-minus"></i></button
+                        >
+                        <button class="header-control icon sr3e-toolbar-button" aria-label="Delete" onclick={deleteThis}
+                           ><i class="fa-solid fa-trash-can"></i></button
+                        >
+                        <button
+                           class="header-control icon sr3e-toolbar-button"
+                           aria-label="Add Spec"
+                           onclick={addNewSpecialization}
+                           disabled={$valueStore <= 1}>{localize(config.skill.addlingo)}</button
+                        >
+                     </div>
+                  </div>
+               </div>
             </div>
-        </div>
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <h1 class="uppercase">
-                        {localize(config.skill.specializations)}
-                    </h1>
-                    <div class="stat-grid single-column">
-                        {#each $specializations as specialization, i}
-                            <SpecializationCard
-                                bind:specialization={$specializations[i]}
-                                {actor}
-                                {skill}
-                                on:arrayChanged={() => {
-                                    $specializations = [...$specializations];
-                                    console.log("array was reassigned");
-                                }}
-                                on:delete={deleteSpecialization}
-                            />
-                        {/each}
-                    </div>
-                </div>
+         </div>
+      </div>
+
+      <div class="item-sheet-component">
+         <div class="sr3e-inner-background-container">
+            <div class="fake-shadow"></div>
+            <div class="sr3e-inner-background">
+               <h1 class="uppercase">
+                  {localize(config.skill.lingos)}
+               </h1>
+               <div class="stat-grid single-column">
+                  {#each $specializationsStore as specialization, i}
+                     <SpecializationCard
+                        bind:specialization={$specializationsStore[i]}
+                        {actor}
+                        {skill}
+                        on:arrayChanged={() => {
+                           $specializationsStore = [...$specializationsStore];
+                        }}
+                        on:delete={deleteSpecialization}
+                     />
+                  {/each}
+               </div>
             </div>
-        </div>
-    </div>
+         </div>
+      </div>
+   </div>
 </div>

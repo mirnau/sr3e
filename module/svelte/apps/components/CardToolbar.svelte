@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { toggleCardSpanById, moveCardById } from "../../../svelteHelpers.js";
+  import { toggleCardSpanById, moveCardById } from "../../../services/utilities.js";
 
   const { id } = $props();
 

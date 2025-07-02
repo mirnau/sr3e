@@ -1,29 +1,25 @@
 <script>
-	import { flags } from "../../../foundry/services/commonConsts.js";
-	import { localize } from "../../../svelteHelpers.js";
-	import { shoppingState } from "../../../svelteStore.js";
-	import { getActorStore, stores } from "../../stores/actorStores.js";
+   import { StoreManager } from "../../../svelte/svelteHelpers/StoreManager.svelte.js";
+   import { flags } from "../../../services/commonConsts.js";
+   import { localize } from "../../../services/utilities.js";
+   import { shoppingState } from "../../../svelteStore.js";
+   import { onDestroy } from "svelte";
 
-	let { actor = {}, config = {} } = $props();
+   let { actor = {}, config = {} } = $props();
 
-	let isShoppingState = getActorStore(
-		actor.id,
-		stores.isShoppingState,
-		actor.getFlag(flags.sr3e, flags.actor.isShoppingState),
-	);
+   let storeManager = StoreManager.Subscribe(actor);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
 
-	function toggleShoppingState() {
-		$isShoppingState = !$isShoppingState;
-		actor.setFlag(flags.sr3e, flags.actor.isShoppingState, isShoppingState);
-		console.log("shoppingState", $isShoppingState);
-	}
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 </script>
 
 <div>
-	<button
-		type="button"
-		aria-label={localize(config.sheet.buyupgrades)}
-		class={`header-control icon fa-solid fa-cart-shopping ${$isShoppingState ? "pulsing-green-cart" : ""}`}
-		onclick={toggleShoppingState}
-	></button>
+   <button
+      type="button"
+      aria-label={localize(config.sheet.buyupgrades)}
+      class={`header-control icon fa-solid fa-cart-shopping ${$isShoppingState ? "pulsing-green-cart" : ""}`}
+      onclick={($isShoppingState = !$isShoppingState)}
+   ></button>
 </div>

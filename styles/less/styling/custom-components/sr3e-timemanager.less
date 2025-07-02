@@ -1,0 +1,41 @@
+.counter-bar {
+        display: flex;
+        flex-direction: column; // <- or row, depending on layout goals
+        gap: 1rem;
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .text-display {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.25rem;
+
+            .clock {
+                color: --h3-color;
+            }
+        }
+
+        .time-editor {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+
+        }
+
+        .time-editor-component {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            margin: 0;
+
+            .time-display {
+                font-size: 1.5rem;
+            }
+        }
+    }

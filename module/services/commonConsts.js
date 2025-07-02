@@ -1,8 +1,8 @@
 export const hooks = {
   renderCharacterActorSheet: "renderCharacterActorSheet",
   closeCharacterActorSheet: "closeCharacterActorSheet",
-  renderMetahumanItemSheet: "renderMetahumanItemSheet",
-  closeMetahumanItemSheet: "closeMetahumanItemSheet",
+  renderMetatypeItemSheet: "renderMetatypeItemSheet",
+  closeMetatypeItemSheet: "closeMetatypeItemSheet",
   renderSidebarTab: "renderSidebarTab",
   preCreateActor: "preCreateActor",
   renderChatMessageHTML: "renderChatMessageHTML",
@@ -10,7 +10,8 @@ export const hooks = {
   createActor: "createActor",
   init: "init",
   ready: "ready",
-  renderApplicationV2: "renderApplicationV2"
+  renderApplicationV2: "renderApplicationV2",
+  renderChatMessageHTML: "renderChatMessageHTML"
 };
 
 export const flags = {
@@ -23,24 +24,19 @@ export const flags = {
     hasAwakened: "hasAwakened",
     burntOut: "burntOut",
     attributeAssignmentLocked: "attributeAssignmentLocked",
-    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize"
+    persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize",
+    isrollcomposeropen: "isrollcomposeropen"
   }
 };
-
-export const tags = {
-  skill: {
-    active: "active",
-    knowledge: "knowledge",
-    language: "language",
-    activeTab: "activeTab",
-    knowledgeTab: "knowledgeTab",
-    languageTab: "languageTab"
-  }
-}
 
 export const masonryMinWidthFallbackValue = {
   characterSheet: 12,
   attributeGrid: 13,
   skillCategoryGrid: 10,
   skillGrid: 4.5,
+}
+
+export const inventory = {
+  arsenal: "arsenal",
+  garage: "garage",
 }

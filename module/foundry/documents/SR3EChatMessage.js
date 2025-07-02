@@ -1,0 +1,1 @@
+export class SR3EChatMessage extends ChatMessage

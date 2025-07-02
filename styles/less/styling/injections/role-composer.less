@@ -1,0 +1,82 @@
+.roll-composer-container {
+   transform: translateZ(0);
+   display: flex;
+   flex-direction: column;
+   background: oklch(from rgb(0, 86, 86) l c h / 0.75);
+   backdrop-filter: blur(10px);
+
+   height: auto;
+   width: 10rem;
+   min-height: 5rem;
+   left: -10.5rem;
+   top: 0rem;
+   position: absolute;
+   transition: width 0.3s ease;
+   padding: 0.5rem;
+   gap: 0.5rem;
+   .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+
+   box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+
+   &.collapsed {
+      width: 0;
+   }
+
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   h6 {
+      margin-bottom: 0.25rem;
+      margin-top: 0.25rem;
+   }
+
+   select.roll-type-select,
+   select {
+      appearance: none;
+      text-indent: 0.5rem;
+      background: transparent !important;
+      color: var(--highlight-color-primary);
+      width: 100%;
+      border: none;
+      border-radius: 0rem !important;
+      box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+      margin: 0 !important;
+      .clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+   }
+
+   optgroup {
+      background-color: lime;
+   }
+
+   option {
+      text-indent: 0.5rem;
+      background-color: blue;
+      border-radius: 0rem;
+      border: none;
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+   }
+
+   // NOTE: The background panel
+   select option {
+      background: black !important;
+      box-shadow: inset 0 0 1rem var(--highlight-color-primary) !important;
+      color: var(--highlight-color-primary);
+      .clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+   }
+}
+
+.roll-composer-card {
+   display: flex;
+   flex-direction: column;
+   padding: 0.25rem;
+   box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+   .clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.2rem);
+}
+
+// INFO: increases readability while still allowing for translucency
+.roll-composer-container,
+.roll-composer-container * {
+   text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);
+}

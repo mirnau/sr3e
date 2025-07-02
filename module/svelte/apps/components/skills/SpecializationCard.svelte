@@ -1,117 +1,86 @@
 <script>
-    import { flags } from "../../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import { createEventDispatcher } from "svelte";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { flags } from "../../../../services/commonConsts.js";
+   import { createEventDispatcher, onDestroy } from "svelte";
+   import TextInput from "../basic/TextInput.svelte";
 
-    let { specialization = $bindable(), actor = {}, skill = {} } = $props();
-    const dispatch = createEventDispatcher();
+   let { specialization = $bindable(), actor = {}, skill = {} } = $props();
 
-    let isCharacterCreation = $state(
-        actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation) ?? false,
-    );
+   let storeManager = StoreManager.Subscribe(actor);
+   const dispatch = createEventDispatcher();
 
-    let liveText = specialization.name;
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 
-    let baseValue = getActorStore(
-        actor.id,
-        skill.id,
-        skill.system.activeSkill.value,
-    );
+   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
+   let baseValue = storeManager.GetStore("activeSkill.value");
 
-   
+   let liveText = specialization.name;
 
+   $effect(() => {
+      if (liveText !== specialization.name) {
+         liveText = specialization.name;
+      }
+   });
 
-    $effect(() => {
-        if (isCharacterCreation) {
-            if (specialization.value === 0) {
-                specialization.value = $baseValue + 1;
-                $baseValue -= 1;
-                dispatch("arrayChanged");
-            }
-        }
-    });
+   function handleInput(e) {
+      liveText = e.target.innerText;
+      specialization.name = liveText;
+      dispatch("arrayChanged");
+   }
 
-    $effect(() => {
-        if (liveText !== specialization.name) {
-            liveText = specialization.name;
-        }
-    });
+   function handleKeyDown(e) {
+      if (e.key === "Enter") {
+         e.preventDefault();
+         e.target.blur();
+      }
+   }
 
-    function handleInput(e) {
-        liveText = e.target.innerText;
-        specialization.name = liveText;
-        dispatch("arrayChanged");
-    }
+   function increment() {
+      console.log("increment Entered");
+   }
 
-    function handleKeyDown(e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            e.target.blur(); // INFO: exits editing
-        }
-    }
+   function decrement() {
+      console.log("decrement Entered");
+   }
 
-    function increment() {
-        console.log("increment Entered");
-    }
+   function deleteThis() {
+      if ($isCharacterCreationStore) {
+         if (specialization.value === $baseValue + 2) {
+            specialization.value = 0;
+            $baseValue += 1;
+            dispatch("arrayChanged");
+         }
+      }
 
-    function decrement() {
-        console.log("decrement Entered");
-    }
-
-    function deleteThis() {
-        if (isCharacterCreation) {
-            if (specialization.value === $baseValue + 2) {
-                specialization.value = 0;
-                $baseValue += 1;
-                dispatch("arrayChanged");
-            }
-        }
-
-        dispatch("delete", { specialization });
-    }
+      dispatch("delete", { specialization });
+   }
 </script>
 
-<div class="skill-specialization-card">
-    <div class="specialization-background"></div>
-
-    <div
-        class="editable-name"
-        contenteditable
-        role="textbox"
-        aria-multiline="false"
-        tabindex="0"
-        bind:innerText={liveText}
-        oninput={handleInput}
-        onkeydown={handleKeyDown}
-        spellcheck="false"
-    ></div>
-
-    <h1 class="specialization-value">{specialization.value}</h1>
-</div>
+<TextInput text={liveText} oninput={handleInput} onkeydown={handleKeyDown}>
+   <h1 class="embedded-value no-margin">{specialization.value}</h1>
+</TextInput>
 
 <div class="buttons-vertical-distribution">
-    <button
-        class="header-control icon sr3e-toolbar-button"
-        aria-label="Increment"
-        onclick={increment}
-        disabled={isCharacterCreation}
-    >
-        <i class="fa-solid fa-plus"></i>
-    </button>
-    <button
-        class="header-control icon sr3e-toolbar-button"
-        aria-label="Decrement"
-        onclick={decrement}
-        disabled={isCharacterCreation}
-    >
-        <i class="fa-solid fa-minus"></i>
-    </button>
+   <button
+      class="header-control icon sr3e-toolbar-button"
+      aria-label="Increment"
+      onclick={increment}
+      disabled={$isCharacterCreationStore}
+   >
+      <i class="fa-solid fa-plus"></i>
+   </button>
+   <button
+      class="header-control icon sr3e-toolbar-button"
+      aria-label="Decrement"
+      onclick={decrement}
+      disabled={$isCharacterCreationStore}
+   >
+      <i class="fa-solid fa-minus"></i>
+   </button>
 
-    <button
-        class="header-control icon sr3e-toolbar-button"
-        aria-label="Delete"
-        onclick={deleteThis}
-    >
-        <i class="fa-solid fa-trash-can"></i>
-    </button>
+   <button class="header-control icon sr3e-toolbar-button" aria-label="Delete" onclick={deleteThis}>
+      <i class="fa-solid fa-trash-can"></i>
+   </button>
 </div>

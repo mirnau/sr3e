@@ -1,71 +1,36 @@
 <script>
-    import SkillCategory from "./SkillCategory.svelte";
-    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-    import { masonryMinWidthFallbackValue } from "../../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import { tick } from "svelte";
+   import SkillCategory from "./SkillCategory.svelte";
+   import MasonryGrid from "../basic/MasonryGrid.svelte";
+   import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
+   import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
+   import { tick } from "svelte";
+   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte";
 
-    let { actor = {}, config = {} } = $props();
-    let gridContainer;
-    let masonryInstance = null;
+   let { actor = {}, config = {} } = $props();
 
-    const activeSkillsIdArrayStore = getActorStore(
-        actor.id,
-        stores.activeSkillsIds,
-        actor.items
-            .filter(
-                (item) =>
-                    item.type === "skill" && item.system.skillType === "active",
-            )
-            .map((item) => item.id),
-    );
+   let storeManager = StoreManager.Subscribe(actor);
 
-    let attributeSortedSkills = $derived(
-        [
-            "body",
-            "quickness",
-            "strength",
-            "charisma",
-            "intelligence",
-            "willpower",
-            "reaction",
-        ].map((attribute) => ({
-            attribute,
-            skills: actor.items.filter(
-                (item) =>
-                    $activeSkillsIdArrayStore.includes(item.id) &&
-                    item.system.activeSkill.linkedAttribute === attribute,
-            ),
-        })),
-    );
+   const activeSkillsIdArrayStore = storeManager.GetShallowStore(
+      actor.id,
+      stores.activeSkillsIds,
+      actor.items.filter((item) => item.type === "skill" && item.system.skillType === "active").map((item) => item.id)
+   );
 
-    $effect(() => {
-        if (masonryInstance) return;
-
-        const rem = parseFloat(
-            getComputedStyle(document.documentElement).fontSize,
-        );
-
-        const result = setupMasonry({
-            container: gridContainer,
-            itemSelector: ".skill-category-container",
-            gridSizerSelector: ".skill-container-grid-sizer",
-            gutterSizerSelector: ".skill-container-gutter-sizer",
-            minItemWidth: masonryMinWidthFallbackValue.skillCategoryGrid * rem,
-        });
-
-        masonryInstance = result.masonryInstance;
-
-        return result.cleanup;
-    });
-
-
+   let attributeSortedSkills = $derived(
+      ["body", "quickness", "strength", "charisma", "intelligence", "willpower", "reaction"].map((attribute) => ({
+         attribute,
+         skills: actor.items.filter(
+            (item) =>
+               $activeSkillsIdArrayStore.includes(item.id) && item.system.activeSkill.linkedAttribute === attribute
+         ),
+      }))
+   );
 </script>
 
-<div bind:this={gridContainer} class="skill-container-masonry-grid">
-    <div class="skill-container-grid-sizer"></div>
-    <div class="skill-container-gutter-sizer"></div>
-    {#each attributeSortedSkills as category}
-        <SkillCategory {...category} {actor} {config} />
-    {/each}
-</div>
+<MasonryGrid itemSelector="skill-category-container" gridPrefix="skill-container">
+   {#each attributeSortedSkills as category}
+      {#if category.skills.length > 0}
+         <SkillCategory {...category} {actor} {config} />
+      {/if}
+   {/each}
+</MasonryGrid>

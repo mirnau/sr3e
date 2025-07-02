@@ -1,87 +1,61 @@
 <script>
-    import { localize } from "../../../../svelteHelpers.js";
-    import { flags } from "../../../../foundry/services/commonConsts.js";
-    import { getActorStore, stores } from "../../../stores/actorStores.js";
-    import CreationPointList from "../../components/CreationPointList.svelte";
+   import { localize } from "../../../../services/utilities.js";
+   import { flags } from "../../../../services/commonConsts.js";
+   import CreationPointList from "../../components/CreationPointList.svelte";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { onDestroy } from "svelte";
 
-    let {
-        actor = {},
-        config = {},
-        isCharacterCreation = $bindable(true),
-    } = $props();
-    
-    let system = $state(actor.system);
+   let { actor = {}, config = {} } = $props();
 
-    let attributePointStore = getActorStore(
-        actor.id,
-        stores.attributePoints,
-        system.creation.attributePoints,
-    );
-    let skillPointStore = getActorStore(
-        actor.id,
-        stores.activePoints,
-        system.creation.activePoints,
-    );
-    let knowledgePointStore = getActorStore(
-        actor.id,
-        stores.knowledgePoints,
-        system.creation.knowledgePoints,
-    );
-    let languagePointStore = getActorStore(
-        actor.id,
-        stores.languagePoints,
-        system.creation.languagePoints,
-    );
+   let attributePointsText = localize(config.attributes.attributes);
+   let activePointsText = localize(config.skill.active);
+   let knowledgePointsText = localize(config.skill.knowledge);
+   let languagePointsText = localize(config.skill.language);
 
-    let attributePointsText = localize(config.attributes.attributes);
-    let activePointsText = localize(config.skill.active);
-    let knowledgePointsText = localize(config.skill.knowledge);
-    let languagePointsText = localize(config.skill.language);
+   let storeManager = StoreManager.Subscribe(actor);
+   let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
+   let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
+   let languagePointsStore = storeManager.GetStore("creation.languagePoints");
 
-    // Make pointList reactive by using derived stores
-    let pointList = $derived([
-        { value: $attributePointStore, text: attributePointsText },
-        { value: $skillPointStore, text: activePointsText },
-        { value: $knowledgePointStore, text: knowledgePointsText },
-        { value: $languagePointStore, text: languagePointsText },
-    ]);
+   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-    $effect(() => {
-        if (
-            $skillPointStore === 0 &&
-            $knowledgePointStore === 0 &&
-            $languagePointStore === 0
-        ) {
-            (async () => {
-                const confirmed =
-                    await foundry.applications.api.DialogV2.confirm({
-                        window: {
-                            title: "Finish Character Creation?",
-                        },
-                        content:
-                            "You've used all your skill points. Done Creating?",
-                        yes: {
-                            label: "Yes, finish",
-                            default: true,
-                        },
-                        no: {
-                            label: "Not yet",
-                        },
-                        modal: true,
-                        rejectClose: true,
-                    });
+   // Make pointList reactive by using derived stores
+   let pointList = $derived([
+      { value: 0, text: attributePointsText },
+      { value: $activeSkillPointsStore, text: activePointsText },
+      { value: $knowledgePointsStore, text: knowledgePointsText },
+      { value: $languagePointsStore, text: languagePointsText },
+   ]);
 
-                if (confirmed) {
-                    actor.setFlag(
-                        flags.sr3e,
-                        flags.actor.isCharacterCreation,
-                        false,
-                    );
-                    isCharacterCreation = false;
-                }
-            })();
-        }
-    });
+   $effect(() => {
+      if ($activeSkillPointsStore === 0 && $knowledgePointsStore === 0 && $languagePointsStore === 0) {
+         (async () => {
+            const confirmed = await foundry.applications.api.DialogV2.confirm({
+               window: {
+                  title: localize(config.modal.exitcreationmodetitle),
+               },
+               content: localize(config.modal.exitcreationmode),
+               yes: {
+                  label: localize(config.modal.confirm),
+                  default: true,
+               },
+               no: {
+                  label: localize(config.modal.decline),
+               },
+               modal: true,
+               rejectClose: true,
+            });
+
+            if (confirmed) {
+               actor.setFlag(flags.sr3e, flags.actor.isCharacterCreation, false);
+               $isCharacterCreationStore = false;
+            }
+         })();
+      }
+   });
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 </script>
 
 <CreationPointList points={pointList} containerCSS={"skill-point-assignment"} />

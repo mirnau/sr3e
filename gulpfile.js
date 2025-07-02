@@ -43,8 +43,7 @@ function watchSvelte() {
   gulp.watch(
     [
       "module/svelte/**/*.svelte", // Svelte components
-      "module/foundry/**/*.js",    // Foundry-related JS
-      "module/models/**/*.js",      // Model-related JS
+      "module/**/*.js",    // Foundry-related JS
       "sr3e.js"      // Model-related JS
     ],
     buildSvelte

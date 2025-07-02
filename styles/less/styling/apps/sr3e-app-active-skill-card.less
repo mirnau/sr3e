@@ -1,167 +1,240 @@
 .skill-masonry-grid {
-    margin: 0 auto;
-    background-color: transparent;
-    margin-bottom: -0.25rem;
+   margin: 0 auto;
+   background-color: transparent;
+   margin-bottom: -0.25rem;
 
-    .skill-card-container,
-    .skill-grid-sizer {
-        min-width: 6.5rem;
-    }
+   .skill-card-container,
+   .skill-grid-sizer {
+      min-width: 6.5rem;
+   }
 
-    .skill-gutter-sizer {
-        width: 0.25rem;
-    }
+   .skill-gutter-sizer {
+      width: 0.25rem;
+   }
 
-    .skill-card-container {
-        display: inline-block;
-        vertical-align: top;
-        box-sizing: border-box;
-        position: relative;
-        margin-bottom: 0.25rem;
-        overflow: visible;
+   .skill-card-container {
+      display: inline-block;
+      vertical-align: top;
+      box-sizing: border-box;
+      position: relative;
+      row-gap: 0.25rem;
+      margin-bottom: 0.25rem;
+      
+      overflow: visible;
 
+      .fa-pen-to-square {
+         position: absolute;
+         top: -0.25rem;
+         right: -0.25rem;
+         z-index: 1;
+      }
 
-        .fa-pen-to-square {
-            position: absolute;
-            top: -0.25rem;
-            right: -0.25rem;
-            z-index: 1;
-        }
+      .skill-card {
+         display: flex;
+         flex-direction: column;
+         gap: 0.25rem;
+         box-sizing: border-box;
+         position: relative;
+         background: var(--highlight-color-primary);
+         text-align: center;
+         padding: 0.5rem;
+         .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
-        .skill-card {
-
-            box-sizing: border-box;
-            position: relative;
-            margin-bottom: 0.25rem;
-            background: @accent-cherry-blossom;
-            text-align: center;
-            padding: 0.5rem;
-            .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
-
-            .skill-background-layer {
-                position: absolute;
-                z-index: -1;
-                top: 1px;
-                left: 1px;
-                width: calc(100% - 2px);
-                height: calc(100% - 2px);
-                background: @background-color;
-                box-shadow: inset 0 0 30px @primary-color;
-                pointer-events: none;
-                .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
-            }
-
-            select.roll-type-select,
-            select {
-                .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
-            }
-        }
-
-        .core-skill {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            gap: 0.5rem;
-            padding: 0.25rem;
-
-            .skill-name {
-                flex: 1;
-                text-indent: 0;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                overflow: hidden;
-            }
-
-            .skill-value {
-                position: relative;
-                min-width: 2rem;
-                text-align: center;
-                background: @highlight-color-primary;
-                padding: 0.25rem 0.5rem;
-                margin: 0;
-                .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-
-                &::before {
-                    content: '';
-                    position: absolute;
-                    z-index: -1;
-                    top: 1px;
-                    left: 1px;
-                    width: calc(100% - 2px);
-                    height: calc(100% - 2px);
-                    background: @secondary-color;
-                    box-shadow: inset 0 0 12px @highlight-color-primary;
-                    pointer-events: none;
-                    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-                }
-            }
-        }
-
-    }
-}
-
-.specialization-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    background: transparent;
-    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-}
-
-.skill-specialization-card {
-    width: 100%;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: @highlight-color-primary;
-    padding: 0.25rem 0.25rem 0.25rem 0.5rem;
-    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-
-    &::before {
-        content: '';
-        position: absolute;
-        z-index: -1;
-        top: 1px;
-        left: 1px;
-        width: calc(100% - 2px);
-        height: calc(100% - 2px);
-        background: @secondary-color;
-        box-shadow: inset 0 0 12px @highlight-color-primary;
-        pointer-events: none;
-        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-    }
-
-    .specialization-name {
-        margin-right: auto;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .specialization-value {
-        position: relative;
-        min-width: 2rem;
-        text-align: center;
-        background: @highlight-color-primary;
-        padding: 0.25rem 0.5rem;
-        margin: 0;
-        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-
-        &::before {
-            content: '';
+         .skill-background-layer {
             position: absolute;
             z-index: -1;
             top: 1px;
             left: 1px;
             width: calc(100% - 2px);
             height: calc(100% - 2px);
-            background: @secondary-color;
-            box-shadow: inset 0 0 12px @highlight-color-primary;
+            background: var(--background-color);
+            box-shadow: inset 0 0 30px @primary-color;
+            pointer-events: none;
+            .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+         }
+
+         select.roll-type-select,
+         select {
+            .clipped-corners(0.25rem, 0.25rem, 0.75rem, 0.25rem);
+         }
+      }
+
+      .skill-name {
+         flex: 1;
+         text-indent: 0;
+         text-overflow: ellipsis;
+         white-space: nowrap;
+         overflow: hidden;
+      }
+
+      .skill-main-container {
+         width: 100%;
+         position: relative;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         background: var(--highlight-color-primary);
+         padding: 0.25rem;
+         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+         &::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            background: var(--background-color);
+            box-shadow: inset 0 0 12px var(--highlight-color-primary);
             pointer-events: none;
             .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
-        }
-    }
+         }
+
+         &.button {
+            cursor: pointer;
+            transition: transform 0.2s ease-out, background-color 0.5s ease;
+            will-change: transform;
+         }
+
+         &.button:hover {
+            transform: scale(1.05);
+
+            .stat-card-background {
+               box-shadow: inset 0 0 10px var(--highlight-color-primary); // or any interactive glow
+            }
+         }
+
+         &.button:active {
+            transform: scale(0.97); // optional press effect
+
+            .stat-card-background {
+               box-shadow: inset 0 0 30px var(--highlight-color-primary); // debug shadow
+            }
+         }
+      }
+
+      .skill-value {
+         position: relative;
+         min-width: 2rem;
+         width: 100%;
+         text-align: center;
+
+         background: var(--highlight-color-primary);
+         padding: 0.25rem;
+         margin: 0;
+         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+         &::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            background: var(--background-color);
+            box-shadow: inset 0 0 12px var(--highlight-color-primary);
+            pointer-events: none;
+            .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+         }
+      }
+   }
+}
+
+.specialization-container {
+   width: 100%;
+   display: flex;
+   flex-direction: row;
+   gap: 0.25rem;
+   background: transparent;
+   overflow: visible;
+}
+
+.skill-specialization-card {
+   width: 100%;
+   position: relative;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   background: var(--highlight-color-primary);
+   padding: 0.25rem 0.25rem 0.25rem 0;
+   .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+   &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 1px;
+      left: 1px;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      background: var(--background-color);
+      box-shadow: inset 0 0 12px var(--highlight-color-primary);
+      pointer-events: none;
+      .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+   }
+
+   &.button {
+      cursor: pointer;
+      transition: transform 0.2s ease-out, background-color 0.5s ease;
+      will-change: transform;
+   }
+
+   &.button:hover {
+      transform: scale(1.05);
+
+      .stat-card-background {
+         box-shadow: inset 0 0 10px var(--highlight-color-primary); // or any interactive glow
+      }
+   }
+
+   &.button:active {
+      transform: scale(0.97); // optional press effect
+
+      .stat-card-background {
+         box-shadow: inset 0 0 30px var(--highlight-color-primary); // debug shadow
+      }
+   }
+
+   .specialization-name {
+      display: block;
+      max-width: 12rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-shrink: 1;
+      flex-grow: 0;
+      margin: 0rem 0rem 0rem 0.5rem;
+      padding-right: 0.5rem;
+      text-align: left;
+      pointer-events: auto;
+      position: relative;
+      z-index: 1;
+   }
+}
+
+.embedded-value {
+   position: relative;
+   flex-shrink: 0;
+   min-width: 2rem;
+   text-align: center;
+   background: var(--highlight-color-primary);
+   padding: 0.25rem 0.5rem;
+   margin: 0.25rem, 0rem, 0rem, 0.25rem;
+   .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+   &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      top: 1px;
+      left: 1px;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      background: var(--background-color);
+      box-shadow: inset 0 0 12px var(--highlight-color-primary);
+      pointer-events: none;
+      .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+   }
 }

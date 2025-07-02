@@ -1,81 +1,38 @@
 <script>
-    import AttributeCard from "./AttributeCardKarmaState.svelte";
-    import { localize } from "../../../svelteHelpers.js";
-    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
-    import { shoppingState } from "../../../svelteStore.js";
-    import CardToolbar from "./CardToolbar.svelte";
-    import { masonryMinWidthFallbackValue } from "../../../foundry/services/commonConsts.js";
+   import { localize } from "../../../services/utilities.js";
+   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+   import { shoppingState } from "../../../svelteStore.js";
+   import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
+   import CardToolbar from "./CardToolbar.svelte";
+   import MasonryGrid from "./basic/MasonryGrid.svelte";
+   import StatCard from "./basic/StatCard.svelte";
+   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte.js";
 
-    let { actor = {}, config = {}, id = {}, span = {} } = $props();
-    let karma = $state(actor.system.karma);
-    let essence = $state(actor.system.attributes.essence ?? 0);
-    let gridContainer;
-    let survivor = $derived(karma.miraculousSurvival);
+   let { actor = {}, config = {}, id = {}, span = {} } = $props();
+   let storeManager = StoreManager.Subscribe(actor);
 
-    $effect(() => {
-        const rem = parseFloat(
-            getComputedStyle(document.documentElement).fontSize,
-        );
-        const result = setupMasonry({
-            container: gridContainer,
-            itemSelector: ".stat-card",
-            gridSizerSelector: ".attribute-grid-sizer",
-            gutterSizerSelector: ".attribute-gutter-sizer",
-            minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
-        });
-        return result.cleanup;
-    });
+   let karmaPoolStore = storeManager.GetStore("karma.karmaPool");
+   let goodKarmaStore = storeManager.GetStore("karma.goodKarma");
+   let essenceStore = storeManager.GetStore("attributes.essence");
+   let miraculousSurvivalStore = storeManager.GetStore("karma.miraculousSurvival");
 </script>
 
 <CardToolbar {id} />
 <h1>{localize(config.karma.karma)}</h1>
-<div bind:this={gridContainer} class="attribute-masonry-grid">
-    <div class="attribute-grid-sizer"></div>
-    <div class="attribute-gutter-sizer"></div>
+<MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
+   <StatCard label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
+   <StatCard label={localize(config.karma.karmapool)} value={$karmaPoolStore} />
+   <StatCard label={localize(config.attributes.essence)} value={$essenceStore} />
 
-    <div class="stat-card">
-        <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.goodKarma)}</h4>
-        <h1 class="stat-value">
-            {karma.goodKarma}
-        </h1>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
-        <h1 class="stat-value">
-            {karma.karmaPool}
-        </h1>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.karma.lifetimeKarma)}</h4>
-        <h1 class="stat-value">
-            {karma.lifetimeKarma}
-        </h1>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card-background"></div>
-        <h4 class="no-margin">{localize(config.attributes.essence)}</h4>
-        <h1 class="stat-value">
-            {essence}
-        </h1>
-    </div>
-
-    {#if !survivor}
-        <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4 class="no-margin">
-                {localize(config.karma.miraculousSurvival)}
-            </h4>
-            <h5 class="stat-value">
-                <i class="fa-solid fa-heart-circle-bolt"></i>
-            </h5>
-        </div>
-    {:else}
-        <!--display nothing-->
-    {/if}
-</div>
+   {#if !$miraculousSurvivalStore}
+      <div class="stat-card">
+         <div class="stat-card-background"></div>
+         <h4 class="no-margin">
+            {localize(config.karma.miraculoussurvival)}
+         </h4>
+         <i class="fa-solid fa-heart-circle-bolt"></i>
+      </div>
+   {:else}
+      <!--display nothing-->
+   {/if}
+</MasonryGrid>
