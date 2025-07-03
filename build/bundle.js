@@ -3713,7 +3713,7 @@ const _StoreManager = class _StoreManager {
       const currentValue = __privateGet(this, _document).getFlag(flags.sr3e, flag);
       const store = writable(currentValue);
       store.subscribe((newValue) => {
-        __privateGet(this, _document).setFlag(flags.sr3e, flag, newValue);
+        __privateGet(this, _document).update({ [`flags.${flags.sr3e}.${flag}`]: newValue }, { render: false });
       });
       __privateGet(this, _persistentStore)[flag] = store;
     }
@@ -9010,7 +9010,11 @@ class ActorDataService {
 }
 var on_click$3 = (_, activeTab) => set(activeTab, proxy(inventory.arsenal));
 var on_click_1$2 = (__1, activeTab) => set(activeTab, proxy(inventory.garage));
-var root$o = /* @__PURE__ */ template(`<!> <h1> </h1> <div class="sr3e-tabs"><button>Arsenal</button> <button>Garage</button></div> <div class="sr3e-inner-background"><!></div>`, 1);
+var root$o = /* @__PURE__ */ template(
+  `<!> <h1> </h1> <div class="sr3e-tabs"><button>Arsenal</button> <button>Garage</button></div> <div class="sr3e-inner-background"><!> // Transactions / Budget
+  // Cyber</div>`,
+  1
+);
 function Inventory($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
@@ -10547,7 +10551,7 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$9 = /* @__PURE__ */ template(`<!> <input class="large" name="name" type="text"> <!>`, 1);
 var root_3$5 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_6$2 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
@@ -10830,7 +10834,7 @@ function MetatypeApp($$anchor, $$props) {
         }
       });
       var input = sibling(node_1, 2);
-      input.__change = [on_change$5, item2];
+      input.__change = [on_change$6, item2];
       var node_2 = sibling(input, 2);
       StatCard(node_2, spread_props(() => get$2(priorityEntry)));
       bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
@@ -11037,7 +11041,7 @@ class MetatypeItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _metatype = new WeakMap();
-var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$6 = /* @__PURE__ */ template(`<input>`);
 var root_1$8 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
 var root_3$4 = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
@@ -11174,7 +11178,7 @@ function MagicApp($$anchor, $$props) {
       StatCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var input = root_2$6();
-          input.__change = [on_change$4, item2];
+          input.__change = [on_change$5, item2];
           bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
           append($$anchor3, input);
         },
@@ -11497,7 +11501,7 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$5 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
 var root_1$6 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
 var root_3$3 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
@@ -11579,7 +11583,7 @@ function WeaponApp($$anchor, $$props) {
       StatCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var input = root_2$5();
-          input.__change = [on_change$3, item2];
+          input.__change = [on_change$4, item2];
           bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
           append($$anchor3, input);
         },
@@ -11783,7 +11787,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$5 = /* @__PURE__ */ template(`<!> <input> <div class="stat-grid two-column"></div>`, 1);
 var root$b = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
 function AmmunitionApp($$anchor, $$props) {
@@ -11825,7 +11829,7 @@ function AmmunitionApp($$anchor, $$props) {
         }
       });
       var input = sibling(node_1, 2);
-      input.__change = [on_change$2, item2];
+      input.__change = [on_change$3, item2];
       var div_2 = sibling(input, 2);
       each(div_2, 21, () => ammoEntries, index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$2(entry)));
@@ -11914,7 +11918,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _ammunition = new WeakMap();
-var on_change$1 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$4 = /* @__PURE__ */ template(`<div class="stat-card-background"></div> <input class="large" name="name" type="text">`, 1);
 var on_change_1$1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_4$4 = /* @__PURE__ */ template(`<option> </option>`);
@@ -12001,7 +12005,7 @@ function SkillApp($$anchor, $$props) {
         children: ($$anchor3, $$slotProps2) => {
           var fragment_1 = root_2$4();
           var input = sibling(first_child(fragment_1), 2);
-          input.__change = [on_change$1, item2];
+          input.__change = [on_change$2, item2];
           template_effect(() => set_value(input, item2().name));
           append($$anchor3, fragment_1);
         },
@@ -13554,6 +13558,9 @@ var on_click_2 = (__3, $$props) => $$props.actor.RefreshAstralPool();
 var on_click_3 = (__4, $$props) => $$props.actor.RefreshSpellPool();
 var on_click_4 = (__5, $$props) => $$props.actor.RefreshControlPool();
 var on_click_5 = (__6, $$props) => $$props.actor.RefreshHackingPool();
+var on_change$1 = (e, $readyForCommit, readyForCommit) => {
+  store_set(readyForCommit, proxy(e.target.checked));
+};
 var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
 function DicePoolRow($$anchor, $$props) {
   push($$props, true);
@@ -13609,6 +13616,7 @@ function DicePoolRow($$anchor, $$props) {
         $$props.actor.RefreshSpellPool();
       }
       $$props.OnCommitStatusChange();
+      store_set(readyForCommit, false);
     }
   }
   user_effect(() => {
@@ -13667,6 +13675,7 @@ function DicePoolRow($$anchor, $$props) {
   var text_12 = child(button_5);
   var td_8 = sibling(td_7);
   var input = child(td_8);
+  input.__change = [on_change$1, $readyForCommit, readyForCommit];
   template_effect(
     ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
       set_attribute(img, "src", $$props.actor.img);
@@ -13689,6 +13698,7 @@ function DicePoolRow($$anchor, $$props) {
       set_text(text_11, `${$hackingPoolStore() ?? ""} / TODO`);
       set_attribute(button_5, "aria-label", $8);
       set_text(text_12, `${$1 ?? ""} `);
+      set_checked(input, $readyForCommit());
     },
     [
       () => localize($$props.config.storytellerscreen.refreshkarmapool),
@@ -13702,12 +13712,11 @@ function DicePoolRow($$anchor, $$props) {
       () => localize($$props.config.storytellerscreen.refreshhackingpool)
     ]
   );
-  bind_checked(input, $readyForCommit, ($$value) => store_set(readyForCommit, $$value));
   append($$anchor, tr);
   pop();
   $$cleanup();
 }
-delegate(["click"]);
+delegate(["click", "change"]);
 async function commitSelected(_, listboxContent, rowRefs) {
   for (const actor of get$2(listboxContent)) {
     const row = rowRefs.get(actor.id);

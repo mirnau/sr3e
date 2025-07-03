@@ -52,6 +52,7 @@
          }
 
          OnCommitStatusChange();
+         $readyForCommit = false;
       }
    }
 
@@ -137,6 +138,12 @@
    </td>
 
    <td>
-      <input type="checkbox" bind:checked={$readyForCommit} />
+      <input
+         type="checkbox"
+         checked={$readyForCommit}
+         onchange={(e) => {
+            $readyForCommit = e.target.checked;
+         }}
+      />
    </td>
 </tr>

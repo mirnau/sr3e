@@ -101,7 +101,12 @@ export class StoreManager {
          const store = writable(currentValue);
 
          store.subscribe((newValue) => {
-            this.#document.setFlag(flags.sr3e, flag, newValue);
+            this.#document.update(
+               {
+                  [`flags.${flags.sr3e}.${flag}`]: newValue,
+               },
+               { render: false }
+            );
          });
 
          this.#persistentStore[flag] = store;

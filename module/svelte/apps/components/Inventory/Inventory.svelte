@@ -38,5 +38,11 @@
   {:else if activeTab === inventory.garage}
   <Garage {actor} {config} />
   {/if}
+
+
+  // Transactions / Budget
+  // Cyber
+
+
 </div>
 
