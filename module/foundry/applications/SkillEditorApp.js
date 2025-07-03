@@ -92,8 +92,6 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 			});
 		}
 
-		const header = windowContent.parentElement.querySelector("header.window-header");
-
 		return windowContent;
 	}
 

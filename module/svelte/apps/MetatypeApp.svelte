@@ -4,6 +4,7 @@
    import StatCard from "./components/StatCard.svelte";
    import Image from "./components/basic/Image.svelte";
    import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
+   import ActiveEffectsViewer from "./components/ActiveEffects/ActiveEffectsViewer.svelte";
 
    let { item = {}, config = {} } = $props();
 
@@ -369,7 +370,7 @@
             <StatCard {...entry} />
          {/each}
       </ItemSheetComponent>
-
+      <ActiveEffectsViewer {item} {config} />
       <!-- Journal Viewer -->
       <JournalViewer {item} {config} />
    </div>

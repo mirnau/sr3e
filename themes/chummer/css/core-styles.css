@@ -289,13 +289,13 @@
     width: max-content;
     max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
   }
-  .sr3e-waterfall .item-sheet-component {
+  .item-sheet-component {
     display: inline-block;
     break-inside: avoid;
     margin-bottom: 0.5rem;
     width: 100%;
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .fake-shadow {
+  .item-sheet-component .sr3e-inner-background-container .fake-shadow {
     position: absolute;
     top: 1.5rem;
     left: 1.5rem;
@@ -306,42 +306,42 @@
     filter: blur(20px);
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
     display: grid;
     background-color: #ff2090;
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
     padding: 0.25rem;
     text-align: center;
     background-color: repeating-linear-gradient(0deg, rgba(81, 106, 134, 0.6) 1px, rgba(57, 77, 100, 0.6) 5px, rgba(31, 44, 66, 0.6) 2px);
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container {
     width: 100%;
     display: block;
     padding: 0.25rem;
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .select-container select {
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="text"],
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="number"] {
     text-indent: none;
     margin-bottom: 0;
     font-size: 1.5rem;
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card input[type="checkbox"] {
     font-size: 1.5rem;
     text-indent: none;
     margin-bottom: 0;
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container {
     width: 100%;
     display: flex;
     justify-content: center;
   }
-  .sr3e-waterfall .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container h4 {
+  .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container h4 {
     width: 80%;
     overflow: hidden;
     white-space: nowrap;
@@ -960,6 +960,12 @@
     padding-left: 2rem;
     /* space for the icon */
   }
+  .effects-editor {
+    background-color: transparent;
+    display: flex;
+    gap: 0.5rem;
+    max-width: 50rem;
+  }
   .form-group {
     padding: 0.5rem;
   }
@@ -978,6 +984,7 @@
     text-overflow: ellipsis;
     margin-right: auto;
   }
+  .active-effects-editor .window-header,
   .sr3e.sheet.item .window-header,
   .sr3e.sheet.charactercreation .window-header,
   .sr3e-item-header,
@@ -2644,6 +2651,7 @@
   form .stat-grid,
   div#support-details .stat-grid,
   div#invitation-links .stat-grid,
+  .sr3e.active-effects-editor .stat-grid,
   .application.category-browser .stat-grid,
   .sr3e.sheet.item .stat-grid,
   .sr3e.sheet.character .stat-grid {
@@ -2657,6 +2665,7 @@
   form .stat-grid.single-column,
   div#support-details .stat-grid.single-column,
   div#invitation-links .stat-grid.single-column,
+  .sr3e.active-effects-editor .stat-grid.single-column,
   .application.category-browser .stat-grid.single-column,
   .sr3e.sheet.item .stat-grid.single-column,
   .sr3e.sheet.character .stat-grid.single-column {
@@ -2667,6 +2676,7 @@
   form .stat-grid.two-column,
   div#support-details .stat-grid.two-column,
   div#invitation-links .stat-grid.two-column,
+  .sr3e.active-effects-editor .stat-grid.two-column,
   .application.category-browser .stat-grid.two-column,
   .sr3e.sheet.item .stat-grid.two-column,
   .sr3e.sheet.character .stat-grid.two-column {
@@ -2676,6 +2686,7 @@
   form .stat-grid.three-column,
   div#support-details .stat-grid.three-column,
   div#invitation-links .stat-grid.three-column,
+  .sr3e.active-effects-editor .stat-grid.three-column,
   .application.category-browser .stat-grid.three-column,
   .sr3e.sheet.item .stat-grid.three-column,
   .sr3e.sheet.character .stat-grid.three-column {
@@ -2685,6 +2696,7 @@
   form .details-foldout,
   div#support-details .details-foldout,
   div#invitation-links .details-foldout,
+  .sr3e.active-effects-editor .details-foldout,
   .application.category-browser .details-foldout,
   .sr3e.sheet.item .details-foldout,
   .sr3e.sheet.character .details-foldout {
@@ -2697,6 +2709,7 @@
   form .sr3e-inner-background-container,
   div#support-details .sr3e-inner-background-container,
   div#invitation-links .sr3e-inner-background-container,
+  .sr3e.active-effects-editor .sr3e-inner-background-container,
   .application.category-browser .sr3e-inner-background-container,
   .sr3e.sheet.item .sr3e-inner-background-container,
   .sr3e.sheet.character .sr3e-inner-background-container {
@@ -2709,6 +2722,7 @@
   form .sr3e-inner-background-container.slim,
   div#support-details .sr3e-inner-background-container.slim,
   div#invitation-links .sr3e-inner-background-container.slim,
+  .sr3e.active-effects-editor .sr3e-inner-background-container.slim,
   .application.category-browser .sr3e-inner-background-container.slim,
   .sr3e.sheet.item .sr3e-inner-background-container.slim,
   .sr3e.sheet.character .sr3e-inner-background-container.slim {
@@ -2721,6 +2735,7 @@
   form .sr3e-inner-background-container .sr3e-inner-background,
   div#support-details .sr3e-inner-background-container .sr3e-inner-background,
   div#invitation-links .sr3e-inner-background-container .sr3e-inner-background,
+  .sr3e.active-effects-editor .sr3e-inner-background-container .sr3e-inner-background,
   .application.category-browser .sr3e-inner-background-container .sr3e-inner-background,
   .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background,
   .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background {
@@ -2735,6 +2750,7 @@
   form .sr3e-inner-background-container .sr3e-inner-background .header-icon,
   div#support-details .sr3e-inner-background-container .sr3e-inner-background .header-icon,
   div#invitation-links .sr3e-inner-background-container .sr3e-inner-background .header-icon,
+  .sr3e.active-effects-editor .sr3e-inner-background-container .sr3e-inner-background .header-icon,
   .application.category-browser .sr3e-inner-background-container .sr3e-inner-background .header-icon,
   .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background .header-icon,
   .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background .header-icon {
@@ -2744,6 +2760,7 @@
   form .sr3e-inner-background-container .sr3e-inner-background.slim,
   div#support-details .sr3e-inner-background-container .sr3e-inner-background.slim,
   div#invitation-links .sr3e-inner-background-container .sr3e-inner-background.slim,
+  .sr3e.active-effects-editor .sr3e-inner-background-container .sr3e-inner-background.slim,
   .application.category-browser .sr3e-inner-background-container .sr3e-inner-background.slim,
   .sr3e.sheet.item .sr3e-inner-background-container .sr3e-inner-background.slim,
   .sr3e.sheet.character .sr3e-inner-background-container .sr3e-inner-background.slim {
@@ -2756,6 +2773,7 @@
   form label,
   div#support-details label,
   div#invitation-links label,
+  .sr3e.active-effects-editor label,
   .application.category-browser label,
   .sr3e.sheet.item label,
   .sr3e.sheet.character label {
@@ -2768,6 +2786,7 @@
   form a,
   div#support-details a,
   div#invitation-links a,
+  .sr3e.active-effects-editor a,
   .application.category-browser a,
   .sr3e.sheet.item a,
   .sr3e.sheet.character a {
@@ -2777,6 +2796,7 @@
   form .fake-shadow,
   div#support-details .fake-shadow,
   div#invitation-links .fake-shadow,
+  .sr3e.active-effects-editor .fake-shadow,
   .application.category-browser .fake-shadow,
   .sr3e.sheet.item .fake-shadow,
   .sr3e.sheet.character .fake-shadow {
@@ -2794,6 +2814,7 @@
   form .sr3e-inner-background,
   div#support-details .sr3e-inner-background,
   div#invitation-links .sr3e-inner-background,
+  .sr3e.active-effects-editor .sr3e-inner-background,
   .application.category-browser .sr3e-inner-background,
   .sr3e.sheet.item .sr3e-inner-background,
   .sr3e.sheet.character .sr3e-inner-background {
@@ -2807,6 +2828,7 @@
   form .sr3e-inner-background::before,
   div#support-details .sr3e-inner-background::before,
   div#invitation-links .sr3e-inner-background::before,
+  .sr3e.active-effects-editor .sr3e-inner-background::before,
   .application.category-browser .sr3e-inner-background::before,
   .sr3e.sheet.item .sr3e-inner-background::before,
   .sr3e.sheet.character .sr3e-inner-background::before {
@@ -2826,6 +2848,7 @@
   form .stat-card,
   div#support-details .stat-card,
   div#invitation-links .stat-card,
+  .sr3e.active-effects-editor .stat-card,
   .application.category-browser .stat-card,
   .sr3e.sheet.item .stat-card,
   .sr3e.sheet.character .stat-card {
@@ -2845,6 +2868,7 @@
   form .stat-card.character,
   div#support-details .stat-card.character,
   div#invitation-links .stat-card.character,
+  .sr3e.active-effects-editor .stat-card.character,
   .application.category-browser .stat-card.character,
   .sr3e.sheet.item .stat-card.character,
   .sr3e.sheet.character .stat-card.character {
@@ -2854,6 +2878,7 @@
   form .stat-card select.roll-type-select,
   div#support-details .stat-card select.roll-type-select,
   div#invitation-links .stat-card select.roll-type-select,
+  .sr3e.active-effects-editor .stat-card select.roll-type-select,
   .application.category-browser .stat-card select.roll-type-select,
   .sr3e.sheet.item .stat-card select.roll-type-select,
   .sr3e.sheet.character .stat-card select.roll-type-select,
@@ -2861,6 +2886,7 @@
   form .stat-card select,
   div#support-details .stat-card select,
   div#invitation-links .stat-card select,
+  .sr3e.active-effects-editor .stat-card select,
   .application.category-browser .stat-card select,
   .sr3e.sheet.item .stat-card select,
   .sr3e.sheet.character .stat-card select {
@@ -2870,6 +2896,7 @@
   form .stat-card .no-margin,
   div#support-details .stat-card .no-margin,
   div#invitation-links .stat-card .no-margin,
+  .sr3e.active-effects-editor .stat-card .no-margin,
   .application.category-browser .stat-card .no-margin,
   .sr3e.sheet.item .stat-card .no-margin,
   .sr3e.sheet.character .stat-card .no-margin {
@@ -2884,6 +2911,7 @@
   form .stat-card .stat-value,
   div#support-details .stat-card .stat-value,
   div#invitation-links .stat-card .stat-value,
+  .sr3e.active-effects-editor .stat-card .stat-value,
   .application.category-browser .stat-card .stat-value,
   .sr3e.sheet.item .stat-card .stat-value,
   .sr3e.sheet.character .stat-card .stat-value {
@@ -2895,6 +2923,7 @@
   form .stat-card.button,
   div#support-details .stat-card.button,
   div#invitation-links .stat-card.button,
+  .sr3e.active-effects-editor .stat-card.button,
   .application.category-browser .stat-card.button,
   .sr3e.sheet.item .stat-card.button,
   .sr3e.sheet.character .stat-card.button {
@@ -2906,6 +2935,7 @@
   form .stat-card.button:hover,
   div#support-details .stat-card.button:hover,
   div#invitation-links .stat-card.button:hover,
+  .sr3e.active-effects-editor .stat-card.button:hover,
   .application.category-browser .stat-card.button:hover,
   .sr3e.sheet.item .stat-card.button:hover,
   .sr3e.sheet.character .stat-card.button:hover {
@@ -2915,6 +2945,7 @@
   form .stat-card.button:hover .stat-card-background,
   div#support-details .stat-card.button:hover .stat-card-background,
   div#invitation-links .stat-card.button:hover .stat-card-background,
+  .sr3e.active-effects-editor .stat-card.button:hover .stat-card-background,
   .application.category-browser .stat-card.button:hover .stat-card-background,
   .sr3e.sheet.item .stat-card.button:hover .stat-card-background,
   .sr3e.sheet.character .stat-card.button:hover .stat-card-background {
@@ -2924,6 +2955,7 @@
   form .stat-card.button:active,
   div#support-details .stat-card.button:active,
   div#invitation-links .stat-card.button:active,
+  .sr3e.active-effects-editor .stat-card.button:active,
   .application.category-browser .stat-card.button:active,
   .sr3e.sheet.item .stat-card.button:active,
   .sr3e.sheet.character .stat-card.button:active {
@@ -2933,6 +2965,7 @@
   form .stat-card.button:active .stat-card-background,
   div#support-details .stat-card.button:active .stat-card-background,
   div#invitation-links .stat-card.button:active .stat-card-background,
+  .sr3e.active-effects-editor .stat-card.button:active .stat-card-background,
   .application.category-browser .stat-card.button:active .stat-card-background,
   .sr3e.sheet.item .stat-card.button:active .stat-card-background,
   .sr3e.sheet.character .stat-card.button:active .stat-card-background {
@@ -2942,6 +2975,7 @@
   form .stat-card:active,
   div#support-details .stat-card:active,
   div#invitation-links .stat-card:active,
+  .sr3e.active-effects-editor .stat-card:active,
   .application.category-browser .stat-card:active,
   .sr3e.sheet.item .stat-card:active,
   .sr3e.sheet.character .stat-card:active {
@@ -2951,6 +2985,7 @@
   form .stat-card-background,
   div#support-details .stat-card-background,
   div#invitation-links .stat-card-background,
+  .sr3e.active-effects-editor .stat-card-background,
   .application.category-browser .stat-card-background,
   .sr3e.sheet.item .stat-card-background,
   .sr3e.sheet.character .stat-card-background {
