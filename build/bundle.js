@@ -10550,8 +10550,7 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, searchTerm, displayValue, inputElement) {
-  var _a;
+function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, closeDropdown, searchTerm, displayValue) {
   if (disabled()) return;
   switch (event2.key) {
     case "ArrowDown":
@@ -10577,15 +10576,15 @@ function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlighte
       break;
     case "Escape":
       event2.preventDefault();
-      set(isOpen, false);
-      set(searchTerm, proxy(get$2(displayValue)));
-      (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
-      updateDropdown();
+      event2.stopPropagation();
+      if (get$2(isOpen)) {
+        closeDropdown();
+      } else {
+        set(searchTerm, proxy(get$2(displayValue)));
+      }
       break;
     case "Tab":
-      set(isOpen, false);
-      set(searchTerm, proxy(get$2(displayValue)));
-      updateDropdown();
+      closeDropdown();
       break;
   }
 }
@@ -10630,12 +10629,40 @@ function ComboSearch($$anchor, $$props) {
       anchor.style.position = "relative";
     }
     anchor.appendChild(dropdownElement);
+    document.addEventListener("click", handleDocumentClick);
+    document.addEventListener("focusin", handleDocumentFocusIn);
   });
   onDestroy(() => {
     dropdownElement == null ? void 0 : dropdownElement.remove();
+    document.removeEventListener("click", handleDocumentClick);
+    document.removeEventListener("focusin", handleDocumentFocusIn);
   });
+  function handleDocumentClick(event2) {
+    if (!get$2(wrapperElement) || !dropdownElement) return;
+    const clickedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
+    if (!clickedInside && get$2(isOpen)) {
+      closeDropdown();
+    }
+  }
+  function handleDocumentFocusIn(event2) {
+    if (!get$2(wrapperElement) || !dropdownElement) return;
+    const focusedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
+    if (!focusedInside && get$2(isOpen)) {
+      closeDropdown();
+    }
+  }
+  function closeDropdown() {
+    set(isOpen, false);
+    set(searchTerm, proxy(get$2(displayValue)));
+    updateDropdown();
+  }
   function updateDropdown() {
-    if (!get$2(isOpen) || !get$2(wrapperElement) || !dropdownElement) return;
+    if (!get$2(wrapperElement) || !dropdownElement) return;
+    if (!get$2(isOpen)) {
+      dropdownElement.style.display = "none";
+      return;
+    }
+    dropdownElement.style.display = "block";
     tick().then(() => {
       const anchor = get$2(wrapperElement).closest(".item-sheet-component");
       if (!anchor) return;
@@ -10678,23 +10705,12 @@ function ComboSearch($$anchor, $$props) {
     }
   }
   function handleInputBlur() {
-    setTimeout(
-      () => {
-        set(isOpen, false);
-        set(searchTerm, proxy(get$2(displayValue)));
-        updateDropdown();
-      },
-      150
-    );
   }
   function selectOption(option) {
-    var _a;
     value(option.value);
     set(searchTerm, proxy(option.label));
-    set(isOpen, false);
-    (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
+    closeDropdown();
     dispatch("select", { value: option.value });
-    updateDropdown();
   }
   async function scrollToHighlighted() {
     var _a, _b;
@@ -10717,9 +10733,9 @@ function ComboSearch($$anchor, $$props) {
     filteredOptions,
     scrollToHighlighted,
     selectOption,
+    closeDropdown,
     searchTerm,
-    displayValue,
-    inputElement
+    displayValue
   ];
   bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
   var i_1 = sibling(input, 2);

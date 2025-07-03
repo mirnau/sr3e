@@ -50,14 +50,49 @@
          anchor.style.position = "relative";
       }
       anchor.appendChild(dropdownElement);
+
+      document.addEventListener("click", handleDocumentClick);
+      document.addEventListener("focusin", handleDocumentFocusIn);
    });
 
    onDestroy(() => {
       dropdownElement?.remove();
+      document.removeEventListener("click", handleDocumentClick);
+      document.removeEventListener("focusin", handleDocumentFocusIn);
    });
 
+   function handleDocumentClick(event) {
+      if (!wrapperElement || !dropdownElement) return;
+      const clickedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
+      if (!clickedInside && isOpen) {
+         closeDropdown();
+      }
+   }
+
+   function handleDocumentFocusIn(event) {
+      if (!wrapperElement || !dropdownElement) return;
+      const focusedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
+      if (!focusedInside && isOpen) {
+         closeDropdown();
+      }
+   }
+
+   function closeDropdown() {
+      isOpen = false;
+      searchTerm = displayValue;
+      updateDropdown();
+   }
+
    function updateDropdown() {
-      if (!isOpen || !wrapperElement || !dropdownElement) return;
+      if (!wrapperElement || !dropdownElement) return;
+
+      if (!isOpen) {
+         dropdownElement.style.display = "none";
+         return;
+      }
+
+      dropdownElement.style.display = "block";
+
       tick().then(() => {
          const anchor = wrapperElement.closest(".item-sheet-component");
          if (!anchor) return;
@@ -95,7 +130,6 @@
             const el = document.createElement("div");
             el.className = "combobox-option no-results";
             el.textContent = nomatchplaceholder;
-
             content.appendChild(el);
          }
 
@@ -111,13 +145,7 @@
       }
    }
 
-   function handleInputBlur() {
-      setTimeout(() => {
-         isOpen = false;
-         searchTerm = displayValue;
-         updateDropdown();
-      }, 150);
-   }
+   function handleInputBlur() {}
 
    function handleInputKeydown(event) {
       if (disabled) return;
@@ -146,15 +174,15 @@
             break;
          case "Escape":
             event.preventDefault();
-            isOpen = false;
-            searchTerm = displayValue;
-            inputElement?.blur();
-            updateDropdown();
+            event.stopPropagation();
+            if (isOpen) {
+               closeDropdown();
+            } else {
+               searchTerm = displayValue;
+            }
             break;
          case "Tab":
-            isOpen = false;
-            searchTerm = displayValue;
-            updateDropdown();
+            closeDropdown();
             break;
       }
    }
@@ -162,10 +190,8 @@
    function selectOption(option) {
       value = option.value;
       searchTerm = option.label;
-      isOpen = false;
-      inputElement?.blur();
+      closeDropdown();
       dispatch("select", { value: option.value });
-      updateDropdown();
    }
 
    async function scrollToHighlighted() {
