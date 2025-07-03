@@ -14,6 +14,7 @@ table {
    padding: 0rem;
    margin: 0rem;
    border-collapse: collapse;
+   width: 100%;
 }
 
 thead th {
@@ -33,7 +34,8 @@ td {
    input[type="text"],
    input[type="number"],
    select,
-   button {
+   button,
+   .combobox-container {
       margin: 0;
       padding: 0;
       min-width: 5rem;
@@ -43,9 +45,8 @@ td {
    }
 }
 tr:nth-child(even) > td {
-      box-shadow: inset 0 0 30px var(--highlight-color-secondary);
+   box-shadow: inset 0 0 30px var(--highlight-color-secondary);
 }
-
 
 thead > tr:first-child > th:first-child {
    .clipped-corners(0.5rem, 0rem, 0rem, 0.5rem); // top-left and bottom-left only

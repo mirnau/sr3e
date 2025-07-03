@@ -13,30 +13,98 @@
    } = $props();
 
    let isOpen = $state(false);
-   let searchTerm = $state("");
+   let searchTerm = $state(""); // only for searching when open, or to show selected label when closed
    let filteredOptions = $state([]);
    let highlightedIndex = $state(-1);
    let inputElement = $state();
    let wrapperElement = $state();
    let dropdownElement;
 
-   let displayValue = $derived(options.find((opt) => opt.value === value)?.label ?? "");
-
    $effect(() => {
       if (!isOpen) {
-         searchTerm = displayValue;
+         const selected = options.find((o) => o.value === value);
+         searchTerm = selected?.label ?? "";
       }
    });
 
+   // Filter options when searching
    $effect(() => {
-      if (searchTerm.trim() === "") {
-         filteredOptions = options;
-      } else {
-         filteredOptions = options.filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (isOpen) {
+         filteredOptions =
+            searchTerm.trim() === ""
+               ? options
+               : options.filter((o) => o.label.toLowerCase().includes(searchTerm.toLowerCase()));
+         highlightedIndex = -1;
+         updateDropdown();
       }
-      highlightedIndex = -1;
-      updateDropdown();
    });
+
+   function openDropdown() {
+      if (disabled || isOpen) return;
+      isOpen = true;
+      searchTerm = "";
+      updateDropdown();
+   }
+
+   function closeDropdown() {
+      isOpen = false;
+      updateDropdown();
+   }
+
+   function handleInputFocus() {
+      openDropdown();
+   }
+
+   function handleInputClick() {
+      if (!isOpen) openDropdown();
+   }
+
+   function handleInputInput(e) {
+      if (!isOpen) openDropdown();
+      searchTerm = e.target.value;
+   }
+
+   function handleInputKeydown(e) {
+      if (disabled) return;
+      switch (e.key) {
+         case "ArrowDown":
+            e.preventDefault();
+            if (!isOpen) openDropdown();
+            highlightedIndex = Math.min(highlightedIndex + 1, filteredOptions.length - 1);
+            scrollToHighlighted();
+            break;
+         case "ArrowUp":
+            e.preventDefault();
+            highlightedIndex = Math.max(highlightedIndex - 1, 0);
+            scrollToHighlighted();
+            break;
+         case "Enter":
+            e.preventDefault();
+            if (isOpen && highlightedIndex >= 0) selectOption(filteredOptions[highlightedIndex]);
+            break;
+         case "Escape":
+            e.preventDefault();
+            e.stopPropagation();
+            if (isOpen) closeDropdown();
+            break;
+         case "Tab":
+            closeDropdown();
+            break;
+      }
+   }
+
+   function selectOption(opt) {
+      value = opt.value;
+      // searchTerm will be synced by effect after dropdown closes
+      closeDropdown();
+      dispatch("select", { value: opt.value });
+   }
+
+   async function scrollToHighlighted() {
+      await tick();
+      const el = dropdownElement?.children[0]?.children?.[highlightedIndex];
+      el?.scrollIntoView({ block: "nearest" });
+   }
 
    onMount(() => {
       dropdownElement = document.createElement("div");
@@ -44,11 +112,8 @@
       dropdownElement.id = "combobox-dropdown-list";
       dropdownElement.style.position = "absolute";
       dropdownElement.style.zIndex = "9999";
-
       const anchor = wrapperElement.closest(".item-sheet-component") ?? document.body;
-      if (getComputedStyle(anchor).position === "static") {
-         anchor.style.position = "relative";
-      }
+      if (getComputedStyle(anchor).position === "static") anchor.style.position = "relative";
       anchor.appendChild(dropdownElement);
 
       document.addEventListener("click", handleDocumentClick);
@@ -61,143 +126,61 @@
       document.removeEventListener("focusin", handleDocumentFocusIn);
    });
 
-   function handleDocumentClick(event) {
-      if (!wrapperElement || !dropdownElement) return;
-      const clickedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
-      if (!clickedInside && isOpen) closeDropdown();
-   }
-
-   function handleDocumentFocusIn(event) {
-      if (!wrapperElement || !dropdownElement) return;
-      const focusedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
-      if (!focusedInside && isOpen) closeDropdown();
-   }
-
-   function closeDropdown() {
-      isOpen = false;
-      searchTerm = displayValue;
-      updateDropdown();
-   }
-
    function updateDropdown() {
       if (!wrapperElement || !dropdownElement) return;
-
-      if (!isOpen) {
-         dropdownElement.style.display = "none";
-         return;
-      }
-
-      dropdownElement.style.display = "block";
+      dropdownElement.style.display = isOpen ? "block" : "none";
+      if (!isOpen) return;
 
       tick().then(() => {
          const anchor = wrapperElement.closest(".item-sheet-component");
          if (!anchor) return;
+         const aRect = anchor.getBoundingClientRect();
+         const wRect = wrapperElement.getBoundingClientRect();
 
-         const anchorRect = anchor.getBoundingClientRect();
-         const wrapperRect = wrapperElement.getBoundingClientRect();
-
-         dropdownElement.style.top = `${wrapperRect.bottom - anchorRect.top}px`;
-         dropdownElement.style.left = `${wrapperRect.left - anchorRect.left}px`;
-         dropdownElement.style.width = `${wrapperRect.width}px`;
+         dropdownElement.style.top = `${wRect.bottom - aRect.top}px`;
+         dropdownElement.style.left = `${wRect.left - aRect.left}px`;
+         dropdownElement.style.width = `${wRect.width}px`;
 
          dropdownElement.innerHTML = "";
-         const content = document.createElement("div");
-         content.style.position = "relative";
-         content.style.maxHeight = maxHeight;
-         content.setAttribute("role", "listbox");
+         const list = document.createElement("div");
+         list.style.position = "relative";
+         list.style.maxHeight = maxHeight;
+         list.setAttribute("role", "listbox");
 
          if (filteredOptions.length) {
-            filteredOptions.forEach((option, i) => {
+            filteredOptions.forEach((opt, i) => {
                const el = document.createElement("div");
                el.className =
                   "combobox-option" +
                   (i === highlightedIndex ? " highlighted" : "") +
-                  (option.value === value ? " selected" : "");
+                  (opt.value === value ? " selected" : "");
                el.setAttribute("role", "option");
-               el.setAttribute("aria-selected", option.value === value);
-               el.textContent = option.label;
-               el.onmousedown = () => handleOptionMousedown(option);
-               content.appendChild(el);
+               el.setAttribute("aria-selected", opt.value === value);
+               el.textContent = opt.label;
+               el.onmousedown = () => selectOption(opt);
+               list.appendChild(el);
             });
          } else if (searchTerm.trim() !== "") {
             const el = document.createElement("div");
             el.className = "combobox-option no-results";
             el.textContent = nomatchplaceholder;
-            content.appendChild(el);
+            list.appendChild(el);
          }
 
-         dropdownElement.appendChild(content);
+         dropdownElement.appendChild(list);
       });
    }
 
-   function handleInputFocus() {
-      if (!disabled) {
-         isOpen = true;
-         searchTerm = "";
-         updateDropdown();
-      }
+   function handleDocumentClick(e) {
+      if (!isOpen) return;
+      const inside = wrapperElement.contains(e.target) || dropdownElement.contains(e.target);
+      if (!inside) closeDropdown();
    }
 
-   function handleInputClick() {
-      if (disabled) return;
-      if (!isOpen) {
-         isOpen = true;
-         updateDropdown();
-      }
-   }
-
-   function handleInputBlur() {}
-
-   function handleInputKeydown(event) {
-      if (disabled) return;
-
-      switch (event.key) {
-         case "ArrowDown":
-            event.preventDefault();
-            if (!isOpen) {
-               isOpen = true;
-               updateDropdown();
-            } else {
-               highlightedIndex = Math.min(highlightedIndex + 1, filteredOptions.length - 1);
-               scrollToHighlighted();
-            }
-            break;
-         case "ArrowUp":
-            event.preventDefault();
-            highlightedIndex = Math.max(highlightedIndex - 1, 0);
-            scrollToHighlighted();
-            break;
-         case "Enter":
-            event.preventDefault();
-            if (isOpen && highlightedIndex >= 0) selectOption(filteredOptions[highlightedIndex]);
-            break;
-         case "Escape":
-            event.preventDefault();
-            event.stopPropagation();
-            if (isOpen) closeDropdown();
-            else searchTerm = displayValue;
-            break;
-         case "Tab":
-            closeDropdown();
-            break;
-      }
-   }
-
-   function selectOption(option) {
-      value = option.value;
-      searchTerm = option.label;
-      closeDropdown();
-      dispatch("select", { value: option.value });
-   }
-
-   async function scrollToHighlighted() {
-      await tick();
-      const el = dropdownElement?.children[0]?.children?.[highlightedIndex];
-      el?.scrollIntoView({ block: "nearest" });
-   }
-
-   function handleOptionMousedown(option) {
-      selectOption(option);
+   function handleDocumentFocusIn(e) {
+      if (!isOpen) return;
+      const inside = wrapperElement.contains(e.target) || dropdownElement.contains(e.target);
+      if (!inside) closeDropdown();
    }
 </script>
 
@@ -206,10 +189,6 @@
       <input
          bind:this={inputElement}
          bind:value={searchTerm}
-         onfocus={handleInputFocus}
-         onclick={handleInputClick}
-         onblur={handleInputBlur}
-         onkeydown={handleInputKeydown}
          {placeholder}
          {disabled}
          class="combobox-input"
@@ -218,6 +197,10 @@
          aria-expanded={isOpen}
          aria-haspopup="listbox"
          aria-controls="combobox-dropdown-list"
+         onfocus={handleInputFocus}
+         onclick={handleInputClick}
+         oninput={handleInputInput}
+         onkeydown={handleInputKeydown}
       />
       <i class="fa-solid fa-magnifying-glass combobox-icon" class:rotated={isOpen}></i>
    </div>

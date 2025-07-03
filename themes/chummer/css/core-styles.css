@@ -964,7 +964,7 @@
   }
   .effects-editor {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 0.5rem;
     max-width: 50rem;
     background-color: transparent;
@@ -973,7 +973,7 @@
     grid-column: span 1;
   }
   .effects-editor > .item-sheet-component:last-of-type {
-    grid-column: span 2;
+    grid-column: span 3;
   }
   .effects-editor .sr3e-inner-background {
     display: flex;
@@ -1372,12 +1372,12 @@
     margin: 0;
   }
   table {
-    width: 100%;
     table-layout: auto;
     box-sizing: border-box;
     padding: 0rem;
     margin: 0rem;
     border-collapse: collapse;
+    width: 100%;
   }
   thead th {
     padding: 0.25rem;
@@ -1395,7 +1395,8 @@
   td input[type="text"],
   td input[type="number"],
   td select,
-  td button {
+  td button,
+  td .combobox-container {
     margin: 0;
     padding: 0;
     min-width: 5rem;
@@ -1827,15 +1828,22 @@
   }
   .combobox-container {
     position: relative;
-    width: 100%;
+    display: inline-block;
+    min-width: 0;
+    width: auto;
+    box-sizing: border-box;
   }
   .combobox-wrapper {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
     position: relative;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     box-shadow: inset 0 0 1rem var(--highlight-color-primary);
     background: var(--highlight-color-primary);
     transition: box-shadow 0.3s ease;
+    box-sizing: border-box;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
     clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
@@ -1862,6 +1870,11 @@
   }
   .combobox-input {
     flex: 1;
+    min-width: 0;
+    max-width: 5rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     padding: 0rem 0.5rem;
     background: transparent;
     outline: none;
@@ -1875,6 +1888,7 @@
     color: #9ca3af;
   }
   .combobox-icon {
+    flex-shrink: 0;
     padding: 0.5rem 0.5rem;
     margin: 0.25rem;
     transition: transform 0.15s ease-in-out;
@@ -1883,7 +1897,7 @@
     text-shadow: 0px 0px 0.25rem var(--highlight-color-primary);
   }
   .combobox-icon.rotated {
-    transform: rotate(180deg);
+    transform: rotate(10deg);
   }
   .combobox-dropdown {
     position: absolute;

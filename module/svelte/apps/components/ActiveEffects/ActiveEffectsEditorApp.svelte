@@ -17,11 +17,19 @@
       });
    }
 
+   //NOTE: Anything non moddable. Add more keys as needed
+   const blockedKeys = [
+      "system.journalId",
+      "system.priority",
+   ];
+
    $effect(() => {
-      propertyOptions = flattenProperties(item.system).map((path) => ({
-         value: path,
-         label: path,
-      }));
+      propertyOptions = flattenProperties(item.system)
+         .filter((path) => !blockedKeys.includes(path))
+         .map((path) => ({
+            value: path,
+            label: path,
+         }));
    });
 
    function commitChanges() {
@@ -34,6 +42,9 @@
    }
 
    function updateChange(index, field, value) {
+      if (field === "key" && value && typeof value === "object" && "value" in value) {
+         value = value.value;
+      }
       const updated = changes.map((c, i) => {
          return i === index ? { ...c, [field]: value } : c;
       });

@@ -10550,40 +10550,35 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-function handleInputClick(_, disabled, isOpen, updateDropdown) {
-  if (disabled()) return;
-  if (!get$2(isOpen)) {
-    set(isOpen, true);
-    updateDropdown();
-  }
+function handleInputClick(_, isOpen, openDropdown) {
+  if (!get$2(isOpen)) openDropdown();
 }
-function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, closeDropdown, searchTerm, displayValue) {
+function handleInputInput(e, isOpen, openDropdown, searchTerm) {
+  if (!get$2(isOpen)) openDropdown();
+  set(searchTerm, proxy(e.target.value));
+}
+function handleInputKeydown(e, disabled, isOpen, openDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, closeDropdown) {
   if (disabled()) return;
-  switch (event2.key) {
+  switch (e.key) {
     case "ArrowDown":
-      event2.preventDefault();
-      if (!get$2(isOpen)) {
-        set(isOpen, true);
-        updateDropdown();
-      } else {
-        set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
-        scrollToHighlighted();
-      }
+      e.preventDefault();
+      if (!get$2(isOpen)) openDropdown();
+      set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
+      scrollToHighlighted();
       break;
     case "ArrowUp":
-      event2.preventDefault();
+      e.preventDefault();
       set(highlightedIndex, proxy(Math.max(get$2(highlightedIndex) - 1, 0)));
       scrollToHighlighted();
       break;
     case "Enter":
-      event2.preventDefault();
+      e.preventDefault();
       if (get$2(isOpen) && get$2(highlightedIndex) >= 0) selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
       break;
     case "Escape":
-      event2.preventDefault();
-      event2.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
       if (get$2(isOpen)) closeDropdown();
-      else set(searchTerm, proxy(get$2(displayValue)));
       break;
     case "Tab":
       closeDropdown();
@@ -10602,24 +10597,43 @@ function ComboSearch($$anchor, $$props) {
   let inputElement = state(void 0);
   let wrapperElement = state(void 0);
   let dropdownElement;
-  let displayValue = /* @__PURE__ */ derived$1(() => {
-    var _a;
-    return ((_a = options().find((opt) => opt.value === value())) == null ? void 0 : _a.label) ?? "";
-  });
   user_effect(() => {
     if (!get$2(isOpen)) {
-      set(searchTerm, proxy(get$2(displayValue)));
+      const selected = options().find((o) => o.value === value());
+      set(searchTerm, proxy((selected == null ? void 0 : selected.label) ?? ""));
     }
   });
   user_effect(() => {
-    if (get$2(searchTerm).trim() === "") {
-      set(filteredOptions, proxy(options()));
-    } else {
-      set(filteredOptions, proxy(options().filter((opt) => opt.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
+    if (get$2(isOpen)) {
+      set(filteredOptions, proxy(get$2(searchTerm).trim() === "" ? options() : options().filter((o) => o.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
+      set(highlightedIndex, -1);
+      updateDropdown();
     }
-    set(highlightedIndex, -1);
-    updateDropdown();
   });
+  function openDropdown() {
+    if (disabled() || get$2(isOpen)) return;
+    set(isOpen, true);
+    set(searchTerm, "");
+    updateDropdown();
+  }
+  function closeDropdown() {
+    set(isOpen, false);
+    updateDropdown();
+  }
+  function handleInputFocus() {
+    openDropdown();
+  }
+  function selectOption(opt) {
+    value(opt.value);
+    closeDropdown();
+    dispatch("select", { value: opt.value });
+  }
+  async function scrollToHighlighted() {
+    var _a, _b;
+    await tick();
+    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
+    el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
+  }
   onMount(() => {
     dropdownElement = document.createElement("div");
     dropdownElement.classList.add("combobox-dropdown");
@@ -10627,9 +10641,7 @@ function ComboSearch($$anchor, $$props) {
     dropdownElement.style.position = "absolute";
     dropdownElement.style.zIndex = "9999";
     const anchor = get$2(wrapperElement).closest(".item-sheet-component") ?? document.body;
-    if (getComputedStyle(anchor).position === "static") {
-      anchor.style.position = "relative";
-    }
+    if (getComputedStyle(anchor).position === "static") anchor.style.position = "relative";
     anchor.appendChild(dropdownElement);
     document.addEventListener("click", handleDocumentClick);
     document.addEventListener("focusin", handleDocumentFocusIn);
@@ -10639,105 +10651,72 @@ function ComboSearch($$anchor, $$props) {
     document.removeEventListener("click", handleDocumentClick);
     document.removeEventListener("focusin", handleDocumentFocusIn);
   });
-  function handleDocumentClick(event2) {
-    if (!get$2(wrapperElement) || !dropdownElement) return;
-    const clickedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
-    if (!clickedInside && get$2(isOpen)) closeDropdown();
-  }
-  function handleDocumentFocusIn(event2) {
-    if (!get$2(wrapperElement) || !dropdownElement) return;
-    const focusedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
-    if (!focusedInside && get$2(isOpen)) closeDropdown();
-  }
-  function closeDropdown() {
-    set(isOpen, false);
-    set(searchTerm, proxy(get$2(displayValue)));
-    updateDropdown();
-  }
   function updateDropdown() {
     if (!get$2(wrapperElement) || !dropdownElement) return;
-    if (!get$2(isOpen)) {
-      dropdownElement.style.display = "none";
-      return;
-    }
-    dropdownElement.style.display = "block";
+    dropdownElement.style.display = get$2(isOpen) ? "block" : "none";
+    if (!get$2(isOpen)) return;
     tick().then(() => {
       const anchor = get$2(wrapperElement).closest(".item-sheet-component");
       if (!anchor) return;
-      const anchorRect = anchor.getBoundingClientRect();
-      const wrapperRect = get$2(wrapperElement).getBoundingClientRect();
-      dropdownElement.style.top = `${wrapperRect.bottom - anchorRect.top}px`;
-      dropdownElement.style.left = `${wrapperRect.left - anchorRect.left}px`;
-      dropdownElement.style.width = `${wrapperRect.width}px`;
+      const aRect = anchor.getBoundingClientRect();
+      const wRect = get$2(wrapperElement).getBoundingClientRect();
+      dropdownElement.style.top = `${wRect.bottom - aRect.top}px`;
+      dropdownElement.style.left = `${wRect.left - aRect.left}px`;
+      dropdownElement.style.width = `${wRect.width}px`;
       dropdownElement.innerHTML = "";
-      const content = document.createElement("div");
-      content.style.position = "relative";
-      content.style.maxHeight = maxHeight();
-      content.setAttribute("role", "listbox");
+      const list = document.createElement("div");
+      list.style.position = "relative";
+      list.style.maxHeight = maxHeight();
+      list.setAttribute("role", "listbox");
       if (get$2(filteredOptions).length) {
-        get$2(filteredOptions).forEach((option, i) => {
+        get$2(filteredOptions).forEach((opt, i) => {
           const el = document.createElement("div");
-          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (option.value === value() ? " selected" : "");
+          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (opt.value === value() ? " selected" : "");
           el.setAttribute("role", "option");
-          el.setAttribute("aria-selected", option.value === value());
-          el.textContent = option.label;
-          el.onmousedown = () => handleOptionMousedown(option);
-          content.appendChild(el);
+          el.setAttribute("aria-selected", opt.value === value());
+          el.textContent = opt.label;
+          el.onmousedown = () => selectOption(opt);
+          list.appendChild(el);
         });
       } else if (get$2(searchTerm).trim() !== "") {
         const el = document.createElement("div");
         el.className = "combobox-option no-results";
         el.textContent = nomatchplaceholder();
-        content.appendChild(el);
+        list.appendChild(el);
       }
-      dropdownElement.appendChild(content);
+      dropdownElement.appendChild(list);
     });
   }
-  function handleInputFocus() {
-    if (!disabled()) {
-      set(isOpen, true);
-      set(searchTerm, "");
-      updateDropdown();
-    }
+  function handleDocumentClick(e) {
+    if (!get$2(isOpen)) return;
+    const inside = get$2(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
+    if (!inside) closeDropdown();
   }
-  function handleInputBlur() {
-  }
-  function selectOption(option) {
-    value(option.value);
-    set(searchTerm, proxy(option.label));
-    closeDropdown();
-    dispatch("select", { value: option.value });
-  }
-  async function scrollToHighlighted() {
-    var _a, _b;
-    await tick();
-    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
-    el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
-  }
-  function handleOptionMousedown(option) {
-    selectOption(option);
+  function handleDocumentFocusIn(e) {
+    if (!get$2(isOpen)) return;
+    const inside = get$2(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
+    if (!inside) closeDropdown();
   }
   var div = root$g();
   var div_1 = child(div);
   var input = child(div_1);
-  input.__click = [
-    handleInputClick,
-    disabled,
+  input.__click = [handleInputClick, isOpen, openDropdown];
+  input.__input = [
+    handleInputInput,
     isOpen,
-    updateDropdown
+    openDropdown,
+    searchTerm
   ];
   input.__keydown = [
     handleInputKeydown,
     disabled,
     isOpen,
-    updateDropdown,
+    openDropdown,
     highlightedIndex,
     filteredOptions,
     scrollToHighlighted,
     selectOption,
-    closeDropdown,
-    searchTerm,
-    displayValue
+    closeDropdown
   ];
   bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
   var i_1 = sibling(input, 2);
@@ -10751,12 +10730,11 @@ function ComboSearch($$anchor, $$props) {
     toggle_class(i_1, "rotated", get$2(isOpen));
   });
   event("focus", input, handleInputFocus);
-  event("blur", input, handleInputBlur);
   bind_value(input, () => get$2(searchTerm), ($$value) => set(searchTerm, $$value));
   append($$anchor, div);
   pop();
 }
-delegate(["click", "keydown"]);
+delegate(["click", "input", "keydown"]);
 function addChange(_, changes, commitChanges) {
   set(changes, proxy([
     ...get$2(changes),
@@ -10780,13 +10758,17 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       return typeof value === "object" && value !== null && !Array.isArray(value) ? flattenProperties(value, path) : [path];
     });
   }
+  const blockedKeys = ["system.journalId", "system.priority"];
   user_effect(() => {
-    set(propertyOptions, proxy(flattenProperties($$props.item.system).map((path) => ({ value: path, label: path }))));
+    set(propertyOptions, proxy(flattenProperties($$props.item.system).filter((path) => !blockedKeys.includes(path)).map((path) => ({ value: path, label: path }))));
   });
   function commitChanges() {
     effectsObject().update({ changes: get$2(changes) });
   }
   function updateChange(index2, field, value) {
+    if (field === "key" && value && typeof value === "object" && "value" in value) {
+      value = value.value;
+    }
     const updated = get$2(changes).map((c, i) => {
       return i === index2 ? { ...c, [field]: value } : c;
     });
