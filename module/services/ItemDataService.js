@@ -5,7 +5,7 @@ export default class ItemDataService {
       return game.items.filter((item) => item.type === name);
    }
 
-   static getAllmetatypes(metatypes) {
+   static getAllMetatypes(metatypes) {
       return metatypes
          .filter((m) => m && typeof m.name === "string" && typeof m.id === "string" && m.system?.priority)
          .map((metatype) => ({
@@ -105,7 +105,7 @@ export default class ItemDataService {
       };
    }
 
-   static getDifficultieGradings(config) {
+   static getDifficultyGradings(config) {
       let difficulty = [
          "simple",
          "routine",

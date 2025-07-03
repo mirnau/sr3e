@@ -307,7 +307,8 @@
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1.4142rem), calc(100% - 1.4142rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     background-color: #ff2090;
   }
   .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card {
@@ -340,6 +341,7 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    margin-top: 0.25rem;
   }
   .item-sheet-component .sr3e-inner-background-container .sr3e-inner-background .stat-card .title-container h4 {
     width: 80%;
@@ -961,10 +963,28 @@
     /* space for the icon */
   }
   .effects-editor {
-    background-color: transparent;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.5rem;
     max-width: 50rem;
+    background-color: transparent;
+  }
+  .effects-editor > .item-sheet-component:first-of-type {
+    grid-column: span 1;
+  }
+  .effects-editor > .item-sheet-component:last-of-type {
+    grid-column: span 2;
+  }
+  .effects-editor .sr3e-inner-background {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0;
+    margin: 0;
+  }
+  .effects-editor .input-container-text {
+    text-align: center;
+    justify-content: center;
   }
   .form-group {
     padding: 0.5rem;
@@ -1343,6 +1363,63 @@
   }
   menu.controls-dropdown.expanded {
     z-index: 999;
+  }
+  .table-wrapper {
+    max-height: 50vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+  table {
+    width: 100%;
+    table-layout: auto;
+    box-sizing: border-box;
+    padding: 0rem;
+    margin: 0rem;
+    border-collapse: collapse;
+  }
+  thead th {
+    padding: 0.25rem;
+    background-color: #1b1f24;
+    text-align: left;
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.25rem;
+    background-color: #1b1f24;
+    vertical-align: middle;
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
+  }
+  td input[type="text"],
+  td input[type="number"],
+  td select,
+  td button {
+    margin: 0;
+    padding: 0;
+    min-width: 5rem;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 10rem;
+  }
+  tr:nth-child(even) > td {
+    box-shadow: inset 0 0 30px var(--highlight-color-secondary);
+  }
+  thead > tr:first-child > th:first-child {
+    clip-path: polygon(0.5rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  thead > tr:last-child > th:last-child {
+    clip-path: polygon(0rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0rem);
+  }
+  tbody > tr > td:first-child {
+    clip-path: polygon(0.5rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  tbody > tr > td:last-child {
+    clip-path: polygon(0rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0rem);
+  }
+  button {
+    white-space: nowrap;
   }
   .chat-message.message {
     position: relative;
@@ -1814,9 +1891,10 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: var(--highlight-color-primary);
     margin-top: 2px;
-    overflow-y: auto;
+    max-height: 200px;
+    background: var(--highlight-color-primary);
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary);
     clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   .combobox-dropdown::before {
@@ -1827,8 +1905,12 @@
     background: var(--background-color);
     box-shadow: inset 0 0 30px #1d282c, inset 0 0 1.5rem var(--highlight-color-primary);
     pointer-events: none;
-    transition: box-shadow 0.15s ease-in-out;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.75rem) 0px, 100% 0.75rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .combobox-dropdown > div {
+    position: relative;
+    overflow-y: auto;
+    max-height: inherit;
   }
   .combobox-option {
     padding: 0.5rem 0.5rem;

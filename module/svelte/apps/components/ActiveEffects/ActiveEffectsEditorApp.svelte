@@ -1,99 +1,101 @@
 <script>
+   import Image from "../basic/Image.svelte";
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
+   import ComboSearch from "../basic/ComboSearch.svelte";
 
-   let { item, effect, config } = $props();
+   let { item, effect: effectsObject, config } = $props();
+   let changes = $state([...effectsObject.changes]);
 
-   function updateEffect(updates) {
-      effect.update(updates);
+   let propertyOptions = $state([]);
+
+   function flattenProperties(obj, prefix = "system") {
+      return Object.entries(obj).flatMap(([key, value]) => {
+         const path = `${prefix}.${key}`;
+         return typeof value === "object" && value !== null && !Array.isArray(value)
+            ? flattenProperties(value, path)
+            : [path];
+      });
+   }
+
+   $effect(() => {
+      propertyOptions = flattenProperties(item.system).map((path) => ({
+         value: path,
+         label: path,
+      }));
+   });
+
+   function commitChanges() {
+      effectsObject.update({ changes });
    }
 
    function addChange() {
-      const changes = [...(effect.changes || []), { key: "", mode: 1, value: "", priority: 0 }];
-      updateEffect({ changes });
+      changes = [...changes, { key: "", mode: 1, value: "", priority: 0 }];
+      commitChanges();
    }
 
    function updateChange(index, field, value) {
-      const changes = [...effect.changes];
-      changes[index][field] = value;
-      updateEffect({ changes });
+      const updated = changes.map((c, i) => {
+         return i === index ? { ...c, [field]: value } : c;
+      });
+      changes = updated;
+      commitChanges();
    }
 
    function deleteChange(index) {
-      const changes = effect.changes.filter((_, i) => i !== index);
-      updateEffect({ changes });
+      changes.splice(index, 1);
+      changes = [...changes];
+      commitChanges();
    }
 </script>
 
 <div class="effects-editor">
    <ItemSheetComponent>
-      <div class="left-column">
-         <h3>Effect Properties</h3>
-         <div class="stat-card-grid single-column">
-            <div class="stat-card">
-               <h4>Name:</h4>
-               <input type="text" value={effect.name} onchange={(e) => updateEffect({ name: e.target.value })} />
-            </div>
+      <h3>Effect Properties</h3>
+      <div class="stat-grid single-column">
+         <Image src={effectsObject.img} title={effectsObject.name} entity={effectsObject} />
 
-            <div class="stat-card">
-               <h4>Icon:</h4>
-               <input type="text" value={effect.icon} onchange={(e) => updateEffect({ icon: e.target.value })} />
-            </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>Name:</h4>
+            <input type="text" bind:value={effectsObject.name} />
+         </div>
 
-            <div class="stat-card">
-               <h4>Transfer:</h4>
-               <input
-                  type="checkbox"
-                  checked={effect.transfer}
-                  onchange={(e) => updateEffect({ transfer: e.target.checked })}
-               />
-            </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>Transfer:</h4>
+            <input type="checkbox" bind:checked={effectsObject.transfer} />
+         </div>
 
-            <div class="stat-card">
-               <h4>Disabled:</h4>
-               <input
-                  type="checkbox"
-                  checked={effect.disabled}
-                  onchange={(e) => updateEffect({ disabled: e.target.checked })}
-               />
-            </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>Disabled:</h4>
+            <input type="checkbox" bind:checked={effectsObject.disabled} />
+         </div>
 
-            <div class="stat-card">
-               <h4>Duration Type:</h4>
-               <select value={effect.duration.type} onchange={(e) => updateEffect({ "duration.type": e.target.value })}>
-                  <option value="none">None</option>
-                  <option value="turns">Turns</option>
-                  <option value="seconds">Seconds</option>
-               </select>
-            </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>Duration Type:</h4>
+            <select bind:value={effectsObject.duration.type}>
+               <option value="none">None</option>
+               <option value="turns">Turns</option>
+               <option value="seconds">Seconds</option>
+            </select>
+         </div>
 
-            <div class="stat-card">
-               <h4>Duration Value:</h4>
-               <input
-                  type="number"
-                  value={effect.duration.value}
-                  onchange={(e) => updateEffect({ "duration.value": parseInt(e.target.value) })}
-               />
-            </div>
-
-            <div class="stat-card">
-               <h4>Duration h4:</h4>
-               <input
-                  type="text"
-                  value={effect.duration.h4}
-                  onchange={(e) => updateEffect({ "duration.h4": e.target.value })}
-               />
-            </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>Duration Value:</h4>
+            <input type="number" bind:value={effectsObject.duration.value} />
          </div>
       </div>
    </ItemSheetComponent>
-   <ItemSheetComponent>
-      <div class="right-column">
-         <div class="table-header">
-            <h3>Changes</h3>
-            <button onclick={addChange}>➕ Add Change</button>
-         </div>
 
-         <table class="effect-table">
+   <ItemSheetComponent>
+      <h1>Changes</h1>
+      <button onclick={addChange}>➕ Add Change</button>
+
+      <div class="table-wrapper">
+         <table>
             <thead>
                <tr>
                   <th>Attribute Key</th>
@@ -104,47 +106,60 @@
                </tr>
             </thead>
             <tbody>
-               {#each effect.changes || [] as change, i}
+               {#each changes as change, i}
                   <tr>
                      <td>
-                        <input
-                           type="text"
-                           value={change.key}
-                           onchange={(e) => updateChange(i, "key", e.target.value)}
-                        />
+                        <div class="stat-card">
+                           <div class="stat-card-background"></div>
+                           <ComboSearch
+                              options={propertyOptions}
+                              placeholder="Select property"
+                              nomatchplaceholder="No match"
+                              bind:value={change.key}
+                              on:select={(e) => updateChange(i, "key", e.detail)}
+                           />
+                        </div>
                      </td>
                      <td>
-                        <select value={change.mode} onchange={(e) => updateChange(i, "mode", parseInt(e.target.value))}>
-                           {#each Object.entries(CONST.ACTIVE_EFFECT_MODES) as [h4, val]}
-                              <option value={val}>{h4}</option>
-                           {/each}
-                        </select>
+                        <div class="stat-card">
+                           <div class="stat-card-background"></div>
+                           <select
+                              value={change.mode}
+                              onchange={(e) => updateChange(i, "mode", parseInt(e.target.value))}
+                           >
+                              {#each Object.entries(CONST.ACTIVE_EFFECT_MODES) as [label, val]}
+                                 <option value={val}>{label}</option>
+                              {/each}
+                           </select>
+                        </div>
                      </td>
                      <td>
-                        <input
-                           type="text"
-                           value={change.value}
-                           onchange={(e) => updateChange(i, "value", e.target.value)}
-                        />
+                        <div class="stat-card">
+                           <div class="stat-card-background"></div>
+                           <input
+                              type="text"
+                              value={change.value}
+                              oninput={(e) => updateChange(i, "value", e.target.value)}
+                           />
+                        </div>
                      </td>
                      <td>
-                        <input
-                           type="number"
-                           value={change.priority}
-                           onchange={(e) => updateChange(i, "priority", parseInt(e.target.value))}
-                        />
+                        <div class="stat-card">
+                           <div class="stat-card-background"></div>
+                           <input
+                              type="number"
+                              value={change.priority}
+                              oninput={(e) => updateChange(i, "priority", +e.target.value)}
+                           />
+                        </div>
                      </td>
                      <td>
                         <button onclick={() => deleteChange(i)}>🗑</button>
                      </td>
                   </tr>
-               {:else}
-                  <tr>
-                     <td colspan="5" class="empty-row">No changes defined</td>
-                  </tr>
                {/each}
             </tbody>
          </table>
-      </div></ItemSheetComponent
-   >
+      </div>
+   </ItemSheetComponent>
 </div>

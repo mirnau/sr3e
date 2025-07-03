@@ -38,7 +38,7 @@
    let readwrite;
    let focusables = [];
 
-   let difficulties = ItemDataService.getDifficultieGradings(config);
+   let difficulties = ItemDataService.getDifficultyGradings(config);
 
    onMount(() => {
       updateFocusables();

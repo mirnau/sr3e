@@ -40,7 +40,8 @@
       }
 
       .sr3e-inner-background {
-         display: grid;
+         display: flex;
+         flex-direction: column;
          background-color: @default-fake-shadow-color;
 
          .stat-card {
@@ -73,6 +74,7 @@
                width: 100%;
                display: flex;
                justify-content: center;
+               margin-top: 0.25rem;
 
                h4 {
                   width: 80%;

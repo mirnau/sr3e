@@ -1,6 +1,28 @@
 .effects-editor {
-   background-color: transparent;
-   display: flex;
+   display: grid;
+   grid-template-columns: 1fr 1fr 1fr;
    gap: 0.5rem;
    max-width: 50rem;
+   background-color: transparent;
+
+   > .item-sheet-component:first-of-type {
+      grid-column: span 1;
+   }
+
+   > .item-sheet-component:last-of-type {
+      grid-column: span 2;
+   }
+
+   .sr3e-inner-background {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0;
+      margin: 0;
+   }
+
+   .input-container-text {
+      text-align: center;
+      justify-content: center;
+   }
 }

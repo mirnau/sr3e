@@ -55,7 +55,7 @@
     });
 
     const metatypeDropdownOptions = $derived(
-        ItemDataService.getAllmetatypes(metatypes),
+        ItemDataService.getAllMetatypes(metatypes),
     );
     const magicsDropdownOptions = $derived(
         ItemDataService.getAllMagics(magics),

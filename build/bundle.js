@@ -4045,7 +4045,7 @@ class ItemDataService {
   static getAllItemsOfType(name) {
     return game.items.filter((item2) => item2.type === name);
   }
-  static getAllmetatypes(metatypes) {
+  static getAllMetatypes(metatypes) {
     return metatypes.filter((m) => {
       var _a;
       return m && typeof m.name === "string" && typeof m.id === "string" && ((_a = m.system) == null ? void 0 : _a.priority);
@@ -4142,7 +4142,7 @@ class ItemDataService {
       }
     };
   }
-  static getDifficultieGradings(config) {
+  static getDifficultyGradings(config) {
     let difficulty = [
       "simple",
       "routine",
@@ -4203,7 +4203,7 @@ function RollComposerComponent($$anchor, $$props) {
   let linkedAttributeString;
   let linkedAttributeStore;
   let focusables = [];
-  let difficulties = ItemDataService.getDifficultieGradings($$props.config);
+  let difficulties = ItemDataService.getDifficultyGradings($$props.config);
   onMount(() => {
     updateFocusables();
     selectEl == null ? void 0 : selectEl.focus();
@@ -7750,7 +7750,7 @@ var on_keydown_2 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$2(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_5$6 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_5$5 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$9 = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$y = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
@@ -7880,7 +7880,7 @@ function ActiveSkillCard($$anchor, $$props) {
       var node_2 = sibling(div_7, 2);
       {
         var consequent_2 = ($$anchor3) => {
-          var div_8 = root_5$6();
+          var div_8 = root_5$5();
           each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
             var div_9 = root_6$3();
             div_9.__click = [on_click_1$5, Roll2, skill, specialization];
@@ -10223,7 +10223,7 @@ var on_input = (__2, showDropdown, selected) => {
 };
 var on_mousedown = (__3, selectJournal, option) => selectJournal(get$2(option));
 var root_4$7 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
-var root_5$5 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
+var root_5$4 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
 var root_2$9 = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
 var root_1$d = /* @__PURE__ */ template(`<div class="popup"><div class="popup-container"><div class="input-group"><input type="text"></div> <div class="buttons"><button>OK</button> <button>Cancel</button></div></div> <!></div>`);
 function JournalSearchModal($$anchor, $$props) {
@@ -10317,7 +10317,7 @@ function JournalSearchModal($$anchor, $$props) {
               append($$anchor4, fragment_1);
             };
             var alternate = ($$anchor4) => {
-              var li_1 = root_5$5();
+              var li_1 = root_5$4();
               append($$anchor4, li_1);
             };
             if_block(node_2, ($$render) => {
@@ -10463,7 +10463,7 @@ function ItemSheetComponent($$anchor, $$props) {
 var root_1$c = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$6 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$8 = /* @__PURE__ */ template(`<select></select>`);
-var root_5$4 = /* @__PURE__ */ template(`<input>`);
+var root_5$3 = /* @__PURE__ */ template(`<input>`);
 var root$h = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4 class="no-margin uppercase"> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
   push($$props, true);
@@ -10521,7 +10521,7 @@ function StatCard($$anchor, $$props) {
           append($$anchor3, select);
         };
         var alternate = ($$anchor3) => {
-          var input_1 = root_5$4();
+          var input_1 = root_5$3();
           input_1.__change = update;
           template_effect(() => {
             set_attribute(input_1, "type", type());
@@ -10550,158 +10550,355 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-function addChange(__1, $$props, updateEffect) {
-  const changes = [
-    ...$$props.effect.changes || [],
-    { key: "", mode: 1, value: "", priority: 0 }
-  ];
-  updateEffect({ changes });
+function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, searchTerm, displayValue, inputElement) {
+  var _a;
+  if (disabled()) return;
+  switch (event2.key) {
+    case "ArrowDown":
+      event2.preventDefault();
+      if (!get$2(isOpen)) {
+        set(isOpen, true);
+        updateDropdown();
+      } else {
+        set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
+        scrollToHighlighted();
+      }
+      break;
+    case "ArrowUp":
+      event2.preventDefault();
+      set(highlightedIndex, proxy(Math.max(get$2(highlightedIndex) - 1, 0)));
+      scrollToHighlighted();
+      break;
+    case "Enter":
+      event2.preventDefault();
+      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) {
+        selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
+      }
+      break;
+    case "Escape":
+      event2.preventDefault();
+      set(isOpen, false);
+      set(searchTerm, proxy(get$2(displayValue)));
+      (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
+      updateDropdown();
+      break;
+    case "Tab":
+      set(isOpen, false);
+      set(searchTerm, proxy(get$2(displayValue)));
+      updateDropdown();
+      break;
+  }
 }
-var on_change$7 = (e, updateEffect) => updateEffect({ name: e.target.value });
-var on_change_1$2 = (e, updateEffect) => updateEffect({ icon: e.target.value });
-var on_change_2$1 = (e, updateEffect) => updateEffect({ transfer: e.target.checked });
-var on_change_3$1 = (e, updateEffect) => updateEffect({ disabled: e.target.checked });
-var on_change_4 = (e, updateEffect) => updateEffect({ "duration.type": e.target.value });
-var on_change_5 = (e, updateEffect) => updateEffect({ "duration.value": parseInt(e.target.value) });
-var on_change_6 = (e, updateEffect) => updateEffect({ "duration.h4": e.target.value });
-var root_1$b = /* @__PURE__ */ template(`<div class="left-column"><h3>Effect Properties</h3> <div class="stat-card-grid single-column"><div class="stat-card"><h4>Name:</h4> <input type="text"></div> <div class="stat-card"><h4>Icon:</h4> <input type="text"></div> <div class="stat-card"><h4>Transfer:</h4> <input type="checkbox"></div> <div class="stat-card"><h4>Disabled:</h4> <input type="checkbox"></div> <div class="stat-card"><h4>Duration Type:</h4> <select><option>None</option><option>Turns</option><option>Seconds</option></select></div> <div class="stat-card"><h4>Duration Value:</h4> <input type="number"></div> <div class="stat-card"><h4>Duration h4:</h4> <input type="text"></div></div></div>`);
-var root_4$5 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3$7 = /* @__PURE__ */ template(`<tr><td><input type="text"></td><td><select></select></td><td><input type="text"></td><td><input type="number"></td><td><button>🗑</button></td></tr>`);
-var root_5$3 = /* @__PURE__ */ template(`<tr><td colspan="5" class="empty-row">No changes defined</td></tr>`);
-var root_2$8 = /* @__PURE__ */ template(`<div class="right-column"><div class="table-header"><h3>Changes</h3> <button>➕ Add Change</button></div> <table class="effect-table"><thead><tr><th>Attribute Key</th><th>Change Mode</th><th>Effect Value</th><th>Priority</th><th>Actions</th></tr></thead><tbody></tbody></table></div>`);
-var root$g = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
-function ActiveEffectsEditorApp($$anchor, $$props) {
+var root$g = /* @__PURE__ */ template(`<div class="combobox-container"><div class="combobox-wrapper"><input class="combobox-input" role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
+function ComboSearch($$anchor, $$props) {
   push($$props, true);
-  function updateEffect(updates) {
-    $$props.effect.update(updates);
+  const dispatch = createEventDispatcher();
+  let options = prop($$props, "options", 19, () => []), value = prop($$props, "value", 15, ""), placeholder = prop($$props, "placeholder", 3, "Search..."), nomatchplaceholder = prop($$props, "nomatchplaceholder", 3, "No matches found..."), disabled = prop($$props, "disabled", 3, false), maxHeight = prop($$props, "maxHeight", 3, "200px");
+  let isOpen = state(false);
+  let searchTerm = state("");
+  let filteredOptions = state(proxy([]));
+  let highlightedIndex = state(-1);
+  let inputElement = state(void 0);
+  let wrapperElement = state(void 0);
+  let dropdownElement;
+  let displayValue = /* @__PURE__ */ derived$1(() => {
+    var _a;
+    return ((_a = options().find((opt) => opt.value === value())) == null ? void 0 : _a.label) ?? "";
+  });
+  user_effect(() => {
+    if (!get$2(isOpen)) {
+      set(searchTerm, proxy(get$2(displayValue)));
+    }
+  });
+  user_effect(() => {
+    if (get$2(searchTerm).trim() === "") {
+      set(filteredOptions, proxy(options()));
+    } else {
+      set(filteredOptions, proxy(options().filter((opt) => opt.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
+    }
+    set(highlightedIndex, -1);
+    updateDropdown();
+  });
+  onMount(() => {
+    dropdownElement = document.createElement("div");
+    dropdownElement.classList.add("combobox-dropdown");
+    dropdownElement.id = "combobox-dropdown-list";
+    dropdownElement.style.position = "absolute";
+    dropdownElement.style.zIndex = "9999";
+    const anchor = get$2(wrapperElement).closest(".item-sheet-component") ?? document.body;
+    if (getComputedStyle(anchor).position === "static") {
+      anchor.style.position = "relative";
+    }
+    anchor.appendChild(dropdownElement);
+  });
+  onDestroy(() => {
+    dropdownElement == null ? void 0 : dropdownElement.remove();
+  });
+  function updateDropdown() {
+    if (!get$2(isOpen) || !get$2(wrapperElement) || !dropdownElement) return;
+    tick().then(() => {
+      const anchor = get$2(wrapperElement).closest(".item-sheet-component");
+      if (!anchor) return;
+      const anchorRect = anchor.getBoundingClientRect();
+      const wrapperRect = get$2(wrapperElement).getBoundingClientRect();
+      const top = wrapperRect.bottom - anchorRect.top;
+      const left = wrapperRect.left - anchorRect.left;
+      dropdownElement.style.top = `${top}px`;
+      dropdownElement.style.left = `${left}px`;
+      dropdownElement.style.width = `${wrapperRect.width}px`;
+      dropdownElement.innerHTML = "";
+      const content = document.createElement("div");
+      content.style.position = "relative";
+      content.style.maxHeight = maxHeight();
+      content.setAttribute("role", "listbox");
+      if (get$2(filteredOptions).length > 0) {
+        get$2(filteredOptions).forEach((option, i) => {
+          const el = document.createElement("div");
+          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (option.value === value() ? " selected" : "");
+          el.setAttribute("role", "option");
+          el.setAttribute("aria-selected", option.value === value());
+          el.textContent = option.label;
+          el.onmousedown = () => handleOptionMousedown(option);
+          content.appendChild(el);
+        });
+      } else if (get$2(searchTerm).trim() !== "") {
+        const el = document.createElement("div");
+        el.className = "combobox-option no-results";
+        el.textContent = nomatchplaceholder();
+        content.appendChild(el);
+      }
+      dropdownElement.appendChild(content);
+    });
   }
-  function updateChange(index2, field, value) {
-    const changes = [...$$props.effect.changes];
-    changes[index2][field] = value;
-    updateEffect({ changes });
+  function handleInputFocus() {
+    if (!disabled()) {
+      set(isOpen, true);
+      set(searchTerm, "");
+      updateDropdown();
+    }
   }
-  function deleteChange(index2) {
-    const changes = $$props.effect.changes.filter((_, i) => i !== index2);
-    updateEffect({ changes });
+  function handleInputBlur() {
+    setTimeout(
+      () => {
+        set(isOpen, false);
+        set(searchTerm, proxy(get$2(displayValue)));
+        updateDropdown();
+      },
+      150
+    );
+  }
+  function selectOption(option) {
+    var _a;
+    value(option.value);
+    set(searchTerm, proxy(option.label));
+    set(isOpen, false);
+    (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
+    dispatch("select", { value: option.value });
+    updateDropdown();
+  }
+  async function scrollToHighlighted() {
+    var _a, _b;
+    await tick();
+    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
+    el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
+  }
+  function handleOptionMousedown(option) {
+    selectOption(option);
   }
   var div = root$g();
+  var div_1 = child(div);
+  var input = child(div_1);
+  input.__keydown = [
+    handleInputKeydown,
+    disabled,
+    isOpen,
+    updateDropdown,
+    highlightedIndex,
+    filteredOptions,
+    scrollToHighlighted,
+    selectOption,
+    searchTerm,
+    displayValue,
+    inputElement
+  ];
+  bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
+  var i_1 = sibling(input, 2);
+  bind_this(div_1, ($$value) => set(wrapperElement, $$value), () => get$2(wrapperElement));
+  template_effect(() => {
+    toggle_class(div_1, "disabled", disabled());
+    set_attribute(input, "placeholder", placeholder());
+    input.disabled = disabled();
+    set_attribute(input, "aria-expanded", get$2(isOpen));
+    toggle_class(input, "open", get$2(isOpen));
+    toggle_class(i_1, "rotated", get$2(isOpen));
+  });
+  event("focus", input, handleInputFocus);
+  event("blur", input, handleInputBlur);
+  bind_value(input, () => get$2(searchTerm), ($$value) => set(searchTerm, $$value));
+  append($$anchor, div);
+  pop();
+}
+delegate(["keydown"]);
+function addChange(_, changes, commitChanges) {
+  set(changes, proxy([
+    ...get$2(changes),
+    { key: "", mode: 1, value: "", priority: 0 }
+  ]));
+  commitChanges();
+}
+var root_1$b = /* @__PURE__ */ template(`<h3>Effect Properties</h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4>Name:</h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Transfer:</h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Disabled:</h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Duration Type:</h4> <select><option>None</option><option>Turns</option><option>Seconds</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Duration Value:</h4> <input type="number"></div></div>`, 1);
+var root_4$5 = /* @__PURE__ */ template(`<option> </option>`);
+var root_3$7 = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
+var root_2$8 = /* @__PURE__ */ template(`<h1>Changes</h1> <button>➕ Add Change</button> <div class="table-wrapper"><table><thead><tr><th>Attribute Key</th><th>Change Mode</th><th>Effect Value</th><th>Priority</th><th>Actions</th></tr></thead><tbody></tbody></table></div>`, 1);
+var root$f = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
+function ActiveEffectsEditorApp($$anchor, $$props) {
+  push($$props, true);
+  let effectsObject = prop($$props, "effect", 7);
+  let changes = state(proxy([...effectsObject().changes]));
+  let propertyOptions = state(proxy([]));
+  function flattenProperties(obj, prefix = "system") {
+    return Object.entries(obj).flatMap(([key, value]) => {
+      const path = `${prefix}.${key}`;
+      return typeof value === "object" && value !== null && !Array.isArray(value) ? flattenProperties(value, path) : [path];
+    });
+  }
+  user_effect(() => {
+    set(propertyOptions, proxy(flattenProperties($$props.item.system).map((path) => ({ value: path, label: path }))));
+  });
+  function commitChanges() {
+    effectsObject().update({ changes: get$2(changes) });
+  }
+  function updateChange(index2, field, value) {
+    const updated = get$2(changes).map((c, i) => {
+      return i === index2 ? { ...c, [field]: value } : c;
+    });
+    set(changes, proxy(updated));
+    commitChanges();
+  }
+  function deleteChange(index2) {
+    get$2(changes).splice(index2, 1);
+    set(changes, proxy([...get$2(changes)]));
+    commitChanges();
+  }
+  var div = root$f();
   var node = child(div);
   ItemSheetComponent(node, {
     children: ($$anchor2, $$slotProps) => {
-      var div_1 = root_1$b();
-      var div_2 = sibling(child(div_1), 2);
-      var div_3 = child(div_2);
-      var input = sibling(child(div_3), 2);
-      input.__change = [on_change$7, updateEffect];
+      var fragment = root_1$b();
+      var div_1 = sibling(first_child(fragment), 2);
+      var node_1 = child(div_1);
+      Image(node_1, {
+        get src() {
+          return effectsObject().img;
+        },
+        get title() {
+          return effectsObject().name;
+        },
+        get entity() {
+          return effectsObject();
+        }
+      });
+      var div_2 = sibling(node_1, 2);
+      var input = sibling(child(div_2), 4);
+      var div_3 = sibling(div_2, 2);
+      var input_1 = sibling(child(div_3), 4);
       var div_4 = sibling(div_3, 2);
-      var input_1 = sibling(child(div_4), 2);
-      input_1.__change = [on_change_1$2, updateEffect];
+      var input_2 = sibling(child(div_4), 4);
       var div_5 = sibling(div_4, 2);
-      var input_2 = sibling(child(div_5), 2);
-      input_2.__change = [on_change_2$1, updateEffect];
-      var div_6 = sibling(div_5, 2);
-      var input_3 = sibling(child(div_6), 2);
-      input_3.__change = [on_change_3$1, updateEffect];
-      var div_7 = sibling(div_6, 2);
-      var select = sibling(child(div_7), 2);
-      init_select(select, () => $$props.effect.duration.type);
-      var select_value;
-      select.__change = [on_change_4, updateEffect];
+      var select = sibling(child(div_5), 4);
       var option = child(select);
       option.value = null == (option.__value = "none") ? "" : "none";
       var option_1 = sibling(option);
       option_1.value = null == (option_1.__value = "turns") ? "" : "turns";
       var option_2 = sibling(option_1);
       option_2.value = null == (option_2.__value = "seconds") ? "" : "seconds";
-      var div_8 = sibling(div_7, 2);
-      var input_4 = sibling(child(div_8), 2);
-      input_4.__change = [on_change_5, updateEffect];
-      var div_9 = sibling(div_8, 2);
-      var input_5 = sibling(child(div_9), 2);
-      input_5.__change = [on_change_6, updateEffect];
-      template_effect(() => {
-        set_value(input, $$props.effect.name);
-        set_value(input_1, $$props.effect.icon);
-        set_checked(input_2, $$props.effect.transfer);
-        set_checked(input_3, $$props.effect.disabled);
-        if (select_value !== (select_value = $$props.effect.duration.type)) {
-          select.value = null == (select.__value = $$props.effect.duration.type) ? "" : $$props.effect.duration.type, select_option(select, $$props.effect.duration.type);
-        }
-        set_value(input_4, $$props.effect.duration.value);
-        set_value(input_5, $$props.effect.duration.h4);
-      });
-      append($$anchor2, div_1);
+      var div_6 = sibling(div_5, 2);
+      var input_3 = sibling(child(div_6), 4);
+      bind_value(input, () => effectsObject().name, ($$value) => effectsObject().name = $$value);
+      bind_checked(input_1, () => effectsObject().transfer, ($$value) => effectsObject().transfer = $$value);
+      bind_checked(input_2, () => effectsObject().disabled, ($$value) => effectsObject().disabled = $$value);
+      bind_select_value(select, () => effectsObject().duration.type, ($$value) => effectsObject().duration.type = $$value);
+      bind_value(input_3, () => effectsObject().duration.value, ($$value) => effectsObject().duration.value = $$value);
+      append($$anchor2, fragment);
     }
   });
-  var node_1 = sibling(node, 2);
-  ItemSheetComponent(node_1, {
+  var node_2 = sibling(node, 2);
+  ItemSheetComponent(node_2, {
     children: ($$anchor2, $$slotProps) => {
-      var div_10 = root_2$8();
-      var div_11 = child(div_10);
-      var button = sibling(child(div_11), 2);
-      button.__click = [addChange, $$props, updateEffect];
-      var table = sibling(div_11, 2);
+      var fragment_1 = root_2$8();
+      var button = sibling(first_child(fragment_1), 2);
+      button.__click = [addChange, changes, commitChanges];
+      var div_7 = sibling(button, 2);
+      var table = child(div_7);
       var tbody = sibling(child(table));
-      each(
-        tbody,
-        21,
-        () => $$props.effect.changes || [],
-        index,
-        ($$anchor3, change, i) => {
-          var tr = root_3$7();
-          var td = child(tr);
-          var input_6 = child(td);
-          input_6.__change = (e) => updateChange(i, "key", e.target.value);
-          var td_1 = sibling(td);
-          var select_1 = child(td_1);
-          init_select(select_1, () => get$2(change).mode);
-          var select_1_value;
-          select_1.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
-          each(select_1, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
-            let h4 = () => $$item[0];
-            let val = () => $$item[1];
-            var option_3 = root_4$5();
-            var option_3_value = {};
-            var text2 = child(option_3);
-            template_effect(() => {
-              if (option_3_value !== (option_3_value = val())) {
-                option_3.value = null == (option_3.__value = val()) ? "" : val();
-              }
-              set_text(text2, h4());
-            });
-            append($$anchor4, option_3);
-          });
-          var td_2 = sibling(td_1);
-          var input_7 = child(td_2);
-          input_7.__change = (e) => updateChange(i, "value", e.target.value);
-          var td_3 = sibling(td_2);
-          var input_8 = child(td_3);
-          input_8.__change = (e) => updateChange(i, "priority", parseInt(e.target.value));
-          var td_4 = sibling(td_3);
-          var button_1 = child(td_4);
-          button_1.__click = () => deleteChange(i);
+      each(tbody, 21, () => get$2(changes), index, ($$anchor3, change, i) => {
+        var tr = root_3$7();
+        var td = child(tr);
+        var div_8 = child(td);
+        var node_3 = sibling(child(div_8), 2);
+        ComboSearch(node_3, {
+          get options() {
+            return get$2(propertyOptions);
+          },
+          placeholder: "Select property",
+          nomatchplaceholder: "No match",
+          get value() {
+            return get$2(change).key;
+          },
+          set value($$value) {
+            get$2(change).key = $$value;
+          },
+          $$events: {
+            select: (e) => updateChange(i, "key", e.detail)
+          }
+        });
+        var td_1 = sibling(td);
+        var div_9 = child(td_1);
+        var select_1 = sibling(child(div_9), 2);
+        init_select(select_1, () => get$2(change).mode);
+        var select_1_value;
+        select_1.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
+        each(select_1, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
+          let label = () => $$item[0];
+          let val = () => $$item[1];
+          var option_3 = root_4$5();
+          var option_3_value = {};
+          var text2 = child(option_3);
           template_effect(() => {
-            set_value(input_6, get$2(change).key);
-            if (select_1_value !== (select_1_value = get$2(change).mode)) {
-              select_1.value = null == (select_1.__value = get$2(change).mode) ? "" : get$2(change).mode, select_option(select_1, get$2(change).mode);
+            if (option_3_value !== (option_3_value = val())) {
+              option_3.value = null == (option_3.__value = val()) ? "" : val();
             }
-            set_value(input_7, get$2(change).value);
-            set_value(input_8, get$2(change).priority);
+            set_text(text2, label());
           });
-          append($$anchor3, tr);
-        },
-        ($$anchor3) => {
-          var tr_1 = root_5$3();
-          append($$anchor3, tr_1);
-        }
-      );
-      append($$anchor2, div_10);
+          append($$anchor4, option_3);
+        });
+        var td_2 = sibling(td_1);
+        var div_10 = child(td_2);
+        var input_4 = sibling(child(div_10), 2);
+        input_4.__input = (e) => updateChange(i, "value", e.target.value);
+        var td_3 = sibling(td_2);
+        var div_11 = child(td_3);
+        var input_5 = sibling(child(div_11), 2);
+        input_5.__input = (e) => updateChange(i, "priority", +e.target.value);
+        var td_4 = sibling(td_3);
+        var button_1 = child(td_4);
+        button_1.__click = () => deleteChange(i);
+        template_effect(() => {
+          if (select_1_value !== (select_1_value = get$2(change).mode)) {
+            select_1.value = null == (select_1.__value = get$2(change).mode) ? "" : get$2(change).mode, select_option(select_1, get$2(change).mode);
+          }
+          set_value(input_4, get$2(change).value);
+          set_value(input_5, get$2(change).priority);
+        });
+        append($$anchor3, tr);
+      });
+      append($$anchor2, fragment_1);
     }
   });
   append($$anchor, div);
   pop();
 }
-delegate(["change", "click"]);
+delegate(["click", "change", "input"]);
 const _ActiveEffectsEditor = class _ActiveEffectsEditor extends foundry.applications.api.ApplicationV2 {
   constructor(document2, effect2, config) {
     const appId = _ActiveEffectsEditor.getAppIdFor(effect2.id);
@@ -10840,7 +11037,7 @@ var root_13 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat
 var root_15 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
 var root_17 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
 var root_19 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <!>`, 1);
-var root$f = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
+var root$e = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
 function MetatypeApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -11097,7 +11294,7 @@ function MetatypeApp($$anchor, $$props) {
     type: "select",
     options: ["C", "D", "E"]
   }));
-  var div = root$f();
+  var div = root$e();
   var div_1 = child(div);
   var node = child(div_1);
   ItemSheetComponent(node, {
@@ -11333,7 +11530,7 @@ var on_change$5 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$6 = /* @__PURE__ */ template(`<input>`);
 var root_1$8 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
 var root_3$4 = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
-var root$e = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!></div></div>`);
+var root$d = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!></div></div>`);
 function MagicApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -11446,7 +11643,7 @@ function MagicApp($$anchor, $$props) {
   user_effect(() => {
     set(isAspected, get$2(magicianType).value === localize(labels.aspectedmage));
   });
-  var div = root$e();
+  var div = root$d();
   var div_1 = child(div);
   var node = child(div_1);
   ItemSheetComponent(node, {
@@ -11745,7 +11942,7 @@ function Commodity($$anchor, $$props) {
   });
   pop();
 }
-var root$d = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
+var root$c = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h3> </h3> <div></div></div></div></div>`);
 function Portability($$anchor, $$props) {
   push($$props, true);
   const system = proxy($$props.item.system);
@@ -11768,7 +11965,7 @@ function Portability($$anchor, $$props) {
       type: "number"
     }
   ];
-  var div = root$d();
+  var div = root$c();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var h3 = child(div_2);
@@ -11793,7 +11990,7 @@ var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
 var root_2$5 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
 var root_1$6 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
 var root_3$3 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
-var root$c = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!></div></div>`);
+var root$b = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let layoutMode = "double";
@@ -11851,7 +12048,7 @@ function WeaponApp($$anchor, $$props) {
       type: "text"
     }
   ];
-  var div = root$c();
+  var div = root$b();
   var div_1 = child(div);
   var node = child(div_1);
   ItemSheetComponent(node, {
@@ -12077,7 +12274,7 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
 }
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
 var root_1$5 = /* @__PURE__ */ template(`<!> <input> <div class="stat-grid two-column"></div>`, 1);
-var root$b = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
+var root$a = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -12101,7 +12298,7 @@ function AmmunitionApp($$anchor, $$props) {
       type: "number"
     }
   ];
-  var div = root$b();
+  var div = root$a();
   var div_1 = child(div);
   var node = child(div_1);
   ItemSheetComponent(node, {
@@ -12223,7 +12420,7 @@ var root_9 = /* @__PURE__ */ template(`<option> </option>`);
 var root_8$1 = /* @__PURE__ */ template(`<select><option disabled selected> </option><option> </option><!></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$4 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
-var root$a = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!></div></div>`);
+var root$9 = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!></div></div>`);
 function SkillApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 7);
@@ -12272,7 +12469,7 @@ function SkillApp($$anchor, $$props) {
     set(value, proxy(type));
     item2().update({ "system.skillType": type });
   }
-  var div = root$a();
+  var div = root$9();
   var div_1 = child(div);
   var node = child(div_1);
   ItemSheetComponent(node, {
@@ -12643,7 +12840,7 @@ var root_2$3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4$3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root$9 = /* @__PURE__ */ template(`<form><div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metatype-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></div></form>`);
+var root$8 = /* @__PURE__ */ template(`<form><div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <input id="character-name" type="text" placeholder="Enter character name"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div for="age-slider"> </div> <input id="age-slider" type="range" step="1"> <div for="height-slider"> </div> <input id="height-slider" type="range" step="1"> <div for="weight-slider"> </div> <input id="weight-slider" type="range" step="1"></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div><div class="creation-dropdwn"><h3> </h3> <select id="metatype-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="magic-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="attributes-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="skills-select"><option disabled selected hidden></option><!></select></div> <div class="creation-dropdwn"><h3> </h3> <select id="resource-select"><option disabled selected hidden></option><!></select></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="character-creation-buttonpanel"><button type="button"><i class="fas fa-dice"></i> </button> <button type="button"><i class="fas fa-eraser"></i> </button> <button type="submit"><i class="fas fa-check"></i> </button></div></div></div></div></div></div></form>`);
 function CharacterCreationDialogApp($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 7);
@@ -12680,7 +12877,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     console.log("Available metatypes:", get$2(metatypes).map((m) => m.name));
     console.log("Selected default metatype:", (_a = get$2(metatypeItem)) == null ? void 0 : _a.name);
   });
-  const metatypeDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllmetatypes(get$2(metatypes)));
+  const metatypeDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMetatypes(get$2(metatypes)));
   const magicsDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMagics(get$2(magics)));
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
@@ -12820,7 +13017,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     set(selectedSkill, proxy(combo.skills));
     set(selectedResource, proxy(combo.resources));
   }
-  var form = root$9();
+  var form = root$8();
   var div = child(form);
   var div_1 = child(div);
   var div_2 = child(div_1);
@@ -13385,13 +13582,13 @@ var on_keydown = (e) => {
   if (e.key === "Enter") e.target.blur();
 };
 var on_click_1$1 = (__1, onDelta) => onDelta()(1);
-var root$8 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h1> </h1> <div class="time-editor-component"><button type="button"><i class="fa-solid fa-circle-left"></i></button> <input class="time-display" type="number"> <button type="button"><i class="fa-solid fa-circle-right"></i></button></div></div>`);
+var root$7 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h1> </h1> <div class="time-editor-component"><button type="button"><i class="fa-solid fa-circle-left"></i></button> <input class="time-display" type="number"> <button type="button"><i class="fa-solid fa-circle-right"></i></button></div></div>`);
 function TimeActuatorInput($$anchor, $$props) {
   push($$props, true);
   const label = prop($$props, "label", 3, "Seconds"), onDelta = prop($$props, "onDelta", 3, () => {
   });
   let input = state("");
-  var div = root$8();
+  var div = root$7();
   var h1 = sibling(child(div), 2);
   var text2 = child(h1);
   var div_1 = sibling(h1, 2);
@@ -13467,7 +13664,7 @@ __publicField(TimeService, "unit", {
   months: "Months",
   years: "Years"
 });
-var root$7 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="counter-bar"><h1 class="text-display"><div> </div> <div> </div> - <div> </div> <div> </div> - <div class="clock"> </div> : <div class="clock"> </div> : <div class="clock"> </div></h1> <div class="time-editor"><!> <!> <!> <!> <!> <!></div></div></div></div></div>`);
+var root$6 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="counter-bar"><h1 class="text-display"><div> </div> <div> </div> - <div> </div> <div> </div> - <div class="clock"> </div> : <div class="clock"> </div> : <div class="clock"> </div></h1> <div class="time-editor"><!> <!> <!> <!> <!> <!></div></div></div></div></div>`);
 function TimeManager($$anchor, $$props) {
   push($$props, true);
   let config = prop($$props, "config", 19, () => ({}));
@@ -13486,7 +13683,7 @@ function TimeManager($$anchor, $$props) {
   const seconds = /* @__PURE__ */ derived$1(() => get$2(currentDate).getSeconds());
   const weekdayAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
   const monthAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { month: "long" }));
-  var div = root$7();
+  var div = root$6();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
@@ -13586,7 +13783,7 @@ function TimeManager($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$6 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
+var root$5 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
 function KarmaRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -13643,7 +13840,7 @@ function KarmaRow($$anchor, $$props) {
     store_set(readyForCommit, false);
     $$props.OnCommitStatusChange();
   }
-  var tr = root$6();
+  var tr = root$5();
   var td = child(tr);
   var img = child(td);
   var td_1 = sibling(td);
@@ -13697,7 +13894,7 @@ function deselectAll$1(__2, listboxContent, rowRefs) {
 var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$2 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4$2 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
-var root$5 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+var root$4 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function KarmaManager($$anchor, $$props) {
   push($$props, true);
   let delimiter = state("");
@@ -13737,7 +13934,7 @@ function KarmaManager($$anchor, $$props) {
     }
     set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
   });
-  var div = root$5();
+  var div = root$4();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
@@ -13849,7 +14046,7 @@ var on_click_5 = (__6, $$props) => $$props.actor.RefreshHackingPool();
 var on_change$1 = (e, $readyForCommit, readyForCommit) => {
   store_set(readyForCommit, proxy(e.target.checked));
 };
-var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
+var root$3 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
 function DicePoolRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -13919,7 +14116,7 @@ function DicePoolRow($$anchor, $$props) {
     store_set(readyForCommit, false);
     $$props.OnCommitStatusChange();
   }
-  var tr = root$4();
+  var tr = root$3();
   var td = child(tr);
   var img = child(td);
   var td_1 = sibling(td);
@@ -14026,7 +14223,7 @@ function deselectAll(__2, listboxContent, rowRefs) {
 var root_1$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$1 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th> </th><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4$1 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
-var root$3 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
+var root$2 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function DicePoolManager($$anchor, $$props) {
   push($$props, true);
   let delimiter = state("");
@@ -14072,7 +14269,7 @@ function DicePoolManager($$anchor, $$props) {
     }
     set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
   });
-  var div = root$3();
+  var div = root$2();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var div_3 = child(div_2);
@@ -14183,11 +14380,11 @@ function DicePoolManager($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root$2 = /* @__PURE__ */ template(`<div><!> <!> <!></div>`);
+var root$1 = /* @__PURE__ */ template(`<div><!> <!> <!></div>`);
 function StorytellerScreenApp($$anchor, $$props) {
   prop($$props, "actor", 19, () => ({}));
   let config = prop($$props, "config", 19, () => ({}));
-  var div = root$2();
+  var div = root$1();
   var node = child(div);
   TimeManager(node, {
     get config() {
@@ -14293,194 +14490,6 @@ class TransactionModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, searchTerm, displayValue, inputElement) {
-  var _a;
-  if (disabled()) return;
-  switch (event2.key) {
-    case "ArrowDown":
-      event2.preventDefault();
-      if (!get$2(isOpen)) {
-        set(isOpen, true);
-        updateDropdown();
-      } else {
-        set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
-        scrollToHighlighted();
-      }
-      break;
-    case "ArrowUp":
-      event2.preventDefault();
-      set(highlightedIndex, proxy(Math.max(get$2(highlightedIndex) - 1, 0)));
-      scrollToHighlighted();
-      break;
-    case "Enter":
-      event2.preventDefault();
-      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) {
-        selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
-      }
-      break;
-    case "Escape":
-      event2.preventDefault();
-      set(isOpen, false);
-      set(searchTerm, proxy(get$2(displayValue)));
-      (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
-      updateDropdown();
-      break;
-    case "Tab":
-      set(isOpen, false);
-      set(searchTerm, proxy(get$2(displayValue)));
-      updateDropdown();
-      break;
-  }
-}
-var root$1 = /* @__PURE__ */ template(`<div class="combobox-container"><div class="combobox-wrapper"><input class="combobox-input" role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
-function ComboSearch($$anchor, $$props) {
-  push($$props, true);
-  const dispatch = createEventDispatcher();
-  let options = prop($$props, "options", 19, () => []), value = prop($$props, "value", 15, ""), placeholder = prop($$props, "placeholder", 3, "Search..."), nomatchplaceholder = prop($$props, "nomatchplaceholder", 3, "No matches found..."), disabled = prop($$props, "disabled", 3, false), maxHeight = prop($$props, "maxHeight", 3, "200px");
-  let isOpen = state(false);
-  let searchTerm = state("");
-  let filteredOptions = state(proxy([]));
-  let highlightedIndex = state(-1);
-  let inputElement = state(void 0);
-  let wrapperElement = state(void 0);
-  let dropdownElement;
-  let displayValue = /* @__PURE__ */ derived$1(() => {
-    var _a;
-    return ((_a = options().find((opt) => opt.value === value())) == null ? void 0 : _a.label) ?? "";
-  });
-  user_effect(() => {
-    if (!get$2(isOpen)) {
-      set(searchTerm, proxy(get$2(displayValue)));
-    }
-  });
-  user_effect(() => {
-    if (get$2(searchTerm).trim() === "") {
-      set(filteredOptions, proxy(options()));
-    } else {
-      set(filteredOptions, proxy(options().filter((opt) => opt.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
-    }
-    set(highlightedIndex, -1);
-    updateDropdown();
-  });
-  onMount(() => {
-    dropdownElement = document.createElement("div");
-    dropdownElement.classList.add("combobox-dropdown");
-    dropdownElement.id = "combobox-dropdown-list";
-    dropdownElement.style.position = "absolute";
-    dropdownElement.style.zIndex = "9999";
-    const anchor = get$2(wrapperElement).closest(".item-sheet-component") ?? document.body;
-    if (getComputedStyle(anchor).position === "static") {
-      anchor.style.position = "relative";
-    }
-    anchor.appendChild(dropdownElement);
-  });
-  onDestroy(() => {
-    dropdownElement == null ? void 0 : dropdownElement.remove();
-  });
-  function updateDropdown() {
-    if (!get$2(isOpen) || !get$2(wrapperElement) || !dropdownElement) return;
-    tick().then(() => {
-      const anchor = get$2(wrapperElement).closest(".item-sheet-component");
-      if (!anchor) return;
-      const anchorRect = anchor.getBoundingClientRect();
-      const wrapperRect = get$2(wrapperElement).getBoundingClientRect();
-      const top = wrapperRect.bottom - anchorRect.top;
-      const left = wrapperRect.left - anchorRect.left;
-      dropdownElement.style.top = `${top}px`;
-      dropdownElement.style.left = `${left}px`;
-      dropdownElement.style.width = `${wrapperRect.width}px`;
-      dropdownElement.innerHTML = "";
-      const content = document.createElement("div");
-      content.style.maxHeight = maxHeight();
-      content.setAttribute("role", "listbox");
-      if (get$2(filteredOptions).length > 0) {
-        get$2(filteredOptions).forEach((option, i) => {
-          const el = document.createElement("div");
-          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (option.value === value() ? " selected" : "");
-          el.setAttribute("role", "option");
-          el.setAttribute("aria-selected", option.value === value());
-          el.textContent = option.label;
-          el.onmousedown = () => handleOptionMousedown(option);
-          content.appendChild(el);
-        });
-      } else if (get$2(searchTerm).trim() !== "") {
-        const el = document.createElement("div");
-        el.className = "combobox-option no-results";
-        el.textContent = nomatchplaceholder();
-        content.appendChild(el);
-      }
-      dropdownElement.appendChild(content);
-    });
-  }
-  function handleInputFocus() {
-    if (!disabled()) {
-      set(isOpen, true);
-      set(searchTerm, "");
-      updateDropdown();
-    }
-  }
-  function handleInputBlur() {
-    setTimeout(
-      () => {
-        set(isOpen, false);
-        set(searchTerm, proxy(get$2(displayValue)));
-        updateDropdown();
-      },
-      150
-    );
-  }
-  function selectOption(option) {
-    var _a;
-    value(option.value);
-    set(searchTerm, proxy(option.label));
-    set(isOpen, false);
-    (_a = get$2(inputElement)) == null ? void 0 : _a.blur();
-    dispatch("select", { value: option.value });
-    updateDropdown();
-  }
-  async function scrollToHighlighted() {
-    var _a, _b;
-    await tick();
-    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
-    el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
-  }
-  function handleOptionMousedown(option) {
-    selectOption(option);
-  }
-  var div = root$1();
-  var div_1 = child(div);
-  var input = child(div_1);
-  input.__keydown = [
-    handleInputKeydown,
-    disabled,
-    isOpen,
-    updateDropdown,
-    highlightedIndex,
-    filteredOptions,
-    scrollToHighlighted,
-    selectOption,
-    searchTerm,
-    displayValue,
-    inputElement
-  ];
-  bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
-  var i_1 = sibling(input, 2);
-  bind_this(div_1, ($$value) => set(wrapperElement, $$value), () => get$2(wrapperElement));
-  template_effect(() => {
-    toggle_class(div_1, "disabled", disabled());
-    set_attribute(input, "placeholder", placeholder());
-    input.disabled = disabled();
-    set_attribute(input, "aria-expanded", get$2(isOpen));
-    toggle_class(input, "open", get$2(isOpen));
-    toggle_class(i_1, "rotated", get$2(isOpen));
-  });
-  event("focus", input, handleInputFocus);
-  event("blur", input, handleInputBlur);
-  bind_value(input, () => get$2(searchTerm), ($$value) => set(searchTerm, $$value));
-  append($$anchor, div);
-  pop();
-}
-delegate(["keydown"]);
 function handleKeyDown(e) {
   if ([8, 9, 27, 13, 46].includes(e.keyCode) || e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode) || e.keyCode >= 35 && e.keyCode <= 39) return;
   if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
