@@ -84,16 +84,17 @@
     font-family: 'VT323', monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
+    font-size: 0.9rem;
     color: var(--h1-color);
     text-shadow: var(--h1-bloom);
     margin-bottom: 0.7rem;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
   .system-sr3e h1.uppercase {
     text-transform: uppercase;
   }
   .system-sr3e h1.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e summary,
@@ -102,8 +103,9 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     color: var(--h2-color);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
   .system-sr3e summary.uppercase,
   .system-sr3e h2.uppercase {
@@ -111,7 +113,7 @@
   }
   .system-sr3e summary.no-margin,
   .system-sr3e h2.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e h3 {
@@ -119,15 +121,16 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     color: var(--h3-color);
     text-shadow: var(--h3-bloom);
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   .system-sr3e h3.uppercase {
     text-transform: uppercase;
   }
   .system-sr3e h3.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e label,
@@ -138,7 +141,7 @@
     line-height: 1rem;
     color: var(--h1-color);
     color: var(--h4-color);
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
   .system-sr3e label.uppercase,
   .system-sr3e span.uppercase,
@@ -148,7 +151,7 @@
   .system-sr3e label.no-margin,
   .system-sr3e span.no-margin,
   .system-sr3e h4.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e h5 {
@@ -156,6 +159,7 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     font-size: 1.1rem;
     color: var(--h5-color);
   }
@@ -163,7 +167,7 @@
     text-transform: uppercase;
   }
   .system-sr3e h5.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e h6 {
@@ -171,13 +175,14 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     color: var(--h6-color);
   }
   .system-sr3e h6.uppercase {
     text-transform: uppercase;
   }
   .system-sr3e h6.no-margin {
-    padding: inherit;
+    padding: 0rem;
     margin: 0rem;
   }
   .system-sr3e span {
@@ -185,7 +190,8 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
-    color: --h4-color;
+    font-size: 0.9rem;
+    color: var(--h4-color);
     border: none;
     text-shadow: var(--h3-bloom);
     font-size: 1rem;
@@ -202,6 +208,7 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
   }
   .system-sr3e a::placeholder,
   .system-sr3e p::placeholder,
@@ -215,6 +222,7 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     /* Restore FA icon font for any button that is or becomes an icon */
     /* Also fix nested icons and pseudo-elements in other buttons */
   }
@@ -966,7 +974,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 0.5rem;
-    max-width: 50rem;
+    width: calc(var(--component-width) * 4rem + 1.5rem);
     background-color: transparent;
   }
   .effects-editor > .item-sheet-component:first-of-type {
@@ -1478,6 +1486,7 @@
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
+    font-size: 0.9rem;
     color: var(--user-color);
     margin: 0rem;
     position: relative;
@@ -1611,7 +1620,7 @@
   }
   .attribute-masonry-grid .stat-card {
     margin-top: 0.25rem;
-    padding: 0rem 0.5rem 0rem 0.5rem;
+    padding: 0.25rem 0.25rem 0.25rem 0.25rem;
     outline: none;
   }
   .attribute-masonry-grid .stat-card .stat-label {
@@ -1828,17 +1837,21 @@
   }
   .combobox-container {
     position: relative;
-    display: inline-block;
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0%;
     min-width: 0;
-    width: auto;
+    width: 100%;
     box-sizing: border-box;
   }
   .combobox-wrapper {
+    display: flex;
+    flex: 1 1 0%;
     min-width: 0;
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
     position: relative;
-    display: inline-flex;
     align-items: center;
     box-shadow: inset 0 0 1rem var(--highlight-color-primary);
     background: var(--highlight-color-primary);
@@ -1891,6 +1904,7 @@
     flex-shrink: 0;
     padding: 0.5rem 0.5rem;
     margin: 0.25rem;
+    margin-left: auto;
     transition: transform 0.15s ease-in-out;
     cursor: none;
     text-shadow: 0px 0px 0.5rem var(--highlight-color-primary);
@@ -2956,7 +2970,7 @@
     background: var(--highlight-color-secondary);
     transition: transform 1s ease, background-color 0.3s ease;
     text-align: center;
-    padding: 0rem 0.5rem 0.25rem 0.5rem;
+    padding: 0.25rem 0.25rem 0.25rem 0.25rem;
     z-index: 1;
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
@@ -3000,7 +3014,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0.5rem;
+    padding: 0.25rem;
     margin: 0;
   }
   dialog .stat-card .stat-value,
