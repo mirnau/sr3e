@@ -64,17 +64,13 @@
    function handleDocumentClick(event) {
       if (!wrapperElement || !dropdownElement) return;
       const clickedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
-      if (!clickedInside && isOpen) {
-         closeDropdown();
-      }
+      if (!clickedInside && isOpen) closeDropdown();
    }
 
    function handleDocumentFocusIn(event) {
       if (!wrapperElement || !dropdownElement) return;
       const focusedInside = wrapperElement.contains(event.target) || dropdownElement.contains(event.target);
-      if (!focusedInside && isOpen) {
-         closeDropdown();
-      }
+      if (!focusedInside && isOpen) closeDropdown();
    }
 
    function closeDropdown() {
@@ -100,11 +96,8 @@
          const anchorRect = anchor.getBoundingClientRect();
          const wrapperRect = wrapperElement.getBoundingClientRect();
 
-         const top = wrapperRect.bottom - anchorRect.top;
-         const left = wrapperRect.left - anchorRect.left;
-
-         dropdownElement.style.top = `${top}px`;
-         dropdownElement.style.left = `${left}px`;
+         dropdownElement.style.top = `${wrapperRect.bottom - anchorRect.top}px`;
+         dropdownElement.style.left = `${wrapperRect.left - anchorRect.left}px`;
          dropdownElement.style.width = `${wrapperRect.width}px`;
 
          dropdownElement.innerHTML = "";
@@ -113,7 +106,7 @@
          content.style.maxHeight = maxHeight;
          content.setAttribute("role", "listbox");
 
-         if (filteredOptions.length > 0) {
+         if (filteredOptions.length) {
             filteredOptions.forEach((option, i) => {
                const el = document.createElement("div");
                el.className =
@@ -145,6 +138,14 @@
       }
    }
 
+   function handleInputClick() {
+      if (disabled) return;
+      if (!isOpen) {
+         isOpen = true;
+         updateDropdown();
+      }
+   }
+
    function handleInputBlur() {}
 
    function handleInputKeydown(event) {
@@ -168,18 +169,13 @@
             break;
          case "Enter":
             event.preventDefault();
-            if (isOpen && highlightedIndex >= 0) {
-               selectOption(filteredOptions[highlightedIndex]);
-            }
+            if (isOpen && highlightedIndex >= 0) selectOption(filteredOptions[highlightedIndex]);
             break;
          case "Escape":
             event.preventDefault();
             event.stopPropagation();
-            if (isOpen) {
-               closeDropdown();
-            } else {
-               searchTerm = displayValue;
-            }
+            if (isOpen) closeDropdown();
+            else searchTerm = displayValue;
             break;
          case "Tab":
             closeDropdown();
@@ -211,6 +207,7 @@
          bind:this={inputElement}
          bind:value={searchTerm}
          onfocus={handleInputFocus}
+         onclick={handleInputClick}
          onblur={handleInputBlur}
          onkeydown={handleInputKeydown}
          {placeholder}

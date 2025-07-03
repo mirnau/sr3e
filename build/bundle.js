@@ -10550,6 +10550,13 @@ function StatCard($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
+function handleInputClick(_, disabled, isOpen, updateDropdown) {
+  if (disabled()) return;
+  if (!get$2(isOpen)) {
+    set(isOpen, true);
+    updateDropdown();
+  }
+}
 function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, closeDropdown, searchTerm, displayValue) {
   if (disabled()) return;
   switch (event2.key) {
@@ -10570,18 +10577,13 @@ function handleInputKeydown(event2, disabled, isOpen, updateDropdown, highlighte
       break;
     case "Enter":
       event2.preventDefault();
-      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) {
-        selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
-      }
+      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
       break;
     case "Escape":
       event2.preventDefault();
       event2.stopPropagation();
-      if (get$2(isOpen)) {
-        closeDropdown();
-      } else {
-        set(searchTerm, proxy(get$2(displayValue)));
-      }
+      if (get$2(isOpen)) closeDropdown();
+      else set(searchTerm, proxy(get$2(displayValue)));
       break;
     case "Tab":
       closeDropdown();
@@ -10640,16 +10642,12 @@ function ComboSearch($$anchor, $$props) {
   function handleDocumentClick(event2) {
     if (!get$2(wrapperElement) || !dropdownElement) return;
     const clickedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
-    if (!clickedInside && get$2(isOpen)) {
-      closeDropdown();
-    }
+    if (!clickedInside && get$2(isOpen)) closeDropdown();
   }
   function handleDocumentFocusIn(event2) {
     if (!get$2(wrapperElement) || !dropdownElement) return;
     const focusedInside = get$2(wrapperElement).contains(event2.target) || dropdownElement.contains(event2.target);
-    if (!focusedInside && get$2(isOpen)) {
-      closeDropdown();
-    }
+    if (!focusedInside && get$2(isOpen)) closeDropdown();
   }
   function closeDropdown() {
     set(isOpen, false);
@@ -10668,17 +10666,15 @@ function ComboSearch($$anchor, $$props) {
       if (!anchor) return;
       const anchorRect = anchor.getBoundingClientRect();
       const wrapperRect = get$2(wrapperElement).getBoundingClientRect();
-      const top = wrapperRect.bottom - anchorRect.top;
-      const left = wrapperRect.left - anchorRect.left;
-      dropdownElement.style.top = `${top}px`;
-      dropdownElement.style.left = `${left}px`;
+      dropdownElement.style.top = `${wrapperRect.bottom - anchorRect.top}px`;
+      dropdownElement.style.left = `${wrapperRect.left - anchorRect.left}px`;
       dropdownElement.style.width = `${wrapperRect.width}px`;
       dropdownElement.innerHTML = "";
       const content = document.createElement("div");
       content.style.position = "relative";
       content.style.maxHeight = maxHeight();
       content.setAttribute("role", "listbox");
-      if (get$2(filteredOptions).length > 0) {
+      if (get$2(filteredOptions).length) {
         get$2(filteredOptions).forEach((option, i) => {
           const el = document.createElement("div");
           el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (option.value === value() ? " selected" : "");
@@ -10724,6 +10720,12 @@ function ComboSearch($$anchor, $$props) {
   var div = root$g();
   var div_1 = child(div);
   var input = child(div_1);
+  input.__click = [
+    handleInputClick,
+    disabled,
+    isOpen,
+    updateDropdown
+  ];
   input.__keydown = [
     handleInputKeydown,
     disabled,
@@ -10754,7 +10756,7 @@ function ComboSearch($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-delegate(["keydown"]);
+delegate(["click", "keydown"]);
 function addChange(_, changes, commitChanges) {
   set(changes, proxy([
     ...get$2(changes),
