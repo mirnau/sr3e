@@ -58,8 +58,8 @@ export default class ActiveEffectsEditor extends foundry.applications.api.Applic
          target: windowContent,
          props: {
             item: this.document,
-            effect: this.effect,
-            config: this.config,
+            effectsObject: this.effect,
+            config: CONFIG.sr3e,
          },
       });
 

@@ -946,7 +946,7 @@ function user_effect(fn) {
       reaction: active_reaction
     });
   } else {
-    var signal = effect$1(fn);
+    var signal = effect(fn);
     return signal;
   }
 }
@@ -966,7 +966,7 @@ function component_root(fn) {
     });
   };
 }
-function effect$1(fn) {
+function effect(fn) {
   return create_effect(EFFECT, fn, false);
 }
 function render_effect(fn) {
@@ -1731,7 +1731,7 @@ function pop(component2) {
           var component_effect = component_effects[i];
           set_active_effect(component_effect.effect);
           set_active_reaction(component_effect.reaction);
-          effect$1(component_effect.fn);
+          effect(component_effect.fn);
         }
       } finally {
         set_active_effect(previous_effect);
@@ -2742,7 +2742,7 @@ function transition(flags2, element, get_fn, get_params) {
       run = !block2 || (block2.f & EFFECT_RAN) !== 0;
     }
     if (run) {
-      effect$1(() => {
+      effect(() => {
         untrack(() => transition2.in());
       });
     }
@@ -2936,7 +2936,7 @@ function select_option(select, value, mounting) {
 }
 function init_select(select, get_value) {
   let mounting = true;
-  effect$1(() => {
+  effect(() => {
     if (get_value) {
       select_option(select, untrack(get_value), mounting);
     }
@@ -2975,7 +2975,7 @@ function bind_select_value(select, get2, set2 = get2) {
     }
     set2(value);
   });
-  effect$1(() => {
+  effect(() => {
     var value = get2();
     select_option(select, value, mounting);
     if (mounting && value === void 0) {
@@ -3006,7 +3006,7 @@ function is_bound_this(bound_value, element_or_component) {
   return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
 }
 function bind_this(element_or_component = {}, update, get_value, get_parts) {
-  effect$1(() => {
+  effect(() => {
     var old_parts;
     var parts;
     render_effect(() => {
@@ -9799,6 +9799,25 @@ sr3e.difficulty = {
   extreme: "sr3e.difficulty.extreme",
   nearlyimpossible: "sr3e.difficulty.nearlyimpossible"
 };
+sr3e.effects = {
+  effectscomposer: "sr3e.effects.effectscomposer",
+  name: "sr3e.effects.name",
+  transfer: "sr3e.effects.transfer",
+  disabled: "sr3e.effects.disabled",
+  durationType: "sr3e.effects.durationType",
+  durationValue: "sr3e.effects.durationValue",
+  attributeKey: "sr3e.effects.attributeKey",
+  changeMode: "sr3e.effects.changeMode",
+  value: "sr3e.effects.value",
+  priority: "sr3e.effects.priority",
+  contributes: "sr3e.effects.contributes",
+  actions: "sr3e.effects.actions",
+  addChange: "sr3e.effects.addChange",
+  noMatch: "sr3e.effects.noMatch",
+  selectProperty: "sr3e.effects.selectProperty",
+  permanent: "sr3e.effects.permanent",
+  changesHeader: "sr3e.effects.changesHeader"
+};
 sr3e.health = {
   health: "sr3e.health.health",
   overflow: "sr3e.health.overflow",
@@ -9976,12 +9995,14 @@ sr3e.notifications = {
   skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold"
 };
 sr3e.time = {
-  year: "sr3e.time.year",
-  month: "sr3e.time.month",
-  day: "sr3e.time.day",
+  days: "sr3e.time.days",
   hours: "sr3e.time.hours",
   minutes: "sr3e.time.minutes",
-  seconds: "sr3e.time.seconds"
+  seconds: "sr3e.time.seconds",
+  rounds: "sr3e.time.rounds",
+  turns: "sr3e.time.turns",
+  months: "sr3e.time.months",
+  years: "sr3e.time.years"
 };
 sr3e.combosearch = {
   noresult: "sr3e.combosearch.noresult",
@@ -10607,10 +10628,13 @@ function ComboSearch($$anchor, $$props) {
     }
   });
   user_effect(() => {
+    const filtered = get$2(searchTerm).trim() === "" ? options() : options().filter((o) => o.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()));
     if (get$2(isOpen)) {
-      set(filteredOptions, proxy(get$2(searchTerm).trim() === "" ? options() : options().filter((o) => o.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()))));
+      set(filteredOptions, proxy(filtered));
       set(highlightedIndex, -1);
       updateDropdown();
+    } else {
+      set(filteredOptions, proxy(filtered));
     }
   });
   function openDropdown() {
@@ -10748,26 +10772,34 @@ function addChange(_, changes, commitChanges) {
   ]));
   commitChanges();
 }
-var root_1$b = /* @__PURE__ */ template(`<h3>Effect Properties</h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4>Name:</h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Transfer:</h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Disabled:</h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Duration Type:</h4> <select><option>None</option><option>Turns</option><option>Seconds</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Duration Value:</h4> <input type="number"></div></div>`, 1);
+var root_1$b = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Source Type:</h4> <select><option>Item</option><option>Character</option><option disabled>Vehicle (TODO)</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div></div>`, 1);
 var root_4$5 = /* @__PURE__ */ template(`<option> </option>`);
-var on_input = (e) => effect.setFlag(flags.sr3e, flags.effect.contributes, e.target.checked);
+var on_input = (e, effectsObject) => effectsObject().setFlag(flags.sr3e, flags.effect.contributes, e.target.checked);
 var root_3$7 = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><div class="stat-card centered"><div class="stat-card-background"></div> <input type="checkbox"></div></td><td><button>🗑</button></td></tr>`);
-var root_2$8 = /* @__PURE__ */ template(`<h1>Changes</h1> <button>➕ Add Change</button> <div class="table-wrapper"><table><thead><tr><th>Attribute Key</th><th>Change Mode</th><th>Effect Value</th><th>Priority</th><th>Add to Pools</th><th>Actions</th></tr></thead><tbody></tbody></table></div>`, 1);
+var root_2$8 = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
 var root$f = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
 function ActiveEffectsEditorApp($$anchor, $$props) {
   push($$props, true);
-  let effectsObject = prop($$props, "effect", 7);
+  let effectsObject = prop($$props, "effectsObject", 7);
   let changes = state(proxy([...effectsObject().changes]));
   let propertyOptions = state(proxy([]));
-  function flattenProperties(obj, prefix = "system") {
-    return Object.entries(obj).flatMap(([key, value]) => {
-      const path = `${prefix}.${key}`;
-      return typeof value === "object" && value !== null && !Array.isArray(value) ? flattenProperties(value, path) : [path];
-    });
-  }
-  const blockedKeys = ["system.journalId", "system.priority"];
+  let sourceType = state(proxy(effectsObject().transfer ? "character" : "item"));
+  const allowedPatterns = ["system.attributes", "system.physical"];
   user_effect(() => {
-    set(propertyOptions, proxy(flattenProperties($$props.item.system).filter((path) => !blockedKeys.includes(path)).map((path) => ({ value: path, label: path }))));
+    const transfer = get$2(sourceType) !== "item";
+    let rawPaths = [];
+    if (transfer) {
+      const actor = game.actors.find((a) => a.type === get$2(sourceType));
+      if (actor) {
+        rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
+      }
+    } else {
+      rawPaths = Object.keys(foundry.utils.flattenObject({ system: $$props.item.toObject().system }));
+    }
+    set(propertyOptions, proxy(rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p))).map((path) => ({ value: path, label: path }))));
+  });
+  user_effect(() => {
+    console.log("propertyOptions", get$2(propertyOptions));
   });
   function commitChanges() {
     effectsObject().update({ changes: get$2(changes) });
@@ -10792,7 +10824,9 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   ItemSheetComponent(node, {
     children: ($$anchor2, $$slotProps) => {
       var fragment = root_1$b();
-      var div_1 = sibling(first_child(fragment), 2);
+      var h3 = first_child(fragment);
+      var text2 = child(h3);
+      var div_1 = sibling(h3, 2);
       var node_1 = child(div_1);
       Image(node_1, {
         get src() {
@@ -10806,26 +10840,85 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         }
       });
       var div_2 = sibling(node_1, 2);
-      var input = sibling(child(div_2), 4);
+      var h4 = sibling(child(div_2), 2);
+      var text_1 = child(h4);
+      var input = sibling(h4, 2);
       var div_3 = sibling(div_2, 2);
-      var input_1 = sibling(child(div_3), 4);
-      var div_4 = sibling(div_3, 2);
-      var input_2 = sibling(child(div_4), 4);
-      var div_5 = sibling(div_4, 2);
-      var select = sibling(child(div_5), 4);
+      var select = sibling(child(div_3), 4);
       var option = child(select);
-      option.value = null == (option.__value = "none") ? "" : "none";
+      option.value = null == (option.__value = "item") ? "" : "item";
       var option_1 = sibling(option);
-      option_1.value = null == (option_1.__value = "turns") ? "" : "turns";
+      option_1.value = null == (option_1.__value = "character") ? "" : "character";
       var option_2 = sibling(option_1);
-      option_2.value = null == (option_2.__value = "seconds") ? "" : "seconds";
+      option_2.value = null == (option_2.__value = "vehicle") ? "" : "vehicle";
+      var div_4 = sibling(div_3, 2);
+      var h4_1 = sibling(child(div_4), 2);
+      var text_2 = child(h4_1);
+      var input_1 = sibling(h4_1, 2);
+      var div_5 = sibling(div_4, 2);
+      var h4_2 = sibling(child(div_5), 2);
+      var text_3 = child(h4_2);
+      var select_1 = sibling(h4_2, 2);
+      var option_3 = child(select_1);
+      option_3.value = null == (option_3.__value = "none") ? "" : "none";
+      var text_4 = child(option_3);
+      var option_4 = sibling(option_3);
+      option_4.value = null == (option_4.__value = "turns") ? "" : "turns";
+      var text_5 = child(option_4);
+      var option_5 = sibling(option_4);
+      option_5.value = null == (option_5.__value = "rounds") ? "" : "rounds";
+      var text_6 = child(option_5);
+      var option_6 = sibling(option_5);
+      option_6.value = null == (option_6.__value = "seconds") ? "" : "seconds";
+      var text_7 = child(option_6);
+      var option_7 = sibling(option_6);
+      option_7.value = null == (option_7.__value = "minutes") ? "" : "minutes";
+      var text_8 = child(option_7);
+      var option_8 = sibling(option_7);
+      option_8.value = null == (option_8.__value = "hours") ? "" : "hours";
+      var text_9 = child(option_8);
+      var option_9 = sibling(option_8);
+      option_9.value = null == (option_9.__value = "days") ? "" : "days";
+      var text_10 = child(option_9);
       var div_6 = sibling(div_5, 2);
-      var input_3 = sibling(child(div_6), 4);
+      var h4_3 = sibling(child(div_6), 2);
+      var text_11 = child(h4_3);
+      var input_2 = sibling(h4_3, 2);
+      template_effect(
+        ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) => {
+          set_text(text2, $0);
+          set_text(text_1, `${$1 ?? ""}:`);
+          set_text(text_2, `${$2 ?? ""}:`);
+          set_text(text_3, `${$3 ?? ""}:`);
+          set_text(text_4, $4);
+          set_text(text_5, $5);
+          set_text(text_6, $6);
+          set_text(text_7, $7);
+          set_text(text_8, $8);
+          set_text(text_9, $9);
+          set_text(text_10, $10);
+          set_text(text_11, `${$11 ?? ""}:`);
+        },
+        [
+          () => localize($$props.config.effects.effectscomposer),
+          () => localize($$props.config.effects.name),
+          () => localize($$props.config.effects.disabled),
+          () => localize($$props.config.effects.durationType),
+          () => localize($$props.config.effects.permanent),
+          () => localize($$props.config.time.turns),
+          () => localize($$props.config.time.rounds),
+          () => localize($$props.config.time.seconds),
+          () => localize($$props.config.time.minutes),
+          () => localize($$props.config.time.hours),
+          () => localize($$props.config.time.days),
+          () => localize($$props.config.effects.durationValue)
+        ]
+      );
       bind_value(input, () => effectsObject().name, ($$value) => effectsObject().name = $$value);
-      bind_checked(input_1, () => effectsObject().transfer, ($$value) => effectsObject().transfer = $$value);
-      bind_checked(input_2, () => effectsObject().disabled, ($$value) => effectsObject().disabled = $$value);
-      bind_select_value(select, () => effectsObject().duration.type, ($$value) => effectsObject().duration.type = $$value);
-      bind_value(input_3, () => effectsObject().duration.value, ($$value) => effectsObject().duration.value = $$value);
+      bind_select_value(select, () => get$2(sourceType), ($$value) => set(sourceType, $$value));
+      bind_checked(input_1, () => effectsObject().disabled, ($$value) => effectsObject().disabled = $$value);
+      bind_select_value(select_1, () => effectsObject().duration.type, ($$value) => effectsObject().duration.type = $$value);
+      bind_value(input_2, () => effectsObject().duration.value, ($$value) => effectsObject().duration.value = $$value);
       append($$anchor2, fragment);
     }
   });
@@ -10833,22 +10926,45 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   ItemSheetComponent(node_2, {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_2$8();
-      var button = sibling(first_child(fragment_1), 2);
+      var h1 = first_child(fragment_1);
+      var text_12 = child(h1);
+      var button = sibling(h1, 2);
       button.__click = [addChange, changes, commitChanges];
+      var text_13 = child(button);
       var div_7 = sibling(button, 2);
       var table = child(div_7);
-      var tbody = sibling(child(table));
+      var thead = child(table);
+      var tr = child(thead);
+      var th = child(tr);
+      var text_14 = child(th);
+      var th_1 = sibling(th);
+      var text_15 = child(th_1);
+      var th_2 = sibling(th_1);
+      var text_16 = child(th_2);
+      var th_3 = sibling(th_2);
+      var text_17 = child(th_3);
+      var th_4 = sibling(th_3);
+      var text_18 = child(th_4);
+      var th_5 = sibling(th_4);
+      var text_19 = child(th_5);
+      var tbody = sibling(thead);
       each(tbody, 21, () => get$2(changes), index, ($$anchor3, change, i) => {
-        var tr = root_3$7();
-        var td = child(tr);
+        var tr_1 = root_3$7();
+        var td = child(tr_1);
         var div_8 = child(td);
         var node_3 = sibling(child(div_8), 2);
+        const expression = /* @__PURE__ */ derived$1(() => localize($$props.config.effects.selectProperty));
+        const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.effects.noMatch));
         ComboSearch(node_3, {
           get options() {
             return get$2(propertyOptions);
           },
-          placeholder: "Select property",
-          nomatchplaceholder: "No match",
+          get placeholder() {
+            return get$2(expression);
+          },
+          get nomatchplaceholder() {
+            return get$2(expression_1);
+          },
           css: "table",
           get value() {
             return get$2(change).key;
@@ -10862,48 +10978,70 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         });
         var td_1 = sibling(td);
         var div_9 = child(td_1);
-        var select_1 = sibling(child(div_9), 2);
-        init_select(select_1, () => get$2(change).mode);
-        var select_1_value;
-        select_1.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
-        each(select_1, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
+        var select_2 = sibling(child(div_9), 2);
+        init_select(select_2, () => get$2(change).mode);
+        var select_2_value;
+        select_2.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
+        each(select_2, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
           let label = () => $$item[0];
           let val = () => $$item[1];
-          var option_3 = root_4$5();
-          var option_3_value = {};
-          var text2 = child(option_3);
+          var option_10 = root_4$5();
+          var option_10_value = {};
+          var text_20 = child(option_10);
           template_effect(() => {
-            if (option_3_value !== (option_3_value = val())) {
-              option_3.value = null == (option_3.__value = val()) ? "" : val();
+            if (option_10_value !== (option_10_value = val())) {
+              option_10.value = null == (option_10.__value = val()) ? "" : val();
             }
-            set_text(text2, label());
+            set_text(text_20, label());
           });
-          append($$anchor4, option_3);
+          append($$anchor4, option_10);
         });
         var td_2 = sibling(td_1);
         var div_10 = child(td_2);
-        var input_4 = sibling(child(div_10), 2);
-        input_4.__input = (e) => updateChange(i, "value", e.target.value);
+        var input_3 = sibling(child(div_10), 2);
+        input_3.__input = (e) => updateChange(i, "value", e.target.value);
         var td_3 = sibling(td_2);
         var div_11 = child(td_3);
-        var input_5 = sibling(child(div_11), 2);
-        input_5.__input = (e) => updateChange(i, "priority", +e.target.value);
+        var input_4 = sibling(child(div_11), 2);
+        input_4.__input = (e) => updateChange(i, "priority", +e.target.value);
         var td_4 = sibling(td_3);
         var div_12 = child(td_4);
-        var input_6 = sibling(child(div_12), 2);
-        input_6.__input = [on_input];
+        var input_5 = sibling(child(div_12), 2);
+        input_5.__input = [on_input, effectsObject];
         var td_5 = sibling(td_4);
         var button_1 = child(td_5);
         button_1.__click = () => deleteChange(i);
         template_effect(() => {
-          if (select_1_value !== (select_1_value = get$2(change).mode)) {
-            select_1.value = null == (select_1.__value = get$2(change).mode) ? "" : get$2(change).mode, select_option(select_1, get$2(change).mode);
+          if (select_2_value !== (select_2_value = get$2(change).mode)) {
+            select_2.value = null == (select_2.__value = get$2(change).mode) ? "" : get$2(change).mode, select_option(select_2, get$2(change).mode);
           }
-          set_value(input_4, get$2(change).value);
-          set_value(input_5, get$2(change).priority);
+          set_value(input_3, get$2(change).value);
+          set_value(input_4, get$2(change).priority);
         });
-        append($$anchor3, tr);
+        append($$anchor3, tr_1);
       });
+      template_effect(
+        ($0, $1, $2, $3, $4, $5, $6, $7) => {
+          set_text(text_12, $0);
+          set_text(text_13, `➕ ${$1 ?? ""}`);
+          set_text(text_14, $2);
+          set_text(text_15, $3);
+          set_text(text_16, $4);
+          set_text(text_17, $5);
+          set_text(text_18, $6);
+          set_text(text_19, $7);
+        },
+        [
+          () => localize($$props.config.effects.changesHeader),
+          () => localize($$props.config.effects.addChange),
+          () => localize($$props.config.effects.attributeKey),
+          () => localize($$props.config.effects.changeMode),
+          () => localize($$props.config.effects.value),
+          () => localize($$props.config.effects.priority),
+          () => localize($$props.config.effects.contributes),
+          () => localize($$props.config.effects.actions)
+        ]
+      );
       append($$anchor2, fragment_1);
     }
   });
@@ -10948,8 +11086,8 @@ const _ActiveEffectsEditor = class _ActiveEffectsEditor extends foundry.applicat
       target: windowContent,
       props: {
         item: this.document,
-        effect: this.effect,
-        config: this.config
+        effectsObject: this.effect,
+        config: CONFIG.sr3e
       }
     }));
     return windowContent;
@@ -13554,16 +13692,16 @@ function attachLightEffect(html2, activeTheme) {
     const selectors = [".stat-card-background", ".skill-background-layer"];
     const targetElements = html2.querySelectorAll(selectors.join(", "));
     targetElements.forEach((element) => {
-      const rect = element.getBoundingClientRect();
-      const centerX = (rect.left + rect.width) * 0.5;
-      const centerY = (rect.top + rect.height) * 0.5;
+      const rect2 = element.getBoundingClientRect();
+      const centerX = (rect2.left + rect2.width) * 0.5;
+      const centerY = (rect2.top + rect2.height) * 0.5;
       const dx = globalX - centerX;
       const dy = globalY - centerY;
       const distance = Math.sqrt(dx ** 2 + dy ** 2);
-      const maxDistance = Math.max(rect.width, rect.height) * 3.5;
+      const maxDistance = Math.max(rect2.width, rect2.height) * 3.5;
       const intensity = Math.max(0, 1 - distance / maxDistance);
       const radialGradient = `radial-gradient(
-        circle at ${globalX - rect.left}px ${globalY - rect.top}px,
+        circle at ${globalX - rect2.left}px ${globalY - rect2.top}px,
         ${themeColors.highlight} 0%,
         ${themeColors.highlight} ${Math.round(intensity * 40)}%,
         rgba(255, 192, 203, 0.15) 75%,
@@ -13582,6 +13720,10 @@ function attachLightEffect(html2, activeTheme) {
       requestAnimationFrame(updateLightEffect);
     }
   });
+  const rect = windowContent.getBoundingClientRect();
+  lastMouse.x = rect.left + rect.width / 2;
+  lastMouse.y = rect.top + rect.height / 2;
+  updateLightEffect();
 }
 class StorytellerScreenModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {

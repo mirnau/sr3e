@@ -1395,10 +1395,10 @@
   table .stat-card.centered {
     width: 95%;
     height: 100%;
-    margin: 0rem !important;
+    margin: 0.25rem !important;
   }
   table .stat-card.centered input[type="checkbox"] {
-    margin: 0;
+    margin: 0.25rem !important;
     display: block;
   }
   thead th {

@@ -3,11 +3,12 @@
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ComboSearch from "../basic/ComboSearch.svelte";
    import { flags } from "../../../../services/commonConsts.js";
+   import { localize } from "../../../../services/utilities.js";
 
-   let { item, effect: effectsObject, config } = $props();
+   let { item, effectsObject, config } = $props();
    let changes = $state([...effectsObject.changes]);
-
    let propertyOptions = $state([]);
+   let sourceType = $state(effectsObject.transfer ? "character" : "item");
 
    function flattenProperties(obj, prefix = "system") {
       return Object.entries(obj).flatMap(([key, value]) => {
@@ -18,16 +19,28 @@
       });
    }
 
-   //NOTE: Anything non moddable. Add more keys as needed
-   const blockedKeys = ["system.journalId", "system.priority"];
+   const allowedPatterns = ["system.attributes", "system.physical"];
 
    $effect(() => {
-      propertyOptions = flattenProperties(item.system)
-         .filter((path) => !blockedKeys.includes(path))
-         .map((path) => ({
-            value: path,
-            label: path,
-         }));
+      const transfer = sourceType !== "item";
+      let rawPaths = [];
+
+      if (transfer) {
+         const actor = game.actors.find((a) => a.type === sourceType);
+         if (actor) {
+            rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
+         }
+      } else {
+         rawPaths = Object.keys(foundry.utils.flattenObject({ system: item.toObject().system }));
+      }
+
+      propertyOptions = rawPaths
+         .filter((path) => allowedPatterns.some((p) => path.startsWith(p)))
+         .map((path) => ({ value: path, label: path }));
+   });
+
+   $effect(() => {
+      console.log("propertyOptions", propertyOptions); // checking triggers infinite loop
    });
 
    function commitChanges() {
@@ -59,60 +72,68 @@
 
 <div class="effects-editor">
    <ItemSheetComponent>
-      <h3>Effect Properties</h3>
+      <h3>{localize(config.effects.effectscomposer)}</h3>
       <div class="stat-grid single-column">
          <Image src={effectsObject.img} title={effectsObject.name} entity={effectsObject} />
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
-            <h4>Name:</h4>
+            <h4>{localize(config.effects.name)}:</h4>
             <input type="text" bind:value={effectsObject.name} />
          </div>
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
-            <h4>Transfer:</h4>
-            <input type="checkbox" bind:checked={effectsObject.transfer} />
-         </div>
-
-         <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4>Disabled:</h4>
-            <input type="checkbox" bind:checked={effectsObject.disabled} />
-         </div>
-
-         <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4>Duration Type:</h4>
-            <select bind:value={effectsObject.duration.type}>
-               <option value="none">None</option>
-               <option value="turns">Turns</option>
-               <option value="seconds">Seconds</option>
+            <h4>Source Type:</h4>
+            <select bind:value={sourceType}>
+               <option value="item">Item</option>
+               <option value="character">Character</option>
+               <option value="vehicle" disabled>Vehicle (TODO)</option>
             </select>
          </div>
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
-            <h4>Duration Value:</h4>
+            <h4>{localize(config.effects.disabled)}:</h4>
+            <input type="checkbox" bind:checked={effectsObject.disabled} />
+         </div>
+
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>{localize(config.effects.durationType)}:</h4>
+            <select bind:value={effectsObject.duration.type}>
+               <option value="none">{localize(config.effects.permanent)}</option>
+               <option value="turns">{localize(config.time.turns)}</option>
+               <option value="rounds">{localize(config.time.rounds)}</option>
+               <option value="seconds">{localize(config.time.seconds)}</option>
+               <option value="minutes">{localize(config.time.minutes)}</option>
+               <option value="hours">{localize(config.time.hours)}</option>
+               <option value="days">{localize(config.time.days)}</option>
+            </select>
+         </div>
+
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>{localize(config.effects.durationValue)}:</h4>
             <input type="number" bind:value={effectsObject.duration.value} />
          </div>
       </div>
    </ItemSheetComponent>
 
    <ItemSheetComponent>
-      <h1>Changes</h1>
-      <button onclick={addChange}>➕ Add Change</button>
+      <h1>{localize(config.effects.changesHeader)}</h1>
+      <button onclick={addChange}>➕ {localize(config.effects.addChange)}</button>
 
       <div class="table-wrapper">
          <table>
             <thead>
                <tr>
-                  <th>Attribute Key</th>
-                  <th>Change Mode</th>
-                  <th>Effect Value</th>
-                  <th>Priority</th>
-                  <th>Add to Pools</th>
-                  <th>Actions</th>
+                  <th>{localize(config.effects.attributeKey)}</th>
+                  <th>{localize(config.effects.changeMode)}</th>
+                  <th>{localize(config.effects.value)}</th>
+                  <th>{localize(config.effects.priority)}</th>
+                  <th>{localize(config.effects.contributes)}</th>
+                  <th>{localize(config.effects.actions)}</th>
                </tr>
             </thead>
             <tbody>
@@ -123,8 +144,8 @@
                            <div class="stat-card-background"></div>
                            <ComboSearch
                               options={propertyOptions}
-                              placeholder="Select property"
-                              nomatchplaceholder="No match"
+                              placeholder={localize(config.effects.selectProperty)}
+                              nomatchplaceholder={localize(config.effects.noMatch)}
                               bind:value={change.key}
                               on:select={(e) => updateChange(i, "key", e.detail)}
                               css={"table"}
@@ -154,7 +175,6 @@
                            />
                         </div>
                      </td>
-
                      <td>
                         <div class="stat-card">
                            <div class="stat-card-background"></div>
@@ -170,7 +190,8 @@
                            <div class="stat-card-background"></div>
                            <input
                               type="checkbox"
-                              oninput={(e) => effect.setFlag(flags.sr3e, flags.effect.contributes, e.target.checked)}
+                              oninput={(e) =>
+                                 effectsObject.setFlag(flags.sr3e, flags.effect.contributes, e.target.checked)}
                            />
                         </div>
                      </td>

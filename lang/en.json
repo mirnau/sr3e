@@ -63,6 +63,25 @@
          "extreme": "Extreme",
          "nearlyimpossible": "Nearly Impossible"
       },
+      "effects": {
+         "effectscomposer": "Effects Composer",
+         "name": "Name",
+         "transfer": "Transfer",
+         "disabled": "Disabled",
+         "durationType": "Duration Type",
+         "durationValue": "Duration Value",
+         "attributeKey": "Attribute Key",
+         "changeMode": "Change Mode",
+         "value": "Effect Value",
+         "priority": "Priority",
+         "contributes": "Add to Pools",
+         "actions": "Actions",
+         "addChange": "Add Change",
+         "selectProperty": "Select Property",
+         "noMatch": "No Match",
+         "permanent": "Permanent",
+         "changesHeader": "Changes"
+      },
       "health": {
          "health": "Health",
          "overflow": "Overflow",
@@ -191,14 +210,15 @@
          "refreshkarmapool": "Refresh Karma Pool",
          "refresh": "Refresh"
       },
-
       "time": {
-         "year": "Year",
-         "month": "Month",
-         "day": "Day",
+         "days": "Days",
          "hours": "Hours",
          "minutes": "Minutes",
-         "seconds": "Seconds"
+         "seconds": "Seconds",
+         "rounds": "Rounds",
+         "turns": "Turns",
+         "months": "Months",
+         "years": "Years"
       },
       "traits": {
          "age": "Age",

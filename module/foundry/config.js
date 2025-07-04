@@ -33,6 +33,26 @@ sr3e.difficulty = {
    nearlyimpossible: "sr3e.difficulty.nearlyimpossible",
 };
 
+sr3e.effects = {
+   effectscomposer: "sr3e.effects.effectscomposer",
+   name: "sr3e.effects.name",
+   transfer: "sr3e.effects.transfer",
+   disabled: "sr3e.effects.disabled",
+   durationType: "sr3e.effects.durationType",
+   durationValue: "sr3e.effects.durationValue",
+   attributeKey: "sr3e.effects.attributeKey",
+   changeMode: "sr3e.effects.changeMode",
+   value: "sr3e.effects.value",
+   priority: "sr3e.effects.priority",
+   contributes: "sr3e.effects.contributes",
+   actions: "sr3e.effects.actions",
+   addChange: "sr3e.effects.addChange",
+   noMatch: "sr3e.effects.noMatch",
+   selectProperty: "sr3e.effects.selectProperty",
+   permanent: "sr3e.effects.permanent",
+   changesHeader: "sr3e.effects.changesHeader"
+};
+
 sr3e.health = {
    health: "sr3e.health.health",
    overflow: "sr3e.health.overflow",
@@ -227,12 +247,14 @@ sr3e.notifications = {
 };
 
 sr3e.time = {
-   year: "sr3e.time.year",
-   month: "sr3e.time.month",
-   day: "sr3e.time.day",
+   days: "sr3e.time.days",
    hours: "sr3e.time.hours",
    minutes: "sr3e.time.minutes",
    seconds: "sr3e.time.seconds",
+   rounds: "sr3e.time.rounds",
+   turns: "sr3e.time.turns",
+   months: "sr3e.time.months",
+   years: "sr3e.time.years",
 };
 
 sr3e.combosearch = {

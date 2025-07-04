@@ -10,7 +10,7 @@
       nomatchplaceholder = "No matches found...",
       disabled = false,
       maxHeight = "200px",
-      css = ""
+      css = "",
    } = $props();
 
    let isOpen = $state(false);
@@ -30,13 +30,18 @@
 
    // Filter options when searching
    $effect(() => {
+      const filtered =
+         searchTerm.trim() === ""
+            ? options
+            : options.filter((o) => o.label.toLowerCase().includes(searchTerm.toLowerCase()));
+
       if (isOpen) {
-         filteredOptions =
-            searchTerm.trim() === ""
-               ? options
-               : options.filter((o) => o.label.toLowerCase().includes(searchTerm.toLowerCase()));
+         filteredOptions = filtered;
          highlightedIndex = -1;
          updateDropdown();
+      } else {
+         // still want to update filteredOptions so they are fresh next time
+         filteredOptions = filtered;
       }
    });
 
@@ -192,7 +197,7 @@
          bind:value={searchTerm}
          {placeholder}
          {disabled}
-         class={`combobox-input ${css}`} 
+         class={`combobox-input ${css}`}
          class:open={isOpen}
          role="combobox"
          aria-expanded={isOpen}
