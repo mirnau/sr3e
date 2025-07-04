@@ -26,6 +26,9 @@ export const flags = {
     attributeAssignmentLocked: "attributeAssignmentLocked",
     persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize",
     isrollcomposeropen: "isrollcomposeropen"
+  },
+  effect: {
+    contributes: "contributes"
   }
 };
 

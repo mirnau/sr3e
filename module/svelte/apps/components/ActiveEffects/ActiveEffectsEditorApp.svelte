@@ -2,6 +2,7 @@
    import Image from "../basic/Image.svelte";
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ComboSearch from "../basic/ComboSearch.svelte";
+   import { flags } from "../../../../services/commonConsts.js";
 
    let { item, effect: effectsObject, config } = $props();
    let changes = $state([...effectsObject.changes]);
@@ -18,10 +19,7 @@
    }
 
    //NOTE: Anything non moddable. Add more keys as needed
-   const blockedKeys = [
-      "system.journalId",
-      "system.priority",
-   ];
+   const blockedKeys = ["system.journalId", "system.priority"];
 
    $effect(() => {
       propertyOptions = flattenProperties(item.system)
@@ -113,6 +111,7 @@
                   <th>Change Mode</th>
                   <th>Effect Value</th>
                   <th>Priority</th>
+                  <th>Add to Pools</th>
                   <th>Actions</th>
                </tr>
             </thead>
@@ -128,6 +127,7 @@
                               nomatchplaceholder="No match"
                               bind:value={change.key}
                               on:select={(e) => updateChange(i, "key", e.detail)}
+                              css={"table"}
                            />
                         </div>
                      </td>
@@ -154,6 +154,7 @@
                            />
                         </div>
                      </td>
+
                      <td>
                         <div class="stat-card">
                            <div class="stat-card-background"></div>
@@ -161,6 +162,15 @@
                               type="number"
                               value={change.priority}
                               oninput={(e) => updateChange(i, "priority", +e.target.value)}
+                           />
+                        </div>
+                     </td>
+                     <td>
+                        <div class="stat-card centered">
+                           <div class="stat-card-background"></div>
+                           <input
+                              type="checkbox"
+                              oninput={(e) => effect.setFlag(flags.sr3e, flags.effect.contributes, e.target.checked)}
                            />
                         </div>
                      </td>

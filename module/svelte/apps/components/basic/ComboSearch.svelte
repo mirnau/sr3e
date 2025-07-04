@@ -10,6 +10,7 @@
       nomatchplaceholder = "No matches found...",
       disabled = false,
       maxHeight = "200px",
+      css = ""
    } = $props();
 
    let isOpen = $state(false);
@@ -184,14 +185,14 @@
    }
 </script>
 
-<div class="combobox-container">
-   <div class="combobox-wrapper" class:disabled bind:this={wrapperElement}>
+<div class={`combobox-container`}>
+   <div class={`combobox-wrapper ${css}`} class:disabled bind:this={wrapperElement}>
       <input
          bind:this={inputElement}
          bind:value={searchTerm}
          {placeholder}
          {disabled}
-         class="combobox-input"
+         class={`combobox-input ${css}`} 
          class:open={isOpen}
          role="combobox"
          aria-expanded={isOpen}

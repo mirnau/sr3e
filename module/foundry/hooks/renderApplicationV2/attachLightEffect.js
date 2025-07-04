@@ -21,7 +21,6 @@ export function attachLightEffect(html, activeTheme) {
   const isDark = activeTheme.toLowerCase().includes("dark");
   const themeColors = isDark ? colors.dark : colors.light;
 
-  // Higher contrast, tighter stripe frequency for more definition
   const brushedBase = `repeating-linear-gradient(
     33deg,
     ${themeColors.darkGray} 0px,
@@ -33,9 +32,12 @@ export function attachLightEffect(html, activeTheme) {
   const windowContent = html.querySelector(".window-content");
   if (!windowContent) return;
 
-  windowContent.addEventListener("mousemove", (event) => {
-    const globalX = event.clientX;
-    const globalY = event.clientY;
+  let lastMouse = { x: 0, y: 0 };
+  let frameRequested = false;
+
+  function updateLightEffect() {
+    const globalX = lastMouse.x;
+    const globalY = lastMouse.y;
 
     const selectors = [".stat-card-background", ".skill-background-layer"];
     const targetElements = html.querySelectorAll(selectors.join(", "));
@@ -62,5 +64,17 @@ export function attachLightEffect(html, activeTheme) {
       element.style.background = `${radialGradient}, ${brushedBase}`;
       element.style.backgroundBlendMode = "screen";
     });
+
+    frameRequested = false;
+  }
+
+  windowContent.addEventListener("mousemove", (event) => {
+    lastMouse.x = event.clientX;
+    lastMouse.y = event.clientY;
+
+    if (!frameRequested) {
+      frameRequested = true;
+      requestAnimationFrame(updateLightEffect);
+    }
   });
 }
