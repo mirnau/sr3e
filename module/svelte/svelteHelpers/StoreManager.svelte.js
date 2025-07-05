@@ -31,6 +31,7 @@ export class StoreManager {
    #document;
    #persistentStore = {};
    #actorStores = {};
+   #hookDisposers = new Map();
 
    constructor(document) {
       this.#document = document;
@@ -53,11 +54,20 @@ export class StoreManager {
       handlerData.subscribers--;
 
       if (handlerData.subscribers < 1) {
+         const manager = handlerData.handler;
+
+         for (const [dataPath, disposer] of manager.#hookDisposers.entries()) {
+            disposer();
+         }
+
+         manager.#hookDisposers.clear();
+         manager.#persistentStore = {};
+
          storeManagers.delete(document.id);
       }
    }
 
-   GetStore(dataPath) {
+   GetRWStore(dataPath) {
       const fullPath = `system.${dataPath}`;
       const value = foundry.utils.getProperty(this.#document.system, dataPath);
 
@@ -67,15 +77,51 @@ export class StoreManager {
 
          const store = writable(clonedValue);
 
-         store.subscribe((newValue) => {
+         // -- Svelte → Foundry sync --
+         const unsubscribe = store.subscribe((newValue) => {
             foundry.utils.setProperty(this.#document.system, dataPath, newValue);
             this.#document.update({ [fullPath]: newValue }, { render: false });
+         });
+
+         // -- Foundry → Svelte sync --
+         const docUpdateHook = (doc) => {
+            if (doc.id !== this.#document.id) return;
+            const newValue = foundry.utils.getProperty(doc.system, dataPath);
+            store.set(
+               newValue && typeof newValue === "object"
+                  ? Array.isArray(newValue)
+                     ? [...newValue]
+                     : { ...newValue }
+                  : newValue
+            );
+         };
+
+         const docType = this.#document.documentName;
+         Hooks.on(`update${docType}`, docUpdateHook);
+
+         // Register cleanup
+         this.#hookDisposers.set(dataPath, () => {
+            Hooks.off(`update${docType}`, docUpdateHook);
+            unsubscribe();
          });
 
          this.#persistentStore[dataPath] = store;
       }
 
       return this.#persistentStore[dataPath];
+   }
+
+   GetSumROStore(dataPath) {
+      const value = this.GetRWStore(`${dataPath}.value`);
+      const mod = this.GetRWStore(`${dataPath}.mod`);
+
+      const total = derived([value, mod], ([$value, $mod]) => ({
+         value: $value,
+         mod: $mod,
+         sum: $value + $mod,
+      }));
+
+      return total;
    }
 
    GetShallowStore(docId, storeName, customValue = null) {
@@ -113,31 +159,5 @@ export class StoreManager {
       }
 
       return this.#persistentStore[flag];
-   }
-
-   /**
-    * Creates a derived Svelte store that combines multiple stores into a single object.
-    * Each key in the resulting object corresponds to a store value, and an additional `sum` property
-    * contains the sum of all store values.
-    *
-    * @param {string} basePath - The base path used to retrieve individual stores.
-    * @param {string[]} keys - An array of keys to identify which stores to combine.
-    * @returns {import('svelte/store').Readable<Object>} A derived Svelte store object with each key's value and a `sum` property.
-    */
-   GetCompositeStore(basePath, keys) {
-      const stores = keys.map((key) => this.GetStore(`${basePath}.${key}`));
-
-      return derived(stores, ($stores) => {
-         const obj = {};
-         let sum = 0;
-
-         keys.forEach((key, i) => {
-            obj[key] = $stores[i];
-            sum += $stores[i];
-         });
-
-         obj.sum = sum;
-         return obj;
-      });
    }
 }

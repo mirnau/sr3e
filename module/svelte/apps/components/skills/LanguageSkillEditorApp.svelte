@@ -11,9 +11,9 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
    let itemStoreManager = StoreManager.Subscribe(skill);
 
-   let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
-   let valueStore = itemStoreManager.GetStore("languageSkill.value");
-   let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
+   let specializationsStore = itemStoreManager.GetRWStore("languageSkill.specializations");
+   let valueStore = itemStoreManager.GetRWStore("languageSkill.value");
+   let languageSkillPointsStore = actorStoreManager.GetRWStore("creation.languagePoints");
 
    let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
 

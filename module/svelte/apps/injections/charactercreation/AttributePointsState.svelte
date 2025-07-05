@@ -15,11 +15,13 @@
 
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
-   let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-   let attributePointsStore = storeManager.GetStore("creation.attributePoints");
-   let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
-   let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
-   let languagePointsStore = storeManager.GetStore("creation.languagePoints");
+   let intelligence = storeManager.GetSumROStore("attributes.intelligence");
+   let attributePointsStore = storeManager.GetRWStore("creation.attributePoints");
+   let activeSkillPointsStore = storeManager.GetRWStore("creation.activePoints");
+   let knowledgePointsStore = storeManager.GetRWStore("creation.knowledgePoints");
+   let languagePointsStore = storeManager.GetRWStore("creation.languagePoints");
+
+   console.log("NEW ACTOR", actor);
 
    // Make pointList reactive by using derived stores
    let pointList = $derived([

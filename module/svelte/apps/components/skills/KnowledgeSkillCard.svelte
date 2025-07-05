@@ -10,8 +10,8 @@
    let skillStoreManager = StoreManager.Subscribe(skill);
    let actorStoreManager = StoreManager.Subscribe(actor);
 
-   let value = skillStoreManager.GetStore("knowledgeSkill.value");
-   let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
+   let value = skillStoreManager.GetRWStore("knowledgeSkill.value");
+   let specializations = skillStoreManager.GetRWStore("knowledgeSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 

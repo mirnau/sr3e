@@ -12,9 +12,7 @@
 
    const attributes = config.attributes;
    const common = config.common;
-   const movementConfig = config.movement;
    const karmaConfig = config.karma;
-   const visionConfig = config.vision;
    const traits = config.traits;
    let layoutMode = $state("double");
 
@@ -108,18 +106,6 @@
       },
    ]);
 
-   const movement = $derived([
-      {
-         item,
-         key: "modifier",
-         label: localize(movementConfig.runSpeedModifier),
-         value: system.movement.modifier,
-         path: "system.movement",
-         type: "number",
-         options: [],
-      },
-   ]);
-
    const karma = $derived([
       {
          item,
@@ -127,63 +113,6 @@
          label: localize(karmaConfig.advancementratio),
          value: system.karma.factor,
          path: "system.karma",
-         type: "number",
-         options: [],
-      },
-   ]);
-
-   const attributeModifiers = $derived([
-      {
-         item,
-         key: "strength",
-         label: localize(attributes.strength),
-         value: system.modifiers.strength,
-         path: "system.modifiers",
-         type: "number",
-         options: [],
-      },
-      {
-         item,
-         key: "quickness",
-         label: localize(attributes.quickness),
-         value: system.modifiers.quickness,
-         path: "system.modifiers",
-         type: "number",
-         options: [],
-      },
-      {
-         item,
-         key: "body",
-         label: localize(attributes.body),
-         value: system.modifiers.body,
-         path: "system.modifiers",
-         type: "number",
-         options: [],
-      },
-      {
-         item,
-         key: "charisma",
-         label: localize(attributes.charisma),
-         value: system.modifiers.charisma,
-         path: "system.modifiers",
-         type: "number",
-         options: [],
-      },
-      {
-         item,
-         key: "intelligence",
-         label: localize(attributes.intelligence),
-         value: system.modifiers.intelligence,
-         path: "system.modifiers",
-         type: "number",
-         options: [],
-      },
-      {
-         item,
-         key: "willpower",
-         label: localize(attributes.willpower),
-         value: system.modifiers.willpower,
-         path: "system.modifiers",
          type: "number",
          options: [],
       },
@@ -243,22 +172,6 @@
          path: "system.attributeLimits",
          type: "number",
          options: [],
-      },
-   ]);
-
-   const vision = $derived([
-      {
-         item,
-         key: "type",
-         label: localize(visionConfig.type),
-         value: system.vision.type,
-         path: "system.vision",
-         type: "select",
-         options: [
-            localize(visionConfig.normalvision),
-            localize(visionConfig.lowlight),
-            localize(visionConfig.thermographic),
-         ],
       },
    ]);
 
@@ -324,30 +237,11 @@
          </ItemSheetComponent>
       {/if}
 
-      <!-- Modifiers -->
-      <ItemSheetComponent>
-         <h3 class="item">{localize(attributes.modifiers)}</h3>
-         <div class="stat-grid">
-            {#each attributeModifiers as entry}
-               <StatCard {...entry} />
-            {/each}
-         </div>
-      </ItemSheetComponent>
       <!-- Attribute Limits -->
       <ItemSheetComponent>
          <h3 class="item">{localize(attributes.limits)}</h3>
          <div class="stat-grid">
             {#each attributeLimits as entry}
-               <StatCard {...entry} />
-            {/each}
-         </div>
-      </ItemSheetComponent>
-
-      <!-- Movement -->
-      <ItemSheetComponent>
-         <h3 class="item">{localize(config.movement.movement)}</h3>
-         <div class="stat-grid single-column">
-            {#each movement as entry}
                <StatCard {...entry} />
             {/each}
          </div>
@@ -363,13 +257,6 @@
          </div>
       </ItemSheetComponent>
 
-      <!-- Vision -->
-      <ItemSheetComponent>
-         <h3 class="item">{localize(config.vision.vision)}</h3>
-         {#each vision as entry}
-            <StatCard {...entry} />
-         {/each}
-      </ItemSheetComponent>
       <ActiveEffectsViewer {item} {config} />
       <!-- Journal Viewer -->
       <JournalViewer {item} {config} />

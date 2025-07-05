@@ -13,12 +13,12 @@
 
    let languageSkill = $state(skill.system.languageSkill);
 
-   let specializations = skillStoreManager.GetStore("skill.system.languageSkill.specializations");
+   let specializations = skillStoreManager.GetRWStore("skill.system.languageSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
-   let value = skillStoreManager.GetStore("languageSkill.value");
-   let readWriteValue = skillStoreManager.GetStore("languageSkill.readwrite.value");
+   let value = skillStoreManager.GetRWStore("languageSkill.value");
+   let readWriteValue = skillStoreManager.GetRWStore("languageSkill.readwrite.value");
 
    let skillEditorInstance = null;
 

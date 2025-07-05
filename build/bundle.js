@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
+var _document, _persistentStore, _actorStores, _hookDisposers, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -105,29 +105,14 @@ class Profile extends foundry.abstract.TypeDataModel {
 class SimpleStat extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      total: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true
-      }),
+      // The User-system inteface (original value)
       value: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
         integer: true
       }),
+      // The AE-system inteface
       mod: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true
-      })
-    };
-  }
-}
-class ComplexStat extends SimpleStat {
-  static defineSchema() {
-    return {
-      ...super.defineSchema(),
-      meta: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
         integer: true
@@ -139,21 +124,18 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
   static defineSchema() {
     return {
       // Attributes using ComplexStat (with meta)
-      body: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      quickness: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      strength: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      charisma: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      intelligence: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      willpower: new foundry.data.fields.SchemaField(ComplexStat.defineSchema()),
-      essence: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 6
-      }),
-      magic: new foundry.data.fields.SchemaField({
-        ...SimpleStat.defineSchema(),
-        isBurnedOut: new foundry.data.fields.BooleanField({
-          initial: false
-        })
+      body: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      quickness: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      strength: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      charisma: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      intelligence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      willpower: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      // NOTE: Active Effect driven attributes
+      reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      isBurnedOut: new foundry.data.fields.BooleanField({
+        initial: false
       })
     };
   }
@@ -3666,6 +3648,7 @@ const _StoreManager = class _StoreManager {
     __privateAdd(this, _document);
     __privateAdd(this, _persistentStore, {});
     __privateAdd(this, _actorStores, {});
+    __privateAdd(this, _hookDisposers, /* @__PURE__ */ new Map());
     __privateSet(this, _document, document2);
   }
   static Subscribe(document2) {
@@ -3682,22 +3665,45 @@ const _StoreManager = class _StoreManager {
     const handlerData = storeManagers.get(document2.id);
     handlerData.subscribers--;
     if (handlerData.subscribers < 1) {
+      const manager = handlerData.handler;
+      for (const [dataPath, disposer] of __privateGet(manager, _hookDisposers).entries()) {
+        disposer();
+      }
+      __privateGet(manager, _hookDisposers).clear();
+      __privateSet(manager, _persistentStore, {});
       storeManagers.delete(document2.id);
     }
   }
-  GetStore(dataPath) {
+  GetRWStore(dataPath) {
     const fullPath = `system.${dataPath}`;
     const value = foundry.utils.getProperty(__privateGet(this, _document).system, dataPath);
     if (!__privateGet(this, _persistentStore)[dataPath]) {
       const clonedValue = value && typeof value === "object" ? Array.isArray(value) ? [...value] : { ...value } : value;
       const store = writable(clonedValue);
-      store.subscribe((newValue) => {
+      const unsubscribe = store.subscribe((newValue) => {
         foundry.utils.setProperty(__privateGet(this, _document).system, dataPath, newValue);
         __privateGet(this, _document).update({ [fullPath]: newValue }, { render: false });
+      });
+      const docUpdateHook = (doc) => {
+        if (doc.id !== __privateGet(this, _document).id) return;
+        const newValue = foundry.utils.getProperty(doc.system, dataPath);
+        store.set(newValue && typeof newValue === "object" ? Array.isArray(newValue) ? [...newValue] : { ...newValue } : newValue);
+      };
+      const docType = __privateGet(this, _document).documentName;
+      Hooks.on(`update${docType}`, docUpdateHook);
+      __privateGet(this, _hookDisposers).set(dataPath, () => {
+        Hooks.off(`update${docType}`, docUpdateHook);
+        unsubscribe();
       });
       __privateGet(this, _persistentStore)[dataPath] = store;
     }
     return __privateGet(this, _persistentStore)[dataPath];
+  }
+  GetSumROStore(dataPath) {
+    const value = this.GetRWStore(`${dataPath}.value`);
+    const mod = this.GetRWStore(`${dataPath}.mod`);
+    const total = derived([value, mod], ([$value, $mod]) => ({ value: $value, mod: $mod, sum: $value + $mod }));
+    return total;
   }
   GetShallowStore(docId, storeName, customValue = null) {
     var _a;
@@ -3722,32 +3728,11 @@ const _StoreManager = class _StoreManager {
     }
     return __privateGet(this, _persistentStore)[flag];
   }
-  /**
-   * Creates a derived Svelte store that combines multiple stores into a single object.
-   * Each key in the resulting object corresponds to a store value, and an additional `sum` property
-   * contains the sum of all store values.
-   *
-   * @param {string} basePath - The base path used to retrieve individual stores.
-   * @param {string[]} keys - An array of keys to identify which stores to combine.
-   * @returns {import('svelte/store').Readable<Object>} A derived Svelte store object with each key's value and a `sum` property.
-   */
-  GetCompositeStore(basePath, keys) {
-    const stores2 = keys.map((key) => this.GetStore(`${basePath}.${key}`));
-    return derived(stores2, ($stores) => {
-      const obj = {};
-      let sum = 0;
-      keys.forEach((key, i) => {
-        obj[key] = $stores[i];
-        sum += $stores[i];
-      });
-      obj.sum = sum;
-      return obj;
-    });
-  }
 };
 _document = new WeakMap();
 _persistentStore = new WeakMap();
 _actorStores = new WeakMap();
+_hookDisposers = new WeakMap();
 let StoreManager = _StoreManager;
 var root$L = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
@@ -3785,7 +3770,7 @@ function TextInput($$anchor, $$props) {
 }
 delegate(["input", "keydown"]);
 var on_keydown$7 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$e = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$d = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$K = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3797,7 +3782,7 @@ function Dossier($$anchor, $$props) {
   let storeManager2 = StoreManager.Subscribe(actor());
   let system = proxy(actor().system);
   let actorNameStore = storeManager2.GetShallowStore(actor().id, stores$1.actorName, actor().name);
-  let isDetailsOpenStore = storeManager2.GetStore("profile.isDetailsOpen");
+  let isDetailsOpenStore = storeManager2.GetRWStore("profile.isDetailsOpen");
   proxy($isDetailsOpenStore());
   let metatype = /* @__PURE__ */ derived$1(() => actor().items.find((i) => i.type === "metatype"));
   let imgPath = /* @__PURE__ */ derived$1(() => {
@@ -3889,7 +3874,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$e();
+      var fragment_3 = root_3$d();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -4090,14 +4075,6 @@ class ItemDataService {
           height: { min: 150, average: 170, max: 220 },
           weight: { min: 50, average: 70, max: 250 }
         },
-        modifiers: {
-          strength: 0,
-          quickness: 0,
-          body: 0,
-          charisma: 0,
-          intelligence: 0,
-          willpower: 0
-        },
         attributeLimits: {
           strength: 6,
           quickness: 6,
@@ -4106,14 +4083,8 @@ class ItemDataService {
           intelligence: 6,
           willpower: 6
         },
-        movement: {
-          modifier: 3
-        },
         karma: {
           factor: 0.1
-        },
-        vision: {
-          type: ""
         },
         priority: "E",
         journalId: ""
@@ -4171,8 +4142,8 @@ var on_click$a = (__1, modifiersArray) => {
   ]));
 };
 var root_2$i = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
-var root_3$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
-var root_4$b = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
+var root_3$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_4$a = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$t = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
@@ -4183,8 +4154,8 @@ function RollComposerComponent($$anchor, $$props) {
   const $linkedAttributeStore = () => store_get(linkedAttributeStore, "$linkedAttributeStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   onDestroy(() => StoreManager.Unsubscribe($$props.actor));
-  let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
-  let penalty = actorStoreManager.GetStore("health.penalty");
+  let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
+  let penalty = actorStoreManager.GetRWStore("health.penalty");
   $karmaPoolStore();
   let targetNumber = state(5);
   let modifiersArray = state(proxy([]));
@@ -4229,7 +4200,7 @@ function RollComposerComponent($$anchor, $$props) {
         linkedAttributeString = skill.system.activeSkill.linkedAttribute;
         console.log("linkedAttributeString", linkedAttributeString);
         set(associatedDicePoolString, proxy(skill.system.activeSkill.associatedDicePool));
-        associatedDicePoolStore = actorStoreManager.GetCompositeStore(`dicePools.${get$2(associatedDicePoolString)}`, ["value", "mod"]);
+        associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${get$2(associatedDicePoolString)}`);
         console.log("associatedDicePoolStore", $associatedDicePoolStore());
       } else if (skill.system.skillType === "knowledge") {
         linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
@@ -4238,7 +4209,7 @@ function RollComposerComponent($$anchor, $$props) {
         skill.system.languageSkill.readwrite;
       }
       if (linkedAttributeString !== "") {
-        linkedAttributeStore = actorStoreManager.GetCompositeStore(`attributes.${linkedAttributeString}`, ["value", "mod", "meta"]);
+        linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
         console.log("linkedAttributeStore", $linkedAttributeStore());
       }
     }
@@ -4443,7 +4414,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_3$d();
+      var div_5 = root_3$c();
       var h1_1 = child(div_5);
       var text_4 = child(h1_1);
       var h4_3 = sibling(h1_1, 2);
@@ -4453,7 +4424,7 @@ function RollComposerComponent($$anchor, $$props) {
         class: "karma-counter",
         min: "0",
         get max() {
-          return $linkedAttributeStore().sum;
+          return $linkedAttributeStore();
         },
         onIncrement: AddDiceFromPool,
         onDecrement: RemoveDiceFromPool,
@@ -4482,7 +4453,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_5 = sibling(node_3, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_6 = root_4$b();
+      var div_6 = root_4$a();
       var h4_4 = sibling(child(div_6), 2);
       var text_6 = child(h4_4);
       var node_6 = sibling(h4_4, 2);
@@ -4529,51 +4500,39 @@ function RollComposerComponent($$anchor, $$props) {
 }
 delegate(["keydown", "click"]);
 var on_keydown$6 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$h = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$c = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
+var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div></div>`);
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_4$a = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_2$h = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $value = () => store_get(value, "$value", $$stores);
   const $total = () => store_get(total, "$total", $$stores);
   const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const storeManager2 = StoreManager.Subscribe($$props.actor);
-  let total = storeManager2.GetCompositeStore(`attributes.${$$props.key}`, ["value", "mod", "meta"]);
-  let value = storeManager2.GetStore(`attributes.${$$props.key}.value`);
-  let attributePointStore = storeManager2.GetStore("creation.attributePoints");
+  let total = storeManager2.GetSumROStore(`attributes.${$$props.key}`);
+  let valueStore = storeManager2.GetRWStore(`attributes.${$$props.key}.value`);
+  let attributePointStore = storeManager2.GetRWStore("creation.attributePoints");
   let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
-  let metatype = /* @__PURE__ */ derived$1(() => {
-    var _a;
-    return "meta" in $$props.stat && ((_a = $$props.actor) == null ? void 0 : _a.items) ? $$props.actor.items.find((i) => i.type === "metatype") : null;
-  });
-  let attributeLimit = /* @__PURE__ */ derived$1(() => {
-    var _a, _b, _c;
-    return $$props.key === "magic" || !("meta" in $$props.stat) ? null : ((_c = (_b = (_a = get$2(metatype)) == null ? void 0 : _a.system) == null ? void 0 : _b.attributeLimits) == null ? void 0 : _c[$$props.key]) ?? 0;
-  });
-  let isMinLimit = /* @__PURE__ */ derived$1(() => $value() <= 1);
-  let isMaxLimit = /* @__PURE__ */ derived$1(() => get$2(attributeLimit) ? $total().sum >= get$2(attributeLimit) : false);
+  let isMinLimit = /* @__PURE__ */ derived$1(() => $total().value <= 1);
   let activeModal = null;
   let isModalOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
   function add(change) {
     if (!$attributeAssignmentLockedStore()) {
       const newPoints = $attributePointStore() - change;
       if (newPoints < 0) return;
-      store_set(value, $value() + change);
+      valueStore.update((v) => v + change);
       store_set(attributePointStore, newPoints);
     }
   }
   const increment2 = () => {
-    if (!get$2(isMaxLimit)) add(1);
+    add(1);
   };
   const decrement2 = () => {
     if (!get$2(isMinLimit)) add(-1);
@@ -4608,7 +4567,7 @@ function AttributeCard($$anchor, $$props) {
             config: CONFIG.sr3e,
             caller: {
               key: $$props.key,
-              value: $value(),
+              value: $total().value,
               type: "attribute",
               dice: $total().sum
             },
@@ -4633,44 +4592,26 @@ function AttributeCard($$anchor, $$props) {
   event("keydown", $window, handleEscape, true);
   var node = first_child(fragment);
   {
-    var consequent_2 = ($$anchor2) => {
+    var consequent = ($$anchor2) => {
       var div = root_1$s();
       var h4 = child(div);
       var text2 = child(h4);
       var div_1 = sibling(h4, 4);
-      var node_1 = child(div_1);
-      {
-        var consequent = ($$anchor3) => {
-          var i_1 = root_2$h();
-          i_1.__click = decrement2;
-          i_1.__keydown = [on_keydown$6, decrement2];
-          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_1);
-        };
-        if_block(node_1, ($$render) => {
-          if ("meta" in $$props.stat) $$render(consequent);
-        });
-      }
-      var h1 = sibling(node_1, 2);
+      var i_1 = child(div_1);
+      i_1.__click = decrement2;
+      i_1.__keydown = [on_keydown$6, decrement2];
+      var h1 = sibling(i_1, 2);
       var text_1 = child(h1);
-      var node_2 = sibling(h1, 2);
-      {
-        var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$c();
-          i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1$2, increment2];
-          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${(get$2(isMaxLimit) || $attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
-          append($$anchor3, i_2);
-        };
-        if_block(node_2, ($$render) => {
-          if ("meta" in $$props.stat) $$render(consequent_1);
-        });
-      }
+      var i_2 = sibling(h1, 2);
+      i_2.__click = increment2;
+      i_2.__keydown = [on_keydown_1$2, increment2];
       template_effect(
         ($0) => {
           toggle_class(div, "button", !$isShoppingState());
           set_text(text2, $0);
+          set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`);
           set_text(text_1, $total().sum);
+          set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
         },
         [
           () => localize($$props.localization[$$props.key])
@@ -4679,7 +4620,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_4$a();
+      var div_2 = root_2$h();
       div_2.__click = Roll2;
       div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
@@ -4700,7 +4641,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent_2);
+      if ($isShoppingState()) $$render(consequent);
       else $$render(alternate, false);
     });
   }
@@ -6348,15 +6289,15 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$q = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root_1$q = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
 var root$G = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $essence = () => store_get(essence, "$essence", $$stores);
   const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $magic = () => store_get(magic, "$magic", $$stores);
+  const $reaction = () => store_get(reaction, "$reaction", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
@@ -6365,21 +6306,17 @@ function Attributes($$anchor, $$props) {
   let localization = config().attributes;
   let storeManager2 = StoreManager.Subscribe(actor());
   storeManager2.GetFlagStore(flags.attributeAssignmentLocked);
-  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
-  let magic = storeManager2.GetCompositeStore("attributes.magic", ["value", "mod"]);
-  let essence = storeManager2.GetStore("attributes.essence");
-  let magicValueStore = storeManager2.GetStore("attributes.magic.value");
-  let magicCap = /* @__PURE__ */ derived$1(() => Math.floor($essence()));
-  let reaction = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum) * 0.5));
-  let augmentedReaction = /* @__PURE__ */ derived$1(() => get$2(reaction) + getTotalModifiersFromItems());
-  function getTotalModifiersFromItems() {
-    ui.notifications.warn("This function is not implemented yet. Attributes.svelte");
-    return 0;
-  }
+  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
+  let quickness = storeManager2.GetSumROStore("attributes.quickness");
+  let magic = storeManager2.GetSumROStore("attributes.magic");
+  storeManager2.GetSumROStore("attributes.essence");
+  let reaction = storeManager2.GetSumROStore("attributes.reaction");
+  let reactionValue = storeManager2.GetRWStore("attributes.reaction.value");
+  user_effect(() => {
+    store_set(reactionValue, proxy(Math.floor(($intelligence().sum + $quickness().sum) * 0.5)));
+  });
   user_effect(() => {
     set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
-    store_set(magicValueStore, proxy(get$2(magicCap)));
   });
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
@@ -6438,16 +6375,7 @@ function Attributes($$anchor, $$props) {
           return config().initiative.reaction;
         },
         get value() {
-          return get$2(reaction);
-        }
-      });
-      var node_5 = sibling(node_4, 2);
-      StatCard$1(node_5, {
-        get label() {
-          return config().initiative.augmentedReaction;
-        },
-        get value() {
-          return get$2(augmentedReaction);
+          return $reaction().sum;
         }
       });
       append($$anchor2, fragment_1);
@@ -6465,11 +6393,17 @@ var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $reaction = () => store_get(reaction, "$reaction", $$stores);
   const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $willpower = () => store_get(willpower, "$willpower", $$stores);
   const $charisma = () => store_get(charisma, "$charisma", $$stores);
   const $magic = () => store_get(magic, "$magic", $$stores);
+  const $combat = () => store_get(combat, "$combat", $$stores);
+  const $control = () => store_get(control, "$control", $$stores);
+  const $hacking = () => store_get(hacking, "$hacking", $$stores);
+  const $astral = () => store_get(astral, "$astral", $$stores);
+  const $spell = () => store_get(spell, "$spell", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let isAwakened = state(false);
@@ -6477,21 +6411,27 @@ function DicePools($$anchor, $$props) {
     set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
   });
   const storeManager2 = StoreManager.Subscribe(actor());
-  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-  let willpower = storeManager2.GetCompositeStore("attributes.willpower", ["value", "mod", "meta"]);
-  let charisma = storeManager2.GetCompositeStore("attributes.charisma", ["value", "mod", "meta"]);
-  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
-  let magic = storeManager2.GetCompositeStore("attributes.magic", ["value", "mod"]);
-  storeManager2.GetStore("dicePools.combat.value");
-  storeManager2.GetStore("dicePools.control.value");
-  storeManager2.GetStore("dicePools.hacking.value");
-  let combatPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5));
-  let controlPool = 999;
-  let hackingPool = 999;
-  storeManager2.GetStore("dicePools.astral.value");
-  storeManager2.GetStore("dicePools.spell.value");
-  let astralPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5));
-  let spellPool = /* @__PURE__ */ derived$1(() => Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5));
+  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
+  let willpower = storeManager2.GetSumROStore("attributes.willpower");
+  let charisma = storeManager2.GetSumROStore("attributes.charisma");
+  let quickness = storeManager2.GetSumROStore("attributes.quickness");
+  let reaction = storeManager2.GetSumROStore("attributes.reaction");
+  let magic = storeManager2.GetSumROStore("attributes.magic");
+  let combat = storeManager2.GetSumROStore("dicePools.combat");
+  let combatValue = storeManager2.GetRWStore("dicePools.combat.value");
+  let control = storeManager2.GetSumROStore("dicePools.control");
+  let controlValue = storeManager2.GetRWStore("dicePools.control.value");
+  let hacking = storeManager2.GetSumROStore("dicePools.hacking");
+  let astral = storeManager2.GetSumROStore("dicePools.astral");
+  let astralValue = storeManager2.GetRWStore("dicePools.astral.value");
+  let spell = storeManager2.GetSumROStore("dicePools.spell");
+  let spellValue = storeManager2.GetRWStore("dicePools.spell.value");
+  user_effect(() => {
+    store_set(controlValue, proxy($reaction().sum));
+    store_set(combatValue, proxy(Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5)));
+    store_set(astralValue, proxy(Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5)));
+    store_set(spellValue, proxy(Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5)));
+  });
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
@@ -6516,7 +6456,7 @@ function DicePools($$anchor, $$props) {
           return config().dicepools.combat;
         },
         get value() {
-          return get$2(combatPool);
+          return $combat().sum;
         }
       });
       var node_3 = sibling(node_2, 2);
@@ -6524,14 +6464,18 @@ function DicePools($$anchor, $$props) {
         get label() {
           return config().dicepools.control;
         },
-        value: controlPool
+        get value() {
+          return $control().sum;
+        }
       });
       var node_4 = sibling(node_3, 2);
       StatCard$1(node_4, {
         get label() {
           return config().dicepools.hacking;
         },
-        value: hackingPool
+        get value() {
+          return $hacking().sum;
+        }
       });
       var node_5 = sibling(node_4, 2);
       {
@@ -6543,7 +6487,7 @@ function DicePools($$anchor, $$props) {
               return config().dicepools.astral;
             },
             get value() {
-              return get$2(astralPool);
+              return $astral().sum;
             }
           });
           var node_7 = sibling(node_6, 2);
@@ -6552,7 +6496,7 @@ function DicePools($$anchor, $$props) {
               return config().dicepools.spell;
             },
             get value() {
-              return get$2(spellPool);
+              return $spell().sum;
             }
           });
           append($$anchor3, fragment_2);
@@ -6577,18 +6521,13 @@ var root$E = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $quickness = () => store_get(quickness, "$quickness", $$stores);
+  const $walking = () => store_get(walking, "$walking", $$stores);
+  const $running = () => store_get(running, "$running", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let quickness = storeManager2.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
-  let runningmodifier = state(3);
-  user_effect(() => {
-    const metaType = actor().items.find((i) => i.type === "metatype");
-    set(runningmodifier, proxy(metaType.system.movement.modifier));
-  });
-  proxy($quickness().sum);
-  let running = /* @__PURE__ */ derived$1(() => $quickness().sum * get$2(runningmodifier));
+  let walking = storeManager2.GetSumROStore("movement.walking");
+  let running = storeManager2.GetSumROStore("movement.running");
   var fragment = root$E();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -6610,7 +6549,7 @@ function Movement($$anchor, $$props) {
           return config().movement.walking;
         },
         get value() {
-          return $quickness().sum;
+          return $walking().sum;
         }
       });
       var node_3 = sibling(node_2, 2);
@@ -6619,7 +6558,7 @@ function Movement($$anchor, $$props) {
           return config().movement.running;
         },
         get value() {
-          return get$2(running);
+          return $running().sum;
         }
       });
       append($$anchor2, fragment_1);
@@ -6664,7 +6603,7 @@ function SpecializationCard($$anchor, $$props) {
     StoreManager.Unsubscribe(actor());
   });
   let isCharacterCreationStore = storeManager2.GetFlagStore(flags.actor.isCharacterCreation);
-  let baseValue = storeManager2.GetStore("activeSkill.value");
+  let baseValue = storeManager2.GetRWStore("activeSkill.value");
   let liveText = specialization().name;
   user_effect(() => {
     if (liveText !== specialization().name) {
@@ -6789,10 +6728,10 @@ function Karma($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let karmaPoolStore = storeManager2.GetStore("karma.karmaPool");
-  let goodKarmaStore = storeManager2.GetStore("karma.goodKarma");
-  let essenceStore = storeManager2.GetStore("attributes.essence");
-  let miraculousSurvivalStore = storeManager2.GetStore("karma.miraculousSurvival");
+  let karmaPoolStore = storeManager2.GetRWStore("karma.karmaPool");
+  let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
+  let essenceStore = storeManager2.GetSumROStore("attributes.essence");
+  let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
   var fragment = root$C();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -6835,7 +6774,7 @@ function Karma($$anchor, $$props) {
           return get$2(expression_2);
         },
         get value() {
-          return $essenceStore();
+          return $essenceStore().sum;
         }
       });
       var node_5 = sibling(node_4, 2);
@@ -6939,9 +6878,9 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   const $activeSkillPointsStore = () => store_get(activeSkillPointsStore, "$activeSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
-  let specializationsStore = itemStoreManager.GetStore("activeSkill.specializations");
-  let activeSkillPointsStore = actorStoreManager.GetStore("creation.activePoints");
-  let valueStore = itemStoreManager.GetStore("activeSkill.value");
+  let specializationsStore = itemStoreManager.GetRWStore("activeSkill.specializations");
+  let activeSkillPointsStore = actorStoreManager.GetRWStore("creation.activePoints");
+  let valueStore = itemStoreManager.GetRWStore("activeSkill.value");
   let karmaShoppingService = null;
   onMount(() => {
     karmaShoppingService ?? (karmaShoppingService = new KarmaShoppingService($$props.skill));
@@ -7183,9 +7122,9 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   const $knowledgeSkillPointsStore = () => store_get(knowledgeSkillPointsStore, "$knowledgeSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
-  let specializations = itemStoreManager.GetStore("knowledgeSkill.specializations");
-  let knowledgeSkillPointsStore = actorStoreManager.GetStore("creation.knowledgePoints");
-  let valueStore = itemStoreManager.GetStore("knowledgeSkill.value");
+  let specializations = itemStoreManager.GetRWStore("knowledgeSkill.specializations");
+  let knowledgeSkillPointsStore = actorStoreManager.GetRWStore("creation.knowledgePoints");
+  let valueStore = itemStoreManager.GetRWStore("knowledgeSkill.value");
   let karmaShoppingService = null;
   onMount(() => {
     karmaShoppingService ?? (karmaShoppingService = new KarmaShoppingService($$props.skill));
@@ -7477,9 +7416,9 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   const $languageSkillPointsStore = () => store_get(languageSkillPointsStore, "$languageSkillPointsStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   let itemStoreManager = StoreManager.Subscribe($$props.skill);
-  let specializationsStore = itemStoreManager.GetStore("languageSkill.specializations");
-  let valueStore = itemStoreManager.GetStore("languageSkill.value");
-  let languageSkillPointsStore = actorStoreManager.GetStore("creation.languagePoints");
+  let specializationsStore = itemStoreManager.GetRWStore("languageSkill.specializations");
+  let valueStore = itemStoreManager.GetRWStore("languageSkill.value");
+  let languageSkillPointsStore = actorStoreManager.GetRWStore("creation.languagePoints");
   let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
   actorStoreManager.GetShallowStore($$props.actor.id, stores$1.languageSkillsIds, $$props.actor.items.filter((item2) => item2.type === "skill" && item2.system.skillType === "language").map((item2) => item2.id));
   let layoutMode = "single";
@@ -7765,8 +7704,8 @@ function ActiveSkillCard($$anchor, $$props) {
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
-  let valueStore = skillStoreManager.GetStore("activeSkill.value");
-  let specializationsStore = skillStoreManager.GetStore("activeSkill.specializations");
+  let valueStore = skillStoreManager.GetRWStore("activeSkill.value");
+  let specializationsStore = skillStoreManager.GetRWStore("activeSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   let isModalOpen = state(false);
   let activeModal = null;
@@ -7934,8 +7873,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
-  let value = skillStoreManager.GetStore("knowledgeSkill.value");
-  let specializations = skillStoreManager.GetStore("knowledgeSkill.specializations");
+  let value = skillStoreManager.GetRWStore("knowledgeSkill.value");
+  let specializations = skillStoreManager.GetRWStore("knowledgeSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
@@ -8003,10 +7942,10 @@ function LanguageSkillCard($$anchor, $$props) {
   let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
   proxy(skill().system.languageSkill);
-  let specializations = skillStoreManager.GetStore("skill.system.languageSkill.specializations");
+  let specializations = skillStoreManager.GetRWStore("skill.system.languageSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
-  let value = skillStoreManager.GetStore("languageSkill.value");
-  let readWriteValue = skillStoreManager.GetStore("languageSkill.readwrite.value");
+  let value = skillStoreManager.GetRWStore("languageSkill.value");
+  let readWriteValue = skillStoreManager.GetRWStore("languageSkill.readwrite.value");
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
@@ -8693,10 +8632,10 @@ function Health($$anchor, $$props) {
   const $overflow = () => store_get(overflow, "$overflow", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let stunArray = storeManager2.GetStore("health.stun");
-  let physicalArray = storeManager2.GetStore("health.physical");
-  let penalty = storeManager2.GetStore("health.penalty");
-  let overflow = storeManager2.GetStore("health.overflow");
+  let stunArray = storeManager2.GetRWStore("health.stun");
+  let physicalArray = storeManager2.GetRWStore("health.physical");
+  let penalty = storeManager2.GetRWStore("health.penalty");
+  let overflow = storeManager2.GetRWStore("health.overflow");
   let maxDegree = state(0);
   let ecgCanvas = state(void 0);
   let ecgPointCanvas = state(void 0);
@@ -9308,11 +9247,12 @@ function AttributePointsState($$anchor, $$props) {
   let languagePointsText = localize($$props.config.skill.language);
   let storeManager2 = StoreManager.Subscribe($$props.actor);
   let attributeAssignmentLocked = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
-  let intelligence = storeManager2.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-  let attributePointsStore = storeManager2.GetStore("creation.attributePoints");
-  let activeSkillPointsStore = storeManager2.GetStore("creation.activePoints");
-  let knowledgePointsStore = storeManager2.GetStore("creation.knowledgePoints");
-  let languagePointsStore = storeManager2.GetStore("creation.languagePoints");
+  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
+  let attributePointsStore = storeManager2.GetRWStore("creation.attributePoints");
+  let activeSkillPointsStore = storeManager2.GetRWStore("creation.activePoints");
+  let knowledgePointsStore = storeManager2.GetRWStore("creation.knowledgePoints");
+  let languagePointsStore = storeManager2.GetRWStore("creation.languagePoints");
+  console.log("NEW ACTOR", $$props.actor);
   let pointList = /* @__PURE__ */ derived$1(() => [
     {
       value: $attributePointsStore(),
@@ -9738,8 +9678,8 @@ class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.warn("Skill creation failed or returned no result.");
       return;
     }
-    const targetStore = storeManager2.GetShallowStore(this.document.id, storeKey, []);
-    targetStore.update((current) => [...current, createdItem.id]);
+    const tarGetRWStore = storeManager2.GetShallowStore(this.document.id, storeKey, []);
+    tarGetRWStore.update((current) => [...current, createdItem.id]);
     StoreManager.Unsubscribe(this.document);
   }
   async handlemetatype(droppedItem) {
@@ -10125,39 +10065,6 @@ class MetatypeModel extends foundry.abstract.TypeDataModel {
           })
         })
       }),
-      // Modifiers
-      modifiers: new foundry.data.fields.SchemaField({
-        strength: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        quickness: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        body: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        charisma: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        intelligence: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        willpower: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
       // Attribute limits
       attributeLimits: new foundry.data.fields.SchemaField({
         strength: new foundry.data.fields.NumberField({
@@ -10191,31 +10098,11 @@ class MetatypeModel extends foundry.abstract.TypeDataModel {
           integer: true
         })
       }),
-      // The running speed modifier
-      movement: new foundry.data.fields.SchemaField({
-        base: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        modifier: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
       // Karma advancement fraction
       karma: new foundry.data.fields.SchemaField({
         factor: new foundry.data.fields.NumberField({
           required: true,
           initial: 0
-        })
-      }),
-      // Vision
-      vision: new foundry.data.fields.SchemaField({
-        type: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
         })
       }),
       // Priority
@@ -11183,20 +11070,15 @@ var root_3$5 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="sta
 var root_6$2 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_9$1 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_11 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
-var root_13 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
-var root_15 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
-var root_17 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
-var root_19 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <!>`, 1);
-var root$e = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
+var root_13 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
+var root$e = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
 function MetatypeApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
   const attributes = config().attributes;
   const common = config().common;
-  const movementConfig = config().movement;
   const karmaConfig = config().karma;
-  const visionConfig = config().vision;
   const traits = config().traits;
   let layoutMode = "double";
   const agerange = /* @__PURE__ */ derived$1(() => [
@@ -11286,17 +11168,6 @@ function MetatypeApp($$anchor, $$props) {
       options: []
     }
   ]);
-  const movement = /* @__PURE__ */ derived$1(() => [
-    {
-      item: item2(),
-      key: "modifier",
-      label: localize(movementConfig.runSpeedModifier),
-      value: system.movement.modifier,
-      path: "system.movement",
-      type: "number",
-      options: []
-    }
-  ]);
   const karma = /* @__PURE__ */ derived$1(() => [
     {
       item: item2(),
@@ -11304,62 +11175,6 @@ function MetatypeApp($$anchor, $$props) {
       label: localize(karmaConfig.advancementratio),
       value: system.karma.factor,
       path: "system.karma",
-      type: "number",
-      options: []
-    }
-  ]);
-  const attributeModifiers = /* @__PURE__ */ derived$1(() => [
-    {
-      item: item2(),
-      key: "strength",
-      label: localize(attributes.strength),
-      value: system.modifiers.strength,
-      path: "system.modifiers",
-      type: "number",
-      options: []
-    },
-    {
-      item: item2(),
-      key: "quickness",
-      label: localize(attributes.quickness),
-      value: system.modifiers.quickness,
-      path: "system.modifiers",
-      type: "number",
-      options: []
-    },
-    {
-      item: item2(),
-      key: "body",
-      label: localize(attributes.body),
-      value: system.modifiers.body,
-      path: "system.modifiers",
-      type: "number",
-      options: []
-    },
-    {
-      item: item2(),
-      key: "charisma",
-      label: localize(attributes.charisma),
-      value: system.modifiers.charisma,
-      path: "system.modifiers",
-      type: "number",
-      options: []
-    },
-    {
-      item: item2(),
-      key: "intelligence",
-      label: localize(attributes.intelligence),
-      value: system.modifiers.intelligence,
-      path: "system.modifiers",
-      type: "number",
-      options: []
-    },
-    {
-      item: item2(),
-      key: "willpower",
-      label: localize(attributes.willpower),
-      value: system.modifiers.willpower,
-      path: "system.modifiers",
       type: "number",
       options: []
     }
@@ -11418,21 +11233,6 @@ function MetatypeApp($$anchor, $$props) {
       path: "system.attributeLimits",
       type: "number",
       options: []
-    }
-  ]);
-  const vision = /* @__PURE__ */ derived$1(() => [
-    {
-      item: item2(),
-      key: "type",
-      label: localize(visionConfig.type),
-      value: system.vision.type,
-      path: "system.vision",
-      type: "select",
-      options: [
-        localize(visionConfig.normalvision),
-        localize(visionConfig.lowlight),
-        localize(visionConfig.thermographic)
-      ]
     }
   ]);
   const priorityEntry = /* @__PURE__ */ derived$1(() => ({
@@ -11537,10 +11337,10 @@ function MetatypeApp($$anchor, $$props) {
       var h3_3 = first_child(fragment_10);
       var text_3 = child(h3_3);
       var div_5 = sibling(h3_3, 2);
-      each(div_5, 21, () => get$2(attributeModifiers), index, ($$anchor3, entry) => {
+      each(div_5, 21, () => get$2(attributeLimits), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$2(entry)));
       });
-      template_effect(($0) => set_text(text_3, $0), [() => localize(attributes.modifiers)]);
+      template_effect(($0) => set_text(text_3, $0), [() => localize(attributes.limits)]);
       append($$anchor2, fragment_10);
     }
   });
@@ -11551,59 +11351,15 @@ function MetatypeApp($$anchor, $$props) {
       var h3_4 = first_child(fragment_12);
       var text_4 = child(h3_4);
       var div_6 = sibling(h3_4, 2);
-      each(div_6, 21, () => get$2(attributeLimits), index, ($$anchor3, entry) => {
+      each(div_6, 21, () => get$2(karma), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$2(entry)));
       });
-      template_effect(($0) => set_text(text_4, $0), [() => localize(attributes.limits)]);
+      template_effect(($0) => set_text(text_4, $0), [() => localize(config().karma.karma)]);
       append($$anchor2, fragment_12);
     }
   });
   var node_8 = sibling(node_7, 2);
-  ItemSheetComponent(node_8, {
-    children: ($$anchor2, $$slotProps) => {
-      var fragment_14 = root_15();
-      var h3_5 = first_child(fragment_14);
-      var text_5 = child(h3_5);
-      var div_7 = sibling(h3_5, 2);
-      each(div_7, 21, () => get$2(movement), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
-      });
-      template_effect(($0) => set_text(text_5, $0), [
-        () => localize(config().movement.movement)
-      ]);
-      append($$anchor2, fragment_14);
-    }
-  });
-  var node_9 = sibling(node_8, 2);
-  ItemSheetComponent(node_9, {
-    children: ($$anchor2, $$slotProps) => {
-      var fragment_16 = root_17();
-      var h3_6 = first_child(fragment_16);
-      var text_6 = child(h3_6);
-      var div_8 = sibling(h3_6, 2);
-      each(div_8, 21, () => get$2(karma), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
-      });
-      template_effect(($0) => set_text(text_6, $0), [() => localize(config().karma.karma)]);
-      append($$anchor2, fragment_16);
-    }
-  });
-  var node_10 = sibling(node_9, 2);
-  ItemSheetComponent(node_10, {
-    children: ($$anchor2, $$slotProps) => {
-      var fragment_18 = root_19();
-      var h3_7 = first_child(fragment_18);
-      var text_7 = child(h3_7);
-      var node_11 = sibling(h3_7, 2);
-      each(node_11, 17, () => get$2(vision), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
-      });
-      template_effect(($0) => set_text(text_7, $0), [() => localize(config().vision.vision)]);
-      append($$anchor2, fragment_18);
-    }
-  });
-  var node_12 = sibling(node_10, 2);
-  ActiveEffectsViewer(node_12, {
+  ActiveEffectsViewer(node_8, {
     get item() {
       return item2();
     },
@@ -11611,8 +11367,8 @@ function MetatypeApp($$anchor, $$props) {
       return config();
     }
   });
-  var node_13 = sibling(node_12, 2);
-  JournalViewer(node_13, {
+  var node_9 = sibling(node_8, 2);
+  JournalViewer(node_9, {
     get item() {
       return item2();
     },
@@ -13105,33 +12861,19 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     const worldmetatype = game.items.get(metatype.id);
     const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$2(selectedAttribute));
     const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$2(selectedSkill));
-    let initBody = metatype.system.modifiers.body < 0 ? -metatype.system.modifiers.body + 1 : 1;
-    let initStrength = metatype.system.modifiers.strength < 0 ? -metatype.system.modifiers.strength + 1 : 1;
-    let initQuickness = metatype.system.modifiers.quickness < 0 ? -metatype.system.modifiers.quickness + 1 : 1;
-    let initIntelligence = metatype.system.modifiers.intelligence < 0 ? -metatype.system.modifiers.intelligence + 1 : 1;
-    let initWillpower = metatype.system.modifiers.willpower < 0 ? -metatype.system.modifiers.willpower + 1 : 1;
-    let initCharisma = metatype.system.modifiers.charisma < 0 ? -metatype.system.modifiers.charisma + 1 : 1;
-    let initTotal = initBody + initStrength + initQuickness + initIntelligence + initWillpower + initCharisma;
-    if (initTotal > selectedAttributeObj.points) throw new Error("The metatype has excessive negative modifiers");
-    let remainingPoints = selectedAttributeObj.points - initTotal;
+    let remainingPoints = selectedAttributeObj.points - 6;
     await actor().update({
       "system.profile.age": get$2(characterAge),
       "system.profile.height": get$2(characterHeight),
       "system.profile.weight": get$2(characterWeight),
       "system.creation.attributePoints": remainingPoints,
       "system.creation.activePoints": selectedSkillObj.points,
-      "system.attributes.body.value": initBody,
-      "system.attributes.quickness.value": initQuickness,
-      "system.attributes.strength.value": initStrength,
-      "system.attributes.charisma.value": initCharisma,
-      "system.attributes.intelligence.value": initIntelligence,
-      "system.attributes.willpower.value": initWillpower,
-      "system.attributes.body.meta": metatype.system.modifiers.body,
-      "system.attributes.quickness.meta": metatype.system.modifiers.quickness,
-      "system.attributes.strength.meta": metatype.system.modifiers.strength,
-      "system.attributes.charisma.meta": metatype.system.modifiers.charisma,
-      "system.attributes.intelligence.meta": metatype.system.modifiers.intelligence,
-      "system.attributes.willpower.meta": metatype.system.modifiers.willpower
+      "system.attributes.body.value": 1,
+      "system.attributes.strength.value": 1,
+      "system.attributes.charisma.value": 1,
+      "system.attributes.willpower.value": 1,
+      "system.attributes.quickness.value": 1,
+      "system.attributes.intelligence.value": 1
     });
     await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
     const magic = get$2(magics).find((m) => m.id === get$2(selectedMagic));
@@ -13593,6 +13335,31 @@ class SR3EActor extends Actor {
     console.warn("SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default.");
     return augmentedReaction;
   }
+  getRollData() {
+    const data = super.getRollData();
+    console.log("I WAS CALLED! getRollData");
+    console.log("Base getRollData result:", data);
+    console.log("this.system:", this.system);
+    console.log("this.system.attributes:", this.system.attributes);
+    console.log("this.system.attributes.quickness:", this.system.attributes.quickness);
+    if (data.attributes) {
+      console.log("Attributes found in data:", data.attributes);
+      for (const [k, v] of Object.entries(data.attributes)) {
+        data[k] = v;
+        console.log(`Set data.${k} = ${v}`);
+      }
+    } else {
+      console.log("No attributes in data, adding manually");
+      data.quickness = this.system.attributes.quickness;
+      data.intelligence = this.system.attributes.intelligence;
+      data.willpower = this.system.attributes.willpower;
+      data.strength = this.system.attributes.strength;
+      data.body = this.system.attributes.body;
+      data.charisma = this.system.attributes.charisma;
+    }
+    console.log("Final roll data:", data);
+    return data;
+  }
   async InitiativeRoll(dice, options) {
     await RollService.Initiative(this, dice, options);
   }
@@ -13652,6 +13419,7 @@ class SR3EActor extends Actor {
   }
   static Register() {
     CONFIG.Actor.documentClass = SR3EActor;
+    console.log("sr3e /// ---> SR3EActor registered");
   }
 }
 function attachLightEffect(html2, activeTheme) {
@@ -13974,12 +13742,12 @@ function KarmaRow($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe($$props.actor);
   });
-  let pendingKarmaReward = storeManager2.GetStore("karma.pendingKarmaReward");
-  let goodKarma = storeManager2.GetStore("karma.goodKarma");
-  let karmaPoolCeiling = storeManager2.GetStore("karma.karmaPoolCeiling");
-  let spentKarma = storeManager2.GetStore("karma.spentKarma");
-  let lifetimeKarma = storeManager2.GetStore("karma.lifetimeKarma");
-  let readyForCommit = storeManager2.GetStore("karma.readyForCommit");
+  let pendingKarmaReward = storeManager2.GetRWStore("karma.pendingKarmaReward");
+  let goodKarma = storeManager2.GetRWStore("karma.goodKarma");
+  let karmaPoolCeiling = storeManager2.GetRWStore("karma.karmaPoolCeiling");
+  let spentKarma = storeManager2.GetRWStore("karma.spentKarma");
+  let lifetimeKarma = storeManager2.GetRWStore("karma.lifetimeKarma");
+  let readyForCommit = storeManager2.GetRWStore("karma.readyForCommit");
   async function CommitSelected() {
     if ($readyForCommit()) {
       const metatypeItem = $$props.actor.items.find((i) => i.type === "metatype");
@@ -14244,17 +14012,17 @@ function DicePoolRow($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe($$props.actor);
   });
-  let intelligenceStore = storeManager2.GetCompositeStore("attributes.intelligence", ["mod", "value", "meta"]);
-  let quicknessStore = storeManager2.GetCompositeStore("attributes.quickness", ["mod", "value", "meta"]);
-  let willpowerStore = storeManager2.GetCompositeStore("attributes.willpower", ["mod", "value", "meta"]);
-  storeManager2.GetCompositeStore("attributes.charisma", ["mod", "value", "meta"]);
-  let karmaPoolCeilingStore = storeManager2.GetStore("karma.karmaPoolCeiling");
-  let karmaPoolStore = storeManager2.GetStore("karma.karmaPool");
-  let combatPoolStore = storeManager2.GetStore("dicePools.combat.value");
-  let astralPoolStore = storeManager2.GetStore("dicePools.astral.value");
-  let hackingPoolStore = storeManager2.GetStore("dicePools.hacking.value");
-  let controlPoolStore = storeManager2.GetStore("dicePools.control.value");
-  let spellPoolStore = storeManager2.GetStore("dicePools.spell.value");
+  let intelligenceStore = storeManager2.GetRWStore("attributes.intelligence");
+  let quicknessStore = storeManager2.GetRWStore("attributes.quickness");
+  let willpowerStore = storeManager2.GetRWStore("attributes.willpower");
+  storeManager2.GetRWStore("attributes.charisma");
+  let karmaPoolCeilingStore = storeManager2.GetRWStore("karma.karmaPoolCeiling");
+  let karmaPoolStore = storeManager2.GetRWStore("karma.karmaPool");
+  let combatPoolStore = storeManager2.GetRWStore("dicePools.combat.value");
+  let astralPoolStore = storeManager2.GetRWStore("dicePools.astral.value");
+  let hackingPoolStore = storeManager2.GetRWStore("dicePools.hacking.value");
+  let controlPoolStore = storeManager2.GetRWStore("dicePools.control.value");
+  let spellPoolStore = storeManager2.GetRWStore("dicePools.spell.value");
   let readyForCommit = storeManager2.GetFlagStore($$props.actor.id, "sr3e.actor.poolcommit");
   async function CommitSelected() {
     if ($readyForCommit()) {
@@ -14353,9 +14121,9 @@ function DicePoolRow($$anchor, $$props) {
     [
       () => localize($$props.config.storytellerscreen.refreshkarmapool),
       () => localize($$props.config.storytellerscreen.refresh),
-      () => Math.floor(($quicknessStore().sum + $intelligenceStore().sum + $willpowerStore().sum) * 0.5),
+      () => Math.floor(($quicknessStore() + $intelligenceStore() + $willpowerStore()) * 0.5),
       () => localize($$props.config.storytellerscreen.refreshcombatpool),
-      () => Math.floor(($intelligenceStore().sum + $willpowerStore().sum) * 0.5),
+      () => Math.floor(($intelligenceStore() + $willpowerStore()) * 0.5),
       () => localize($$props.config.storytellerscreen.refreshastralpool),
       () => localize($$props.config.storytellerscreen.refreshspellpool),
       () => localize($$props.config.storytellerscreen.refreshcontrolpool),
@@ -15036,6 +14804,33 @@ __publicField(_SR3Edie, "MODIFIERS", {
   // disable core explode
 });
 let SR3Edie = _SR3Edie;
+class SR3ERoll extends Roll {
+  constructor(formula, data = {}, options = {}) {
+    if (Object.keys(data).length === 0) {
+      const speaker = ChatMessage.getSpeaker();
+      const actor = ChatMessage.getSpeakerActor(speaker);
+      if (actor == null ? void 0 : actor.getRollData) {
+        data = actor.getRollData();
+      }
+    }
+    super(formula, data, options);
+  }
+  static create(formula, data = {}, options = {}) {
+    if (Object.keys(data).length === 0) {
+      const speaker = ChatMessage.getSpeaker();
+      const actor = ChatMessage.getSpeakerActor(speaker);
+      if (actor == null ? void 0 : actor.getRollData) {
+        data = actor.getRollData();
+      }
+    }
+    return new this(formula, data, options);
+  }
+  // Update your Register method
+  static Register() {
+    CONFIG.Dice.rolls = [SR3ERoll];
+    window.Roll = SR3ERoll;
+  }
+}
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
@@ -15050,10 +14845,13 @@ function registerDocumentTypes({ args }) {
   });
 }
 function configureProject() {
+  SR3EActor.Register();
+  SR3ECombat.Register();
+  SR3Edie.Register();
+  SR3ERoll.Register();
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
-  CONFIG.Combat.documentClass = SR3ECombat;
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -15090,9 +14888,6 @@ function configureProject() {
   };
   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
-  SR3EActor.Register();
-  SR3ECombat.Register();
-  SR3Edie.Register();
 }
 function setupMouseLightSourceEffect(includedThemes) {
   Hooks.on(hooks.renderApplicationV2, (app, html2) => {

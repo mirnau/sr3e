@@ -59,40 +59,6 @@ export default class MetatypeModel extends foundry.abstract.TypeDataModel {
         })
       }),
 
-      // Modifiers
-      modifiers: new foundry.data.fields.SchemaField({
-        strength: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        quickness: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        body: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        charisma: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        intelligence: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        willpower: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-
       // Attribute limits
       attributeLimits: new foundry.data.fields.SchemaField({
         strength: new foundry.data.fields.NumberField({
@@ -127,35 +93,12 @@ export default class MetatypeModel extends foundry.abstract.TypeDataModel {
         })
       }),
 
-      // The running speed modifier
-      movement: new foundry.data.fields.SchemaField({
-        base: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        modifier: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        })
-      }),
-
-
       // Karma advancement fraction
       karma: new foundry.data.fields.SchemaField({
         factor: new foundry.data.fields.NumberField({
           required: true,
           initial: 0,
         })
-      }),
-
-      // Vision
-      vision: new foundry.data.fields.SchemaField({
-        type: new foundry.data.fields.StringField({
-          required: true,
-          initial: ""
-        }),
       }),
 
       // Priority

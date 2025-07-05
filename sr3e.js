@@ -26,6 +26,7 @@ import TransactionModel from "./module/models/item/TransactionModel.js";
 import TransactionItemSheet from "./module/foundry/sheets/TransactionItemSheet.js";
 import SR3ECombat from "./module/foundry/documents/SR3ECombat.js";
 import SR3Edie from "./module/foundry/documents/SR3Edie.js";
+import SR3ERoll from "./module/foundry/documents/SR3ERoll.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -42,13 +43,15 @@ function registerDocumentTypes({ args }) {
 }
 
 function configureProject() {
+   
+   SR3EActor.Register();
+   SR3ECombat.Register();
+   SR3Edie.Register();
+   SR3ERoll.Register();
+
    CONFIG.sr3e = sr3e;
    CONFIG.Actor.dataModels = {};
    CONFIG.Item.dataModels = {};
-
-   CONFIG.Combat.documentClass = SR3ECombat;
-   //CONFIG.Dice.rolls.push(SR3ERoll);
-   //CONFIG.Dice.Roll = SR3ERoll;
    CONFIG.canvasTextStyle.fontFamily = "VT323";
    CONFIG.defaultFontFamily = "VT323";
    CONFIG.fontDefinitions["Neanderthaw"] = {
@@ -88,10 +91,6 @@ function configureProject() {
 
    DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
    DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
-
-   SR3EActor.Register();
-   SR3ECombat.Register();
-   SR3Edie.Register();
 }
 
 function setupMouseLightSourceEffect(includedThemes) {

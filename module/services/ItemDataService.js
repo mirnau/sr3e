@@ -49,14 +49,6 @@ export default class ItemDataService {
                height: { min: 150, average: 170, max: 220 },
                weight: { min: 50, average: 70, max: 250 },
             },
-            modifiers: {
-               strength: 0,
-               quickness: 0,
-               body: 0,
-               charisma: 0,
-               intelligence: 0,
-               willpower: 0,
-            },
             attributeLimits: {
                strength: 6,
                quickness: 6,
@@ -65,14 +57,8 @@ export default class ItemDataService {
                intelligence: 6,
                willpower: 6,
             },
-            movement: {
-               modifier: 3,
-            },
             karma: {
                factor: 0.1,
-            },
-            vision: {
-               type: "",
             },
             priority: "E",
             journalId: "", // Set to a real JournalEntry ID if needed

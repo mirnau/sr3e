@@ -23,12 +23,12 @@
       StoreManager.Unsubscribe(actor);
    });
 
-   let pendingKarmaReward = storeManager.GetStore("karma.pendingKarmaReward");
-   let goodKarma = storeManager.GetStore("karma.goodKarma");
-   let karmaPoolCeiling = storeManager.GetStore("karma.karmaPoolCeiling");
-   let spentKarma = storeManager.GetStore("karma.spentKarma");
-   let lifetimeKarma = storeManager.GetStore("karma.lifetimeKarma");
-   let readyForCommit = storeManager.GetStore("karma.readyForCommit");
+   let pendingKarmaReward = storeManager.GetRWStore("karma.pendingKarmaReward");
+   let goodKarma = storeManager.GetRWStore("karma.goodKarma");
+   let karmaPoolCeiling = storeManager.GetRWStore("karma.karmaPoolCeiling");
+   let spentKarma = storeManager.GetRWStore("karma.spentKarma");
+   let lifetimeKarma = storeManager.GetRWStore("karma.lifetimeKarma");
+   let readyForCommit = storeManager.GetRWStore("karma.readyForCommit");
 
    async function CommitSelected() {
       if ($readyForCommit) {

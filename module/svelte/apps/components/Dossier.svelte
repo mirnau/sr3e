@@ -12,7 +12,7 @@
 
    let system = $state(actor.system);
    let actorNameStore = storeManager.GetShallowStore(actor.id, stores.actorName, actor.name);
-   let isDetailsOpenStore = storeManager.GetStore("profile.isDetailsOpen");
+   let isDetailsOpenStore = storeManager.GetRWStore("profile.isDetailsOpen");
 
    let isDetailsOpen = $state($isDetailsOpenStore);
 

@@ -10,21 +10,20 @@
 
    const storeManager = StoreManager.Subscribe(actor);
 
-   let total = storeManager.GetCompositeStore(`attributes.${key}`, ["value", "mod", "meta"]);
-   let value = storeManager.GetStore(`attributes.${key}.value`);
-   let attributePointStore = storeManager.GetStore("creation.attributePoints");
+   // Use GetSumROStore for total, and get value store for direct updates
+   let total = storeManager.GetSumROStore(`attributes.${key}`);
+   let valueStore = storeManager.GetRWStore(`attributes.${key}.value`);
+   let attributePointStore = storeManager.GetRWStore("creation.attributePoints");
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
    let attributeAssignmentLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
-   let metatype = $derived("meta" in stat && actor?.items ? actor.items.find((i) => i.type === "metatype") : null);
+   let metatype = $derived(actor.items.find((i) => i.type === "metatype") || []);
 
-   let attributeLimit = $derived(
-      key === "magic" || !("meta" in stat) ? null : (metatype?.system?.attributeLimits?.[key] ?? 0)
-   );
+   let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
 
-   let isMinLimit = $derived($value <= 1);
-   let isMaxLimit = $derived(attributeLimit ? $total.sum >= attributeLimit : false);
+   let isMinLimit = $derived($total.value <= 1);
+   // Removed isMaxLimit
 
    let activeModal = null;
    let isModalOpen = storeManager.GetShallowStore(actor.id, stores.isrollcomposeropen, false);
@@ -34,13 +33,14 @@
          const newPoints = $attributePointStore - change;
          if (newPoints < 0) return;
 
-         $value += change;
+         valueStore.update(v => v + change);
          $attributePointStore = newPoints;
       }
    }
 
    const increment = () => {
-      if (!isMaxLimit) add(1);
+      // Removed isMaxLimit check
+      add(1);
    };
 
    const decrement = () => {
@@ -78,7 +78,7 @@
                props: {
                   actor,
                   config: CONFIG.sr3e,
-                  caller: { key, value: $value, type: "attribute", dice: $total.sum },
+                  caller: { key, value: $total.value, type: "attribute", dice: $total.sum },
                   onclose: (result) => {
                      unmount(activeModal);
                      $isModalOpen = false;
@@ -108,7 +108,6 @@
       <div class="stat-card-background"></div>
 
       <div class="stat-label">
-         {#if "meta" in stat}
             <i
                class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
                role="button"
@@ -116,13 +115,10 @@
                onclick={decrement}
                onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
             ></i>
-         {/if}
 
          <h1 class="stat-value">{$total.sum}</h1>
-
-         {#if "meta" in stat}
             <i
-               class="fa-solid fa-circle-chevron-up increment-attribute {isMaxLimit || $attributePointStore === 0
+               class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0
                   ? 'disabled'
                   : ''}"
                role="button"
@@ -130,7 +126,6 @@
                onclick={increment}
                onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
             ></i>
-         {/if}
       </div>
    </div>
 {:else}

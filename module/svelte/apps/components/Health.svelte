@@ -10,10 +10,10 @@
 
   let storeManager = StoreManager.Subscribe(actor);
 
-  let stunArray = storeManager.GetStore("health.stun");
-  let physicalArray = storeManager.GetStore("health.physical");
-  let penalty = storeManager.GetStore("health.penalty");
-  let overflow = storeManager.GetStore("health.overflow");
+  let stunArray = storeManager.GetRWStore("health.stun");
+  let physicalArray = storeManager.GetRWStore("health.physical");
+  let penalty = storeManager.GetRWStore("health.penalty");
+  let overflow = storeManager.GetRWStore("health.overflow");
 
   let maxDegree = $state(0);
   let ecgCanvas = $state();

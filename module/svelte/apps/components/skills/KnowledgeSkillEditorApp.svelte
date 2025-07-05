@@ -14,9 +14,9 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
    let itemStoreManager = StoreManager.Subscribe(skill);
 
-   let specializations = itemStoreManager.GetStore("knowledgeSkill.specializations");
-   let knowledgeSkillPointsStore = actorStoreManager.GetStore("creation.knowledgePoints");
-   let valueStore = itemStoreManager.GetStore("knowledgeSkill.value");
+   let specializations = itemStoreManager.GetRWStore("knowledgeSkill.specializations");
+   let knowledgeSkillPointsStore = actorStoreManager.GetRWStore("creation.knowledgePoints");
+   let valueStore = itemStoreManager.GetRWStore("knowledgeSkill.value");
 
    let karmaShoppingService = null;
 

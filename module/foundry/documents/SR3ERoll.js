@@ -1,37 +1,34 @@
-export default class SR3ERoll extends foundry.dice.Roll {
-  /** @override */
-  async evaluate({}) {
-    await super.evaluate({async});
-
-    const tn = this.options.target || 7; // Default TN>6 should come from options
-    this.terms = this.terms.flatMap(term => {
-      if (term instanceof DieTerm && term.faces === 6 && tn > 6) {
-        const newResults = [];
-        for (const r of term.results) {
-          if (r.result === 6) {
-            let total = 6;
-            let keepRolling = true;
-            while (keepRolling) {
-              const reroll = new DieTerm({faces: 6, number: 1});
-              reroll.evaluateSync(); // synchronous roll
-              const rv = reroll.total;
-              total += rv;
-              keepRolling = (rv === 6 && total < tn);
-            }
-            newResults.push({result: total, active: true, d: 6});
-          } else {
-            newResults.push(r);
-          }
-        }
-        return [term.clone({results: newResults})];
+// Add this to your SR3Edie.js file
+export default class SR3ERoll extends Roll {
+   constructor(formula, data = {}, options = {}) {
+      // Auto-fetch roll data if none provided
+      if (Object.keys(data).length === 0) {
+         const speaker = ChatMessage.getSpeaker();
+         const actor = ChatMessage.getSpeakerActor(speaker);
+         if (actor?.getRollData) {
+            data = actor.getRollData();
+         }
       }
-      return [term];
-    });
 
-    this._evaluateTotal(); // recalculate total from modified terms
+      super(formula, data, options);
+   }
 
-    console.log("SR3eRoll.evaluate", this);
+   static create(formula, data = {}, options = {}) {
+      // Preserve Roll.create behavior with auto roll data
+      if (Object.keys(data).length === 0) {
+         const speaker = ChatMessage.getSpeaker();
+         const actor = ChatMessage.getSpeakerActor(speaker);
+         if (actor?.getRollData) {
+            data = actor.getRollData();
+         }
+      }
 
-    return this;
-  }
+      return new this(formula, data, options);
+   }
+
+   // Update your Register method
+   static Register() {
+      CONFIG.Dice.rolls = [SR3ERoll];
+      window.Roll = SR3ERoll;
+   }
 }

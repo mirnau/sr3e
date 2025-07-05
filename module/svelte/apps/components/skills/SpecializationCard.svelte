@@ -14,7 +14,7 @@
    });
 
    let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
-   let baseValue = storeManager.GetStore("activeSkill.value");
+   let baseValue = storeManager.GetRWStore("activeSkill.value");
 
    let liveText = specialization.name;
 

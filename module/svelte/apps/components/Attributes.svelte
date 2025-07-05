@@ -18,25 +18,20 @@
 
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.attributeAssignmentLocked);
 
-   let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-   let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
-   let magic = storeManager.GetCompositeStore("attributes.magic", ["value", "mod"]);
-   let essence = storeManager.GetStore("attributes.essence");
-   let magicValueStore = storeManager.GetStore("attributes.magic.value");
-   let magicCap = $derived(Math.floor($essence));
+   let intelligence = storeManager.GetSumROStore("attributes.intelligence");
+   let quickness = storeManager.GetSumROStore("attributes.quickness");
 
-   let reaction = $derived(Math.floor(($intelligence.sum + $quickness.sum) * 0.5));
+   let magic = storeManager.GetSumROStore("attributes.magic");
+   let essence = storeManager.GetSumROStore("attributes.essence");
+   let reaction = storeManager.GetSumROStore("attributes.reaction");
+   let reactionValue = storeManager.GetRWStore("attributes.reaction.value");
 
-   let augmentedReaction = $derived(reaction + getTotalModifiersFromItems());
-
-   function getTotalModifiersFromItems() {
-      ui.notifications.warn("This function is not implemented yet. Attributes.svelte");
-      return 0;
-   }
+   $effect(() => {
+      $reactionValue = Math.floor(($intelligence.sum + $quickness.sum) * 0.5);
+   });
 
    $effect(() => {
       isAwakened = actor.items.some((item) => item.type === "magic") && !actor.system.attributes.magic.isBurnedOut;
-      $magicValueStore = magicCap;
    });
 
    onDestroy(() => {
@@ -53,6 +48,5 @@
    {#if isAwakened}
       <StatCard label={config.magic.magic} value={$magic.sum} />
    {/if}
-   <StatCard label={config.initiative.reaction} value={reaction} />
-   <StatCard label={config.initiative.augmentedReaction} value={augmentedReaction} />
+   <StatCard label={config.initiative.reaction} value={$reaction.sum} />
 </MasonryGrid>

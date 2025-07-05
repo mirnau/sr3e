@@ -11,10 +11,10 @@
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
    let storeManager = StoreManager.Subscribe(actor);
 
-   let karmaPoolStore = storeManager.GetStore("karma.karmaPool");
-   let goodKarmaStore = storeManager.GetStore("karma.goodKarma");
-   let essenceStore = storeManager.GetStore("attributes.essence");
-   let miraculousSurvivalStore = storeManager.GetStore("karma.miraculousSurvival");
+   let karmaPoolStore = storeManager.GetRWStore("karma.karmaPool");
+   let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma");
+   let essenceStore = storeManager.GetSumROStore("attributes.essence");
+   let miraculousSurvivalStore = storeManager.GetRWStore("karma.miraculousSurvival");
 </script>
 
 <CardToolbar {id} />
@@ -22,7 +22,7 @@
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
    <StatCard label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
    <StatCard label={localize(config.karma.karmapool)} value={$karmaPoolStore} />
-   <StatCard label={localize(config.attributes.essence)} value={$essenceStore} />
+   <StatCard label={localize(config.attributes.essence)} value={$essenceStore.sum} />
 
    {#if !$miraculousSurvivalStore}
       <div class="stat-card">

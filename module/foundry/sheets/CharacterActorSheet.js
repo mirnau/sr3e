@@ -259,8 +259,8 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          return;
       }
 
-      const targetStore = storeManager.GetShallowStore(this.document.id, storeKey, []);
-      targetStore.update((current) => [...current, createdItem.id]);
+      const tarGetRWStore = storeManager.GetShallowStore(this.document.id, storeKey, []);
+      tarGetRWStore.update((current) => [...current, createdItem.id]);
 
       StoreManager.Unsubscribe(this.document);
    }

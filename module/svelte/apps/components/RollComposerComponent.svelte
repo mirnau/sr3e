@@ -10,8 +10,8 @@
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => StoreManager.Unsubscribe(actor));
 
-   let karmaPoolStore = actorStoreManager.GetStore("karma.karmaPool");
-   let penalty = actorStoreManager.GetStore("health.penalty");
+   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
+   let penalty = actorStoreManager.GetRWStore("health.penalty");
    let karmaPoolBacking = $karmaPoolStore;
 
    let targetNumber = $state(5);
@@ -64,10 +64,7 @@
             console.log("linkedAttributeString", linkedAttributeString); //OK
 
             associatedDicePoolString = skill.system.activeSkill.associatedDicePool;
-            associatedDicePoolStore = actorStoreManager.GetCompositeStore(`dicePools.${associatedDicePoolString}`, [
-               "value",
-               "mod",
-            ]);
+            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
 
             console.log("associatedDicePoolStore", $associatedDicePoolStore); // OK
          } else if (skill.system.skillType === "knowledge") {
@@ -78,11 +75,7 @@
          }
 
          if (linkedAttributeString !== "") {
-            linkedAttributeStore = actorStoreManager.GetCompositeStore(`attributes.${linkedAttributeString}`, [
-               "value",
-               "mod",
-               "meta",
-            ]);
+            linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
 
             console.log("linkedAttributeStore", $linkedAttributeStore); // OK
          }
@@ -310,7 +303,7 @@
             class="karma-counter"
             bind:value={poolDiceBought}
             min="0"
-            max={$linkedAttributeStore.sum}
+            max={$linkedAttributeStore}
             onIncrement={AddDiceFromPool}
             onDecrement={RemoveDiceFromPool}
          />

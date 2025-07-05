@@ -18,25 +18,34 @@
 
    const storeManager = StoreManager.Subscribe(actor);
 
-   let intelligence = storeManager.GetCompositeStore("attributes.intelligence", ["value", "mod", "meta"]);
-   let willpower = storeManager.GetCompositeStore("attributes.willpower", ["value", "mod", "meta"]);
-   let charisma = storeManager.GetCompositeStore("attributes.charisma", ["value", "mod", "meta"]);
-   let quickness = storeManager.GetCompositeStore("attributes.quickness", ["value", "mod", "meta"]);
+   let intelligence = storeManager.GetSumROStore("attributes.intelligence");
+   let willpower = storeManager.GetSumROStore("attributes.willpower");
+   let charisma = storeManager.GetSumROStore("attributes.charisma");
+   let quickness = storeManager.GetSumROStore("attributes.quickness");
+   let reaction = storeManager.GetSumROStore("attributes.reaction");
 
-   let magic = storeManager.GetCompositeStore("attributes.magic", ["value", "mod"]);
-   let combat = storeManager.GetStore("dicePools.combat.value");
-   let control = storeManager.GetStore("dicePools.control.value");
-   let hacking = storeManager.GetStore("dicePools.hacking.value");
+   let magic = storeManager.GetSumROStore("attributes.magic");
 
-   let reaction = $derived(Math.floor(($intelligence.sum + $quickness.sum) * 0.5));
-   let combatPool = $derived(Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5));
-   let controlPool = 999; //Temp debug
-   let hackingPool = 999; //Temp debug
+   let combat = storeManager.GetSumROStore("dicePools.combat");
+   let combatValue = storeManager.GetRWStore("dicePools.combat.value");
 
-   let astral = storeManager.GetStore("dicePools.astral.value");
-   let spell = storeManager.GetStore("dicePools.spell.value");
-   let astralPool = $derived(Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5));
-   let spellPool = $derived(Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5));
+   let control = storeManager.GetSumROStore("dicePools.control");
+   let controlValue = storeManager.GetRWStore("dicePools.control.value");
+
+   let hacking = storeManager.GetSumROStore("dicePools.hacking");
+
+   let astral = storeManager.GetSumROStore("dicePools.astral");
+   let astralValue = storeManager.GetRWStore("dicePools.astral.value");
+
+   let spell = storeManager.GetSumROStore("dicePools.spell");
+   let spellValue = storeManager.GetRWStore("dicePools.spell.value");
+
+   $effect(() => {
+      $controlValue = $reaction.sum;
+      $combatValue = Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5);
+      $astralValue = Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5);
+      $spellValue = Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5);
+   });
 
    onDestroy(() => {
       StoreManager.Unsubscribe(actor);
@@ -46,11 +55,11 @@
 <CardToolbar {id} />
 <h1>{localize(config.dicepools.dicepools)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard label={config.dicepools.combat} value={combatPool} />
-   <StatCard label={config.dicepools.control} value={controlPool} />
-   <StatCard label={config.dicepools.hacking} value={hackingPool} />
+   <StatCard label={config.dicepools.combat} value={$combat.sum} />
+   <StatCard label={config.dicepools.control} value={$control.sum} />
+   <StatCard label={config.dicepools.hacking} value={$hacking.sum} />
    {#if isAwakened}
-      <StatCard label={config.dicepools.astral} value={astralPool} />
-      <StatCard label={config.dicepools.spell} value={spellPool} />
+      <StatCard label={config.dicepools.astral} value={$astral.sum} />
+      <StatCard label={config.dicepools.spell} value={$spell.sum} />
    {/if}
 </MasonryGrid>

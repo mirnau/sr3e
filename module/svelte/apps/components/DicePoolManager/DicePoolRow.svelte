@@ -26,18 +26,18 @@
       StoreManager.Unsubscribe(actor);
    });
 
-   let intelligenceStore = storeManager.GetCompositeStore("attributes.intelligence", ["mod", "value", "meta"]);
-   let quicknessStore = storeManager.GetCompositeStore("attributes.quickness", ["mod", "value", "meta"]);
-   let willpowerStore = storeManager.GetCompositeStore("attributes.willpower", ["mod", "value", "meta"]);
-   let charismaStore = storeManager.GetCompositeStore("attributes.charisma", ["mod", "value", "meta"]);
+   let intelligenceStore = storeManager.GetRWStore("attributes.intelligence");
+   let quicknessStore = storeManager.GetRWStore("attributes.quickness");
+   let willpowerStore = storeManager.GetRWStore("attributes.willpower");
+   let charismaStore = storeManager.GetRWStore("attributes.charisma");
 
-   let karmaPoolCeilingStore = storeManager.GetStore("karma.karmaPoolCeiling");
-   let karmaPoolStore = storeManager.GetStore("karma.karmaPool");
-   let combatPoolStore = storeManager.GetStore("dicePools.combat.value");
-   let astralPoolStore = storeManager.GetStore("dicePools.astral.value");
-   let hackingPoolStore = storeManager.GetStore("dicePools.hacking.value");
-   let controlPoolStore = storeManager.GetStore("dicePools.control.value");
-   let spellPoolStore = storeManager.GetStore("dicePools.spell.value");
+   let karmaPoolCeilingStore = storeManager.GetRWStore("karma.karmaPoolCeiling");
+   let karmaPoolStore = storeManager.GetRWStore("karma.karmaPool");
+   let combatPoolStore = storeManager.GetRWStore("dicePools.combat.value");
+   let astralPoolStore = storeManager.GetRWStore("dicePools.astral.value");
+   let hackingPoolStore = storeManager.GetRWStore("dicePools.hacking.value");
+   let controlPoolStore = storeManager.GetRWStore("dicePools.control.value");
+   let spellPoolStore = storeManager.GetRWStore("dicePools.spell.value");
    let readyForCommit = storeManager.GetFlagStore(actor.id, "sr3e.actor.poolcommit");
 
    async function CommitSelected() {
@@ -90,7 +90,7 @@
 
    <td>
       <h3>
-         {$combatPoolStore} / {Math.floor(($quicknessStore.sum + $intelligenceStore.sum + $willpowerStore.sum) * 0.5)}
+         {$combatPoolStore} / {Math.floor(($quicknessStore + $intelligenceStore + $willpowerStore) * 0.5)}
       </h3>
       <button
          aria-label={localize(config.storytellerscreen.refreshcombatpool)}
@@ -101,7 +101,7 @@
    </td>
 
    <td>
-      <h3>{$astralPoolStore} / {Math.floor(($intelligenceStore.sum + $willpowerStore.sum) * 0.5)}</h3>
+      <h3>{$astralPoolStore} / {Math.floor(($intelligenceStore + $willpowerStore) * 0.5)}</h3>
       <button
          aria-label={localize(config.storytellerscreen.refreshastralpool)}
          onclick={() => actor.RefreshAstralPool()}
@@ -111,7 +111,7 @@
    </td>
 
    <td>
-      <h3>{$spellPoolStore} / {Math.floor(($intelligenceStore.sum + $willpowerStore.sum) * 0.5)}</h3>
+      <h3>{$spellPoolStore} / {Math.floor(($intelligenceStore + $willpowerStore) * 0.5)}</h3>
       <button aria-label={localize(config.storytellerscreen.refreshspellpool)} onclick={() => actor.RefreshSpellPool()}>
          {localize(config.storytellerscreen.refresh)}<i class="fa-solid fa-wand-sparkles"></i>
       </button>
