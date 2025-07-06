@@ -10,39 +10,46 @@
 
    const storeManager = StoreManager.Subscribe(actor);
 
-   // Use GetSumROStore for total, and get value store for direct updates
-   let total = storeManager.GetSumROStore(`attributes.${key}`);
-   let valueStore = storeManager.GetRWStore(`attributes.${key}.value`);
+   let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
+   let baseValueStore = storeManager.GetRWStore(`attributes.${key}.value`);
    let attributePointStore = storeManager.GetRWStore("creation.attributePoints");
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
    let attributeAssignmentLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let metatype = $derived(actor.items.find((i) => i.type === "metatype") || []);
-
    let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
+   let isMinLimit = $derived($valueROStore.value <= 1);
 
-   let isMinLimit = $derived($total.value <= 1);
-   // Removed isMaxLimit
+   let valueRWStore = $derived(
+      $isShoppingState && !$attributeAssignmentLockedStore ? baseValueStore : null
+   );
+
+   $effect(() => {
+      if (!$attributeAssignmentLockedStore && $isShoppingState && $valueROStore.sum < 1 && $valueROStore.mod < 0 && valueRWStore) {
+         let deficit = 1 - $valueROStore.sum;
+         while (deficit > 0 && $attributePointStore > 0) {
+            $attributePointStore -= 1;
+            $valueRWStore += 1;
+            deficit -= 1;
+         }
+      }
+   });
 
    let activeModal = null;
    let isModalOpen = storeManager.GetShallowStore(actor.id, stores.isrollcomposeropen, false);
 
    function add(change) {
-      if (!$attributeAssignmentLockedStore) {
+      if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
          const newPoints = $attributePointStore - change;
-         if (newPoints < 0) return;
-
-         valueStore.update(v => v + change);
-         $attributePointStore = newPoints;
+         if (newPoints >= 0) {
+            $attributePointStore = newPoints;
+            $valueRWStore += change;
+         }
       }
    }
 
-   const increment = () => {
-      // Removed isMaxLimit check
-      add(1);
-   };
-
+   const increment = () => add(1);
    const decrement = () => {
       if (!isMinLimit) add(-1);
    };
@@ -78,7 +85,7 @@
                props: {
                   actor,
                   config: CONFIG.sr3e,
-                  caller: { key, value: $total.value, type: "attribute", dice: $total.sum },
+                  caller: { key, value: $valueROStore.value, type: "attribute", dice: $valueROStore.sum },
                   onclose: (result) => {
                      unmount(activeModal);
                      $isModalOpen = false;
@@ -93,7 +100,7 @@
             await actor.AttributeRoll(options.dice, options.attributeName, options.options);
          }
       } else {
-         await actor.AttributeRoll($total.sum, key);
+         await actor.AttributeRoll($valueROStore.sum, key);
       }
 
       e.preventDefault();
@@ -103,35 +110,33 @@
 <svelte:window on:keydown|capture={handleEscape} />
 
 {#if $isShoppingState}
-   <div class="stat-card" class:button={!$isShoppingState} role="button" tabindex="0">
+   <div class="stat-card" role="button" tabindex="0">
       <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
       <div class="stat-card-background"></div>
 
       <div class="stat-label">
-            <i
-               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-               role="button"
-               tabindex="0"
-               onclick={decrement}
-               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-            ></i>
+         <i
+            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+            role="button"
+            tabindex="0"
+            onclick={decrement}
+            onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+         ></i>
 
-         <h1 class="stat-value">{$total.sum}</h1>
-            <i
-               class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0
-                  ? 'disabled'
-                  : ''}"
-               role="button"
-               tabindex="0"
-               onclick={increment}
-               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-            ></i>
+         <h1 class="stat-value">{$valueROStore.sum}</h1>
+
+         <i
+            class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
+            role="button"
+            tabindex="0"
+            onclick={increment}
+            onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+         ></i>
       </div>
    </div>
 {:else}
    <div
       class="stat-card"
-      class:button={!$isShoppingState}
       role="button"
       tabindex="0"
       onclick={Roll}
@@ -143,7 +148,7 @@
       <div class="stat-card-background"></div>
 
       <div class="stat-label">
-         <h1 class="stat-value">{$total.sum}</h1>
+         <h1 class="stat-value">{$valueROStore.sum}</h1>
       </div>
    </div>
 {/if}

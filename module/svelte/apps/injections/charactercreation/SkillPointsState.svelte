@@ -13,9 +13,9 @@
    let languagePointsText = localize(config.skill.language);
 
    let storeManager = StoreManager.Subscribe(actor);
-   let activeSkillPointsStore = storeManager.GetStore("creation.activePoints");
-   let knowledgePointsStore = storeManager.GetStore("creation.knowledgePoints");
-   let languagePointsStore = storeManager.GetStore("creation.languagePoints");
+   let activeSkillPointsStore = storeManager.GetRWStore("creation.activePoints");
+   let knowledgePointsStore = storeManager.GetRWStore("creation.knowledgePoints");
+   let languagePointsStore = storeManager.GetRWStore("creation.languagePoints");
 
    let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 

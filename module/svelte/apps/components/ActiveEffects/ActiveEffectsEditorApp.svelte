@@ -35,12 +35,10 @@
       }
 
       propertyOptions = rawPaths
-         .filter((path) => allowedPatterns.some((p) => path.startsWith(p)))
+         .filter((path) =>
+            allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith('.mod')
+         )
          .map((path) => ({ value: path, label: path }));
-   });
-
-   $effect(() => {
-      console.log("propertyOptions", propertyOptions); // checking triggers infinite loop
    });
 
    function commitChanges() {
