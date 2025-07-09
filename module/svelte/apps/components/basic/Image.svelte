@@ -12,7 +12,7 @@
     }
   });
 
-  async function handleClick() {
+  async function handleClick(event) {
     if (entity) await openFilePicker(entity);
   }
 </script>

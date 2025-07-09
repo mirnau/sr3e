@@ -20,6 +20,9 @@
          "strength": "Strength",
          "willpower": "Willpower"
       },
+      "broadcaster": {
+         "broadcaster": "Broadcaster"
+      },
       "combosearch": {
          "noresult": "No results...",
          "search": "Search"
@@ -225,7 +228,6 @@
          "agerange": "Playable Age Range",
          "height": "Height",
          "metatype": "metatype",
-         "metaType": "metaType",
          "weight": "Weight",
          "child": "Child",
          "adolecent": "Adolecent",

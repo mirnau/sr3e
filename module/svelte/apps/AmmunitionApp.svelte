@@ -48,6 +48,6 @@
 
     <Commodity {item} {config} gridCss="two-column" />
     <Portability {item} {config} gridCss="two-column" />
-    <JournalViewer {item} {config} />
+    <JournalViewer {document} {config} />
   </div>
 </div>

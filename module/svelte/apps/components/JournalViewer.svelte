@@ -1,10 +1,12 @@
 <script>
     import JournalViewerToolbar from "./JournalViewerToolbar.svelte";
 
-    let { item = {}, config = {} } = $props();
+    let { document = {}, config = {} } = $props();
+
+    console.log("DOCUMENT", document);
 
     let toolbar;
-    let journalId = $state(item.system.journalId ?? null);
+    let journalId = $state(document.system.journalId ?? null);
     let previewContent = $state("");
 
     let journalOptions = $derived(
@@ -40,7 +42,7 @@
 
         journalId = result.value;
 
-        await item.update({
+        await document.update({
             "system.journalId": result.value,
         });
     }

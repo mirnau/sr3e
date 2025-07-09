@@ -994,6 +994,45 @@
     text-align: center;
     justify-content: center;
   }
+  .broadcaster-info {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .broadcaster-info .image-mask {
+    width: var(--component-width);
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+  }
+  .broadcaster-info .broadcaster-control {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: transparent;
+  }
+  .news-input {
+    text-align: left;
+    margin-bottom: 1rem;
+  }
+  .list-box select {
+    width: 100%;
+    min-height: 10rem;
+    padding: 0.25rem;
+    color: var(--color-text-dark, #000);
+    font-size: 1rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    outline: none;
+  }
   .form-group {
     padding: 0.5rem;
   }
@@ -2447,47 +2486,49 @@
       transform: translateX(calc(-1 * var(--marquee-half-width)));
     }
   }
-  .ticker {
+  .window-header.sr3e-actor-header {
     display: flex;
     align-items: center;
-    gap: 0;
-    width: 100%;
-    height: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+    overflow: hidden;
+    position: relative;
   }
-  .left-gradient,
-  .right-gradient {
+  .window-header.sr3e-actor-header .ticker {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+  .window-header.sr3e-actor-header .ticker .left-gradient,
+  .window-header.sr3e-actor-header .ticker .right-gradient {
     height: 100%;
     min-width: 0.5rem;
     max-width: 1rem;
     flex: 0 0 1rem;
   }
-  .left-gradient {
-    left: 0;
+  .window-header.sr3e-actor-header .ticker .left-gradient {
     background: linear-gradient(to left, #ff2090 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0) 100%);
   }
-  .right-gradient {
-    right: 0;
+  .window-header.sr3e-actor-header .ticker .right-gradient {
     background: linear-gradient(to right, #ff2090 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0) 100%);
   }
-  .marquee-item {
-    display: inline-block;
-    padding: 0 2rem;
-    line-height: 1;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .marquee-outer {
+  .window-header.sr3e-actor-header .ticker .marquee-outer {
     overflow: hidden;
     position: relative;
-    flex: 1 1 0;
+    flex: 1 1 auto;
     white-space: nowrap;
     display: flex;
     align-items: center;
     text-align: center;
     backdrop-filter: blur(8px);
   }
-  .marquee-outer::before,
-  .marquee-outer::after {
+  .window-header.sr3e-actor-header .ticker .marquee-outer::before,
+  .window-header.sr3e-actor-header .ticker .marquee-outer::after {
     content: "";
     position: absolute;
     top: 0;
@@ -2496,15 +2537,15 @@
     pointer-events: none;
     z-index: 3;
   }
-  .marquee-outer::before {
+  .window-header.sr3e-actor-header .ticker .marquee-outer::before {
     left: 0;
     background: linear-gradient(to right, #ff2090 0%, rgba(0, 255, 255, 0.5) 25%, rgba(0, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
   }
-  .marquee-outer::after {
+  .window-header.sr3e-actor-header .ticker .marquee-outer::after {
     right: 0;
     background: linear-gradient(to left, #ff2090 0%, rgba(0, 255, 255, 0.5) 25%, rgba(0, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
   }
-  .marquee-outer .marquee-inner {
+  .window-header.sr3e-actor-header .ticker .marquee-outer .marquee-inner {
     display: inline-flex;
     white-space: nowrap;
     animation: marquee-move var(--marquee-duration, 30s) linear infinite;
@@ -2513,8 +2554,38 @@
     text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);
     will-change: transform;
   }
-  .marquee-outer .marquee-inner span {
+  .window-header.sr3e-actor-header .ticker .marquee-outer .marquee-inner span {
     font-size: 1.5rem;
+  }
+  .window-header.sr3e-actor-header .ticker .marquee-item {
+    display: inline-block;
+    padding: 0 2rem;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .window-header.sr3e-actor-header .window-icon,
+  .window-header.sr3e-actor-header .shopping-cart-slot,
+  .window-header.sr3e-actor-header .header-control {
+    flex: 0 0 auto;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    /* Remove any extra margin or gap for snug fit */
+    margin-left: 0;
+    gap: 0;
+    font-size: 1rem;
+  }
+  .window-header.sr3e-actor-header .shopping-cart-slot {
+    display: flex;
+    margin-left: 0;
+    gap: 0.15rem;
+  }
+  .window-header.sr3e-actor-header .header-control {
+    margin-left: 0.15rem;
+  }
+  .window-header.sr3e-actor-header .header-control:first-of-type {
+    margin-left: 0;
   }
   .roll-composer-container {
     transform: translateZ(0);

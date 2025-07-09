@@ -259,6 +259,6 @@
 
       <ActiveEffectsViewer {item} {config} />
       <!-- Journal Viewer -->
-      <JournalViewer {item} {config} />
+      <JournalViewer {document} {config} />
    </div>
 </div>

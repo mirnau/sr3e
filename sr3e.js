@@ -27,6 +27,8 @@ import TransactionItemSheet from "./module/foundry/sheets/TransactionItemSheet.j
 import SR3ECombat from "./module/foundry/documents/SR3ECombat.js";
 import SR3Edie from "./module/foundry/documents/SR3Edie.js";
 import SR3ERoll from "./module/foundry/documents/SR3ERoll.js";
+import BroadcasterModel from "./module/models/actor/BroadcasterModel.js";
+import BroadcasterActorSheet from "./module/foundry/sheets/BroadcasterActorSheet.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -43,7 +45,6 @@ function registerDocumentTypes({ args }) {
 }
 
 function configureProject() {
-   
    SR3EActor.Register();
    SR3ECombat.Register();
    SR3Edie.Register();
@@ -77,16 +78,17 @@ function configureProject() {
    };
 
    CONFIG.Actor.typeLabels = {
+      broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
       character: localize(CONFIG.sr3e.sheet.playercharacter),
+      storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
    };
    CONFIG.Item.typeLabels = {
-      metatype: localize(CONFIG.sr3e.traits.metatype),
-      magic: localize(CONFIG.sr3e.magic.magic),
-      weapon: localize(CONFIG.sr3e.weapon.weapon),
       ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
+      magic: localize(CONFIG.sr3e.magic.magic),
+      metatype: localize(CONFIG.sr3e.traits.metatype),
       skill: localize(CONFIG.sr3e.skill.skill),
-      storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
       transaction: localize(CONFIG.sr3e.transaction.transaction),
+      weapon: localize(CONFIG.sr3e.weapon.weapon),
    };
 
    DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
@@ -316,6 +318,12 @@ function registerHooks() {
                type: "storytellerscreen",
                model: StorytellerScreenModel,
                sheet: StorytellerScreenActorSheet,
+            },
+            {
+               docClass: Actor,
+               type: "broadcaster",
+               model: BroadcasterModel,
+               sheet: BroadcasterActorSheet,
             },
             {
                docClass: Item,

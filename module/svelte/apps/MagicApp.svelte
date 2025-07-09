@@ -171,6 +171,6 @@
       {/each}
     {/if}
 
-    <JournalViewer {item} {config} />
+    <JournalViewer {document} {config} />
   </div>
 </div>
