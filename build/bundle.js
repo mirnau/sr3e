@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _tickerInterval, _frameUpdateInterval, _initialized, _instance, _NewsService_instances, setupSocket_fn, startTickerLoop_fn, loadActiveBroadcasters_fn, updateTickerFrame_fn, sendFrameUpdate_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _tickerLock, _instance, _NewsService_instances, setupSocket_fn, loadActiveBroadcasters_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -9248,9 +9248,9 @@ const _NewsService = class _NewsService {
     __privateAdd(this, _currentIndices, /* @__PURE__ */ new Map());
     __privateAdd(this, _maxVisible, 5);
     __privateAdd(this, _lastBroadcasterIndex, -1);
-    __privateAdd(this, _tickerInterval, null);
     __privateAdd(this, _frameUpdateInterval, null);
     __privateAdd(this, _initialized, false);
+    __privateAdd(this, _tickerLock, { userId: null, timestamp: 0 });
   }
   static Instance() {
     if (!__privateGet(this, _instance)) {
@@ -9262,20 +9262,34 @@ const _NewsService = class _NewsService {
     if (__privateGet(this, _initialized)) return;
     __privateSet(this, _initialized, true);
     __privateMethod(this, _NewsService_instances, setupSocket_fn).call(this);
-    __privateMethod(this, _NewsService_instances, startTickerLoop_fn).call(this);
     __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
     CONFIG.sr3e = CONFIG.sr3e || {};
     CONFIG.sr3e.newsService = this;
   }
+  TryClaimBroadcast() {
+    var _a;
+    const userId = (_a = game.user) == null ? void 0 : _a.id;
+    const now2 = Date.now();
+    if (!__privateGet(this, _tickerLock) || !__privateGet(this, _tickerLock).userId || now2 - __privateGet(this, _tickerLock).timestamp > 3e4) {
+      __privateSet(this, _tickerLock, { userId, timestamp: now2 });
+      console.log("✅ Broadcast lock claimed by", userId);
+      return true;
+    }
+    if (__privateGet(this, _tickerLock).userId === userId) {
+      __privateGet(this, _tickerLock).timestamp = now2;
+      return true;
+    }
+    return false;
+  }
+  sendNextFrame() {
+    __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
+    const buffer = [...__privateGet(this, _feedBuffer)];
+    const timestamp = Date.now();
+    const frame = { buffer, timestamp };
+    this.currentDisplayFrame.set(frame);
+    game.socket.emit("module.sr3e", { type: "frameUpdate", buffer, timestamp });
+  }
   destroy() {
-    if (__privateGet(this, _tickerInterval)) {
-      clearInterval(__privateGet(this, _tickerInterval));
-      __privateSet(this, _tickerInterval, null);
-    }
-    if (__privateGet(this, _frameUpdateInterval)) {
-      clearInterval(__privateGet(this, _frameUpdateInterval));
-      __privateSet(this, _frameUpdateInterval, null);
-    }
     game.socket.off("module.sr3e");
     __privateSet(this, _initialized, false);
     if (CONFIG.sr3e && CONFIG.sr3e.newsService === this) {
@@ -9287,14 +9301,20 @@ _feedBuffer = new WeakMap();
 _currentIndices = new WeakMap();
 _maxVisible = new WeakMap();
 _lastBroadcasterIndex = new WeakMap();
-_tickerInterval = new WeakMap();
 _frameUpdateInterval = new WeakMap();
 _initialized = new WeakMap();
+_tickerLock = new WeakMap();
 _instance = new WeakMap();
 _NewsService_instances = new WeakSet();
 setupSocket_fn = function() {
   game.socket.on("module.sr3e", (data) => {
-    const { type, actorName, headlines } = data;
+    const {
+      type,
+      actorName,
+      headlines,
+      buffer,
+      timestamp
+    } = data;
     switch (type) {
       case "syncBroadcast":
         __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, actorName, headlines);
@@ -9303,44 +9323,19 @@ setupSocket_fn = function() {
         __privateMethod(this, _NewsService_instances, stopBroadcaster_fn).call(this, actorName);
         break;
       case "requestFrameSync":
-        __privateMethod(this, _NewsService_instances, sendFrameUpdate_fn).call(this);
+        this.sendNextFrame();
+        break;
+      case "frameUpdate":
+        this.currentDisplayFrame.set({ buffer, timestamp });
         break;
     }
   });
-};
-startTickerLoop_fn = function() {
-  __privateSet(this, _tickerInterval, setInterval(
-    () => {
-      __privateMethod(this, _NewsService_instances, updateTickerFrame_fn).call(this);
-    },
-    3e3
-  ));
-  __privateSet(this, _frameUpdateInterval, setInterval(
-    () => {
-      __privateMethod(this, _NewsService_instances, sendFrameUpdate_fn).call(this);
-    },
-    1e3
-  ));
 };
 loadActiveBroadcasters_fn = function() {
   const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
   allBroadcasters.forEach((broadcaster) => {
     const headlines = broadcaster.system.rollingNews || [];
     __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
-  });
-};
-updateTickerFrame_fn = function() {
-  __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
-  const buffer = [...__privateGet(this, _feedBuffer)];
-  const timestamp = Date.now();
-  this.currentDisplayFrame.set({ buffer, timestamp });
-};
-sendFrameUpdate_fn = function() {
-  const frame = get$1(this.currentDisplayFrame);
-  game.socket.emit("module.sr3e", {
-    type: "frameUpdate",
-    buffer: frame.buffer,
-    timestamp: frame.timestamp
   });
 };
 receiveBroadcastSync_fn = function(actorName, headlines) {
@@ -9411,7 +9406,7 @@ publishFeed_fn = function() {
 __privateAdd(_NewsService, _instance, null);
 let NewsService = _NewsService;
 let newsServiceInstance = null;
-const getNewsService$1 = () => {
+const getNewsService = () => {
   if (!newsServiceInstance) {
     newsServiceInstance = NewsService.Instance();
     newsServiceInstance.initialize();
@@ -9433,11 +9428,18 @@ function NewsFeed($$anchor, $$props) {
   let animationStart = Date.now();
   let lastFrameTimestamp = 0;
   const SCROLL_SPEED = 100;
+  const NewsService2 = getNewsService();
   function applyFrame(frame) {
     if (!frame || frame.timestamp === lastFrameTimestamp) return;
+    console.log("📡 New frame received:", frame);
     lastFrameTimestamp = frame.timestamp;
     set(buffer, proxy(frame.buffer.map((m) => `${m.sender}: "${m.headline}"`)));
     animationStart = frame.timestamp;
+    if (inner) {
+      inner.style.animation = "none";
+      inner.offsetHeight;
+      inner.style.animation = "";
+    }
     tick().then(() => inner && requestAnimationFrame(setOffsets));
   }
   function setOffsets() {
@@ -9445,12 +9447,25 @@ function NewsFeed($$anchor, $$props) {
     const fullWidth = inner.scrollWidth;
     const duration = fullWidth / SCROLL_SPEED;
     const root2 = document.documentElement;
+    const now2 = Date.now();
+    const elapsed = now2 - animationStart;
+    const remaining = Math.max(duration * 1e3 - elapsed, 0);
     root2.style.setProperty("--marquee-width", `${fullWidth}px`);
     root2.style.setProperty("--marquee-duration", `${duration}s`);
-    root2.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
+    root2.style.setProperty("--marquee-delay", `-${elapsed}ms`);
+    if (NewsService2.TryClaimBroadcast && NewsService2.TryClaimBroadcast()) {
+      console.log("🟢 Driver scheduling next frame in", remaining, "ms");
+      setTimeout(
+        () => {
+          game.socket.emit("module.sr3e", { type: "requestFrameSync" });
+        },
+        remaining
+      );
+    }
   }
   function handleFrameUpdate(data) {
     if (data.type === "frameUpdate") {
+      console.log("📡 Socket frame update received");
       applyFrame({
         buffer: data.buffer,
         timestamp: data.timestamp
@@ -9458,21 +9473,24 @@ function NewsFeed($$anchor, $$props) {
     }
   }
   onMount(() => {
-    console.log("NewsFeed mounted, setting up listeners");
+    var _a;
+    console.log("🚀 NewsFeed mounted");
     game.socket.on("module.sr3e", handleFrameUpdate);
-    const newsService = getNewsService$1();
-    const currentFrame = newsService.currentDisplayFrame;
-    if (currentFrame) {
-      const unsubscribe = currentFrame.subscribe((frame) => {
-        console.log("Frame update received:", frame);
-        applyFrame(frame);
-      });
-      return () => {
-        unsubscribe();
-        game.socket.off("module.sr3e", handleFrameUpdate);
-      };
+    const unsubscribe = NewsService2.currentDisplayFrame.subscribe((frame) => {
+      applyFrame(frame);
+    });
+    const claimed = (_a = NewsService2.TryClaimBroadcast) == null ? void 0 : _a.call(NewsService2);
+    console.log("🔑 Claimed ticker lock on mount?", claimed);
+    if (claimed) {
+      console.log("📤 Sending first frame manually");
+      NewsService2.sendNextFrame();
+    } else {
+      console.log("⏳ Waiting for broadcast owner to push first frame...");
     }
-    game.socket.emit("module.sr3e", { type: "requestFrameSync" });
+    return () => {
+      unsubscribe();
+      game.socket.off("module.sr3e", handleFrameUpdate);
+    };
   });
   var div = root_1$h();
   var div_1 = child(div);
@@ -9485,7 +9503,6 @@ function NewsFeed($$anchor, $$props) {
   });
   bind_this(div_2, ($$value) => inner = $$value, () => inner);
   bind_this(div_1, ($$value) => outer = $$value, () => outer);
-  event("animationiteration", div_2, () => game.socket.emit("module.sr3e", { type: "requestFrameSync" }));
   append($$anchor, div);
   pop();
 }
@@ -15422,10 +15439,6 @@ function configureProject() {
       }
     ]
   };
-  if (game.user && game.user.isGM && game.users.filter((u) => u.isGM).length === 1) {
-    const newsService = getNewsService();
-    console.log("NewsService initialized:", newsService);
-  }
   CONFIG.Actor.typeLabels = {
     broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
     character: localize(CONFIG.sr3e.sheet.playercharacter),
@@ -15615,6 +15628,7 @@ function registerHooks() {
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
   Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
   Hooks.on("ready", () => {
+    getNewsService();
     const activeBroadcasters = game.actors.filter(
       (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
     );

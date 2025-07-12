@@ -1,4 +1,4 @@
-// NewsService.svelte.js
+// Updated NewsService.svelte.js
 import { writable, get } from "svelte/store";
 
 export class NewsService {
@@ -10,9 +10,12 @@ export class NewsService {
    #currentIndices = new Map();
    #maxVisible = 5;
    #lastBroadcasterIndex = -1;
-   #tickerInterval = null;
    #frameUpdateInterval = null;
    #initialized = false;
+   #tickerLock = {
+      userId: null,
+      timestamp: 0,
+   };
 
    static #instance = null;
 
@@ -26,20 +29,39 @@ export class NewsService {
    initialize() {
       if (this.#initialized) return;
       this.#initialized = true;
-      
+
       this.#setupSocket();
-      this.#startTickerLoop();
       this.#loadActiveBroadcasters();
-      
-      // Register globally for easy access
+
       CONFIG.sr3e = CONFIG.sr3e || {};
       CONFIG.sr3e.newsService = this;
    }
 
+   TryClaimBroadcast() {
+      const userId = game.user?.id;
+      const now = Date.now();
+
+      if (!this.#tickerLock || !this.#tickerLock.userId || now - this.#tickerLock.timestamp > 30000) {
+         this.#tickerLock = {
+            userId,
+            timestamp: now,
+         };
+         console.log("✅ Broadcast lock claimed by", userId);
+         return true;
+      }
+
+      if (this.#tickerLock.userId === userId) {
+         this.#tickerLock.timestamp = now;
+         return true;
+      }
+
+      return false;
+   }
+
    #setupSocket() {
       game.socket.on("module.sr3e", (data) => {
-         const { type, actorName, headlines } = data;
-         
+         const { type, actorName, headlines, buffer, timestamp } = data;
+
          switch (type) {
             case "syncBroadcast":
                this.#receiveBroadcastSync(actorName, headlines);
@@ -48,46 +70,37 @@ export class NewsService {
                this.#stopBroadcaster(actorName);
                break;
             case "requestFrameSync":
-               this.#sendFrameUpdate();
+               this.sendNextFrame();
+               break;
+            case "frameUpdate":
+               this.currentDisplayFrame.set({ buffer, timestamp });
                break;
          }
       });
    }
 
-   #startTickerLoop() {
-      this.#tickerInterval = setInterval(() => {
-         this.#updateTickerFrame();
-      }, 3000);
-
-      this.#frameUpdateInterval = setInterval(() => {
-         this.#sendFrameUpdate();
-      }, 1000);
-   }
-
    #loadActiveBroadcasters() {
-      const allBroadcasters = game.actors.filter(actor => 
-         actor.type === "broadcaster" && actor.system.isBroadcasting
+      const allBroadcasters = game.actors.filter(
+         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
       );
-      
-      allBroadcasters.forEach(broadcaster => {
+
+      allBroadcasters.forEach((broadcaster) => {
          const headlines = broadcaster.system.rollingNews || [];
          this.#receiveBroadcastSync(broadcaster.name, headlines);
       });
    }
 
-   #updateTickerFrame() {
+   sendNextFrame() {
       this.#fillFeedBuffer(10);
       const buffer = [...this.#feedBuffer];
       const timestamp = Date.now();
-      this.currentDisplayFrame.set({ buffer, timestamp });
-   }
+      const frame = { buffer, timestamp };
 
-   #sendFrameUpdate() {
-      const frame = get(this.currentDisplayFrame);
+      this.currentDisplayFrame.set(frame);
       game.socket.emit("module.sr3e", {
          type: "frameUpdate",
-         buffer: frame.buffer,
-         timestamp: frame.timestamp,
+         buffer,
+         timestamp,
       });
    }
 
@@ -125,7 +138,7 @@ export class NewsService {
          const index = (this.#lastBroadcasterIndex + offset + 1) % broadcasterNames.length;
          const broadcasterName = broadcasterNames[index];
          const headlines = broadcasters.get(broadcasterName);
-         
+
          if (!headlines || headlines.length === 0) continue;
 
          const currentIndex = this.#currentIndices.get(broadcasterName) || 0;
@@ -141,37 +154,36 @@ export class NewsService {
 
    #fillFeedBuffer(minLength = 10) {
       const buffer = [...this.#feedBuffer];
-      
+
       while (buffer.length < minLength) {
          const nextHeadline = this.#pumpNextHeadline();
          if (!nextHeadline) break;
          buffer.push(nextHeadline);
       }
-      
+
       this.#feedBuffer = buffer.slice(-this.#maxVisible);
       this.#publishFeed();
    }
 
    #updateFeedBuffer() {
       const broadcasters = get(this.activeBroadcasters);
-      
+
       if (broadcasters.size === 0) {
          this.#feedBuffer = [];
          this.#publishFeed();
          return;
       }
-      
-      this.#feedBuffer = this.#feedBuffer.filter(message => 
-         broadcasters.has(message.sender) && 
-         broadcasters.get(message.sender).includes(message.headline)
+
+      this.#feedBuffer = this.#feedBuffer.filter(
+         (message) => broadcasters.has(message.sender) && broadcasters.get(message.sender).includes(message.headline)
       );
-      
+
       this.#fillFeedBuffer(this.#maxVisible);
    }
 
    #publishFeed() {
       const feeds = {};
-      this.#feedBuffer.forEach(message => {
+      this.#feedBuffer.forEach((message) => {
          feeds[message.sender] = feeds[message.sender] || [];
          feeds[message.sender].push(message);
       });
@@ -179,26 +191,15 @@ export class NewsService {
    }
 
    destroy() {
-      if (this.#tickerInterval) {
-         clearInterval(this.#tickerInterval);
-         this.#tickerInterval = null;
-      }
-      
-      if (this.#frameUpdateInterval) {
-         clearInterval(this.#frameUpdateInterval);
-         this.#frameUpdateInterval = null;
-      }
-      
       game.socket.off("module.sr3e");
       this.#initialized = false;
-      
+
       if (CONFIG.sr3e && CONFIG.sr3e.newsService === this) {
          CONFIG.sr3e.newsService = null;
       }
    }
 }
 
-// Initialize the service when module loads
 let newsServiceInstance = null;
 
 export const getNewsService = () => {
@@ -210,25 +211,24 @@ export const getNewsService = () => {
 };
 
 export const broadcastNews = (actorName, headlines) => {
-   game.socket.emit("module.sr3e", { 
-      type: "syncBroadcast", 
-      actorName, 
-      headlines 
+   game.socket.emit("module.sr3e", {
+      type: "syncBroadcast",
+      actorName,
+      headlines,
    });
 };
 
 export const stopBroadcast = (actorName) => {
-   game.socket.emit("module.sr3e", { 
-      type: "stopBroadcast", 
-      actorName 
+   game.socket.emit("module.sr3e", {
+      type: "stopBroadcast",
+      actorName,
    });
 };
 
 export const requestFrameSync = () => {
-   game.socket.emit("module.sr3e", { 
-      type: "requestFrameSync" 
+   game.socket.emit("module.sr3e", {
+      type: "requestFrameSync",
    });
 };
 
-export const currentDisplayFrame = () => 
-   CONFIG.sr3e?.newsService?.currentDisplayFrame;
+export const currentDisplayFrame = () => CONFIG.sr3e?.newsService?.currentDisplayFrame;
