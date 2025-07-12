@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _StoreManager_instances, triggerCallbacks_fn, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _tickerInterval, _frameUpdateInterval, _initialized, _instance, _NewsService_instances, setupSocket_fn, startTickerLoop_fn, loadActiveBroadcasters_fn, updateTickerFrame_fn, sendFrameUpdate_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3553,7 +3553,7 @@ function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
 var on_click$c = (e) => e.stopPropagation();
-var on_keydown$a = (e) => {
+var on_keydown$9 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
@@ -3569,7 +3569,7 @@ function CardToolbar($$anchor, $$props) {
   }
   var div = root$N();
   div.__click = [on_click$c];
-  div.__keydown = [on_keydown$a];
+  div.__keydown = [on_keydown$9];
   var button = child(div);
   button.__click = [on_click_1$7, handleMove];
   var button_1 = sibling(button, 2);
@@ -3645,7 +3645,6 @@ const stores$1 = {
 };
 const _StoreManager = class _StoreManager {
   constructor(document2) {
-    __privateAdd(this, _StoreManager_instances);
     __privateAdd(this, _document);
     __privateAdd(this, _persistentStore, {});
     __privateAdd(this, _actorStores, {});
@@ -3751,45 +3750,12 @@ const _StoreManager = class _StoreManager {
     }
     return __privateGet(this, _persistentStore)[flag];
   }
-  GetBroadcastStore(docId, storeName, initialValue = null) {
-    this.GetShallowStore(docId, storeName, initialValue);
-    const store = __privateGet(this, _actorStores)[docId][storeName];
-    return {
-      subscribe: store.subscribe,
-      set: (v) => {
-        store.set(v);
-        __privateMethod(this, _StoreManager_instances, triggerCallbacks_fn).call(this, docId, storeName, v);
-      },
-      update: (fn) => {
-        store.update(fn);
-        __privateMethod(this, _StoreManager_instances, triggerCallbacks_fn).call(this, docId, storeName, get$1(store));
-      },
-      onBroadcast: (cb) => {
-        var _a, _b;
-        (_a = __privateGet(this, _actorSubscriptions))[docId] ?? (_a[docId] = {});
-        (_b = __privateGet(this, _actorSubscriptions)[docId])[storeName] ?? (_b[storeName] = []);
-        __privateGet(this, _actorSubscriptions)[docId][storeName].push(cb);
-        return () => {
-          __privateGet(this, _actorSubscriptions)[docId][storeName] = __privateGet(this, _actorSubscriptions)[docId][storeName].filter((fn) => fn !== cb);
-        };
-      }
-    };
-  }
 };
 _document = new WeakMap();
 _persistentStore = new WeakMap();
 _actorStores = new WeakMap();
 _hookDisposers = new WeakMap();
 _actorSubscriptions = new WeakMap();
-_StoreManager_instances = new WeakSet();
-//how to brodcast
-//const bc = manager.GetBroadcastStore(actor.id, "broadcasters", []);
-//bc.set(newMsgList);
-triggerCallbacks_fn = function(docId, name, value) {
-  var _a;
-  const subs = (_a = __privateGet(this, _actorSubscriptions)[docId]) == null ? void 0 : _a[name];
-  if (subs) subs.forEach((fn) => fn(value));
-};
 let StoreManager = _StoreManager;
 var root$L = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
@@ -3826,8 +3792,8 @@ function TextInput($$anchor, $$props) {
   pop();
 }
 delegate(["input", "keydown"]);
-var on_keydown$9 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$f = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
+var root_3$e = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$K = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3926,12 +3892,12 @@ function Dossier($$anchor, $$props) {
   var div_1 = sibling(node_1, 2);
   var div_2 = child(div_1);
   div_2.__click = toggleDetails;
-  div_2.__keydown = [on_keydown$9, toggleDetails];
+  div_2.__keydown = [on_keydown$8, toggleDetails];
   var text2 = sibling(child(div_2));
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$f();
+      var fragment_3 = root_3$e();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -4198,8 +4164,8 @@ var on_click$a = (__1, modifiersArray) => {
     { name: "Modifier", value: 0 }
   ]));
 };
-var root_2$j = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
-var root_3$e = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_3$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
 var root_4$b = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$v = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
@@ -4449,7 +4415,7 @@ function RollComposerComponent($$anchor, $$props) {
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
   each(node_1, 17, () => get$2(modifiersArray), index, ($$anchor2, modifier, i) => {
-    var div_4 = root_2$j();
+    var div_4 = root_2$k();
     var h4_2 = child(div_4);
     var text_3 = child(h4_2);
     var node_2 = sibling(h4_2, 2);
@@ -4471,7 +4437,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_3$e();
+      var div_5 = root_3$d();
       var h1_1 = child(div_5);
       var text_4 = child(h1_1);
       var h4_3 = sibling(h1_1, 2);
@@ -4556,13 +4522,13 @@ function RollComposerComponent($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["keydown", "click"]);
-var on_keydown$8 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_1$u = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div></div>`);
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_2$i = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_2$j = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4667,7 +4633,7 @@ function AttributeCard($$anchor, $$props) {
       var div_1 = sibling(h4, 4);
       var i_1 = child(div_1);
       i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$8, decrement2];
+      i_1.__keydown = [on_keydown$7, decrement2];
       var h1 = sibling(i_1, 2);
       var text_1 = child(h1);
       var i_2 = sibling(h1, 2);
@@ -4687,7 +4653,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$i();
+      var div_2 = root_2$j();
       div_2.__click = Roll2;
       div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
@@ -6275,7 +6241,7 @@ function setupMasonry({
   return { masonryInstance: msnry, cleanup };
 }
 var root_1$t = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
-var root_3$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_3$c = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root$I = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
@@ -6302,7 +6268,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var h1 = root_3$d();
+      var h1 = root_3$c();
       var text_1 = child(h1);
       template_effect(() => set_text(text_1, $$props.value));
       append($$anchor2, h1);
@@ -6453,7 +6419,7 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_2$h = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_2$i = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$r = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
@@ -6546,7 +6512,7 @@ function DicePools($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var fragment_2 = root_2$h();
+          var fragment_2 = root_2$i();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
             get label() {
@@ -6781,7 +6747,7 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$g = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
+var root_2$h = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
 var root_1$o = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
@@ -6846,7 +6812,7 @@ function Karma($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var div = root_2$g();
+          var div = root_2$h();
           var h4 = sibling(child(div), 2);
           var text_1 = child(h4);
           template_effect(($0) => set_text(text_1, $0), [
@@ -7745,9 +7711,9 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
   }
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
-var on_keydown$7 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_3$c = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_2$f = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
+var root_3$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$g = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$n = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$6 = (e, Roll2, skill) => Roll2(e, skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
@@ -7835,7 +7801,7 @@ function ActiveSkillCard($$anchor, $$props) {
       var i = first_child(fragment);
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$7, openSkill];
+      i.__keydown = [on_keydown$6, openSkill];
       var div_1 = sibling(i, 2);
       var h6 = sibling(child(div_1), 2);
       var text2 = child(h6);
@@ -7845,9 +7811,9 @@ function ActiveSkillCard($$anchor, $$props) {
       var node_1 = sibling(div_2, 2);
       {
         var consequent = ($$anchor3) => {
-          var div_3 = root_2$f();
+          var div_3 = root_2$g();
           each(div_3, 5, $specializationsStore, index, ($$anchor4, specialization) => {
-            var div_4 = root_3$c();
+            var div_4 = root_3$b();
             var div_5 = sibling(child(div_4), 2);
             var text_2 = child(div_5);
             var h1_1 = sibling(div_5, 2);
@@ -7926,9 +7892,9 @@ function ActiveSkillCard($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
+var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$m = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$f = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$x = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -7955,7 +7921,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
       var i = root_1$m();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$6, openSkill];
+      i.__keydown = [on_keydown$5, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
         () => localize(config().sheet.buyupgrades)
       ]);
@@ -7973,7 +7939,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
   each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$e();
+    var div_4 = root_2$f();
     var div_5 = sibling(child(div_4), 2);
     var text_2 = child(div_5);
     var h1_1 = sibling(div_5, 2);
@@ -7993,9 +7959,9 @@ function KnowledgeSkillCard($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
+var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$l = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_2$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root$w = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -8025,7 +7991,7 @@ function LanguageSkillCard($$anchor, $$props) {
       var i = root_1$l();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
-      i.__keydown = [on_keydown$5, openSkill];
+      i.__keydown = [on_keydown$4, openSkill];
       template_effect(($0) => set_attribute(i, "aria-label", $0), [
         () => localize(config().sheet.buyupgrades)
       ]);
@@ -8047,7 +8013,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var text_2 = child(h1_1);
   var div_5 = sibling(div_3, 2);
   each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_6 = root_2$d();
+    var div_6 = root_2$e();
     var div_7 = sibling(child(div_6), 2);
     var text_3 = child(div_7);
     var h1_2 = sibling(div_7, 2);
@@ -8682,11 +8648,11 @@ setPace_fn = function(freq, amp) {
     this.ecgAnimator.setAmplitude(amp);
   }
 };
-var root_2$c = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_2$d = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
 var root_1$j = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
-var root_3$b = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
-var on_keydown$4 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
+var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var on_keydown$3 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
 var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
 var root$r = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
@@ -8767,7 +8733,7 @@ function Health($$anchor, $$props) {
     var node_2 = sibling(input, 2);
     {
       var consequent = ($$anchor3) => {
-        var div_5 = root_2$c();
+        var div_5 = root_2$d();
         var h4 = child(div_5);
         var text2 = child(h4);
         template_effect(() => {
@@ -8797,7 +8763,7 @@ function Health($$anchor, $$props) {
   var div_6 = sibling(div_3, 2);
   var node_3 = sibling(child(div_6), 2);
   each(node_3, 16, () => Array(10), index, ($$anchor2, _, i) => {
-    var div_7 = root_3$b();
+    var div_7 = root_3$a();
     var input_1 = child(div_7);
     set_attribute(input_1, "id", `healthBox${i + 11}`);
     input_1.__change = (e) => toggle(i, false, e.target.checked);
@@ -8833,7 +8799,7 @@ function Health($$anchor, $$props) {
   });
   var a = sibling(node_3, 2);
   a.__click = incrementOverflow;
-  a.__keydown = [on_keydown$4, incrementOverflow];
+  a.__keydown = [on_keydown$3, incrementOverflow];
   var a_1 = sibling(a, 2);
   a_1.__click = decrementOverflow;
   a_1.__keydown = [on_keydown_1, decrementOverflow];
@@ -9092,7 +9058,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root_2$b = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -9217,7 +9183,7 @@ function CharacterSheetApp($$anchor, $$props) {
       each(node, 17, () => get$2(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
         let Comp = () => get$2($$item).comp;
         let props = () => get$2($$item).props;
-        var div = root_2$b();
+        var div = root_2$c();
         var div_1 = child(div);
         var div_2 = sibling(child(div_1), 2);
         var node_1 = child(div_2);
@@ -9272,106 +9238,257 @@ function NeonName($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var on_keydown$3 = (e, handleKeyToggle) => {
-  handleKeyToggle(e);
+const _NewsService = class _NewsService {
+  constructor() {
+    __privateAdd(this, _NewsService_instances);
+    __publicField(this, "activeBroadcasters", writable(/* @__PURE__ */ new Map()));
+    __publicField(this, "allFeeds", writable({}));
+    __publicField(this, "currentDisplayFrame", writable({ buffer: [], timestamp: Date.now() }));
+    __privateAdd(this, _feedBuffer, []);
+    __privateAdd(this, _currentIndices, /* @__PURE__ */ new Map());
+    __privateAdd(this, _maxVisible, 5);
+    __privateAdd(this, _lastBroadcasterIndex, -1);
+    __privateAdd(this, _tickerInterval, null);
+    __privateAdd(this, _frameUpdateInterval, null);
+    __privateAdd(this, _initialized, false);
+  }
+  static Instance() {
+    if (!__privateGet(this, _instance)) {
+      __privateSet(this, _instance, new _NewsService());
+    }
+    return __privateGet(this, _instance);
+  }
+  initialize() {
+    if (__privateGet(this, _initialized)) return;
+    __privateSet(this, _initialized, true);
+    __privateMethod(this, _NewsService_instances, setupSocket_fn).call(this);
+    __privateMethod(this, _NewsService_instances, startTickerLoop_fn).call(this);
+    __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
+    CONFIG.sr3e = CONFIG.sr3e || {};
+    CONFIG.sr3e.newsService = this;
+  }
+  destroy() {
+    if (__privateGet(this, _tickerInterval)) {
+      clearInterval(__privateGet(this, _tickerInterval));
+      __privateSet(this, _tickerInterval, null);
+    }
+    if (__privateGet(this, _frameUpdateInterval)) {
+      clearInterval(__privateGet(this, _frameUpdateInterval));
+      __privateSet(this, _frameUpdateInterval, null);
+    }
+    game.socket.off("module.sr3e");
+    __privateSet(this, _initialized, false);
+    if (CONFIG.sr3e && CONFIG.sr3e.newsService === this) {
+      CONFIG.sr3e.newsService = null;
+    }
+  }
 };
-var root_3$a = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
-var root_1$h = /* @__PURE__ */ template(`<div class="ticker"><div class="left-gradient"></div> <div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" ,="" area-label="News Feed"><!></div></div> <div class="right-gradient"></div></div>`);
+_feedBuffer = new WeakMap();
+_currentIndices = new WeakMap();
+_maxVisible = new WeakMap();
+_lastBroadcasterIndex = new WeakMap();
+_tickerInterval = new WeakMap();
+_frameUpdateInterval = new WeakMap();
+_initialized = new WeakMap();
+_instance = new WeakMap();
+_NewsService_instances = new WeakSet();
+setupSocket_fn = function() {
+  game.socket.on("module.sr3e", (data) => {
+    const { type, actorName, headlines } = data;
+    switch (type) {
+      case "syncBroadcast":
+        __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, actorName, headlines);
+        break;
+      case "stopBroadcast":
+        __privateMethod(this, _NewsService_instances, stopBroadcaster_fn).call(this, actorName);
+        break;
+      case "requestFrameSync":
+        __privateMethod(this, _NewsService_instances, sendFrameUpdate_fn).call(this);
+        break;
+    }
+  });
+};
+startTickerLoop_fn = function() {
+  __privateSet(this, _tickerInterval, setInterval(
+    () => {
+      __privateMethod(this, _NewsService_instances, updateTickerFrame_fn).call(this);
+    },
+    3e3
+  ));
+  __privateSet(this, _frameUpdateInterval, setInterval(
+    () => {
+      __privateMethod(this, _NewsService_instances, sendFrameUpdate_fn).call(this);
+    },
+    1e3
+  ));
+};
+loadActiveBroadcasters_fn = function() {
+  const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
+  allBroadcasters.forEach((broadcaster) => {
+    const headlines = broadcaster.system.rollingNews || [];
+    __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
+  });
+};
+updateTickerFrame_fn = function() {
+  __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
+  const buffer = [...__privateGet(this, _feedBuffer)];
+  const timestamp = Date.now();
+  this.currentDisplayFrame.set({ buffer, timestamp });
+};
+sendFrameUpdate_fn = function() {
+  const frame = get$1(this.currentDisplayFrame);
+  game.socket.emit("module.sr3e", {
+    type: "frameUpdate",
+    buffer: frame.buffer,
+    timestamp: frame.timestamp
+  });
+};
+receiveBroadcastSync_fn = function(actorName, headlines) {
+  const broadcasters = get$1(this.activeBroadcasters);
+  if (!headlines || headlines.length === 0) {
+    broadcasters.delete(actorName);
+    __privateGet(this, _currentIndices).delete(actorName);
+  } else {
+    broadcasters.set(actorName, headlines);
+    const currentIndex = __privateGet(this, _currentIndices).get(actorName) || 0;
+    __privateGet(this, _currentIndices).set(actorName, currentIndex % headlines.length);
+  }
+  this.activeBroadcasters.set(new Map(broadcasters));
+  __privateMethod(this, _NewsService_instances, updateFeedBuffer_fn).call(this);
+};
+stopBroadcaster_fn = function(actorName) {
+  const broadcasters = get$1(this.activeBroadcasters);
+  broadcasters.delete(actorName);
+  __privateGet(this, _currentIndices).delete(actorName);
+  this.activeBroadcasters.set(new Map(broadcasters));
+  __privateMethod(this, _NewsService_instances, updateFeedBuffer_fn).call(this);
+};
+pumpNextHeadline_fn = function() {
+  const broadcasters = get$1(this.activeBroadcasters);
+  if (broadcasters.size === 0) return null;
+  const broadcasterNames = Array.from(broadcasters.keys());
+  for (let offset = 0; offset < broadcasterNames.length; offset++) {
+    const index2 = (__privateGet(this, _lastBroadcasterIndex) + offset + 1) % broadcasterNames.length;
+    const broadcasterName = broadcasterNames[index2];
+    const headlines = broadcasters.get(broadcasterName);
+    if (!headlines || headlines.length === 0) continue;
+    const currentIndex = __privateGet(this, _currentIndices).get(broadcasterName) || 0;
+    const headline = headlines[currentIndex];
+    __privateGet(this, _currentIndices).set(broadcasterName, (currentIndex + 1) % headlines.length);
+    __privateSet(this, _lastBroadcasterIndex, index2);
+    return { sender: broadcasterName, headline };
+  }
+  return null;
+};
+fillFeedBuffer_fn = function(minLength = 10) {
+  const buffer = [...__privateGet(this, _feedBuffer)];
+  while (buffer.length < minLength) {
+    const nextHeadline = __privateMethod(this, _NewsService_instances, pumpNextHeadline_fn).call(this);
+    if (!nextHeadline) break;
+    buffer.push(nextHeadline);
+  }
+  __privateSet(this, _feedBuffer, buffer.slice(-__privateGet(this, _maxVisible)));
+  __privateMethod(this, _NewsService_instances, publishFeed_fn).call(this);
+};
+updateFeedBuffer_fn = function() {
+  const broadcasters = get$1(this.activeBroadcasters);
+  if (broadcasters.size === 0) {
+    __privateSet(this, _feedBuffer, []);
+    __privateMethod(this, _NewsService_instances, publishFeed_fn).call(this);
+    return;
+  }
+  __privateSet(this, _feedBuffer, __privateGet(this, _feedBuffer).filter((message) => broadcasters.has(message.sender) && broadcasters.get(message.sender).includes(message.headline)));
+  __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, __privateGet(this, _maxVisible));
+};
+publishFeed_fn = function() {
+  const feeds = {};
+  __privateGet(this, _feedBuffer).forEach((message) => {
+    feeds[message.sender] = feeds[message.sender] || [];
+    feeds[message.sender].push(message);
+  });
+  this.allFeeds.set(feeds);
+};
+__privateAdd(_NewsService, _instance, null);
+let NewsService = _NewsService;
+let newsServiceInstance = null;
+const getNewsService$1 = () => {
+  if (!newsServiceInstance) {
+    newsServiceInstance = NewsService.Instance();
+    newsServiceInstance.initialize();
+  }
+  return newsServiceInstance;
+};
+const broadcastNews = (actorName, headlines) => {
+  game.socket.emit("module.sr3e", { type: "syncBroadcast", actorName, headlines });
+};
+const stopBroadcast = (actorName) => {
+  game.socket.emit("module.sr3e", { type: "stopBroadcast", actorName });
+};
+var root_2$b = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
+var root_1$h = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
   push($$props, true);
-  let outer;
-  let inner;
+  let outer, inner;
+  let buffer = state(proxy([]));
+  let animationStart = Date.now();
+  let lastFrameTimestamp = 0;
   const SCROLL_SPEED = 100;
-  let visible = state(true);
-  let messages = [
-    "Welcome Chummer! You can toggle the newsfeed on and off using F2 on your keyboard...",
-    "Attribute points are uncapped, consult your core rule-book to find out what applies to your character...",
-    "GMs can create a broadcaster actor, to cusomize this news reel..."
-  ];
-  let newsFeed = state(proxy([messages]));
-  let storeManager2 = StoreManager.Subscribe($$props.actor);
-  const brooadCasters = storeManager2.GetBroadcastStore($$props.actor.id, "broadcasters", []);
-  const unsubscribe = brooadCasters.onBroadcast((msgs) => {
-    set(newsFeed, proxy(msgs));
-  });
-  onDestroy(() => {
-    unsubscribe();
-    StoreManager.Unsubscribe($$props.actor);
-  });
-  let resizeDebounce;
-  function debouncedSetOffsets() {
-    clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(
-      () => {
-        setOffsets();
-      },
-      150
-    );
+  function applyFrame(frame) {
+    if (!frame || frame.timestamp === lastFrameTimestamp) return;
+    lastFrameTimestamp = frame.timestamp;
+    set(buffer, proxy(frame.buffer.map((m) => `${m.sender}: "${m.headline}"`)));
+    animationStart = frame.timestamp;
+    tick().then(() => inner && requestAnimationFrame(setOffsets));
   }
   function setOffsets() {
-    if (!outer || !inner || messages.length === 0) return;
-    const app = document.querySelector(".window-header") || outer.closest(".window-header");
-    (app == null ? void 0 : app.offsetWidth) ?? outer.offsetWidth;
-    const halfWidth = inner.scrollWidth / 2;
-    const duration = halfWidth / SCROLL_SPEED;
+    if (!inner || !outer) return;
+    const fullWidth = inner.scrollWidth;
+    const duration = fullWidth / SCROLL_SPEED;
     const root2 = document.documentElement;
-    root2.style.setProperty("--marquee-half-width", `${halfWidth}px`);
+    root2.style.setProperty("--marquee-width", `${fullWidth}px`);
     root2.style.setProperty("--marquee-duration", `${duration}s`);
+    root2.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
   }
-  function handleKeyToggle(e) {
-    if (e.code === "F2") {
-      set(visible, !get$2(visible));
+  function handleFrameUpdate(data) {
+    if (data.type === "frameUpdate") {
+      applyFrame({
+        buffer: data.buffer,
+        timestamp: data.timestamp
+      });
     }
   }
   onMount(() => {
-    setOffsets();
-    const appHeader = document.querySelector(".window-header") || outer.closest(".window-header");
-    const resizeObserver = new ResizeObserver(debouncedSetOffsets);
-    if (appHeader) resizeObserver.observe(appHeader);
-    window.addEventListener("resize", debouncedSetOffsets);
-    window.addEventListener("keydown", handleKeyToggle);
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", debouncedSetOffsets);
-      window.removeEventListener("keydown", handleKeyToggle);
-    };
+    console.log("NewsFeed mounted, setting up listeners");
+    game.socket.on("module.sr3e", handleFrameUpdate);
+    const newsService = getNewsService$1();
+    const currentFrame = newsService.currentDisplayFrame;
+    if (currentFrame) {
+      const unsubscribe = currentFrame.subscribe((frame) => {
+        console.log("Frame update received:", frame);
+        applyFrame(frame);
+      });
+      return () => {
+        unsubscribe();
+        game.socket.off("module.sr3e", handleFrameUpdate);
+      };
+    }
+    game.socket.emit("module.sr3e", { type: "requestFrameSync" });
   });
   var div = root_1$h();
-  var div_1 = sibling(child(div), 2);
+  var div_1 = child(div);
   var div_2 = child(div_1);
-  div_2.__keydown = [on_keydown$3, handleKeyToggle];
-  var node = child(div_2);
-  {
-    var consequent = ($$anchor2) => {
-      var fragment = comment();
-      var node_1 = first_child(fragment);
-      each(
-        node_1,
-        17,
-        () => [
-          ...get$2(newsFeed).flat(),
-          ...get$2(newsFeed).flat()
-        ],
-        index,
-        ($$anchor3, msg) => {
-          var span = root_3$a();
-          var text2 = child(span);
-          template_effect(() => set_text(text2, get$2(msg)));
-          append($$anchor3, span);
-        }
-      );
-      append($$anchor2, fragment);
-    };
-    if_block(node, ($$render) => {
-      if (get$2(visible) && get$2(newsFeed).length > 0) $$render(consequent);
-    });
-  }
+  each(div_2, 21, () => get$2(buffer), index, ($$anchor2, message) => {
+    var span = root_2$b();
+    var text2 = child(span);
+    template_effect(() => set_text(text2, get$2(message)));
+    append($$anchor2, span);
+  });
   bind_this(div_2, ($$value) => inner = $$value, () => inner);
   bind_this(div_1, ($$value) => outer = $$value, () => outer);
+  event("animationiteration", div_2, () => game.socket.emit("module.sr3e", { type: "requestFrameSync" }));
   append($$anchor, div);
   pop();
 }
-delegate(["keydown"]);
 var root_1$g = /* @__PURE__ */ template(`<div class="point-container"><h1> </h1> <div> </div></div>`);
 var root$n = /* @__PURE__ */ template(`<div></div>`);
 function CreationPointList($$anchor, $$props) {
@@ -13360,8 +13477,9 @@ __publicField(CharacterCreationApp, "DEFAULT_OPTIONS", {
   }
 });
 async function displayCreationDialog(actor, options, userId) {
+  var _a;
   if (actor.type !== "character") return true;
-  Log.info("Running Character Dialog", displayCreationDialog.name);
+  if (!((_a = game.users.get(userId)) == null ? void 0 : _a.isSelf)) return true;
   const dialogResult = await _runCharacterCreationDialog(actor);
   if (!dialogResult) {
     console.log(`Character creation canceled for actor: ${actor.name}. Deleting actor.`);
@@ -13369,24 +13487,19 @@ async function displayCreationDialog(actor, options, userId) {
     return false;
   }
   actor.sheet.render(true);
-  Log.success("Character Dialog Completed", displayCreationDialog.name);
   return true;
 }
 async function _runCharacterCreationDialog(actor) {
   return new Promise((resolve) => {
     try {
-      const app = new CharacterCreationApp(
-        actor,
-        {
-          onSubmit: (result) => {
-            resolve(result);
-          },
-          onCancel: () => {
-            console.log("The character creation was canelled");
-            resolve(false);
-          }
+      const app = new CharacterCreationApp(actor, {
+        onSubmit: (result) => {
+          resolve(result);
+        },
+        onCancel: () => {
+          resolve(false);
         }
-      );
+      });
       app.render(true);
     } catch (e) {
       console.error("Failed to create character creation dialog:", e);
@@ -15005,10 +15118,13 @@ class BroadcasterModel extends foundry.abstract.TypeDataModel {
   }
 }
 function addHeadline(__1, headlineInput, $preparedNewsStore, preparedNewsStore) {
-  if (!get$2(headlineInput)) return ui.notifications.warn("Headline cannot be empty.");
+  if (!get$2(headlineInput).trim()) {
+    ui.notifications.warn("Headline cannot be empty.");
+    return;
+  }
   store_set(preparedNewsStore, proxy([
     ...$preparedNewsStore(),
-    get$2(headlineInput)
+    get$2(headlineInput).trim()
   ]));
   set(headlineInput, "");
 }
@@ -15027,29 +15143,48 @@ var root = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 function BroadcasterApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $preparedNewsStore = () => store_get(preparedNewsStore, "$preparedNewsStore", $$stores);
-  const $rollingNewsStore = () => store_get(rollingNewsStore, "$rollingNewsStore", $$stores);
   const $isBroadcastingStore = () => store_get(isBroadcastingStore, "$isBroadcastingStore", $$stores);
+  const $rollingNewsStore = () => store_get(rollingNewsStore, "$rollingNewsStore", $$stores);
+  const $preparedNewsStore = () => store_get(preparedNewsStore, "$preparedNewsStore", $$stores);
   let storeManager2 = StoreManager.Subscribe($$props.actor);
   onDestroy(() => {
+    unsubscribe();
     StoreManager.Unsubscribe($$props.actor);
   });
   let preparedNewsStore = storeManager2.GetRWStore("preparedNews");
-  let rollingNewsStore = storeManager2.GetBroadcastStore($$props.actor.id, "rollingNews", $$props.actor.system.rollingNews);
+  let rollingNewsStore = storeManager2.GetRWStore("rollingNews");
   let isBroadcastingStore = storeManager2.GetRWStore("isBroadcasting");
   let headlineInput = state("");
   let selectedPrepared = [];
   let selectedRolling = [];
+  const unsubscribe = rollingNewsStore.subscribe((currentRollingNews) => {
+    if ($isBroadcastingStore()) {
+      broadcastNews($$props.actor.name, currentRollingNews);
+    }
+  });
+  user_effect(() => {
+    if ($isBroadcastingStore()) {
+      broadcastNews($$props.actor.name, $rollingNewsStore());
+    } else {
+      stopBroadcast($$props.actor.name);
+    }
+  });
   function deleteHeadlines() {
-    if (!selectedPrepared.length) return ui.notifications.warn("Select at least one headline to delete.");
-    let headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore()[i]);
+    if (!selectedPrepared.length) {
+      ui.notifications.warn("Select at least one headline to delete.");
+      return;
+    }
+    const headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore()[i]);
     store_set(preparedNewsStore, proxy($preparedNewsStore().filter((_, i) => !selectedPrepared.includes(i))));
     store_set(rollingNewsStore, proxy($rollingNewsStore().filter((h) => !headlinesToDelete.includes(h))));
     selectedPrepared = [];
   }
   function moveToRolling() {
-    if (!selectedPrepared.length) return ui.notifications.warn("Select at least one headline to move.");
-    let moved = selectedPrepared.map((i) => $preparedNewsStore()[i]).filter(Boolean);
+    if (!selectedPrepared.length) {
+      ui.notifications.warn("Select at least one headline to move.");
+      return;
+    }
+    const moved = selectedPrepared.map((i) => $preparedNewsStore()[i]).filter(Boolean);
     store_set(preparedNewsStore, proxy($preparedNewsStore().filter((_, i) => !selectedPrepared.includes(i))));
     store_set(rollingNewsStore, proxy([
       ...$rollingNewsStore(),
@@ -15058,8 +15193,11 @@ function BroadcasterApp($$anchor, $$props) {
     selectedPrepared = [];
   }
   function moveToPrepared() {
-    if (!selectedRolling.length) return ui.notifications.warn("Select at least one headline to move.");
-    let moved = selectedRolling.map((i) => $rollingNewsStore()[i]).filter(Boolean);
+    if (!selectedRolling.length) {
+      ui.notifications.warn("Select at least one headline to move.");
+      return;
+    }
+    const moved = selectedRolling.map((i) => $rollingNewsStore()[i]).filter(Boolean);
     store_set(rollingNewsStore, proxy($rollingNewsStore().filter((_, i) => !selectedRolling.includes(i))));
     store_set(preparedNewsStore, proxy([
       ...$preparedNewsStore(),
@@ -15080,13 +15218,6 @@ function BroadcasterApp($$anchor, $$props) {
       $$props.actor.update({ name: newName });
     }
   }
-  let lastBroadcast = null;
-  user_effect(() => {
-    if ($isBroadcastingStore() && rollingNewsStore && $rollingNewsStore() !== lastBroadcast) {
-      rollingNewsStore.set($rollingNewsStore());
-      lastBroadcast = $rollingNewsStore();
-    }
-  });
   var fragment = root();
   var node = first_child(fragment);
   ItemSheetComponent(node, {
@@ -15291,6 +15422,10 @@ function configureProject() {
       }
     ]
   };
+  if (game.user && game.user.isGM && game.users.filter((u) => u.isGM).length === 1) {
+    const newsService = getNewsService();
+    console.log("NewsService initialized:", newsService);
+  }
   CONFIG.Actor.typeLabels = {
     broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
     character: localize(CONFIG.sr3e.sheet.playercharacter),
@@ -15479,6 +15614,15 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
   Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
+  Hooks.on("ready", () => {
+    const activeBroadcasters = game.actors.filter(
+      (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
+    );
+    activeBroadcasters.forEach((actor) => {
+      const headlines = actor.system.rollingNews ?? [];
+      broadcastNews(actor.name, headlines);
+    });
+  });
   Hooks.once(hooks.init, () => {
     configureProject();
     configureThemes();

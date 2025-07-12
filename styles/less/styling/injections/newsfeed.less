@@ -3,7 +3,7 @@
       transform: translateX(0%);
    }
    to {
-      transform: translateX(calc(-1 * var(--marquee-half-width)));
+      transform: translateX(calc(-1 * var(--marquee-width)));
    }
 }
 
@@ -97,7 +97,8 @@
          .marquee-inner {
             display: inline-flex;
             white-space: nowrap;
-            animation: marquee-move var(--marquee-duration, 30s) linear infinite;
+            animation: marquee-move var(--marquee-duration) linear infinite;
+            animation-delay: var(--marquee-delay);
             line-height: 0;
             margin: 0;
             text-shadow: 0 0 3px oklch(0% 0 0 / 0.35), 0 0 6px oklch(0% 0 0 / 0.25);

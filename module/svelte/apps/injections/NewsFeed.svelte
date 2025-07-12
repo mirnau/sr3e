@@ -1,104 +1,81 @@
 <script>
-   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
-   import { onDestroy, onMount } from "svelte";
+   import { onMount, tick } from "svelte";
+   import { getNewsService } from "../../../services/NewsService.svelte.js";
 
-   let outer;
-   let inner;
-   const SCROLL_SPEED = 100; // pixels per second
+   let outer, inner;
+   let buffer = $state([]);
+   let animationStart = Date.now();
+   let lastFrameTimestamp = 0;
 
-   let { actor } = $props();
+   const SCROLL_SPEED = 100;
 
-   let visible = $state(true);
-
-   let messages = [
-      "Welcome Chummer! You can toggle the newsfeed on and off using F2 on your keyboard...",
-      "Attribute points are uncapped, consult your core rule-book to find out what applies to your character...",
-      "GMs can create a broadcaster actor, to cusomize this news reel...",
-   ];
-   let newsFeed = $state([messages]);
-
-   let storeManager = StoreManager.Subscribe(actor);
-   const brooadCasters = storeManager.GetBroadcastStore(actor.id, "broadcasters", []);
-   const unsubscribe = brooadCasters.onBroadcast((msgs) => {
-      newsFeed = msgs;
-   });
-
-   onDestroy(() => {
-      unsubscribe();
-      StoreManager.Unsubscribe(actor);
-   });
-
-   let resizeDebounce;
-
-   function debouncedSetOffsets() {
-      clearTimeout(resizeDebounce);
-      resizeDebounce = setTimeout(() => {
-         setOffsets();
-      }, 150);
+   function applyFrame(frame) {
+      if (!frame || frame.timestamp === lastFrameTimestamp) return;
+      lastFrameTimestamp = frame.timestamp;
+      buffer = frame.buffer.map((m) => `${m.sender}: "${m.headline}"`);
+      animationStart = frame.timestamp;
+      tick().then(() => inner && requestAnimationFrame(setOffsets));
    }
 
    function setOffsets() {
-      if (!outer || !inner || messages.length === 0) return;
-
-      const app = document.querySelector(".window-header") || outer.closest(".window-header");
-      const appWidth = app?.offsetWidth ?? outer.offsetWidth;
-
-      const halfWidth = inner.scrollWidth / 2;
-      const duration = halfWidth / SCROLL_SPEED;
-
+      if (!inner || !outer) return;
+      const fullWidth = inner.scrollWidth;
+      const duration = fullWidth / SCROLL_SPEED;
       const root = document.documentElement;
-      root.style.setProperty("--marquee-half-width", `${halfWidth}px`);
+
+      root.style.setProperty("--marquee-width", `${fullWidth}px`);
       root.style.setProperty("--marquee-duration", `${duration}s`);
+      root.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
    }
 
-   function handleKeyToggle(e) {
-      // Ignore if something else is focused or if modifier keys are down
-      if (e.code === "F2") {
-         visible = !visible;
+   function handleFrameUpdate(data) {
+      if (data.type === "frameUpdate") {
+         applyFrame({ buffer: data.buffer, timestamp: data.timestamp });
       }
    }
 
    onMount(() => {
-      setOffsets();
-
-      const appHeader = document.querySelector(".window-header") || outer.closest(".window-header");
-      const resizeObserver = new ResizeObserver(debouncedSetOffsets);
-      if (appHeader) resizeObserver.observe(appHeader);
-
-      window.addEventListener("resize", debouncedSetOffsets);
-      window.addEventListener("keydown", handleKeyToggle);
-
-      return () => {
-         resizeObserver.disconnect();
-         window.removeEventListener("resize", debouncedSetOffsets);
-         window.removeEventListener("keydown", handleKeyToggle);
-      };
+      console.log("NewsFeed mounted, setting up listeners");
+      
+      // Listen for socket events
+      game.socket.on("module.sr3e", handleFrameUpdate);
+      
+      // Get initial frame from service
+      const newsService = getNewsService();
+      const currentFrame = newsService.currentDisplayFrame;
+      
+      if (currentFrame) {
+         // Subscribe to frame updates
+         const unsubscribe = currentFrame.subscribe((frame) => {
+            console.log("Frame update received:", frame);
+            applyFrame(frame);
+         });
+         
+         // Clean up subscription on destroy
+         return () => {
+            unsubscribe();
+            game.socket.off("module.sr3e", handleFrameUpdate);
+         };
+      }
+      
+      // Request initial sync
+      game.socket.emit("module.sr3e", { type: "requestFrameSync" });
    });
 </script>
 
 <div class="ticker">
-   <div class="left-gradient"></div>
    <div class="marquee-outer" bind:this={outer}>
-      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div
          class="marquee-inner"
          bind:this={inner}
-         onkeydown={(e) => {
-            handleKeyToggle(e);
-         }}
+         onanimationiteration={() => game.socket.emit("module.sr3e", { type: "requestFrameSync" })}
          role="status"
          aria-live="polite"
-         ,
-         area-label="News Feed"
+         aria-label="News Feed"
       >
-         {#if visible && newsFeed.length > 0}
-            {#each [...newsFeed.flat(), ...newsFeed.flat()] as msg}
-               <span class="marquee-item">
-                  {msg}
-               </span>
-            {/each}
-         {/if}
+         {#each buffer as message}
+            <span class="marquee-item">{message}</span>
+         {/each}
       </div>
    </div>
-   <div class="right-gradient"></div>
 </div>

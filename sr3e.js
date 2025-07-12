@@ -29,6 +29,7 @@ import SR3Edie from "./module/foundry/documents/SR3Edie.js";
 import SR3ERoll from "./module/foundry/documents/SR3ERoll.js";
 import BroadcasterModel from "./module/models/actor/BroadcasterModel.js";
 import BroadcasterActorSheet from "./module/foundry/sheets/BroadcasterActorSheet.js";
+import { NewsService, broadcastNews } from "./module/services/NewsService.svelte.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -77,6 +78,10 @@ function configureProject() {
       ],
    };
 
+   if (game.user && game.user.isGM && game.users.filter((u) => u.isGM).length === 1) {
+      const newsService = getNewsService();
+      console.log("NewsService initialized:", newsService);
+   }
    CONFIG.Actor.typeLabels = {
       broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
       character: localize(CONFIG.sr3e.sheet.playercharacter),
@@ -301,6 +306,17 @@ function registerHooks() {
 
    Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
    Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
+
+   Hooks.on("ready", () => {
+      const activeBroadcasters = game.actors.filter(
+         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
+      );
+
+      activeBroadcasters.forEach((actor) => {
+         const headlines = actor.system.rollingNews ?? [];
+         broadcastNews(actor.name, headlines);
+      });
+   });
 
    Hooks.once(hooks.init, () => {
       configureProject();

@@ -1,5 +1,6 @@
 <script>
    import { localize } from "../../services/utilities.js";
+   import { broadcastNews, stopBroadcast } from "../../services/NewsService.svelte.js";
    import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
    import Image from "./components/basic/Image.svelte";
    import { StoreManager, stores } from "../svelteHelpers/StoreManager.svelte.js";
@@ -10,51 +11,74 @@
 
    let storeManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
+      unsubscribe();
       StoreManager.Unsubscribe(actor);
    });
 
-   // Use ShallowStore and BroadcastStore as per instructions
    let preparedNewsStore = storeManager.GetRWStore("preparedNews");
-   let rollingNewsStore = storeManager.GetBroadcastStore(actor.id, "rollingNews", actor.system.rollingNews);
+   let rollingNewsStore = storeManager.GetRWStore("rollingNews");
    let isBroadcastingStore = storeManager.GetRWStore("isBroadcasting");
    let headlineInput = $state("");
    let selectedPrepared = [];
    let selectedRolling = [];
    let layoutMode = "single";
 
+   const unsubscribe = rollingNewsStore.subscribe((currentRollingNews) => {
+      if ($isBroadcastingStore) {
+         broadcastNews(actor.name, currentRollingNews);
+      }
+   });
+
+   $effect(() => {
+      if ($isBroadcastingStore) {
+         broadcastNews(actor.name, $rollingNewsStore);
+      } else {
+         stopBroadcast(actor.name);
+      }
+   });
+
    function addHeadline() {
-      if (!headlineInput) return ui.notifications.warn("Headline cannot be empty.");
-      $preparedNewsStore = [...$preparedNewsStore, headlineInput];
+      if (!headlineInput.trim()) {
+         ui.notifications.warn("Headline cannot be empty.");
+         return;
+      }
+      $preparedNewsStore = [...$preparedNewsStore, headlineInput.trim()];
       headlineInput = "";
    }
 
    function deleteHeadlines() {
-      if (!selectedPrepared.length) return ui.notifications.warn("Select at least one headline to delete.");
+      if (!selectedPrepared.length) {
+         ui.notifications.warn("Select at least one headline to delete.");
+         return;
+      }
 
-      let headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore[i]);
+      const headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore[i]);
       $preparedNewsStore = $preparedNewsStore.filter((_, i) => !selectedPrepared.includes(i));
       $rollingNewsStore = $rollingNewsStore.filter((h) => !headlinesToDelete.includes(h));
-
       selectedPrepared = [];
    }
 
    function moveToRolling() {
-      if (!selectedPrepared.length) return ui.notifications.warn("Select at least one headline to move.");
+      if (!selectedPrepared.length) {
+         ui.notifications.warn("Select at least one headline to move.");
+         return;
+      }
 
-      let moved = selectedPrepared.map((i) => $preparedNewsStore[i]).filter(Boolean);
+      const moved = selectedPrepared.map((i) => $preparedNewsStore[i]).filter(Boolean);
       $preparedNewsStore = $preparedNewsStore.filter((_, i) => !selectedPrepared.includes(i));
       $rollingNewsStore = [...$rollingNewsStore, ...moved.filter((h) => !$rollingNewsStore.includes(h))];
-
       selectedPrepared = [];
    }
 
    function moveToPrepared() {
-      if (!selectedRolling.length) return ui.notifications.warn("Select at least one headline to move.");
+      if (!selectedRolling.length) {
+         ui.notifications.warn("Select at least one headline to move.");
+         return;
+      }
 
-      let moved = selectedRolling.map((i) => $rollingNewsStore[i]).filter(Boolean);
+      const moved = selectedRolling.map((i) => $rollingNewsStore[i]).filter(Boolean);
       $rollingNewsStore = $rollingNewsStore.filter((_, i) => !selectedRolling.includes(i));
       $preparedNewsStore = [...$preparedNewsStore, ...moved.filter((h) => !$preparedNewsStore.includes(h))];
-
       selectedRolling = [];
    }
 
@@ -72,14 +96,6 @@
          actor.update({ name: newName });
       }
    }
-
-   let lastBroadcast = null;
-   $effect(() => {
-      if ($isBroadcastingStore && rollingNewsStore && $rollingNewsStore !== lastBroadcast) {
-         rollingNewsStore.set($rollingNewsStore);
-         lastBroadcast = $rollingNewsStore;
-      }
-   });
 </script>
 
 <ItemSheetComponent>
@@ -108,6 +124,7 @@
       </div>
    </div>
 </ItemSheetComponent>
+
 <ItemSheetComponent>
    <div class="news-input">
       <input type="text" bind:value={headlineInput} placeholder="Write a headline" />
@@ -127,6 +144,7 @@
       </div>
    </div>
 </ItemSheetComponent>
+
 <ItemSheetComponent>
    <div class="list-box">
       <h3>Prepared Headlines</h3>
@@ -167,4 +185,5 @@
       </select>
    </div>
 </ItemSheetComponent>
+
 <JournalViewer document={actor} {config} />

@@ -181,40 +181,4 @@ export class StoreManager {
 
       return this.#persistentStore[flag];
    }
-
-   //how to brodcast
-   //const bc = manager.GetBroadcastStore(actor.id, "broadcasters", []);
-   //bc.set(newMsgList);
-
-   #triggerCallbacks(docId, name, value) {
-      const subs = this.#actorSubscriptions[docId]?.[name];
-      if (subs) subs.forEach((fn) => fn(value));
-   }
-
-   GetBroadcastStore(docId, storeName, initialValue = null) {
-      this.GetShallowStore(docId, storeName, initialValue);
-      const store = this.#actorStores[docId][storeName];
-
-      return {
-         subscribe: store.subscribe,
-         set: (v) => {
-            store.set(v);
-            this.#triggerCallbacks(docId, storeName, v);
-         },
-         update: (fn) => {
-            store.update(fn);
-            this.#triggerCallbacks(docId, storeName, get(store));
-         },
-         onBroadcast: (cb) => {
-            this.#actorSubscriptions[docId] ??= {};
-            this.#actorSubscriptions[docId][storeName] ??= [];
-            this.#actorSubscriptions[docId][storeName].push(cb);
-            return () => {
-               this.#actorSubscriptions[docId][storeName] = this.#actorSubscriptions[docId][storeName].filter(
-                  (fn) => fn !== cb
-               );
-            };
-         },
-      };
-   }
 }
