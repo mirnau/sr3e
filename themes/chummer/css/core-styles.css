@@ -2480,7 +2480,7 @@
   }
   @keyframes marquee-move {
     from {
-      transform: translateX(var(--marquee-outer-width));
+      transform: translateX(calc(var(--ticker-width) * 1.5));
     }
     to {
       transform: translateX(calc(-1 * var(--marquee-width)));
@@ -2587,14 +2587,6 @@
   }
   .window-header.sr3e-actor-header .header-control:first-of-type {
     margin-left: 0;
-  }
-  .marquee-measurer {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-    white-space: nowrap;
-    visibility: hidden;
-    font: inherit;
   }
   .roll-composer-container {
     transform: translateZ(0);

@@ -22,6 +22,7 @@
    let selectedPrepared = [];
    let selectedRolling = [];
    let layoutMode = "single";
+   let isEditing = $state(false);
 
    const unsubscribe = rollingNewsStore.subscribe((currentRollingNews) => {
       if ($isBroadcastingStore) {
@@ -38,44 +39,40 @@
    });
 
    function addHeadline() {
-      if (!headlineInput.trim()) {
-         ui.notifications.warn("Headline cannot be empty.");
-         return;
+      const trimmedInput = headlineInput.trim();
+      if (isEditing && selectedPrepared.length === 1) {
+         // Update existing headline
+         const index = selectedPrepared[0];
+         $preparedNewsStore[index] = trimmedInput;
+         $preparedNewsStore = [...$preparedNewsStore];
+         isEditing = false;
+         selectedPrepared = [];
+      } else {
+         // Add new headline
+         $preparedNewsStore = [...$preparedNewsStore, trimmedInput];
       }
-      $preparedNewsStore = [...$preparedNewsStore, headlineInput.trim()];
       headlineInput = "";
    }
 
    function deleteHeadlines() {
-      if (!selectedPrepared.length) {
-         ui.notifications.warn("Select at least one headline to delete.");
-         return;
-      }
-
       const headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore[i]);
       $preparedNewsStore = $preparedNewsStore.filter((_, i) => !selectedPrepared.includes(i));
       $rollingNewsStore = $rollingNewsStore.filter((h) => !headlinesToDelete.includes(h));
       selectedPrepared = [];
+      headlineInput = "";
+      isEditing = false;
    }
 
    function moveToRolling() {
-      if (!selectedPrepared.length) {
-         ui.notifications.warn("Select at least one headline to move.");
-         return;
-      }
-
       const moved = selectedPrepared.map((i) => $preparedNewsStore[i]).filter(Boolean);
       $preparedNewsStore = $preparedNewsStore.filter((_, i) => !selectedPrepared.includes(i));
       $rollingNewsStore = [...$rollingNewsStore, ...moved.filter((h) => !$rollingNewsStore.includes(h))];
       selectedPrepared = [];
+      headlineInput = "";
+      isEditing = false;
    }
 
    function moveToPrepared() {
-      if (!selectedRolling.length) {
-         ui.notifications.warn("Select at least one headline to move.");
-         return;
-      }
-
       const moved = selectedRolling.map((i) => $rollingNewsStore[i]).filter(Boolean);
       $rollingNewsStore = $rollingNewsStore.filter((_, i) => !selectedRolling.includes(i));
       $preparedNewsStore = [...$preparedNewsStore, ...moved.filter((h) => !$preparedNewsStore.includes(h))];
@@ -84,9 +81,11 @@
 
    function updateSelectedHeadline() {
       if (selectedPrepared.length === 1) {
-         headlineInput = $preparedNewsStore[selectedPrepared[0]] ?? "";
+         headlineInput = $preparedNewsStore[selectedPrepared[0]];
+         isEditing = true;
       } else {
          headlineInput = "";
+         isEditing = false;
       }
    }
 
@@ -127,10 +126,20 @@
 
 <ItemSheetComponent>
    <div class="news-input">
-      <input type="text" bind:value={headlineInput} placeholder="Write a headline" />
+      <input 
+         type="text" 
+         bind:value={headlineInput} 
+         placeholder={isEditing ? "Edit headline" : "Write a headline"}
+      />
       <div class="buttons-vertical-distribution">
-         <button type="button" class="link-button" title="Add Headline" aria-label="Add Headline" onclick={addHeadline}>
-            <i class="fas fa-plus"></i>
+         <button 
+            type="button" 
+            class="link-button" 
+            title={isEditing ? "Update Headline" : "Add Headline"} 
+            aria-label={isEditing ? "Update Headline" : "Add Headline"} 
+            onclick={addHeadline}
+         >
+            <i class="fas {isEditing ? 'fa-save' : 'fa-plus'}"></i>
          </button>
          <button
             type="button"

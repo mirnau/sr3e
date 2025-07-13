@@ -9495,6 +9495,7 @@ checkControllerHealth_fn = function() {
 };
 scheduleNextFrame_fn = function() {
   if (!__privateGet(this, _isController)) return;
+  __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
   __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
   if (__privateGet(this, _feedBuffer).length === 0) {
     clearTimeout(__privateGet(this, _nextTick));
@@ -9533,9 +9534,52 @@ receiveFrameUpdate_fn = function(buffer, timestamp, duration) {
   this.currentDisplayFrame.set({ buffer, timestamp, duration });
 };
 guessDuration_fn = function(buffer) {
-  if (buffer.length === 0) return this.DEFAULT_MS;
-  const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
-  return Math.max(Math.ceil(totalPx / this.SCROLL_SPEED * 1e3), this.DEFAULT_MS);
+  if (!Array.isArray(buffer) || buffer.length === 0) return this.DEFAULT_MS;
+  const FONT_SIZE_PX = 24;
+  const calculateTextWidth = (text2 = "") => {
+    let totalWidth = 0;
+    for (const char of text2) {
+      const code = char.codePointAt(0);
+      if (code >= 19968 && code <= 40959 || // CJK Unified Ideographs
+      code >= 13312 && code <= 19903 || // CJK Extension A
+      code >= 12352 && code <= 12447 || // Hiragana
+      code >= 12448 && code <= 12543 || // Katakana
+      code >= 44032 && code <= 55215) {
+        totalWidth += FONT_SIZE_PX * 1;
+      } else if (code >= 1024 && code <= 1279) {
+        totalWidth += FONT_SIZE_PX * 0.75;
+      } else if (code >= 1424 && code <= 1535 || // Hebrew
+      code >= 1536 && code <= 1791) {
+        totalWidth += FONT_SIZE_PX * 0.65;
+      } else if (code >= 3584 && code <= 3711) {
+        totalWidth += FONT_SIZE_PX * 0.6;
+      } else if (code >= 2304 && code <= 2431) {
+        totalWidth += FONT_SIZE_PX * 0.7;
+      } else if ("iltfj".includes(char)) {
+        totalWidth += FONT_SIZE_PX * 0.4;
+      } else if ("wmMW".includes(char)) {
+        totalWidth += FONT_SIZE_PX * 1.2;
+      } else if (code < 128) {
+        totalWidth += FONT_SIZE_PX * 0.75;
+      } else {
+        totalWidth += FONT_SIZE_PX * 0.8;
+      }
+    }
+    return totalWidth;
+  };
+  const marqueeWidth = buffer.reduce(
+    (sum, msg) => {
+      const senderWidth = calculateTextWidth(msg.sender);
+      const headlineWidth = calculateTextWidth(msg.headline);
+      const itemPadding = 64;
+      return sum + senderWidth + headlineWidth + itemPadding;
+    },
+    0
+  );
+  const estimatedTickerWidth = this.ESTIMATED_TICKER_WIDTH || 400;
+  const totalDistance = estimatedTickerWidth + marqueeWidth;
+  const duration = totalDistance / this.SCROLL_SPEED * 1e3;
+  return Math.max(Math.ceil(duration), this.DEFAULT_MS);
 };
 handleStateSyncRequest_fn = function(requestingUserId) {
   var _a;
@@ -9649,12 +9693,12 @@ derived(() => {
   return $store.subscribe(set2);
 });
 var root_1$h = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
-var root$o = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"><div class="marquee-measurer" aria-hidden="true"></div> <!></div></div></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
   push($$props, true);
   const SCROLL_SPEED = 100;
   const NewsService2 = getNewsService();
-  let measurer;
+  let ticker;
   let outer;
   let inner;
   let buffer = state(proxy([]));
@@ -9684,19 +9728,12 @@ function NewsFeed($$anchor, $$props) {
     lastFrameTimestamp = frame.timestamp;
     animationStart = frame.timestamp;
     set(buffer, proxy(frame.buffer.map((m) => (m == null ? void 0 : m.sender) && (m == null ? void 0 : m.headline) ? `${m.sender}: "${m.headline}"` : String(m))));
-    tick().then(() => {
-      const outerWidth = outer.clientWidth;
-      document.documentElement.style.setProperty("--marquee-outer-width", `${outerWidth}px`);
-      if (!measurer) return;
-      const fullText = get$2(buffer).join("   ");
-      measurer.textContent = fullText;
-      const totalPx = measurer.scrollWidth;
-      const duration = Math.max(totalPx / SCROLL_SPEED * 1e3, 5e3);
-      document.documentElement.style.setProperty("--marquee-width", `${totalPx}px`);
-      document.documentElement.style.setProperty("--marquee-duration", `${duration / 1e3}s`);
-      document.documentElement.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
-      restartAnimation();
-    });
+    if (NewsService2.isController) {
+      game.socket.emit("module.sr3e", { type: "forceResync" });
+    }
+    const tickerWidth = ticker.clientWidth;
+    document.documentElement.style.setProperty("--ticker-width", `${tickerWidth}px`);
+    restartAnimation();
   }
   onMount(() => {
     console.log("NewsFeed: Mounted");
@@ -9714,10 +9751,7 @@ function NewsFeed($$anchor, $$props) {
   var div = root$o();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  bind_this(div_3, ($$value) => measurer = $$value, () => measurer);
-  var node = sibling(div_3, 2);
-  each(node, 17, () => get$2(buffer), index, ($$anchor2, line) => {
+  each(div_2, 21, () => get$2(buffer), index, ($$anchor2, line) => {
     var span = root_1$h();
     var text2 = child(span);
     template_effect(() => set_text(text2, get$2(line)));
@@ -9725,6 +9759,7 @@ function NewsFeed($$anchor, $$props) {
   });
   bind_this(div_2, ($$value) => inner = $$value, () => inner);
   bind_this(div_1, ($$value) => outer = $$value, () => outer);
+  bind_this(div, ($$value) => ticker = $$value, () => ticker);
   append($$anchor, div);
   pop();
 }
@@ -15356,17 +15391,6 @@ class BroadcasterModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
-function addHeadline(__1, headlineInput, $preparedNewsStore, preparedNewsStore) {
-  if (!get$2(headlineInput).trim()) {
-    ui.notifications.warn("Headline cannot be empty.");
-    return;
-  }
-  store_set(preparedNewsStore, proxy([
-    ...$preparedNewsStore(),
-    get$2(headlineInput).trim()
-  ]));
-  set(headlineInput, "");
-}
 var on_keydown = (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -15374,7 +15398,7 @@ var on_keydown = (e) => {
   }
 };
 var root_1 = /* @__PURE__ */ template(`<div class="broadcaster-info"><!> <div class="broadcaster-control"><div class="editable-actor-name"><h1 class="no-margin" contenteditable="true"> </h1></div> <div class="broadcast-toggle"><p>Broadcasting:</p> <input type="checkbox" id="broadcasting-toggle" class="toggle-input"></div></div></div>`);
-var root_2 = /* @__PURE__ */ template(`<div class="news-input"><input type="text" placeholder="Write a headline"> <div class="buttons-vertical-distribution"><button type="button" class="link-button" title="Add Headline" aria-label="Add Headline"><i class="fas fa-plus"></i></button> <button type="button" class="link-button" title="Delete Headline" aria-label="Delete Headline"><i class="fas fa-trash-can"></i></button></div></div>`);
+var root_2 = /* @__PURE__ */ template(`<div class="news-input"><input type="text"> <div class="buttons-vertical-distribution"><button type="button" class="link-button"><i></i></button> <button type="button" class="link-button" title="Delete Headline" aria-label="Delete Headline"><i class="fas fa-trash-can"></i></button></div></div>`);
 var root_4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3 = /* @__PURE__ */ template(`<div class="list-box"><h3>Prepared Headlines</h3> <select size="5" multiple></select></div> <div class="buttons-vertical-distribution"><button type="button" class="link-button" title="Move to Rolling News" aria-label="Move to Rolling News"><i class="fas fa-arrow-down"></i></button> <button type="button" class="link-button" title="Move to Prepared News" aria-label="Move to Prepared News"><i class="fas fa-arrow-up"></i></button></div> <div class="list-box"><h3>Rolling Headlines</h3> <select size="5" multiple></select></div>`, 1);
@@ -15396,6 +15420,7 @@ function BroadcasterApp($$anchor, $$props) {
   let headlineInput = state("");
   let selectedPrepared = [];
   let selectedRolling = [];
+  let isEditing = state(false);
   const unsubscribe = rollingNewsStore.subscribe((currentRollingNews) => {
     if ($isBroadcastingStore()) {
       broadcastNews($$props.actor.name, currentRollingNews);
@@ -15408,21 +15433,28 @@ function BroadcasterApp($$anchor, $$props) {
       stopBroadcast($$props.actor.name);
     }
   });
-  function deleteHeadlines() {
-    if (!selectedPrepared.length) {
-      ui.notifications.warn("Select at least one headline to delete.");
-      return;
+  function addHeadline() {
+    const trimmedInput = get$2(headlineInput).trim();
+    if (get$2(isEditing) && selectedPrepared.length === 1) {
+      const index2 = selectedPrepared[0];
+      store_mutate(preparedNewsStore, untrack($preparedNewsStore)[index2] = trimmedInput, untrack($preparedNewsStore));
+      store_set(preparedNewsStore, proxy([...$preparedNewsStore()]));
+      set(isEditing, false);
+      selectedPrepared = [];
+    } else {
+      store_set(preparedNewsStore, proxy([...$preparedNewsStore(), trimmedInput]));
     }
+    set(headlineInput, "");
+  }
+  function deleteHeadlines() {
     const headlinesToDelete = selectedPrepared.map((i) => $preparedNewsStore()[i]);
     store_set(preparedNewsStore, proxy($preparedNewsStore().filter((_, i) => !selectedPrepared.includes(i))));
     store_set(rollingNewsStore, proxy($rollingNewsStore().filter((h) => !headlinesToDelete.includes(h))));
     selectedPrepared = [];
+    set(headlineInput, "");
+    set(isEditing, false);
   }
   function moveToRolling() {
-    if (!selectedPrepared.length) {
-      ui.notifications.warn("Select at least one headline to move.");
-      return;
-    }
     const moved = selectedPrepared.map((i) => $preparedNewsStore()[i]).filter(Boolean);
     store_set(preparedNewsStore, proxy($preparedNewsStore().filter((_, i) => !selectedPrepared.includes(i))));
     store_set(rollingNewsStore, proxy([
@@ -15430,12 +15462,10 @@ function BroadcasterApp($$anchor, $$props) {
       ...moved.filter((h) => !$rollingNewsStore().includes(h))
     ]));
     selectedPrepared = [];
+    set(headlineInput, "");
+    set(isEditing, false);
   }
   function moveToPrepared() {
-    if (!selectedRolling.length) {
-      ui.notifications.warn("Select at least one headline to move.");
-      return;
-    }
     const moved = selectedRolling.map((i) => $rollingNewsStore()[i]).filter(Boolean);
     store_set(rollingNewsStore, proxy($rollingNewsStore().filter((_, i) => !selectedRolling.includes(i))));
     store_set(preparedNewsStore, proxy([
@@ -15446,9 +15476,11 @@ function BroadcasterApp($$anchor, $$props) {
   }
   function updateSelectedHeadline() {
     if (selectedPrepared.length === 1) {
-      set(headlineInput, proxy($preparedNewsStore()[selectedPrepared[0]] ?? ""));
+      set(headlineInput, proxy($preparedNewsStore()[selectedPrepared[0]]));
+      set(isEditing, true);
     } else {
       set(headlineInput, "");
+      set(isEditing, false);
     }
   }
   function commitName(event2) {
@@ -15488,14 +15520,16 @@ function BroadcasterApp($$anchor, $$props) {
       var input_1 = child(div_4);
       var div_5 = sibling(input_1, 2);
       var button = child(div_5);
-      button.__click = [
-        addHeadline,
-        headlineInput,
-        $preparedNewsStore,
-        preparedNewsStore
-      ];
+      button.__click = addHeadline;
+      var i_1 = child(button);
       var button_1 = sibling(button, 2);
       button_1.__click = deleteHeadlines;
+      template_effect(() => {
+        set_attribute(input_1, "placeholder", get$2(isEditing) ? "Edit headline" : "Write a headline");
+        set_attribute(button, "title", get$2(isEditing) ? "Update Headline" : "Add Headline");
+        set_attribute(button, "aria-label", get$2(isEditing) ? "Update Headline" : "Add Headline");
+        set_class(i_1, `fas ${(get$2(isEditing) ? "fa-save" : "fa-plus") ?? ""}`);
+      });
       bind_value(input_1, () => get$2(headlineInput), ($$value) => set(headlineInput, $$value));
       append($$anchor2, div_4);
     }

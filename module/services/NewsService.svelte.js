@@ -242,6 +242,8 @@ export class NewsService {
    #scheduleNextFrame() {
       if (!this.#isController) return;
 
+      this.#loadActiveBroadcasters();
+
       this.#fillFeedBuffer(10);
 
       if (this.#feedBuffer.length === 0) {
@@ -258,6 +260,7 @@ export class NewsService {
       const frame = { buffer, timestamp: startTime, duration };
 
       this.currentDisplayFrame.set(frame);
+
       game.socket.emit("module.sr3e", {
          type: "frameUpdate",
          buffer,
@@ -281,9 +284,85 @@ export class NewsService {
    }
 
    #guessDuration(buffer) {
-      if (buffer.length === 0) return this.DEFAULT_MS;
-      const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
-      return Math.max(Math.ceil((totalPx / this.SCROLL_SPEED) * 1000), this.DEFAULT_MS);
+      if (!Array.isArray(buffer) || buffer.length === 0) return this.DEFAULT_MS;
+
+      const FONT_SIZE_PX = 24; // 1.5rem = 24px typically
+
+      const calculateTextWidth = (text = "") => {
+         let totalWidth = 0;
+
+         for (const char of text) {
+            const code = char.codePointAt(0);
+
+            // CJK (Chinese, Japanese, Korean) - full width
+            if (
+               (code >= 0x4e00 && code <= 0x9fff) || // CJK Unified Ideographs
+               (code >= 0x3400 && code <= 0x4dbf) || // CJK Extension A
+               (code >= 0x3040 && code <= 0x309f) || // Hiragana
+               (code >= 0x30a0 && code <= 0x30ff) || // Katakana
+               (code >= 0xac00 && code <= 0xd7af)
+            ) {
+               // Hangul
+               totalWidth += FONT_SIZE_PX * 1.0; // Full width
+            }
+            // Cyrillic
+            else if (code >= 0x0400 && code <= 0x04ff) {
+               totalWidth += FONT_SIZE_PX * 0.75; // Similar to Latin
+            }
+            // Arabic/Hebrew (RTL)
+            else if (
+               (code >= 0x0590 && code <= 0x05ff) || // Hebrew
+               (code >= 0x0600 && code <= 0x06ff)
+            ) {
+               // Arabic
+               totalWidth += FONT_SIZE_PX * 0.65; // Often condensed
+            }
+            // Thai, Devanagari, etc.
+            else if (code >= 0x0e00 && code <= 0x0e7f) {
+               // Thai
+               totalWidth += FONT_SIZE_PX * 0.6;
+            } else if (code >= 0x0900 && code <= 0x097f) {
+               // Devanagari
+               totalWidth += FONT_SIZE_PX * 0.7;
+            }
+            // Latin narrow characters
+            else if ("iltfj".includes(char)) {
+               totalWidth += FONT_SIZE_PX * 0.4;
+            }
+            // Latin wide characters
+            else if ("wmMW".includes(char)) {
+               totalWidth += FONT_SIZE_PX * 1.2;
+            }
+            // Default Latin
+            else if (code < 0x0080) {
+               totalWidth += FONT_SIZE_PX * 0.75;
+            }
+            // Fallback for other scripts
+            else {
+               totalWidth += FONT_SIZE_PX * 0.8;
+            }
+         }
+
+         return totalWidth;
+      };
+
+      // Calculate total content width
+      const marqueeWidth = buffer.reduce((sum, msg) => {
+         const senderWidth = calculateTextWidth(msg.sender);
+         const headlineWidth = calculateTextWidth(msg.headline);
+         const itemPadding = 64; // 2rem left + 2rem right
+         return sum + senderWidth + headlineWidth + itemPadding;
+      }, 0);
+
+      // Estimated ticker container width
+      const estimatedTickerWidth = this.ESTIMATED_TICKER_WIDTH || 400;
+
+      // Total animation distance: from ticker-width to -marquee-width
+      const totalDistance = estimatedTickerWidth + marqueeWidth;
+
+      const duration = (totalDistance / this.SCROLL_SPEED) * 1000;
+
+      return Math.max(Math.ceil(duration), this.DEFAULT_MS);
    }
 
    #handleStateSyncRequest(requestingUserId) {
@@ -425,8 +504,6 @@ export const stopBroadcast = (actorName) => {
       actorName,
    });
 };
-
-
 
 export const currentDisplayFrame = derived(
    () => CONFIG.sr3e?.newsService?.currentDisplayFrame,
