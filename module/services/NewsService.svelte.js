@@ -5,7 +5,7 @@ console.log(
    performance.now().toFixed(1)
 );
 
-import { writable, get } from "svelte/store";
+import { writable, get, derived } from "svelte/store";
 
 export class NewsService {
    activeBroadcasters = writable(new Map());
@@ -426,8 +426,7 @@ export const stopBroadcast = (actorName) => {
    });
 };
 
-// NewsService.svelte.js
-import { derived } from "svelte/store";
+
 
 export const currentDisplayFrame = derived(
    () => CONFIG.sr3e?.newsService?.currentDisplayFrame,

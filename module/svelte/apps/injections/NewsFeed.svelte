@@ -1,10 +1,11 @@
 <script lang="ts">
-   import { onMount } from "svelte";
+   import { onMount, tick } from "svelte";
    import { getNewsService } from "../../../services/NewsService.svelte.js";
 
    const SCROLL_SPEED = 100;
    const NewsService = getNewsService();
 
+   let measurer;
    let outer;
    let inner;
    let buffer = $state([]);
@@ -43,13 +44,25 @@
       animationStart = frame.timestamp;
       buffer = frame.buffer.map((m) => (m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m)));
 
-      if (NewsService.isController) {
-         game.socket.emit("module.sr3e", {
-            type: "forceResync",
-         });
-      }
+      tick().then(() => {
+         
+         const outerWidth = outer.clientWidth;
+         document.documentElement.style.setProperty("--marquee-outer-width", `${outerWidth}px`);
+         
+         if (!measurer) return;
+         
+         const fullText = buffer.join("   "); // add spacing between items
+         measurer.textContent = fullText;
 
-      restartAnimation();
+         const totalPx = measurer.scrollWidth;
+         const duration = Math.max((totalPx / SCROLL_SPEED) * 1000, 5000); // or your DEFAULT_MS
+
+         document.documentElement.style.setProperty("--marquee-width", `${totalPx}px`);
+         document.documentElement.style.setProperty("--marquee-duration", `${duration / 1000}s`);
+         document.documentElement.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
+
+         restartAnimation();
+      });
    }
 
    onMount(() => {
@@ -72,6 +85,7 @@
 <div class="ticker">
    <div class="marquee-outer" bind:this={outer}>
       <div class="marquee-inner" bind:this={inner} role="status" aria-live="polite" aria-label="News Feed">
+         <div class="marquee-measurer" bind:this={measurer} aria-hidden="true"></div>
          {#each buffer as line}
             <span class="marquee-item">{line}</span>
          {/each}

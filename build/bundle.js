@@ -9649,11 +9649,12 @@ derived(() => {
   return $store.subscribe(set2);
 });
 var root_1$h = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
-var root$o = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"><div class="marquee-measurer" aria-hidden="true"></div> <!></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
   push($$props, true);
   const SCROLL_SPEED = 100;
   const NewsService2 = getNewsService();
+  let measurer;
   let outer;
   let inner;
   let buffer = state(proxy([]));
@@ -9683,10 +9684,19 @@ function NewsFeed($$anchor, $$props) {
     lastFrameTimestamp = frame.timestamp;
     animationStart = frame.timestamp;
     set(buffer, proxy(frame.buffer.map((m) => (m == null ? void 0 : m.sender) && (m == null ? void 0 : m.headline) ? `${m.sender}: "${m.headline}"` : String(m))));
-    if (NewsService2.isController) {
-      game.socket.emit("module.sr3e", { type: "forceResync" });
-    }
-    restartAnimation();
+    tick().then(() => {
+      const outerWidth = outer.clientWidth;
+      document.documentElement.style.setProperty("--marquee-outer-width", `${outerWidth}px`);
+      if (!measurer) return;
+      const fullText = get$2(buffer).join("   ");
+      measurer.textContent = fullText;
+      const totalPx = measurer.scrollWidth;
+      const duration = Math.max(totalPx / SCROLL_SPEED * 1e3, 5e3);
+      document.documentElement.style.setProperty("--marquee-width", `${totalPx}px`);
+      document.documentElement.style.setProperty("--marquee-duration", `${duration / 1e3}s`);
+      document.documentElement.style.setProperty("--marquee-delay", `-${Date.now() - animationStart}ms`);
+      restartAnimation();
+    });
   }
   onMount(() => {
     console.log("NewsFeed: Mounted");
@@ -9704,7 +9714,10 @@ function NewsFeed($$anchor, $$props) {
   var div = root$o();
   var div_1 = child(div);
   var div_2 = child(div_1);
-  each(div_2, 21, () => get$2(buffer), index, ($$anchor2, line) => {
+  var div_3 = child(div_2);
+  bind_this(div_3, ($$value) => measurer = $$value, () => measurer);
+  var node = sibling(div_3, 2);
+  each(node, 17, () => get$2(buffer), index, ($$anchor2, line) => {
     var span = root_1$h();
     var text2 = child(span);
     template_effect(() => set_text(text2, get$2(line)));

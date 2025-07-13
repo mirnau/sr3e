@@ -1,6 +1,6 @@
 @keyframes marquee-move {
    from {
-      transform: translateX(0%);
+      transform: translateX(var(--marquee-outer-width));
    }
    to {
       transform: translateX(calc(-1 * var(--marquee-width)));
@@ -144,4 +144,13 @@
          margin-left: 0;
       }
    }
+}
+
+.marquee-measurer {
+   position: absolute;
+   top: -9999px;
+   left: -9999px;
+   white-space: nowrap;
+   visibility: hidden;
+   font: inherit;
 }
