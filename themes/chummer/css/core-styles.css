@@ -2518,6 +2518,7 @@
     background: linear-gradient(to right, #ff2090 0%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0) 100%);
   }
   .window-header.sr3e-actor-header .ticker .marquee-outer {
+    height: 100%;
     overflow: hidden;
     position: relative;
     flex: 1 1 auto;

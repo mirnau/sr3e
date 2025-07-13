@@ -34,6 +34,13 @@ export class NewsService {
    HEARTBEAT_INTERVAL = 5000;
    ELECTION_DELAY = 1000;
 
+   #defaultMessages = [
+   { sender: "System", headline: "Please stand by." },
+   { sender: "System", headline: "Waiting for broadcast..." },
+   { sender: "System", headline: "No active news sources." },
+];
+
+
    static #instance = null;
 
    static Instance() {
@@ -425,19 +432,28 @@ export class NewsService {
       return null;
    }
 
-   #fillFeedBuffer(minLength = 10) {
-      const buffer = [...this.#feedBuffer];
-      const broadcasters = get(this.activeBroadcasters);
+#fillFeedBuffer(minLength = 10) {
+   const buffer = [...this.#feedBuffer];
+   const broadcasters = get(this.activeBroadcasters);
 
-      while (buffer.length < minLength) {
-         const nextHeadline = this.#pumpNextHeadline();
-         if (!nextHeadline) break;
-         buffer.push(nextHeadline);
-      }
-
-      this.#feedBuffer = buffer.slice(-this.#maxVisible);
-      this.#publishFeed();
+   while (buffer.length < minLength) {
+      const nextHeadline = this.#pumpNextHeadline();
+      if (!nextHeadline) break;
+      buffer.push(nextHeadline);
    }
+
+   // ⛔ No broadcasters, inject default system messages
+   if (buffer.length === 0 && broadcasters.size === 0) {
+      for (let i = 0; i < minLength; i++) {
+         const msg = this.#defaultMessages[i % this.#defaultMessages.length];
+         buffer.push(msg);
+      }
+   }
+
+   this.#feedBuffer = buffer.slice(-this.#maxVisible);
+   this.#publishFeed();
+}
+
 
    #updateFeedBuffer() {
       const broadcasters = get(this.activeBroadcasters);

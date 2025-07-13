@@ -5,6 +5,7 @@
    const SCROLL_SPEED = 100;
    const NewsService = getNewsService();
 
+   let isOn = $state(true);
    let ticker;
    let outer;
    let inner;
@@ -56,6 +57,13 @@
       restartAnimation();
    }
 
+   function handleKeydown(event) {
+      if (event.key === "F2") {
+         event.preventDefault();
+         isOn = !isOn;
+      }
+   }
+
    onMount(() => {
       console.log("NewsFeed: Mounted");
       const unsub = NewsService.currentDisplayFrame.subscribe(applyFrame);
@@ -64,21 +72,28 @@
          console.log("NewsFeed: Force resync triggered");
          restartAnimation();
       };
+      
+      window.addEventListener("keydown", handleKeydown);
       Hooks.on("sr3e.forceResync", handleResync);
 
       return () => {
          unsub();
+         window.removeEventListener("keydown", handleKeydown);
          Hooks.off("sr3e.forceResync", handleResync);
       };
    });
 </script>
 
-<div class="ticker"bind:this={ticker}>
+<div class="ticker" bind:this={ticker}>
    <div class="marquee-outer" bind:this={outer}>
       <div class="marquee-inner" bind:this={inner} role="status" aria-live="polite" aria-label="News Feed">
-         {#each buffer as line}
-            <span class="marquee-item">{line}</span>
-         {/each}
+         {#if isOn}
+            {#each buffer as line}
+               <span class="marquee-item">{line}</span>
+            {/each}
+         {:else}
+            <span> </span>
+         {/if}
       </div>
    </div>
 </div>
