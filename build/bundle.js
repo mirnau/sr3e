@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _instance, _NewsService_instances, setupSocket_fn, requestControllerElection_fn, handleControllerElection_fn, becomeController_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, loadActiveBroadcasters_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -3560,14 +3560,14 @@ var on_keydown$9 = (e) => {
 };
 var on_click_1$7 = (__1, handleMove) => handleMove("up");
 var on_click_2$2 = (__2, handleMove) => handleMove("down");
-var root$N = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$O = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$N();
+  var div = root$O();
   div.__click = [on_click$c];
   div.__keydown = [on_keydown$9];
   var button = child(div);
@@ -3583,7 +3583,7 @@ delegate(["click", "keydown"]);
 async function handleClick(event2, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$M = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$N = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3594,7 +3594,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$M();
+  var div = root$N();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3757,7 +3757,7 @@ _actorStores = new WeakMap();
 _hookDisposers = new WeakMap();
 _actorSubscriptions = new WeakMap();
 let StoreManager = _StoreManager;
-var root$L = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+var root$M = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
   push($$props, true);
   let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
@@ -3774,7 +3774,7 @@ function TextInput($$anchor, $$props) {
     text2(editableEl.innerText);
     oninput()(e);
   }
-  var div = root$L();
+  var div = root$M();
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
   div_1.__keydown = function(...$$args) {
@@ -3794,7 +3794,7 @@ function TextInput($$anchor, $$props) {
 delegate(["input", "keydown"]);
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var root_3$e = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$K = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$L = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3857,7 +3857,7 @@ function Dossier($$anchor, $$props) {
       { render: false }
     );
   }
-  var fragment = root$K();
+  var fragment = root$L();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3993,7 +3993,7 @@ var on_click_1$6 = (__1, increment2, $$props) => {
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
 };
-var root$J = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
+var root$K = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
 function Counter($$anchor, $$props) {
   push($$props, true);
   let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
@@ -4030,7 +4030,7 @@ function Counter($$anchor, $$props) {
   user_effect(() => {
     updateDisplay();
   });
-  var div = root$J();
+  var div = root$K();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
   button.__click = [on_click$b, decrement2, $$props];
@@ -4164,7 +4164,7 @@ var on_click$a = (__1, modifiersArray) => {
     { name: "Modifier", value: 0 }
   ]));
 };
-var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_2$j = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
 var root_3$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
 var root_4$b = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$v = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
@@ -4415,7 +4415,7 @@ function RollComposerComponent($$anchor, $$props) {
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
   each(node_1, 17, () => get$2(modifiersArray), index, ($$anchor2, modifier, i) => {
-    var div_4 = root_2$k();
+    var div_4 = root_2$j();
     var h4_2 = child(div_4);
     var text_3 = child(h4_2);
     var node_2 = sibling(h4_2, 2);
@@ -4528,7 +4528,7 @@ var root_1$u = /* @__PURE__ */ template(`<div class="stat-card" role="button" ta
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_2$j = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_2$i = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4653,7 +4653,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$j();
+      var div_2 = root_2$i();
       div_2.__click = Roll2;
       div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
@@ -6242,10 +6242,10 @@ function setupMasonry({
 }
 var root_1$t = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_3$c = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$I = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  var div = root$I();
+  var div = root$J();
   var node = sibling(child(div), 2);
   {
     var consequent = ($$anchor2) => {
@@ -6281,7 +6281,7 @@ function StatCard$1($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$H = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+var root$I = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
   let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
@@ -6304,7 +6304,7 @@ function MasonryGrid($$anchor, $$props) {
   user_effect(async () => {
     gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
-  var div = root$H();
+  var div = root$I();
   var div_1 = child(div);
   var div_2 = sibling(div_1, 2);
   var node = sibling(div_2, 2);
@@ -6322,7 +6322,7 @@ function MasonryGrid($$anchor, $$props) {
   pop();
 }
 var root_1$s = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
-var root$G = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6353,7 +6353,7 @@ function Attributes($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$G();
+  var fragment = root$H();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6419,9 +6419,9 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_2$i = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_2$h = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$r = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$G = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6467,7 +6467,7 @@ function DicePools($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$F();
+  var fragment = root$G();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6512,7 +6512,7 @@ function DicePools($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var fragment_2 = root_2$i();
+          var fragment_2 = root_2$h();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
             get label() {
@@ -6549,7 +6549,7 @@ function DicePools($$anchor, $$props) {
   $$cleanup();
 }
 var root_1$q = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$E = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6560,7 +6560,7 @@ function Movement($$anchor, $$props) {
   let storeManager2 = StoreManager.Subscribe(actor());
   let walking = storeManager2.GetSumROStore("movement.walking");
   let running = storeManager2.GetSumROStore("movement.running");
-  var fragment = root$E();
+  var fragment = root$F();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6621,7 +6621,7 @@ function deleteThis$3(_, $isCharacterCreationStore, isCharacterCreationStore, sp
   dispatch("delete", { specialization: specialization() });
 }
 var root_1$p = /* @__PURE__ */ template(`<h1 class="embedded-value no-margin"> </h1>`);
-var root$D = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
+var root$E = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
 function SpecializationCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6653,7 +6653,7 @@ function SpecializationCard($$anchor, $$props) {
       e.target.blur();
     }
   }
-  var fragment = root$D();
+  var fragment = root$E();
   var node = first_child(fragment);
   TextInput(node, {
     text: liveText,
@@ -6747,9 +6747,9 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$h = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
+var root_2$g = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
 var root_1$o = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$C = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root$D = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6764,7 +6764,7 @@ function Karma($$anchor, $$props) {
   let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
   let essenceStore = storeManager2.GetSumROStore("attributes.essence");
   let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
-  var fragment = root$C();
+  var fragment = root$D();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6812,7 +6812,7 @@ function Karma($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var div = root_2$h();
+          var div = root_2$g();
           var h4 = sibling(child(div), 2);
           var text_1 = child(h4);
           template_effect(($0) => set_text(text_1, $0), [
@@ -6899,7 +6899,7 @@ async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacter
   }
 }
 var on_click$9 = async (__2, $$props) => openFilePicker($$props.actor);
-var root$B = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$C = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6977,7 +6977,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$B();
+  var div = root$C();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7143,7 +7143,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacter
   }
 }
 var on_click$8 = async (__2, $$props) => openFilePicker($$props.actor);
-var root$A = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$B = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7221,7 +7221,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$A();
+  var div = root$B();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7437,7 +7437,7 @@ async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCr
   }
 }
 var on_click$7 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$z = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$A = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7493,7 +7493,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$z();
+  var div = root$A();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7713,7 +7713,7 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_2$g = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_2$f = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$n = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$6 = (e, Roll2, skill) => Roll2(e, skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
@@ -7726,7 +7726,7 @@ var on_keydown_2 = (e, Roll2, skill, specialization) => {
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$6 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$a = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
-var root$y = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
+var root$z = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7793,7 +7793,7 @@ function ActiveSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$y();
+  var div = root$z();
   var node = child(div);
   {
     var consequent_1 = ($$anchor2) => {
@@ -7811,7 +7811,7 @@ function ActiveSkillCard($$anchor, $$props) {
       var node_1 = sibling(div_2, 2);
       {
         var consequent = ($$anchor3) => {
-          var div_3 = root_2$g();
+          var div_3 = root_2$f();
           each(div_3, 5, $specializationsStore, index, ($$anchor4, specialization) => {
             var div_4 = root_3$b();
             var div_5 = sibling(child(div_4), 2);
@@ -7894,8 +7894,8 @@ function ActiveSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$m = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$f = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root$x = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+var root_2$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root$y = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7914,7 +7914,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$x();
+  var div = root$y();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -7939,7 +7939,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
   var text_1 = child(h1);
   var div_3 = sibling(div_2, 2);
   each(div_3, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_4 = root_2$f();
+    var div_4 = root_2$e();
     var div_5 = sibling(child(div_4), 2);
     var text_2 = child(div_5);
     var h1_1 = sibling(div_5, 2);
@@ -7961,8 +7961,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$l = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root$w = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
+var root_2$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root$x = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7984,7 +7984,7 @@ function LanguageSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$w();
+  var div = root$x();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
@@ -8013,7 +8013,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var text_2 = child(h1_1);
   var div_5 = sibling(div_3, 2);
   each(div_5, 5, $specializations, index, ($$anchor2, specialization) => {
-    var div_6 = root_2$e();
+    var div_6 = root_2$d();
     var div_7 = sibling(child(div_6), 2);
     var text_3 = child(div_7);
     var h1_2 = sibling(div_7, 2);
@@ -8036,7 +8036,7 @@ function LanguageSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var root_7$1 = /* @__PURE__ */ template(`<div class="debug-unknown"> </div>`);
 var root_1$k = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$v = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+var root$w = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
   let categoryOfSkills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8052,7 +8052,7 @@ function SkillCategory($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$v();
+  var div = root$w();
   var div_1 = sibling(child(div), 2);
   var h1 = child(div_1);
   var text2 = child(h1);
@@ -8153,7 +8153,7 @@ function SkillCategory($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$u = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$v = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsLanguage($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8166,7 +8166,7 @@ function SkillsLanguage($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var div = root$u();
+  var div = root$v();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -8185,7 +8185,7 @@ function SkillsLanguage($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$t = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$u = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsKnowledge($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8198,7 +8198,7 @@ function SkillsKnowledge($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var div = root$t();
+  var div = root$u();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -8272,13 +8272,13 @@ function SkillsActive($$anchor, $$props) {
 var on_click$5 = (_, activeTab) => set(activeTab, "active");
 var on_click_1$4 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2$1 = (__2, activeTab) => set(activeTab, "language");
-var root$s = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$t = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
-  var fragment = root$s();
+  var fragment = root$t();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -8648,13 +8648,13 @@ setPace_fn = function(freq, amp) {
     this.ecgAnimator.setAmplitude(amp);
   }
 };
-var root_2$d = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
 var root_1$j = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var on_keydown$3 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
 var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
-var root$r = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
+var root$s = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8708,7 +8708,7 @@ function Health($$anchor, $$props) {
   function decrementOverflow() {
     store_set(overflow, proxy(Math.max($overflow() - 1, 0)));
   }
-  var fragment = root$r();
+  var fragment = root$s();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -8733,7 +8733,7 @@ function Health($$anchor, $$props) {
     var node_2 = sibling(input, 2);
     {
       var consequent = ($$anchor3) => {
-        var div_5 = root_2$d();
+        var div_5 = root_2$c();
         var h4 = child(div_5);
         var text2 = child(h4);
         template_effect(() => {
@@ -8835,10 +8835,10 @@ function Garage($$anchor) {
   append($$anchor, text$1);
 }
 var root_1$i = /* @__PURE__ */ template(`<div><div> </div></div>`);
-var root$q = /* @__PURE__ */ template(`<div></div>`);
+var root$r = /* @__PURE__ */ template(`<div></div>`);
 function Arsenal($$anchor, $$props) {
   let arsenal = prop($$props, "arsenal", 19, () => []);
-  var div = root$q();
+  var div = root$r();
   each(div, 21, arsenal, index, ($$anchor2, item2) => {
     var div_1 = root_1$i();
     var div_2 = child(div_1);
@@ -8983,7 +8983,7 @@ class ActorDataService {
 }
 var on_click$4 = (_, activeTab) => set(activeTab, proxy(inventory.arsenal));
 var on_click_1$3 = (__1, activeTab) => set(activeTab, proxy(inventory.garage));
-var root$p = /* @__PURE__ */ template(
+var root$q = /* @__PURE__ */ template(
   `<!> <h1> </h1> <div class="sr3e-tabs"><button>Arsenal</button> <button>Garage</button></div> <div class="sr3e-inner-background"><!> // Transactions / Budget
   // Cyber</div>`,
   1
@@ -8994,7 +8994,7 @@ function Inventory($$anchor, $$props) {
   prop($$props, "span", 19, () => ({}));
   let activeTab = state(proxy(inventory.arsenal));
   let arsenal = ActorDataService.getInventoryCategory(actor(), ["weapon", "ammunition"]);
-  var fragment = root$p();
+  var fragment = root$q();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -9058,7 +9058,7 @@ function Inventory($$anchor, $$props) {
   pop();
 }
 delegate(["click"]);
-var root_2$c = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root_2$b = /* @__PURE__ */ template(`<div><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 function CharacterSheetApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -9183,7 +9183,7 @@ function CharacterSheetApp($$anchor, $$props) {
       each(node, 17, () => get$2(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
         let Comp = () => get$2($$item).comp;
         let props = () => get$2($$item).props;
-        var div = root_2$c();
+        var div = root_2$b();
         var div_1 = child(div);
         var div_2 = sibling(child(div_1), 2);
         var node_1 = child(div_2);
@@ -9200,7 +9200,7 @@ function CharacterSheetApp($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$o = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
+var root$p = /* @__PURE__ */ template(`<div class="neon-name"><!></div>`);
 function NeonName($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -9231,19 +9231,20 @@ function NeonName($$anchor, $$props) {
     }
     return [...name2].map((char, index2) => malfunctioningIndexes.includes(index2) ? `<div class="neon-name-text malfunc">${char}</div>` : `<div class="neon-name-text">${char}</div>`).join("");
   }
-  var div = root$o();
+  var div = root$p();
   var node = child(div);
   html(node, () => get$2(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
 }
+console.log("%cNewsService module evaluated →", "color:#ff66aa;font-weight:bold;", import.meta.url, performance.now().toFixed(1));
 const _NewsService = class _NewsService {
   constructor() {
     __privateAdd(this, _NewsService_instances);
     __publicField(this, "activeBroadcasters", writable(/* @__PURE__ */ new Map()));
     __publicField(this, "allFeeds", writable({}));
-    __publicField(this, "currentDisplayFrame", writable({ buffer: [], timestamp: Date.now() }));
+    __publicField(this, "currentDisplayFrame", writable({ buffer: [], timestamp: 0 }));
     __privateAdd(this, _feedBuffer, []);
     __privateAdd(this, _currentIndices, /* @__PURE__ */ new Map());
     __privateAdd(this, _maxVisible, 5);
@@ -9252,17 +9253,18 @@ const _NewsService = class _NewsService {
     __privateAdd(this, _initialized, false);
     __privateAdd(this, _nextTick, null);
     __privateAdd(this, _broadcastController, null);
-    // The authoritative client
     __privateAdd(this, _isController, false);
     __privateAdd(this, _controllerHeartbeat, null);
     __privateAdd(this, _lastHeartbeat, 0);
     __privateAdd(this, _syncRequestTimeout, null);
+    __privateAdd(this, _electionCandidates, /* @__PURE__ */ new Set());
+    __privateAdd(this, _electionInProgress, false);
     __publicField(this, "AVG_CHAR_PX", 12);
     __publicField(this, "SCROLL_SPEED", 100);
     __publicField(this, "DEFAULT_MS", 1e4);
     __publicField(this, "CONTROLLER_TIMEOUT", 15e3);
-    // 15 seconds before controller is considered dead
     __publicField(this, "HEARTBEAT_INTERVAL", 5e3);
+    __publicField(this, "ELECTION_DELAY", 1e3);
   }
   static Instance() {
     if (!__privateGet(this, _instance)) {
@@ -9276,8 +9278,17 @@ const _NewsService = class _NewsService {
     __privateMethod(this, _NewsService_instances, setupSocket_fn).call(this);
     __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
     __privateMethod(this, _NewsService_instances, requestControllerElection_fn).call(this);
+    __privateMethod(this, _NewsService_instances, startControllerHealthCheck_fn).call(this);
     CONFIG.sr3e = CONFIG.sr3e || {};
     CONFIG.sr3e.newsService = this;
+  }
+  requestFullResync() {
+    var _a;
+    __privateMethod(this, _NewsService_instances, requestControllerStatus_fn).call(this);
+    game.socket.emit("module.sr3e", {
+      type: "requestStateSync",
+      userId: (_a = game.user) == null ? void 0 : _a.id
+    });
   }
   destroy() {
     var _a;
@@ -9302,8 +9313,20 @@ _isController = new WeakMap();
 _controllerHeartbeat = new WeakMap();
 _lastHeartbeat = new WeakMap();
 _syncRequestTimeout = new WeakMap();
+_electionCandidates = new WeakMap();
+_electionInProgress = new WeakMap();
 _instance = new WeakMap();
 _NewsService_instances = new WeakSet();
+loadActiveBroadcasters_fn = function() {
+  const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
+  allBroadcasters.forEach((broadcaster) => {
+    const headlines = broadcaster.system.rollingNews || [];
+    __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
+  });
+};
+startControllerHealthCheck_fn = function() {
+  setInterval(() => __privateMethod(this, _NewsService_instances, checkControllerHealth_fn).call(this), this.HEARTBEAT_INTERVAL);
+};
 setupSocket_fn = function() {
   game.socket.on("module.sr3e", (data) => {
     const {
@@ -9315,7 +9338,8 @@ setupSocket_fn = function() {
       userId,
       broadcasters,
       duration,
-      controllerId
+      controllerId,
+      targetId
     } = data;
     switch (type) {
       case "syncBroadcast":
@@ -9339,51 +9363,101 @@ setupSocket_fn = function() {
       case "stateSyncResponse":
         __privateMethod(this, _NewsService_instances, handleStateSyncResponse_fn).call(this, broadcasters);
         break;
+      case "controllerAnnouncement":
+        __privateMethod(this, _NewsService_instances, handleControllerHeartbeat_fn).call(this, userId);
+        break;
+      case "controllerStatusRequest":
+        __privateMethod(this, _NewsService_instances, handleControllerStatusRequest_fn).call(this, userId);
+        break;
+      case "controllerStatusResponse":
+        __privateMethod(this, _NewsService_instances, handleControllerStatusResponse_fn).call(this, controllerId, targetId);
+        break;
+      case "forceResync":
+        Hooks.callAll("sr3e.forceResync");
+        break;
     }
   });
 };
 requestControllerElection_fn = function() {
-  var _a;
-  console.log("📊 Requesting controller election");
-  game.socket.emit("module.sr3e", {
-    type: "controllerElection",
-    userId: (_a = game.user) == null ? void 0 : _a.id
-  });
-  clearTimeout(__privateGet(this, _syncRequestTimeout));
-  __privateSet(this, _syncRequestTimeout, setTimeout(
-    () => {
-      __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
-    },
-    2e3
-  ));
-};
-handleControllerElection_fn = function(userId) {
-  var _a, _b, _c, _d;
-  if (userId === ((_a = game.user) == null ? void 0 : _a.id)) return;
+  var _a, _b;
+  if (__privateGet(this, _electionInProgress)) return;
+  __privateSet(this, _electionInProgress, true);
+  __privateGet(this, _electionCandidates).clear();
+  __privateGet(this, _electionCandidates).add((_a = game.user) == null ? void 0 : _a.id);
   game.socket.emit("module.sr3e", {
     type: "controllerElection",
     userId: (_b = game.user) == null ? void 0 : _b.id
   });
-  const allUsers = [userId, (_c = game.user) == null ? void 0 : _c.id].sort();
-  if (allUsers[0] === ((_d = game.user) == null ? void 0 : _d.id)) {
-    clearTimeout(__privateGet(this, _syncRequestTimeout));
-    __privateSet(this, _syncRequestTimeout, setTimeout(
-      () => {
-        __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
-      },
-      1e3
-    ));
+  clearTimeout(__privateGet(this, _syncRequestTimeout));
+  __privateSet(this, _syncRequestTimeout, setTimeout(
+    () => {
+      __privateMethod(this, _NewsService_instances, resolveElection_fn).call(this);
+    },
+    this.ELECTION_DELAY
+  ));
+};
+resolveElection_fn = function() {
+  var _a;
+  const sorted = Array.from(__privateGet(this, _electionCandidates)).sort();
+  const winner = sorted[0];
+  __privateSet(this, _electionInProgress, false);
+  if (winner === ((_a = game.user) == null ? void 0 : _a.id)) {
+    __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
+  } else {
+    __privateSet(this, _broadcastController, winner);
+  }
+};
+handleControllerElection_fn = function(userId) {
+  __privateGet(this, _electionCandidates).add(userId);
+  if (!__privateGet(this, _electionInProgress)) {
+    __privateMethod(this, _NewsService_instances, requestControllerElection_fn).call(this);
   }
 };
 becomeController_fn = function() {
   var _a;
   if (__privateGet(this, _isController)) return;
-  console.log("👑 Becoming broadcast controller");
+  __privateMethod(this, _NewsService_instances, announceController_fn).call(this);
   __privateSet(this, _isController, true);
   __privateSet(this, _broadcastController, (_a = game.user) == null ? void 0 : _a.id);
   __privateMethod(this, _NewsService_instances, startControllerHeartbeat_fn).call(this);
   __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
   __privateMethod(this, _NewsService_instances, scheduleNextFrame_fn).call(this);
+};
+announceController_fn = function() {
+  var _a;
+  game.socket.emit("module.sr3e", {
+    type: "controllerAnnouncement",
+    userId: (_a = game.user) == null ? void 0 : _a.id
+  });
+};
+requestControllerStatus_fn = function() {
+  var _a;
+  game.socket.emit("module.sr3e", {
+    type: "controllerStatusRequest",
+    userId: (_a = game.user) == null ? void 0 : _a.id
+  });
+  clearTimeout(__privateGet(this, _syncRequestTimeout));
+  __privateSet(this, _syncRequestTimeout, setTimeout(
+    () => {
+      __privateMethod(this, _NewsService_instances, requestControllerElection_fn).call(this);
+    },
+    2e3
+  ));
+};
+handleControllerStatusRequest_fn = function(requesterId) {
+  var _a;
+  if (!__privateGet(this, _isController)) return;
+  game.socket.emit("module.sr3e", {
+    type: "controllerStatusResponse",
+    controllerId: (_a = game.user) == null ? void 0 : _a.id,
+    targetId: requesterId
+  });
+};
+handleControllerStatusResponse_fn = function(controllerId, targetId) {
+  var _a;
+  if (targetId !== ((_a = game.user) == null ? void 0 : _a.id)) return;
+  __privateSet(this, _broadcastController, controllerId);
+  __privateSet(this, _lastHeartbeat, Date.now());
 };
 startControllerHeartbeat_fn = function() {
   clearInterval(__privateGet(this, _controllerHeartbeat));
@@ -9402,11 +9476,10 @@ startControllerHeartbeat_fn = function() {
 };
 handleControllerHeartbeat_fn = function(userId) {
   var _a;
-  if (userId === ((_a = game.user) == null ? void 0 : _a.id)) return;
   __privateSet(this, _broadcastController, userId);
   __privateSet(this, _lastHeartbeat, Date.now());
+  if (userId === ((_a = game.user) == null ? void 0 : _a.id)) return;
   if (__privateGet(this, _isController)) {
-    console.log("👑 Stepping down as controller - another client is active");
     __privateSet(this, _isController, false);
     clearInterval(__privateGet(this, _controllerHeartbeat));
     clearTimeout(__privateGet(this, _nextTick));
@@ -9415,31 +9488,35 @@ handleControllerHeartbeat_fn = function(userId) {
 checkControllerHealth_fn = function() {
   if (__privateGet(this, _isController)) return;
   const now2 = Date.now();
-  if (__privateGet(this, _lastHeartbeat) > 0 && now2 - __privateGet(this, _lastHeartbeat) > this.CONTROLLER_TIMEOUT) {
-    console.log("💀 Controller appears dead, taking over");
-    __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
+  const elapsed = now2 - __privateGet(this, _lastHeartbeat);
+  if (elapsed > this.CONTROLLER_TIMEOUT + 200) {
+    __privateMethod(this, _NewsService_instances, requestControllerElection_fn).call(this);
   }
-};
-loadActiveBroadcasters_fn = function() {
-  const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
-  allBroadcasters.forEach((broadcaster) => {
-    const headlines = broadcaster.system.rollingNews || [];
-    __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
-  });
 };
 scheduleNextFrame_fn = function() {
   if (!__privateGet(this, _isController)) return;
   __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
+  if (__privateGet(this, _feedBuffer).length === 0) {
+    clearTimeout(__privateGet(this, _nextTick));
+    __privateSet(this, _nextTick, setTimeout(
+      () => {
+        __privateMethod(this, _NewsService_instances, scheduleNextFrame_fn).call(this);
+      },
+      1e3
+    ));
+    return;
+  }
   const buffer = [...__privateGet(this, _feedBuffer)];
   const duration = __privateMethod(this, _NewsService_instances, guessDuration_fn).call(this, buffer);
-  const startTime = Date.now() + 100;
+  const startTime = Date.now() + 200;
+  const frame = { buffer, timestamp: startTime, duration };
+  this.currentDisplayFrame.set(frame);
   game.socket.emit("module.sr3e", {
     type: "frameUpdate",
     buffer,
     timestamp: startTime,
     duration
   });
-  __privateMethod(this, _NewsService_instances, receiveFrameUpdate_fn).call(this, buffer, startTime, duration);
   clearTimeout(__privateGet(this, _nextTick));
   __privateSet(this, _nextTick, setTimeout(
     () => {
@@ -9450,15 +9527,15 @@ scheduleNextFrame_fn = function() {
 };
 receiveFrameUpdate_fn = function(buffer, timestamp, duration) {
   const current = get$1(this.currentDisplayFrame);
-  if (timestamp > current.timestamp) {
-    this.currentDisplayFrame.set({ buffer, timestamp, duration });
-  }
+  if (!Array.isArray(buffer)) return;
+  if (!timestamp) return;
+  if (timestamp <= current.timestamp) return;
+  this.currentDisplayFrame.set({ buffer, timestamp, duration });
 };
 guessDuration_fn = function(buffer) {
   if (buffer.length === 0) return this.DEFAULT_MS;
   const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
-  const calculatedDuration = Math.ceil(totalPx / this.SCROLL_SPEED * 1e3);
-  return Math.max(calculatedDuration, this.DEFAULT_MS);
+  return Math.max(Math.ceil(totalPx / this.SCROLL_SPEED * 1e3), this.DEFAULT_MS);
 };
 handleStateSyncRequest_fn = function(requestingUserId) {
   var _a;
@@ -9469,14 +9546,12 @@ handleStateSyncRequest_fn = function(requestingUserId) {
   broadcasters.forEach((headlines, actorName) => {
     broadcastersData[actorName] = headlines;
   });
-  console.log("📤 Sending state sync response to", requestingUserId);
   game.socket.emit("module.sr3e", {
     type: "stateSyncResponse",
     broadcasters: broadcastersData
   });
 };
 handleStateSyncResponse_fn = function(broadcastersData) {
-  console.log("📥 Received state sync response:", broadcastersData);
   Object.entries(broadcastersData).forEach(([actorName, headlines]) => {
     __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, actorName, headlines);
   });
@@ -9520,6 +9595,7 @@ pumpNextHeadline_fn = function() {
 };
 fillFeedBuffer_fn = function(minLength = 10) {
   const buffer = [...__privateGet(this, _feedBuffer)];
+  get$1(this.activeBroadcasters);
   while (buffer.length < minLength) {
     const nextHeadline = __privateMethod(this, _NewsService_instances, pumpNextHeadline_fn).call(this);
     if (!nextHeadline) break;
@@ -9546,7 +9622,6 @@ publishFeed_fn = function() {
   });
   this.allFeeds.set(feeds);
 };
-// 5 seconds between heartbeats
 __privateAdd(_NewsService, _instance, null);
 let NewsService = _NewsService;
 let newsServiceInstance = null;
@@ -9563,57 +9638,74 @@ const broadcastNews = (actorName, headlines) => {
 const stopBroadcast = (actorName) => {
   game.socket.emit("module.sr3e", { type: "stopBroadcast", actorName });
 };
-var root_2$b = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
-var root_1$h = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
+derived(() => {
+  var _a, _b;
+  return (_b = (_a = CONFIG.sr3e) == null ? void 0 : _a.newsService) == null ? void 0 : _b.currentDisplayFrame;
+}, ($store, set2) => {
+  if (!($store == null ? void 0 : $store.subscribe)) {
+    set2({ buffer: [], timestamp: 0 });
+    return;
+  }
+  return $store.subscribe(set2);
+});
+var root_1$h = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
+var root$o = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
   push($$props, true);
   const SCROLL_SPEED = 100;
   const NewsService2 = getNewsService();
-  let outer, inner;
+  let outer;
+  let inner;
   let buffer = state(proxy([]));
-  let currentFrame = null;
-  let animationTimeout = null;
-  function scheduleFrameDisplay(frame) {
-    if (!frame || frame === currentFrame) return;
-    currentFrame = frame;
-    const now2 = Date.now();
-    const delay = Math.max(0, frame.timestamp - now2);
-    clearTimeout(animationTimeout);
-    animationTimeout = setTimeout(
-      () => {
-        applyFrame(frame);
-      },
-      delay
-    );
-  }
-  function applyFrame(frame) {
-    if (!frame) return;
-    set(buffer, proxy(frame.buffer.map((m) => `${m.sender}: "${m.headline}"`)));
+  let lastFrameTimestamp = 0;
+  let frameDuration = 0;
+  let animationStart = 0;
+  function restartAnimation() {
+    if (!inner || !outer) return;
+    inner.style.animation = "none";
+    inner.offsetHeight;
     requestAnimationFrame(() => {
-      if (!inner || !outer) return;
-      const fullWidth = inner.scrollWidth;
-      const durationMS = frame.duration || fullWidth / SCROLL_SPEED * 1e3;
-      inner.style.animation = "none";
-      inner.offsetHeight;
-      const root2 = document.documentElement;
-      root2.style.setProperty("--marquee-width", `${fullWidth}px`);
-      root2.style.setProperty("--marquee-duration", `${durationMS / 1e3}s`);
-      root2.style.setProperty("--marquee-delay", "0s");
-      inner.style.animation = "";
+      requestAnimationFrame(() => {
+        const fullWidth = inner.scrollWidth;
+        frameDuration = Math.max(fullWidth / SCROLL_SPEED * 1e3, 5e3);
+        const elapsed = Date.now() - animationStart;
+        document.documentElement.style.setProperty("--marquee-width", `${fullWidth}px`);
+        document.documentElement.style.setProperty("--marquee-duration", `${frameDuration / 1e3}s`);
+        document.documentElement.style.setProperty("--marquee-delay", `-${elapsed}ms`);
+        inner.style.animation = "";
+      });
     });
   }
+  function applyFrame(frame) {
+    if (!frame || !Array.isArray(frame.buffer)) return;
+    if (frame.buffer.length === 0) return;
+    if (frame.timestamp <= lastFrameTimestamp) return;
+    lastFrameTimestamp = frame.timestamp;
+    animationStart = frame.timestamp;
+    set(buffer, proxy(frame.buffer.map((m) => (m == null ? void 0 : m.sender) && (m == null ? void 0 : m.headline) ? `${m.sender}: "${m.headline}"` : String(m))));
+    if (NewsService2.isController) {
+      game.socket.emit("module.sr3e", { type: "forceResync" });
+    }
+    restartAnimation();
+  }
   onMount(() => {
-    const unsub = NewsService2.currentDisplayFrame.subscribe(scheduleFrameDisplay);
+    console.log("NewsFeed: Mounted");
+    const unsub = NewsService2.currentDisplayFrame.subscribe(applyFrame);
+    const handleResync = () => {
+      console.log("NewsFeed: Force resync triggered");
+      restartAnimation();
+    };
+    Hooks.on("sr3e.forceResync", handleResync);
     return () => {
       unsub();
-      clearTimeout(animationTimeout);
+      Hooks.off("sr3e.forceResync", handleResync);
     };
   });
-  var div = root_1$h();
+  var div = root$o();
   var div_1 = child(div);
   var div_2 = child(div_1);
   each(div_2, 21, () => get$2(buffer), index, ($$anchor2, line) => {
-    var span = root_2$b();
+    var span = root_1$h();
     var text2 = child(span);
     template_effect(() => set_text(text2, get$2(line)));
     append($$anchor2, span);

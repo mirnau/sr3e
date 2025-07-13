@@ -1,10 +1,16 @@
-// Fixed NewsService.svelte.js
+console.log(
+   "%cNewsService module evaluated →",
+   "color:#ff66aa;font-weight:bold;",
+   import.meta.url,
+   performance.now().toFixed(1)
+);
+
 import { writable, get } from "svelte/store";
 
 export class NewsService {
    activeBroadcasters = writable(new Map());
    allFeeds = writable({});
-   currentDisplayFrame = writable({ buffer: [], timestamp: Date.now() });
+   currentDisplayFrame = writable({ buffer: [], timestamp: 0 });
 
    #feedBuffer = [];
    #currentIndices = new Map();
@@ -13,17 +19,20 @@ export class NewsService {
    #frameUpdateInterval = null;
    #initialized = false;
    #nextTick = null;
-   #broadcastController = null; // The authoritative client
+   #broadcastController = null;
    #isController = false;
    #controllerHeartbeat = null;
    #lastHeartbeat = 0;
    #syncRequestTimeout = null;
-   
+   #electionCandidates = new Set();
+   #electionInProgress = false;
+
    AVG_CHAR_PX = 12;
    SCROLL_SPEED = 100;
-   DEFAULT_MS = 10_000;
-   CONTROLLER_TIMEOUT = 15000; // 15 seconds before controller is considered dead
-   HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
+   DEFAULT_MS = 10000;
+   CONTROLLER_TIMEOUT = 15000;
+   HEARTBEAT_INTERVAL = 5000;
+   ELECTION_DELAY = 1000;
 
    static #instance = null;
 
@@ -41,14 +50,41 @@ export class NewsService {
       this.#setupSocket();
       this.#loadActiveBroadcasters();
       this.#requestControllerElection();
+      this.#startControllerHealthCheck();
 
       CONFIG.sr3e = CONFIG.sr3e || {};
       CONFIG.sr3e.newsService = this;
    }
 
+   #loadActiveBroadcasters() {
+      const allBroadcasters = game.actors.filter(
+         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
+      );
+
+      allBroadcasters.forEach((broadcaster) => {
+         const headlines = broadcaster.system.rollingNews || [];
+         this.#receiveBroadcastSync(broadcaster.name, headlines);
+      });
+   }
+
+   #startControllerHealthCheck() {
+      setInterval(() => this.#checkControllerHealth(), this.HEARTBEAT_INTERVAL);
+   }
+
    #setupSocket() {
       game.socket.on("module.sr3e", (data) => {
-         const { type, actorName, headlines, buffer, timestamp, userId, broadcasters, duration, controllerId } = data;
+         const {
+            type,
+            actorName,
+            headlines,
+            buffer,
+            timestamp,
+            userId,
+            broadcasters,
+            duration,
+            controllerId,
+            targetId,
+         } = data;
 
          switch (type) {
             case "syncBroadcast":
@@ -72,52 +108,101 @@ export class NewsService {
             case "stateSyncResponse":
                this.#handleStateSyncResponse(broadcasters);
                break;
+            case "controllerAnnouncement":
+               this.#handleControllerHeartbeat(userId);
+               break;
+            case "controllerStatusRequest":
+               this.#handleControllerStatusRequest(userId);
+               break;
+            case "controllerStatusResponse":
+               this.#handleControllerStatusResponse(controllerId, targetId);
+               break;
+            case "forceResync":
+               Hooks.callAll("sr3e.forceResync");
+               break;
          }
       });
    }
 
    #requestControllerElection() {
-      console.log("📊 Requesting controller election");
+      if (this.#electionInProgress) return;
+      this.#electionInProgress = true;
+      this.#electionCandidates.clear();
+      this.#electionCandidates.add(game.user?.id);
+
       game.socket.emit("module.sr3e", {
          type: "controllerElection",
          userId: game.user?.id,
       });
 
-      // Wait for responses, then determine controller
       clearTimeout(this.#syncRequestTimeout);
       this.#syncRequestTimeout = setTimeout(() => {
+         this.#resolveElection();
+      }, this.ELECTION_DELAY);
+   }
+
+   #resolveElection() {
+      const sorted = Array.from(this.#electionCandidates).sort();
+      const winner = sorted[0];
+      this.#electionInProgress = false;
+
+      if (winner === game.user?.id) {
          this.#becomeController();
-      }, 2000);
+      } else {
+         this.#broadcastController = winner;
+      }
    }
 
    #handleControllerElection(userId) {
-      if (userId === game.user?.id) return;
-
-      // Respond to election request
-      game.socket.emit("module.sr3e", {
-         type: "controllerElection",
-         userId: game.user?.id,
-      });
-
-      // Let the user with lowest ID become controller (deterministic)
-      const allUsers = [userId, game.user?.id].sort();
-      if (allUsers[0] === game.user?.id) {
-         clearTimeout(this.#syncRequestTimeout);
-         this.#syncRequestTimeout = setTimeout(() => {
-            this.#becomeController();
-         }, 1000);
+      this.#electionCandidates.add(userId);
+      if (!this.#electionInProgress) {
+         this.#requestControllerElection();
       }
    }
 
    #becomeController() {
       if (this.#isController) return;
-      
-      console.log("👑 Becoming broadcast controller");
+
+      this.#announceController();
       this.#isController = true;
       this.#broadcastController = game.user?.id;
       this.#startControllerHeartbeat();
       this.#loadActiveBroadcasters();
       this.#scheduleNextFrame();
+   }
+
+   #announceController() {
+      game.socket.emit("module.sr3e", {
+         type: "controllerAnnouncement",
+         userId: game.user?.id,
+      });
+   }
+
+   #requestControllerStatus() {
+      game.socket.emit("module.sr3e", {
+         type: "controllerStatusRequest",
+         userId: game.user?.id,
+      });
+
+      clearTimeout(this.#syncRequestTimeout);
+      this.#syncRequestTimeout = setTimeout(() => {
+         this.#requestControllerElection();
+      }, 2000);
+   }
+
+   #handleControllerStatusRequest(requesterId) {
+      if (!this.#isController) return;
+      game.socket.emit("module.sr3e", {
+         type: "controllerStatusResponse",
+         controllerId: game.user?.id,
+         targetId: requesterId,
+      });
+   }
+
+   #handleControllerStatusResponse(controllerId, targetId) {
+      if (targetId !== game.user?.id) return;
+      this.#broadcastController = controllerId;
+      this.#lastHeartbeat = Date.now();
    }
 
    #startControllerHeartbeat() {
@@ -133,14 +218,12 @@ export class NewsService {
    }
 
    #handleControllerHeartbeat(userId) {
-      if (userId === game.user?.id) return;
-
       this.#broadcastController = userId;
       this.#lastHeartbeat = Date.now();
-      
-      // Stop being controller if we thought we were
+
+      if (userId === game.user?.id) return;
+
       if (this.#isController) {
-         console.log("👑 Stepping down as controller - another client is active");
          this.#isController = false;
          clearInterval(this.#controllerHeartbeat);
          clearTimeout(this.#nextTick);
@@ -149,42 +232,32 @@ export class NewsService {
 
    #checkControllerHealth() {
       if (this.#isController) return;
-
       const now = Date.now();
-      if (this.#lastHeartbeat > 0 && now - this.#lastHeartbeat > this.CONTROLLER_TIMEOUT) {
-         console.log("💀 Controller appears dead, taking over");
-         this.#becomeController();
+      const elapsed = now - this.#lastHeartbeat;
+      if (elapsed > this.CONTROLLER_TIMEOUT + 200) {
+         this.#requestControllerElection();
       }
-   }
-
-   #loadActiveBroadcasters() {
-      const allBroadcasters = game.actors.filter(
-         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
-      );
-
-      allBroadcasters.forEach((broadcaster) => {
-         const headlines = broadcaster.system.rollingNews || [];
-         this.#receiveBroadcastSync(broadcaster.name, headlines);
-      });
    }
 
    #scheduleNextFrame() {
       if (!this.#isController) return;
 
       this.#fillFeedBuffer(10);
+
+      if (this.#feedBuffer.length === 0) {
+         clearTimeout(this.#nextTick);
+         this.#nextTick = setTimeout(() => {
+            this.#scheduleNextFrame();
+         }, 1000);
+         return;
+      }
+
       const buffer = [...this.#feedBuffer];
       const duration = this.#guessDuration(buffer);
+      const startTime = Date.now() + 200;
+      const frame = { buffer, timestamp: startTime, duration };
 
-      // Schedule frame to start at a future time for sync
-      const startTime = Date.now() + 100; // 100ms in future for processing
-      
-      const frame = {
-         buffer,
-         timestamp: startTime,
-         duration,
-      };
-
-      // Send to all clients including self
+      this.currentDisplayFrame.set(frame);
       game.socket.emit("module.sr3e", {
          type: "frameUpdate",
          buffer,
@@ -192,10 +265,6 @@ export class NewsService {
          duration,
       });
 
-      // Apply to self
-      this.#receiveFrameUpdate(buffer, startTime, duration);
-
-      // Schedule next frame
       clearTimeout(this.#nextTick);
       this.#nextTick = setTimeout(() => {
          this.#scheduleNextFrame();
@@ -204,34 +273,27 @@ export class NewsService {
 
    #receiveFrameUpdate(buffer, timestamp, duration) {
       const current = get(this.currentDisplayFrame);
-      
-      // Only apply if this is newer than current frame
-      if (timestamp > current.timestamp) {
-         this.currentDisplayFrame.set({ buffer, timestamp, duration });
-      }
+      if (!Array.isArray(buffer)) return;
+      if (!timestamp) return;
+      if (timestamp <= current.timestamp) return;
+
+      this.currentDisplayFrame.set({ buffer, timestamp, duration });
    }
 
    #guessDuration(buffer) {
       if (buffer.length === 0) return this.DEFAULT_MS;
-      
       const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
-      const calculatedDuration = Math.ceil((totalPx / this.SCROLL_SPEED) * 1000);
-      
-      return Math.max(calculatedDuration, this.DEFAULT_MS);
+      return Math.max(Math.ceil((totalPx / this.SCROLL_SPEED) * 1000), this.DEFAULT_MS);
    }
 
    #handleStateSyncRequest(requestingUserId) {
       if (requestingUserId === game.user?.id) return;
-
       const broadcasters = get(this.activeBroadcasters);
       if (broadcasters.size === 0) return;
-
       const broadcastersData = {};
       broadcasters.forEach((headlines, actorName) => {
          broadcastersData[actorName] = headlines;
       });
-
-      console.log("📤 Sending state sync response to", requestingUserId);
       game.socket.emit("module.sr3e", {
          type: "stateSyncResponse",
          broadcasters: broadcastersData,
@@ -239,8 +301,6 @@ export class NewsService {
    }
 
    #handleStateSyncResponse(broadcastersData) {
-      console.log("📥 Received state sync response:", broadcastersData);
-
       Object.entries(broadcastersData).forEach(([actorName, headlines]) => {
          this.#receiveBroadcastSync(actorName, headlines);
       });
@@ -248,7 +308,6 @@ export class NewsService {
 
    #receiveBroadcastSync(actorName, headlines) {
       const broadcasters = get(this.activeBroadcasters);
-
       if (!headlines || headlines.length === 0) {
          broadcasters.delete(actorName);
          this.#currentIndices.delete(actorName);
@@ -257,7 +316,6 @@ export class NewsService {
          const currentIndex = this.#currentIndices.get(actorName) || 0;
          this.#currentIndices.set(actorName, currentIndex % headlines.length);
       }
-
       this.activeBroadcasters.set(new Map(broadcasters));
       this.#updateFeedBuffer();
    }
@@ -273,22 +331,16 @@ export class NewsService {
    #pumpNextHeadline() {
       const broadcasters = get(this.activeBroadcasters);
       if (broadcasters.size === 0) return null;
-
       const broadcasterNames = Array.from(broadcasters.keys());
-
       for (let offset = 0; offset < broadcasterNames.length; offset++) {
          const index = (this.#lastBroadcasterIndex + offset + 1) % broadcasterNames.length;
          const broadcasterName = broadcasterNames[index];
          const headlines = broadcasters.get(broadcasterName);
-
          if (!headlines || headlines.length === 0) continue;
-
          const currentIndex = this.#currentIndices.get(broadcasterName) || 0;
          const headline = headlines[currentIndex];
-
          this.#currentIndices.set(broadcasterName, (currentIndex + 1) % headlines.length);
          this.#lastBroadcasterIndex = index;
-
          return { sender: broadcasterName, headline };
       }
       return null;
@@ -296,6 +348,7 @@ export class NewsService {
 
    #fillFeedBuffer(minLength = 10) {
       const buffer = [...this.#feedBuffer];
+      const broadcasters = get(this.activeBroadcasters);
 
       while (buffer.length < minLength) {
          const nextHeadline = this.#pumpNextHeadline();
@@ -309,17 +362,14 @@ export class NewsService {
 
    #updateFeedBuffer() {
       const broadcasters = get(this.activeBroadcasters);
-
       if (broadcasters.size === 0) {
          this.#feedBuffer = [];
          this.#publishFeed();
          return;
       }
-
       this.#feedBuffer = this.#feedBuffer.filter(
          (message) => broadcasters.has(message.sender) && broadcasters.get(message.sender).includes(message.headline)
       );
-
       this.#fillFeedBuffer(this.#maxVisible);
    }
 
@@ -330,6 +380,14 @@ export class NewsService {
          feeds[message.sender].push(message);
       });
       this.allFeeds.set(feeds);
+   }
+
+   requestFullResync() {
+      this.#requestControllerStatus();
+      game.socket.emit("module.sr3e", {
+         type: "requestStateSync",
+         userId: game.user?.id,
+      });
    }
 
    destroy() {
@@ -368,4 +426,17 @@ export const stopBroadcast = (actorName) => {
    });
 };
 
-export const currentDisplayFrame = () => CONFIG.sr3e?.newsService?.currentDisplayFrame;
+// NewsService.svelte.js
+import { derived } from "svelte/store";
+
+export const currentDisplayFrame = derived(
+   () => CONFIG.sr3e?.newsService?.currentDisplayFrame,
+   ($store, set) => {
+      if (!$store?.subscribe) {
+         set({ buffer: [], timestamp: 0 });
+         return;
+      }
+
+      return $store.subscribe(set);
+   }
+);
