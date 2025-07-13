@@ -1,55 +1,64 @@
 <script lang="ts">
    /*
-   NewsFeed.svelte is a fully passive Svelte component that visually renders a synchronized, scrolling news ticker. It subscribes to a shared NewsService and displays a buffer of messages received via socket broadcast, ensuring consistent animation across all connected clients.
+   NewsFeed.svelte - Synchronized scrolling news ticker that waits for scheduled frame start times
    */
 
    import { onMount } from "svelte";
-   import { getNewsService, requestFrameSync } from "../../../services/NewsService.svelte.js";
+   import { getNewsService } from "../../../services/NewsService.svelte.js";
 
    const SCROLL_SPEED = 100;
    const NewsService = getNewsService();
 
    let outer, inner;
    let buffer = $state([]);
-   let animationStart = 0;
-   let lastFrameTimestamp = 0;
-   let frameDuration = 0;
+   let currentFrame = null;
+   let animationTimeout = null;
 
-   function restartAnimation() {
-      if (!inner) return;
-      inner.style.animation = "none";
-      inner.offsetHeight;
-      inner.style.animation = "";
-      requestAnimationFrame(setOffsets);
+   function scheduleFrameDisplay(frame) {
+      if (!frame || frame === currentFrame) return;
+      
+      currentFrame = frame;
+      const now = Date.now();
+      const delay = Math.max(0, frame.timestamp - now);
+      
+      clearTimeout(animationTimeout);
+      animationTimeout = setTimeout(() => {
+         applyFrame(frame);
+      }, delay);
    }
 
    function applyFrame(frame) {
-      if (!frame || frame.timestamp === lastFrameTimestamp) return;
-      lastFrameTimestamp = frame.timestamp;
-      animationStart = frame.timestamp;
-      frameDuration = frame.duration ?? 0;
+      if (!frame) return;
+      
       buffer = frame.buffer.map((m) => `${m.sender}: "${m.headline}"`);
-      restartAnimation();
-   }
-
-   function setOffsets() {
-      if (!inner || !outer) return;
-      const fullWidth = inner.scrollWidth;
-      const durationMS = frameDuration || (fullWidth / SCROLL_SPEED) * 1000;
-      const elapsedMS = Date.now() - animationStart;
-      const root = document.documentElement;
-      root.style.setProperty("--marquee-width", `${fullWidth}px`);
-      root.style.setProperty("--marquee-duration", `${durationMS / 1000}s`);
-      root.style.setProperty("--marquee-delay", `-${elapsedMS}ms`);
+      
+      requestAnimationFrame(() => {
+         if (!inner || !outer) return;
+         
+         const fullWidth = inner.scrollWidth;
+         const durationMS = frame.duration || (fullWidth / SCROLL_SPEED) * 1000;
+         
+         // Reset animation
+         inner.style.animation = "none";
+         inner.offsetHeight; // Force reflow
+         
+         // Set CSS properties for synchronized animation
+         const root = document.documentElement;
+         root.style.setProperty("--marquee-width", `${fullWidth}px`);
+         root.style.setProperty("--marquee-duration", `${durationMS / 1000}s`);
+         root.style.setProperty("--marquee-delay", "0s");
+         
+         // Start animation
+         inner.style.animation = "";
+      });
    }
 
    onMount(() => {
-      Hooks.on("sr3e.forceResync", restartAnimation);
-      const unsub = NewsService.currentDisplayFrame.subscribe(applyFrame);
-      requestFrameSync();
+      const unsub = NewsService.currentDisplayFrame.subscribe(scheduleFrameDisplay);
+      
       return () => {
          unsub();
-         Hooks.off("sr3e.forceResync", restartAnimation);
+         clearTimeout(animationTimeout);
       };
    });
 </script>

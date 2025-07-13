@@ -1,4 +1,4 @@
-// Updated NewsService.svelte.js
+// Fixed NewsService.svelte.js
 import { writable, get } from "svelte/store";
 
 export class NewsService {
@@ -13,13 +13,17 @@ export class NewsService {
    #frameUpdateInterval = null;
    #initialized = false;
    #nextTick = null;
-   #tickerLock = {
-      userId: null,
-      timestamp: 0,
-   };
-   AVG_CHAR_PX = 12; // average width of one glyph
-   SCROLL_SPEED = 100; // px per second (matches NewsFeed)
-   DEFAULT_MS = 10_000; // fallback when nothing to measure
+   #broadcastController = null; // The authoritative client
+   #isController = false;
+   #controllerHeartbeat = null;
+   #lastHeartbeat = 0;
+   #syncRequestTimeout = null;
+   
+   AVG_CHAR_PX = 12;
+   SCROLL_SPEED = 100;
+   DEFAULT_MS = 10_000;
+   CONTROLLER_TIMEOUT = 15000; // 15 seconds before controller is considered dead
+   HEARTBEAT_INTERVAL = 5000; // 5 seconds between heartbeats
 
    static #instance = null;
 
@@ -27,7 +31,6 @@ export class NewsService {
       if (!this.#instance) {
          this.#instance = new NewsService();
       }
-
       return this.#instance;
    }
 
@@ -37,36 +40,15 @@ export class NewsService {
 
       this.#setupSocket();
       this.#loadActiveBroadcasters();
-      this.#requestStateSync();
+      this.#requestControllerElection();
 
       CONFIG.sr3e = CONFIG.sr3e || {};
       CONFIG.sr3e.newsService = this;
    }
 
-   TryClaimBroadcast() {
-      const userId = game.user?.id;
-      const now = Date.now();
-
-      if (!this.#tickerLock || !this.#tickerLock.userId || now - this.#tickerLock.timestamp > 30000) {
-         this.#tickerLock = {
-            userId,
-            timestamp: now,
-         };
-         console.log("✅ Broadcast lock claimed by", userId);
-         return true;
-      }
-
-      if (this.#tickerLock.userId === userId) {
-         this.#tickerLock.timestamp = now;
-         return true;
-      }
-
-      return false;
-   }
-
    #setupSocket() {
       game.socket.on("module.sr3e", (data) => {
-         const { type, actorName, headlines, buffer, timestamp, userId, broadcasters, duration } = data;
+         const { type, actorName, headlines, buffer, timestamp, userId, broadcasters, duration, controllerId } = data;
 
          switch (type) {
             case "syncBroadcast":
@@ -75,16 +57,14 @@ export class NewsService {
             case "stopBroadcast":
                this.#stopBroadcaster(actorName);
                break;
-            case "requestFrameSync":
-               this.#sendCurrentFrame();
+            case "frameUpdate":
+               this.#receiveFrameUpdate(buffer, timestamp, duration);
                break;
-            case "frameUpdate": {
-               const current = get(this.currentDisplayFrame).timestamp;
-               if (timestamp > current) this.currentDisplayFrame.set({ buffer, timestamp, duration });
+            case "controllerElection":
+               this.#handleControllerElection(userId);
                break;
-            }
-            case "forceResync":
-               Hooks.call("sr3e.forceResync");
+            case "controllerHeartbeat":
+               this.#handleControllerHeartbeat(userId);
                break;
             case "requestStateSync":
                this.#handleStateSyncRequest(userId);
@@ -96,12 +76,148 @@ export class NewsService {
       });
    }
 
-   #requestStateSync() {
-      console.log("📡 Requesting state sync from other clients");
+   #requestControllerElection() {
+      console.log("📊 Requesting controller election");
       game.socket.emit("module.sr3e", {
-         type: "requestStateSync",
+         type: "controllerElection",
          userId: game.user?.id,
       });
+
+      // Wait for responses, then determine controller
+      clearTimeout(this.#syncRequestTimeout);
+      this.#syncRequestTimeout = setTimeout(() => {
+         this.#becomeController();
+      }, 2000);
+   }
+
+   #handleControllerElection(userId) {
+      if (userId === game.user?.id) return;
+
+      // Respond to election request
+      game.socket.emit("module.sr3e", {
+         type: "controllerElection",
+         userId: game.user?.id,
+      });
+
+      // Let the user with lowest ID become controller (deterministic)
+      const allUsers = [userId, game.user?.id].sort();
+      if (allUsers[0] === game.user?.id) {
+         clearTimeout(this.#syncRequestTimeout);
+         this.#syncRequestTimeout = setTimeout(() => {
+            this.#becomeController();
+         }, 1000);
+      }
+   }
+
+   #becomeController() {
+      if (this.#isController) return;
+      
+      console.log("👑 Becoming broadcast controller");
+      this.#isController = true;
+      this.#broadcastController = game.user?.id;
+      this.#startControllerHeartbeat();
+      this.#loadActiveBroadcasters();
+      this.#scheduleNextFrame();
+   }
+
+   #startControllerHeartbeat() {
+      clearInterval(this.#controllerHeartbeat);
+      this.#controllerHeartbeat = setInterval(() => {
+         if (this.#isController) {
+            game.socket.emit("module.sr3e", {
+               type: "controllerHeartbeat",
+               userId: game.user?.id,
+            });
+         }
+      }, this.HEARTBEAT_INTERVAL);
+   }
+
+   #handleControllerHeartbeat(userId) {
+      if (userId === game.user?.id) return;
+
+      this.#broadcastController = userId;
+      this.#lastHeartbeat = Date.now();
+      
+      // Stop being controller if we thought we were
+      if (this.#isController) {
+         console.log("👑 Stepping down as controller - another client is active");
+         this.#isController = false;
+         clearInterval(this.#controllerHeartbeat);
+         clearTimeout(this.#nextTick);
+      }
+   }
+
+   #checkControllerHealth() {
+      if (this.#isController) return;
+
+      const now = Date.now();
+      if (this.#lastHeartbeat > 0 && now - this.#lastHeartbeat > this.CONTROLLER_TIMEOUT) {
+         console.log("💀 Controller appears dead, taking over");
+         this.#becomeController();
+      }
+   }
+
+   #loadActiveBroadcasters() {
+      const allBroadcasters = game.actors.filter(
+         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
+      );
+
+      allBroadcasters.forEach((broadcaster) => {
+         const headlines = broadcaster.system.rollingNews || [];
+         this.#receiveBroadcastSync(broadcaster.name, headlines);
+      });
+   }
+
+   #scheduleNextFrame() {
+      if (!this.#isController) return;
+
+      this.#fillFeedBuffer(10);
+      const buffer = [...this.#feedBuffer];
+      const duration = this.#guessDuration(buffer);
+
+      // Schedule frame to start at a future time for sync
+      const startTime = Date.now() + 100; // 100ms in future for processing
+      
+      const frame = {
+         buffer,
+         timestamp: startTime,
+         duration,
+      };
+
+      // Send to all clients including self
+      game.socket.emit("module.sr3e", {
+         type: "frameUpdate",
+         buffer,
+         timestamp: startTime,
+         duration,
+      });
+
+      // Apply to self
+      this.#receiveFrameUpdate(buffer, startTime, duration);
+
+      // Schedule next frame
+      clearTimeout(this.#nextTick);
+      this.#nextTick = setTimeout(() => {
+         this.#scheduleNextFrame();
+      }, duration);
+   }
+
+   #receiveFrameUpdate(buffer, timestamp, duration) {
+      const current = get(this.currentDisplayFrame);
+      
+      // Only apply if this is newer than current frame
+      if (timestamp > current.timestamp) {
+         this.currentDisplayFrame.set({ buffer, timestamp, duration });
+      }
+   }
+
+   #guessDuration(buffer) {
+      if (buffer.length === 0) return this.DEFAULT_MS;
+      
+      const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
+      const calculatedDuration = Math.ceil((totalPx / this.SCROLL_SPEED) * 1000);
+      
+      return Math.max(calculatedDuration, this.DEFAULT_MS);
    }
 
    #handleStateSyncRequest(requestingUserId) {
@@ -127,69 +243,6 @@ export class NewsService {
 
       Object.entries(broadcastersData).forEach(([actorName, headlines]) => {
          this.#receiveBroadcastSync(actorName, headlines);
-      });
-   }
-
-   #loadActiveBroadcasters() {
-      const allBroadcasters = game.actors.filter(
-         (actor) => actor.type === "broadcaster" && actor.system.isBroadcasting
-      );
-
-      allBroadcasters.forEach((broadcaster) => {
-         const headlines = broadcaster.system.rollingNews || [];
-         this.#receiveBroadcastSync(broadcaster.name, headlines);
-      });
-   }
-
-   sendNextFrame(duration = null) {
-      this.#fillFeedBuffer(10);
-      const buffer = [...this.#feedBuffer];
-
-      if (duration == null) duration = this.#guessDuration(buffer);
-
-      const frame = {
-         buffer,
-         timestamp: Date.now(),
-         duration,
-      };
-
-      this.currentDisplayFrame.set(frame);
-
-      game.socket.emit("module.sr3e", {
-         type: "frameUpdate",
-         buffer,
-         timestamp: frame.timestamp,
-         duration,
-      });
-
-      game.socket.emit("module.sr3e", {
-         type: "forceResync",
-      });
-
-      clearTimeout(this.#nextTick);
-      this.#nextTick = setTimeout(() => {
-         if (this.TryClaimBroadcast()) this.sendNextFrame();
-      }, duration);
-   }
-
-   #guessDuration(buffer) {
-      const AVG_CHAR_PX = 12;
-      const SCROLL_SPEED = 100;
-      const DEFAULT_MS = 10000;
-
-      const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * AVG_CHAR_PX;
-      return Math.ceil((totalPx / SCROLL_SPEED) * 1000) || DEFAULT_MS;
-   }
-
-   #sendCurrentFrame() {
-      const frame = get(this.currentDisplayFrame);
-      if (!frame?.buffer?.length) return;
-
-      game.socket.emit("module.sr3e", {
-         type: "frameUpdate",
-         buffer: frame.buffer,
-         timestamp: frame.timestamp,
-         duration: frame.duration,
       });
    }
 
@@ -268,10 +321,6 @@ export class NewsService {
       );
 
       this.#fillFeedBuffer(this.#maxVisible);
-
-      if (!get(this.currentDisplayFrame).buffer.length && this.TryClaimBroadcast()) {
-         this.sendNextFrame();
-      }
    }
 
    #publishFeed() {
@@ -287,6 +336,9 @@ export class NewsService {
       game.socket.off("module.sr3e");
       this.#initialized = false;
       clearTimeout(this.#nextTick);
+      clearInterval(this.#controllerHeartbeat);
+      clearTimeout(this.#syncRequestTimeout);
+      this.#isController = false;
       if (CONFIG.sr3e?.newsService === this) CONFIG.sr3e.newsService = null;
    }
 }
@@ -313,12 +365,6 @@ export const stopBroadcast = (actorName) => {
    game.socket.emit("module.sr3e", {
       type: "stopBroadcast",
       actorName,
-   });
-};
-
-export const requestFrameSync = () => {
-   game.socket.emit("module.sr3e", {
-      type: "requestFrameSync",
    });
 };
 

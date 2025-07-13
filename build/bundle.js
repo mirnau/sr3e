@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _tickerLock, _instance, _NewsService_instances, setupSocket_fn, requestStateSync_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, loadActiveBroadcasters_fn, guessDuration_fn, sendCurrentFrame_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _instance, _NewsService_instances, setupSocket_fn, requestControllerElection_fn, handleControllerElection_fn, becomeController_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, loadActiveBroadcasters_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -9251,12 +9251,18 @@ const _NewsService = class _NewsService {
     __privateAdd(this, _frameUpdateInterval, null);
     __privateAdd(this, _initialized, false);
     __privateAdd(this, _nextTick, null);
-    __privateAdd(this, _tickerLock, { userId: null, timestamp: 0 });
+    __privateAdd(this, _broadcastController, null);
+    // The authoritative client
+    __privateAdd(this, _isController, false);
+    __privateAdd(this, _controllerHeartbeat, null);
+    __privateAdd(this, _lastHeartbeat, 0);
+    __privateAdd(this, _syncRequestTimeout, null);
     __publicField(this, "AVG_CHAR_PX", 12);
-    // average width of one glyph
     __publicField(this, "SCROLL_SPEED", 100);
-    // px per second (matches NewsFeed)
     __publicField(this, "DEFAULT_MS", 1e4);
+    __publicField(this, "CONTROLLER_TIMEOUT", 15e3);
+    // 15 seconds before controller is considered dead
+    __publicField(this, "HEARTBEAT_INTERVAL", 5e3);
   }
   static Instance() {
     if (!__privateGet(this, _instance)) {
@@ -9269,51 +9275,18 @@ const _NewsService = class _NewsService {
     __privateSet(this, _initialized, true);
     __privateMethod(this, _NewsService_instances, setupSocket_fn).call(this);
     __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
-    __privateMethod(this, _NewsService_instances, requestStateSync_fn).call(this);
+    __privateMethod(this, _NewsService_instances, requestControllerElection_fn).call(this);
     CONFIG.sr3e = CONFIG.sr3e || {};
     CONFIG.sr3e.newsService = this;
-  }
-  TryClaimBroadcast() {
-    var _a;
-    const userId = (_a = game.user) == null ? void 0 : _a.id;
-    const now2 = Date.now();
-    if (!__privateGet(this, _tickerLock) || !__privateGet(this, _tickerLock).userId || now2 - __privateGet(this, _tickerLock).timestamp > 3e4) {
-      __privateSet(this, _tickerLock, { userId, timestamp: now2 });
-      console.log("✅ Broadcast lock claimed by", userId);
-      return true;
-    }
-    if (__privateGet(this, _tickerLock).userId === userId) {
-      __privateGet(this, _tickerLock).timestamp = now2;
-      return true;
-    }
-    return false;
-  }
-  sendNextFrame(duration = null) {
-    __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
-    const buffer = [...__privateGet(this, _feedBuffer)];
-    if (duration == null) duration = __privateMethod(this, _NewsService_instances, guessDuration_fn).call(this, buffer);
-    const frame = { buffer, timestamp: Date.now(), duration };
-    this.currentDisplayFrame.set(frame);
-    game.socket.emit("module.sr3e", {
-      type: "frameUpdate",
-      buffer,
-      timestamp: frame.timestamp,
-      duration
-    });
-    game.socket.emit("module.sr3e", { type: "forceResync" });
-    clearTimeout(__privateGet(this, _nextTick));
-    __privateSet(this, _nextTick, setTimeout(
-      () => {
-        if (this.TryClaimBroadcast()) this.sendNextFrame();
-      },
-      duration
-    ));
   }
   destroy() {
     var _a;
     game.socket.off("module.sr3e");
     __privateSet(this, _initialized, false);
     clearTimeout(__privateGet(this, _nextTick));
+    clearInterval(__privateGet(this, _controllerHeartbeat));
+    clearTimeout(__privateGet(this, _syncRequestTimeout));
+    __privateSet(this, _isController, false);
     if (((_a = CONFIG.sr3e) == null ? void 0 : _a.newsService) === this) CONFIG.sr3e.newsService = null;
   }
 };
@@ -9324,7 +9297,11 @@ _lastBroadcasterIndex = new WeakMap();
 _frameUpdateInterval = new WeakMap();
 _initialized = new WeakMap();
 _nextTick = new WeakMap();
-_tickerLock = new WeakMap();
+_broadcastController = new WeakMap();
+_isController = new WeakMap();
+_controllerHeartbeat = new WeakMap();
+_lastHeartbeat = new WeakMap();
+_syncRequestTimeout = new WeakMap();
 _instance = new WeakMap();
 _NewsService_instances = new WeakSet();
 setupSocket_fn = function() {
@@ -9337,7 +9314,8 @@ setupSocket_fn = function() {
       timestamp,
       userId,
       broadcasters,
-      duration
+      duration,
+      controllerId
     } = data;
     switch (type) {
       case "syncBroadcast":
@@ -9346,16 +9324,14 @@ setupSocket_fn = function() {
       case "stopBroadcast":
         __privateMethod(this, _NewsService_instances, stopBroadcaster_fn).call(this, actorName);
         break;
-      case "requestFrameSync":
-        __privateMethod(this, _NewsService_instances, sendCurrentFrame_fn).call(this);
+      case "frameUpdate":
+        __privateMethod(this, _NewsService_instances, receiveFrameUpdate_fn).call(this, buffer, timestamp, duration);
         break;
-      case "frameUpdate": {
-        const current = get$1(this.currentDisplayFrame).timestamp;
-        if (timestamp > current) this.currentDisplayFrame.set({ buffer, timestamp, duration });
+      case "controllerElection":
+        __privateMethod(this, _NewsService_instances, handleControllerElection_fn).call(this, userId);
         break;
-      }
-      case "forceResync":
-        Hooks.call("sr3e.forceResync");
+      case "controllerHeartbeat":
+        __privateMethod(this, _NewsService_instances, handleControllerHeartbeat_fn).call(this, userId);
         break;
       case "requestStateSync":
         __privateMethod(this, _NewsService_instances, handleStateSyncRequest_fn).call(this, userId);
@@ -9366,13 +9342,123 @@ setupSocket_fn = function() {
     }
   });
 };
-requestStateSync_fn = function() {
+requestControllerElection_fn = function() {
   var _a;
-  console.log("📡 Requesting state sync from other clients");
+  console.log("📊 Requesting controller election");
   game.socket.emit("module.sr3e", {
-    type: "requestStateSync",
+    type: "controllerElection",
     userId: (_a = game.user) == null ? void 0 : _a.id
   });
+  clearTimeout(__privateGet(this, _syncRequestTimeout));
+  __privateSet(this, _syncRequestTimeout, setTimeout(
+    () => {
+      __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
+    },
+    2e3
+  ));
+};
+handleControllerElection_fn = function(userId) {
+  var _a, _b, _c, _d;
+  if (userId === ((_a = game.user) == null ? void 0 : _a.id)) return;
+  game.socket.emit("module.sr3e", {
+    type: "controllerElection",
+    userId: (_b = game.user) == null ? void 0 : _b.id
+  });
+  const allUsers = [userId, (_c = game.user) == null ? void 0 : _c.id].sort();
+  if (allUsers[0] === ((_d = game.user) == null ? void 0 : _d.id)) {
+    clearTimeout(__privateGet(this, _syncRequestTimeout));
+    __privateSet(this, _syncRequestTimeout, setTimeout(
+      () => {
+        __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
+      },
+      1e3
+    ));
+  }
+};
+becomeController_fn = function() {
+  var _a;
+  if (__privateGet(this, _isController)) return;
+  console.log("👑 Becoming broadcast controller");
+  __privateSet(this, _isController, true);
+  __privateSet(this, _broadcastController, (_a = game.user) == null ? void 0 : _a.id);
+  __privateMethod(this, _NewsService_instances, startControllerHeartbeat_fn).call(this);
+  __privateMethod(this, _NewsService_instances, loadActiveBroadcasters_fn).call(this);
+  __privateMethod(this, _NewsService_instances, scheduleNextFrame_fn).call(this);
+};
+startControllerHeartbeat_fn = function() {
+  clearInterval(__privateGet(this, _controllerHeartbeat));
+  __privateSet(this, _controllerHeartbeat, setInterval(
+    () => {
+      var _a;
+      if (__privateGet(this, _isController)) {
+        game.socket.emit("module.sr3e", {
+          type: "controllerHeartbeat",
+          userId: (_a = game.user) == null ? void 0 : _a.id
+        });
+      }
+    },
+    this.HEARTBEAT_INTERVAL
+  ));
+};
+handleControllerHeartbeat_fn = function(userId) {
+  var _a;
+  if (userId === ((_a = game.user) == null ? void 0 : _a.id)) return;
+  __privateSet(this, _broadcastController, userId);
+  __privateSet(this, _lastHeartbeat, Date.now());
+  if (__privateGet(this, _isController)) {
+    console.log("👑 Stepping down as controller - another client is active");
+    __privateSet(this, _isController, false);
+    clearInterval(__privateGet(this, _controllerHeartbeat));
+    clearTimeout(__privateGet(this, _nextTick));
+  }
+};
+checkControllerHealth_fn = function() {
+  if (__privateGet(this, _isController)) return;
+  const now2 = Date.now();
+  if (__privateGet(this, _lastHeartbeat) > 0 && now2 - __privateGet(this, _lastHeartbeat) > this.CONTROLLER_TIMEOUT) {
+    console.log("💀 Controller appears dead, taking over");
+    __privateMethod(this, _NewsService_instances, becomeController_fn).call(this);
+  }
+};
+loadActiveBroadcasters_fn = function() {
+  const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
+  allBroadcasters.forEach((broadcaster) => {
+    const headlines = broadcaster.system.rollingNews || [];
+    __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
+  });
+};
+scheduleNextFrame_fn = function() {
+  if (!__privateGet(this, _isController)) return;
+  __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, 10);
+  const buffer = [...__privateGet(this, _feedBuffer)];
+  const duration = __privateMethod(this, _NewsService_instances, guessDuration_fn).call(this, buffer);
+  const startTime = Date.now() + 100;
+  game.socket.emit("module.sr3e", {
+    type: "frameUpdate",
+    buffer,
+    timestamp: startTime,
+    duration
+  });
+  __privateMethod(this, _NewsService_instances, receiveFrameUpdate_fn).call(this, buffer, startTime, duration);
+  clearTimeout(__privateGet(this, _nextTick));
+  __privateSet(this, _nextTick, setTimeout(
+    () => {
+      __privateMethod(this, _NewsService_instances, scheduleNextFrame_fn).call(this);
+    },
+    duration
+  ));
+};
+receiveFrameUpdate_fn = function(buffer, timestamp, duration) {
+  const current = get$1(this.currentDisplayFrame);
+  if (timestamp > current.timestamp) {
+    this.currentDisplayFrame.set({ buffer, timestamp, duration });
+  }
+};
+guessDuration_fn = function(buffer) {
+  if (buffer.length === 0) return this.DEFAULT_MS;
+  const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * this.AVG_CHAR_PX;
+  const calculatedDuration = Math.ceil(totalPx / this.SCROLL_SPEED * 1e3);
+  return Math.max(calculatedDuration, this.DEFAULT_MS);
 };
 handleStateSyncRequest_fn = function(requestingUserId) {
   var _a;
@@ -9393,31 +9479,6 @@ handleStateSyncResponse_fn = function(broadcastersData) {
   console.log("📥 Received state sync response:", broadcastersData);
   Object.entries(broadcastersData).forEach(([actorName, headlines]) => {
     __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, actorName, headlines);
-  });
-};
-loadActiveBroadcasters_fn = function() {
-  const allBroadcasters = game.actors.filter((actor) => actor.type === "broadcaster" && actor.system.isBroadcasting);
-  allBroadcasters.forEach((broadcaster) => {
-    const headlines = broadcaster.system.rollingNews || [];
-    __privateMethod(this, _NewsService_instances, receiveBroadcastSync_fn).call(this, broadcaster.name, headlines);
-  });
-};
-guessDuration_fn = function(buffer) {
-  const AVG_CHAR_PX = 12;
-  const SCROLL_SPEED = 100;
-  const DEFAULT_MS = 1e4;
-  const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * AVG_CHAR_PX;
-  return Math.ceil(totalPx / SCROLL_SPEED * 1e3) || DEFAULT_MS;
-};
-sendCurrentFrame_fn = function() {
-  var _a;
-  const frame = get$1(this.currentDisplayFrame);
-  if (!((_a = frame == null ? void 0 : frame.buffer) == null ? void 0 : _a.length)) return;
-  game.socket.emit("module.sr3e", {
-    type: "frameUpdate",
-    buffer: frame.buffer,
-    timestamp: frame.timestamp,
-    duration: frame.duration
   });
 };
 receiveBroadcastSync_fn = function(actorName, headlines) {
@@ -9476,9 +9537,6 @@ updateFeedBuffer_fn = function() {
   }
   __privateSet(this, _feedBuffer, __privateGet(this, _feedBuffer).filter((message) => broadcasters.has(message.sender) && broadcasters.get(message.sender).includes(message.headline)));
   __privateMethod(this, _NewsService_instances, fillFeedBuffer_fn).call(this, __privateGet(this, _maxVisible));
-  if (!get$1(this.currentDisplayFrame).buffer.length && this.TryClaimBroadcast()) {
-    this.sendNextFrame();
-  }
 };
 publishFeed_fn = function() {
   const feeds = {};
@@ -9488,7 +9546,7 @@ publishFeed_fn = function() {
   });
   this.allFeeds.set(feeds);
 };
-// fallback when nothing to measure
+// 5 seconds between heartbeats
 __privateAdd(_NewsService, _instance, null);
 let NewsService = _NewsService;
 let newsServiceInstance = null;
@@ -9505,9 +9563,6 @@ const broadcastNews = (actorName, headlines) => {
 const stopBroadcast = (actorName) => {
   game.socket.emit("module.sr3e", { type: "stopBroadcast", actorName });
 };
-const requestFrameSync = () => {
-  game.socket.emit("module.sr3e", { type: "requestFrameSync" });
-};
 var root_2$b = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
 var root_1$h = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
@@ -9516,41 +9571,42 @@ function NewsFeed($$anchor, $$props) {
   const NewsService2 = getNewsService();
   let outer, inner;
   let buffer = state(proxy([]));
-  let animationStart = 0;
-  let lastFrameTimestamp = 0;
-  let frameDuration = 0;
-  function restartAnimation() {
-    if (!inner) return;
-    inner.style.animation = "none";
-    inner.offsetHeight;
-    inner.style.animation = "";
-    requestAnimationFrame(setOffsets);
+  let currentFrame = null;
+  let animationTimeout = null;
+  function scheduleFrameDisplay(frame) {
+    if (!frame || frame === currentFrame) return;
+    currentFrame = frame;
+    const now2 = Date.now();
+    const delay = Math.max(0, frame.timestamp - now2);
+    clearTimeout(animationTimeout);
+    animationTimeout = setTimeout(
+      () => {
+        applyFrame(frame);
+      },
+      delay
+    );
   }
   function applyFrame(frame) {
-    if (!frame || frame.timestamp === lastFrameTimestamp) return;
-    lastFrameTimestamp = frame.timestamp;
-    animationStart = frame.timestamp;
-    frameDuration = frame.duration ?? 0;
+    if (!frame) return;
     set(buffer, proxy(frame.buffer.map((m) => `${m.sender}: "${m.headline}"`)));
-    restartAnimation();
-  }
-  function setOffsets() {
-    if (!inner || !outer) return;
-    const fullWidth = inner.scrollWidth;
-    const durationMS = frameDuration || fullWidth / SCROLL_SPEED * 1e3;
-    const elapsedMS = Date.now() - animationStart;
-    const root2 = document.documentElement;
-    root2.style.setProperty("--marquee-width", `${fullWidth}px`);
-    root2.style.setProperty("--marquee-duration", `${durationMS / 1e3}s`);
-    root2.style.setProperty("--marquee-delay", `-${elapsedMS}ms`);
+    requestAnimationFrame(() => {
+      if (!inner || !outer) return;
+      const fullWidth = inner.scrollWidth;
+      const durationMS = frame.duration || fullWidth / SCROLL_SPEED * 1e3;
+      inner.style.animation = "none";
+      inner.offsetHeight;
+      const root2 = document.documentElement;
+      root2.style.setProperty("--marquee-width", `${fullWidth}px`);
+      root2.style.setProperty("--marquee-duration", `${durationMS / 1e3}s`);
+      root2.style.setProperty("--marquee-delay", "0s");
+      inner.style.animation = "";
+    });
   }
   onMount(() => {
-    Hooks.on("sr3e.forceResync", restartAnimation);
-    const unsub = NewsService2.currentDisplayFrame.subscribe(applyFrame);
-    requestFrameSync();
+    const unsub = NewsService2.currentDisplayFrame.subscribe(scheduleFrameDisplay);
     return () => {
       unsub();
-      Hooks.off("sr3e.forceResync", restartAnimation);
+      clearTimeout(animationTimeout);
     };
   });
   var div = root_1$h();
