@@ -12,10 +12,14 @@ export class NewsService {
    #lastBroadcasterIndex = -1;
    #frameUpdateInterval = null;
    #initialized = false;
+   #nextTick = null;
    #tickerLock = {
       userId: null,
       timestamp: 0,
    };
+   AVG_CHAR_PX = 12; // average width of one glyph
+   SCROLL_SPEED = 100; // px per second (matches NewsFeed)
+   DEFAULT_MS = 10_000; // fallback when nothing to measure
 
    static #instance = null;
 
@@ -23,6 +27,7 @@ export class NewsService {
       if (!this.#instance) {
          this.#instance = new NewsService();
       }
+
       return this.#instance;
    }
 
@@ -32,6 +37,7 @@ export class NewsService {
 
       this.#setupSocket();
       this.#loadActiveBroadcasters();
+      this.#requestStateSync();
 
       CONFIG.sr3e = CONFIG.sr3e || {};
       CONFIG.sr3e.newsService = this;
@@ -60,7 +66,7 @@ export class NewsService {
 
    #setupSocket() {
       game.socket.on("module.sr3e", (data) => {
-         const { type, actorName, headlines, buffer, timestamp } = data;
+         const { type, actorName, headlines, buffer, timestamp, userId, broadcasters, duration } = data;
 
          switch (type) {
             case "syncBroadcast":
@@ -70,12 +76,57 @@ export class NewsService {
                this.#stopBroadcaster(actorName);
                break;
             case "requestFrameSync":
-               this.sendNextFrame();
+               this.#sendCurrentFrame();
                break;
-            case "frameUpdate":
-               this.currentDisplayFrame.set({ buffer, timestamp });
+            case "frameUpdate": {
+               const current = get(this.currentDisplayFrame).timestamp;
+               if (timestamp > current) this.currentDisplayFrame.set({ buffer, timestamp, duration });
+               break;
+            }
+            case "forceResync":
+               Hooks.call("sr3e.forceResync");
+               break;
+            case "requestStateSync":
+               this.#handleStateSyncRequest(userId);
+               break;
+            case "stateSyncResponse":
+               this.#handleStateSyncResponse(broadcasters);
                break;
          }
+      });
+   }
+
+   #requestStateSync() {
+      console.log("📡 Requesting state sync from other clients");
+      game.socket.emit("module.sr3e", {
+         type: "requestStateSync",
+         userId: game.user?.id,
+      });
+   }
+
+   #handleStateSyncRequest(requestingUserId) {
+      if (requestingUserId === game.user?.id) return;
+
+      const broadcasters = get(this.activeBroadcasters);
+      if (broadcasters.size === 0) return;
+
+      const broadcastersData = {};
+      broadcasters.forEach((headlines, actorName) => {
+         broadcastersData[actorName] = headlines;
+      });
+
+      console.log("📤 Sending state sync response to", requestingUserId);
+      game.socket.emit("module.sr3e", {
+         type: "stateSyncResponse",
+         broadcasters: broadcastersData,
+      });
+   }
+
+   #handleStateSyncResponse(broadcastersData) {
+      console.log("📥 Received state sync response:", broadcastersData);
+
+      Object.entries(broadcastersData).forEach(([actorName, headlines]) => {
+         this.#receiveBroadcastSync(actorName, headlines);
       });
    }
 
@@ -90,17 +141,55 @@ export class NewsService {
       });
    }
 
-   sendNextFrame() {
+   sendNextFrame(duration = null) {
       this.#fillFeedBuffer(10);
       const buffer = [...this.#feedBuffer];
-      const timestamp = Date.now();
-      const frame = { buffer, timestamp };
+
+      if (duration == null) duration = this.#guessDuration(buffer);
+
+      const frame = {
+         buffer,
+         timestamp: Date.now(),
+         duration,
+      };
 
       this.currentDisplayFrame.set(frame);
+
       game.socket.emit("module.sr3e", {
          type: "frameUpdate",
          buffer,
-         timestamp,
+         timestamp: frame.timestamp,
+         duration,
+      });
+
+      game.socket.emit("module.sr3e", {
+         type: "forceResync",
+      });
+
+      clearTimeout(this.#nextTick);
+      this.#nextTick = setTimeout(() => {
+         if (this.TryClaimBroadcast()) this.sendNextFrame();
+      }, duration);
+   }
+
+   #guessDuration(buffer) {
+      const AVG_CHAR_PX = 12;
+      const SCROLL_SPEED = 100;
+      const DEFAULT_MS = 10000;
+
+      const totalPx = buffer.reduce((sum, msg) => sum + msg.headline.length, 0) * AVG_CHAR_PX;
+      return Math.ceil((totalPx / SCROLL_SPEED) * 1000) || DEFAULT_MS;
+   }
+
+   #sendCurrentFrame() {
+      const frame = get(this.currentDisplayFrame);
+      if (!frame?.buffer?.length) return;
+
+      game.socket.emit("module.sr3e", {
+         type: "frameUpdate",
+         buffer: frame.buffer,
+         timestamp: frame.timestamp,
+         duration: frame.duration,
       });
    }
 
@@ -179,6 +268,10 @@ export class NewsService {
       );
 
       this.#fillFeedBuffer(this.#maxVisible);
+
+      if (!get(this.currentDisplayFrame).buffer.length && this.TryClaimBroadcast()) {
+         this.sendNextFrame();
+      }
    }
 
    #publishFeed() {
@@ -193,10 +286,8 @@ export class NewsService {
    destroy() {
       game.socket.off("module.sr3e");
       this.#initialized = false;
-
-      if (CONFIG.sr3e && CONFIG.sr3e.newsService === this) {
-         CONFIG.sr3e.newsService = null;
-      }
+      clearTimeout(this.#nextTick);
+      if (CONFIG.sr3e?.newsService === this) CONFIG.sr3e.newsService = null;
    }
 }
 

@@ -1,87 +1,55 @@
-<script>
-   import { onMount, tick } from "svelte";
-   import { getNewsService } from "../../../services/NewsService.svelte.js";
+<script lang="ts">
+   /*
+   NewsFeed.svelte is a fully passive Svelte component that visually renders a synchronized, scrolling news ticker. It subscribes to a shared NewsService and displays a buffer of messages received via socket broadcast, ensuring consistent animation across all connected clients.
+   */
 
-   let outer, inner;
-   let buffer = $state([]);
-   let animationStart = Date.now();
-   let lastFrameTimestamp = 0;
+   import { onMount } from "svelte";
+   import { getNewsService, requestFrameSync } from "../../../services/NewsService.svelte.js";
 
    const SCROLL_SPEED = 100;
    const NewsService = getNewsService();
 
+   let outer, inner;
+   let buffer = $state([]);
+   let animationStart = 0;
+   let lastFrameTimestamp = 0;
+   let frameDuration = 0;
+
+   function restartAnimation() {
+      if (!inner) return;
+      inner.style.animation = "none";
+      inner.offsetHeight;
+      inner.style.animation = "";
+      requestAnimationFrame(setOffsets);
+   }
+
    function applyFrame(frame) {
       if (!frame || frame.timestamp === lastFrameTimestamp) return;
-
-      console.log("📡 New frame received:", frame);
-
       lastFrameTimestamp = frame.timestamp;
-      buffer = frame.buffer.map((m) => `${m.sender}: "${m.headline}"`);
       animationStart = frame.timestamp;
-
-      // Reset animation so every feed restarts cleanly
-      if (inner) {
-         inner.style.animation = "none";
-         inner.offsetHeight; // force reflow
-         inner.style.animation = "";
-      }
-
-      tick().then(() => inner && requestAnimationFrame(setOffsets));
+      frameDuration = frame.duration ?? 0;
+      buffer = frame.buffer.map((m) => `${m.sender}: "${m.headline}"`);
+      restartAnimation();
    }
 
    function setOffsets() {
       if (!inner || !outer) return;
-
       const fullWidth = inner.scrollWidth;
-      const duration = fullWidth / SCROLL_SPEED;
+      const durationMS = frameDuration || (fullWidth / SCROLL_SPEED) * 1000;
+      const elapsedMS = Date.now() - animationStart;
       const root = document.documentElement;
-
-      const now = Date.now();
-      const elapsed = now - animationStart;
-      const remaining = Math.max(duration * 1000 - elapsed, 0);
-
       root.style.setProperty("--marquee-width", `${fullWidth}px`);
-      root.style.setProperty("--marquee-duration", `${duration}s`);
-      root.style.setProperty("--marquee-delay", `-${elapsed}ms`);
-
-      // If we're the driver, schedule the next frame
-      if (NewsService.TryClaimBroadcast && NewsService.TryClaimBroadcast()) {
-         console.log("🟢 Driver scheduling next frame in", remaining, "ms");
-         setTimeout(() => {
-            game.socket.emit("module.sr3e", { type: "requestFrameSync" });
-         }, remaining);
-      }
-   }
-
-   function handleFrameUpdate(data) {
-      if (data.type === "frameUpdate") {
-         console.log("📡 Socket frame update received");
-         applyFrame({ buffer: data.buffer, timestamp: data.timestamp });
-      }
+      root.style.setProperty("--marquee-duration", `${durationMS / 1000}s`);
+      root.style.setProperty("--marquee-delay", `-${elapsedMS}ms`);
    }
 
    onMount(() => {
-      console.log("🚀 NewsFeed mounted");
-
-      game.socket.on("module.sr3e", handleFrameUpdate);
-
-      const unsubscribe = NewsService.currentDisplayFrame.subscribe((frame) => {
-         applyFrame(frame);
-      });
-
-      // Force a manual kickoff
-      const claimed = NewsService.TryClaimBroadcast?.();
-      console.log("🔑 Claimed ticker lock on mount?", claimed);
-      if (claimed) {
-         console.log("📤 Sending first frame manually");
-         NewsService.sendNextFrame();
-      } else {
-         console.log("⏳ Waiting for broadcast owner to push first frame...");
-      }
-
+      Hooks.on("sr3e.forceResync", restartAnimation);
+      const unsub = NewsService.currentDisplayFrame.subscribe(applyFrame);
+      requestFrameSync();
       return () => {
-         unsubscribe();
-         game.socket.off("module.sr3e", handleFrameUpdate);
+         unsub();
+         Hooks.off("sr3e.forceResync", restartAnimation);
       };
    });
 </script>
@@ -89,8 +57,8 @@
 <div class="ticker">
    <div class="marquee-outer" bind:this={outer}>
       <div class="marquee-inner" bind:this={inner} role="status" aria-live="polite" aria-label="News Feed">
-         {#each buffer as message}
-            <span class="marquee-item">{message}</span>
+         {#each buffer as line}
+            <span class="marquee-item">{line}</span>
          {/each}
       </div>
    </div>
