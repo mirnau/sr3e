@@ -1,50 +1,92 @@
-import * as CombatService from "./../../services/CombatService.js";
+import * as CombatService from "../../services/CombatService.js";
 
 export default class SR3ECombat extends foundry.documents.Combat {
-  async startCombat() {
-    CombatService.Print("Combat Started");
-    await this._refreshDicePools();
-  }
+   async startCombat() {
+      CombatService.Print("=== COMBAT STARTED ===");
+      await this.setFlag("sr3e", "combatTurn", 1);
+      await this.setFlag("sr3e", "initiativePass", 1);
+      return super.startCombat();
+   }
 
-  _refreshDicePools() {
-    for (const combatant of this.combatants) {
-      const actor = combatant.actor;
-      if (!actor) continue;
-      
-      const dicePool = actor.getWoundModifier();
-    }
-  }
+   async rollInitiative(ids, { createCombatants = false, updateTurn = true } = {}) {
+      const updates = [];
 
-  nextTurn() {
-    throw new NotImplementedError("nextInitiativePass");
-  }
-  nextRound() {
-    throw new NotImplementedError("nextInitiativePass");
-  }
-  #nextInitiativePass() {
-    throw new NotImplementedError("nextInitiativePass");
-  }
+      for (let id of ids) {
+         const combatant = this.combatants.get(id);
+         if (!combatant || !combatant.actor) continue;
 
-  #startNewCombatTurn() {
-    throw new NotImplementedError("startNewCombatTurn");
-  }
+         const totalInit = await combatant.actor.InitiativeRoll();
+         updates.push({ _id: id, initiative: totalInit });
+      }
 
-  #recordAction() {
-    throw new NotImplementedError("recordAction");
-  }
-  #resetCombatantActions() {
-    throw new NotImplementedError("resetCombatantActions");
-  }
+      if (updates.length > 0) {
+         await this.updateEmbeddedDocuments("Combatant", updates);
+      }
 
-  #handleDelayedAction() {
-    throw new NotImplementedError("handleDelayedAction");
-  }
+      if (updateTurn) await this.update({ turn: 0 });
 
-  #handleIntervention() {
-    throw new NotImplementedError("handleIntervention");
-  }
+      return this;
+   }
 
-  static Register() {
-    CONFIG.Combat.documentClass = SR3ECombat;
-  }
+   async nextTurn() {
+      const result = await super.nextTurn();
+      const combatant = this.combatant;
+
+      if (!combatant) return result;
+
+      if (combatant.initiative < 1) {
+         await this._advanceInitiativePass();
+      } else {
+         CombatService.Print(`-> ${combatant.name} acts (Init: ${combatant.initiative})`);
+      }
+
+      return result;
+   }
+
+   async _advanceInitiativePass() {
+      const currentPass = this.getFlag("sr3e", "initiativePass") || 1;
+      CombatService.Print(`--- Ending Initiative Pass ${currentPass} ---`);
+
+      // Decrement and clamp to 0
+      for (const c of this.combatants.contents) {
+         if (c.initiative > 0) {
+            const newInit = Math.max(0, c.initiative - 10);
+            await c.update({ initiative: newInit });
+         }
+      }
+
+      const stillActive = this.combatants.contents.some((c) => c.initiative > 0);
+
+      if (stillActive) {
+         const newPass = currentPass + 1;
+         CombatService.Print(`--- New Initiative Pass ${newPass} ---`);
+         await this.setFlag("sr3e", "initiativePass", newPass);
+         await this.update({ turn: 0 });
+      } else {
+         CombatService.Print("— All Initiative Passes Completed — Proceeding to next round —");
+         await this.nextRound(); // Full round transition, clean and automatic
+      }
+   }
+
+   async nextRound() {
+      const initiativePass = this.getFlag("sr3e", "initiativePass") || 1;
+      const hasPositive = this.combatants.contents.some((c) => c.initiative > 0);
+
+      // If any combatant still has initiative AND we're mid-passes, continue rather than full reset
+      if (hasPositive && initiativePass > 0) {
+         return await this._advanceInitiativePass();
+      } else {
+         // Everybody at zero: proceed with true round reset
+         const round = this.round + 1;
+         CombatService.Print(`=== STARTING COMBAT TURN ${round} ===`);
+         await this.setFlag("sr3e", "combatTurn", round);
+         await this.setFlag("sr3e", "initiativePass", 1);
+         await this.resetAll({ updateTurn: false });
+         return super.nextRound();
+      }
+   }
+
+   static Register() {
+      CONFIG.Combat.documentClass = SR3ECombat;
+   }
 }

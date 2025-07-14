@@ -141,6 +141,6 @@
             {/if}
          </div>
       </ItemSheetComponent>
-      <JournalViewer {document} {config} />
+      <JournalViewer document={item} {config} />
    </div>
 </div>

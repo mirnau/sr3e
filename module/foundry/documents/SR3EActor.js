@@ -1,37 +1,18 @@
 import { get } from "svelte/store";
-import RollService from "../../services/RollService.js";
+import RollService from "../../services/RollService.svelte.js";
 export default class SR3EActor extends Actor {
-   get getInitiativeDice() {
-      let dice = 1;
-      // Get all bioware
-      // Get all cybeware
-      // Spell effects
-      // Adept powers
-      console.warn("SR3EActor.getInitiativeDice is not implemented. Returning 1 by default.");
-      return dice;
-   }
-
-   get AugumentedReaction() {
-      let augmentedReaction = 0;
-      // Get all bioware
-      // Get all cybeware
-      // Spell effects
-      // Adept powers
-      console.warn("SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default.");
-      return augmentedReaction;
-   }
-
+   /*
    getRollData() {
       const data = super.getRollData();
-
+      
       console.log("I WAS CALLED! getRollData");
-    
+      
       // Debug: Log the structure to see what we're working with
       console.log("Base getRollData result:", data);
       console.log("this.system:", this.system);
       console.log("this.system.attributes:", this.system.attributes);
       console.log("this.system.attributes.quickness:", this.system.attributes.quickness);
-
+      
       // The system data should already be in the data object
       // Check if attributes are already there
       if (data.attributes) {
@@ -43,21 +24,22 @@ export default class SR3EActor extends Actor {
          }
       } else {
          console.log("No attributes in data, adding manually");
-         // Add attributes manually from this.system
-         data.quickness = this.system.attributes.quickness;
-         data.intelligence = this.system.attributes.intelligence;
-         data.willpower = this.system.attributes.willpower;
-         data.strength = this.system.attributes.strength;
-         data.body = this.system.attributes.body;
-         data.charisma = this.system.attributes.charisma;
-      }
-
-      console.log("Final roll data:", data);
-      return data;
+      // Add attributes manually from this.system
+      data.quickness = this.system.attributes.quickness;
+      data.intelligence = this.system.attributes.intelligence;
+      data.willpower = this.system.attributes.willpower;
+      data.strength = this.system.attributes.strength;
+      data.body = this.system.attributes.body;
+      data.charisma = this.system.attributes.charisma;
    }
+   
+   console.log("Final roll data:", data);
+   return data;
+}
+*/
 
-   async InitiativeRoll(dice, options) {
-      await RollService.Initiative(this, dice, options);
+   async InitiativeRoll() {
+      return await RollService.Initiaitve(this);
    }
 
    async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {

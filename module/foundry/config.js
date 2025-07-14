@@ -174,7 +174,7 @@ sr3e.traits = {
    height: "sr3e.traits.height",
    weight: "sr3e.traits.weight",
    agerange: "sr3e.traits.agerange",
-   metatype: "sr3e.traits.metaType",
+   metatype: "sr3e.traits.metatype",
    child: "sr3e.traits.child",
    adolecent: "sr3e.traits.adolecent",
    youngadult: "sr3e.traits.youngadult",

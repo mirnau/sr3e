@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _SR3ECombat_instances, nextInitiativePass_fn, startNewCombatTurn_fn, recordAction_fn, resetCombatantActions_fn, handleDelayedAction_fn, handleIntervention_fn, _app6, _footer2;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _app3, _metatype, _magic, _weapon, _ammunition, _skill, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted, _app4, _app5, _app6, _footer2;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -134,6 +134,7 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      initiative: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       isBurnedOut: new foundry.data.fields.BooleanField({
         initial: false
       })
@@ -556,7 +557,7 @@ function proxy(value, parent = null, prev) {
           sources.set(prop2, s);
         }
         if (s !== void 0) {
-          var v = get$2(s);
+          var v = get$1(s);
           return v === UNINITIALIZED ? void 0 : v;
         }
         return Reflect.get(target, prop2, receiver);
@@ -565,7 +566,7 @@ function proxy(value, parent = null, prev) {
         var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
         if (descriptor && "value" in descriptor) {
           var s = sources.get(prop2);
-          if (s) descriptor.value = get$2(s);
+          if (s) descriptor.value = get$1(s);
         } else if (descriptor === void 0) {
           var source2 = sources.get(prop2);
           var value2 = source2 == null ? void 0 : source2.v;
@@ -592,7 +593,7 @@ function proxy(value, parent = null, prev) {
             s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
             sources.set(prop2, s);
           }
-          var value2 = get$2(s);
+          var value2 = get$1(s);
           if (value2 === UNINITIALIZED) {
             return false;
           }
@@ -645,7 +646,7 @@ function proxy(value, parent = null, prev) {
         return true;
       },
       ownKeys(target) {
-        get$2(version);
+        get$1(version);
         var own_keys = Reflect.ownKeys(target).filter((key2) => {
           var source3 = sources.get(key2);
           return source3 === void 0 || source3.v !== UNINITIALIZED;
@@ -956,7 +957,7 @@ function render_effect(fn) {
 }
 function template_effect(fn, thunks = [], d = derived$1) {
   const deriveds = thunks.map(d);
-  const effect2 = () => fn(...deriveds.map(get$2));
+  const effect2 = () => fn(...deriveds.map(get$1));
   return block(effect2);
 }
 function block(fn, flags2 = 0) {
@@ -1609,7 +1610,7 @@ async function tick() {
   await Promise.resolve();
   flush_sync();
 }
-function get$2(signal) {
+function get$1(signal) {
   var _a;
   var flags2 = signal.f;
   var is_derived = (flags2 & DERIVED) !== 0;
@@ -2161,7 +2162,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
     return is_array(collection) ? collection : collection == null ? [] : array_from(collection);
   });
   block(() => {
-    var array = get$2(each_array);
+    var array = get$1(each_array);
     var length = array.length;
     if (was_empty && length === 0) {
       return;
@@ -2196,7 +2197,7 @@ function each(node, flags2, get_collection, get_key, render_fn, fallback_fn = nu
         });
       }
     }
-    get$2(each_array);
+    get$1(each_array);
   });
 }
 function reconcile(array, state2, anchor, render_fn, flags2, is_inert, get_key, get_collection) {
@@ -3182,7 +3183,7 @@ function derived(stores2, fn, initial_value) {
     };
   });
 }
-function get$1(store) {
+function get(store) {
   let value;
   subscribe_to_store(store, (_) => value = _)();
   return value;
@@ -3214,9 +3215,9 @@ function store_get(store, store_name, stores2) {
     }
   }
   if (store && IS_UNMOUNTED in stores2) {
-    return get$1(store);
+    return get(store);
   }
-  return get$2(entry.source);
+  return get$1(entry.source);
 }
 function store_set(store, value) {
   store.set(value);
@@ -3405,7 +3406,7 @@ function prop(props, key, flags2, fallback) {
   var current_value = with_parent_branch(
     () => /* @__PURE__ */ derived$1(() => {
       var parent_value = getter();
-      var child_value = get$2(inner_current_value);
+      var child_value = get$1(inner_current_value);
       if (from_child) {
         from_child = false;
         was_from_child = true;
@@ -3418,18 +3419,18 @@ function prop(props, key, flags2, fallback) {
   if (!immutable) current_value.equals = safe_equals;
   return function(value, mutation) {
     if (arguments.length > 0) {
-      const new_value = mutation ? get$2(current_value) : bindable ? proxy(value) : value;
+      const new_value = mutation ? get$1(current_value) : bindable ? proxy(value) : value;
       if (!current_value.equals(new_value)) {
         from_child = true;
         set(inner_current_value, new_value);
         if (fallback_used && fallback_value !== void 0) {
           fallback_value = new_value;
         }
-        untrack(() => get$2(current_value));
+        untrack(() => get$1(current_value));
       }
       return value;
     }
-    return get$2(current_value);
+    return get$1(current_value);
   };
 }
 function cubic_out(t) {
@@ -3810,11 +3811,11 @@ function Dossier($$anchor, $$props) {
   let metatype = /* @__PURE__ */ derived$1(() => actor().items.find((i) => i.type === "metatype"));
   let imgPath = /* @__PURE__ */ derived$1(() => {
     var _a;
-    return ((_a = get$2(metatype)) == null ? void 0 : _a.img) || "";
+    return ((_a = get$1(metatype)) == null ? void 0 : _a.img) || "";
   });
   let imgName = /* @__PURE__ */ derived$1(() => {
     var _a;
-    return ((_a = get$2(metatype)) == null ? void 0 : _a.name) || "";
+    return ((_a = get$1(metatype)) == null ? void 0 : _a.name) || "";
   });
   function toggleDetails() {
     store_set(isDetailsOpenStore, !$isDetailsOpenStore());
@@ -3870,10 +3871,10 @@ function Dossier($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       Image($$anchor2, {
         get src() {
-          return get$2(imgPath);
+          return get$1(imgPath);
         },
         get title() {
-          return get$2(imgName);
+          return get$1(imgName);
         }
       });
     };
@@ -4160,7 +4161,7 @@ function swallowDirectional(e) {
 }
 var on_click$a = (__1, modifiersArray) => {
   set(modifiersArray, proxy([
-    ...get$2(modifiersArray),
+    ...get$1(modifiersArray),
     { name: "Modifier", value: 0 }
   ]));
 };
@@ -4223,7 +4224,7 @@ function RollComposerComponent($$anchor, $$props) {
         linkedAttributeString = skill.system.activeSkill.linkedAttribute;
         console.log("linkedAttributeString", linkedAttributeString);
         set(associatedDicePoolString, proxy(skill.system.activeSkill.associatedDicePool));
-        associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${get$2(associatedDicePoolString)}`);
+        associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${get$1(associatedDicePoolString)}`);
         console.log("associatedDicePoolStore", $associatedDicePoolStore());
       } else if (skill.system.skillType === "knowledge") {
         linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
@@ -4238,22 +4239,22 @@ function RollComposerComponent($$anchor, $$props) {
     }
   });
   function updateFocusables() {
-    const selector = get$2(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
+    const selector = get$1(isDefaulting) ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]" : "select, .counter-component[tabindex='0'], button[type]";
     focusables = Array.from(containerEl.querySelectorAll(selector));
   }
   function KarmaCostCalculator() {
-    set(karmaCost, 0.5 * get$2(diceBought) * (get$2(diceBought) + 1));
+    set(karmaCost, 0.5 * get$1(diceBought) * (get$1(diceBought) + 1));
   }
   function AddDiceFromPool() {
     if ($associatedDicePoolStore() > 0) {
-      set(poolDiceBought, get$2(poolDiceBought) + 1);
+      set(poolDiceBought, get$1(poolDiceBought) + 1);
       store_set(associatedDicePoolStore, $associatedDicePoolStore() - 1);
     }
   }
   function RemoveDiceFromPool() {
   }
   user_effect(() => {
-    set(isDefaulting, get$2(isDefaultingAsString) === "true");
+    set(isDefaulting, get$1(isDefaultingAsString) === "true");
     updateFocusables();
   });
   user_effect(() => {
@@ -4263,7 +4264,7 @@ function RollComposerComponent($$anchor, $$props) {
         value: -$penalty()
       }
     ] : [];
-    if (get$2(isDefaulting)) {
+    if (get$1(isDefaulting)) {
       switch ($$props.caller.type) {
         case "attribute":
           set(modifiersArray, proxy([
@@ -4295,7 +4296,7 @@ function RollComposerComponent($$anchor, $$props) {
     }
   });
   user_effect(() => {
-    const tn = Number(get$2(targetNumber));
+    const tn = Number(get$1(targetNumber));
     if (!difficulties) return;
     if (tn === 2) set(difficulty, proxy(difficulties.simple));
     else if (tn === 3) set(difficulty, proxy(difficulties.routine));
@@ -4320,20 +4321,20 @@ function RollComposerComponent($$anchor, $$props) {
     selectEl == null ? void 0 : selectEl.focus();
   }
   user_effect(() => {
-    set(modifiersTotal, proxy(get$2(modifiersArray).reduce((acc, val) => acc + val.value, 0)));
+    set(modifiersTotal, proxy(get$1(modifiersArray).reduce((acc, val) => acc + val.value, 0)));
   });
   user_effect(() => {
-    set(canSubmit, get$2(targetNumber) + get$2(modifiersTotal) < 2);
+    set(canSubmit, get$1(targetNumber) + get$1(modifiersTotal) < 2);
   });
   function Submit() {
-    store_set(karmaPoolStore, $karmaPoolStore() - get$2(karmaCost));
+    store_set(karmaPoolStore, $karmaPoolStore() - get$1(karmaCost));
     $$props.onclose({
-      dice: $$props.caller.dice + get$2(diceBought),
+      dice: $$props.caller.dice + get$1(diceBought),
       attributeName: $$props.caller.key,
       options: {
-        targetNumber: get$2(targetNumber),
-        modifiers: get$2(modifiersArray),
-        explodes: !get$2(isDefaulting)
+        targetNumber: get$1(targetNumber),
+        modifiers: get$1(modifiersArray),
+        explodes: !get$1(isDefaulting)
       }
     });
   }
@@ -4402,7 +4403,7 @@ function RollComposerComponent($$anchor, $$props) {
   Counter(node, {
     min: "2",
     get value() {
-      return get$2(targetNumber);
+      return get$1(targetNumber);
     },
     set value($$value) {
       set(targetNumber, proxy($$value));
@@ -4414,24 +4415,24 @@ function RollComposerComponent($$anchor, $$props) {
   var h4_1 = sibling(button, 2);
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
-  each(node_1, 17, () => get$2(modifiersArray), index, ($$anchor2, modifier, i) => {
+  each(node_1, 17, () => get$1(modifiersArray), index, ($$anchor2, modifier, i) => {
     var div_4 = root_2$k();
     var h4_2 = child(div_4);
     var text_3 = child(h4_2);
     var node_2 = sibling(h4_2, 2);
     Counter(node_2, {
       get value() {
-        return get$2(modifier).value;
+        return get$1(modifier).value;
       },
       set value($$value) {
-        get$2(modifier).value = $$value;
+        get$1(modifier).value = $$value;
       }
     });
     var button_1 = sibling(node_2, 2);
     button_1.__click = () => {
-      set(modifiersArray, proxy(get$2(modifiersArray).filter((_, j) => j !== i)));
+      set(modifiersArray, proxy(get$1(modifiersArray).filter((_, j) => j !== i)));
     };
-    template_effect(() => set_text(text_3, get$2(modifier).name));
+    template_effect(() => set_text(text_3, get$1(modifier).name));
     append($$anchor2, div_4);
   });
   var node_3 = sibling(div_3, 2);
@@ -4452,7 +4453,7 @@ function RollComposerComponent($$anchor, $$props) {
         onIncrement: AddDiceFromPool,
         onDecrement: RemoveDiceFromPool,
         get value() {
-          return get$2(poolDiceBought);
+          return get$1(poolDiceBought);
         },
         set value($$value) {
           set(poolDiceBought, proxy($$value));
@@ -4461,16 +4462,16 @@ function RollComposerComponent($$anchor, $$props) {
       template_effect(
         ($0) => {
           set_text(text_4, $0);
-          set_text(text_5, `Dice Added: ${get$2(poolDiceBought) ?? ""}`);
+          set_text(text_5, `Dice Added: ${get$1(poolDiceBought) ?? ""}`);
         },
         [
-          () => localize($$props.config.dicepools[get$2(associatedDicePoolString)])
+          () => localize($$props.config.dicepools[get$1(associatedDicePoolString)])
         ]
       );
       append($$anchor2, div_5);
     };
     if_block(node_3, ($$render) => {
-      if (get$2(associatedDicePoolString) !== "") $$render(consequent);
+      if (get$1(associatedDicePoolString) !== "") $$render(consequent);
     });
   }
   var node_5 = sibling(node_3, 2);
@@ -4489,17 +4490,17 @@ function RollComposerComponent($$anchor, $$props) {
         onIncrement: KarmaCostCalculator,
         onDecrement: KarmaCostCalculator,
         get value() {
-          return get$2(diceBought);
+          return get$1(diceBought);
         },
         set value($$value) {
           set(diceBought, proxy($$value));
         }
       });
-      template_effect(() => set_text(text_6, `Extra Dice Cost: ${get$2(karmaCost) ?? ""}`));
+      template_effect(() => set_text(text_6, `Extra Dice Cost: ${get$1(karmaCost) ?? ""}`));
       append($$anchor2, div_6);
     };
     if_block(node_5, ($$render) => {
-      if (!get$2(isDefaulting)) $$render(consequent_1);
+      if (!get$1(isDefaulting)) $$render(consequent_1);
     });
   }
   var button_2 = sibling(node_5, 2);
@@ -4510,13 +4511,13 @@ function RollComposerComponent($$anchor, $$props) {
   bind_this(button_3, ($$value) => clearBtn = $$value, () => clearBtn);
   bind_this(div, ($$value) => containerEl = $$value, () => containerEl);
   template_effect(() => {
-    set_text(text2, get$2(title));
-    set_text(text_1, get$2(difficulty));
-    set_text(text_2, `Modifiers Total: ${get$2(modifiersTotal) ?? ""}`);
-    button_2.disabled = get$2(canSubmit);
+    set_text(text2, get$1(title));
+    set_text(text_1, get$1(difficulty));
+    set_text(text_2, `Modifiers Total: ${get$1(modifiersTotal) ?? ""}`);
+    button_2.disabled = get$1(canSubmit);
   });
   event("keydown", div, handleKey, true);
-  bind_select_value(select, () => get$2(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
+  bind_select_value(select, () => get$1(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
   append($$anchor, div);
   pop();
   $$cleanup();
@@ -4536,7 +4537,7 @@ function AttributeCard($$anchor, $$props) {
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $valueRWStore = () => store_get(get$2(valueRWStore), "$valueRWStore", $$stores);
+  const $valueRWStore = () => store_get(get$1(valueRWStore), "$valueRWStore", $$stores);
   const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
   const storeManager2 = StoreManager.Subscribe($$props.actor);
   let valueROStore = storeManager2.GetSumROStore(`attributes.${$$props.key}`);
@@ -4547,11 +4548,11 @@ function AttributeCard($$anchor, $$props) {
   let isMinLimit = /* @__PURE__ */ derived$1(() => $valueROStore().value <= 1);
   let valueRWStore = /* @__PURE__ */ derived$1(() => $isShoppingState() && !$attributeAssignmentLockedStore() ? baseValueStore : null);
   user_effect(() => {
-    if (!$attributeAssignmentLockedStore() && $isShoppingState() && $valueROStore().sum < 1 && $valueROStore().mod < 0 && get$2(valueRWStore)) {
+    if (!$attributeAssignmentLockedStore() && $isShoppingState() && $valueROStore().sum < 1 && $valueROStore().mod < 0 && get$1(valueRWStore)) {
       let deficit = 1 - $valueROStore().sum;
       while (deficit > 0 && $attributePointStore() > 0) {
         store_set(attributePointStore, $attributePointStore() - 1);
-        store_set(get$2(valueRWStore), $valueRWStore() + 1);
+        store_set(get$1(valueRWStore), $valueRWStore() + 1);
         deficit -= 1;
       }
     }
@@ -4559,17 +4560,17 @@ function AttributeCard($$anchor, $$props) {
   let activeModal = null;
   let isModalOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
   function add(change) {
-    if (!$attributeAssignmentLockedStore() && $isShoppingState() && get$2(valueRWStore)) {
+    if (!$attributeAssignmentLockedStore() && $isShoppingState() && get$1(valueRWStore)) {
       const newPoints = $attributePointStore() - change;
       if (newPoints >= 0) {
         store_set(attributePointStore, newPoints);
-        store_set(get$2(valueRWStore), $valueRWStore() + change);
+        store_set(get$1(valueRWStore), $valueRWStore() + change);
       }
     }
   }
   const increment2 = () => add(1);
   const decrement2 = () => {
-    if (!get$2(isMinLimit)) add(-1);
+    if (!get$1(isMinLimit)) add(-1);
   };
   function handleEscape(e) {
     if (e.key === "Escape" && activeModal) {
@@ -4642,7 +4643,7 @@ function AttributeCard($$anchor, $$props) {
       template_effect(
         ($0) => {
           set_text(text2, $0);
-          set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$2(isMinLimit) ? "disabled" : "") ?? ""}`);
+          set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
           set_text(text_1, $valueROStore().sum);
           set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
         },
@@ -6370,8 +6371,8 @@ function Attributes($$anchor, $$props) {
       var fragment_1 = root_1$r();
       var node_2 = first_child(fragment_1);
       each(node_2, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor3, $$item) => {
-        let key = () => get$2($$item)[0];
-        let stat = () => get$2($$item)[1];
+        let key = () => get$1($$item)[0];
+        let stat = () => get$1($$item)[1];
         AttributeCard($$anchor3, {
           get actor() {
             return actor();
@@ -6398,7 +6399,7 @@ function Attributes($$anchor, $$props) {
           });
         };
         if_block(node_3, ($$render) => {
-          if (get$2(isAwakened)) $$render(consequent);
+          if (get$1(isAwakened)) $$render(consequent);
         });
       }
       var node_4 = sibling(node_3, 2);
@@ -6534,7 +6535,7 @@ function DicePools($$anchor, $$props) {
           append($$anchor3, fragment_2);
         };
         if_block(node_5, ($$render) => {
-          if (get$2(isAwakened)) $$render(consequent);
+          if (get$1(isAwakened)) $$render(consequent);
         });
       }
       append($$anchor2, fragment_1);
@@ -6783,7 +6784,7 @@ function Karma($$anchor, $$props) {
       const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
       StatCard$1(node_2, {
         get label() {
-          return get$2(expression);
+          return get$1(expression);
         },
         get value() {
           return $goodKarmaStore();
@@ -6793,7 +6794,7 @@ function Karma($$anchor, $$props) {
       const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
       StatCard$1(node_3, {
         get label() {
-          return get$2(expression_1);
+          return get$1(expression_1);
         },
         get value() {
           return $karmaPoolStore();
@@ -6803,7 +6804,7 @@ function Karma($$anchor, $$props) {
       const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
       StatCard$1(node_4, {
         get label() {
-          return get$2(expression_2);
+          return get$1(expression_2);
         },
         get value() {
           return $essenceStore().sum;
@@ -6892,7 +6893,7 @@ async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacter
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
       const store = storeManager.getActorStore($$props.actor.id, stores.activeSkillsIds);
-      const current = get$1(store);
+      const current = get(store);
       store.set(current.filter((sid) => sid !== id));
     }
     $$props.app.close();
@@ -7064,8 +7065,8 @@ function ActiveSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "alt", $$props.skill.name);
       set_text(text2, $$props.skill.name);
       set_text(text_1, $valueStore());
-      button.disabled = get$2(disableValueControls);
-      button_1.disabled = get$2(disableValueControls);
+      button.disabled = get$1(disableValueControls);
+      button_1.disabled = get$1(disableValueControls);
       button_3.disabled = $valueStore() <= 1;
       set_text(text_2, $0);
       set_text(text_3, $1);
@@ -7136,7 +7137,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacter
       const id = $$props.skill.id;
       await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
       const store = storeManager.getActorStore($$props.actor.id, stores$1.knowledgeSkillsIds);
-      const current = get$1(store);
+      const current = get(store);
       store.set(current.filter((sid) => sid !== id));
     }
     $$props.app.close();
@@ -7308,8 +7309,8 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
       set_attribute(img, "alt", $$props.skill.name);
       set_text(text2, $$props.skill.name);
       set_text(text_1, $valueStore());
-      button.disabled = get$2(disableValueControls);
-      button_1.disabled = get$2(disableValueControls);
+      button.disabled = get$1(disableValueControls);
+      button_1.disabled = get$1(disableValueControls);
       button_3.disabled = $valueStore() <= 1;
       set_text(text_2, $0);
       set_text(text_3, $1);
@@ -7432,7 +7433,7 @@ async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCr
     const id = $$props.skill.id;
     await $$props.actor.deleteEmbeddedDocuments("Item", [id], { render: false });
     const store = storeManager.getActorStore($$props.actor.id, stores$1.languageSkillsIds);
-    store.set(get$1(store).filter((sid) => sid !== id));
+    store.set(get(store).filter((sid) => sid !== id));
     $$props.app.close();
   }
 }
@@ -7468,7 +7469,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     );
     $$props.skill.update(
       {
-        "system.languageSkill.readwrite.value": get$2(readWrite)
+        "system.languageSkill.readwrite.value": get$1(readWrite)
       },
       { render: false }
     );
@@ -7477,7 +7478,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     await $$props.skill.update(
       {
         "system.languageSkill.value": $valueStore(),
-        "system.languageSkill.readwrite.value": get$2(readWrite)
+        "system.languageSkill.readwrite.value": get$1(readWrite)
       },
       { render: false }
     );
@@ -7607,9 +7608,9 @@ function LanguageSkillEditorApp($$anchor, $$props) {
       set_text(text2, $$props.skill.name);
       set_text(text_1, $valueStore());
       set_text(text_2, `${$0 ?? ""}:`);
-      set_text(text_3, get$2(readWrite));
-      button.disabled = get$2(disableValueControls);
-      button_1.disabled = get$2(disableValueControls);
+      set_text(text_3, get$1(readWrite));
+      button.disabled = get$1(disableValueControls);
+      button_1.disabled = get$1(disableValueControls);
       button_3.disabled = $valueStore() <= 1;
       set_text(text_4, $1);
       set_text(text_5, $2);
@@ -7719,9 +7720,9 @@ var on_click$6 = (e, Roll2, skill) => Roll2(e, skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
-var on_click_1$5 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$2(specialization).name);
+var on_click_1$5 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
 var on_keydown_2 = (e, Roll2, skill, specialization) => {
-  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$2(specialization).name);
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$6 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
@@ -7747,7 +7748,7 @@ function ActiveSkillCard($$anchor, $$props) {
   async function Roll2(e, skillId, specializationName2 = null) {
     var _a, _b;
     if (e.shiftKey) {
-      if (get$2(isModalOpen)) return;
+      if (get$1(isModalOpen)) return;
       set(isModalOpen, true);
       const rollType = specializationName2 ? "specialization" : "skill";
       const rollName = specializationName2 || skill().name;
@@ -7819,8 +7820,8 @@ function ActiveSkillCard($$anchor, $$props) {
             var h1_1 = sibling(div_5, 2);
             var text_3 = child(h1_1);
             template_effect(() => {
-              set_text(text_2, get$2(specialization).name);
-              set_text(text_3, get$2(specialization).value);
+              set_text(text_2, get$1(specialization).name);
+              set_text(text_3, get$1(specialization).value);
             });
             append($$anchor4, div_4);
           });
@@ -7865,8 +7866,8 @@ function ActiveSkillCard($$anchor, $$props) {
             var text_7 = child(h1_3);
             template_effect(() => {
               toggle_class(div_9, "button", !$isShoppingState());
-              set_text(text_6, get$2(specialization).name);
-              set_text(text_7, get$2(specialization).value);
+              set_text(text_6, get$1(specialization).name);
+              set_text(text_7, get$1(specialization).value);
             });
             append($$anchor4, div_9);
           });
@@ -7945,8 +7946,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
     var h1_1 = sibling(div_5, 2);
     var text_3 = child(h1_1);
     template_effect(() => {
-      set_text(text_2, get$2(specialization).name);
-      set_text(text_3, get$2(specialization).value);
+      set_text(text_2, get$1(specialization).name);
+      set_text(text_3, get$1(specialization).value);
     });
     append($$anchor2, div_4);
   });
@@ -8019,8 +8020,8 @@ function LanguageSkillCard($$anchor, $$props) {
     var h1_2 = sibling(div_7, 2);
     var text_4 = child(h1_2);
     template_effect(() => {
-      set_text(text_3, get$2(specialization).name);
-      set_text(text_4, get$2(specialization).value);
+      set_text(text_3, get$1(specialization).name);
+      set_text(text_4, get$1(specialization).value);
     });
     append($$anchor2, div_6);
   });
@@ -8061,13 +8062,13 @@ function SkillCategory($$anchor, $$props) {
   each(node, 17, categoryOfSkills, (skill) => skill._id, ($$anchor2, skill) => {
     var fragment = root_1$j();
     var node_1 = first_child(fragment);
-    html(node_1, () => `<script>console.log(${JSON.stringify(get$2(skill))})<\/script>`);
+    html(node_1, () => `<script>console.log(${JSON.stringify(get$1(skill))})<\/script>`);
     var node_2 = sibling(node_1, 2);
     {
       var consequent = ($$anchor3) => {
         ActiveSkillCard($$anchor3, {
           get skill() {
-            return get$2(skill);
+            return get$1(skill);
           },
           get actor() {
             return actor();
@@ -8084,7 +8085,7 @@ function SkillCategory($$anchor, $$props) {
           var consequent_1 = ($$anchor4) => {
             KnowledgeSkillCard($$anchor4, {
               get skill() {
-                return get$2(skill);
+                return get$1(skill);
               },
               get actor() {
                 return actor();
@@ -8101,7 +8102,7 @@ function SkillCategory($$anchor, $$props) {
               var consequent_2 = ($$anchor5) => {
                 LanguageSkillCard($$anchor5, {
                   get skill() {
-                    return get$2(skill);
+                    return get$1(skill);
                   },
                   get actor() {
                     return actor();
@@ -8114,13 +8115,13 @@ function SkillCategory($$anchor, $$props) {
               var alternate = ($$anchor5) => {
                 var div_3 = root_7$1();
                 var text_1 = child(div_3);
-                template_effect(() => set_text(text_1, `Unknown skill type: ${get$2(skill).name ?? ""}`));
+                template_effect(() => set_text(text_1, `Unknown skill type: ${get$1(skill).name ?? ""}`));
                 append($$anchor5, div_3);
               };
               if_block(
                 node_4,
                 ($$render) => {
-                  if (get$2(skill).system.skillType === "language") $$render(consequent_2);
+                  if (get$1(skill).system.skillType === "language") $$render(consequent_2);
                   else $$render(alternate, false);
                 },
                 true
@@ -8131,7 +8132,7 @@ function SkillCategory($$anchor, $$props) {
           if_block(
             node_3,
             ($$render) => {
-              if (get$2(skill).system.skillType === "knowledge") $$render(consequent_1);
+              if (get$1(skill).system.skillType === "knowledge") $$render(consequent_1);
               else $$render(alternate_1, false);
             },
             true
@@ -8140,7 +8141,7 @@ function SkillCategory($$anchor, $$props) {
         append($$anchor3, fragment_2);
       };
       if_block(node_2, ($$render) => {
-        if (get$2(skill).system.skillType === "active") $$render(consequent);
+        if (get$1(skill).system.skillType === "active") $$render(consequent);
         else $$render(alternate_2, false);
       });
     }
@@ -8171,7 +8172,7 @@ function SkillsLanguage($$anchor, $$props) {
   SkillCategory(node, {
     attribute: "intelligence",
     get skills() {
-      return get$2(languageSkills);
+      return get$1(languageSkills);
     },
     get actor() {
       return actor();
@@ -8203,7 +8204,7 @@ function SkillsKnowledge($$anchor, $$props) {
   SkillCategory(node, {
     attribute: "intelligence",
     get skills() {
-      return get$2(knowledgeSkills);
+      return get$1(knowledgeSkills);
     },
     get actor() {
       return actor();
@@ -8242,12 +8243,12 @@ function SkillsActive($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = comment();
       var node = first_child(fragment_1);
-      each(node, 17, () => get$2(attributeSortedSkills), index, ($$anchor3, category) => {
+      each(node, 17, () => get$1(attributeSortedSkills), index, ($$anchor3, category) => {
         var fragment_2 = comment();
         var node_1 = first_child(fragment_2);
         {
           var consequent = ($$anchor4) => {
-            SkillCategory($$anchor4, spread_props(() => get$2(category), {
+            SkillCategory($$anchor4, spread_props(() => get$1(category), {
               get actor() {
                 return actor();
               },
@@ -8257,7 +8258,7 @@ function SkillsActive($$anchor, $$props) {
             }));
           };
           if_block(node_1, ($$render) => {
-            if (get$2(category).skills.length > 0) $$render(consequent);
+            if (get$1(category).skills.length > 0) $$render(consequent);
           });
         }
         append($$anchor3, fragment_2);
@@ -8339,7 +8340,7 @@ function Skills($$anchor, $$props) {
             if_block(
               node_3,
               ($$render) => {
-                if (get$2(activeTab) === "language") $$render(consequent_2);
+                if (get$1(activeTab) === "language") $$render(consequent_2);
               },
               true
             );
@@ -8349,7 +8350,7 @@ function Skills($$anchor, $$props) {
         if_block(
           node_2,
           ($$render) => {
-            if (get$2(activeTab) === "knowledge") $$render(consequent_1);
+            if (get$1(activeTab) === "knowledge") $$render(consequent_1);
             else $$render(alternate, false);
           },
           true
@@ -8358,16 +8359,16 @@ function Skills($$anchor, $$props) {
       append($$anchor2, fragment_2);
     };
     if_block(node_1, ($$render) => {
-      if (get$2(activeTab) === "active") $$render(consequent);
+      if (get$1(activeTab) === "active") $$render(consequent);
       else $$render(alternate_1, false);
     });
   }
   template_effect(
     ($0) => {
       set_text(text2, $0);
-      toggle_class(button, "active", get$2(activeTab) === "active");
-      toggle_class(button_1, "active", get$2(activeTab) === "knowledge");
-      toggle_class(button_2, "active", get$2(activeTab) === "language");
+      toggle_class(button, "active", get$1(activeTab) === "active");
+      toggle_class(button_1, "active", get$1(activeTab) === "knowledge");
+      toggle_class(button_2, "active", get$1(activeTab) === "language");
     },
     [() => localize(config().skill.skill)]
   );
@@ -8689,14 +8690,14 @@ function Health($$anchor, $$props) {
   }
   user_effect(() => {
     var _a;
-    store_set(penalty, proxy((_a = get$2(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
+    store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
   });
   let ecg;
   onMount(() => {
     set(ecgService, proxy(new ElectroCardiogramService(actor(), {
       find: (selector) => {
-        if (selector === "#ecg-canvas") return [get$2(ecgCanvas)];
-        if (selector === "#ecg-point-canvas") return [get$2(ecgPointCanvas)];
+        if (selector === "#ecg-canvas") return [get$1(ecgCanvas)];
+        if (selector === "#ecg-point-canvas") return [get$1(ecgPointCanvas)];
         return [];
       },
       html: ecg.parentElement
@@ -8717,9 +8718,9 @@ function Health($$anchor, $$props) {
   });
   var div = sibling(node, 2);
   var canvas = child(div);
-  bind_this(canvas, ($$value) => set(ecgCanvas, $$value), () => get$2(ecgCanvas));
+  bind_this(canvas, ($$value) => set(ecgCanvas, $$value), () => get$1(ecgCanvas));
   var canvas_1 = sibling(canvas, 2);
-  bind_this(canvas_1, ($$value) => set(ecgPointCanvas, $$value), () => get$2(ecgPointCanvas));
+  bind_this(canvas_1, ($$value) => set(ecgPointCanvas, $$value), () => get$1(ecgPointCanvas));
   bind_this(div, ($$value) => ecg = $$value, () => ecg);
   var div_1 = sibling(div, 2);
   var div_2 = child(div_1);
@@ -8812,7 +8813,7 @@ function Health($$anchor, $$props) {
       return $penalty();
     },
     get label() {
-      return get$2(expression);
+      return get$1(expression);
     }
   });
   var node_6 = sibling(node_5, 2);
@@ -8822,7 +8823,7 @@ function Health($$anchor, $$props) {
       return $overflow();
     },
     get label() {
-      return get$2(expression_1);
+      return get$1(expression_1);
     }
   });
   append($$anchor, fragment);
@@ -8844,8 +8845,8 @@ function Arsenal($$anchor, $$props) {
     var div_2 = child(div_1);
     var text2 = child(div_2);
     template_effect(() => {
-      set_value(div_1, get$2(item2).id);
-      set_text(text2, get$2(item2).name);
+      set_value(div_1, get$1(item2).id);
+      set_text(text2, get$1(item2).name);
     });
     append($$anchor2, div_1);
   });
@@ -9032,7 +9033,7 @@ function Inventory($$anchor, $$props) {
         if_block(
           node_2,
           ($$render) => {
-            if (get$2(activeTab) === inventory.garage) $$render(consequent_1);
+            if (get$1(activeTab) === inventory.garage) $$render(consequent_1);
           },
           true
         );
@@ -9040,15 +9041,15 @@ function Inventory($$anchor, $$props) {
       append($$anchor2, fragment_2);
     };
     if_block(node_1, ($$render) => {
-      if (get$2(activeTab) === inventory.arsenal) $$render(consequent);
+      if (get$1(activeTab) === inventory.arsenal) $$render(consequent);
       else $$render(alternate, false);
     });
   }
   template_effect(
     ($0) => {
       set_text(text2, $0);
-      toggle_class(button, "active", get$2(activeTab) === inventory.arsenal);
-      toggle_class(button_1, "active", get$2(activeTab) === inventory.garage);
+      toggle_class(button, "active", get$1(activeTab) === inventory.arsenal);
+      toggle_class(button_1, "active", get$1(activeTab) === inventory.garage);
     },
     [
       () => localize(config().inventory.inventory)
@@ -9180,9 +9181,9 @@ function CharacterSheetApp($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = comment();
       var node = first_child(fragment_1);
-      each(node, 17, () => get$2(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
-        let Comp = () => get$2($$item).comp;
-        let props = () => get$2($$item).props;
+      each(node, 17, () => get$1(cards), ({ comp: Comp, props }) => props.id, ($$anchor3, $$item) => {
+        let Comp = () => get$1($$item).comp;
+        let props = () => get$1($$item).props;
         var div = root_2$c();
         var div_1 = child(div);
         var div_2 = sibling(child(div_1), 2);
@@ -9213,7 +9214,7 @@ function NeonName($$anchor, $$props) {
   let malfunctioningIndexes = [];
   const actorName = storeManager2.GetShallowStore(actor().id, stores$1.actorName, actor().name);
   let name = /* @__PURE__ */ derived$1($actorName);
-  let neonHTML = /* @__PURE__ */ derived$1(() => getNeonHtml(get$2(name)));
+  let neonHTML = /* @__PURE__ */ derived$1(() => getNeonHtml(get$1(name)));
   const randomInRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
   function getNeonHtml(name2) {
     malfunctioningIndexes = [];
@@ -9233,7 +9234,7 @@ function NeonName($$anchor, $$props) {
   }
   var div = root$p();
   var node = child(div);
-  html(node, () => get$2(neonHTML));
+  html(node, () => get$1(neonHTML));
   append($$anchor, div);
   pop();
   $$cleanup();
@@ -9542,7 +9543,7 @@ scheduleNextFrame_fn = function() {
   ));
 };
 receiveFrameUpdate_fn = function(buffer, timestamp, duration) {
-  const current = get$1(this.currentDisplayFrame);
+  const current = get(this.currentDisplayFrame);
   if (!Array.isArray(buffer)) return;
   if (!timestamp) return;
   if (timestamp <= current.timestamp) return;
@@ -9599,7 +9600,7 @@ guessDuration_fn = function(buffer) {
 handleStateSyncRequest_fn = function(requestingUserId) {
   var _a;
   if (requestingUserId === ((_a = game.user) == null ? void 0 : _a.id)) return;
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   if (broadcasters.size === 0) return;
   const broadcastersData = {};
   broadcasters.forEach((headlines, actorName) => {
@@ -9616,7 +9617,7 @@ handleStateSyncResponse_fn = function(broadcastersData) {
   });
 };
 receiveBroadcastSync_fn = function(actorName, headlines) {
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   if (!headlines || headlines.length === 0) {
     broadcasters.delete(actorName);
     __privateGet(this, _currentIndices).delete(actorName);
@@ -9629,14 +9630,14 @@ receiveBroadcastSync_fn = function(actorName, headlines) {
   __privateMethod(this, _NewsService_instances, updateFeedBuffer_fn).call(this);
 };
 stopBroadcaster_fn = function(actorName) {
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   broadcasters.delete(actorName);
   __privateGet(this, _currentIndices).delete(actorName);
   this.activeBroadcasters.set(new Map(broadcasters));
   __privateMethod(this, _NewsService_instances, updateFeedBuffer_fn).call(this);
 };
 pumpNextHeadline_fn = function() {
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   if (broadcasters.size === 0) return null;
   const broadcasterNames = Array.from(broadcasters.keys());
   for (let offset = 0; offset < broadcasterNames.length; offset++) {
@@ -9654,7 +9655,7 @@ pumpNextHeadline_fn = function() {
 };
 fillFeedBuffer_fn = function(minLength = 10) {
   const buffer = [...__privateGet(this, _feedBuffer)];
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   while (buffer.length < minLength) {
     const nextHeadline = __privateMethod(this, _NewsService_instances, pumpNextHeadline_fn).call(this);
     if (!nextHeadline) break;
@@ -9670,7 +9671,7 @@ fillFeedBuffer_fn = function(minLength = 10) {
   __privateMethod(this, _NewsService_instances, publishFeed_fn).call(this);
 };
 updateFeedBuffer_fn = function() {
-  const broadcasters = get$1(this.activeBroadcasters);
+  const broadcasters = get(this.activeBroadcasters);
   if (broadcasters.size === 0) {
     __privateSet(this, _feedBuffer, []);
     __privateMethod(this, _NewsService_instances, publishFeed_fn).call(this);
@@ -9761,7 +9762,7 @@ function NewsFeed($$anchor, $$props) {
   function handleKeydown2(event2) {
     if (event2.key === "F2") {
       event2.preventDefault();
-      set(isOn, !get$2(isOn));
+      set(isOn, !get$1(isOn));
     }
   }
   onMount(() => {
@@ -9787,10 +9788,10 @@ function NewsFeed($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       var fragment = comment();
       var node_1 = first_child(fragment);
-      each(node_1, 17, () => get$2(buffer), index, ($$anchor3, line) => {
+      each(node_1, 17, () => get$1(buffer), index, ($$anchor3, line) => {
         var span = root_2$b();
         var text2 = child(span);
-        template_effect(() => set_text(text2, get$2(line)));
+        template_effect(() => set_text(text2, get$1(line)));
         append($$anchor3, span);
       });
       append($$anchor2, fragment);
@@ -9800,7 +9801,7 @@ function NewsFeed($$anchor, $$props) {
       append($$anchor2, span_1);
     };
     if_block(node, ($$render) => {
-      if (get$2(isOn)) $$render(consequent);
+      if (get$1(isOn)) $$render(consequent);
       else $$render(alternate, false);
     });
   }
@@ -9823,8 +9824,8 @@ function CreationPointList($$anchor, $$props) {
     var div_2 = sibling(h1, 2);
     var text_1 = child(div_2);
     template_effect(() => {
-      set_text(text2, get$2(point).value);
-      set_text(text_1, get$2(point).text);
+      set_text(text2, get$1(point).value);
+      set_text(text_1, get$1(point).text);
     });
     append($$anchor2, div_1);
   });
@@ -9904,7 +9905,7 @@ function AttributePointsState($$anchor, $$props) {
   });
   CreationPointList($$anchor, {
     get points() {
-      return get$2(pointList);
+      return get$1(pointList);
     },
     containerCSS: "attribute-point-assignment"
   });
@@ -9972,7 +9973,7 @@ function SkillPointsState($$anchor, $$props) {
   });
   CreationPointList($$anchor, {
     get points() {
-      return get$2(pointList);
+      return get$1(pointList);
     },
     containerCSS: "skill-point-assignment"
   });
@@ -10466,7 +10467,7 @@ sr3e.traits = {
   height: "sr3e.traits.height",
   weight: "sr3e.traits.weight",
   agerange: "sr3e.traits.agerange",
-  metatype: "sr3e.traits.metaType",
+  metatype: "sr3e.traits.metatype",
   child: "sr3e.traits.child",
   adolecent: "sr3e.traits.adolecent",
   youngadult: "sr3e.traits.youngadult",
@@ -10722,7 +10723,7 @@ class MetatypeModel extends foundry.abstract.TypeDataModel {
 function ok(_, visible, $$props, selected) {
   var _a;
   set(visible, false);
-  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$2(selected));
+  (_a = $$props.onclose) == null ? void 0 : _a.call($$props, get$1(selected));
 }
 function cancel(__1, visible, $$props) {
   var _a;
@@ -10733,7 +10734,7 @@ var on_input$1 = (__2, showDropdown, selected) => {
   set(showDropdown, true);
   set(selected, null);
 };
-var on_mousedown = (__3, selectJournal, option) => selectJournal(get$2(option));
+var on_mousedown = (__3, selectJournal, option) => selectJournal(get$1(option));
 var root_4$8 = /* @__PURE__ */ template(`<li class="dropdown-item"><div role="option" tabindex="0"><i class="fa-solid fa-book-open" style="margin-right: 0.5rem;"></i> </div></li>`);
 var root_5$5 = /* @__PURE__ */ template(`<li class="dropdown-empty">No journal entries found.</li>`);
 var root_2$a = /* @__PURE__ */ template(`<ul class="dropdown-list floating"><!></ul>`);
@@ -10769,9 +10770,9 @@ function JournalSearchModal($$anchor, $$props) {
     })));
   });
   user_effect(() => {
-    if (get$2(showDropdown) && get$2(inputEl)) {
+    if (get$1(showDropdown) && get$1(inputEl)) {
       requestAnimationFrame(() => {
-        const rect = get$2(inputEl).getBoundingClientRect();
+        const rect = get$1(inputEl).getBoundingClientRect();
         set(dropdownStyle, `
                 position: fixed;
                 top: ${rect.bottom + 2}px;
@@ -10783,8 +10784,8 @@ function JournalSearchModal($$anchor, $$props) {
     }
   });
   function filteredOptions() {
-    const q = get$2(search).toLowerCase().trim();
-    return q ? get$2(options).filter((o) => o.label.toLowerCase().includes(q)) : get$2(options);
+    const q = get$1(search).toLowerCase().trim();
+    return q ? get$1(options).filter((o) => o.label.toLowerCase().includes(q)) : get$1(options);
   }
   function selectJournal(option) {
     set(selected, proxy(option));
@@ -10800,7 +10801,7 @@ function JournalSearchModal($$anchor, $$props) {
       var div_2 = child(div_1);
       var input = child(div_2);
       input.__input = [on_input$1, showDropdown, selected];
-      bind_this(input, ($$value) => set(inputEl, $$value), () => get$2(inputEl));
+      bind_this(input, ($$value) => set(inputEl, $$value), () => get$1(inputEl));
       var div_3 = sibling(div_2, 2);
       var button = child(div_3);
       button.__click = [ok, visible, $$props, selected];
@@ -10821,8 +10822,8 @@ function JournalSearchModal($$anchor, $$props) {
                 div_4.__mousedown = [on_mousedown, selectJournal, option];
                 var text2 = sibling(child(div_4));
                 template_effect(() => {
-                  set_attribute(div_4, "aria-selected", get$2(selected) && get$2(selected).value === get$2(option).value);
-                  set_text(text2, ` ${get$2(option).label ?? ""}`);
+                  set_attribute(div_4, "aria-selected", get$1(selected) && get$1(selected).value === get$1(option).value);
+                  set_text(text2, ` ${get$1(option).label ?? ""}`);
                 });
                 append($$anchor5, li);
               });
@@ -10837,17 +10838,17 @@ function JournalSearchModal($$anchor, $$props) {
               else $$render(alternate, false);
             });
           }
-          template_effect(() => set_attribute(ul, "style", get$2(dropdownStyle)));
+          template_effect(() => set_attribute(ul, "style", get$1(dropdownStyle)));
           append($$anchor3, ul);
         };
         if_block(node_1, ($$render) => {
-          if (get$2(showDropdown)) $$render(consequent_1);
+          if (get$1(showDropdown)) $$render(consequent_1);
         });
       }
       template_effect(
         ($0) => {
           set_attribute(input, "placeholder", $0);
-          button.disabled = !get$2(selected);
+          button.disabled = !get$1(selected);
         },
         [
           () => localize($$props.config.sheet.searchJournals)
@@ -10855,11 +10856,11 @@ function JournalSearchModal($$anchor, $$props) {
       );
       event("focus", input, () => set(showDropdown, true));
       event("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
-      bind_value(input, () => get$2(search), ($$value) => set(search, $$value));
+      bind_value(input, () => get$1(search), ($$value) => set(search, $$value));
       append($$anchor2, div);
     };
     if_block(node, ($$render) => {
-      if (get$2(visible)) $$render(consequent_2);
+      if (get$1(visible)) $$render(consequent_2);
     });
   }
   append($$anchor, fragment);
@@ -10868,8 +10869,8 @@ function JournalSearchModal($$anchor, $$props) {
 delegate(["input", "click", "mousedown"]);
 function handleOpen(_, journalId) {
   var _a;
-  if (!get$2(journalId)) return;
-  const entry = game.journal.get(get$2(journalId));
+  if (!get$1(journalId)) return;
+  const entry = game.journal.get(get$1(journalId));
   (_a = entry == null ? void 0 : entry.sheet) == null ? void 0 : _a.render(true);
 }
 function handleSearch(__1, config, journalId, $$props) {
@@ -10923,11 +10924,11 @@ function JournalViewer($$anchor, $$props) {
   let previewContent = state("");
   user_effect(async () => {
     var _a, _b, _c;
-    if (!get$2(journalId)) {
+    if (!get$1(journalId)) {
       set(previewContent, "");
       return;
     }
-    const journal = game.journal.get(get$2(journalId));
+    const journal = game.journal.get(get$1(journalId));
     const page = (_b = (_a = journal == null ? void 0 : journal.pages) == null ? void 0 : _a.contents) == null ? void 0 : _b[0];
     const content = ((_c = page == null ? void 0 : page.text) == null ? void 0 : _c.content) || "";
     set(previewContent, proxy(await foundry.applications.ux.TextEditor.enrichHTML(content, {
@@ -10952,7 +10953,7 @@ function JournalViewer($$anchor, $$props) {
         return config();
       },
       get id() {
-        return get$2(journalId);
+        return get$1(journalId);
       }
     }),
     ($$value) => toolbar = $$value,
@@ -10960,7 +10961,7 @@ function JournalViewer($$anchor, $$props) {
   );
   var div_3 = sibling(node, 2);
   var node_1 = child(div_3);
-  html(node_1, () => get$2(previewContent));
+  html(node_1, () => get$1(previewContent));
   append($$anchor, div);
   pop();
 }
@@ -11018,11 +11019,11 @@ function StatCard($$anchor, $$props) {
             var option_1_value = {};
             var text_1 = child(option_1);
             template_effect(() => {
-              if (option_1_value !== (option_1_value = get$2(option))) {
-                option_1.value = null == (option_1.__value = get$2(option)) ? "" : get$2(option);
+              if (option_1_value !== (option_1_value = get$1(option))) {
+                option_1.value = null == (option_1.__value = get$1(option)) ? "" : get$1(option);
               }
-              set_selected(option_1, $$props.value === get$2(option));
-              set_text(text_1, get$2(option));
+              set_selected(option_1, $$props.value === get$1(option));
+              set_text(text_1, get$1(option));
             });
             append($$anchor4, option_1);
           });
@@ -11064,10 +11065,10 @@ function StatCard($$anchor, $$props) {
 }
 delegate(["change"]);
 function handleInputClick(_, isOpen, openDropdown) {
-  if (!get$2(isOpen)) openDropdown();
+  if (!get$1(isOpen)) openDropdown();
 }
 function handleInputInput(e, isOpen, openDropdown, searchTerm) {
-  if (!get$2(isOpen)) openDropdown();
+  if (!get$1(isOpen)) openDropdown();
   set(searchTerm, proxy(e.target.value));
 }
 function handleInputKeydown(e, disabled, isOpen, openDropdown, highlightedIndex, filteredOptions, scrollToHighlighted, selectOption, closeDropdown) {
@@ -11075,23 +11076,23 @@ function handleInputKeydown(e, disabled, isOpen, openDropdown, highlightedIndex,
   switch (e.key) {
     case "ArrowDown":
       e.preventDefault();
-      if (!get$2(isOpen)) openDropdown();
-      set(highlightedIndex, proxy(Math.min(get$2(highlightedIndex) + 1, get$2(filteredOptions).length - 1)));
+      if (!get$1(isOpen)) openDropdown();
+      set(highlightedIndex, proxy(Math.min(get$1(highlightedIndex) + 1, get$1(filteredOptions).length - 1)));
       scrollToHighlighted();
       break;
     case "ArrowUp":
       e.preventDefault();
-      set(highlightedIndex, proxy(Math.max(get$2(highlightedIndex) - 1, 0)));
+      set(highlightedIndex, proxy(Math.max(get$1(highlightedIndex) - 1, 0)));
       scrollToHighlighted();
       break;
     case "Enter":
       e.preventDefault();
-      if (get$2(isOpen) && get$2(highlightedIndex) >= 0) selectOption(get$2(filteredOptions)[get$2(highlightedIndex)]);
+      if (get$1(isOpen) && get$1(highlightedIndex) >= 0) selectOption(get$1(filteredOptions)[get$1(highlightedIndex)]);
       break;
     case "Escape":
       e.preventDefault();
       e.stopPropagation();
-      if (get$2(isOpen)) closeDropdown();
+      if (get$1(isOpen)) closeDropdown();
       break;
     case "Tab":
       closeDropdown();
@@ -11111,14 +11112,14 @@ function ComboSearch($$anchor, $$props) {
   let wrapperElement = state(void 0);
   let dropdownElement;
   user_effect(() => {
-    if (!get$2(isOpen)) {
+    if (!get$1(isOpen)) {
       const selected = options().find((o) => o.value === value());
       set(searchTerm, proxy((selected == null ? void 0 : selected.label) ?? ""));
     }
   });
   user_effect(() => {
-    const filtered = get$2(searchTerm).trim() === "" ? options() : options().filter((o) => o.label.toLowerCase().includes(get$2(searchTerm).toLowerCase()));
-    if (get$2(isOpen)) {
+    const filtered = get$1(searchTerm).trim() === "" ? options() : options().filter((o) => o.label.toLowerCase().includes(get$1(searchTerm).toLowerCase()));
+    if (get$1(isOpen)) {
       set(filteredOptions, proxy(filtered));
       set(highlightedIndex, -1);
       updateDropdown();
@@ -11127,7 +11128,7 @@ function ComboSearch($$anchor, $$props) {
     }
   });
   function openDropdown() {
-    if (disabled() || get$2(isOpen)) return;
+    if (disabled() || get$1(isOpen)) return;
     set(isOpen, true);
     set(searchTerm, "");
     updateDropdown();
@@ -11147,7 +11148,7 @@ function ComboSearch($$anchor, $$props) {
   async function scrollToHighlighted() {
     var _a, _b;
     await tick();
-    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$2(highlightedIndex)];
+    const el = (_b = (_a = dropdownElement == null ? void 0 : dropdownElement.children[0]) == null ? void 0 : _a.children) == null ? void 0 : _b[get$1(highlightedIndex)];
     el == null ? void 0 : el.scrollIntoView({ block: "nearest" });
   }
   onMount(() => {
@@ -11156,7 +11157,7 @@ function ComboSearch($$anchor, $$props) {
     dropdownElement.id = "combobox-dropdown-list";
     dropdownElement.style.position = "absolute";
     dropdownElement.style.zIndex = "9999";
-    const anchor = get$2(wrapperElement).closest(".item-sheet-component") ?? document.body;
+    const anchor = get$1(wrapperElement).closest(".item-sheet-component") ?? document.body;
     if (getComputedStyle(anchor).position === "static") anchor.style.position = "relative";
     anchor.appendChild(dropdownElement);
     document.addEventListener("click", handleDocumentClick);
@@ -11168,14 +11169,14 @@ function ComboSearch($$anchor, $$props) {
     document.removeEventListener("focusin", handleDocumentFocusIn);
   });
   function updateDropdown() {
-    if (!get$2(wrapperElement) || !dropdownElement) return;
-    dropdownElement.style.display = get$2(isOpen) ? "block" : "none";
-    if (!get$2(isOpen)) return;
+    if (!get$1(wrapperElement) || !dropdownElement) return;
+    dropdownElement.style.display = get$1(isOpen) ? "block" : "none";
+    if (!get$1(isOpen)) return;
     tick().then(() => {
-      const anchor = get$2(wrapperElement).closest(".item-sheet-component");
+      const anchor = get$1(wrapperElement).closest(".item-sheet-component");
       if (!anchor) return;
       const aRect = anchor.getBoundingClientRect();
-      const wRect = get$2(wrapperElement).getBoundingClientRect();
+      const wRect = get$1(wrapperElement).getBoundingClientRect();
       dropdownElement.style.top = `${wRect.bottom - aRect.top}px`;
       dropdownElement.style.left = `${wRect.left - aRect.left}px`;
       dropdownElement.style.width = `${wRect.width}px`;
@@ -11184,17 +11185,17 @@ function ComboSearch($$anchor, $$props) {
       list.style.position = "relative";
       list.style.maxHeight = maxHeight();
       list.setAttribute("role", "listbox");
-      if (get$2(filteredOptions).length) {
-        get$2(filteredOptions).forEach((opt, i) => {
+      if (get$1(filteredOptions).length) {
+        get$1(filteredOptions).forEach((opt, i) => {
           const el = document.createElement("div");
-          el.className = "combobox-option" + (i === get$2(highlightedIndex) ? " highlighted" : "") + (opt.value === value() ? " selected" : "");
+          el.className = "combobox-option" + (i === get$1(highlightedIndex) ? " highlighted" : "") + (opt.value === value() ? " selected" : "");
           el.setAttribute("role", "option");
           el.setAttribute("aria-selected", opt.value === value());
           el.textContent = opt.label;
           el.onmousedown = () => selectOption(opt);
           list.appendChild(el);
         });
-      } else if (get$2(searchTerm).trim() !== "") {
+      } else if (get$1(searchTerm).trim() !== "") {
         const el = document.createElement("div");
         el.className = "combobox-option no-results";
         el.textContent = nomatchplaceholder();
@@ -11204,13 +11205,13 @@ function ComboSearch($$anchor, $$props) {
     });
   }
   function handleDocumentClick(e) {
-    if (!get$2(isOpen)) return;
-    const inside = get$2(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
+    if (!get$1(isOpen)) return;
+    const inside = get$1(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
     if (!inside) closeDropdown();
   }
   function handleDocumentFocusIn(e) {
-    if (!get$2(isOpen)) return;
-    const inside = get$2(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
+    if (!get$1(isOpen)) return;
+    const inside = get$1(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
     if (!inside) closeDropdown();
   }
   var div = root$h();
@@ -11235,28 +11236,28 @@ function ComboSearch($$anchor, $$props) {
     selectOption,
     closeDropdown
   ];
-  bind_this(input, ($$value) => set(inputElement, $$value), () => get$2(inputElement));
+  bind_this(input, ($$value) => set(inputElement, $$value), () => get$1(inputElement));
   var i_1 = sibling(input, 2);
-  bind_this(div_1, ($$value) => set(wrapperElement, $$value), () => get$2(wrapperElement));
+  bind_this(div_1, ($$value) => set(wrapperElement, $$value), () => get$1(wrapperElement));
   template_effect(() => {
     set_class(div_1, `combobox-wrapper ${css()}`);
     toggle_class(div_1, "disabled", disabled());
     set_attribute(input, "placeholder", placeholder());
     input.disabled = disabled();
     set_class(input, `combobox-input ${css()}`);
-    set_attribute(input, "aria-expanded", get$2(isOpen));
-    toggle_class(input, "open", get$2(isOpen));
-    toggle_class(i_1, "rotated", get$2(isOpen));
+    set_attribute(input, "aria-expanded", get$1(isOpen));
+    toggle_class(input, "open", get$1(isOpen));
+    toggle_class(i_1, "rotated", get$1(isOpen));
   });
   event("focus", input, handleInputFocus);
-  bind_value(input, () => get$2(searchTerm), ($$value) => set(searchTerm, $$value));
+  bind_value(input, () => get$1(searchTerm), ($$value) => set(searchTerm, $$value));
   append($$anchor, div);
   pop();
 }
 delegate(["click", "input", "keydown"]);
 function addChange(_, changes, commitChanges) {
   set(changes, proxy([
-    ...get$2(changes),
+    ...get$1(changes),
     { key: "", mode: 1, value: "", priority: 0 }
   ]));
   commitChanges();
@@ -11275,10 +11276,10 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   let sourceType = state(proxy(effectsObject().transfer ? "character" : "item"));
   const allowedPatterns = ["system.attributes", "system.physical"];
   user_effect(() => {
-    const transfer = get$2(sourceType) !== "item";
+    const transfer = get$1(sourceType) !== "item";
     let rawPaths = [];
     if (transfer) {
-      const actor = game.actors.find((a) => a.type === get$2(sourceType));
+      const actor = game.actors.find((a) => a.type === get$1(sourceType));
       if (actor) {
         rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
       }
@@ -11288,21 +11289,21 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
     set(propertyOptions, proxy(rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod")).map((path) => ({ value: path, label: path }))));
   });
   function commitChanges() {
-    effectsObject().update({ changes: get$2(changes) });
+    effectsObject().update({ changes: get$1(changes) });
   }
   function updateChange(index2, field, value) {
     if (field === "key" && value && typeof value === "object" && "value" in value) {
       value = value.value;
     }
-    const updated = get$2(changes).map((c, i) => {
+    const updated = get$1(changes).map((c, i) => {
       return i === index2 ? { ...c, [field]: value } : c;
     });
     set(changes, proxy(updated));
     commitChanges();
   }
   function deleteChange(index2) {
-    get$2(changes).splice(index2, 1);
-    set(changes, proxy([...get$2(changes)]));
+    get$1(changes).splice(index2, 1);
+    set(changes, proxy([...get$1(changes)]));
     commitChanges();
   }
   var div = root$g();
@@ -11401,7 +11402,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         ]
       );
       bind_value(input, () => effectsObject().name, ($$value) => effectsObject().name = $$value);
-      bind_select_value(select, () => get$2(sourceType), ($$value) => set(sourceType, $$value));
+      bind_select_value(select, () => get$1(sourceType), ($$value) => set(sourceType, $$value));
       bind_checked(input_1, () => effectsObject().disabled, ($$value) => effectsObject().disabled = $$value);
       bind_select_value(select_1, () => effectsObject().duration.type, ($$value) => effectsObject().duration.type = $$value);
       bind_value(input_2, () => effectsObject().duration.value, ($$value) => effectsObject().duration.value = $$value);
@@ -11434,7 +11435,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       var th_5 = sibling(th_4);
       var text_19 = child(th_5);
       var tbody = sibling(thead);
-      each(tbody, 21, () => get$2(changes), index, ($$anchor3, change, i) => {
+      each(tbody, 21, () => get$1(changes), index, ($$anchor3, change, i) => {
         var tr_1 = root_3$8();
         var td = child(tr_1);
         var div_8 = child(td);
@@ -11443,20 +11444,20 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.effects.noMatch));
         ComboSearch(node_3, {
           get options() {
-            return get$2(propertyOptions);
+            return get$1(propertyOptions);
           },
           get placeholder() {
-            return get$2(expression);
+            return get$1(expression);
           },
           get nomatchplaceholder() {
-            return get$2(expression_1);
+            return get$1(expression_1);
           },
           css: "table",
           get value() {
-            return get$2(change).key;
+            return get$1(change).key;
           },
           set value($$value) {
-            get$2(change).key = $$value;
+            get$1(change).key = $$value;
           },
           $$events: {
             select: (e) => updateChange(i, "key", e.detail)
@@ -11465,7 +11466,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         var td_1 = sibling(td);
         var div_9 = child(td_1);
         var select_2 = sibling(child(div_9), 2);
-        init_select(select_2, () => get$2(change).mode);
+        init_select(select_2, () => get$1(change).mode);
         var select_2_value;
         select_2.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
         each(select_2, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
@@ -11498,11 +11499,11 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         var button_1 = child(td_5);
         button_1.__click = () => deleteChange(i);
         template_effect(() => {
-          if (select_2_value !== (select_2_value = get$2(change).mode)) {
-            select_2.value = null == (select_2.__value = get$2(change).mode) ? "" : get$2(change).mode, select_option(select_2, get$2(change).mode);
+          if (select_2_value !== (select_2_value = get$1(change).mode)) {
+            select_2.value = null == (select_2.__value = get$1(change).mode) ? "" : get$1(change).mode, select_option(select_2, get$1(change).mode);
           }
-          set_value(input_3, get$2(change).value);
-          set_value(input_4, get$2(change).priority);
+          set_value(input_3, get$1(change).value);
+          set_value(input_4, get$1(change).priority);
         });
         append($$anchor3, tr_1);
       });
@@ -11613,8 +11614,8 @@ async function addEffect(_, $$props) {
     }
   ]);
 }
-var on_click$2 = (__1, openEditor, effect2) => openEditor(get$2(effect2));
-var on_click_1$2 = (__2, deleteEffect, effect2) => deleteEffect(get$2(effect2).id);
+var on_click$2 = (__1, openEditor, effect2) => openEditor(get$1(effect2));
+var on_click_1$2 = (__2, deleteEffect, effect2) => deleteEffect(get$1(effect2).id);
 var root_2$8 = /* @__PURE__ */ template(`<tr><td> </td><td><button>✏️ Edit</button> <button>🗑 Delete</button></td></tr>`);
 var root_3$7 = /* @__PURE__ */ template(`<tr><td colspan="2" class="empty-row">No effects defined</td></tr>`);
 var root_1$b = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><h3>Active Effects</h3> <button>➕ Add Effect</button></div> <table class="effects-table"><thead><tr><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div>`);
@@ -11638,7 +11639,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
       each(
         tbody,
         21,
-        () => get$2(effects),
+        () => get$1(effects),
         (effect2) => effect2.id,
         ($$anchor3, effect2) => {
           var tr = root_2$8();
@@ -11649,7 +11650,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
           button_1.__click = [on_click$2, openEditor, effect2];
           var button_2 = sibling(button_1, 2);
           button_2.__click = [on_click_1$2, deleteEffect, effect2];
-          template_effect(() => set_text(text2, get$2(effect2).name));
+          template_effect(() => set_text(text2, get$1(effect2).name));
           append($$anchor3, tr);
         },
         ($$anchor3) => {
@@ -11861,7 +11862,7 @@ function MetatypeApp($$anchor, $$props) {
       var input = sibling(node_1, 2);
       input.__change = [on_change$6, item2];
       var node_2 = sibling(input, 2);
-      StatCard(node_2, spread_props(() => get$2(priorityEntry)));
+      StatCard(node_2, spread_props(() => get$1(priorityEntry)));
       bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
       append($$anchor2, fragment);
     }
@@ -11875,8 +11876,8 @@ function MetatypeApp($$anchor, $$props) {
           var h3 = first_child(fragment_2);
           var text2 = child(h3);
           var div_2 = sibling(h3, 2);
-          each(div_2, 21, () => get$2(agerange), index, ($$anchor4, entry) => {
-            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          each(div_2, 21, () => get$1(agerange), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$1(entry)));
           });
           template_effect(($0) => set_text(text2, $0), [() => localize(traits.agerange)]);
           append($$anchor3, fragment_2);
@@ -11884,7 +11885,7 @@ function MetatypeApp($$anchor, $$props) {
       });
     };
     if_block(node_3, ($$render) => {
-      if (get$2(agerange)) $$render(consequent);
+      if (get$1(agerange)) $$render(consequent);
     });
   }
   var node_4 = sibling(node_3, 2);
@@ -11896,8 +11897,8 @@ function MetatypeApp($$anchor, $$props) {
           var h3_1 = first_child(fragment_5);
           var text_1 = child(h3_1);
           var div_3 = sibling(h3_1, 2);
-          each(div_3, 21, () => get$2(height), index, ($$anchor4, entry) => {
-            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          each(div_3, 21, () => get$1(height), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$1(entry)));
           });
           template_effect(($0) => set_text(text_1, $0), [() => localize(traits.height)]);
           append($$anchor3, fragment_5);
@@ -11905,7 +11906,7 @@ function MetatypeApp($$anchor, $$props) {
       });
     };
     if_block(node_4, ($$render) => {
-      if (get$2(height)) $$render(consequent_1);
+      if (get$1(height)) $$render(consequent_1);
     });
   }
   var node_5 = sibling(node_4, 2);
@@ -11917,8 +11918,8 @@ function MetatypeApp($$anchor, $$props) {
           var h3_2 = first_child(fragment_8);
           var text_2 = child(h3_2);
           var div_4 = sibling(h3_2, 2);
-          each(div_4, 21, () => get$2(weight), index, ($$anchor4, entry) => {
-            StatCard($$anchor4, spread_props(() => get$2(entry)));
+          each(div_4, 21, () => get$1(weight), index, ($$anchor4, entry) => {
+            StatCard($$anchor4, spread_props(() => get$1(entry)));
           });
           template_effect(($0) => set_text(text_2, $0), [() => localize(traits.weight)]);
           append($$anchor3, fragment_8);
@@ -11926,7 +11927,7 @@ function MetatypeApp($$anchor, $$props) {
       });
     };
     if_block(node_5, ($$render) => {
-      if (get$2(weight)) $$render(consequent_2);
+      if (get$1(weight)) $$render(consequent_2);
     });
   }
   var node_6 = sibling(node_5, 2);
@@ -11936,8 +11937,8 @@ function MetatypeApp($$anchor, $$props) {
       var h3_3 = first_child(fragment_10);
       var text_3 = child(h3_3);
       var div_5 = sibling(h3_3, 2);
-      each(div_5, 21, () => get$2(attributeLimits), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      each(div_5, 21, () => get$1(attributeLimits), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text_3, $0), [() => localize(attributes.limits)]);
       append($$anchor2, fragment_10);
@@ -11950,8 +11951,8 @@ function MetatypeApp($$anchor, $$props) {
       var h3_4 = first_child(fragment_12);
       var text_4 = child(h3_4);
       var div_6 = sibling(h3_4, 2);
-      each(div_6, 21, () => get$2(karma), index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
+      each(div_6, 21, () => get$1(karma), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text_4, $0), [() => localize(config().karma.karma)]);
       append($$anchor2, fragment_12);
@@ -11968,7 +11969,9 @@ function MetatypeApp($$anchor, $$props) {
   });
   var node_9 = sibling(node_8, 2);
   JournalViewer(node_9, {
-    document,
+    get document() {
+      return item2();
+    },
     get config() {
       return config();
     }
@@ -12144,7 +12147,7 @@ function MagicApp($$anchor, $$props) {
   const adeptFields = /* @__PURE__ */ derived$1(() => []);
   let isAspected = state(false);
   user_effect(() => {
-    set(isAspected, get$2(magicianType).value === localize(labels.aspectedmage));
+    set(isAspected, get$1(magicianType).value === localize(labels.aspectedmage));
   });
   var div = root$e();
   var div_1 = child(div);
@@ -12173,9 +12176,9 @@ function MagicApp($$anchor, $$props) {
         $$slots: { default: true }
       });
       var node_3 = sibling(node_2, 2);
-      StatCard(node_3, spread_props(() => get$2(archetype)));
+      StatCard(node_3, spread_props(() => get$1(archetype)));
       var node_4 = sibling(node_3, 2);
-      StatCard(node_4, spread_props(() => get$2(priority)));
+      StatCard(node_4, spread_props(() => get$1(priority)));
       append($$anchor2, fragment);
     }
   });
@@ -12186,7 +12189,7 @@ function MagicApp($$anchor, $$props) {
       var node_6 = first_child(fragment_1);
       ItemSheetComponent(node_6, {
         children: ($$anchor3, $$slotProps) => {
-          StatCard($$anchor3, spread_props(() => get$2(magicianType)));
+          StatCard($$anchor3, spread_props(() => get$1(magicianType)));
         }
       });
       var node_7 = sibling(node_6, 2);
@@ -12194,19 +12197,19 @@ function MagicApp($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           ItemSheetComponent($$anchor3, {
             children: ($$anchor4, $$slotProps) => {
-              StatCard($$anchor4, spread_props(() => get$2(aspect)));
+              StatCard($$anchor4, spread_props(() => get$1(aspect)));
             }
           });
         };
         if_block(node_7, ($$render) => {
-          if (get$2(isAspected)) $$render(consequent);
+          if (get$1(isAspected)) $$render(consequent);
         });
       }
       var node_8 = sibling(node_7, 2);
-      each(node_8, 17, () => get$2(magicianFields), index, ($$anchor3, entry) => {
+      each(node_8, 17, () => get$1(magicianFields), index, ($$anchor3, entry) => {
         ItemSheetComponent($$anchor3, {
           children: ($$anchor4, $$slotProps) => {
-            StatCard($$anchor4, spread_props(() => get$2(entry)));
+            StatCard($$anchor4, spread_props(() => get$1(entry)));
           }
         });
       });
@@ -12219,10 +12222,10 @@ function MagicApp($$anchor, $$props) {
         var consequent_2 = ($$anchor3) => {
           var fragment_8 = comment();
           var node_10 = first_child(fragment_8);
-          each(node_10, 17, () => get$2(adeptFields), index, ($$anchor4, entry) => {
+          each(node_10, 17, () => get$1(adeptFields), index, ($$anchor4, entry) => {
             ItemSheetComponent($$anchor4, {
               children: ($$anchor5, $$slotProps) => {
-                StatCard($$anchor5, spread_props(() => get$2(entry)));
+                StatCard($$anchor5, spread_props(() => get$1(entry)));
               }
             });
           });
@@ -12231,7 +12234,7 @@ function MagicApp($$anchor, $$props) {
         if_block(
           node_9,
           ($$render) => {
-            if (awakened.archetype === get$2(archetype).options[0]) $$render(consequent_2);
+            if (awakened.archetype === get$1(archetype).options[0]) $$render(consequent_2);
           },
           true
         );
@@ -12239,13 +12242,15 @@ function MagicApp($$anchor, $$props) {
       append($$anchor2, fragment_7);
     };
     if_block(node_5, ($$render) => {
-      if (awakened.archetype === get$2(archetype).options[1]) $$render(consequent_1);
+      if (awakened.archetype === get$1(archetype).options[1]) $$render(consequent_1);
       else $$render(alternate, false);
     });
   }
   var node_11 = sibling(node_5, 2);
   JournalViewer(node_11, {
-    document,
+    get document() {
+      return item2();
+    },
     get config() {
       return config();
     }
@@ -12427,7 +12432,7 @@ function Commodity($$anchor, $$props) {
       var text2 = child(h3);
       var div = sibling(h3, 2);
       each(div, 21, () => entries, index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(
         ($0) => {
@@ -12473,7 +12478,7 @@ function Portability($$anchor, $$props) {
   var text2 = child(h3);
   var div_3 = sibling(h3, 2);
   each(div_3, 21, () => entries, index, ($$anchor2, entry) => {
-    StatCard($$anchor2, spread_props(() => get$2(entry)));
+    StatCard($$anchor2, spread_props(() => get$1(entry)));
   });
   template_effect(
     ($0) => {
@@ -12589,7 +12594,7 @@ function WeaponApp($$anchor, $$props) {
       StatCard(node_4, spread_props(weaponMode));
       var div_4 = sibling(div_3, 2);
       each(div_4, 21, () => weaponEntries, index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       template_effect(($0) => set_text(text2, $0), [
         () => localize(config().common.details)
@@ -12619,7 +12624,7 @@ function WeaponApp($$anchor, $$props) {
   });
   var node_7 = sibling(node_6, 2);
   JournalViewer(node_7, {
-    get item() {
+    get document() {
       return item2();
     },
     get config() {
@@ -12818,7 +12823,7 @@ function AmmunitionApp($$anchor, $$props) {
       input.__change = [on_change$3, item2];
       var div_2 = sibling(input, 2);
       each(div_2, 21, () => ammoEntries, index, ($$anchor3, entry) => {
-        StatCard($$anchor3, spread_props(() => get$2(entry)));
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
       bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
       append($$anchor2, fragment);
@@ -12846,7 +12851,9 @@ function AmmunitionApp($$anchor, $$props) {
   });
   var node_4 = sibling(node_3, 2);
   JournalViewer(node_4, {
-    document,
+    get document() {
+      return item2();
+    },
     get config() {
       return config();
     }
@@ -12999,7 +13006,7 @@ function SkillApp($$anchor, $$props) {
       StatCard$1(node_3, {
         children: ($$anchor3, $$slotProps2) => {
           var select = root_3$3();
-          init_select(select, () => get$2(value));
+          init_select(select, () => get$1(value));
           var select_value;
           select.__change = [on_change_1$1, updateSkillType];
           each(select, 21, () => typeOfSkillSelectOptions, index, ($$anchor4, option) => {
@@ -13007,16 +13014,16 @@ function SkillApp($$anchor, $$props) {
             var option_1_value = {};
             var text2 = child(option_1);
             template_effect(() => {
-              if (option_1_value !== (option_1_value = get$2(option).value)) {
-                option_1.value = null == (option_1.__value = get$2(option).value) ? "" : get$2(option).value;
+              if (option_1_value !== (option_1_value = get$1(option).value)) {
+                option_1.value = null == (option_1.__value = get$1(option).value) ? "" : get$1(option).value;
               }
-              set_text(text2, get$2(option).label);
+              set_text(text2, get$1(option).label);
             });
             append($$anchor4, option_1);
           });
           template_effect(() => {
-            if (select_value !== (select_value = get$2(value))) {
-              select.value = null == (select.__value = get$2(value)) ? "" : get$2(value), select_option(select, get$2(value));
+            if (select_value !== (select_value = get$1(value))) {
+              select.value = null == (select.__value = get$1(value)) ? "" : get$1(value), select_option(select, get$1(value));
             }
           });
           append($$anchor3, select);
@@ -13043,10 +13050,10 @@ function SkillApp($$anchor, $$props) {
                 var option_3_value = {};
                 var text_2 = child(option_3);
                 template_effect(() => {
-                  if (option_3_value !== (option_3_value = get$2(option).value)) {
-                    option_3.value = null == (option_3.__value = get$2(option).value) ? "" : get$2(option).value;
+                  if (option_3_value !== (option_3_value = get$1(option).value)) {
+                    option_3.value = null == (option_3.__value = get$1(option).value) ? "" : get$1(option).value;
                   }
-                  set_text(text_2, get$2(option).label);
+                  set_text(text_2, get$1(option).label);
                 });
                 append($$anchor5, option_3);
               });
@@ -13083,10 +13090,10 @@ function SkillApp($$anchor, $$props) {
                 var option_6_value = {};
                 var text_5 = child(option_6);
                 template_effect(() => {
-                  if (option_6_value !== (option_6_value = get$2(option).value)) {
-                    option_6.value = null == (option_6.__value = get$2(option).value) ? "" : get$2(option).value;
+                  if (option_6_value !== (option_6_value = get$1(option).value)) {
+                    option_6.value = null == (option_6.__value = get$1(option).value) ? "" : get$1(option).value;
                   }
-                  set_text(text_5, get$2(option).label);
+                  set_text(text_5, get$1(option).label);
                 });
                 append($$anchor5, option_6);
               });
@@ -13109,7 +13116,7 @@ function SkillApp($$anchor, $$props) {
           append($$anchor3, fragment_2);
         };
         if_block(node_4, ($$render) => {
-          if (get$2(value) === "active") $$render(consequent);
+          if (get$1(value) === "active") $$render(consequent);
         });
       }
       append($$anchor2, fragment);
@@ -13117,7 +13124,9 @@ function SkillApp($$anchor, $$props) {
   });
   var node_9 = sibling(node, 2);
   JournalViewer(node_9, {
-    document,
+    get document() {
+      return item2();
+    },
     get config() {
       return $$props.config;
     }
@@ -13330,7 +13339,7 @@ function handleClear(_, selectedmetatype, selectedMagic, selectedAttribute, sele
   set(characterAge, 25);
   set(characterHeight, 175);
   set(characterWeight, 75);
-  set(metatypeItem, proxy(get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0]));
+  set(metatypeItem, proxy(get$1(metatypes).find((m) => m.name === "Human") || get$1(metatypes)[0]));
 }
 var root_1$4 = /* @__PURE__ */ template(`<option> </option>`);
 var root_2$4 = /* @__PURE__ */ template(`<option> </option>`);
@@ -13359,104 +13368,104 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   onMount(async () => {
     var _a;
     set(metatypes, proxy(ItemDataService.getAllItemsOfType("metatype")));
-    if (get$2(metatypes).length === 0) {
+    if (get$1(metatypes).length === 0) {
       const humanItem = ItemDataService.getDefaultHumanItem();
       await Item.create(humanItem);
       set(metatypes, proxy(ItemDataService.getAllItemsOfType("metatype")));
     }
     set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
-    if (get$2(magics).length === 0) {
+    if (get$1(magics).length === 0) {
       const magicItem = ItemDataService.getDefaultMagic();
       await Item.create(magicItem);
       set(magics, proxy(ItemDataService.getAllItemsOfType("magic")));
     }
-    set(metatypeItem, proxy(get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0]));
-    console.log("Available metatypes:", get$2(metatypes).map((m) => m.name));
-    console.log("Selected default metatype:", (_a = get$2(metatypeItem)) == null ? void 0 : _a.name);
+    set(metatypeItem, proxy(get$1(metatypes).find((m) => m.name === "Human") || get$1(metatypes)[0]));
+    console.log("Available metatypes:", get$1(metatypes).map((m) => m.name));
+    console.log("Selected default metatype:", (_a = get$1(metatypeItem)) == null ? void 0 : _a.name);
   });
-  const metatypeDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMetatypes(get$2(metatypes)));
-  const magicsDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMagics(get$2(magics)));
+  const metatypeDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMetatypes(get$1(metatypes)));
+  const magicsDropdownOptions = /* @__PURE__ */ derived$1(() => ItemDataService.getAllMagics(get$1(magics)));
   const priorities = ActorDataService.getCharacterCreationStats();
   const attributPointDropdownOptions = priorities.attributes;
   const skillPointDropdownOptions = priorities.skills;
   const resourcesDropdownOptions = priorities.resources;
   CharacterGeneratorService.generatePriorityCombination(
     // svelte-ignore state_referenced_locally
-    get$2(metatypes)[0],
+    get$1(metatypes)[0],
     // svelte-ignore state_referenced_locally
-    get$2(magics)[0]
+    get$1(magics)[0]
   );
   console.log("CHARACTER", actor());
   user_effect(() => {
-    if (get$2(selectedmetatype)) {
-      const foundItem = get$2(metatypes).find((i) => i.id === get$2(selectedmetatype));
+    if (get$1(selectedmetatype)) {
+      const foundItem = get$1(metatypes).find((i) => i.id === get$1(selectedmetatype));
       if (foundItem) {
         set(metatypeItem, proxy(foundItem));
       }
     } else {
-      const fallback = get$2(metatypes).find((m) => m.name === "Human") || get$2(metatypes)[0];
+      const fallback = get$1(metatypes).find((m) => m.name === "Human") || get$1(metatypes)[0];
       if (fallback) {
         set(metatypeItem, proxy(fallback));
       }
     }
   });
   user_effect(() => {
-    if (actor() && get$2(characterName) !== actor().name) {
-      actor().name = get$2(characterName);
-      if (get$2(characterName).length > 0) {
-        actor().update({ name: get$2(characterName) });
+    if (actor() && get$1(characterName) !== actor().name) {
+      actor().name = get$1(characterName);
+      if (get$1(characterName).length > 0) {
+        actor().update({ name: get$1(characterName) });
       }
     }
   });
-  let canCreate = /* @__PURE__ */ derived$1(() => get$2(selectedmetatype) && get$2(selectedMagic) && get$2(selectedAttribute) && get$2(selectedSkill) && get$2(selectedResource));
+  let canCreate = /* @__PURE__ */ derived$1(() => get$1(selectedmetatype) && get$1(selectedMagic) && get$1(selectedAttribute) && get$1(selectedSkill) && get$1(selectedResource));
   let ageMin = 0;
   let ageMax = /* @__PURE__ */ derived$1(() => {
     var _a, _b, _c;
-    return ((_c = (_b = (_a = get$2(metatypeItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
+    return ((_c = (_b = (_a = get$1(metatypeItem)) == null ? void 0 : _a.system) == null ? void 0 : _b.agerange) == null ? void 0 : _c.max) ?? 100;
   });
-  let lifespan = /* @__PURE__ */ derived$1(() => get$2(ageMax) - ageMin);
+  let lifespan = /* @__PURE__ */ derived$1(() => get$1(ageMax) - ageMin);
   let phaseTemplate = ActorDataService.getPhaseTemplate();
   let agePhases = /* @__PURE__ */ derived$1(() => phaseTemplate.map((p) => {
-    const from = ageMin + p.from * get$2(lifespan);
-    const to = ageMin + p.to * get$2(lifespan);
+    const from = ageMin + p.from * get$1(lifespan);
+    const to = ageMin + p.to * get$1(lifespan);
     const midpoint = (from + to) / 2;
     return {
       text: p.text,
       from,
       to,
       midpoint,
-      percent: (midpoint - ageMin) / get$2(lifespan) * 100
+      percent: (midpoint - ageMin) / get$1(lifespan) * 100
     };
   }));
   let currentPhase = /* @__PURE__ */ derived$1(() => {
     var _a;
-    return ((_a = get$2(agePhases).find((p) => get$2(characterAge) >= p.from && get$2(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
+    return ((_a = get$1(agePhases).find((p) => get$1(characterAge) >= p.from && get$1(characterAge) <= p.to)) == null ? void 0 : _a.text) ?? "";
   });
   let usedPriorities = state(proxy([]));
   user_effect(() => {
     const arr = [];
-    const m = get$2(metatypeDropdownOptions).find((o) => o.foundryitemid === get$2(selectedmetatype));
+    const m = get$1(metatypeDropdownOptions).find((o) => o.foundryitemid === get$1(selectedmetatype));
     if (m) arr.push(m.priority);
-    const g = get$2(magicsDropdownOptions).find((o) => o.foundryitemid === get$2(selectedMagic));
+    const g = get$1(magicsDropdownOptions).find((o) => o.foundryitemid === get$1(selectedMagic));
     if (g) arr.push(g.priority);
-    if (get$2(selectedAttribute)) arr.push(get$2(selectedAttribute));
-    if (get$2(selectedSkill)) arr.push(get$2(selectedSkill));
-    if (get$2(selectedResource)) arr.push(get$2(selectedResource));
+    if (get$1(selectedAttribute)) arr.push(get$1(selectedAttribute));
+    if (get$1(selectedSkill)) arr.push(get$1(selectedSkill));
+    if (get$1(selectedResource)) arr.push(get$1(selectedResource));
     set(usedPriorities, proxy(arr));
   });
   async function handleSubmit(event2) {
     var _a;
     event2.preventDefault();
     console.log("Handle submit was entered");
-    const metatype = get$2(metatypes).find((m) => m.id === get$2(selectedmetatype));
+    const metatype = get$1(metatypes).find((m) => m.id === get$1(selectedmetatype));
     const worldmetatype = game.items.get(metatype.id);
-    const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$2(selectedAttribute));
-    const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$2(selectedSkill));
+    const selectedAttributeObj = attributPointDropdownOptions.find((attr) => attr.priority === get$1(selectedAttribute));
+    const selectedSkillObj = skillPointDropdownOptions.find((skill) => skill.priority === get$1(selectedSkill));
     let remainingPoints = selectedAttributeObj.points - 6;
     await actor().update({
-      "system.profile.age": get$2(characterAge),
-      "system.profile.height": get$2(characterHeight),
-      "system.profile.weight": get$2(characterWeight),
+      "system.profile.age": get$1(characterAge),
+      "system.profile.height": get$1(characterHeight),
+      "system.profile.weight": get$1(characterWeight),
       "system.creation.attributePoints": remainingPoints,
       "system.creation.activePoints": selectedSkillObj.points,
       "system.attributes.body.value": 1,
@@ -13464,11 +13473,12 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.attributes.charisma.value": 1,
       "system.attributes.willpower.value": 1,
       "system.attributes.quickness.value": 1,
-      "system.attributes.intelligence.value": 1
+      "system.attributes.intelligence.value": 1,
+      "system.attributes.initiative.value": 1
     });
     await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
-    const magic = get$2(magics).find((m) => m.id === get$2(selectedMagic));
-    if (["A", "B"].includes(get$2(selectedMagic).priority)) {
+    const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
+    if (["A", "B"].includes(get$1(selectedMagic).priority)) {
       const worldMagic = game.items.get(magic.id);
       await actor().createEmbeddedDocuments("Item", [worldMagic.toObject()]);
       actor().setFlag(flags.sr3e, flags.actor.hasAwakened, true);
@@ -13481,20 +13491,20 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     let combo, metaOpts, magicOpts;
     do {
       combo = CharacterGeneratorService.generatePriorityCombination({
-        metatypeOptions: get$2(metatypeDropdownOptions),
-        magicOptions: get$2(magicsDropdownOptions)
+        metatypeOptions: get$1(metatypeDropdownOptions),
+        magicOptions: get$1(magicsDropdownOptions)
       });
-      metaOpts = get$2(metatypeDropdownOptions).filter((i) => i.priority === combo.metatype);
-      magicOpts = get$2(magicsDropdownOptions).filter((i) => i.priority === combo.magic);
+      metaOpts = get$1(metatypeDropdownOptions).filter((i) => i.priority === combo.metatype);
+      magicOpts = get$1(magicsDropdownOptions).filter((i) => i.priority === combo.magic);
     } while (!metaOpts.length || !magicOpts.length);
     set(selectedmetatype, proxy(metaOpts[getRandomIntinRange(0, metaOpts.length - 1)].foundryitemid));
     set(selectedMagic, proxy(magicOpts[getRandomIntinRange(0, magicOpts.length - 1)].foundryitemid));
-    set(metatypeItem, proxy(get$2(metatypes).find((i) => i.id === get$2(selectedmetatype))));
-    const ageSrc = get$2(metatypeItem).system.agerange ?? get$2(metatypeItem).system.lifespan;
+    set(metatypeItem, proxy(get$1(metatypes).find((i) => i.id === get$1(selectedmetatype))));
+    const ageSrc = get$1(metatypeItem).system.agerange ?? get$1(metatypeItem).system.lifespan;
     set(characterAge, proxy(getRandomBellCurveWithMode(ageSrc.min, ageSrc.max, ageSrc.average)));
-    const h = get$2(metatypeItem).system.physical.height;
+    const h = get$1(metatypeItem).system.physical.height;
     set(characterHeight, proxy(getRandomBellCurveWithMode(h.min, h.max, h.average)));
-    const w = get$2(metatypeItem).system.physical.weight;
+    const w = get$1(metatypeItem).system.physical.weight;
     set(characterWeight, proxy(getRandomBellCurveWithMode(w.min, w.max, w.average)));
     set(selectedAttribute, proxy(combo.attribute));
     set(selectedSkill, proxy(combo.skills));
@@ -13533,15 +13543,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option.value = null == (option.__value = "") ? "" : "";
   option.textContent = chooseAnOption;
   var node = sibling(option);
-  each(node, 17, () => get$2(metatypeDropdownOptions), index, ($$anchor2, metatype) => {
+  each(node, 17, () => get$1(metatypeDropdownOptions), index, ($$anchor2, metatype) => {
     var option_1 = root_1$4();
     var option_1_value = {};
     var text_4 = child(option_1);
     template_effect(() => {
-      if (option_1_value !== (option_1_value = get$2(metatype).foundryitemid)) {
-        option_1.value = null == (option_1.__value = get$2(metatype).foundryitemid) ? "" : get$2(metatype).foundryitemid;
+      if (option_1_value !== (option_1_value = get$1(metatype).foundryitemid)) {
+        option_1.value = null == (option_1.__value = get$1(metatype).foundryitemid) ? "" : get$1(metatype).foundryitemid;
       }
-      set_text(text_4, `${get$2(metatype).priority ?? ""}: ${get$2(metatype).name ?? ""}`);
+      set_text(text_4, `${get$1(metatype).priority ?? ""}: ${get$1(metatype).name ?? ""}`);
     });
     append($$anchor2, option_1);
   });
@@ -13553,20 +13563,20 @@ function CharacterCreationDialogApp($$anchor, $$props) {
   option_2.value = null == (option_2.__value = "") ? "" : "";
   option_2.textContent = chooseAnOption;
   var node_1 = sibling(option_2);
-  each(node_1, 17, () => get$2(magicsDropdownOptions), index, ($$anchor2, magic) => {
+  each(node_1, 17, () => get$1(magicsDropdownOptions), index, ($$anchor2, magic) => {
     var option_3 = root_2$4();
     var option_3_value = {};
     var text_6 = child(option_3);
     template_effect(
       ($0) => {
-        if (option_3_value !== (option_3_value = get$2(magic).foundryitemid)) {
-          option_3.value = null == (option_3.__value = get$2(magic).foundryitemid) ? "" : get$2(magic).foundryitemid;
+        if (option_3_value !== (option_3_value = get$1(magic).foundryitemid)) {
+          option_3.value = null == (option_3.__value = get$1(magic).foundryitemid) ? "" : get$1(magic).foundryitemid;
         }
         option_3.disabled = $0;
-        set_text(text_6, `${get$2(magic).priority ?? ""}: ${get$2(magic).name ?? ""}`);
+        set_text(text_6, `${get$1(magic).priority ?? ""}: ${get$1(magic).name ?? ""}`);
       },
       [
-        () => get$2(usedPriorities).includes(get$2(magic).priority) && get$2(magic).foundryitemid !== get$2(selectedMagic)
+        () => get$1(usedPriorities).includes(get$1(magic).priority) && get$1(magic).foundryitemid !== get$1(selectedMagic)
       ]
     );
     append($$anchor2, option_3);
@@ -13585,14 +13595,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     var text_8 = child(option_5);
     template_effect(
       ($0) => {
-        if (option_5_value !== (option_5_value = get$2(attribute).priority)) {
-          option_5.value = null == (option_5.__value = get$2(attribute).priority) ? "" : get$2(attribute).priority;
+        if (option_5_value !== (option_5_value = get$1(attribute).priority)) {
+          option_5.value = null == (option_5.__value = get$1(attribute).priority) ? "" : get$1(attribute).priority;
         }
         option_5.disabled = $0;
-        set_text(text_8, `${get$2(attribute).priority ?? ""}: ${get$2(attribute).points ?? ""}`);
+        set_text(text_8, `${get$1(attribute).priority ?? ""}: ${get$1(attribute).points ?? ""}`);
       },
       [
-        () => get$2(usedPriorities).includes(get$2(attribute).priority) && get$2(attribute).priority !== get$2(selectedAttribute)
+        () => get$1(usedPriorities).includes(get$1(attribute).priority) && get$1(attribute).priority !== get$1(selectedAttribute)
       ]
     );
     append($$anchor2, option_5);
@@ -13611,14 +13621,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     var text_10 = child(option_7);
     template_effect(
       ($0) => {
-        if (option_7_value !== (option_7_value = get$2(skill).priority)) {
-          option_7.value = null == (option_7.__value = get$2(skill).priority) ? "" : get$2(skill).priority;
+        if (option_7_value !== (option_7_value = get$1(skill).priority)) {
+          option_7.value = null == (option_7.__value = get$1(skill).priority) ? "" : get$1(skill).priority;
         }
         option_7.disabled = $0;
-        set_text(text_10, `${get$2(skill).priority ?? ""}: ${get$2(skill).points ?? ""}`);
+        set_text(text_10, `${get$1(skill).priority ?? ""}: ${get$1(skill).points ?? ""}`);
       },
       [
-        () => get$2(usedPriorities).includes(get$2(skill).priority) && get$2(skill).priority !== get$2(selectedSkill)
+        () => get$1(usedPriorities).includes(get$1(skill).priority) && get$1(skill).priority !== get$1(selectedSkill)
       ]
     );
     append($$anchor2, option_7);
@@ -13637,14 +13647,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     var text_12 = child(option_9);
     template_effect(
       ($0) => {
-        if (option_9_value !== (option_9_value = get$2(resource).priority)) {
-          option_9.value = null == (option_9.__value = get$2(resource).priority) ? "" : get$2(resource).priority;
+        if (option_9_value !== (option_9_value = get$1(resource).priority)) {
+          option_9.value = null == (option_9.__value = get$1(resource).priority) ? "" : get$1(resource).priority;
         }
         option_9.disabled = $0;
-        set_text(text_12, `${get$2(resource).priority ?? ""}: ${get$2(resource).points ?? ""}`);
+        set_text(text_12, `${get$1(resource).priority ?? ""}: ${get$1(resource).points ?? ""}`);
       },
       [
-        () => get$2(usedPriorities).includes(get$2(resource).priority) && get$2(resource).priority !== get$2(selectedResource)
+        () => get$1(usedPriorities).includes(get$1(resource).priority) && get$1(resource).priority !== get$1(selectedResource)
       ]
     );
     append($$anchor2, option_9);
@@ -13677,18 +13687,18 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
       var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
       set_class(div_1, `sr3e-waterfall sr3e-waterfall--${layoutMode}`);
-      set_attribute(img, "src", ((_a = get$2(metatypeItem)) == null ? void 0 : _a.img) ?? "");
-      set_attribute(img, "title", ((_b = get$2(metatypeItem)) == null ? void 0 : _b.name) ?? "");
-      set_attribute(img, "alt", ((_c = get$2(metatypeItem)) == null ? void 0 : _c.name) ?? "");
-      set_text(text2, `${$0 ?? ""}: ${get$2(characterAge) ?? ""} (${get$2(currentPhase) ?? ""})`);
-      set_attribute(input_1, "min", ((_f = (_e = (_d = get$2(metatypeItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
-      set_attribute(input_1, "max", ((_i = (_h = (_g = get$2(metatypeItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
-      set_text(text_1, `${$1 ?? ""}: ${get$2(characterHeight) ?? ""}`);
-      set_attribute(input_2, "min", ((_m = (_l = (_k = (_j = get$2(metatypeItem)) == null ? void 0 : _j.system) == null ? void 0 : _k.physical) == null ? void 0 : _l.height) == null ? void 0 : _m.min) ?? 0);
-      set_attribute(input_2, "max", ((_q = (_p = (_o = (_n = get$2(metatypeItem)) == null ? void 0 : _n.system) == null ? void 0 : _o.physical) == null ? void 0 : _p.height) == null ? void 0 : _q.max) ?? 200);
-      set_text(text_2, `${$2 ?? ""}: ${get$2(characterWeight) ?? ""}`);
-      set_attribute(input_3, "min", ((_u = (_t = (_s = (_r = get$2(metatypeItem)) == null ? void 0 : _r.system) == null ? void 0 : _s.physical) == null ? void 0 : _t.weight) == null ? void 0 : _u.min) ?? 0);
-      set_attribute(input_3, "max", ((_y = (_x = (_w = (_v = get$2(metatypeItem)) == null ? void 0 : _v.system) == null ? void 0 : _w.physical) == null ? void 0 : _x.weight) == null ? void 0 : _y.max) ?? 200);
+      set_attribute(img, "src", ((_a = get$1(metatypeItem)) == null ? void 0 : _a.img) ?? "");
+      set_attribute(img, "title", ((_b = get$1(metatypeItem)) == null ? void 0 : _b.name) ?? "");
+      set_attribute(img, "alt", ((_c = get$1(metatypeItem)) == null ? void 0 : _c.name) ?? "");
+      set_text(text2, `${$0 ?? ""}: ${get$1(characterAge) ?? ""} (${get$1(currentPhase) ?? ""})`);
+      set_attribute(input_1, "min", ((_f = (_e = (_d = get$1(metatypeItem)) == null ? void 0 : _d.system) == null ? void 0 : _e.agerange) == null ? void 0 : _f.min) ?? 0);
+      set_attribute(input_1, "max", ((_i = (_h = (_g = get$1(metatypeItem)) == null ? void 0 : _g.system) == null ? void 0 : _h.agerange) == null ? void 0 : _i.max) ?? 100);
+      set_text(text_1, `${$1 ?? ""}: ${get$1(characterHeight) ?? ""}`);
+      set_attribute(input_2, "min", ((_m = (_l = (_k = (_j = get$1(metatypeItem)) == null ? void 0 : _j.system) == null ? void 0 : _k.physical) == null ? void 0 : _l.height) == null ? void 0 : _m.min) ?? 0);
+      set_attribute(input_2, "max", ((_q = (_p = (_o = (_n = get$1(metatypeItem)) == null ? void 0 : _n.system) == null ? void 0 : _o.physical) == null ? void 0 : _p.height) == null ? void 0 : _q.max) ?? 200);
+      set_text(text_2, `${$2 ?? ""}: ${get$1(characterWeight) ?? ""}`);
+      set_attribute(input_3, "min", ((_u = (_t = (_s = (_r = get$1(metatypeItem)) == null ? void 0 : _r.system) == null ? void 0 : _s.physical) == null ? void 0 : _t.weight) == null ? void 0 : _u.min) ?? 0);
+      set_attribute(input_3, "max", ((_y = (_x = (_w = (_v = get$1(metatypeItem)) == null ? void 0 : _v.system) == null ? void 0 : _w.physical) == null ? void 0 : _x.weight) == null ? void 0 : _y.max) ?? 200);
       set_text(text_3, $3);
       set_text(text_5, $4);
       set_text(text_7, $5);
@@ -13696,7 +13706,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       set_text(text_11, $7);
       set_text(text_13, ` ${$8 ?? ""}`);
       set_text(text_14, ` ${$9 ?? ""}`);
-      button_2.disabled = !get$2(canCreate);
+      button_2.disabled = !get$1(canCreate);
       set_text(text_15, ` ${$10 ?? ""}`);
     },
     [
@@ -13714,15 +13724,15 @@ function CharacterCreationDialogApp($$anchor, $$props) {
     ]
   );
   event("submit", form, handleSubmit);
-  bind_value(input, () => get$2(characterName), ($$value) => set(characterName, $$value));
-  bind_value(input_1, () => get$2(characterAge), ($$value) => set(characterAge, $$value));
-  bind_value(input_2, () => get$2(characterHeight), ($$value) => set(characterHeight, $$value));
-  bind_value(input_3, () => get$2(characterWeight), ($$value) => set(characterWeight, $$value));
-  bind_select_value(select, () => get$2(selectedmetatype), ($$value) => set(selectedmetatype, $$value));
-  bind_select_value(select_1, () => get$2(selectedMagic), ($$value) => set(selectedMagic, $$value));
-  bind_select_value(select_2, () => get$2(selectedAttribute), ($$value) => set(selectedAttribute, $$value));
-  bind_select_value(select_3, () => get$2(selectedSkill), ($$value) => set(selectedSkill, $$value));
-  bind_select_value(select_4, () => get$2(selectedResource), ($$value) => set(selectedResource, $$value));
+  bind_value(input, () => get$1(characterName), ($$value) => set(characterName, $$value));
+  bind_value(input_1, () => get$1(characterAge), ($$value) => set(characterAge, $$value));
+  bind_value(input_2, () => get$1(characterHeight), ($$value) => set(characterHeight, $$value));
+  bind_value(input_3, () => get$1(characterWeight), ($$value) => set(characterWeight, $$value));
+  bind_select_value(select, () => get$1(selectedmetatype), ($$value) => set(selectedmetatype, $$value));
+  bind_select_value(select_1, () => get$1(selectedMagic), ($$value) => set(selectedMagic, $$value));
+  bind_select_value(select_2, () => get$1(selectedAttribute), ($$value) => set(selectedAttribute, $$value));
+  bind_select_value(select_3, () => get$1(selectedSkill), ($$value) => set(selectedSkill, $$value));
+  bind_select_value(select_4, () => get$1(selectedResource), ($$value) => set(selectedResource, $$value));
   append($$anchor, form);
   pop();
 }
@@ -13878,27 +13888,23 @@ class RollService {
     });
   }
   static async SkillRoll(actor, skillName, dice, options) {
-    console.log("[SkillRoll]", {
-      skillName,
-      dice,
-      options
-    });
+    console.log("[SkillRoll]", { skillName, dice, options });
   }
   static async SpecializationRoll(actor, skillName, dice, options) {
-    console.log("[SpecializationRoll]", {
-      skillName,
-      dice,
-      options
-    });
+    console.log("[SpecializationRoll]", { skillName, dice, options });
   }
   static async Initiaitve(actor) {
-    const initiativeDice = get(storeManager.getActorStore(actor.id, stores.initiativeDice, 1));
-    const augmentedReaction = get(storeManager.getActorStore(actor.id, stores.augmentedReaction));
+    const storeManager2 = StoreManager.Subscribe(actor);
+    const initiativeDiceStore = storeManager2.GetSumROStore("attributes.initiative");
+    const reactionStore = storeManager2.GetSumROStore("attributes.reaction");
+    const initiativeDice = get(initiativeDiceStore).sum;
+    const reaction = get(reactionStore).sum;
+    StoreManager.Unsubscribe(actor);
     const roll = await new Roll(`${initiativeDice}d6`).evaluate();
-    const totalInit = roll.total + augmentedReaction;
+    const totalInit = roll.total + reaction;
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor }),
-      flavor: `${actor.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`
+      flavor: `${actor.name} rolls Initiative: ${initiativeDice}d6 + ${reaction}`
     });
     if (actor.combatant) {
       await actor.combatant.update({ initiative: totalInit });
@@ -13912,43 +13918,44 @@ class RollService {
   }
 }
 class SR3EActor extends Actor {
-  get getInitiativeDice() {
-    let dice = 1;
-    console.warn("SR3EActor.getInitiativeDice is not implemented. Returning 1 by default.");
-    return dice;
+  /*
+     getRollData() {
+        const data = super.getRollData();
+        
+        console.log("I WAS CALLED! getRollData");
+        
+        // Debug: Log the structure to see what we're working with
+        console.log("Base getRollData result:", data);
+        console.log("this.system:", this.system);
+        console.log("this.system.attributes:", this.system.attributes);
+        console.log("this.system.attributes.quickness:", this.system.attributes.quickness);
+        
+        // The system data should already be in the data object
+        // Check if attributes are already there
+        if (data.attributes) {
+           console.log("Attributes found in data:", data.attributes);
+           // Flatten attributes to root level
+           for (const [k, v] of Object.entries(data.attributes)) {
+              data[k] = v;
+              console.log(`Set data.${k} = ${v}`);
+           }
+        } else {
+           console.log("No attributes in data, adding manually");
+        // Add attributes manually from this.system
+        data.quickness = this.system.attributes.quickness;
+        data.intelligence = this.system.attributes.intelligence;
+        data.willpower = this.system.attributes.willpower;
+        data.strength = this.system.attributes.strength;
+        data.body = this.system.attributes.body;
+        data.charisma = this.system.attributes.charisma;
+     }
+     
+     console.log("Final roll data:", data);
+     return data;
   }
-  get AugumentedReaction() {
-    let augmentedReaction = 0;
-    console.warn("SR3EActor.getAugmentedReaction is not implemented. Returning 0 by default.");
-    return augmentedReaction;
-  }
-  getRollData() {
-    const data = super.getRollData();
-    console.log("I WAS CALLED! getRollData");
-    console.log("Base getRollData result:", data);
-    console.log("this.system:", this.system);
-    console.log("this.system.attributes:", this.system.attributes);
-    console.log("this.system.attributes.quickness:", this.system.attributes.quickness);
-    if (data.attributes) {
-      console.log("Attributes found in data:", data.attributes);
-      for (const [k, v] of Object.entries(data.attributes)) {
-        data[k] = v;
-        console.log(`Set data.${k} = ${v}`);
-      }
-    } else {
-      console.log("No attributes in data, adding manually");
-      data.quickness = this.system.attributes.quickness;
-      data.intelligence = this.system.attributes.intelligence;
-      data.willpower = this.system.attributes.willpower;
-      data.strength = this.system.attributes.strength;
-      data.body = this.system.attributes.body;
-      data.charisma = this.system.attributes.charisma;
-    }
-    console.log("Final roll data:", data);
-    return data;
-  }
-  async InitiativeRoll(dice, options) {
-    await RollService.Initiative(this, dice, options);
+  */
+  async InitiativeRoll() {
+    return await RollService.Initiaitve(this);
   }
   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.AttributeRoll(this, attributeName, dice, options);
@@ -14134,7 +14141,7 @@ function TimeActuatorInput($$anchor, $$props) {
     }
     set(input, "");
   });
-  bind_value(input_1, () => get$2(input), ($$value) => set(input, $$value));
+  bind_value(input_1, () => get$1(input), ($$value) => set(input, $$value));
   append($$anchor, div);
   pop();
 }
@@ -14196,13 +14203,13 @@ function TimeManager($$anchor, $$props) {
     Hooks.on("updateWorldTime", handler);
     return () => Hooks.off("updateWorldTime", handler);
   });
-  const year = /* @__PURE__ */ derived$1(() => get$2(currentDate).getFullYear());
-  const day = /* @__PURE__ */ derived$1(() => get$2(currentDate).getDate());
-  const hours = /* @__PURE__ */ derived$1(() => get$2(currentDate).getHours());
-  const minutes = /* @__PURE__ */ derived$1(() => get$2(currentDate).getMinutes());
-  const seconds = /* @__PURE__ */ derived$1(() => get$2(currentDate).getSeconds());
-  const weekdayAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
-  const monthAsString = /* @__PURE__ */ derived$1(() => get$2(currentDate).toLocaleDateString(void 0, { month: "long" }));
+  const year = /* @__PURE__ */ derived$1(() => get$1(currentDate).getFullYear());
+  const day = /* @__PURE__ */ derived$1(() => get$1(currentDate).getDate());
+  const hours = /* @__PURE__ */ derived$1(() => get$1(currentDate).getHours());
+  const minutes = /* @__PURE__ */ derived$1(() => get$1(currentDate).getMinutes());
+  const seconds = /* @__PURE__ */ derived$1(() => get$1(currentDate).getSeconds());
+  const weekdayAsString = /* @__PURE__ */ derived$1(() => get$1(currentDate).toLocaleDateString(void 0, { weekday: "long" }));
+  const monthAsString = /* @__PURE__ */ derived$1(() => get$1(currentDate).toLocaleDateString(void 0, { month: "long" }));
   var div = root$7();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
@@ -14227,7 +14234,7 @@ function TimeManager($$anchor, $$props) {
   const expression = /* @__PURE__ */ derived$1(() => localize(config().time.year));
   TimeActuatorInput(node, {
     get label() {
-      return get$2(expression);
+      return get$1(expression);
     },
     onDelta: (n) => {
       TimeService.updateYears(n);
@@ -14237,7 +14244,7 @@ function TimeManager($$anchor, $$props) {
   const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().time.month));
   TimeActuatorInput(node_1, {
     get label() {
-      return get$2(expression_1);
+      return get$1(expression_1);
     },
     onDelta: (n) => {
       TimeService.updateMonths(n);
@@ -14247,7 +14254,7 @@ function TimeManager($$anchor, $$props) {
   const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().time.day));
   TimeActuatorInput(node_2, {
     get label() {
-      return get$2(expression_2);
+      return get$1(expression_2);
     },
     onDelta: (n) => {
       TimeService.updateDays(n);
@@ -14257,7 +14264,7 @@ function TimeManager($$anchor, $$props) {
   const expression_3 = /* @__PURE__ */ derived$1(() => localize(config().time.hours));
   TimeActuatorInput(node_3, {
     get label() {
-      return get$2(expression_3);
+      return get$1(expression_3);
     },
     onDelta: (n) => {
       TimeService.updateHours(n);
@@ -14267,7 +14274,7 @@ function TimeManager($$anchor, $$props) {
   const expression_4 = /* @__PURE__ */ derived$1(() => localize(config().time.minutes));
   TimeActuatorInput(node_4, {
     get label() {
-      return get$2(expression_4);
+      return get$1(expression_4);
     },
     onDelta: (n) => {
       TimeService.updateMinutes(n);
@@ -14277,7 +14284,7 @@ function TimeManager($$anchor, $$props) {
   const expression_5 = /* @__PURE__ */ derived$1(() => localize(config().time.seconds));
   TimeActuatorInput(node_5, {
     get label() {
-      return get$2(expression_5);
+      return get$1(expression_5);
     },
     onDelta: (n) => {
       TimeService.updateSeconds(n);
@@ -14285,19 +14292,19 @@ function TimeManager($$anchor, $$props) {
   });
   template_effect(
     ($0, $1, $2, $3) => {
-      set_text(text2, get$2(weekdayAsString));
+      set_text(text2, get$1(weekdayAsString));
       set_text(text_1, $0);
-      set_text(text_2, get$2(monthAsString));
-      set_text(text_3, get$2(year));
+      set_text(text_2, get$1(monthAsString));
+      set_text(text_3, get$1(year));
       set_text(text_4, $1);
       set_text(text_5, $2);
       set_text(text_6, $3);
     },
     [
-      () => get$2(day).toString().padStart(2, "0"),
-      () => get$2(hours).toString().padStart(2, "0"),
-      () => get$2(minutes).toString().padStart(2, "0"),
-      () => get$2(seconds).toString().padStart(2, "0")
+      () => get$1(day).toString().padStart(2, "0"),
+      () => get$1(hours).toString().padStart(2, "0"),
+      () => get$1(minutes).toString().padStart(2, "0"),
+      () => get$1(seconds).toString().padStart(2, "0")
     ]
   );
   append($$anchor, div);
@@ -14394,19 +14401,19 @@ function KarmaRow($$anchor, $$props) {
   $$cleanup();
 }
 async function commitSelected$1(_, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.CommitSelected) await row.CommitSelected();
   }
 }
 function selectAll$1(__1, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.Select) row.Select();
   }
 }
 function deselectAll$1(__2, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.Deselect) row.Deselect();
   }
@@ -14438,7 +14445,7 @@ function KarmaManager($$anchor, $$props) {
   user_effect(() => {
     var _a;
     let baseList = [];
-    switch (get$2(filter)) {
+    switch (get$1(filter)) {
       case "character":
         baseList = game.actors.filter((a) => a.type === "character");
         break;
@@ -14452,7 +14459,7 @@ function KarmaManager($$anchor, $$props) {
         });
         break;
     }
-    set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
+    set(listboxContent, proxy(((_a = get$1(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$1(delimiter).toLowerCase())) : baseList));
   });
   var div = root$5();
   var div_1 = child(div);
@@ -14461,8 +14468,8 @@ function KarmaManager($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var select = child(div_4);
   each(select, 21, () => options, index, ($$anchor2, $$item) => {
-    let value = () => get$2($$item).value;
-    let label = () => get$2($$item).label;
+    let value = () => get$1($$item).value;
+    let label = () => get$1($$item).label;
     var option = root_1$3();
     var option_value = {};
     var text2 = child(option);
@@ -14500,16 +14507,16 @@ function KarmaManager($$anchor, $$props) {
       var th_3 = sibling(th_2);
       var text_7 = child(th_3);
       var tbody = sibling(thead);
-      each(tbody, 21, () => get$2(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
+      each(tbody, 21, () => get$1(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
         KarmaRow($$anchor3, {
           get actor() {
-            return get$2(actor);
+            return get$1(actor);
           },
           get config() {
             return $$props.config;
           },
           OnCommitStatusChange,
-          onmount: (el) => rowRefs.set(get$2(actor).id, el)
+          onmount: (el) => rowRefs.set(get$1(actor).id, el)
         });
       });
       template_effect(
@@ -14534,7 +14541,7 @@ function KarmaManager($$anchor, $$props) {
     };
     if_block(node, ($$render) => {
       var _a;
-      if ((_a = get$2(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
+      if ((_a = get$1(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
       else $$render(alternate, false);
     });
   }
@@ -14542,7 +14549,7 @@ function KarmaManager($$anchor, $$props) {
     ($0, $1, $2) => {
       set_text(text_1, $0);
       set_text(text_2, $1);
-      button_2.disabled = !get$2(anyReady);
+      button_2.disabled = !get$1(anyReady);
       set_text(text_3, $2);
     },
     [
@@ -14551,8 +14558,8 @@ function KarmaManager($$anchor, $$props) {
       () => localize($$props.config.karma.commitselected)
     ]
   );
-  bind_select_value(select, () => get$2(filter), ($$value) => set(filter, $$value));
-  bind_value(input, () => get$2(delimiter), ($$value) => set(delimiter, $$value));
+  bind_select_value(select, () => get$1(filter), ($$value) => set(filter, $$value));
+  bind_value(input, () => get$1(delimiter), ($$value) => set(delimiter, $$value));
   append($$anchor, div);
   pop();
 }
@@ -14723,19 +14730,19 @@ function DicePoolRow($$anchor, $$props) {
 }
 delegate(["click", "change"]);
 async function commitSelected(_, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.CommitSelected) await row.CommitSelected();
   }
 }
 function selectAll(__1, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.Select) row.Select();
   }
 }
 function deselectAll(__2, listboxContent, rowRefs) {
-  for (const actor of get$2(listboxContent)) {
+  for (const actor of get$1(listboxContent)) {
     const row = rowRefs.get(actor.id);
     if (row == null ? void 0 : row.Deselect) row.Deselect();
   }
@@ -14767,7 +14774,7 @@ function DicePoolManager($$anchor, $$props) {
   user_effect(() => {
     var _a;
     let baseList = [];
-    switch (get$2(filter)) {
+    switch (get$1(filter)) {
       case "character":
         baseList = game.actors.filter((a) => {
           var _a2, _b;
@@ -14787,7 +14794,7 @@ function DicePoolManager($$anchor, $$props) {
         });
         break;
     }
-    set(listboxContent, proxy(((_a = get$2(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$2(delimiter).toLowerCase())) : baseList));
+    set(listboxContent, proxy(((_a = get$1(delimiter)) == null ? void 0 : _a.length) > 0 ? baseList.filter((a) => a.name.toLowerCase().includes(get$1(delimiter).toLowerCase())) : baseList));
   });
   var div = root$3();
   var div_1 = child(div);
@@ -14796,8 +14803,8 @@ function DicePoolManager($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var select = child(div_4);
   each(select, 21, () => options, index, ($$anchor2, $$item) => {
-    let value = () => get$2($$item).value;
-    let label = () => get$2($$item).label;
+    let value = () => get$1($$item).value;
+    let label = () => get$1($$item).label;
     var option = root_1$2();
     var option_value = {};
     var text2 = child(option);
@@ -14839,16 +14846,16 @@ function DicePoolManager($$anchor, $$props) {
       var th_5 = sibling(th_4);
       var text_9 = child(th_5);
       var tbody = sibling(thead);
-      each(tbody, 21, () => get$2(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
+      each(tbody, 21, () => get$1(listboxContent), (actor) => actor.id, ($$anchor3, actor) => {
         DicePoolRow($$anchor3, {
           get actor() {
-            return get$2(actor);
+            return get$1(actor);
           },
           get config() {
             return $$props.config;
           },
           OnCommitStatusChange,
-          onmount: (el) => rowRefs.set(get$2(actor).id, el)
+          onmount: (el) => rowRefs.set(get$1(actor).id, el)
         });
       });
       template_effect(
@@ -14877,7 +14884,7 @@ function DicePoolManager($$anchor, $$props) {
     };
     if_block(node, ($$render) => {
       var _a;
-      if ((_a = get$2(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
+      if ((_a = get$1(listboxContent)) == null ? void 0 : _a.length) $$render(consequent);
       else $$render(alternate, false);
     });
   }
@@ -14885,7 +14892,7 @@ function DicePoolManager($$anchor, $$props) {
     ($0, $1, $2) => {
       set_text(text_1, $0);
       set_text(text_2, $1);
-      button_2.disabled = !get$2(anyReady);
+      button_2.disabled = !get$1(anyReady);
       set_text(text_3, $2);
     },
     [
@@ -14894,8 +14901,8 @@ function DicePoolManager($$anchor, $$props) {
       () => localize($$props.config.karma.commitselected)
     ]
   );
-  bind_select_value(select, () => get$2(filter), ($$value) => set(filter, $$value));
-  bind_value(input, () => get$2(delimiter), ($$value) => set(delimiter, $$value));
+  bind_select_value(select, () => get$1(filter), ($$value) => set(filter, $$value));
+  bind_value(input, () => get$1(delimiter), ($$value) => set(delimiter, $$value));
   append($$anchor, div);
   pop();
 }
@@ -15090,7 +15097,7 @@ function TransactionApp($$anchor, $$props) {
           var input_1 = root_2$1();
           input_1.__input = handleInput;
           input_1.__keydown = [handleKeyDown];
-          template_effect(() => set_value(input_1, get$2(formattedAmount)));
+          template_effect(() => set_value(input_1, get$1(formattedAmount)));
           event("focus", input_1, handleFocus);
           event("blur", input_1, handleBlur);
           append($$anchor3, input_1);
@@ -15142,7 +15149,7 @@ function TransactionApp($$anchor, $$props) {
       StatCard$1(node_4, {
         children: ($$anchor3, $$slotProps2) => {
           var input_2 = root_4$1();
-          bind_value(input_2, () => get$2(interest), ($$value) => set(interest, $$value));
+          bind_value(input_2, () => get$1(interest), ($$value) => set(interest, $$value));
           append($$anchor3, input_2);
         },
         $$slots: { default: true }
@@ -15187,16 +15194,16 @@ function TransactionApp($$anchor, $$props) {
           const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.combosearch.noresult));
           ComboSearch(node_8, {
             get options() {
-              return get$2(creditorOptions);
+              return get$1(creditorOptions);
             },
             get placeholder() {
-              return get$2(expression);
+              return get$1(expression);
             },
             get nomatchplaceholder() {
-              return get$2(expression_1);
+              return get$1(expression_1);
             },
             get value() {
-              return get$2(selectedId);
+              return get$1(selectedId);
             },
             set value($$value) {
               set(selectedId, proxy($$value));
@@ -15213,7 +15220,9 @@ function TransactionApp($$anchor, $$props) {
   }
   var node_9 = sibling(div_1, 2);
   JournalViewer(node_9, {
-    document,
+    get document() {
+      return item2();
+    },
     get config() {
       return $$props.config;
     }
@@ -15270,55 +15279,82 @@ class TransactionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 }
 _app5 = new WeakMap();
 function Print(message = "Combat Service Print Function") {
+  const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+  const tag = "[COMBAT]";
+  const finalMessage = `${tag} ${timestamp} - ${message}`;
   ui.notifications.info(message);
-  console.log(message);
+  console.log(finalMessage);
 }
-const _SR3ECombat = class _SR3ECombat extends foundry.documents.Combat {
-  constructor() {
-    super(...arguments);
-    __privateAdd(this, _SR3ECombat_instances);
-  }
+class SR3ECombat extends foundry.documents.Combat {
   async startCombat() {
-    Print("Combat Started");
-    await this._refreshDicePools();
+    Print("=== COMBAT STARTED ===");
+    await this.setFlag("sr3e", "combatTurn", 1);
+    await this.setFlag("sr3e", "initiativePass", 1);
+    return super.startCombat();
   }
-  _refreshDicePools() {
-    for (const combatant of this.combatants) {
-      const actor = combatant.actor;
-      if (!actor) continue;
-      actor.getWoundModifier();
+  async rollInitiative(ids, { createCombatants = false, updateTurn = true } = {}) {
+    const updates = [];
+    for (let id of ids) {
+      const combatant = this.combatants.get(id);
+      if (!combatant || !combatant.actor) continue;
+      const totalInit = await combatant.actor.InitiativeRoll();
+      updates.push({ _id: id, initiative: totalInit });
+    }
+    if (updates.length > 0) {
+      await this.updateEmbeddedDocuments("Combatant", updates);
+    }
+    if (updateTurn) await this.update({ turn: 0 });
+    return this;
+  }
+  async nextTurn() {
+    const result = await super.nextTurn();
+    const combatant = this.combatant;
+    if (!combatant) return result;
+    if (combatant.initiative < 1) {
+      await this._advanceInitiativePass();
+    } else {
+      Print(`-> ${combatant.name} acts (Init: ${combatant.initiative})`);
+    }
+    return result;
+  }
+  async _advanceInitiativePass() {
+    const currentPass = this.getFlag("sr3e", "initiativePass") || 1;
+    Print(`--- Ending Initiative Pass ${currentPass} ---`);
+    for (const c of this.combatants.contents) {
+      if (c.initiative > 0) {
+        const newInit = Math.max(0, c.initiative - 10);
+        await c.update({ initiative: newInit });
+      }
+    }
+    const stillActive = this.combatants.contents.some((c) => c.initiative > 0);
+    if (stillActive) {
+      const newPass = currentPass + 1;
+      Print(`--- New Initiative Pass ${newPass} ---`);
+      await this.setFlag("sr3e", "initiativePass", newPass);
+      await this.update({ turn: 0 });
+    } else {
+      Print("— All Initiative Passes Completed — Proceeding to next round —");
+      await this.nextRound();
     }
   }
-  nextTurn() {
-    throw new NotImplementedError("nextInitiativePass");
-  }
-  nextRound() {
-    throw new NotImplementedError("nextInitiativePass");
+  async nextRound() {
+    const initiativePass = this.getFlag("sr3e", "initiativePass") || 1;
+    const hasPositive = this.combatants.contents.some((c) => c.initiative > 0);
+    if (hasPositive && initiativePass > 0) {
+      return await this._advanceInitiativePass();
+    } else {
+      const round = this.round + 1;
+      Print(`=== STARTING COMBAT TURN ${round} ===`);
+      await this.setFlag("sr3e", "combatTurn", round);
+      await this.setFlag("sr3e", "initiativePass", 1);
+      await this.resetAll({ updateTurn: false });
+      return super.nextRound();
+    }
   }
   static Register() {
-    CONFIG.Combat.documentClass = _SR3ECombat;
+    CONFIG.Combat.documentClass = SR3ECombat;
   }
-};
-_SR3ECombat_instances = new WeakSet();
-nextInitiativePass_fn = function() {
-  throw new NotImplementedError("nextInitiativePass");
-};
-startNewCombatTurn_fn = function() {
-  throw new NotImplementedError("startNewCombatTurn");
-};
-recordAction_fn = function() {
-  throw new NotImplementedError("recordAction");
-};
-resetCombatantActions_fn = function() {
-  throw new NotImplementedError("resetCombatantActions");
-};
-handleDelayedAction_fn = function() {
-  throw new NotImplementedError("handleDelayedAction");
-};
-handleIntervention_fn = function() {
-  throw new NotImplementedError("handleIntervention");
-};
-let SR3ECombat = _SR3ECombat;
+}
 const _SR3Edie = class _SR3Edie extends foundry.dice.terms.Die {
   /* ------------------------------------------------------------------ */
   /*  Evaluation                                                        */
@@ -15481,8 +15517,8 @@ function BroadcasterApp($$anchor, $$props) {
     }
   });
   function addHeadline() {
-    const trimmedInput = get$2(headlineInput).trim();
-    if (get$2(isEditing) && selectedPrepared.length === 1) {
+    const trimmedInput = get$1(headlineInput).trim();
+    if (get$1(isEditing) && selectedPrepared.length === 1) {
       const index2 = selectedPrepared[0];
       store_mutate(preparedNewsStore, untrack($preparedNewsStore)[index2] = trimmedInput, untrack($preparedNewsStore));
       store_set(preparedNewsStore, proxy([...$preparedNewsStore()]));
@@ -15572,12 +15608,12 @@ function BroadcasterApp($$anchor, $$props) {
       var button_1 = sibling(button, 2);
       button_1.__click = deleteHeadlines;
       template_effect(() => {
-        set_attribute(input_1, "placeholder", get$2(isEditing) ? "Edit headline" : "Write a headline");
-        set_attribute(button, "title", get$2(isEditing) ? "Update Headline" : "Add Headline");
-        set_attribute(button, "aria-label", get$2(isEditing) ? "Update Headline" : "Add Headline");
-        set_class(i_1, `fas ${(get$2(isEditing) ? "fa-save" : "fa-plus") ?? ""}`);
+        set_attribute(input_1, "placeholder", get$1(isEditing) ? "Edit headline" : "Write a headline");
+        set_attribute(button, "title", get$1(isEditing) ? "Update Headline" : "Add Headline");
+        set_attribute(button, "aria-label", get$1(isEditing) ? "Update Headline" : "Add Headline");
+        set_class(i_1, `fas ${(get$1(isEditing) ? "fa-save" : "fa-plus") ?? ""}`);
       });
-      bind_value(input_1, () => get$2(headlineInput), ($$value) => set(headlineInput, $$value));
+      bind_value(input_1, () => get$1(headlineInput), ($$value) => set(headlineInput, $$value));
       append($$anchor2, div_4);
     }
   });
@@ -15592,7 +15628,7 @@ function BroadcasterApp($$anchor, $$props) {
         var option = root_4();
         option.value = null == (option.__value = i) ? "" : i;
         var text_1 = child(option);
-        template_effect(() => set_text(text_1, get$2(headline)));
+        template_effect(() => set_text(text_1, get$1(headline)));
         append($$anchor3, option);
       });
       var div_7 = sibling(div_6, 2);
@@ -15606,7 +15642,7 @@ function BroadcasterApp($$anchor, $$props) {
         var option_1 = root_5();
         option_1.value = null == (option_1.__value = i) ? "" : i;
         var text_2 = child(option_1);
-        template_effect(() => set_text(text_2, get$2(headline)));
+        template_effect(() => set_text(text_2, get$1(headline)));
         append($$anchor3, option_1);
       });
       bind_select_value(select, () => selectedPrepared, ($$value) => selectedPrepared = $$value);

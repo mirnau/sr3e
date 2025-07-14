@@ -159,6 +159,7 @@
          "system.attributes.willpower.value": 1,
          "system.attributes.quickness.value": 1,
          "system.attributes.intelligence.value": 1,
+         "system.attributes.initiative.value": 1,
       });
 
       // INFO: Mods handled by Active Effects system

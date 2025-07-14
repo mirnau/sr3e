@@ -1,3 +1,6 @@
+import { get } from "svelte/store";
+import { StoreManager } from "../svelte/svelteHelpers/StoreManager.svelte";
+
 export default class RollService {
    static async AttributeRoll(
       actor,
@@ -76,15 +79,20 @@ export default class RollService {
    }
 
    static async Initiaitve(actor) {
-      const initiativeDice = get(storeManager.getActorStore(actor.id, stores.initiativeDice, 1));
-      const augmentedReaction = get(storeManager.getActorStore(actor.id, stores.augmentedReaction));
+
+      const storeManager = StoreManager.Subscribe(actor);
+      const initiativeDiceStore = storeManager.GetSumROStore("attributes.initiative");
+      const reactionStore = storeManager.GetSumROStore("attributes.reaction");
+      const initiativeDice = get(initiativeDiceStore).sum;
+      const reaction = get(reactionStore).sum;
+      StoreManager.Unsubscribe(actor);
 
       const roll = await new Roll(`${initiativeDice}d6`).evaluate();
-      const totalInit = roll.total + augmentedReaction;
+      const totalInit = roll.total + reaction;
 
       await roll.toMessage({
          speaker: ChatMessage.getSpeaker({ actor: actor }),
-         flavor: `${actor.name} rolls Initiative: ${initiativeDice}d6 + ${augmentedReaction}`,
+         flavor: `${actor.name} rolls Initiative: ${initiativeDice}d6 + ${reaction}`,
       });
 
       if (actor.combatant) {
@@ -96,6 +104,6 @@ export default class RollService {
          }
       }
 
-      return totalInit; // Return the total value, not the roll object
+      return totalInit;
    }
 }
