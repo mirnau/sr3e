@@ -1483,11 +1483,8 @@
     white-space: nowrap;
   }
   .chat-message.message {
-    position: relative;
-    width: 100%;
-    height: 100%;
     background: transparent;
-    border-radius: 0rem;
+    border-radius: 0;
     margin: 0;
     padding: 0;
   }
@@ -1496,9 +1493,15 @@
     text-shadow: 0 0 1rem var(--author-color), 0 0 0.5rem black;
   }
   .chat-message.message .chat-message-wrapper {
+    /* NEW ↓ ensure the wrapper takes only as much space as it needs */
+    display: inline-block;
+    position: relative;
+    /* anchor the absolute bg */
     padding: 0.5rem;
   }
   .chat-message.message .chat-message-wrapper .chat-message-dynamic-background {
+    /* NEW ↓ overlay exactly the wrapper’s box */
+    inset: 0;
     z-index: 0;
     position: absolute;
     top: 1.5rem;

@@ -15843,6 +15843,13 @@ function debugFlagsOnActor(actor, options, userId) {
   console.groupEnd();
 }
 function wrapChatMessage(message, html2, context) {
+  const isPopup = (context == null ? void 0 : context.canClose) && !(context == null ? void 0 : context.canDelete);
+  if (isPopup) {
+    console.log("=== POPUP CHAT MESSAGE DETECTED ===");
+    console.log("HTML Element:\n", html2.outerHTML);
+    console.log("Message:\n", message);
+    console.log("Context:\n", context);
+  }
   const wrapper = document.createElement("div");
   const dynamicBackground = document.createElement("div");
   const dynamicMessage = document.createElement("div");

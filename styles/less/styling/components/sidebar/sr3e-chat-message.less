@@ -1,47 +1,52 @@
 .chat-message.message {
-  .apply-container();
-  background: transparent;
-  border-radius: 0rem;
-  margin: 0;
-  padding: 0;
+   background: transparent;
+   border-radius: 0;
+   margin: 0;
+   padding: 0;
 
-  h4.message-sender {
-    color: var(--author-color);
-    text-shadow: 0 0 1rem var(--author-color), 0 0 0.5rem black;
-  }
+   h4.message-sender {
+      color: var(--author-color);
+      text-shadow: 0 0 1rem var(--author-color), 0 0 0.5rem black;
+   }
 
-  .chat-message-wrapper {
-    padding: 0.5rem;
-
-    .chat-message-dynamic-background {
-      z-index: 0;
-      .fake-shadow(var(--author-color));
-      .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
-    }
-
-    .chat-message-dynamic {
-      position: relative;
-      z-index: 1;
+   .chat-message-wrapper {
+      /* NEW ↓ ensure the wrapper takes only as much space as it needs */
+      display: inline-block;
+      position: relative; /* anchor the absolute bg */
       padding: 0.5rem;
-      background: var(--author-color);
-      .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 
-      &::before {
-        content: "";
-        position: absolute;
-        z-index: -1; // Put it behind the content
-        top: 1px;
-        left: 1px;
-        width: calc(100% - 2px);
-        height: calc(100% - 2px);
-        background: var(--background-with-image);
-        background-blend-mode: multiply, multiply, overlay;
-        background-repeat: repeat;
-        background-size: 200;
-        box-shadow: inset 0 0 30px black;
-        pointer-events: none;
-        .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+      .chat-message-dynamic-background {
+         /* NEW ↓ overlay exactly the wrapper’s box */
+         position: absolute;
+         inset: 0;
+         z-index: 0;
+         .fake-shadow(var(--author-color));
+         .clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
       }
-    }
-  }
+
+      .chat-message-dynamic {
+         position: relative;
+         z-index: 1;
+         padding: 0.5rem;
+         background: var(--author-color);
+         .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+         &::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            background: var(--background-with-image);
+            background-blend-mode: multiply, multiply, overlay;
+            background-repeat: repeat;
+            background-size: 200;
+            box-shadow: inset 0 0 30px black;
+            pointer-events: none;
+            .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+         }
+      }
+   }
 }
