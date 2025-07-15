@@ -13,8 +13,8 @@ export default class AttributesModel extends foundry.abstract.TypeDataModel {
 
          // NOTE: Active Effect driven attributes
          reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-         essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
          magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+         essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
          initiative: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
 
          isBurnedOut: new foundry.data.fields.BooleanField({

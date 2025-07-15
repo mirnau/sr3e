@@ -132,8 +132,8 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
       willpower: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       // NOTE: Active Effect driven attributes
       reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       initiative: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
       isBurnedOut: new foundry.data.fields.BooleanField({
         initial: false
@@ -6322,15 +6322,13 @@ function MasonryGrid($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root_1$r = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
+var root_1$r = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $quickness = () => store_get(quickness, "$quickness", $$stores);
-  const $magic = () => store_get(magic, "$magic", $$stores);
-  const $reaction = () => store_get(reaction, "$reaction", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let attributes = proxy(actor().system.attributes);
@@ -6341,9 +6339,9 @@ function Attributes($$anchor, $$props) {
   storeManager2.GetFlagStore(flags.attributeAssignmentLocked);
   let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
   let quickness = storeManager2.GetSumROStore("attributes.quickness");
-  let magic = storeManager2.GetSumROStore("attributes.magic");
+  storeManager2.GetSumROStore("attributes.magic");
   storeManager2.GetSumROStore("attributes.essence");
-  let reaction = storeManager2.GetSumROStore("attributes.reaction");
+  storeManager2.GetSumROStore("attributes.reaction");
   let reactionValue = storeManager2.GetRWStore("attributes.reaction.value");
   user_effect(() => {
     store_set(reactionValue, proxy(Math.floor(($intelligence().sum + $quickness().sum) * 0.5)));
@@ -6370,47 +6368,32 @@ function Attributes($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$r();
       var node_2 = first_child(fragment_1);
-      each(node_2, 17, () => Object.entries(attributes).slice(0, 6), index, ($$anchor3, $$item) => {
-        let key = () => get$1($$item)[0];
-        let stat = () => get$1($$item)[1];
+      each(node_2, 17, () => Object.keys(attributes).slice(0, 7), index, ($$anchor3, key) => {
         AttributeCard($$anchor3, {
           get actor() {
             return actor();
           },
-          get stat() {
-            return stat();
-          },
           localization,
           get key() {
-            return key();
+            return get$1(key);
           }
         });
       });
       var node_3 = sibling(node_2, 2);
       {
         var consequent = ($$anchor3) => {
-          StatCard$1($$anchor3, {
-            get label() {
-              return config().magic.magic;
+          AttributeCard($$anchor3, {
+            get actor() {
+              return actor();
             },
-            get value() {
-              return $magic().sum;
-            }
+            localization,
+            key: "magic"
           });
         };
         if_block(node_3, ($$render) => {
           if (get$1(isAwakened)) $$render(consequent);
         });
       }
-      var node_4 = sibling(node_3, 2);
-      StatCard$1(node_4, {
-        get label() {
-          return config().initiative.reaction;
-        },
-        get value() {
-          return $reaction().sum;
-        }
-      });
       append($$anchor2, fragment_1);
     },
     $$slots: { default: true }
@@ -13887,11 +13870,13 @@ class RollService {
       rollMode: options.rollMode ?? game.settings.get("core", "rollMode")
     });
   }
+  // NOTE: May need to diverge from attribute rolls in the future
   static async SkillRoll(actor, skillName, dice, options) {
-    console.log("[SkillRoll]", { skillName, dice, options });
+    this.AttributeRoll(actor, skillName, dice, options);
   }
+  // NOTE: May need to diverge from attribute rolls in the future
   static async SpecializationRoll(actor, skillName, dice, options) {
-    console.log("[SpecializationRoll]", { skillName, dice, options });
+    this.AttributeRoll(actor, skillName, dice, options);
   }
   static async Initiaitve(actor) {
     const storeManager2 = StoreManager.Subscribe(actor);
@@ -13965,24 +13950,6 @@ class SR3EActor extends Actor {
   }
   async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.SpecializationRoll(this, specializationName, dice, options);
-  }
-  RefreshKarmaPool() {
-    console.log("SR3EActor.RefreshKarmaPool is not implemented.");
-  }
-  RefreshCombatPool() {
-    console.log("SR3EActor.RefreshCombatPool is not implemented.");
-  }
-  RefreshAstralPool() {
-    console.log("SR3EActor.RefreshAstralPool is not implemented.");
-  }
-  RefreshHackingPool() {
-    console.log("SR3EActor.RefreshHackingPool is not implemented.");
-  }
-  RefreshControlPool() {
-    console.log("SR3EActor.RefreshControlPool is not implemented.");
-  }
-  RefreshSpellPool() {
-    console.log("SR3EActor.RefreshSpellPool is not implemented.");
   }
   async canAcceptmetatype(incomingItem) {
     const existing = this.items.filter((i) => i.type === "metatype");
@@ -15344,6 +15311,7 @@ class SR3ECombat extends foundry.documents.Combat {
       return await this._advanceInitiativePass();
     } else {
       const round = this.round + 1;
+      game.time.advance(3);
       Print(`=== STARTING COMBAT TURN ${round} ===`);
       await this.setFlag("sr3e", "combatTurn", round);
       await this.setFlag("sr3e", "initiativePass", 1);

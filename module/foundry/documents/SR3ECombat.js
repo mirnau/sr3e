@@ -47,7 +47,6 @@ export default class SR3ECombat extends foundry.documents.Combat {
       const currentPass = this.getFlag("sr3e", "initiativePass") || 1;
       CombatService.Print(`--- Ending Initiative Pass ${currentPass} ---`);
 
-      // Decrement and clamp to 0
       for (const c of this.combatants.contents) {
          if (c.initiative > 0) {
             const newInit = Math.max(0, c.initiative - 10);
@@ -64,7 +63,7 @@ export default class SR3ECombat extends foundry.documents.Combat {
          await this.update({ turn: 0 });
       } else {
          CombatService.Print("— All Initiative Passes Completed — Proceeding to next round —");
-         await this.nextRound(); // Full round transition, clean and automatic
+         await this.nextRound();
       }
    }
 
@@ -72,12 +71,11 @@ export default class SR3ECombat extends foundry.documents.Combat {
       const initiativePass = this.getFlag("sr3e", "initiativePass") || 1;
       const hasPositive = this.combatants.contents.some((c) => c.initiative > 0);
 
-      // If any combatant still has initiative AND we're mid-passes, continue rather than full reset
       if (hasPositive && initiativePass > 0) {
          return await this._advanceInitiativePass();
       } else {
-         // Everybody at zero: proceed with true round reset
          const round = this.round + 1;
+         game.time.advance(3);
          CombatService.Print(`=== STARTING COMBAT TURN ${round} ===`);
          await this.setFlag("sr3e", "combatTurn", round);
          await this.setFlag("sr3e", "initiativePass", 1);

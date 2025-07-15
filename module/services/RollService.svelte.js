@@ -62,24 +62,17 @@ export default class RollService {
       });
    }
 
+   // NOTE: May need to diverge from attribute rolls in the future
    static async SkillRoll(actor, skillName, dice, options) {
-      console.log("[SkillRoll]", {
-         skillName,
-         dice,
-         options,
-      });
+      this.AttributeRoll(actor, skillName, dice, options);
    }
 
+   // NOTE: May need to diverge from attribute rolls in the future
    static async SpecializationRoll(actor, skillName, dice, options) {
-      console.log("[SpecializationRoll]", {
-         skillName,
-         dice,
-         options,
-      });
+      this.AttributeRoll(actor, skillName, dice, options);
    }
 
    static async Initiaitve(actor) {
-
       const storeManager = StoreManager.Subscribe(actor);
       const initiativeDiceStore = storeManager.GetSumROStore("attributes.initiative");
       const reactionStore = storeManager.GetSumROStore("attributes.reaction");

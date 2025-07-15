@@ -6,7 +6,7 @@
    import { mount, unmount } from "svelte";
    import RollComposerComponent from "../../components/RollComposerComponent.svelte";
 
-   let { actor, stat, localization, key } = $props();
+   let { actor, localization, key } = $props();
 
    const storeManager = StoreManager.Subscribe(actor);
 

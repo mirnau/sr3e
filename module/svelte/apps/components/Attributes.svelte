@@ -42,11 +42,12 @@
 <CardToolbar {id} />
 <h1>{localize(localization.attributes)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   {#each Object.entries(attributes).slice(0, 6) as [key, stat]}
-      <AttributeCard {actor} {stat} {localization} {key} />
+   {#each Object.keys(attributes).slice(0, 7) as key}
+      <AttributeCard {actor} {localization} {key} />
    {/each}
+
    {#if isAwakened}
-      <StatCard label={config.magic.magic} value={$magic.sum} />
+      <AttributeCard {actor} {localization} key="magic" />
    {/if}
-   <StatCard label={config.initiative.reaction} value={$reaction.sum} />
+
 </MasonryGrid>
