@@ -3561,14 +3561,14 @@ var on_keydown$9 = (e) => {
 };
 var on_click_1$7 = (__1, handleMove) => handleMove("up");
 var on_click_2$2 = (__2, handleMove) => handleMove("down");
-var root$O = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$N = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$O();
+  var div = root$N();
   div.__click = [on_click$c];
   div.__keydown = [on_keydown$9];
   var button = child(div);
@@ -3584,7 +3584,7 @@ delegate(["click", "keydown"]);
 async function handleClick(event2, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$N = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$M = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3595,7 +3595,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$N();
+  var div = root$M();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3642,7 +3642,8 @@ const stores$1 = {
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
-  isrollcomposeropen: "isrollcomposeropen"
+  isrollcomposeropen: "isrollcomposeropen",
+  dicepoolSelection: "dicepoolSelection"
 };
 const _StoreManager = class _StoreManager {
   constructor(document2) {
@@ -3758,7 +3759,7 @@ _actorStores = new WeakMap();
 _hookDisposers = new WeakMap();
 _actorSubscriptions = new WeakMap();
 let StoreManager = _StoreManager;
-var root$M = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+var root$L = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
   push($$props, true);
   let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
@@ -3775,7 +3776,7 @@ function TextInput($$anchor, $$props) {
     text2(editableEl.innerText);
     oninput()(e);
   }
-  var div = root$M();
+  var div = root$L();
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
   div_1.__keydown = function(...$$args) {
@@ -3794,8 +3795,8 @@ function TextInput($$anchor, $$props) {
 }
 delegate(["input", "keydown"]);
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$f = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$L = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root_3$e = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root$K = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3858,7 +3859,7 @@ function Dossier($$anchor, $$props) {
       { render: false }
     );
   }
-  var fragment = root$L();
+  var fragment = root$K();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3898,7 +3899,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$f();
+      var fragment_3 = root_3$e();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -3994,7 +3995,7 @@ var on_click_1$6 = (__1, increment2, $$props) => {
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
 };
-var root$K = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
+var root$J = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
 function Counter($$anchor, $$props) {
   push($$props, true);
   let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
@@ -4031,7 +4032,7 @@ function Counter($$anchor, $$props) {
   user_effect(() => {
     updateDisplay();
   });
-  var div = root$K();
+  var div = root$J();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
   button.__click = [on_click$b, decrement2, $$props];
@@ -4165,9 +4166,9 @@ var on_click$a = (__1, modifiersArray) => {
     { name: "Modifier", value: 0 }
   ]));
 };
-var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
-var root_3$e = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
-var root_4$b = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
+var root_2$l = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_3$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_4$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$u = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
@@ -4176,11 +4177,16 @@ function RollComposerComponent($$anchor, $$props) {
   const $penalty = () => store_get(penalty, "$penalty", $$stores);
   const $associatedDicePoolStore = () => store_get(associatedDicePoolStore, "$associatedDicePoolStore", $$stores);
   const $linkedAttributeStore = () => store_get(linkedAttributeStore, "$linkedAttributeStore", $$stores);
+  const $currentDicePoolStore = () => store_get(currentDicePoolStore, "$currentDicePoolStore", $$stores);
+  const $currentDicePoolSelectionStore = () => store_get(currentDicePoolSelectionStore, "$currentDicePoolSelectionStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
   onDestroy(() => StoreManager.Unsubscribe($$props.actor));
   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
   let penalty = actorStoreManager.GetRWStore("health.penalty");
   $karmaPoolStore();
+  let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
+  let currentDicePoolName = state("");
+  let currentDicePoolStore;
   let targetNumber = state(5);
   let modifiersArray = state(proxy([]));
   let karmaCost = state(0);
@@ -4246,9 +4252,9 @@ function RollComposerComponent($$anchor, $$props) {
     set(karmaCost, 0.5 * get$1(diceBought) * (get$1(diceBought) + 1));
   }
   function AddDiceFromPool() {
-    if ($associatedDicePoolStore() > 0) {
+    if ($currentDicePoolStore() > 0) {
       set(poolDiceBought, get$1(poolDiceBought) + 1);
-      store_set(associatedDicePoolStore, $associatedDicePoolStore() - 1);
+      store_set(currentDicePoolStore, $currentDicePoolStore() - 1);
     }
   }
   function RemoveDiceFromPool() {
@@ -4256,6 +4262,11 @@ function RollComposerComponent($$anchor, $$props) {
   user_effect(() => {
     set(isDefaulting, get$1(isDefaultingAsString) === "true");
     updateFocusables();
+  });
+  user_effect(() => {
+    set(currentDicePoolName, proxy($currentDicePoolSelectionStore()));
+    if (!get$1(currentDicePoolName)) return;
+    currentDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${get$1(currentDicePoolName)}`);
   });
   user_effect(() => {
     const baseModifiers = $penalty() > 0 ? [
@@ -4416,7 +4427,7 @@ function RollComposerComponent($$anchor, $$props) {
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
   each(node_1, 17, () => get$1(modifiersArray), index, ($$anchor2, modifier, i) => {
-    var div_4 = root_2$k();
+    var div_4 = root_2$l();
     var h4_2 = child(div_4);
     var text_3 = child(h4_2);
     var node_2 = sibling(h4_2, 2);
@@ -4438,7 +4449,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_3$e();
+      var div_5 = root_3$d();
       var h1_1 = child(div_5);
       var text_4 = child(h1_1);
       var h4_3 = sibling(h1_1, 2);
@@ -4448,7 +4459,7 @@ function RollComposerComponent($$anchor, $$props) {
         class: "karma-counter",
         min: "0",
         get max() {
-          return $linkedAttributeStore();
+          return $currentDicePoolStore();
         },
         onIncrement: AddDiceFromPool,
         onDecrement: RemoveDiceFromPool,
@@ -4465,19 +4476,19 @@ function RollComposerComponent($$anchor, $$props) {
           set_text(text_5, `Dice Added: ${get$1(poolDiceBought) ?? ""}`);
         },
         [
-          () => localize($$props.config.dicepools[get$1(associatedDicePoolString)])
+          () => localize($$props.config.dicepools[get$1(currentDicePoolName)])
         ]
       );
       append($$anchor2, div_5);
     };
     if_block(node_3, ($$render) => {
-      if (get$1(associatedDicePoolString) !== "") $$render(consequent);
+      if (!($$props.caller.type === "attribute" && get$1(isDefaulting)) && get$1(currentDicePoolName) && currentDicePoolStore) $$render(consequent);
     });
   }
   var node_5 = sibling(node_3, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_6 = root_4$b();
+      var div_6 = root_4$c();
       var h4_4 = sibling(child(div_6), 2);
       var text_6 = child(h4_4);
       var node_6 = sibling(h4_4, 2);
@@ -4529,7 +4540,7 @@ var root_1$t = /* @__PURE__ */ template(`<div class="stat-card" role="button" ta
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_2$j = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_2$k = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4546,6 +4557,7 @@ function AttributeCard($$anchor, $$props) {
   let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
   let isMinLimit = /* @__PURE__ */ derived$1(() => $valueROStore().value <= 1);
+  storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
   let valueRWStore = /* @__PURE__ */ derived$1(() => $isShoppingState() && !$attributeAssignmentLockedStore() ? baseValueStore : null);
   user_effect(() => {
     if (!$attributeAssignmentLockedStore() && $isShoppingState() && $valueROStore().sum < 1 && $valueROStore().mod < 0 && get$1(valueRWStore)) {
@@ -4654,7 +4666,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$j();
+      var div_2 = root_2$k();
       div_2.__click = Roll2;
       div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
@@ -6241,47 +6253,117 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
-var root_1$s = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
-var root_3$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root$J = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+const handleKeyDown$1 = (e, provideSelectedDicepool) => {
+  if (e.key === "Enter" || e.key === " ") provideSelectedDicepool(e);
+};
+var root_2$j = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_4$b = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
+var root_6$4 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
+var root_5$7 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
-  var div = root$J();
-  var node = sibling(child(div), 2);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $isRollComposerOpen = () => store_get(isRollComposerOpen, "$isRollComposerOpen", $$stores);
+  let isButton = prop($$props, "isButton", 3, false), key = prop($$props, "key", 3, "");
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  let currentDicePoolSelectionStore = storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
+  let isRollComposerOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  function provideSelectedDicepool(_) {
+    store_set(currentDicePoolSelectionStore, key());
+  }
+  var fragment = comment();
+  var node = first_child(fragment);
   {
-    var consequent = ($$anchor2) => {
-      var h4 = root_1$s();
-      var text2 = child(h4);
-      template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
-      append($$anchor2, h4);
+    var consequent_2 = ($$anchor2) => {
+      var div = root_1$s();
+      div.__click = provideSelectedDicepool;
+      div.__keydown = [handleKeyDown$1, provideSelectedDicepool];
+      var node_1 = sibling(child(div), 2);
+      {
+        var consequent = ($$anchor3) => {
+          var h4 = root_2$j();
+          var text2 = child(h4);
+          template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
+          append($$anchor3, h4);
+        };
+        if_block(node_1, ($$render) => {
+          var _a;
+          if (((_a = $$props.label) == null ? void 0 : _a.length) > 0) $$render(consequent);
+        });
+      }
+      var node_2 = sibling(node_1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var fragment_1 = comment();
+          var node_3 = first_child(fragment_1);
+          snippet(node_3, () => $$props.children ?? noop);
+          append($$anchor3, fragment_1);
+        };
+        var alternate = ($$anchor3) => {
+          var h1 = root_4$b();
+          var text_1 = child(h1);
+          template_effect(() => set_text(text_1, $$props.value));
+          append($$anchor3, h1);
+        };
+        if_block(node_2, ($$render) => {
+          if ($$props.children) $$render(consequent_1);
+          else $$render(alternate, false);
+        });
+      }
+      template_effect(() => toggle_class(div, "alert-animation", $isRollComposerOpen()));
+      append($$anchor2, div);
+    };
+    var alternate_2 = ($$anchor2) => {
+      var div_1 = root_5$7();
+      var node_4 = sibling(child(div_1), 2);
+      {
+        var consequent_3 = ($$anchor3) => {
+          var h4_1 = root_6$4();
+          var text_2 = child(h4_1);
+          template_effect(($0) => set_text(text_2, $0), [() => localize($$props.label)]);
+          append($$anchor3, h4_1);
+        };
+        if_block(node_4, ($$render) => {
+          var _a;
+          if (((_a = $$props.label) == null ? void 0 : _a.length) > 0) $$render(consequent_3);
+        });
+      }
+      var node_5 = sibling(node_4, 2);
+      {
+        var consequent_4 = ($$anchor3) => {
+          var fragment_2 = comment();
+          var node_6 = first_child(fragment_2);
+          snippet(node_6, () => $$props.children ?? noop);
+          append($$anchor3, fragment_2);
+        };
+        var alternate_1 = ($$anchor3) => {
+          var h1_1 = root_8$2();
+          var text_3 = child(h1_1);
+          template_effect(() => set_text(text_3, $$props.value));
+          append($$anchor3, h1_1);
+        };
+        if_block(node_5, ($$render) => {
+          if ($$props.children) $$render(consequent_4);
+          else $$render(alternate_1, false);
+        });
+      }
+      append($$anchor2, div_1);
     };
     if_block(node, ($$render) => {
-      var _a;
-      if (((_a = $$props.label) == null ? void 0 : _a.length) > 0) $$render(consequent);
+      if (isButton() && $isRollComposerOpen()) $$render(consequent_2);
+      else $$render(alternate_2, false);
     });
   }
-  var node_1 = sibling(node, 2);
-  {
-    var consequent_1 = ($$anchor2) => {
-      var fragment = comment();
-      var node_2 = first_child(fragment);
-      snippet(node_2, () => $$props.children ?? noop);
-      append($$anchor2, fragment);
-    };
-    var alternate = ($$anchor2) => {
-      var h1 = root_3$d();
-      var text_1 = child(h1);
-      template_effect(() => set_text(text_1, $$props.value));
-      append($$anchor2, h1);
-    };
-    if_block(node_1, ($$render) => {
-      if ($$props.children) $$render(consequent_1);
-      else $$render(alternate, false);
-    });
-  }
-  append($$anchor, div);
+  append($$anchor, fragment);
   pop();
+  $$cleanup();
 }
+delegate(["click", "keydown"]);
 var root$I = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
@@ -6468,30 +6550,45 @@ function DicePools($$anchor, $$props) {
       var fragment_1 = root_1$q();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return config().dicepools.combat;
         },
         get value() {
           return $combat().sum;
-        }
+        },
+        key: "combat",
+        isButton: true
       });
       var node_3 = sibling(node_2, 2);
       StatCard$1(node_3, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return config().dicepools.control;
         },
         get value() {
           return $control().sum;
-        }
+        },
+        key: "control",
+        isButton: true
       });
       var node_4 = sibling(node_3, 2);
       StatCard$1(node_4, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return config().dicepools.hacking;
         },
         get value() {
           return $hacking().sum;
-        }
+        },
+        key: "hacking",
+        isButton: true
       });
       var node_5 = sibling(node_4, 2);
       {
@@ -6499,21 +6596,31 @@ function DicePools($$anchor, $$props) {
           var fragment_2 = root_2$i();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
+            get actor() {
+              return actor();
+            },
             get label() {
               return config().dicepools.astral;
             },
             get value() {
               return $astral().sum;
-            }
+            },
+            key: "astral",
+            isButton: true
           });
           var node_7 = sibling(node_6, 2);
           StatCard$1(node_7, {
+            get actor() {
+              return actor();
+            },
             get label() {
               return config().dicepools.spell;
             },
             get value() {
               return $spell().sum;
-            }
+            },
+            key: "spell",
+            isButton: true
           });
           append($$anchor3, fragment_2);
         };
@@ -6561,6 +6668,9 @@ function Movement($$anchor, $$props) {
       var fragment_1 = root_1$p();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return config().movement.walking;
         },
@@ -6570,6 +6680,9 @@ function Movement($$anchor, $$props) {
       });
       var node_3 = sibling(node_2, 2);
       StatCard$1(node_3, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return config().movement.running;
         },
@@ -6766,6 +6879,9 @@ function Karma($$anchor, $$props) {
       var node_2 = first_child(fragment_1);
       const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
       StatCard$1(node_2, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return get$1(expression);
         },
@@ -6776,6 +6892,9 @@ function Karma($$anchor, $$props) {
       var node_3 = sibling(node_2, 2);
       const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
       StatCard$1(node_3, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return get$1(expression_1);
         },
@@ -6786,6 +6905,9 @@ function Karma($$anchor, $$props) {
       var node_4 = sibling(node_3, 2);
       const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
       StatCard$1(node_4, {
+        get actor() {
+          return actor();
+        },
         get label() {
           return get$1(expression_2);
         },
@@ -8792,6 +8914,9 @@ function Health($$anchor, $$props) {
   var node_5 = child(div_10);
   const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
   StatCard$1(node_5, {
+    get actor() {
+      return actor();
+    },
     get value() {
       return $penalty();
     },
@@ -8802,6 +8927,9 @@ function Health($$anchor, $$props) {
   var node_6 = sibling(node_5, 2);
   const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().health.overflow));
   StatCard$1(node_6, {
+    get actor() {
+      return actor();
+    },
     get value() {
       return $overflow();
     },

@@ -19,6 +19,7 @@ export const stores = {
    initiativeDice: "initiativeDice",
    baseInitiative: "baseInitiative",
    isrollcomposeropen: "isrollcomposeropen",
+   dicepoolSelection: "dicepoolSelection",
    combat: {
       stunDamage: "stunDamage",
       leathalDamage: "leathalDamage",

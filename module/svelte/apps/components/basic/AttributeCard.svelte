@@ -21,12 +21,18 @@
    let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
    let isMinLimit = $derived($valueROStore.value <= 1);
 
-   let valueRWStore = $derived(
-      $isShoppingState && !$attributeAssignmentLockedStore ? baseValueStore : null
-   );
+   let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
+
+   let valueRWStore = $derived($isShoppingState && !$attributeAssignmentLockedStore ? baseValueStore : null);
 
    $effect(() => {
-      if (!$attributeAssignmentLockedStore && $isShoppingState && $valueROStore.sum < 1 && $valueROStore.mod < 0 && valueRWStore) {
+      if (
+         !$attributeAssignmentLockedStore &&
+         $isShoppingState &&
+         $valueROStore.sum < 1 &&
+         $valueROStore.mod < 0 &&
+         valueRWStore
+      ) {
          let deficit = 1 - $valueROStore.sum;
          while (deficit > 0 && $attributePointStore > 0) {
             $attributePointStore -= 1;

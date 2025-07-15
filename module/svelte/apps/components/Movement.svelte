@@ -13,12 +13,11 @@
    let storeManager = StoreManager.Subscribe(actor);
    let walking = storeManager.GetSumROStore("movement.walking");
    let running = storeManager.GetSumROStore("movement.running");
-
 </script>
 
 <CardToolbar {id} />
 <h1>{localize(config.movement.movement)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard label={config.movement.walking} value={$walking.sum} />
-   <StatCard label={config.movement.running} value={$running.sum} />
+   <StatCard {actor} label={config.movement.walking} value={$walking.sum} />
+   <StatCard {actor} label={config.movement.running} value={$running.sum} />
 </MasonryGrid>

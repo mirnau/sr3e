@@ -179,6 +179,28 @@ div#invitation-links,
       padding: 0.25rem 0.25rem 0.25rem 0.25rem; // reduce padding if needed
       z-index: 1;
 
+      &.alert-animation {
+         background-image: linear-gradient(
+            135deg,
+            var(--highlight-color-secondary) 0%,
+            var(--highlight-color-secondary) 45%,
+            rgba(255, 255, 255, 0.85) 50%,
+            var(--highlight-color-secondary) 55%,
+            var(--highlight-color-secondary) 100%
+         );
+         background-size: 200% 200%;
+         animation: background-sheen 2s linear infinite;
+      }
+
+      @keyframes background-sheen {
+         0% {
+            background-position: -100% -100%;
+         }
+         100% {
+            background-position: 100% 100%;
+         }
+      }
+
       &.character {
          background: var(--highlight-color-primary);
       }
@@ -240,7 +262,7 @@ div#invitation-links,
       left: 1px;
       width: calc(100% - 2px);
       height: calc(100% - 2px);
-      background: @secondary-color;
+      background: black;
       box-shadow: inset 0 0 30px @primary-color;
       pointer-events: none;
       .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);

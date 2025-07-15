@@ -14,6 +14,10 @@
    let penalty = actorStoreManager.GetRWStore("health.penalty");
    let karmaPoolBacking = $karmaPoolStore;
 
+   let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
+   let currentDicePoolName = $state("");
+   let currentDicePoolStore;
+
    let targetNumber = $state(5);
    let modifiersArray = $state([]);
    let karmaCost = $state(0);
@@ -94,9 +98,9 @@
    }
 
    function AddDiceFromPool() {
-      if ($associatedDicePoolStore > 0) {
+      if ($currentDicePoolStore > 0) {
          poolDiceBought += 1;
-         $associatedDicePoolStore -= 1;
+         $currentDicePoolStore -= 1;
       }
    }
 
@@ -105,6 +109,13 @@
    $effect(() => {
       isDefaulting = isDefaultingAsString === "true";
       updateFocusables();
+   });
+
+   $effect(() => {
+      currentDicePoolName = $currentDicePoolSelectionStore;
+      if (!currentDicePoolName) return;
+
+      currentDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${currentDicePoolName}`);
    });
 
    $effect(() => {
@@ -295,15 +306,15 @@
       {/each}
    </div>
 
-   {#if associatedDicePoolString !== ""}
+   {#if !(caller.type === "attribute" && isDefaulting) && currentDicePoolName && currentDicePoolStore}
       <div class="roll-composer-card">
-         <h1>{localize(config.dicepools[associatedDicePoolString])}</h1>
+         <h1>{localize(config.dicepools[currentDicePoolName])}</h1>
          <h4>Dice Added: {poolDiceBought}</h4>
          <Counter
             class="karma-counter"
             bind:value={poolDiceBought}
             min="0"
-            max={$linkedAttributeStore}
+            max={$currentDicePoolStore}
             onIncrement={AddDiceFromPool}
             onDecrement={RemoveDiceFromPool}
          />

@@ -3078,6 +3078,26 @@
     z-index: 1;
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
+  dialog .stat-card.alert-animation,
+  form .stat-card.alert-animation,
+  div#support-details .stat-card.alert-animation,
+  div#invitation-links .stat-card.alert-animation,
+  .sr3e.active-effects-editor .stat-card.alert-animation,
+  .application.category-browser .stat-card.alert-animation,
+  .sr3e.sheet.item .stat-card.alert-animation,
+  .sr3e.sheet.character .stat-card.alert-animation {
+    background-image: linear-gradient(135deg, var(--highlight-color-secondary) 0%, var(--highlight-color-secondary) 45%, rgba(255, 255, 255, 0.85) 50%, var(--highlight-color-secondary) 55%, var(--highlight-color-secondary) 100%);
+    background-size: 200% 200%;
+    animation: background-sheen 2s linear infinite;
+  }
+  @keyframes background-sheen {
+    0% {
+      background-position: -100% -100%;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+  }
   dialog .stat-card.character,
   form .stat-card.character,
   div#support-details .stat-card.character,
@@ -3210,7 +3230,7 @@
     left: 1px;
     width: calc(100% - 2px);
     height: calc(100% - 2px);
-    background: #003856;
+    background: black;
     box-shadow: inset 0 0 30px #1b1f24;
     pointer-events: none;
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);

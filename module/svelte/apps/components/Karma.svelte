@@ -20,9 +20,9 @@
 <CardToolbar {id} />
 <h1>{localize(config.karma.karma)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
-   <StatCard label={localize(config.karma.karmapool)} value={$karmaPoolStore} />
-   <StatCard label={localize(config.attributes.essence)} value={$essenceStore.sum} />
+   <StatCard {actor} label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
+   <StatCard {actor} label={localize(config.karma.karmapool)} value={$karmaPoolStore} />
+   <StatCard {actor} label={localize(config.attributes.essence)} value={$essenceStore.sum} />
 
    {#if !$miraculousSurvivalStore}
       <div class="stat-card">
