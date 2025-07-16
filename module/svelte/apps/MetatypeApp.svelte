@@ -256,8 +256,9 @@
             {/each}
          </div>
       </ItemSheetComponent>
-
-      <ActiveEffectsViewer document={item} {config} />
+      <ItemSheetComponent>
+         <ActiveEffectsViewer document={item} {config} />
+      </ItemSheetComponent>
       <!-- Journal Viewer -->
       <JournalViewer document={item} {config} />
    </div>

@@ -1445,19 +1445,54 @@
     background: transparent;
   }
   table tr {
+    max-height: 1rem;
     background: transparent;
   }
   table thead tr {
+    max-height: 1rem;
     background: transparent;
   }
   table tbody tr {
+    max-height: 1rem;
     background: transparent;
   }
   table td,
   table th {
+    max-height: 1rem;
     vertical-align: middle;
-    padding: 0.5rem;
+    padding: 0.125rem;
     background: transparent;
+  }
+  table .cell-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 1.5rem;
+    max-height: 1.5rem;
+    line-height: 1rem;
+    overflow: hidden;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+  table .cell-content > * {
+    min-width: 0;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
+  table .cell-content button {
+    flex-shrink: 1;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 0.75rem;
+  }
+  table .cell-content img {
+    max-height: 100%;
+    max-width: 100%;
+    flex-shrink: 1;
   }
   table .stat-card {
     background: transparent;
@@ -1483,6 +1518,7 @@
     box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
   td {
+    max-height: 1rem;
     margin: 0.5rem;
     background: transparent;
     vertical-align: middle;
@@ -1522,18 +1558,9 @@
     background: transparent;
   }
   button {
+    margin: 0;
+    padding: 0;
     white-space: nowrap;
-  }
-  /* Additional rules to eliminate corner remnants */
-  table thead > tr:first-child > th:first-child::before,
-  table thead > tr:first-child > th:first-child::after,
-  table thead > tr:last-child > th:last-child::before,
-  table thead > tr:last-child > th:last-child::after,
-  table tbody > tr > td:first-child::before,
-  table tbody > tr > td:first-child::after,
-  table tbody > tr > td:last-child::before,
-  table tbody > tr > td:last-child::after {
-    background: transparent !important;
   }
   .chat-message.message {
     background: transparent;
@@ -1927,15 +1954,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .karma-manager .list-box table.actor-table tbody td.portrait-cell {
-    width: 3rem;
-  }
-  .karma-manager .list-box table.actor-table tbody td.portrait-cell img {
-    width: 3rem;
-    height: 3rem;
-    object-fit: cover;
-    border-radius: 4px;
   }
   .karma-manager .list-box .empty {
     text-align: center;

@@ -7,7 +7,9 @@
    background: transparent;
 }
 
-thead { background: none }
+thead {
+   background: none;
+}
 
 table {
    width: 100%;
@@ -19,23 +21,72 @@ table {
    background: transparent;
 
    tr {
+      max-height: 1rem;
       background: transparent;
    }
 
    thead tr {
+      max-height: 1rem;
       background: transparent;
    }
 
    tbody tr {
+      max-height: 1rem;
       background: transparent;
    }
 
    td,
    th {
+      max-height: 1rem;
       vertical-align: middle;
-      padding: 0.5rem;
+      padding: 0.125rem;
       background: transparent;
    }
+
+   //NOTE: enforcing height in cells
+.cell-content {
+   display: flex;
+   align-items: center;
+   justify-content: flex-start;
+
+   height: 1.5rem;
+   max-height: 1.5rem;
+   line-height: 1rem;
+
+   overflow: hidden;
+
+   // Ensures contents don't enforce their own width
+   min-width: 0;
+   flex-wrap: nowrap;
+
+   // Apply this to all direct children
+   > * {
+      min-width: 0;
+      flex-shrink: 1;
+      overflow: hidden;
+   }
+
+   button {
+      // Let it shrink fully
+      flex-shrink: 1;
+      min-width: 0;
+      width: auto;
+      padding: 0;
+      margin: 0;
+
+      // Prevent text from forcing size
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 0.75rem;
+   }
+
+   img {
+      max-height: 100%;
+      max-width: 100%;
+      flex-shrink: 1;
+   }
+}
+
 
    .stat-card {
       background: transparent;
@@ -67,6 +118,7 @@ table thead th {
 }
 
 td {
+   max-height: 1rem;
    margin: 0.5rem;
    background: transparent;
    vertical-align: middle;
@@ -115,17 +167,7 @@ table tbody > tr > td:last-child {
 }
 
 button {
+   margin: 0;
+   padding: 0;
    white-space: nowrap;
-}
-
-/* Additional rules to eliminate corner remnants */
-table thead > tr:first-child > th:first-child::before,
-table thead > tr:first-child > th:first-child::after,
-table thead > tr:last-child > th:last-child::before,
-table thead > tr:last-child > th:last-child::after,
-table tbody > tr > td:first-child::before,
-table tbody > tr > td:first-child::after,
-table tbody > tr > td:last-child::before,
-table tbody > tr > td:last-child::after {
-   background: transparent !important;
 }
