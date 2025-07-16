@@ -5,19 +5,14 @@
    import { flags } from "../../../../services/commonConsts.js";
    import { localize } from "../../../../services/utilities.js";
 
-   let { item, effectsObject, config } = $props();
+   let { item, effectsObject, config, updateEffectsState } = $props();
+
+   let name = $state(effectsObject.name);
+   let disabled = $state(effectsObject.disabled);
+   let duration = $state({ ...effectsObject.duration });
+   let sourceType = $state(effectsObject.transfer ? "character" : "item");
    let changes = $state([...effectsObject.changes]);
    let propertyOptions = $state([]);
-   let sourceType = $state(effectsObject.transfer ? "character" : "item");
-
-   function flattenProperties(obj, prefix = "system") {
-      return Object.entries(obj).flatMap(([key, value]) => {
-         const path = `${prefix}.${key}`;
-         return typeof value === "object" && value !== null && !Array.isArray(value)
-            ? flattenProperties(value, path)
-            : [path];
-      });
-   }
 
    const allowedPatterns = ["system.attributes", "system.physical"];
 
@@ -39,8 +34,18 @@
          .map((path) => ({ value: path, label: path }));
    });
 
-   function commitChanges() {
-      effectsObject.update({ changes });
+   async function commitChanges() {
+      await effectsObject.update(
+         {
+            name,
+            disabled,
+            duration: { ...duration },
+            changes: [...changes],
+         },
+         { render: false }
+      );
+
+      updateEffectsState?.();
    }
 
    function addChange() {
@@ -52,9 +57,7 @@
       if (field === "key" && value && typeof value === "object" && "value" in value) {
          value = value.value;
       }
-      const updated = changes.map((c, i) => {
-         return i === index ? { ...c, [field]: value } : c;
-      });
+      const updated = changes.map((c, i) => (i === index ? { ...c, [field]: value } : c));
       changes = updated;
       commitChanges();
    }
@@ -70,12 +73,12 @@
    <ItemSheetComponent>
       <h3>{localize(config.effects.effectscomposer)}</h3>
       <div class="stat-grid single-column">
-         <Image src={effectsObject.img} title={effectsObject.name} entity={effectsObject} />
+         <Image src={effectsObject.img} title={name} entity={effectsObject} />
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.name)}:</h4>
-            <input type="text" bind:value={effectsObject.name} />
+            <input type="text" bind:value={name} onblur={commitChanges} />
          </div>
 
          <div class="stat-card">
@@ -91,13 +94,13 @@
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.disabled)}:</h4>
-            <input type="checkbox" bind:checked={effectsObject.disabled} />
+            <input type="checkbox" bind:checked={disabled} onchange={commitChanges} />
          </div>
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.durationType)}:</h4>
-            <select bind:value={effectsObject.duration.type}>
+            <select bind:value={duration.type} onchange={commitChanges}>
                <option value="none">{localize(config.effects.permanent)}</option>
                <option value="turns">{localize(config.time.turns)}</option>
                <option value="rounds">{localize(config.time.rounds)}</option>
@@ -111,7 +114,7 @@
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.durationValue)}:</h4>
-            <input type="number" bind:value={effectsObject.duration.value} />
+            <input type="number" bind:value={duration.value} onblur={commitChanges} />
          </div>
       </div>
    </ItemSheetComponent>
@@ -142,8 +145,8 @@
                               placeholder={localize(config.effects.selectProperty)}
                               nomatchplaceholder={localize(config.effects.noMatch)}
                               bind:value={change.key}
-                              on:select={(e) => updateChange(i, "key", e.detail)}
-                              css={"table"}
+                              onselect={(e) => updateChange(i, "key", e.detail)}
+                              css="table"
                            />
                         </div>
                      </td>

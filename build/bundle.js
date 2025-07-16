@@ -1797,7 +1797,7 @@ function create_event(event_name, dom, handler, options = {}) {
   }
   return target_handler;
 }
-function event(event_name, dom, handler, capture, passive) {
+function event$1(event_name, dom, handler, capture, passive) {
   var options = { capture, passive };
   var target_handler = create_event(event_name, dom, handler, options);
   if (dom === document.body || dom === window || dom === document) {
@@ -3557,14 +3557,14 @@ var on_keydown$9 = (e) => {
 };
 var on_click_1$7 = (__1, handleMove) => handleMove("up");
 var on_click_2$3 = (__2, handleMove) => handleMove("down");
-var root$O = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
+var root$P = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
   function handleMove(direction) {
     console.log("handle move called");
     moveCardById($$props.id, direction);
   }
-  var div = root$O();
+  var div = root$P();
   div.__click = [on_click$c];
   div.__keydown = [on_keydown$9];
   var button = child(div);
@@ -3580,7 +3580,7 @@ delegate(["click", "keydown"]);
 async function handleClick(event2, entity) {
   if (entity()) await openFilePicker(entity());
 }
-var root$N = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
+var root$O = /* @__PURE__ */ template(`<div class="image-mask"><img role="presentation" data-edit="img"></div>`);
 function Image($$anchor, $$props) {
   push($$props, true);
   let src = prop($$props, "src", 7, ""), title = prop($$props, "title", 7, ""), alt = prop($$props, "alt", 7, ""), entity = prop($$props, "entity", 3, null);
@@ -3591,7 +3591,7 @@ function Image($$anchor, $$props) {
       alt(alt() || entity().name);
     }
   });
-  var div = root$N();
+  var div = root$O();
   var img = child(div);
   img.__click = [handleClick, entity];
   template_effect(() => {
@@ -3753,7 +3753,7 @@ _actorStores = new WeakMap();
 _hookDisposers = new WeakMap();
 _actorSubscriptions = new WeakMap();
 let StoreManager = _StoreManager;
-var root$M = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
+var root$N = /* @__PURE__ */ template(`<div class="input-component-container"><div class="input-component-container-background"></div> <div class="input-container-text" contenteditable="" role="textbox" aria-multiline="false" tabindex="0" spellcheck="false"></div> <!></div>`);
 function TextInput($$anchor, $$props) {
   push($$props, true);
   let text2 = prop($$props, "text", 7, ""), onblur = prop($$props, "onblur", 3, () => {
@@ -3770,7 +3770,7 @@ function TextInput($$anchor, $$props) {
     text2(editableEl.innerText);
     oninput()(e);
   }
-  var div = root$M();
+  var div = root$N();
   var div_1 = sibling(child(div), 2);
   div_1.__input = handleInput;
   div_1.__keydown = function(...$$args) {
@@ -3780,7 +3780,7 @@ function TextInput($$anchor, $$props) {
   bind_this(div_1, ($$value) => editableEl = $$value, () => editableEl);
   var node = sibling(div_1, 2);
   snippet(node, () => $$props.children ?? noop);
-  event("blur", div_1, function(...$$args) {
+  event$1("blur", div_1, function(...$$args) {
     var _a;
     (_a = onblur()) == null ? void 0 : _a.apply(this, $$args);
   });
@@ -3790,7 +3790,7 @@ function TextInput($$anchor, $$props) {
 delegate(["input", "keydown"]);
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
 var root_3$d = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
-var root$L = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
+var root$M = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -3853,7 +3853,7 @@ function Dossier($$anchor, $$props) {
       { render: false }
     );
   }
-  var fragment = root$L();
+  var fragment = root$M();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -3944,15 +3944,15 @@ function Dossier($$anchor, $$props) {
           () => localize(config().sheet.quote)
         ]
       );
-      event("blur", input, handleActorNameChange);
-      event("keypress", input, (e) => e.key === "Enter" && handleActorNameChange(e));
+      event$1("blur", input, handleActorNameChange);
+      event$1("keypress", input, (e) => e.key === "Enter" && handleActorNameChange(e));
       transition(1, div_3, () => slide, () => ({ duration: 100, easing: cubicInOut }));
       transition(2, div_3, () => slide, () => ({ duration: 50, easing: cubicInOut }));
-      event("blur", div_10, updateAge);
-      event("blur", div_15, updateHeight);
-      event("blur", div_20, updateWeight);
-      event("blur", div_22, updateQuote);
-      event("keypress", div_22, (e) => {
+      event$1("blur", div_10, updateAge);
+      event$1("blur", div_15, updateHeight);
+      event$1("blur", div_20, updateWeight);
+      event$1("blur", div_22, updateQuote);
+      event$1("keypress", div_22, (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           e.currentTarget.blur();
@@ -3989,7 +3989,7 @@ var on_click_1$6 = (__1, increment2, $$props) => {
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
 };
-var root$K = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
+var root$L = /* @__PURE__ */ template(`<div class="counter-component" role="spinbutton" tabindex="0" aria-label="Adjust value"><button class="counter-button" aria-label="Decrement Value" tabindex="-1"><i class="fa-solid fa-minus"></i></button> <div class="counter-value" contenteditable="true" role="textbox" aria-label="Value" tabindex="-1"> </div> <button class="counter-button" aria-label="Increment Value" tabindex="-1"><i class="fa-solid fa-plus"></i></button></div>`);
 function Counter($$anchor, $$props) {
   push($$props, true);
   let value = prop($$props, "value", 15), min = prop($$props, "min", 19, () => -Infinity), max = prop($$props, "max", 3, Infinity);
@@ -4026,7 +4026,7 @@ function Counter($$anchor, $$props) {
   user_effect(() => {
     updateDisplay();
   });
-  var div = root$K();
+  var div = root$L();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
   button.__click = [on_click$b, decrement2, $$props];
@@ -4163,7 +4163,7 @@ var on_click$a = (__1, modifiersArray) => {
 var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
 var root_3$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
 var root_4$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
-var root_1$u = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
+var root_1$t = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -4456,7 +4456,7 @@ function RollComposerComponent($$anchor, $$props) {
       set(isDefaultingAsString, proxy(selectEl.value));
     }
   }
-  var div = root_1$u();
+  var div = root_1$t();
   div.__keydown = [swallowDirectional];
   var div_1 = child(div);
   var h1 = child(div_1);
@@ -4588,7 +4588,7 @@ function RollComposerComponent($$anchor, $$props) {
     set_text(text_2, `Modifiers Total: ${get$1(modifiersTotal) ?? ""}`);
     button_2.disabled = get$1(canSubmit);
   });
-  event("keydown", div, handleKey, true);
+  event$1("keydown", div, handleKey, true);
   bind_select_value(select, () => get$1(isDefaultingAsString), ($$value) => set(isDefaultingAsString, $$value));
   append($$anchor, div);
   pop();
@@ -4597,7 +4597,7 @@ function RollComposerComponent($$anchor, $$props) {
 delegate(["keydown", "click"]);
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_1$t = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div></div>`);
+var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div></div>`);
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
@@ -4697,11 +4697,11 @@ function AttributeCard($$anchor, $$props) {
     e.preventDefault();
   }
   var fragment = comment();
-  event("keydown", $window, handleEscape, true);
+  event$1("keydown", $window, handleEscape, true);
   var node = first_child(fragment);
   {
     var consequent = ($$anchor2) => {
-      var div = root_1$t();
+      var div = root_1$s();
       var h4 = child(div);
       var text2 = child(h4);
       var div_1 = sibling(h4, 4);
@@ -6319,7 +6319,7 @@ const handleKeyDown$1 = (e, provideSelectedDicepool) => {
 };
 var root_2$i = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_4$b = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_1$s = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
+var root_1$r = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
 var root_6$4 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_5$7 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
@@ -6341,7 +6341,7 @@ function StatCard$1($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$s();
+      var div = root_1$r();
       div.__click = provideSelectedDicepool;
       div.__keydown = [handleKeyDown$1, provideSelectedDicepool];
       var node_1 = sibling(child(div), 2);
@@ -6425,7 +6425,7 @@ function StatCard$1($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var root$J = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+var root$K = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
 function MasonryGrid($$anchor, $$props) {
   push($$props, true);
   let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
@@ -6448,7 +6448,7 @@ function MasonryGrid($$anchor, $$props) {
   user_effect(async () => {
     gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
   });
-  var div = root$J();
+  var div = root$K();
   var div_1 = child(div);
   var div_2 = sibling(div_1, 2);
   var node = sibling(div_2, 2);
@@ -6459,14 +6459,14 @@ function MasonryGrid($$anchor, $$props) {
     set_class(div_1, `${gridPrefix()}-grid-sizer`);
     set_class(div_2, `${gridPrefix()}-gutter-sizer`);
   });
-  event("masonry-reflow", div, () => {
+  event$1("masonry-reflow", div, () => {
     masonryInstance.layout();
   });
   append($$anchor, div);
   pop();
 }
-var root_1$r = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$I = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$q = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$J = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Attributes($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6495,7 +6495,7 @@ function Attributes($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$I();
+  var fragment = root$J();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6509,7 +6509,7 @@ function Attributes($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$r();
+      var fragment_1 = root_1$q();
       var node_2 = first_child(fragment_1);
       each(node_2, 17, () => Object.keys(attributes).slice(0, 7), index, ($$anchor3, key) => {
         AttributeCard($$anchor3, {
@@ -6547,8 +6547,8 @@ function Attributes($$anchor, $$props) {
   $$cleanup();
 }
 var root_2$h = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root_1$q = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$p = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$I = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6594,7 +6594,7 @@ function DicePools($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var fragment = root$H();
+  var fragment = root$I();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6608,7 +6608,7 @@ function DicePools($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$q();
+      var fragment_1 = root_1$p();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get actor() {
@@ -6700,8 +6700,8 @@ function DicePools($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_1$p = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$G = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$o = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6712,7 +6712,7 @@ function Movement($$anchor, $$props) {
   let storeManager2 = StoreManager.Subscribe(actor());
   let walking = storeManager2.GetSumROStore("movement.walking");
   let running = storeManager2.GetSumROStore("movement.running");
-  var fragment = root$G();
+  var fragment = root$H();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6726,7 +6726,7 @@ function Movement($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$p();
+      var fragment_1 = root_1$o();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get actor() {
@@ -6778,8 +6778,8 @@ function deleteThis$3(_, $isCharacterCreationStore, isCharacterCreationStore, sp
   }
   dispatch("delete", { specialization: specialization() });
 }
-var root_1$o = /* @__PURE__ */ template(`<h1 class="embedded-value no-margin"> </h1>`);
-var root$F = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
+var root_1$n = /* @__PURE__ */ template(`<h1 class="embedded-value no-margin"> </h1>`);
+var root$G = /* @__PURE__ */ template(`<!> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increment"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrement"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button></div>`, 1);
 function SpecializationCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6811,14 +6811,14 @@ function SpecializationCard($$anchor, $$props) {
       e.target.blur();
     }
   }
-  var fragment = root$F();
+  var fragment = root$G();
   var node = first_child(fragment);
   TextInput(node, {
     text: liveText,
     oninput: handleInput,
     onkeydown: handleKeyDown2,
     children: ($$anchor2, $$slotProps) => {
-      var h1 = root_1$o();
+      var h1 = root_1$n();
       var text2 = child(h1);
       template_effect(() => set_text(text2, specialization().value));
       append($$anchor2, h1);
@@ -6906,8 +6906,8 @@ class KarmaShoppingService {
   }
 }
 var root_2$g = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
-var root_1$n = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
-var root$E = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+var root_1$m = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6922,7 +6922,7 @@ function Karma($$anchor, $$props) {
   let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
   let essenceStore = storeManager2.GetSumROStore("attributes.essence");
   let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
-  var fragment = root$E();
+  var fragment = root$F();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -6936,7 +6936,7 @@ function Karma($$anchor, $$props) {
     itemSelector: "stat-card",
     gridPrefix: "attribute",
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$n();
+      var fragment_1 = root_1$m();
       var node_2 = first_child(fragment_1);
       const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
       StatCard$1(node_2, {
@@ -7066,7 +7066,7 @@ async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacter
   }
 }
 var on_click$9 = async (__2, $$props) => openFilePicker($$props.actor);
-var root$D = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$E = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7144,7 +7144,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
     store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$D();
+  var div = root$E();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7310,7 +7310,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacter
   }
 }
 var on_click$8 = async (__2, $$props) => openFilePicker($$props.actor);
-var root$C = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$D = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7388,7 +7388,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
     store_set(specializations, proxy($specializations().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$C();
+  var div = root$D();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7604,7 +7604,7 @@ async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCr
   }
 }
 var on_click$7 = async (__4, $$props) => openFilePicker($$props.actor);
-var root$B = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
+var root$C = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7660,7 +7660,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
     store_set(specializationsStore, proxy($specializationsStore().filter((s) => s !== toDelete)));
     store_set(valueStore, $valueStore() + 1);
   }
-  var div = root$B();
+  var div = root$C();
   var div_1 = child(div);
   var div_2 = child(div_1);
   var div_3 = child(div_2);
@@ -7881,7 +7881,7 @@ let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$b = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$f = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
-var root_1$m = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
+var root_1$l = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$6 = (e, Roll2, skill) => Roll2(e, skill().id);
 var on_keydown_1$1 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
@@ -7893,7 +7893,7 @@ var on_keydown_2 = (e, Roll2, skill, specialization) => {
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$6 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$a = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
-var root$A = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
+var root$B = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -7960,11 +7960,11 @@ function ActiveSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$A();
+  var div = root$B();
   var node = child(div);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment = root_1$m();
+      var fragment = root_1$l();
       var i = first_child(fragment);
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
@@ -8060,9 +8060,9 @@ function ActiveSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$l = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_1$k = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root$z = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
+var root$A = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="specialization-container"></div></div></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8081,11 +8081,11 @@ function KnowledgeSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$z();
+  var div = root$A();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$l();
+      var i = root_1$k();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$5, openSkill];
@@ -8127,9 +8127,9 @@ function KnowledgeSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_1$k = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
+var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var root_2$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root$y = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
+var root$z = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <h1 class="skill-value"> </h1></div> <div class="skill-card"><div class="core-skill"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name">Read/Write</h6> <h1 class="skill-value"> </h1></div></div> <div class="specialization-container"></div></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8151,11 +8151,11 @@ function LanguageSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
-  var div = root$y();
+  var div = root$z();
   var node = child(div);
   {
     var consequent = ($$anchor2) => {
-      var i = root_1$k();
+      var i = root_1$j();
       set_class(i, `header-control icon fa-solid fa-pen-to-square pulsing-green-cart`);
       i.__click = openSkill;
       i.__keydown = [on_keydown$4, openSkill];
@@ -8202,8 +8202,8 @@ function LanguageSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var root_7$1 = /* @__PURE__ */ template(`<div class="debug-unknown"> </div>`);
-var root_1$j = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$x = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
+var root_1$i = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$y = /* @__PURE__ */ template(`<div class="skill-category-container static-full-width"><div class="skill-masonry-background-layer"></div> <div class="skill-container-header"><h1> </h1></div> <div class="skill-masonry-grid"><div class="skill-grid-sizer"></div> <div class="skill-gutter-sizer"></div> <!></div></div>`);
 function SkillCategory($$anchor, $$props) {
   push($$props, true);
   let categoryOfSkills = prop($$props, "skills", 19, () => []), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -8219,14 +8219,14 @@ function SkillCategory($$anchor, $$props) {
     });
     return result.cleanup;
   });
-  var div = root$x();
+  var div = root$y();
   var div_1 = sibling(child(div), 2);
   var h1 = child(div_1);
   var text2 = child(h1);
   var div_2 = sibling(div_1, 2);
   var node = sibling(child(div_2), 4);
   each(node, 17, categoryOfSkills, (skill) => skill._id, ($$anchor2, skill) => {
-    var fragment = root_1$j();
+    var fragment = root_1$i();
     var node_1 = first_child(fragment);
     html(node_1, () => `<script>console.log(${JSON.stringify(get$1(skill))})<\/script>`);
     var node_2 = sibling(node_1, 2);
@@ -8320,7 +8320,7 @@ function SkillCategory($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$w = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$x = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsLanguage($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8333,7 +8333,7 @@ function SkillsLanguage($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var div = root$w();
+  var div = root$x();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -8352,7 +8352,7 @@ function SkillsLanguage($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root$v = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
+var root$w = /* @__PURE__ */ template(`<div class="skill-container-masonry-grid"><!></div>`);
 function SkillsKnowledge($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8365,7 +8365,7 @@ function SkillsKnowledge($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
   });
-  var div = root$v();
+  var div = root$w();
   var node = child(div);
   SkillCategory(node, {
     attribute: "intelligence",
@@ -8439,13 +8439,13 @@ function SkillsActive($$anchor, $$props) {
 var on_click$5 = (_, activeTab) => set(activeTab, "active");
 var on_click_1$4 = (__1, activeTab) => set(activeTab, "knowledge");
 var on_click_2$2 = (__2, activeTab) => set(activeTab, "language");
-var root$u = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
+var root$v = /* @__PURE__ */ template(`<!> <div class="skill"><h1> </h1> <div class="sr3e-tabs"><button>Active Skills</button> <button>Knowledge Skills</button> <button>Language Skills</button></div> <div class="sr3e-inner-background"><!></div></div>`, 1);
 function Skills($$anchor, $$props) {
   push($$props, true);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let activeTab = state("active");
-  var fragment = root$u();
+  var fragment = root$v();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -8816,12 +8816,12 @@ setPace_fn = function(freq, amp) {
   }
 };
 var root_2$c = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
-var root_1$i = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var root_1$h = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var on_keydown$3 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
 var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
-var root$t = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
+var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8875,7 +8875,7 @@ function Health($$anchor, $$props) {
   function decrementOverflow() {
     store_set(overflow, proxy(Math.max($overflow() - 1, 0)));
   }
-  var fragment = root$t();
+  var fragment = root$u();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
@@ -8893,7 +8893,7 @@ function Health($$anchor, $$props) {
   var div_3 = child(div_2);
   var node_1 = sibling(child(div_3), 2);
   each(node_1, 16, () => Array(10), index, ($$anchor2, _, i) => {
-    var div_4 = root_1$i();
+    var div_4 = root_1$h();
     var input = child(div_4);
     set_attribute(input, "id", `healthBox${i + 1}`);
     input.__change = (e) => toggle(i, true, e.target.checked);
@@ -9007,13 +9007,13 @@ function Garage($$anchor) {
   var text$1 = text("Hello garage!");
   append($$anchor, text$1);
 }
-var root_1$h = /* @__PURE__ */ template(`<div><div> </div></div>`);
-var root$s = /* @__PURE__ */ template(`<div></div>`);
+var root_1$g = /* @__PURE__ */ template(`<div><div> </div></div>`);
+var root$t = /* @__PURE__ */ template(`<div></div>`);
 function Arsenal($$anchor, $$props) {
   let arsenal = prop($$props, "arsenal", 19, () => []);
-  var div = root$s();
+  var div = root$t();
   each(div, 21, arsenal, index, ($$anchor2, item2) => {
-    var div_1 = root_1$h();
+    var div_1 = root_1$g();
     var div_2 = child(div_1);
     var text2 = child(div_2);
     template_effect(() => {
@@ -9024,9 +9024,9 @@ function Arsenal($$anchor, $$props) {
   });
   append($$anchor, div);
 }
-var root$r = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
+var root$s = /* @__PURE__ */ template(`<div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><!></div></div></div>`);
 function ItemSheetComponent($$anchor, $$props) {
-  var div = root$r();
+  var div = root$s();
   var div_1 = child(div);
   var div_2 = sibling(child(div_1), 2);
   var node = child(div_2);
@@ -9068,7 +9068,7 @@ function handleInputKeydown(e, disabled, isOpen, openDropdown, highlightedIndex,
       break;
   }
 }
-var root$q = /* @__PURE__ */ template(`<div><div><input role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
+var root$r = /* @__PURE__ */ template(`<div><div><input role="combobox" aria-haspopup="listbox" aria-controls="combobox-dropdown-list"> <i class="fa-solid fa-magnifying-glass combobox-icon"></i></div></div>`);
 function ComboSearch($$anchor, $$props) {
   push($$props, true);
   const dispatch = createEventDispatcher();
@@ -9183,7 +9183,7 @@ function ComboSearch($$anchor, $$props) {
     const inside = get$1(wrapperElement).contains(e.target) || dropdownElement.contains(e.target);
     if (!inside) closeDropdown();
   }
-  var div = root$q();
+  var div = root$r();
   set_class(div, `combobox-container`);
   var div_1 = child(div);
   var input = child(div_1);
@@ -9218,7 +9218,7 @@ function ComboSearch($$anchor, $$props) {
     toggle_class(input, "open", get$1(isOpen));
     toggle_class(i_1, "rotated", get$1(isOpen));
   });
-  event("focus", input, handleInputFocus);
+  event$1("focus", input, handleInputFocus);
   bind_value(input, () => get$1(searchTerm), ($$value) => set(searchTerm, $$value));
   append($$anchor, div);
   pop();
@@ -9231,17 +9231,19 @@ function addChange(_, changes, commitChanges) {
   ]));
   commitChanges();
 }
-var root_1$g = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Source Type:</h4> <select><option>Item</option><option>Character</option><option disabled>Vehicle (TODO)</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div></div>`, 1);
+var root_1$f = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4>Source Type:</h4> <select><option>Item</option><option>Character</option><option disabled>Vehicle (TODO)</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div></div>`, 1);
 var root_4$8 = /* @__PURE__ */ template(`<option> </option>`);
 var root_3$9 = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
 var root_2$b = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
-var root$p = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
+var root$q = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
 function ActiveEffectsEditorApp($$anchor, $$props) {
   push($$props, true);
-  let effectsObject = prop($$props, "effectsObject", 7);
-  let changes = state(proxy([...effectsObject().changes]));
+  let name = state(proxy($$props.effectsObject.name));
+  let disabled = state(proxy($$props.effectsObject.disabled));
+  let duration = proxy({ ...$$props.effectsObject.duration });
+  let sourceType = state(proxy($$props.effectsObject.transfer ? "character" : "item"));
+  let changes = state(proxy([...$$props.effectsObject.changes]));
   let propertyOptions = state(proxy([]));
-  let sourceType = state(proxy(effectsObject().transfer ? "character" : "item"));
   const allowedPatterns = ["system.attributes", "system.physical"];
   user_effect(() => {
     const transfer = get$1(sourceType) !== "item";
@@ -9256,16 +9258,24 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
     }
     set(propertyOptions, proxy(rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod")).map((path) => ({ value: path, label: path }))));
   });
-  function commitChanges() {
-    effectsObject().update({ changes: get$1(changes) });
+  async function commitChanges() {
+    var _a;
+    await $$props.effectsObject.update(
+      {
+        name: get$1(name),
+        disabled: get$1(disabled),
+        duration: { ...duration },
+        changes: [...get$1(changes)]
+      },
+      { render: false }
+    );
+    (_a = $$props.updateEffectsState) == null ? void 0 : _a.call($$props);
   }
   function updateChange(index2, field, value) {
     if (field === "key" && value && typeof value === "object" && "value" in value) {
       value = value.value;
     }
-    const updated = get$1(changes).map((c, i) => {
-      return i === index2 ? { ...c, [field]: value } : c;
-    });
+    const updated = get$1(changes).map((c, i) => i === index2 ? { ...c, [field]: value } : c);
     set(changes, proxy(updated));
     commitChanges();
   }
@@ -9274,24 +9284,24 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
     set(changes, proxy([...get$1(changes)]));
     commitChanges();
   }
-  var div = root$p();
+  var div = root$q();
   var node = child(div);
   ItemSheetComponent(node, {
     children: ($$anchor2, $$slotProps) => {
-      var fragment = root_1$g();
+      var fragment = root_1$f();
       var h3 = first_child(fragment);
       var text2 = child(h3);
       var div_1 = sibling(h3, 2);
       var node_1 = child(div_1);
       Image(node_1, {
         get src() {
-          return effectsObject().img;
+          return $$props.effectsObject.img;
         },
         get title() {
-          return effectsObject().name;
+          return get$1(name);
         },
         get entity() {
-          return effectsObject();
+          return $$props.effectsObject;
         }
       });
       var div_2 = sibling(node_1, 2);
@@ -9310,10 +9320,12 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       var h4_1 = sibling(child(div_4), 2);
       var text_2 = child(h4_1);
       var input_1 = sibling(h4_1, 2);
+      input_1.__change = commitChanges;
       var div_5 = sibling(div_4, 2);
       var h4_2 = sibling(child(div_5), 2);
       var text_3 = child(h4_2);
       var select_1 = sibling(h4_2, 2);
+      select_1.__change = commitChanges;
       var option_3 = child(select_1);
       option_3.value = null == (option_3.__value = "none") ? "" : "none";
       var text_4 = child(option_3);
@@ -9369,11 +9381,13 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
           () => localize($$props.config.effects.durationValue)
         ]
       );
-      bind_value(input, () => effectsObject().name, ($$value) => effectsObject().name = $$value);
+      event$1("blur", input, commitChanges);
+      bind_value(input, () => get$1(name), ($$value) => set(name, $$value));
       bind_select_value(select, () => get$1(sourceType), ($$value) => set(sourceType, $$value));
-      bind_checked(input_1, () => effectsObject().disabled, ($$value) => effectsObject().disabled = $$value);
-      bind_select_value(select_1, () => effectsObject().duration.type, ($$value) => effectsObject().duration.type = $$value);
-      bind_value(input_2, () => effectsObject().duration.value, ($$value) => effectsObject().duration.value = $$value);
+      bind_checked(input_1, () => get$1(disabled), ($$value) => set(disabled, $$value));
+      bind_select_value(select_1, () => duration.type, ($$value) => duration.type = $$value);
+      event$1("blur", input_2, commitChanges);
+      bind_value(input_2, () => duration.value, ($$value) => duration.value = $$value);
       append($$anchor2, fragment);
     }
   });
@@ -9418,15 +9432,13 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
           get nomatchplaceholder() {
             return get$1(expression_1);
           },
+          onselect: (e) => updateChange(i, "key", e.detail),
           css: "table",
           get value() {
             return get$1(change).key;
           },
           set value($$value) {
             get$1(change).key = $$value;
-          },
-          $$events: {
-            select: (e) => updateChange(i, "key", e.detail)
           }
         });
         var td_1 = sibling(td);
@@ -9495,15 +9507,16 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-delegate(["click", "change", "input"]);
+delegate(["change", "click", "input"]);
 const _ActiveEffectsEditor = class _ActiveEffectsEditor extends foundry.applications.api.ApplicationV2 {
-  constructor(document2, effect2, config) {
+  constructor(document2, effect2, config, updateEffectsState) {
     const appId = _ActiveEffectsEditor.getAppIdFor(effect2.id);
     super({ id: appId });
     __privateAdd(this, _app2);
     this.document = document2;
     this.effect = effect2;
     this.config = config;
+    this.updateEffectsState = updateEffectsState;
   }
   static getAppIdFor(docId) {
     return `sr3e-active-skill-editor-${docId}`;
@@ -9534,7 +9547,8 @@ const _ActiveEffectsEditor = class _ActiveEffectsEditor extends foundry.applicat
       props: {
         item: this.document,
         effectsObject: this.effect,
-        config: CONFIG.sr3e
+        config: CONFIG.sr3e,
+        updateEffectsState: this.updateEffectsState
       }
     }));
     return windowContent;
@@ -9558,39 +9572,11 @@ __publicField(_ActiveEffectsEditor, "DEFAULT_OPTIONS", {
   }
 });
 let ActiveEffectsEditor = _ActiveEffectsEditor;
-async function addEffect(_, $$props) {
-  await $$props.document.createEmbeddedDocuments("ActiveEffect", [
-    {
-      name: "New Effect",
-      icon: "systems/sr3e/icons/activeeffects.webp",
-      // Consider using your system namespace
-      origin: $$props.document.uuid,
-      disabled: false,
-      transfer: true,
-      duration: {
-        startTime: game.time.worldTime,
-        // use worldTime, not seconds, to align with system
-        type: "none",
-        // default for permanent
-        value: 0
-      },
-      changes: [],
-      flags: {
-        sr3e: {
-          source: "manual"
-          // Any other default flags useful for tracking
-        }
-      }
-    }
-  ]);
-}
-var on_click$4 = (__1, openEditor, effect2) => openEditor(get$1(effect2));
-var on_click_1$3 = (__2, deleteEffect, effect2) => deleteEffect(get$1(effect2).id);
-var root_1$f = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button class="fas fa-edit"></button> <button class="fas fa-trash-can"></button></div></div></td></tr>`);
-var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content">Name</div></th><th><div class="cell-content">Duration</div></th><th><div class="cell-content">Actions</div></th></tr></thead><tbody></tbody></table></div>`);
-function ActiveEffectsViewer($$anchor, $$props) {
+var on_click$4 = (_, $$props) => openEditor($$props.effect);
+var on_click_1$3 = (__1, deleteEffect, $$props) => deleteEffect($$props.effect.id);
+var root$p = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button class="fas fa-edit"></button> <button class="fas fa-trash-can"></button></div></div></td></tr>`);
+function ActiveEffectsRow($$anchor, $$props) {
   push($$props, true);
-  const effects = /* @__PURE__ */ derived$1(() => $$props.document.effects.contents);
   function formatDuration(duration) {
     console.log();
     if (!duration || duration.type === "none") return "Permanent";
@@ -9609,53 +9595,139 @@ function ActiveEffectsViewer($$anchor, $$props) {
     return "Unknown";
   }
   async function deleteEffect(effectId) {
-    await $$props.document.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+    await $$props.document.deleteEmbeddedDocuments("ActiveEffect", [effectId], { render: false });
+    await $$props.onHandleEffectTriggerUI();
   }
-  function openEditor(effect2) {
-    ActiveEffectsEditor.launch($$props.document, effect2, $$props.config);
+  var tr = root$p();
+  var td = child(tr);
+  var div = child(td);
+  var img = child(div);
+  var td_1 = sibling(td);
+  var div_1 = child(td_1);
+  var text2 = child(div_1);
+  var td_2 = sibling(td_1);
+  var div_2 = child(td_2);
+  var text_1 = child(div_2);
+  var td_3 = sibling(td_2);
+  var div_3 = child(td_3);
+  var div_4 = child(div_3);
+  var button = child(div_4);
+  button.__click = [on_click$4, $$props];
+  var button_1 = sibling(button, 2);
+  button_1.__click = [on_click_1$3, deleteEffect, $$props];
+  template_effect(
+    ($0, $1) => {
+      var _a;
+      set_attribute(img, "src", $$props.effect.img);
+      set_attribute(img, "alt", $$props.effect.name);
+      set_text(text2, $$props.effect.name);
+      set_text(text_1, $0);
+      set_attribute(button, "aria-label", $1);
+      set_attribute(button_1, "aria-label", $1);
+      button_1.disabled = ((_a = $$props.effect.duration) == null ? void 0 : _a.type) === "permanent" && $$props.effect.changes.length > 1;
+    },
+    [
+      () => formatDuration($$props.effect.duration),
+      () => localize($$props.config.sheet.delete)
+    ]
+  );
+  append($$anchor, tr);
+  pop();
+}
+delegate(["click"]);
+async function addEffect(e, $$props, onHandleEffectTriggerUI) {
+  event == null ? void 0 : event.stopPropagation();
+  event == null ? void 0 : event.preventDefault();
+  await $$props.document.createEmbeddedDocuments(
+    "ActiveEffect",
+    [
+      {
+        name: "New Effect",
+        icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
+        origin: $$props.document.uuid,
+        disabled: false,
+        transfer: true,
+        duration: {
+          startTime: game.time.worldTime,
+          // use worldTime, not seconds, to align with system
+          type: "none",
+          // default for permanent
+          value: 0
+        },
+        changes: [],
+        flags: {
+          sr3e: {
+            source: "manual"
+            // Any other default flags useful for tracking
+          }
+        }
+      }
+    ],
+    { render: false }
+  );
+  await onHandleEffectTriggerUI();
+}
+var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content">Name</div></th><th><div class="cell-content">Duration</div></th><th><div class="cell-content">Actions</div></th></tr></thead><tbody><!><!></tbody></table></div>`);
+function ActiveEffectsViewer($$anchor, $$props) {
+  push($$props, true);
+  let actorAttachedEffects = state(proxy($$props.document.effects.contents));
+  let transferredEffects = state(proxy([]));
+  user_effect(() => {
+    set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
+    set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((effect2) => ({ effect: effect2, item: item2 }))) : []));
+  });
+  async function onHandleEffectTriggerUI() {
+    set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
+    set(transferredEffects, proxy([...get$1(transferredEffects)]));
   }
   var div = root$o();
   var div_1 = child(div);
   var button = child(div_1);
-  button.__click = [addEffect, $$props];
+  button.__click = [addEffect, $$props, onHandleEffectTriggerUI];
   var table = sibling(div_1, 2);
   var tbody = sibling(child(table));
-  each(tbody, 21, () => get$1(effects), (effect2) => effect2.id, ($$anchor2, effect2) => {
-    var tr = root_1$f();
-    var td = child(tr);
-    var div_2 = child(td);
-    var img = child(div_2);
-    var td_1 = sibling(td);
-    var div_3 = child(td_1);
-    var text2 = child(div_3);
-    var td_2 = sibling(td_1);
-    var div_4 = child(td_2);
-    var text_1 = child(div_4);
-    var td_3 = sibling(td_2);
-    var div_5 = child(td_3);
-    var div_6 = child(div_5);
-    var button_1 = child(div_6);
-    button_1.__click = [on_click$4, openEditor, effect2];
-    var button_2 = sibling(button_1, 2);
-    button_2.__click = [on_click_1$3, deleteEffect, effect2];
-    template_effect(
-      ($0, $1) => {
-        var _a;
-        set_attribute(img, "src", get$1(effect2).img);
-        set_attribute(img, "alt", get$1(effect2).name);
-        set_text(text2, get$1(effect2).name);
-        set_text(text_1, $0);
-        set_attribute(button_1, "aria-label", $1);
-        set_attribute(button_2, "aria-label", $1);
-        button_2.disabled = ((_a = get$1(effect2).duration) == null ? void 0 : _a.type) === "permanent" && get$1(effect2).changes.length > 1;
+  var node = child(tbody);
+  each(node, 17, () => get$1(actorAttachedEffects), (effect2) => effect2.id, ($$anchor2, effect2) => {
+    ActiveEffectsRow($$anchor2, {
+      get document() {
+        return $$props.document;
       },
-      [
-        () => formatDuration(get$1(effect2).duration),
-        () => localize($$props.config.sheet.delete)
-      ]
-    );
-    append($$anchor2, tr);
+      get effect() {
+        return get$1(effect2);
+      },
+      get config() {
+        return $$props.config;
+      },
+      onHandleEffectTriggerUI
+    });
   });
+  var node_1 = sibling(node);
+  {
+    var consequent = ($$anchor2) => {
+      var fragment_1 = comment();
+      var node_2 = first_child(fragment_1);
+      each(node_2, 17, () => get$1(transferredEffects), ({ effect: effect2, item: item2 }) => effect2.id, ($$anchor3, $$item) => {
+        let effect2 = () => get$1($$item).effect;
+        let item2 = () => get$1($$item).item;
+        ActiveEffectsRow($$anchor3, {
+          get document() {
+            return item2();
+          },
+          get effect() {
+            return effect2();
+          },
+          get config() {
+            return $$props.config;
+          },
+          onHandleEffectTriggerUI
+        });
+      });
+      append($$anchor2, fragment_1);
+    };
+    if_block(node_1, ($$render) => {
+      if ($$props.document instanceof Actor) $$render(consequent);
+    });
+  }
   append($$anchor, div);
   pop();
 }
@@ -11699,8 +11771,8 @@ function JournalSearchModal($$anchor, $$props) {
           () => localize($$props.config.sheet.searchJournals)
         ]
       );
-      event("focus", input, () => set(showDropdown, true));
-      event("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
+      event$1("focus", input, () => set(showDropdown, true));
+      event$1("blur", input, () => setTimeout(() => set(showDropdown, false), 100));
       bind_value(input, () => get$1(search), ($$value) => set(search, $$value));
       append($$anchor2, div);
     };
@@ -13963,7 +14035,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       () => localize($$props.config.sheet.createCharacter)
     ]
   );
-  event("submit", form, handleSubmit);
+  event$1("submit", form, handleSubmit);
   bind_value(input, () => get$1(characterName), ($$value) => set(characterName, $$value));
   bind_value(input_1, () => get$1(characterAge), ($$value) => set(characterAge, $$value));
   bind_value(input_2, () => get$1(characterHeight), ($$value) => set(characterHeight, $$value));
@@ -14358,7 +14430,7 @@ function TimeActuatorInput($$anchor, $$props) {
     },
     [() => `± ${label().toLowerCase()}`]
   );
-  event("blur", input_1, (e) => {
+  event$1("blur", input_1, (e) => {
     const delta = e.target.valueAsNumber;
     if (!Number.isNaN(delta) && delta !== 0) {
       onDelta()(delta);
@@ -15322,8 +15394,8 @@ function TransactionApp($$anchor, $$props) {
           input_1.__input = handleInput;
           input_1.__keydown = [handleKeyDown];
           template_effect(() => set_value(input_1, get$1(formattedAmount)));
-          event("focus", input_1, handleFocus);
-          event("blur", input_1, handleBlur);
+          event$1("focus", input_1, handleFocus);
+          event$1("blur", input_1, handleBlur);
           append($$anchor3, input_1);
         },
         $$slots: { default: true }
@@ -15816,7 +15888,7 @@ function BroadcasterApp($$anchor, $$props) {
       var div_3 = sibling(div_2, 2);
       var input = sibling(child(div_3), 2);
       template_effect(() => set_text(text2, $$props.actor.name));
-      event("blur", h1, (e) => commitName(e));
+      event$1("blur", h1, (e) => commitName(e));
       bind_checked(input, $isBroadcastingStore, ($$value) => store_set(isBroadcastingStore, $$value));
       append($$anchor2, div);
     }

@@ -2,68 +2,64 @@
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
    import { localize } from "../../../../services/utilities.js";
+   import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
 
    let { document, config } = $props();
 
-   const effects = $derived(document.effects.contents);
+   let actorAttachedEffects = $state(document.effects.contents);
+   let transferredEffects = $state([]);
 
-   function formatDuration(duration) {
-      console.log();
+   $effect(() => {
+      actorAttachedEffects = [...document.effects.contents];
 
-      if (!duration || duration.type === "none") return "Permanent";
+      transferredEffects =
+         document instanceof Actor
+            ? document.items.contents.flatMap((item) => item.effects.contents.map((effect) => ({ effect, item })))
+            : [];
+   });
 
-      const { seconds, rounds, turns, combat } = duration;
+   async function addEffect(e) {
+      event?.stopPropagation();
+      event?.preventDefault();
 
-      if (seconds) {
-         const minutes = Math.floor(seconds / 60);
-         const hours = Math.floor(minutes / 60);
-         const days = Math.floor(hours / 24);
+      await document.createEmbeddedDocuments(
+         "ActiveEffect",
+         [
+            {
+               name: "New Effect",
+               icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
+               origin: document.uuid,
+               disabled: false,
+               transfer: true,
 
-         if (days) return `${days}d ${hours % 24}h ${minutes % 60}m`;
-         if (hours) return `${hours}h ${minutes % 60}m`;
-         if (minutes) return `${minutes}m ${seconds % 60}s`;
-         return `${seconds}s`;
-      }
+               duration: {
+                  startTime: game.time.worldTime, // use worldTime, not seconds, to align with system
+                  type: "none", // default for permanent
+                  value: 0,
+               },
 
-      if (rounds) return `${rounds} rounds`;
-      if (turns) return `${turns} turns`;
+               changes: [],
 
-      return "Unknown";
-   }
-
-   async function addEffect() {
-      await document.createEmbeddedDocuments("ActiveEffect", [
-         {
-            name: "New Effect",
-            icon: "systems/sr3e/icons/activeeffects.webp", // Consider using your system namespace
-            origin: document.uuid,
-            disabled: false,
-            transfer: true,
-
-            duration: {
-               startTime: game.time.worldTime, // use worldTime, not seconds, to align with system
-               type: "none", // default for permanent
-               value: 0,
-            },
-
-            changes: [],
-
-            flags: {
-               sr3e: {
-                  source: "manual",
-                  // Any other default flags useful for tracking
+               flags: {
+                  sr3e: {
+                     source: "manual",
+                     // Any other default flags useful for tracking
+                  },
                },
             },
-         },
-      ]);
+         ],
+         { render: false }
+      );
+      await onHandleEffectTriggerUI();
    }
 
-   async function deleteEffect(effectId) {
-      await document.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+   async function onHandleEffectTriggerUI() {
+      actorAttachedEffects = [...document.effects.contents];
+      transferredEffects = [...transferredEffects];
    }
 
    function openEditor(effect) {
-      ActiveEffectsEditor.launch(document, effect, config);
+      ActiveEffectsEditor.launch(document, effect, config, updateEffectsState);
    }
 </script>
 
@@ -82,38 +78,14 @@
          </tr>
       </thead>
       <tbody>
-         {#each effects as effect (effect.id)}
-            <tr>
-               <td>
-                  <div class="cell-content">
-                     <img src={effect.img} alt={effect.name} />
-                  </div>
-               </td>
-               <td>
-                  <div class="cell-content">{effect.name}</div>
-               </td>
-               <td>
-                  <div class="cell-content">{formatDuration(effect.duration)}</div>
-               </td>
-               <td>
-                  <div class="cell-content">
-                     <div class="buttons-vertical-distribution square">
-                        <button
-                           aria-label={localize(config.sheet.delete)}
-                           class="fas fa-edit"
-                           onclick={() => openEditor(effect)}
-                        ></button>
-                        <button
-                           aria-label={localize(config.sheet.delete)}
-                           onclick={() => deleteEffect(effect.id)}
-                           class="fas fa-trash-can"
-                           disabled={effect.duration?.type === "permanent" && effect.changes.length > 1}
-                        ></button>
-                     </div>
-                  </div>
-               </td>
-            </tr>
+         {#each actorAttachedEffects as effect (effect.id)}
+            <ActiveEffectsRow {document} {effect} {config} {onHandleEffectTriggerUI} />
          {/each}
+         {#if document instanceof Actor}
+            {#each transferredEffects as { effect, item } (effect.id)}
+               <ActiveEffectsRow document={item} {effect} {config} {onHandleEffectTriggerUI} />
+            {/each}
+         {/if}
       </tbody>
    </table>
 </div>

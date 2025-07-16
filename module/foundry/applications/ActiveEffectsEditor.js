@@ -4,13 +4,14 @@ import { mount, unmount } from "svelte";
 export default class ActiveEffectsEditor extends foundry.applications.api.ApplicationV2 {
    #app;
 
-   constructor(document, effect, config) {
+   constructor(document, effect, config, updateEffectsState) {
 		const appId = ActiveEffectsEditor.getAppIdFor(effect.id);
 		super({ id: appId });
 
       this.document = document;
       this.effect = effect;
       this.config = config;
+      this.updateEffectsState = updateEffectsState;
    }
 
    static getAppIdFor(docId) {
@@ -60,6 +61,7 @@ export default class ActiveEffectsEditor extends foundry.applications.api.Applic
             item: this.document,
             effectsObject: this.effect,
             config: CONFIG.sr3e,
+            updateEffectsState: this.updateEffectsState,
          },
       });
 
