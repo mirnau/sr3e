@@ -142,7 +142,7 @@
    </div>
 {:else}
    <div
-      class="stat-card"
+      class="stat-card button"
       role="button"
       tabindex="0"
       onclick={Roll}

@@ -23,7 +23,7 @@
 
 {#if isButton && $isRollComposerOpen}
    <div
-      class="stat-card"
+      class="stat-card button"
       class:alert-animation={$isRollComposerOpen}
       role="button"
       tabindex="0"

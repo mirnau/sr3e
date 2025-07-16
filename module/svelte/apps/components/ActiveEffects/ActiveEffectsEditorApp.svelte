@@ -35,9 +35,7 @@
       }
 
       propertyOptions = rawPaths
-         .filter((path) =>
-            allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith('.mod')
-         )
+         .filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod"))
          .map((path) => ({ value: path, label: path }));
    });
 
@@ -120,7 +118,7 @@
 
    <ItemSheetComponent>
       <h1>{localize(config.effects.changesHeader)}</h1>
-      <button onclick={addChange}>➕ {localize(config.effects.addChange)}</button>
+      <button onclick={addChange}>{localize(config.effects.addChange)}</button>
 
       <div class="table-wrapper">
          <table>
@@ -130,7 +128,6 @@
                   <th>{localize(config.effects.changeMode)}</th>
                   <th>{localize(config.effects.value)}</th>
                   <th>{localize(config.effects.priority)}</th>
-                  <th>{localize(config.effects.contributes)}</th>
                   <th>{localize(config.effects.actions)}</th>
                </tr>
             </thead>
@@ -180,16 +177,6 @@
                               type="number"
                               value={change.priority}
                               oninput={(e) => updateChange(i, "priority", +e.target.value)}
-                           />
-                        </div>
-                     </td>
-                     <td>
-                        <div class="stat-card centered">
-                           <div class="stat-card-background"></div>
-                           <input
-                              type="checkbox"
-                              oninput={(e) =>
-                                 effectsObject.setFlag(flags.sr3e, flags.effect.contributes, e.target.checked)}
                            />
                         </div>
                      </td>

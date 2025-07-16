@@ -42,4 +42,5 @@ export const masonryMinWidthFallbackValue = {
 export const inventory = {
   arsenal: "arsenal",
   garage: "garage",
+  effects: "effects"
 }

@@ -1,3 +1,4 @@
+import SimpleStat from "./SimpleStat";
 export default class KarmaModel extends foundry.abstract.TypeDataModel {
    static defineSchema() {
       return {
@@ -6,11 +7,8 @@ export default class KarmaModel extends foundry.abstract.TypeDataModel {
             initial: 0,
             integer: true,
          }),
-         karmaPool: new foundry.data.fields.NumberField({
-            required: true,
-            initial: 1,
-            integer: true,
-         }),
+         karmaPool: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+
          //NOTE: Used to calculate the current karma pool reset, not exposed to the player
          karmaPoolCeiling: new foundry.data.fields.NumberField({
             required: true,

@@ -1,66 +1,69 @@
 <script>
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
-   import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js"
+   import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
+   import { localize } from "../../../../services/utilities.js";
 
-   let { item, config } = $props();
+   let { document, config } = $props();
 
-   const effects = $derived(item.effects.contents);
+   const effects = $derived(document.effects.contents);
 
    async function addEffect() {
-      await item.createEmbeddedDocuments("ActiveEffect", [
+      await document.createEmbeddedDocuments("ActiveEffect", [
          {
             name: "New Effect",
             transfer: true,
             disabled: false,
-            changes: [
-               {
-                  key: "system.attributes.strength",
-                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                  value: 0,
-               },
-            ],
+            changes: [],
          },
       ]);
    }
 
    async function deleteEffect(effectId) {
-      await item.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+      await document.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
    }
 
    function openEditor(effect) {
-      ActiveEffectsEditor.launch(item, effect, config);
+      ActiveEffectsEditor.launch(document, effect, config);
    }
 </script>
 
-<ItemSheetComponent>
-   <div class="effects-viewer">
-      <div class="effects-header">
-         <h3>Active Effects</h3>
-         <button onclick={addEffect}>➕ Add Effect</button>
-      </div>
-
-      <table class="effects-table">
-         <thead>
-            <tr>
-               <th>Name</th>
-               <th>Actions</th>
-            </tr>
-         </thead>
-         <tbody>
-            {#each effects as effect (effect.id)}
-               <tr>
-                  <td>{effect.name}</td>
-                  <td>
-                     <button onclick={() => openEditor(effect)}>✏️ Edit</button>
-                     <button onclick={() => deleteEffect(effect.id)}>🗑 Delete</button>
-                  </td>
-               </tr>
-            {:else}
-               <tr>
-                  <td colspan="2" class="empty-row">No effects defined</td>
-               </tr>
-            {/each}
-         </tbody>
-      </table>
+<div class="effects-viewer">
+   <div class="effects-header">
+      <button class="fas fa-plus" type="button" onclick={addEffect}></button>
    </div>
-</ItemSheetComponent>
+
+   <table>
+      <thead>
+         <tr>
+            <th>Name</th>
+            <th>Actions</th>
+         </tr>
+      </thead>
+      <tbody>
+         {#each effects as effect (effect.id)}
+            <tr>
+               <td>{effect.name}</td>
+               <td>
+                  <div class="buttons-vertical-distribution square">
+                     <button
+                        aria-label={localize(config.sheet.delete)}
+                        class="fas fa-edit"
+                        onclick={() => openEditor(effect)}
+                     ></button>
+                     <button
+                        aria-label={localize(config.sheet.delete)}
+                        onclick={() => deleteEffect(effect.id)}
+                        class="fas fa-trash-can"
+                        disabled={effect.duration?.type === "permanent" && effect.changes.length > 1}
+                     ></button>
+                  </div>
+               </td>
+            </tr>
+         {:else}
+            <tr>
+               <td colspan="2" class="empty-row">No effects defined</td>
+            </tr>
+         {/each}
+      </tbody>
+   </table>
+</div>

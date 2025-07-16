@@ -16,13 +16,13 @@
 
    let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
    let currentDicePoolName = $state("");
-   let currentDicePoolStore;
+   let currentDicePoolAddition = $state(0);
+   let displayCurrentDicePoolStore = null;
 
    let targetNumber = $state(5);
    let modifiersArray = $state([]);
    let karmaCost = $state(0);
    let diceBought = $state(0);
-   let poolDiceBought = $state(0);
    let modifiersTotal = $state(0);
    let difficulty = $state("");
    let canSubmit = $state(true);
@@ -98,9 +98,9 @@
    }
 
    function AddDiceFromPool() {
-      if ($currentDicePoolStore > 0) {
-         poolDiceBought += 1;
-         $currentDicePoolStore -= 1;
+      if (currentDicePoolAddition > 0) {
+         currentDicePoolAddition += 1;
+         currentDicePoolAddition -= 1;
       }
    }
 
@@ -115,7 +115,8 @@
       currentDicePoolName = $currentDicePoolSelectionStore;
       if (!currentDicePoolName) return;
 
-      currentDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${currentDicePoolName}`);
+      currentDicePoolAddition = 0;
+      displayCurrentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${currentDicePoolName}`);
    });
 
    $effect(() => {
@@ -161,6 +162,7 @@
       targetNumber = 5;
       modifiersArray = $penalty > 0 ? [{ name: localize(config.health.penalty), value: -$penalty }] : [];
       diceBought = 0;
+      currentDicePoolAddition = 0;
       karmaCost = 0;
       isDefaultingAsString = "false";
       selectEl?.focus();
@@ -175,7 +177,78 @@
    });
 
    function Submit() {
-      $karmaPoolStore -= karmaCost;
+      const isInCombat = game.combat !== null && game.combat !== undefined;
+      if (isInCombat) {
+         const combat = game.combat;
+      }
+
+      if (karmaCost > 0) {
+         const karmaEffect = {
+            name: `Karma Drain (${karmaCost})`,
+            label: `Used ${karmaCost} Karma Pool`,
+            icon: "icons/magic/light/explosion-star-glow-blue.webp",
+            changes: [
+               {
+                  key: "system.karma.karmaPool", // Not a simple stat, has no mod!
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${karmaCost}`,
+                  priority: 20,
+               },
+            ],
+            origin: actor.uuid,
+            ...(isInCombat
+               ? {
+                    duration: {
+                       rounds: 1,
+                       startRound: combat.round,
+                       startTurn: combat.turn,
+                    },
+                 }
+               : {}),
+            flags: {
+               sr3e: {
+                  temporaryKarmaPoolDrain: true,
+                  expiresOutsideCombat: !isInCombat,
+               },
+            },
+         };
+
+         actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect]);
+      }
+
+      if (currentDicePoolAddition > 0 && currentDicePoolName) {
+         const effect = {
+            name: `Dice Pool Drain (${currentDicePoolName})`,
+            label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
+            icon: "icons/skills/melee/blade-tips-triple-white.webp",
+            changes: [
+               {
+                  key: `system.dicePools.${currentDicePoolName}.mod`,
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${currentDicePoolAddition}`,
+                  priority: 20,
+               },
+            ],
+            origin: actor.uuid,
+            ...(isInCombat
+               ? {
+                    duration: {
+                       rounds: 1,
+                       startRound: combat.round,
+                       startTurn: combat.turn,
+                    },
+                 }
+               : {}),
+            flags: {
+               sr3e: {
+                  temporaryDicePoolDrain: true,
+                  expiresOutsideCombat: !isInCombat, // storyteller UI can target these
+               },
+            },
+         };
+
+         actor.createEmbeddedDocuments("ActiveEffect", [effect]);
+      }
 
       onclose({
          dice: caller.dice + diceBought,
@@ -306,15 +379,15 @@
       {/each}
    </div>
 
-   {#if !(caller.type === "attribute" && isDefaulting) && currentDicePoolName && currentDicePoolStore}
+   {#if !(caller.type === "attribute" && isDefaulting) && currentDicePoolName}
       <div class="roll-composer-card">
          <h1>{localize(config.dicepools[currentDicePoolName])}</h1>
-         <h4>Dice Added: {poolDiceBought}</h4>
+         <h4>Dice Added: {currentDicePoolAddition}</h4>
          <Counter
             class="karma-counter"
-            bind:value={poolDiceBought}
+            bind:value={currentDicePoolAddition}
             min="0"
-            max={$currentDicePoolStore}
+            max={$displayCurrentDicePoolStore.sum}
             onIncrement={AddDiceFromPool}
             onDecrement={RemoveDiceFromPool}
          />

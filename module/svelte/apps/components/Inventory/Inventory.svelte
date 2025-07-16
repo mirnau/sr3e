@@ -7,6 +7,7 @@
   import CardToolbar from "../CardToolbar.svelte";
   import Garage from "./Garage.svelte";
   import Arsenal from "./Arsenal.svelte";
+  import Effects from "./Effects.svelte";
   import ActorDataService from "../../../../services/ActorDataService.js";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
@@ -30,6 +31,10 @@
     class:active={activeTab === inventory.garage}
     onclick={() => (activeTab = inventory.garage)}>Garage</button
   >
+  <button
+    class:active={activeTab === inventory.effects}
+    onclick={() => (activeTab = inventory.effects)}>Active Effects</button
+  >
 </div>
 
 <div class="sr3e-inner-background">
@@ -37,12 +42,8 @@
   <Arsenal {arsenal} {actor} {config} />
   {:else if activeTab === inventory.garage}
   <Garage {actor} {config} />
+  {:else if activeTab === inventory.effects}
+  <Effects {actor} {config} />
   {/if}
-
-
-  // Transactions / Budget
-  // Cyber
-
-
 </div>
 

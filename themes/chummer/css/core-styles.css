@@ -1148,15 +1148,28 @@
     align-items: center;
     justify-content: flex-start;
     gap: 0.25rem;
-    padding: 0.25rem;
+    padding: 0rem;
+    margin: 0rem;
     width: fit-content;
     max-width: max-content;
     align-self: flex-start;
   }
   .buttons-vertical-distribution > button {
-    width: auto;
     flex: 0 0 auto;
     white-space: nowrap;
+    width: auto;
+  }
+  .buttons-vertical-distribution.square > button {
+    aspect-ratio: 1 / 1;
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: normal;
   }
   img {
     margin: 0rem;
@@ -1417,6 +1430,10 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    background: transparent;
+  }
+  thead {
+    background: none;
   }
   table {
     width: 100%;
@@ -1425,62 +1442,98 @@
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    background: transparent;
+  }
+  table tr {
+    background: transparent;
+  }
+  table thead tr {
+    background: transparent;
+  }
+  table tbody tr {
+    background: transparent;
   }
   table td,
   table th {
     vertical-align: middle;
-    padding: 0;
+    padding: 0.5rem;
+    background: transparent;
+  }
+  table .stat-card {
+    background: transparent;
   }
   table .stat-card.centered {
     width: 95%;
     height: 100%;
     margin: 0.25rem !important;
+    background: transparent;
   }
   table .stat-card.centered input[type="checkbox"] {
     margin: 0.25rem !important;
     display: block;
+    background: transparent;
   }
-  thead th {
-    padding: 0.25rem;
-    background-color: #1b1f24;
+  table thead th {
+    padding: 0.5rem;
+    background: transparent;
     text-align: left;
-    box-shadow: inset 0 0 30px var(--highlight-color-primary);
     white-space: nowrap;
+    margin: 0.5rem;
+    vertical-align: middle;
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
   td {
-    padding: 0.125rem;
-    background-color: #1b1f24;
+    margin: 0.5rem;
+    background: transparent;
     vertical-align: middle;
     box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
   td input[type="text"],
   td input[type="number"],
-  td select,
-  td button {
+  td select {
     margin: 0;
     padding: 0;
     min-width: 6rem;
     width: 100%;
     box-sizing: border-box;
     max-width: 8rem;
+    background: transparent;
   }
-  tr:nth-child(even) > td {
+  table tr:nth-child(even) > td {
     box-shadow: inset 0 0 30px var(--highlight-color-secondary);
+    background: transparent;
   }
-  thead > tr:first-child > th:first-child {
+  table thead > tr:first-child > th:first-child {
     clip-path: polygon(0.5rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+    background: transparent;
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
-  thead > tr:last-child > th:last-child {
+  table thead > tr:last-child > th:last-child {
     clip-path: polygon(0rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0rem);
+    background: transparent;
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
-  tbody > tr > td:first-child {
+  table tbody > tr > td:first-child {
     clip-path: polygon(0.5rem 0px, calc(100% - 0rem) 0px, 100% 0rem, 100% calc(100% - 0rem), calc(100% - 0rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+    background: transparent;
   }
-  tbody > tr > td:last-child {
+  table tbody > tr > td:last-child {
     clip-path: polygon(0rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0rem 100%, 0px calc(100% - 0rem), 0px 0rem);
+    background: transparent;
   }
   button {
     white-space: nowrap;
+  }
+  /* Additional rules to eliminate corner remnants */
+  table thead > tr:first-child > th:first-child::before,
+  table thead > tr:first-child > th:first-child::after,
+  table thead > tr:last-child > th:last-child::before,
+  table thead > tr:last-child > th:last-child::after,
+  table tbody > tr > td:first-child::before,
+  table tbody > tr > td:first-child::after,
+  table tbody > tr > td:last-child::before,
+  table tbody > tr > td:last-child::after {
+    background: transparent !important;
   }
   .chat-message.message {
     background: transparent;

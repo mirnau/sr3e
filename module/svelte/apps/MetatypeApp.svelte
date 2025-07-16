@@ -257,7 +257,7 @@
          </div>
       </ItemSheetComponent>
 
-      <ActiveEffectsViewer {item} {config} />
+      <ActiveEffectsViewer document={item} {config} />
       <!-- Journal Viewer -->
       <JournalViewer document={item} {config} />
    </div>

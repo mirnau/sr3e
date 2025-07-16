@@ -174,20 +174,23 @@
          "weight": "Weight"
       },
       "sheet": {
-         "playercharacter": "Player Character",
-         "details": "Details",
-         "viewbackground": "View Background",
-         "buyupgrades": "Buy upgrades",
-         "searchJournals": "Search Journals",
-         "createCharacter": "Create Character",
-         "cancel": "Cancel",
-         "randomize": "Randomize",
-         "clear": "Clear",
-         "chooseanoption": "Choose an option... ",
          "attributepoints": "Attribute Points",
+         "buyupgrades": "Buy upgrades",
+         "cancel": "Cancel",
+         "clear": "Clear",
+         "createCharacter": "Create Character",
+         "chooseanoption": "Choose an option... ",
+         "delete": "Delete",
+         "details": "Details",
+         "edit": "Edit",
+         "playercharacter": "Player Character",
+         "quote": "Quote",
+         "randomize": "Randomize",
+         "searchJournals": "Search Journals",
          "skillpoints": "Skill Points",
          "resources": "Resources",
-         "quote": "Quote"
+         "viewbackground": "View Background"
+         
       },
       "skill": {
          "active": "Active Skill",

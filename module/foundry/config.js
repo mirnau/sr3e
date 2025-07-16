@@ -167,6 +167,8 @@ sr3e.sheet = {
    skillpoints: "sr3e.sheet.skillpoints",
    resources: "sr3e.sheet.resources",
    quote: "sr3e.sheet.quote",
+   delete: "sr3e.sheet.delete",
+   edit: "sr3e.sheet.edit"
 };
 
 sr3e.traits = {

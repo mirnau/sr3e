@@ -85,14 +85,30 @@ footer.form-footer button:last-of-type {
    justify-content: flex-start;
    gap: 0.25rem;
 
-   padding: 0.25rem;
+   padding: 0.0rem;
+   margin: 0.0rem;
    width: fit-content;
    max-width: max-content;
    align-self: flex-start;
-}
 
-.buttons-vertical-distribution > button {
-   width: auto;
-   flex: 0 0 auto;
-   white-space: nowrap;
+   > button {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      width: auto;
+   }
+
+   &.square {
+      > button {
+         aspect-ratio: 1 / 1;
+         width: 1.5rem;
+         height: 1.5rem;
+         min-width: 1.5rem;
+         min-height: 1.5rem;
+         padding: 0;
+         display: inline-flex;
+         align-items: center;
+         justify-content: center;
+         white-space: normal;
+      }
+   }
 }
