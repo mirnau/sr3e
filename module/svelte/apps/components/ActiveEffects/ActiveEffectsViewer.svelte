@@ -7,6 +7,7 @@
 
    let actorAttachedEffects = $state(document.effects.contents);
    let transferredEffects = $state([]);
+   let isViewerInstanceOfActor = document instanceof Actor;
 
    $effect(() => {
       actorAttachedEffects = [...document.effects.contents];
@@ -81,7 +82,7 @@
          {/each}
          {#if document instanceof Actor}
             {#each transferredEffects as { activeEffect, item } (activeEffect.id)}
-               <ActiveEffectsRow document={item} {activeEffect} {config} {onHandleEffectTriggerUI} />
+               <ActiveEffectsRow document={item} {activeEffect} {config} {isViewerInstanceOfActor} {onHandleEffectTriggerUI} />
             {/each}
          {/if}
       </tbody>

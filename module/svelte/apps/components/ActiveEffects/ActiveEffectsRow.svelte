@@ -4,7 +4,7 @@
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
 
-   let { document, activeEffect, config, onHandleEffectTriggerUI } = $props();
+   let { document, activeEffect, config, isViewerInstanceOfActor = false, onHandleEffectTriggerUI } = $props();
 
    let storeManager = StoreManager.Subscribe(document);
    onDestroy(() => {
@@ -13,7 +13,7 @@
    let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
    let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
    let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
-   let isEmbeddedOnThisDocument = activeEffect.origin === document.uuid;
+   let canDelete = !isViewerInstanceOfActor;
 
    let duration = $state("");
 
@@ -83,7 +83,7 @@
                aria-label={localize(config.sheet.delete)}
                onclick={() => deleteEffect(activeEffect.id)}
                class="fas fa-trash-can"
-               disabled={!isEmbeddedOnThisDocument ||
+               disabled={!canDelete ||
                   (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
             ></button>
          </div>

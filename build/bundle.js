@@ -6922,7 +6922,7 @@ function Karma($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let karmaPoolStore = storeManager2.GetRWStore("karma.karmaPool");
+  let karmaPoolStore = storeManager2.GetSumROStore("karma.karmaPool");
   let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
   let essenceStore = storeManager2.GetSumROStore("attributes.essence");
   let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
@@ -6964,7 +6964,7 @@ function Karma($$anchor, $$props) {
           return get$1(expression_1);
         },
         get value() {
-          return $karmaPoolStore();
+          return $karmaPoolStore().sum;
         }
       });
       var node_4 = sibling(node_3, 2);
@@ -9650,6 +9650,7 @@ function ActiveEffectsRow($$anchor, $$props) {
   const $durationStore = () => store_get(durationStore, "$durationStore", $$stores);
   const $nameStore = () => store_get(nameStore, "$nameStore", $$stores);
   const $disabledStore = () => store_get(disabledStore, "$disabledStore", $$stores);
+  let isViewerInstanceOfActor = prop($$props, "isViewerInstanceOfActor", 3, false);
   let storeManager2 = StoreManager.Subscribe($$props.document);
   onDestroy(() => {
     StoreManager.Unsubscribe($$props.document);
@@ -9657,7 +9658,7 @@ function ActiveEffectsRow($$anchor, $$props) {
   let nameStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:name`, $$props.activeEffect.name);
   let durationStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:duration`, $$props.activeEffect.duration);
   let disabledStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:disabled`, $$props.activeEffect.disabled);
-  let isEmbeddedOnThisDocument = $$props.activeEffect.origin === $$props.document.uuid;
+  let canDelete = !isViewerInstanceOfActor();
   let duration = state("");
   user_effect(() => {
     set(duration, proxy(formatDuration($durationStore())));
@@ -9718,7 +9719,7 @@ function ActiveEffectsRow($$anchor, $$props) {
       set_text(text_2, $disabledStore() ? "Yes" : "No");
       set_attribute(button, "aria-label", $0);
       set_attribute(button_1, "aria-label", $0);
-      button_1.disabled = !isEmbeddedOnThisDocument || ((_a = $$props.activeEffect.duration) == null ? void 0 : _a.type) === "permanent" && $$props.activeEffect.changes.length > 1;
+      button_1.disabled = !canDelete || ((_a = $$props.activeEffect.duration) == null ? void 0 : _a.type) === "permanent" && $$props.activeEffect.changes.length > 1;
     },
     [
       () => localize($$props.config.sheet.delete)
@@ -9767,6 +9768,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   let isSlim = prop($$props, "isSlim", 3, false);
   let actorAttachedEffects = state(proxy($$props.document.effects.contents));
   let transferredEffects = state(proxy([]));
+  let isViewerInstanceOfActor = $$props.document instanceof Actor;
   user_effect(() => {
     set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
     set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
@@ -9828,6 +9830,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
           get config() {
             return $$props.config;
           },
+          isViewerInstanceOfActor,
           onHandleEffectTriggerUI
         });
       });
@@ -13905,7 +13908,8 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.attributes.willpower.value": 1,
       "system.attributes.quickness.value": 1,
       "system.attributes.intelligence.value": 1,
-      "system.attributes.initiative.value": 1
+      "system.attributes.initiative.value": 1,
+      "system.karma.karmaPool.value": 1
     });
     await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
     const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
