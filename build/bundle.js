@@ -3549,14 +3549,14 @@ function lerpColor(hex1, hex2, t) {
 function handleToggleSpan(_, $$props) {
   toggleCardSpanById($$props.id);
 }
-var on_click$d = (e) => e.stopPropagation();
+var on_click$e = (e) => e.stopPropagation();
 var on_keydown$9 = (e) => {
   if (e.key === "Escape") {
     e.currentTarget.blur();
   }
 };
-var on_click_1$8 = (__1, handleMove) => handleMove("up");
-var on_click_2$3 = (__2, handleMove) => handleMove("down");
+var on_click_1$9 = (__1, handleMove) => handleMove("up");
+var on_click_2$4 = (__2, handleMove) => handleMove("down");
 var root$P = /* @__PURE__ */ template(`<div class="toolbar" role="toolbar" tabindex="0"><button class="header-control icon sr3e-toolbar-button" aria-label="Move card up"><i class="fa-solid fa-arrow-up"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Move card down"><i class="fa-solid fa-arrow-down"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-arrows-spin"></i></button></div>`);
 function CardToolbar($$anchor, $$props) {
   push($$props, true);
@@ -3565,12 +3565,12 @@ function CardToolbar($$anchor, $$props) {
     moveCardById($$props.id, direction);
   }
   var div = root$P();
-  div.__click = [on_click$d];
+  div.__click = [on_click$e];
   div.__keydown = [on_keydown$9];
   var button = child(div);
-  button.__click = [on_click_1$8, handleMove];
+  button.__click = [on_click_1$9, handleMove];
   var button_1 = sibling(button, 2);
-  button_1.__click = [on_click_2$3, handleMove];
+  button_1.__click = [on_click_2$4, handleMove];
   var button_2 = sibling(button_1, 2);
   button_2.__click = [handleToggleSpan, $$props];
   append($$anchor, div);
@@ -3979,12 +3979,12 @@ function handleKeydown(e, increment2, decrement2) {
     decrement2();
   }
 }
-var on_click$c = (_, decrement2, $$props) => {
+var on_click$d = (_, decrement2, $$props) => {
   var _a;
   decrement2();
   (_a = $$props.onDecrement) == null ? void 0 : _a.call($$props);
 };
-var on_click_1$7 = (__1, increment2, $$props) => {
+var on_click_1$8 = (__1, increment2, $$props) => {
   var _a;
   increment2();
   (_a = $$props.onIncrement) == null ? void 0 : _a.call($$props);
@@ -4029,13 +4029,13 @@ function Counter($$anchor, $$props) {
   var div = root$L();
   div.__keydown = [handleKeydown, increment2, decrement2];
   var button = child(div);
-  button.__click = [on_click$c, decrement2, $$props];
+  button.__click = [on_click$d, decrement2, $$props];
   var div_1 = sibling(button, 2);
   div_1.__input = handleDivInput;
   var text2 = child(div_1);
   bind_this(div_1, ($$value) => editableDiv = $$value, () => editableDiv);
   var button_1 = sibling(div_1, 2);
-  button_1.__click = [on_click_1$7, increment2, $$props];
+  button_1.__click = [on_click_1$8, increment2, $$props];
   template_effect(() => {
     set_attribute(div, "aria-valuemin", min());
     set_attribute(div, "aria-valuemax", max());
@@ -4154,7 +4154,7 @@ function swallowDirectional(e) {
     e.stopPropagation();
   }
 }
-var on_click$b = (__1, modifiersArray) => {
+var on_click$c = (__1, modifiersArray) => {
   set(modifiersArray, proxy([
     ...get$1(modifiersArray),
     { name: "Modifier", value: 0 }
@@ -4483,7 +4483,7 @@ function RollComposerComponent($$anchor, $$props) {
   });
   var div_3 = sibling(div_2, 2);
   var button = sibling(child(div_3), 2);
-  button.__click = [on_click$b, modifiersArray];
+  button.__click = [on_click$c, modifiersArray];
   var h4_1 = sibling(button, 2);
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
@@ -4597,10 +4597,10 @@ function RollComposerComponent($$anchor, $$props) {
 delegate(["keydown", "click"]);
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var root_2$j = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
-var on_keydown_1$3 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
+var on_keydown_1$4 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_3$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
-var on_keydown_2$2 = (e, Roll2) => {
+var on_keydown_2$3 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
 var root_4$e = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
@@ -4743,7 +4743,7 @@ function AttributeCard($$anchor, $$props) {
         var consequent_1 = ($$anchor3) => {
           var i_2 = root_3$e();
           i_2.__click = increment2;
-          i_2.__keydown = [on_keydown_1$3, increment2];
+          i_2.__keydown = [on_keydown_1$4, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
           append($$anchor3, i_2);
         };
@@ -4765,7 +4765,7 @@ function AttributeCard($$anchor, $$props) {
     var alternate = ($$anchor2) => {
       var div_2 = root_4$e();
       div_2.__click = Roll2;
-      div_2.__keydown = [on_keydown_2$2, Roll2];
+      div_2.__keydown = [on_keydown_2$3, Roll2];
       var h4_1 = child(div_2);
       var text_2 = child(h4_1);
       var div_3 = sibling(h4_1, 4);
@@ -7105,7 +7105,7 @@ async function deleteThis$2(__1, $$props, $isCharacterCreationStore, isCharacter
     $$props.app.close();
   }
 }
-var on_click$a = async (__2, $$props) => openFilePicker($$props.actor);
+var on_click$b = async (__2, $$props) => openFilePicker($$props.actor);
 var root$E = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function ActiveSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -7191,7 +7191,7 @@ function ActiveSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$a, $$props];
+  img.__click = [on_click$b, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7349,7 +7349,7 @@ async function deleteThis$1(__1, $$props, $isCharacterCreationStore, isCharacter
     $$props.app.close();
   }
 }
-var on_click$9 = async (__2, $$props) => openFilePicker($$props.actor);
+var on_click$a = async (__2, $$props) => openFilePicker($$props.actor);
 var root$D = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Toggle card span"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function KnowledgeSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -7435,7 +7435,7 @@ function KnowledgeSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$9, $$props];
+  img.__click = [on_click$a, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7643,7 +7643,7 @@ async function deleteThis(__3, $$props, $isCharacterCreationStore, isCharacterCr
     $$props.app.close();
   }
 }
-var on_click$8 = async (__4, $$props) => openFilePicker($$props.actor);
+var on_click$9 = async (__4, $$props) => openFilePicker($$props.actor);
 var root$C = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="image-mask"><img role="presentation" data-edit="img"></div> <div class="stat-grid single-column"><div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <h1> </h1></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="skill-specialization-card"><div class="specialization-background"></div> <h6> </h6> <h1 class="embedded-value"> </h1></div></div> <div class="stat-card"><div class="stat-card-background"></div> <div class="buttons-vertical-distribution"><button class="header-control icon sr3e-toolbar-button" aria-label="Increase"><i class="fa-solid fa-plus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Decrease"><i class="fa-solid fa-minus"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Delete"><i class="fa-solid fa-trash-can"></i></button> <button class="header-control icon sr3e-toolbar-button" aria-label="Add Spec"> </button></div></div></div></div></div></div> <div class="item-sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><h1 class="uppercase"> </h1> <div class="stat-grid single-column"></div></div></div></div></div></div>`);
 function LanguageSkillEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -7707,7 +7707,7 @@ function LanguageSkillEditorApp($$anchor, $$props) {
   var div_4 = sibling(child(div_3), 2);
   var div_5 = child(div_4);
   var img = child(div_5);
-  img.__click = [on_click$8, $$props];
+  img.__click = [on_click$9, $$props];
   var div_6 = sibling(div_5, 2);
   var div_7 = child(div_6);
   var h1 = sibling(child(div_7), 2);
@@ -7922,12 +7922,12 @@ var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$f = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$l = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
-var on_click$7 = (e, Roll2, skill) => Roll2(e, skill().id);
-var on_keydown_1$2 = (e, Roll2, skill) => {
+var on_click$8 = (e, Roll2, skill) => Roll2(e, skill().id);
+var on_keydown_1$3 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
-var on_click_1$6 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
-var on_keydown_2$1 = (e, Roll2, skill, specialization) => {
+var on_click_1$7 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
+var on_keydown_2$2 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
 var root_6$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
@@ -7951,14 +7951,14 @@ function ActiveSkillCard($$anchor, $$props) {
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
   }
-  async function Roll2(e, skillId, specializationName2 = null) {
+  async function Roll2(e, skillId, specializationName = null) {
     var _a, _b;
     if (e.shiftKey) {
       if (get$1(isModalOpen)) return;
       set(isModalOpen, true);
-      const rollType = specializationName2 ? "specialization" : "skill";
-      const rollName = specializationName2 || skill().name;
-      const dice = specializationName2 ? (_a = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _a.value : $valueStore();
+      const rollType = specializationName ? "specialization" : "skill";
+      const rollName = specializationName || skill().name;
+      const dice = specializationName ? (_a = $specializationsStore().find((s) => s.name === specializationName)) == null ? void 0 : _a.value : $valueStore();
       const options = await new Promise((resolve) => {
         activeModal = mount(RollComposerComponent, {
           target: document.querySelector(".composer-position"),
@@ -7981,15 +7981,15 @@ function ActiveSkillCard($$anchor, $$props) {
         });
       });
       if (options) {
-        if (specializationName2) {
-          await actor().SpecializationRoll(options.dice, specializationName2.name, options.options);
+        if (specializationName) {
+          await actor().SpecializationRoll(options.dice, specializationName.name, options.options);
         } else {
           await actor().SkillRoll(options.dice, skill().name, options.options);
         }
       }
     } else {
-      if (specializationName2) {
-        const specValue = (_b = $specializationsStore().find((s) => s.name === specializationName2)) == null ? void 0 : _b.value;
+      if (specializationName) {
+        const specValue = (_b = $specializationsStore().find((s) => s.name === specializationName)) == null ? void 0 : _b.value;
         await actor().SpecializationRoll(specValue, skill().name);
       } else {
         await actor().SkillRoll($valueStore(), skill().name);
@@ -8054,8 +8054,8 @@ function ActiveSkillCard($$anchor, $$props) {
       var h6_1 = sibling(child(div_6), 2);
       var text_4 = child(h6_1);
       var div_7 = sibling(h6_1, 2);
-      div_7.__click = [on_click$7, Roll2, skill];
-      div_7.__keydown = [on_keydown_1$2, Roll2, skill];
+      div_7.__click = [on_click$8, Roll2, skill];
+      div_7.__keydown = [on_keydown_1$3, Roll2, skill];
       var h1_2 = child(div_7);
       var text_5 = child(h1_2);
       var node_2 = sibling(div_7, 2);
@@ -8064,8 +8064,8 @@ function ActiveSkillCard($$anchor, $$props) {
           var div_8 = root_5$8();
           each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
             var div_9 = root_6$4();
-            div_9.__click = [on_click_1$6, Roll2, skill, specialization];
-            div_9.__keydown = [on_keydown_2$1, Roll2, skill, specialization];
+            div_9.__click = [on_click_1$7, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2$2, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
             var text_6 = child(div_10);
             var h1_3 = sibling(div_10, 2);
@@ -8103,12 +8103,12 @@ var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$c = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$e = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$k = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
-var on_click$6 = (e, skill) => Roll(e, skill().id);
-var on_keydown_1$1 = (e, skill) => {
+var on_click$7 = (e, skill) => Roll(e, skill().id);
+var on_keydown_1$2 = (e, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll(e, skill().id);
 };
-var on_click_1$5 = (e, skill, specialization) => Roll(e, skill().id, get$1(specialization).name);
-var on_keydown_2 = (e, skill, specialization) => {
+var on_click_1$6 = (e, skill, specialization) => Roll(e, skill().id, get$1(specialization).name);
+var on_keydown_2$1 = (e, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll(e, skill().id, get$1(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
@@ -8187,8 +8187,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
       var h6_1 = sibling(child(div_6), 2);
       var text_4 = child(h6_1);
       var div_7 = sibling(h6_1, 2);
-      div_7.__click = [on_click$6, skill];
-      div_7.__keydown = [on_keydown_1$1, skill];
+      div_7.__click = [on_click$7, skill];
+      div_7.__keydown = [on_keydown_1$2, skill];
       var h1_2 = child(div_7);
       var text_5 = child(h1_2);
       var node_2 = sibling(div_7, 2);
@@ -8197,8 +8197,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
           var div_8 = root_5$7();
           each(div_8, 5, $specializations, index, ($$anchor4, specialization) => {
             var div_9 = root_6$3();
-            div_9.__click = [on_click_1$5, skill, specialization];
-            div_9.__keydown = [on_keydown_2, skill, specialization];
+            div_9.__click = [on_click_1$6, skill, specialization];
+            div_9.__keydown = [on_keydown_2$1, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
             var text_6 = child(div_10);
             var h1_3 = sibling(div_10, 2);
@@ -8234,10 +8234,16 @@ function KnowledgeSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var root_2$d = /* @__PURE__ */ template(`<div class="specialization-container"><div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name">Read/Write</div> <h1 class="embedded-value"> </h1></div></div>`);
-var root_4$a = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var on_click$6 = (e, Roll2, skill, $valueStore, valueStore) => Roll2(e, skill().id, "skill", skill().name, $valueStore());
+var on_keydown_1$1 = (e, Roll2, skill, $valueStore, valueStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "skill", skill().name, $valueStore());
+var on_click_1$5 = (e, Roll2, skill, $readWriteStore, readWriteStore) => Roll2(e, skill().id, "readwrite", "Read/Write", $readWriteStore());
+var on_keydown_2 = (e, Roll2, skill, $readWriteStore, readWriteStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "readwrite", "Read/Write", $readWriteStore());
+var root_2$d = /* @__PURE__ */ template(`<div class="specialization-container"><div class="skill-specialization-card button" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name">Read/Write</div> <h1 class="embedded-value"> </h1></div></div>`);
+var on_click_2$3 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
+var on_keydown_3 = (e, Roll2, skill, specialization) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
+var root_4$a = /* @__PURE__ */ template(`<div class="skill-specialization-card button" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_3$b = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
-var root$z = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!> <!></div></div>`);
+var root$z = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!> <!></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -8252,8 +8258,51 @@ function LanguageSkillCard($$anchor, $$props) {
   let readWriteStore = skillStoreManager.GetRWStore("languageSkill.readwrite.value");
   let specializationsStore = skillStoreManager.GetRWStore("languageSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+  let isModalOpen = state(false);
+  let activeModal = null;
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
+  }
+  async function Roll2(e, skillId, rollType, rollName, diceValue) {
+    if (e.shiftKey) {
+      if (get$1(isModalOpen)) return;
+      set(isModalOpen, true);
+      const options = await new Promise((resolve) => {
+        activeModal = mount(RollComposerComponent, {
+          target: document.querySelector(".composer-position"),
+          props: {
+            actor: actor(),
+            config: config(),
+            caller: {
+              key: rollName,
+              type: rollType,
+              dice: diceValue,
+              skillId
+            },
+            onclose: (result) => {
+              unmount(activeModal);
+              set(isModalOpen, false);
+              activeModal = null;
+              resolve(result);
+            }
+          }
+        });
+      });
+      if (options) {
+        if (rollType === "specialization") {
+          await actor().SpecializationRoll(options.dice, rollName, options.options);
+        } else {
+          await actor().SkillRoll(options.dice, rollName, options.options);
+        }
+      }
+    } else {
+      if (rollType === "specialization") {
+        await actor().SpecializationRoll(diceValue, rollName);
+      } else {
+        await actor().SkillRoll(diceValue, rollName);
+      }
+    }
+    e.preventDefault();
   }
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
@@ -8279,6 +8328,20 @@ function LanguageSkillCard($$anchor, $$props) {
   var h6 = sibling(child(div_1), 2);
   var text2 = child(h6);
   var div_2 = sibling(h6, 2);
+  div_2.__click = [
+    on_click$6,
+    Roll2,
+    skill,
+    $valueStore,
+    valueStore
+  ];
+  div_2.__keydown = [
+    on_keydown_1$1,
+    Roll2,
+    skill,
+    $valueStore,
+    valueStore
+  ];
   var h1 = child(div_2);
   var text_1 = child(h1);
   var node_1 = sibling(div_2, 2);
@@ -8286,6 +8349,20 @@ function LanguageSkillCard($$anchor, $$props) {
     var consequent_1 = ($$anchor2) => {
       var div_3 = root_2$d();
       var div_4 = child(div_3);
+      div_4.__click = [
+        on_click_1$5,
+        Roll2,
+        skill,
+        $readWriteStore,
+        readWriteStore
+      ];
+      div_4.__keydown = [
+        on_keydown_2,
+        Roll2,
+        skill,
+        $readWriteStore,
+        readWriteStore
+      ];
       var h1_1 = sibling(child(div_4), 4);
       var text_2 = child(h1_1);
       template_effect(() => set_text(text_2, $readWriteStore()));
@@ -8301,6 +8378,8 @@ function LanguageSkillCard($$anchor, $$props) {
       var div_5 = root_3$b();
       each(div_5, 5, $specializationsStore, index, ($$anchor3, specialization) => {
         var div_6 = root_4$a();
+        div_6.__click = [on_click_2$3, Roll2, skill, specialization];
+        div_6.__keydown = [on_keydown_3, Roll2, skill, specialization];
         var div_7 = sibling(child(div_6), 2);
         var text_3 = child(div_7);
         var h1_2 = sibling(div_7, 2);
@@ -14518,7 +14597,7 @@ class SR3EActor extends Actor {
   async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.SkillRoll(this, skillName, dice, options);
   }
-  async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+  async SpecializationRoll(dice, specializationName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
     await RollService.SpecializationRoll(this, specializationName, dice, options);
   }
   async canAcceptmetatype(incomingItem) {

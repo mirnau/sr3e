@@ -50,7 +50,7 @@ export default class SR3EActor extends Actor {
       await RollService.SkillRoll(this, skillName, dice, options);
    }
 
-   async SpecializationRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+   async SpecializationRoll(dice, specializationName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
       await RollService.SpecializationRoll(this, specializationName, dice, options);
    }
 
