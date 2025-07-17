@@ -78,7 +78,20 @@
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
    });
+   function handleEscape(e) {
+   if (e.key === "Escape" && activeModal) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      isModalOpen = false;
+      activeModal = null;
+   }
+}
+
 </script>
+<svelte:window on:keydown|capture={handleEscape} />
+
 
 <div class="skill-card-container">
    {#if $isShoppingState}

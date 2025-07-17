@@ -8010,7 +8010,18 @@ function ActiveSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
+  function handleEscape(e) {
+    if (e.key === "Escape" && activeModal) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      set(isModalOpen, false);
+      activeModal = null;
+    }
+  }
   var div = root$B();
+  event$1("keydown", $window, handleEscape, true);
   var node = child(div);
   {
     var consequent_1 = ($$anchor2) => {
@@ -8190,7 +8201,18 @@ function KnowledgeSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
+  function handleEscape(e) {
+    if (e.key === "Escape" && activeModal) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      set(isModalOpen, false);
+      activeModal = null;
+    }
+  }
   var div = root$A();
+  event$1("keydown", $window, handleEscape, true);
   var node = child(div);
   {
     var consequent_1 = ($$anchor2) => {
@@ -8364,7 +8386,18 @@ function LanguageSkillCard($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
   });
+  function handleEscape(e) {
+    if (e.key === "Escape" && activeModal) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      set(isModalOpen, false);
+      activeModal = null;
+    }
+  }
   var div = root$z();
+  event$1("keydown", $window, handleEscape, true);
   var node = child(div);
   {
     var consequent = ($$anchor2) => {

@@ -73,7 +73,20 @@
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
    });
+   
+   function handleEscape(e) {
+      if (e.key === "Escape" && activeModal) {
+         e.preventDefault();
+         e.stopImmediatePropagation();
+         e.stopPropagation();
+         unmount(activeModal);
+         isModalOpen = false;
+         activeModal = null;
+      }
+   }
 </script>
+
+<svelte:window on:keydown|capture={handleEscape} />
 
 <div class="skill-card-container">
    {#if $isShoppingState}
@@ -97,7 +110,8 @@
          role="button"
          tabindex="0"
          onclick={(e) => Roll(e, skill.id, "language", skill.name, $valueStore)}
-         onkeydown={(e) => (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "language", skill.name, $valueStore)}
+         onkeydown={(e) =>
+            (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "language", skill.name, $valueStore)}
       >
          <h1 class="skill-value">{$valueStore}</h1>
       </div>
