@@ -3789,7 +3789,7 @@ function TextInput($$anchor, $$props) {
 }
 delegate(["input", "keydown"]);
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$d = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$e = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$M = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -3893,7 +3893,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$d();
+      var fragment_3 = root_3$e();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -4161,8 +4161,8 @@ var on_click$a = (__1, modifiersArray) => {
   ]));
 };
 var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
-var root_3$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
-var root_4$c = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
+var root_3$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_4$d = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$t = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
   push($$props, true);
@@ -4510,7 +4510,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_3$c();
+      var div_5 = root_3$d();
       var h1_1 = child(div_5);
       var text_4 = child(h1_1);
       var h4_3 = sibling(h1_1, 2);
@@ -4549,7 +4549,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_5 = sibling(node_3, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_6 = root_4$c();
+      var div_6 = root_4$d();
       var h4_4 = sibling(child(div_6), 2);
       var text_6 = child(h4_4);
       var node_6 = sibling(h4_4, 2);
@@ -4596,18 +4596,20 @@ function RollComposerComponent($$anchor, $$props) {
 }
 delegate(["keydown", "click"]);
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
+var root_2$j = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$2 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><i role="button" tabindex="0"></i> <h1 class="stat-value"> </h1> <i role="button" tabindex="0"></i></div></div>`);
+var root_3$c = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 var on_keydown_2$1 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
-var root_2$j = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
+var root_4$c = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
 function AttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $valueROStore = () => store_get(valueROStore, "$valueROStore", $$stores);
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
+  const $valueROStore = () => store_get(valueROStore, "$valueROStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   const $valueRWStore = () => store_get(get$1(valueRWStore), "$valueRWStore", $$stores);
   const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
@@ -4617,7 +4619,22 @@ function AttributeCard($$anchor, $$props) {
   let attributePointStore = storeManager2.GetRWStore("creation.attributePoints");
   let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
-  let isMinLimit = /* @__PURE__ */ derived$1(() => $valueROStore().value <= 1);
+  let metatype = /* @__PURE__ */ derived$1(() => $$props.actor.items.find((i) => i.type === "metatype") || []);
+  let attributeLimit = /* @__PURE__ */ derived$1(() => $$props.key === "magic" ? null : get$1(metatype).system.attributeLimits[$$props.key] ?? 0);
+  let committedValue = null;
+  user_effect(() => {
+    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue === null) {
+      committedValue = $valueROStore().value;
+    }
+  });
+  let isMinLimit = state(false);
+  user_effect(() => {
+    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue !== null) {
+      set(isMinLimit, $valueROStore().value <= committedValue);
+    } else {
+      set(isMinLimit, $valueROStore().value <= 1);
+    }
+  });
   storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
   let valueRWStore = /* @__PURE__ */ derived$1(() => $isShoppingState() && !$attributeAssignmentLockedStore() ? baseValueStore : null);
   user_effect(() => {
@@ -4635,9 +4652,10 @@ function AttributeCard($$anchor, $$props) {
   function add(change) {
     if (!$attributeAssignmentLockedStore() && $isShoppingState() && get$1(valueRWStore)) {
       const newPoints = $attributePointStore() - change;
-      if (newPoints >= 0) {
+      const newValue = $valueRWStore() + change;
+      if (newPoints >= 0 && (get$1(attributeLimit) === null || newValue <= get$1(attributeLimit))) {
         store_set(attributePointStore, newPoints);
-        store_set(get$1(valueRWStore), $valueRWStore() + change);
+        store_set(get$1(valueRWStore), newValue);
       }
     }
   }
@@ -4700,25 +4718,43 @@ function AttributeCard($$anchor, $$props) {
   event$1("keydown", $window, handleEscape, true);
   var node = first_child(fragment);
   {
-    var consequent = ($$anchor2) => {
+    var consequent_2 = ($$anchor2) => {
       var div = root_1$s();
       var h4 = child(div);
       var text2 = child(h4);
       var div_1 = sibling(h4, 4);
-      var i_1 = child(div_1);
-      i_1.__click = decrement2;
-      i_1.__keydown = [on_keydown$7, decrement2];
-      var h1 = sibling(i_1, 2);
+      var node_1 = child(div_1);
+      {
+        var consequent = ($$anchor3) => {
+          var i_1 = root_2$j();
+          i_1.__click = decrement2;
+          i_1.__keydown = [on_keydown$7, decrement2];
+          template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_1);
+        };
+        if_block(node_1, ($$render) => {
+          if ($$props.key !== "reaction") $$render(consequent);
+        });
+      }
+      var h1 = sibling(node_1, 2);
       var text_1 = child(h1);
-      var i_2 = sibling(h1, 2);
-      i_2.__click = increment2;
-      i_2.__keydown = [on_keydown_1$2, increment2];
+      var node_2 = sibling(h1, 2);
+      {
+        var consequent_1 = ($$anchor3) => {
+          var i_2 = root_3$c();
+          i_2.__click = increment2;
+          i_2.__keydown = [on_keydown_1$2, increment2];
+          template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
+          append($$anchor3, i_2);
+        };
+        if_block(node_2, ($$render) => {
+          if ($$props.key !== "reaction") $$render(consequent_1);
+        });
+      }
       template_effect(
         ($0) => {
           set_text(text2, $0);
-          set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`);
           set_text(text_1, $valueROStore().sum);
-          set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`);
         },
         [
           () => localize($$props.localization[$$props.key])
@@ -4727,7 +4763,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate = ($$anchor2) => {
-      var div_2 = root_2$j();
+      var div_2 = root_4$c();
       div_2.__click = Roll2;
       div_2.__keydown = [on_keydown_2$1, Roll2];
       var h4_1 = child(div_2);
@@ -4747,7 +4783,7 @@ function AttributeCard($$anchor, $$props) {
       append($$anchor2, div_2);
     };
     if_block(node, ($$render) => {
-      if ($isShoppingState()) $$render(consequent);
+      if ($isShoppingState()) $$render(consequent_2);
       else $$render(alternate, false);
     });
   }
@@ -11090,10 +11126,7 @@ function ShoppingCart($$anchor, $$props) {
   });
   var div = root$j();
   var button = child(div);
-  button.__click = function(...$$args) {
-    var _a;
-    (_a = store_set(isShoppingState, !$isShoppingState())) == null ? void 0 : _a.apply(this, $$args);
-  };
+  button.__click = () => isShoppingState.update((v) => !v);
   template_effect(
     ($0) => {
       set_attribute(button, "aria-label", $0);

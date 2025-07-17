@@ -20,6 +20,6 @@
       type="button"
       aria-label={localize(config.sheet.buyupgrades)}
       class={`header-control icon fa-solid fa-cart-shopping ${$isShoppingState ? "pulsing-green-cart" : ""}`}
-      onclick={($isShoppingState = !$isShoppingState)}
+      onclick={() => isShoppingState.update(v => !v)}
    ></button>
 </div>

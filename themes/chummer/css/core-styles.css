@@ -2940,6 +2940,11 @@
   * {
     border: none;
   }
+  .form,
+  .app.window-content {
+    background-image: none;
+    background: red;
+  }
   .application {
     background: none;
     box-shadow: none;
@@ -3344,5 +3349,10 @@
   section.body.flexcol.scrollable {
     overflow-y: auto;
     max-height: 20rem;
+  }
+  .tokenizer > * {
+    background-image: none;
+    background-color: #262626;
+    color: var(--h1-color);
   }
 }

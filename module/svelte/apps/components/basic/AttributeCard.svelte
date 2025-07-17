@@ -19,7 +19,24 @@
 
    let metatype = $derived(actor.items.find((i) => i.type === "metatype") || []);
    let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
-   let isMinLimit = $derived($valueROStore.value <= 1);
+
+   let committedValue = null;
+
+   $effect(() => {
+      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue === null) {
+         committedValue = $valueROStore.value;
+      }
+   });
+
+   let isMinLimit = $state(false);
+
+   $effect(() => {
+      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue !== null) {
+         isMinLimit = $valueROStore.value <= committedValue;
+      } else {
+         isMinLimit = $valueROStore.value <= 1;
+      }
+   });
 
    let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
 
@@ -48,9 +65,11 @@
    function add(change) {
       if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
          const newPoints = $attributePointStore - change;
-         if (newPoints >= 0) {
+         const newValue = $valueRWStore + change;
+
+         if (newPoints >= 0 && (attributeLimit === null || newValue <= attributeLimit)) {
             $attributePointStore = newPoints;
-            $valueRWStore += change;
+            $valueRWStore = newValue;
          }
       }
    }
@@ -121,23 +140,26 @@
       <div class="stat-card-background"></div>
 
       <div class="stat-label">
-         <i
-            class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-            role="button"
-            tabindex="0"
-            onclick={decrement}
-            onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-         ></i>
+         {#if key !== "reaction"}
+            <i
+               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+               role="button"
+               tabindex="0"
+               onclick={decrement}
+               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+            ></i>
+         {/if}
 
          <h1 class="stat-value">{$valueROStore.sum}</h1>
-
-         <i
-            class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
-            role="button"
-            tabindex="0"
-            onclick={increment}
-            onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-         ></i>
+         {#if key !== "reaction"}
+            <i
+               class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
+               role="button"
+               tabindex="0"
+               onclick={increment}
+               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+            ></i>
+         {/if}
       </div>
    </div>
 {:else}
