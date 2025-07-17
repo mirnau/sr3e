@@ -190,7 +190,7 @@
    <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
       <!-- Name and Priority -->
       <ItemSheetComponent>
-         <Image src={item.img} title={item.name} />
+         <Image entity={item} />
          <input
             class="large"
             name="name"

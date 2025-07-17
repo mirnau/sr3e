@@ -12278,11 +12278,8 @@ function MetatypeApp($$anchor, $$props) {
       var fragment = root_1$a();
       var node_1 = first_child(fragment);
       Image(node_1, {
-        get src() {
-          return item2().img;
-        },
-        get title() {
-          return item2().name;
+        get entity() {
+          return item2();
         }
       });
       var input = sibling(node_1, 2);
