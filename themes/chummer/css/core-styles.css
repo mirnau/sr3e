@@ -1438,6 +1438,56 @@
     height: auto;
     max-height: none;
   }
+  table.slim {
+    table-layout: fixed;
+    width: 100%;
+  }
+  table.slim td,
+  table.slim th {
+    min-width: 0;
+    max-width: none;
+    width: auto;
+    padding: 0.25rem;
+  }
+  table.slim .cell-content,
+  table.slim .cell-content > *,
+  table.slim input[type="text"],
+  table.slim input[type="number"],
+  table.slim select,
+  table.slim button {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  table.slim tbody > tr > td:first-child,
+  table.slim thead > tr > th:first-child {
+    width: 2rem;
+    min-width: 2rem;
+    max-width: 2rem;
+    overflow: hidden;
+  }
+  table.slim tbody > tr > td:not(:first-child):not(:last-child),
+  table.slim thead > tr > th:not(:first-child):not(:last-child) {
+    width: 3rem;
+    min-width: 0;
+    max-width: 3rem;
+    padding: 0 0.25rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  table.slim tbody > tr > td:not(:first-child):not(:last-child) .cell-content,
+  table.slim tbody > tr > td:not(:first-child):not(:last-child) .cell-content > *,
+  table.slim tbody > tr > td:not(:first-child):not(:last-child) input,
+  table.slim tbody > tr > td:not(:first-child):not(:last-child) select,
+  table.slim tbody > tr > td:not(:first-child):not(:last-child) button {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
   table tr,
   table thead tr,
   table tbody tr {

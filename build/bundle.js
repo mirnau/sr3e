@@ -9761,9 +9761,10 @@ async function addEffect(e, $$props, onHandleEffectTriggerUI) {
   );
   await onHandleEffectTriggerUI();
 }
-var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table class="shrink"><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
 function ActiveEffectsViewer($$anchor, $$props) {
   push($$props, true);
+  let isSlim = prop($$props, "isSlim", 3, false);
   let actorAttachedEffects = state(proxy($$props.document.effects.contents));
   let transferredEffects = state(proxy([]));
   user_effect(() => {
@@ -9838,6 +9839,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   }
   template_effect(
     ($0, $1, $2, $3) => {
+      toggle_class(table, "slim", isSlim());
       set_text(text2, $0);
       set_text(text_1, $1);
       set_text(text_2, $2);
@@ -12394,7 +12396,8 @@ function MetatypeApp($$anchor, $$props) {
         },
         get config() {
           return config();
-        }
+        },
+        isSlim: true
       });
     }
   });

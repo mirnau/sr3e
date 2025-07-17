@@ -13,6 +13,64 @@ table {
    height: auto;
    max-height: none;
 
+   &.slim {
+      table-layout: fixed;
+      width: 100%;
+
+      td,
+      th {
+         min-width: 0;
+         max-width: none;
+         width: auto;
+         padding: 0.25rem;
+      }
+
+      .cell-content,
+      .cell-content > *,
+      input[type="text"],
+      input[type="number"],
+      select,
+      button {
+         min-width: 0;
+         max-width: 100%;
+         overflow: hidden;
+         text-overflow: ellipsis;
+      }
+
+      tbody > tr > td:first-child,
+      thead > tr > th:first-child {
+         width: 2rem;
+         min-width: 2rem;
+         max-width: 2rem;
+         overflow: hidden;
+      }
+
+      tbody > tr > td:not(:first-child):not(:last-child),
+      thead > tr > th:not(:first-child):not(:last-child) {
+         width: 3rem;
+         min-width: 0;
+         max-width: 3rem;
+         padding: 0 0.25rem;
+         overflow: hidden;
+         white-space: nowrap;
+         text-overflow: ellipsis;
+      }
+
+      tbody > tr > td:not(:first-child):not(:last-child) {
+         .cell-content,
+         .cell-content > *,
+         input,
+         select,
+         button {
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+         }
+      }
+   }
+
    tr,
    thead tr,
    tbody tr {

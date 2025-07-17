@@ -3,7 +3,7 @@
    import { localize } from "../../../../services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
 
-   let { document, config } = $props();
+   let { document, config, isSlim = false } = $props();
 
    let actorAttachedEffects = $state(document.effects.contents);
    let transferredEffects = $state([]);
@@ -13,7 +13,9 @@
 
       transferredEffects =
          document instanceof Actor
-            ? document.items.contents.flatMap((item) => item.effects.contents.map((activeEffect) => ({ activeEffect, item })))
+            ? document.items.contents.flatMap((item) =>
+                 item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
+              )
             : [];
    });
 
@@ -56,8 +58,6 @@
       actorAttachedEffects = [...document.effects.contents];
       transferredEffects = [...transferredEffects];
    }
-
-
 </script>
 
 <div class="effects-viewer">
@@ -65,7 +65,7 @@
       <button class="fas fa-plus" type="button" onclick={addEffect}></button>
    </div>
 
-   <table class="shrink">
+   <table class:slim={isSlim}>
       <thead>
          <tr>
             <th><div class="cell-content"></div></th>
