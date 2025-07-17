@@ -8103,13 +8103,13 @@ var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_3$c = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$e = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$k = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
-var on_click$7 = (e, skill) => Roll(e, skill().id);
-var on_keydown_1$2 = (e, skill) => {
-  if (e.key === "Enter" || e.key === " ") Roll(e, skill().id);
+var on_click$7 = (e, Roll2, skill) => Roll2(e, skill().id);
+var on_keydown_1$2 = (e, Roll2, skill) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
-var on_click_1$6 = (e, skill, specialization) => Roll(e, skill().id, get$1(specialization).name);
-var on_keydown_2$1 = (e, skill, specialization) => {
-  if (e.key === "Enter" || e.key === " ") Roll(e, skill().id, get$1(specialization).name);
+var on_click_1$6 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
+var on_keydown_2$1 = (e, Roll2, skill, specialization) => {
+  if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$7 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
@@ -8118,17 +8118,65 @@ var root$A = /* @__PURE__ */ template(`<div class="skill-card-container"><!></di
 function KnowledgeSkillCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
-  const $value = () => store_get(value, "$value", $$stores);
   const $specializations = () => store_get(specializations, "$specializations", $$stores);
+  const $value = () => store_get(value, "$value", $$stores);
+  const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   let skill = prop($$props, "skill", 19, () => ({})), actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
   let skillStoreManager = StoreManager.Subscribe(skill());
   let actorStoreManager = StoreManager.Subscribe(actor());
   let value = skillStoreManager.GetRWStore("knowledgeSkill.value");
   let specializations = skillStoreManager.GetRWStore("knowledgeSkill.specializations");
   let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+  let isModalOpen = state(false);
+  let activeModal = null;
   function openSkill() {
     ActiveSkillEditorSheet.launch(actor(), skill(), config());
+  }
+  async function Roll2(e, skillId, specializationName = null) {
+    var _a, _b;
+    if (e.shiftKey) {
+      if (get$1(isModalOpen)) return;
+      set(isModalOpen, true);
+      const rollType = specializationName ? "specialization" : "skill";
+      const rollName = specializationName || skill().name;
+      const dice = specializationName ? (_a = $specializations().find((s) => s.name === specializationName)) == null ? void 0 : _a.value : $value();
+      const options = await new Promise((resolve) => {
+        activeModal = mount(RollComposerComponent, {
+          target: document.querySelector(".composer-position"),
+          props: {
+            actor: actor(),
+            config: config(),
+            caller: {
+              key: rollName,
+              type: rollType,
+              dice,
+              skillId
+            },
+            onclose: (result) => {
+              unmount(activeModal);
+              set(isModalOpen, false);
+              activeModal = null;
+              resolve(result);
+            }
+          }
+        });
+      });
+      if (options) {
+        if (specializationName) {
+          await actor().SpecializationRoll(options.dice, specializationName.name, options.options);
+        } else {
+          await actor().SkillRoll(options.dice, skill().name, options.options);
+        }
+      }
+    } else {
+      if (specializationName) {
+        const specValue = (_b = $specializations().find((s) => s.name === specializationName)) == null ? void 0 : _b.value;
+        await actor().SpecializationRoll(specValue, skill().name);
+      } else {
+        await actor().SkillRoll($value(), skill().name);
+      }
+    }
+    e.preventDefault();
   }
   onDestroy(() => {
     StoreManager.Unsubscribe(skill());
@@ -8187,8 +8235,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
       var h6_1 = sibling(child(div_6), 2);
       var text_4 = child(h6_1);
       var div_7 = sibling(h6_1, 2);
-      div_7.__click = [on_click$7, skill];
-      div_7.__keydown = [on_keydown_1$2, skill];
+      div_7.__click = [on_click$7, Roll2, skill];
+      div_7.__keydown = [on_keydown_1$2, Roll2, skill];
       var h1_2 = child(div_7);
       var text_5 = child(h1_2);
       var node_2 = sibling(div_7, 2);
@@ -8197,8 +8245,8 @@ function KnowledgeSkillCard($$anchor, $$props) {
           var div_8 = root_5$7();
           each(div_8, 5, $specializations, index, ($$anchor4, specialization) => {
             var div_9 = root_6$3();
-            div_9.__click = [on_click_1$6, skill, specialization];
-            div_9.__keydown = [on_keydown_2$1, skill, specialization];
+            div_9.__click = [on_click_1$6, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2$1, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
             var text_6 = child(div_10);
             var h1_3 = sibling(div_10, 2);

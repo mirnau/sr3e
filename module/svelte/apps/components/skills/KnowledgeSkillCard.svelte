@@ -3,6 +3,8 @@
    import { flags } from "../../../../services/commonConsts.js";
    import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import RollComposerComponent from "../../components/RollComposerComponent.svelte";
+   import { mount, unmount } from "svelte";
    import { onDestroy } from "svelte";
 
    let { skill = {}, actor = {}, config = {} } = $props();
@@ -15,8 +17,61 @@
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
 
+   let isModalOpen = $state(false);
+   let activeModal = null;
+
    function openSkill() {
       ActiveSkillEditorSheet.launch(actor, skill, config);
+   }
+
+   async function Roll(e, skillId, specializationName = null) {
+      if (e.shiftKey) {
+         if (isModalOpen) return;
+         isModalOpen = true;
+
+         const rollType = specializationName ? "specialization" : "skill";
+         const rollName = specializationName || skill.name;
+         const dice = specializationName ? $specializations.find((s) => s.name === specializationName)?.value : $value;
+
+         const options = await new Promise((resolve) => {
+            activeModal = mount(RollComposerComponent, {
+               target: document.querySelector(".composer-position"),
+               props: {
+                  actor,
+                  config,
+                  caller: {
+                     key: rollName,
+                     type: rollType,
+                     dice,
+                     skillId,
+                  },
+                  onclose: (result) => {
+                     unmount(activeModal);
+                     isModalOpen = false;
+                     activeModal = null;
+                     resolve(result);
+                  },
+               },
+            });
+         });
+
+         if (options) {
+            if (specializationName) {
+               await actor.SpecializationRoll(options.dice, specializationName.name, options.options);
+            } else {
+               await actor.SkillRoll(options.dice, skill.name, options.options);
+            }
+         }
+      } else {
+         if (specializationName) {
+            const specValue = $specializations.find((s) => s.name === specializationName)?.value;
+            await actor.SpecializationRoll(specValue, skill.name);
+         } else {
+            await actor.SkillRoll($value, skill.name);
+         }
+      }
+
+      e.preventDefault();
    }
 
    onDestroy(() => {
@@ -96,4 +151,3 @@
       </div>
    {/if}
 </div>
-
