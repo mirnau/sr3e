@@ -34,22 +34,66 @@
          onclick={openSkill}
          onkeydown={(e) => e.key === "Enter" && openSkill()}
       ></i>
-   {/if}
-   <div class="skill-card">
-      <div class="core-skill">
+      <div class="skill-card">
          <div class="skill-background-layer"></div>
-         <h6 class="no-margin skill-name">{skill.name}</h6>
-         <h1 class="skill-value">{$value}</h1>
-      </div>
 
-      <div class="specialization-container">
-         {#each $specializations as specialization}
-            <div class="skill-specialization-card">
-               <div class="specialization-background"></div>
-               <div class="specialization-name">{specialization.name}</div>
-               <h1 class="embedded-value">{specialization.value}</h1>
+         <h6 class="no-margin skill-name">{skill.name}</h6>
+
+         <div class="skill-main-container">
+            <h1 class="skill-value">{$value}</h1>
+         </div>
+
+         {#if $specializations.length > 0}
+            <div class="specialization-container">
+               {#each $specializations as specialization}
+                  <div class="skill-specialization-card">
+                     <div class="specialization-background"></div>
+                     <div class="specialization-name">{specialization.name}</div>
+                     <h1 class="embedded-value">{specialization.value}</h1>
+                  </div>
+               {/each}
             </div>
-         {/each}
+         {/if}
       </div>
-   </div>
+   {:else}
+      <div class="skill-card">
+         <div class="skill-background-layer"></div>
+
+         <h6 class="no-margin skill-name">{skill.name}</h6>
+
+         <div
+            class="skill-main-container button"
+            role="button"
+            tabindex="0"
+            onclick={(e) => Roll(e, skill.id)}
+            onkeydown={(e) => {
+               if (e.key === "Enter" || e.key === " ") Roll(e, skill.id);
+            }}
+         >
+            <h1 class="skill-value">{$value}</h1>
+         </div>
+
+         {#if $specializations.length > 0}
+            <div class="specialization-container">
+               {#each $specializations as specialization}
+                  <div
+                     class="skill-specialization-card"
+                     class:button={!$isShoppingState}
+                     role="button"
+                     tabindex="0"
+                     onclick={(e) => Roll(e, skill.id, specialization.name)}
+                     onkeydown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") Roll(e, skill.id, specialization.name);
+                     }}
+                  >
+                     <div class="specialization-background"></div>
+                     <div class="specialization-name">{specialization.name}</div>
+                     <h1 class="embedded-value">{specialization.value}</h1>
+                  </div>
+               {/each}
+            </div>
+         {/if}
+      </div>
+   {/if}
 </div>
+

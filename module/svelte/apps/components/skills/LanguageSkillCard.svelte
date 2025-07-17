@@ -1,30 +1,25 @@
-<!-- Language Skill Card Component -->
 <script>
    import { localize } from "../../../../services/utilities.js";
    import { flags } from "../../../../services/commonConsts.js";
    import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
-   import { mount, onDestroy } from "svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { onDestroy } from "svelte";
 
    let { skill = {}, actor = {}, config = {} } = $props();
 
    let skillStoreManager = StoreManager.Subscribe(skill);
    let actorStoreManager = StoreManager.Subscribe(actor);
 
-   let languageSkill = $state(skill.system.languageSkill);
-
-   let specializations = skillStoreManager.GetRWStore("skill.system.languageSkill.specializations");
+   let valueStore = skillStoreManager.GetRWStore("languageSkill.value");
+   let readWriteStore = skillStoreManager.GetRWStore("languageSkill.readwrite.value");
+   let specializationsStore = skillStoreManager.GetRWStore("languageSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
-
-   let value = skillStoreManager.GetRWStore("languageSkill.value");
-   let readWriteValue = skillStoreManager.GetRWStore("languageSkill.readwrite.value");
-
-   let skillEditorInstance = null;
 
    function openSkill() {
       ActiveSkillEditorSheet.launch(actor, skill, config);
    }
+
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
    });
@@ -41,30 +36,36 @@
          onkeydown={(e) => e.key === "Enter" && openSkill()}
       ></i>
    {/if}
+
    <div class="skill-card">
-      <div class="core-skill">
-         <div class="skill-background-layer"></div>
-         <h6 class="no-margin skill-name">{skill.name}</h6>
-         <h1 class="skill-value">{$value}</h1>
+      <div class="skill-background-layer"></div>
+
+      <h6 class="no-margin skill-name">{skill.name}</h6>
+
+      <div class="skill-main-container">
+         <h1 class="skill-value">{$valueStore}</h1>
       </div>
 
-      <!-- Read/Write nested skill card -->
-      <div class="skill-card">
-         <div class="core-skill">
-            <div class="skill-background-layer"></div>
-            <h6 class="no-margin skill-name">Read/Write</h6>
-            <h1 class="skill-value">{$readWriteValue}</h1>
-         </div>
-      </div>
-
-      <div class="specialization-container">
-         {#each $specializations as specialization}
+      {#if $readWriteStore > 0}
+         <div class="specialization-container">
             <div class="skill-specialization-card">
                <div class="specialization-background"></div>
-               <div class="specialization-name">{specialization.name}</div>
-               <h1 class="embedded-value">{specialization.value}</h1>
+               <div class="specialization-name">Read/Write</div>
+               <h1 class="embedded-value">{$readWriteStore}</h1>
             </div>
-         {/each}
-      </div>
+         </div>
+      {/if}
+
+      {#if $specializationsStore.length > 0}
+         <div class="specialization-container">
+            {#each $specializationsStore as specialization}
+               <div class="skill-specialization-card">
+                  <div class="specialization-background"></div>
+                  <div class="specialization-name">{specialization.name}</div>
+                  <h1 class="embedded-value">{specialization.value}</h1>
+               </div>
+            {/each}
+         </div>
+      {/if}
    </div>
 </div>
