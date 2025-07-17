@@ -4,15 +4,56 @@
    import ComboSearch from "../basic/ComboSearch.svelte";
    import { flags } from "../../../../services/commonConsts.js";
    import { localize } from "../../../../services/utilities.js";
+   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { onDestroy, onMount } from "svelte";
 
-   let { item, effectsObject, config, updateEffectsState } = $props();
-
-   let name = $state(effectsObject.name);
-   let disabled = $state(effectsObject.disabled);
-   let duration = $state({ ...effectsObject.duration });
-   let sourceType = $state(effectsObject.transfer ? "character" : "item");
-   let changes = $state([...effectsObject.changes]);
+   let { document, activeEffect, config, updateEffectsState } = $props();
+   let disabled = $state(activeEffect.disabled);
+   let duration = $state({ ...activeEffect.duration, value: 0 });
+   let sourceType = $state(activeEffect.transfer ? "character" : "item");
+   let changes = $state([...activeEffect.changes]);
    let propertyOptions = $state([]);
+   let name = $state(activeEffect.name);
+
+   let storeManager = StoreManager.Subscribe(document);
+
+   let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
+   let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
+   let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
+
+   onMount(() => {
+      const storedDuration = $durationStore;
+      const storedName = $nameStore;
+      const storedDisabled = $disabledStore;
+
+      const baseDuration = JSON.stringify(storedDuration) !== JSON.stringify(activeEffect.duration)
+         ? storedDuration : activeEffect.duration;
+
+      duration = {
+         ...baseDuration,
+         value: baseDuration[baseDuration.type] ?? 0
+      };
+
+      if (storedName !== activeEffect.name) name = storedName;
+      if (storedDisabled !== activeEffect.disabled) disabled = storedDisabled;
+
+      $nameStore = name;
+      $disabledStore = disabled;
+      $durationStore = duration;
+   });
+
+   onDestroy(() => {
+      commitChanges();
+      StoreManager.Unsubscribe(document);
+   });
+
+   function setDurationField(field, val) {
+      duration = { ...duration, [field]: field === "value" ? +val : val };
+      $durationStore = duration;
+   }
+
+   $effect(() => { $disabledStore = disabled; });
+   $effect(() => { $nameStore = name; });
 
    const allowedPatterns = ["system.attributes", "system.physical"];
 
@@ -26,26 +67,41 @@
             rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
          }
       } else {
-         rawPaths = Object.keys(foundry.utils.flattenObject({ system: item.toObject().system }));
+         rawPaths = Object.keys(foundry.utils.flattenObject({ system: document.toObject().system }));
       }
 
-      propertyOptions = rawPaths
+      const newOptions = rawPaths
          .filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod"))
          .map((path) => ({ value: path, label: path }));
+
+      if (JSON.stringify(newOptions) !== JSON.stringify(propertyOptions)) {
+         propertyOptions = newOptions;
+      }
    });
 
-   async function commitChanges() {
-      await effectsObject.update(
-         {
-            name,
-            disabled,
-            duration: { ...duration },
-            changes: [...changes],
-         },
-         { render: false }
-      );
+   function extractValue(value) {
+      return value && typeof value === "object" && "value" in value ? value.value : value;
+   }
 
-      updateEffectsState?.();
+   async function commitChanges() {
+      const key = duration.type;
+      const expandedDuration = {
+         type: key,
+         rounds: key === "rounds" ? duration.value : undefined,
+         seconds: key === "seconds" ? duration.value : undefined,
+         turns: key === "turns" ? duration.value : undefined,
+         startTime: duration.startTime,
+         startRound: duration.startRound,
+         startTurn: duration.startTurn,
+         combat: duration.combat
+      };
+
+      await activeEffect.update({
+         name: extractValue(name),
+         disabled,
+         duration: expandedDuration,
+         changes: [...changes],
+      }, { render: false });
    }
 
    function addChange() {
@@ -54,10 +110,8 @@
    }
 
    function updateChange(index, field, value) {
-      if (field === "key" && value && typeof value === "object" && "value" in value) {
-         value = value.value;
-      }
-      const updated = changes.map((c, i) => (i === index ? { ...c, [field]: value } : c));
+      const extractedValue = extractValue(value);
+      const updated = changes.map((c, i) => (i === index ? { ...c, [field]: extractedValue } : c));
       changes = updated;
       commitChanges();
    }
@@ -73,7 +127,7 @@
    <ItemSheetComponent>
       <h3>{localize(config.effects.effectscomposer)}</h3>
       <div class="stat-grid single-column">
-         <Image src={effectsObject.img} title={name} entity={effectsObject} />
+         <Image src={activeEffect.img} title={extractValue(name)} entity={activeEffect} />
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
@@ -100,7 +154,7 @@
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.durationType)}:</h4>
-            <select bind:value={duration.type} onchange={commitChanges}>
+            <select bind:value={duration.type} onchange={(e) => setDurationField("type", e.target.value)}>
                <option value="none">{localize(config.effects.permanent)}</option>
                <option value="turns">{localize(config.time.turns)}</option>
                <option value="rounds">{localize(config.time.rounds)}</option>
@@ -111,11 +165,18 @@
             </select>
          </div>
 
+         {#if duration.type !== "none"}
          <div class="stat-card">
             <div class="stat-card-background"></div>
             <h4>{localize(config.effects.durationValue)}:</h4>
-            <input type="number" bind:value={duration.value} onblur={commitChanges} />
+            <input
+               type="number"
+               bind:value={duration.value}
+               oninput={(e) => setDurationField("value", e.target.value)}
+               onblur={commitChanges}
+            />
          </div>
+         {/if}
       </div>
    </ItemSheetComponent>
 
@@ -144,8 +205,8 @@
                               options={propertyOptions}
                               placeholder={localize(config.effects.selectProperty)}
                               nomatchplaceholder={localize(config.effects.noMatch)}
-                              bind:value={change.key}
-                              onselect={(e) => updateChange(i, "key", e.detail)}
+                              bind:value={changes[i].key}
+                              onselect={(e) => updateChange(i, "key", e.detail.value)}
                               css="table"
                            />
                         </div>
@@ -154,7 +215,7 @@
                         <div class="stat-card">
                            <div class="stat-card-background"></div>
                            <select
-                              value={change.mode}
+                              bind:value={change.mode}
                               onchange={(e) => updateChange(i, "mode", parseInt(e.target.value))}
                            >
                               {#each Object.entries(CONST.ACTIVE_EFFECT_MODES) as [label, val]}

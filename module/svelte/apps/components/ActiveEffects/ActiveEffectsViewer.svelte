@@ -1,6 +1,5 @@
 <script>
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
-   import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
    import { localize } from "../../../../services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
 
@@ -14,7 +13,7 @@
 
       transferredEffects =
          document instanceof Actor
-            ? document.items.contents.flatMap((item) => item.effects.contents.map((effect) => ({ effect, item })))
+            ? document.items.contents.flatMap((item) => item.effects.contents.map((activeEffect) => ({ activeEffect, item })))
             : [];
    });
 
@@ -58,9 +57,7 @@
       transferredEffects = [...transferredEffects];
    }
 
-   function openEditor(effect) {
-      ActiveEffectsEditor.launch(document, effect, config, updateEffectsState);
-   }
+
 </script>
 
 <div class="effects-viewer">
@@ -72,18 +69,19 @@
       <thead>
          <tr>
             <th><div class="cell-content"></div></th>
-            <th><div class="cell-content">Name</div></th>
-            <th><div class="cell-content">Duration</div></th>
-            <th><div class="cell-content">Actions</div></th>
+            <th><div class="cell-content">{localize(config.effects.name)}</div></th>
+            <th><div class="cell-content">{localize(config.effects.durationType)}</div></th>
+            <th><div class="cell-content">{localize(config.effects.disabled)}</div></th>
+            <th><div class="cell-content">{localize(config.effects.actions)}</div></th>
          </tr>
       </thead>
       <tbody>
-         {#each actorAttachedEffects as effect (effect.id)}
-            <ActiveEffectsRow {document} {effect} {config} {onHandleEffectTriggerUI} />
+         {#each actorAttachedEffects as activeEffect (activeEffect.id)}
+            <ActiveEffectsRow {document} {activeEffect} {config} {onHandleEffectTriggerUI} />
          {/each}
          {#if document instanceof Actor}
-            {#each transferredEffects as { effect, item } (effect.id)}
-               <ActiveEffectsRow document={item} {effect} {config} {onHandleEffectTriggerUI} />
+            {#each transferredEffects as { activeEffect, item } (activeEffect.id)}
+               <ActiveEffectsRow document={item} {activeEffect} {config} {onHandleEffectTriggerUI} />
             {/each}
          {/if}
       </tbody>

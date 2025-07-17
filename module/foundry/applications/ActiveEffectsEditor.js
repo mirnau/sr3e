@@ -1,21 +1,21 @@
 import ActiveEffectsEditorApp from "../../svelte/apps/components/ActiveEffects/ActiveEffectsEditorApp.svelte";
-import { mount, unmount } from "svelte";
+import { mount, unmount, onDestroy } from "svelte";
 
 export default class ActiveEffectsEditor extends foundry.applications.api.ApplicationV2 {
    #app;
 
-   constructor(document, effect, config, updateEffectsState) {
-		const appId = ActiveEffectsEditor.getAppIdFor(effect.id);
+   constructor(document, activeEffect, config, updateEffectsState) {
+		const appId = ActiveEffectsEditor.getAppIdFor(activeEffect.id);
 		super({ id: appId });
 
-      this.document = document;
-      this.effect = effect;
+      this.doc = document;
+      this.activeEffect = activeEffect;
       this.config = config;
       this.updateEffectsState = updateEffectsState;
    }
 
    static getAppIdFor(docId) {
-      return `sr3e-active-skill-editor-${docId}`;
+      return `sr3e-active-effect-editor-${docId}`;
    }
 
    static getExisting(docId) {
@@ -58,8 +58,8 @@ export default class ActiveEffectsEditor extends foundry.applications.api.Applic
       this.#app = mount(ActiveEffectsEditorApp, {
          target: windowContent,
          props: {
-            item: this.document,
-            effectsObject: this.effect,
+            document: this.doc,
+            activeEffect: this.activeEffect,
             config: CONFIG.sr3e,
             updateEffectsState: this.updateEffectsState,
          },

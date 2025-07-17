@@ -40,30 +40,30 @@ export class StoreManager {
    }
 
    static Subscribe(document) {
-      if (storeManagers.has(document.id)) {
-         const handlerData = storeManagers.get(document.id);
+      const documentId = document.id;
+
+      if (storeManagers.has(documentId)) {
+         const handlerData = storeManagers.get(documentId);
          handlerData.subscribers++;
          return handlerData.handler;
       }
 
       const handler = new StoreManager(document);
-      storeManagers.set(document.id, { handler, subscribers: 1 });
+      storeManagers.set(documentId, { handler, subscribers: 1 });
       return handler;
    }
 
    static Unsubscribe(document) {
       const handlerData = storeManagers.get(document.id);
-      handlerData.subscribers--;
+      if (!handlerData) return; // already cleaned up—just bail
 
-      if (handlerData.subscribers < 1) {
+      if (--handlerData.subscribers <= 0) {
          const manager = handlerData.handler;
 
-         for (const [dataPath, disposer] of manager.#hookDisposers.entries()) {
-            disposer();
-         }
-
+         for (const disposer of manager.#hookDisposers.values()) disposer();
          manager.#hookDisposers.clear();
          manager.#persistentStore = {};
+         manager.#actorStores = {};
 
          storeManagers.delete(document.id);
       }
@@ -78,16 +78,14 @@ export class StoreManager {
             initial && typeof initial === "object" ? (Array.isArray(initial) ? [...initial] : { ...initial }) : initial;
 
          const store = writable(cloned);
-         let muted = false; // <- breaks the echo
+         let muted = false;
 
-         // UI -> Foundry
          const unsub = store.subscribe((v) => {
-            if (muted) return; // ignore mirror updates
+            if (muted) return;
             foundry.utils.setProperty(this.#document.system, dataPath, v);
             this.#document.update({ [fullPath]: v }, { render: false });
          });
 
-         // Foundry -> UI
          const docType = this.#document.documentName;
          const hook = (doc) => {
             if (doc.id !== this.#document.id) return;
