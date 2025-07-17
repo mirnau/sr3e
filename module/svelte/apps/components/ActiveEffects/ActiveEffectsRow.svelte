@@ -13,6 +13,7 @@
    let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
    let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
    let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
+   let isEmbeddedOnThisDocument = activeEffect.origin === document.uuid;
 
    let duration = $state("");
 
@@ -82,7 +83,8 @@
                aria-label={localize(config.sheet.delete)}
                onclick={() => deleteEffect(activeEffect.id)}
                class="fas fa-trash-can"
-               disabled={activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1}
+               disabled={!isEmbeddedOnThisDocument ||
+                  (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
             ></button>
          </div>
       </div>

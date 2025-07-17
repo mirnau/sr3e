@@ -9653,6 +9653,7 @@ function ActiveEffectsRow($$anchor, $$props) {
   let nameStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:name`, $$props.activeEffect.name);
   let durationStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:duration`, $$props.activeEffect.duration);
   let disabledStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:disabled`, $$props.activeEffect.disabled);
+  let isEmbeddedOnThisDocument = $$props.activeEffect.origin === $$props.document.uuid;
   let duration = state("");
   user_effect(() => {
     set(duration, proxy(formatDuration($durationStore())));
@@ -9713,7 +9714,7 @@ function ActiveEffectsRow($$anchor, $$props) {
       set_text(text_2, $disabledStore() ? "Yes" : "No");
       set_attribute(button, "aria-label", $0);
       set_attribute(button_1, "aria-label", $0);
-      button_1.disabled = ((_a = $$props.activeEffect.duration) == null ? void 0 : _a.type) === "permanent" && $$props.activeEffect.changes.length > 1;
+      button_1.disabled = !isEmbeddedOnThisDocument || ((_a = $$props.activeEffect.duration) == null ? void 0 : _a.type) === "permanent" && $$props.activeEffect.changes.length > 1;
     },
     [
       () => localize($$props.config.sheet.delete)
