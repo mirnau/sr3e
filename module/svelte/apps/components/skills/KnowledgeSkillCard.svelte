@@ -29,7 +29,6 @@
          if (isModalOpen) return;
          isModalOpen = true;
 
-         const rollType = specializationName ? "specialization" : "skill";
          const rollName = specializationName || skill.name;
          const dice = specializationName ? $specializations.find((s) => s.name === specializationName)?.value : $value;
 
@@ -41,7 +40,7 @@
                   config,
                   caller: {
                      key: rollName,
-                     type: rollType,
+                     type: "knowledge",
                      dice,
                      skillId,
                   },

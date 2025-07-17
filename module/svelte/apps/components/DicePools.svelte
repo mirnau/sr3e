@@ -55,11 +55,11 @@
 <CardToolbar {id} />
 <h1>{localize(config.dicepools.dicepools)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard {actor} label={config.dicepools.combat} value={$combat.sum} key={"combat"} isButton={true} />
-   <StatCard {actor} label={config.dicepools.control} value={$control.sum} key={"control"} isButton={true} />
-   <StatCard {actor} label={config.dicepools.hacking} value={$hacking.sum} key={"hacking"} isButton={true} />
+   <StatCard document={actor} label={config.dicepools.combat} value={$combat.sum} key={"combat"} isButton={true} />
+   <StatCard document={actor} label={config.dicepools.control} value={$control.sum} key={"control"} isButton={true} />
+   <StatCard document={actor} label={config.dicepools.hacking} value={$hacking.sum} key={"hacking"} isButton={true} />
    {#if isAwakened}
-      <StatCard {actor} label={config.dicepools.astral} value={$astral.sum} key={"astral"} isButton={true} />
-      <StatCard {actor} label={config.dicepools.spell} value={$spell.sum} key={"spell"} isButton={true} />
+      <StatCard document={actor} label={config.dicepools.astral} value={$astral.sum} key={"astral"} isButton={true} />
+      <StatCard document={actor} label={config.dicepools.spell} value={$spell.sum} key={"spell"} isButton={true} />
    {/if}
 </MasonryGrid>

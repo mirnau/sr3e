@@ -3636,7 +3636,7 @@ const stores$1 = {
   activeSkillsIds: "activeSkillsIds",
   knowledgeSkillsIds: "knowledgeSkillsIds",
   languageSkillsIds: "languageSkillsIds",
-  isrollcomposeropen: "isrollcomposeropen",
+  shouldDisplaySheen: "shouldDisplaySheen",
   dicepoolSelection: "dicepoolSelection"
 };
 const _StoreManager = class _StoreManager {
@@ -4174,7 +4174,10 @@ function RollComposerComponent($$anchor, $$props) {
   const $currentDicePoolSelectionStore = () => store_get(currentDicePoolSelectionStore, "$currentDicePoolSelectionStore", $$stores);
   const $displayCurrentDicePoolStore = () => store_get(displayCurrentDicePoolStore, "$displayCurrentDicePoolStore", $$stores);
   let actorStoreManager = StoreManager.Subscribe($$props.actor);
-  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
+  onDestroy(() => {
+    store_set(shouldDisplaySheen, false);
+    StoreManager.Unsubscribe($$props.actor);
+  });
   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
   let penalty = actorStoreManager.GetRWStore("health.penalty");
   $karmaPoolStore();
@@ -4202,6 +4205,15 @@ function RollComposerComponent($$anchor, $$props) {
   let linkedAttributeStore;
   let focusables = [];
   let difficulties = ItemDataService.getDifficultyGradings($$props.config);
+  let shouldDisplaySheen = actorStoreManager.GetShallowStore($$props.actor.id, stores$1.shouldDisplaySheen, false);
+  user_effect(() => {
+    console.log("caller type", $$props.caller.type);
+    if ($$props.caller.type === "active" || $$props.caller.type === "attribute") {
+      store_set(shouldDisplaySheen, true);
+    } else {
+      store_set(shouldDisplaySheen, false);
+    }
+  });
   onMount(() => {
     updateFocusables();
     selectEl == null ? void 0 : selectEl.focus();
@@ -4612,7 +4624,6 @@ function AttributeCard($$anchor, $$props) {
   const $valueROStore = () => store_get(valueROStore, "$valueROStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
   const $valueRWStore = () => store_get(get$1(valueRWStore), "$valueRWStore", $$stores);
-  const $isModalOpen = () => store_get(isModalOpen, "$isModalOpen", $$stores);
   const storeManager2 = StoreManager.Subscribe($$props.actor);
   let valueROStore = storeManager2.GetSumROStore(`attributes.${$$props.key}`);
   let baseValueStore = storeManager2.GetRWStore(`attributes.${$$props.key}.value`);
@@ -4648,7 +4659,7 @@ function AttributeCard($$anchor, $$props) {
     }
   });
   let activeModal = null;
-  let isModalOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
+  let isModalOpen = state(false);
   function add(change) {
     if (!$attributeAssignmentLockedStore() && $isShoppingState() && get$1(valueRWStore)) {
       const newPoints = $attributePointStore() - change;
@@ -4669,7 +4680,7 @@ function AttributeCard($$anchor, $$props) {
       e.stopImmediatePropagation();
       e.stopPropagation();
       unmount(activeModal);
-      store_set(isModalOpen, false);
+      set(isModalOpen, false);
       activeModal = null;
     }
   }
@@ -4677,14 +4688,14 @@ function AttributeCard($$anchor, $$props) {
     StoreManager.Unsubscribe($$props.actor);
     if (activeModal) {
       unmount(activeModal);
-      store_set(isModalOpen, false);
+      set(isModalOpen, false);
       activeModal = null;
     }
   });
   async function Roll2(e) {
     if (e.shiftKey) {
-      if ($isModalOpen()) return;
-      store_set(isModalOpen, true);
+      if (get$1(isModalOpen)) return;
+      set(isModalOpen, true);
       const options = await new Promise((resolve) => {
         activeModal = mount(RollComposerComponent, {
           target: document.querySelector(".composer-position"),
@@ -4699,7 +4710,7 @@ function AttributeCard($$anchor, $$props) {
             },
             onclose: (result) => {
               unmount(activeModal);
-              store_set(isModalOpen, false);
+              set(isModalOpen, false);
               activeModal = null;
               resolve(result);
             }
@@ -6362,14 +6373,14 @@ var root_5$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $isRollComposerOpen = () => store_get(isRollComposerOpen, "$isRollComposerOpen", $$stores);
+  const $shouldDisplaySheen = () => store_get(shouldDisplaySheen, "$shouldDisplaySheen", $$stores);
   let isButton = prop($$props, "isButton", 3, false), key = prop($$props, "key", 3, "");
   let currentDicePoolSelectionStore;
-  let isRollComposerOpen;
+  let shouldDisplaySheen;
   if ($$props.document) {
     const storeManager2 = StoreManager.Subscribe($$props.document);
     currentDicePoolSelectionStore = storeManager2.GetShallowStore($$props.document.id, stores$1.dicepoolSelection);
-    isRollComposerOpen = storeManager2.GetShallowStore($$props.document.id, stores$1.isrollcomposeropen, false);
+    shouldDisplaySheen = storeManager2.GetShallowStore($$props.document.id, stores$1.shouldDisplaySheen, false);
     onDestroy(() => {
       StoreManager.Unsubscribe($$props.document);
     });
@@ -6416,7 +6427,7 @@ function StatCard$1($$anchor, $$props) {
           else $$render(alternate, false);
         });
       }
-      template_effect(() => toggle_class(div, "alert-animation", $isRollComposerOpen()));
+      template_effect(() => toggle_class(div, "alert-animation", $shouldDisplaySheen()));
       append($$anchor2, div);
     };
     var alternate_2 = ($$anchor2) => {
@@ -6456,7 +6467,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, div_1);
     };
     if_block(node, ($$render) => {
-      if (isButton() && $isRollComposerOpen()) $$render(consequent_2);
+      if (isButton() && $shouldDisplaySheen()) $$render(consequent_2);
       else $$render(alternate_2, false);
     });
   }
@@ -6651,7 +6662,7 @@ function DicePools($$anchor, $$props) {
       var fragment_1 = root_1$p();
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
-        get actor() {
+        get document() {
           return actor();
         },
         get label() {
@@ -6665,7 +6676,7 @@ function DicePools($$anchor, $$props) {
       });
       var node_3 = sibling(node_2, 2);
       StatCard$1(node_3, {
-        get actor() {
+        get document() {
           return actor();
         },
         get label() {
@@ -6679,7 +6690,7 @@ function DicePools($$anchor, $$props) {
       });
       var node_4 = sibling(node_3, 2);
       StatCard$1(node_4, {
-        get actor() {
+        get document() {
           return actor();
         },
         get label() {
@@ -6697,7 +6708,7 @@ function DicePools($$anchor, $$props) {
           var fragment_2 = root_2$h();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
-            get actor() {
+            get document() {
               return actor();
             },
             get label() {
@@ -6711,7 +6722,7 @@ function DicePools($$anchor, $$props) {
           });
           var node_7 = sibling(node_6, 2);
           StatCard$1(node_7, {
-            get actor() {
+            get document() {
               return actor();
             },
             get label() {
@@ -7956,7 +7967,6 @@ function ActiveSkillCard($$anchor, $$props) {
     if (e.shiftKey) {
       if (get$1(isModalOpen)) return;
       set(isModalOpen, true);
-      const rollType = specializationName ? "specialization" : "skill";
       const rollName = specializationName || skill().name;
       const dice = specializationName ? (_a = $specializationsStore().find((s) => s.name === specializationName)) == null ? void 0 : _a.value : $valueStore();
       const options = await new Promise((resolve) => {
@@ -7967,7 +7977,7 @@ function ActiveSkillCard($$anchor, $$props) {
             config: config(),
             caller: {
               key: rollName,
-              type: rollType,
+              type: "active",
               dice,
               skillId
             },
@@ -8137,7 +8147,6 @@ function KnowledgeSkillCard($$anchor, $$props) {
     if (e.shiftKey) {
       if (get$1(isModalOpen)) return;
       set(isModalOpen, true);
-      const rollType = specializationName ? "specialization" : "skill";
       const rollName = specializationName || skill().name;
       const dice = specializationName ? (_a = $specializations().find((s) => s.name === specializationName)) == null ? void 0 : _a.value : $value();
       const options = await new Promise((resolve) => {
@@ -8148,7 +8157,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
             config: config(),
             caller: {
               key: rollName,
-              type: rollType,
+              type: "knowledge",
               dice,
               skillId
             },
@@ -8282,10 +8291,10 @@ function KnowledgeSkillCard($$anchor, $$props) {
 delegate(["click", "keydown"]);
 var on_keydown$4 = (e, openSkill) => e.key === "Enter" && openSkill();
 var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
-var on_click$6 = (e, Roll2, skill, $valueStore, valueStore) => Roll2(e, skill().id, "skill", skill().name, $valueStore());
-var on_keydown_1$1 = (e, Roll2, skill, $valueStore, valueStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "skill", skill().name, $valueStore());
-var on_click_1$5 = (e, Roll2, skill, $readWriteStore, readWriteStore) => Roll2(e, skill().id, "readwrite", "Read/Write", $readWriteStore());
-var on_keydown_2 = (e, Roll2, skill, $readWriteStore, readWriteStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "readwrite", "Read/Write", $readWriteStore());
+var on_click$6 = (e, Roll2, skill, $valueStore, valueStore) => Roll2(e, skill().id, "language", skill().name, $valueStore());
+var on_keydown_1$1 = (e, Roll2, skill, $valueStore, valueStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "language", skill().name, $valueStore());
+var on_click_1$5 = (e, Roll2, skill, $readWriteStore, readWriteStore) => Roll2(e, skill().id, "language", "Read/Write", $readWriteStore());
+var on_keydown_2 = (e, Roll2, skill, $readWriteStore, readWriteStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "language", "Read/Write", $readWriteStore());
 var root_2$d = /* @__PURE__ */ template(`<div class="specialization-container"><div class="skill-specialization-card button" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name">Read/Write</div> <h1 class="embedded-value"> </h1></div></div>`);
 var on_click_2$3 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
 var on_keydown_3 = (e, Roll2, skill, specialization) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);

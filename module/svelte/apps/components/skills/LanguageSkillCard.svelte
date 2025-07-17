@@ -96,8 +96,8 @@
          class="skill-main-container button"
          role="button"
          tabindex="0"
-         onclick={(e) => Roll(e, skill.id, "skill", skill.name, $valueStore)}
-         onkeydown={(e) => (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "skill", skill.name, $valueStore)}
+         onclick={(e) => Roll(e, skill.id, "language", skill.name, $valueStore)}
+         onkeydown={(e) => (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "language", skill.name, $valueStore)}
       >
          <h1 class="skill-value">{$valueStore}</h1>
       </div>
@@ -108,9 +108,9 @@
                class="skill-specialization-card button"
                role="button"
                tabindex="0"
-               onclick={(e) => Roll(e, skill.id, "readwrite", "Read/Write", $readWriteStore)}
+               onclick={(e) => Roll(e, skill.id, "language", "Read/Write", $readWriteStore)}
                onkeydown={(e) =>
-                  (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "readwrite", "Read/Write", $readWriteStore)}
+                  (e.key === "Enter" || e.key === " ") && Roll(e, skill.id, "language", "Read/Write", $readWriteStore)}
             >
                <div class="specialization-background"></div>
                <div class="specialization-name">Read/Write</div>

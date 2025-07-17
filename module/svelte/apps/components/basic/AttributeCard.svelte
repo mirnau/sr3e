@@ -60,7 +60,7 @@
    });
 
    let activeModal = null;
-   let isModalOpen = storeManager.GetShallowStore(actor.id, stores.isrollcomposeropen, false);
+   let isModalOpen = $state(false);
 
    function add(change) {
       if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
@@ -85,7 +85,8 @@
          e.stopImmediatePropagation();
          e.stopPropagation();
          unmount(activeModal);
-         $isModalOpen = false;
+         isModalOpen
+ = false;
          activeModal = null;
       }
    }
@@ -94,15 +95,18 @@
       StoreManager.Unsubscribe(actor);
       if (activeModal) {
          unmount(activeModal);
-         $isModalOpen = false;
+         isModalOpen
+ = false;
          activeModal = null;
       }
    });
 
    async function Roll(e) {
       if (e.shiftKey) {
-         if ($isModalOpen) return;
-         $isModalOpen = true;
+         if (isModalOpen
+) return;
+         isModalOpen
+ = true;
 
          const options = await new Promise((resolve) => {
             activeModal = mount(RollComposerComponent, {
@@ -113,7 +117,8 @@
                   caller: { key, value: $valueROStore.value, type: "attribute", dice: $valueROStore.sum },
                   onclose: (result) => {
                      unmount(activeModal);
-                     $isModalOpen = false;
+                     isModalOpen
+ = false;
                      activeModal = null;
                      resolve(result);
                   },

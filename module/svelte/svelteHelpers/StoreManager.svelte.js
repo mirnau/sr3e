@@ -18,7 +18,7 @@ export const stores = {
    isCharacterCreation: "isCharacterCreation",
    initiativeDice: "initiativeDice",
    baseInitiative: "baseInitiative",
-   isrollcomposeropen: "isrollcomposeropen",
+   shouldDisplaySheen: "shouldDisplaySheen",
    dicepoolSelection: "dicepoolSelection",
    combat: {
       stunDamage: "stunDamage",

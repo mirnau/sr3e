@@ -8,7 +8,10 @@
    let { actor, config, caller, onclose } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
-   onDestroy(() => StoreManager.Unsubscribe(actor));
+   onDestroy(() => {
+      $shouldDisplaySheen = false;
+      StoreManager.Unsubscribe(actor);
+   });
 
    let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
    let penalty = actorStoreManager.GetRWStore("health.penalty");
@@ -43,6 +46,17 @@
    let focusables = [];
 
    let difficulties = ItemDataService.getDifficultyGradings(config);
+
+   let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
+
+   $effect(() => {
+      console.log("caller type", caller.type);
+      if (caller.type === "active" || caller.type === "attribute") {
+         $shouldDisplaySheen = true;
+      } else {
+         $shouldDisplaySheen = false;
+      }
+   });
 
    onMount(() => {
       updateFocusables();

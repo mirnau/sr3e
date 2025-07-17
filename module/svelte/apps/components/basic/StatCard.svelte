@@ -6,12 +6,12 @@
    let { document, value, label, isButton = false, key = "", children } = $props();
 
    let currentDicePoolSelectionStore;
-   let isRollComposerOpen;
+   let shouldDisplaySheen;
 
    if (document) {
       const storeManager = StoreManager.Subscribe(document);
       currentDicePoolSelectionStore = storeManager.GetShallowStore(document.id, stores.dicepoolSelection);
-      isRollComposerOpen = storeManager.GetShallowStore(document.id, stores.isrollcomposeropen, false);
+      shouldDisplaySheen = storeManager.GetShallowStore(document.id, stores.shouldDisplaySheen, false);
 
       onDestroy(() => {
          StoreManager.Unsubscribe(document);
@@ -27,10 +27,10 @@
    };
 </script>
 
-{#if isButton && $isRollComposerOpen}
+{#if isButton && $shouldDisplaySheen}
    <div
       class="stat-card button"
-      class:alert-animation={$isRollComposerOpen}
+      class:alert-animation={$shouldDisplaySheen}
       role="button"
       tabindex="0"
       onclick={provideSelectedDicepool}

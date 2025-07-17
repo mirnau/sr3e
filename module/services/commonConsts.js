@@ -25,7 +25,7 @@ export const flags = {
     burntOut: "burntOut",
     attributeAssignmentLocked: "attributeAssignmentLocked",
     persistanceBlobCharacterSheetSize: "persistanceBlobCharacterSheetSize",
-    isrollcomposeropen: "isrollcomposeropen"
+    shouldDisplaySheen: "shouldDisplaySheen"
   },
   effect: {
     contributes: "contributes"
