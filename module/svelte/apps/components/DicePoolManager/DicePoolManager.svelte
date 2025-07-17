@@ -92,7 +92,7 @@
             </div>
             <div class="list-box">
                {#if listboxContent?.length}
-                  <table class="actor-table">
+                  <table>
                      <thead>
                         <tr>
                            <th>Portrait</th>

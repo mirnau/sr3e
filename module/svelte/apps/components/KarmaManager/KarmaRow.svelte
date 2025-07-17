@@ -2,6 +2,7 @@
    import { onDestroy, onMount } from "svelte";
    import { localize } from "../../../../services/utilities.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import Image from "../basic/Image.svelte";
 
    let { actor, config, OnCommitStatusChange, onmount } = $props();
 
@@ -65,7 +66,7 @@
 
 <tr>
    <td class="portrait-cell">
-      <img src={actor.img} alt="portrait" />
+      <Image entity={actor} />
    </td>
    <td>
       <h3>{actor.name}</h3>

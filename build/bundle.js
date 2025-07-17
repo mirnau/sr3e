@@ -6328,14 +6328,18 @@ function StatCard$1($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $isRollComposerOpen = () => store_get(isRollComposerOpen, "$isRollComposerOpen", $$stores);
   let isButton = prop($$props, "isButton", 3, false), key = prop($$props, "key", 3, "");
-  const storeManager2 = StoreManager.Subscribe($$props.actor);
-  let currentDicePoolSelectionStore = storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
-  let isRollComposerOpen = storeManager2.GetShallowStore($$props.actor.id, stores$1.isrollcomposeropen, false);
-  onDestroy(() => {
-    StoreManager.Unsubscribe($$props.actor);
-  });
+  let currentDicePoolSelectionStore;
+  let isRollComposerOpen;
+  if ($$props.document) {
+    const storeManager2 = StoreManager.Subscribe($$props.document);
+    currentDicePoolSelectionStore = storeManager2.GetShallowStore($$props.document.id, stores$1.dicepoolSelection);
+    isRollComposerOpen = storeManager2.GetShallowStore($$props.document.id, stores$1.isrollcomposeropen, false);
+    onDestroy(() => {
+      StoreManager.Unsubscribe($$props.document);
+    });
+  }
   function provideSelectedDicepool(_) {
-    store_set(currentDicePoolSelectionStore, key());
+    if (currentDicePoolSelectionStore) store_set(currentDicePoolSelectionStore, key());
   }
   var fragment = comment();
   var node = first_child(fragment);
@@ -9757,7 +9761,7 @@ async function addEffect(e, $$props, onHandleEffectTriggerUI) {
   );
   await onHandleEffectTriggerUI();
 }
-var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table class="shrink"><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
 function ActiveEffectsViewer($$anchor, $$props) {
   push($$props, true);
   let actorAttachedEffects = state(proxy($$props.document.effects.contents));
@@ -12584,11 +12588,8 @@ function MagicApp($$anchor, $$props) {
       var fragment = root_1$9();
       var node_1 = first_child(fragment);
       Image(node_1, {
-        get src() {
-          return item2().img;
-        },
-        get title() {
-          return item2().name;
+        get entity() {
+          return item2();
         }
       });
       var div_2 = sibling(node_1, 2);
@@ -14721,7 +14722,7 @@ function TimeManager($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var root$6 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
+var root$6 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><!></td><td><h3> </h3></td><td><input type="number"></td><td><h3> </h3></td><td><h3> </h3></td><td><h3> </h3></td><td><input type="checkbox"></td></tr>`);
 function KarmaRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -14780,7 +14781,12 @@ function KarmaRow($$anchor, $$props) {
   }
   var tr = root$6();
   var td = child(tr);
-  var img = child(td);
+  var node = child(td);
+  Image(node, {
+    get entity() {
+      return $$props.actor;
+    }
+  });
   var td_1 = sibling(td);
   var h3 = child(td_1);
   var text2 = child(h3);
@@ -14798,7 +14804,6 @@ function KarmaRow($$anchor, $$props) {
   var td_6 = sibling(td_5);
   var input_1 = child(td_6);
   template_effect(() => {
-    set_attribute(img, "src", $$props.actor.img);
     set_text(text2, $$props.actor.name);
     set_attribute(input, "id", $$props.actor.id);
     set_text(text_1, $goodKarma());
@@ -14830,7 +14835,7 @@ function deselectAll$1(__2, listboxContent, rowRefs) {
   }
 }
 var root_1$3 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2$3 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
+var root_2$3 = /* @__PURE__ */ template(`<table><thead><tr><th>Portrait</th><th>Name</th><th>Points</th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4$3 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
 var root$5 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function KarmaManager($$anchor, $$props) {
@@ -14984,7 +14989,7 @@ var on_click_5 = (__6, $$props) => $$props.actor.RefreshHackingPool();
 var on_change$1 = (e, $readyForCommit, readyForCommit) => {
   store_set(readyForCommit, proxy(e.target.checked));
 };
-var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><img alt="portrait"></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
+var root$4 = /* @__PURE__ */ template(`<tr><td class="portrait-cell"><!></td><td><h3> </h3></td><td><h3> </h3> <button> <i class="fa-solid fa-dharmachakra"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-person-rifle"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-star"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-wand-sparkles"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-robot"></i></button></td><td><h3> </h3> <button> <i class="fa-solid fa-computer"></i></button></td><td><input type="checkbox"></td></tr>`);
 function DicePoolRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -15056,7 +15061,12 @@ function DicePoolRow($$anchor, $$props) {
   }
   var tr = root$4();
   var td = child(tr);
-  var img = child(td);
+  var node = child(td);
+  Image(node, {
+    get entity() {
+      return $$props.actor;
+    }
+  });
   var td_1 = sibling(td);
   var h3 = child(td_1);
   var text2 = child(h3);
@@ -15101,7 +15111,6 @@ function DicePoolRow($$anchor, $$props) {
   input.__change = [on_change$1, $readyForCommit, readyForCommit];
   template_effect(
     ($0, $1, $2, $3, $4, $5, $6, $7, $8) => {
-      set_attribute(img, "src", $$props.actor.img);
       set_text(text2, $$props.actor.name);
       set_text(text_1, `${$karmaPoolStore() ?? ""} / ${$karmaPoolCeilingStore() ?? ""}`);
       set_attribute(button, "aria-label", $0);
@@ -15159,7 +15168,7 @@ function deselectAll(__2, listboxContent, rowRefs) {
   }
 }
 var root_1$2 = /* @__PURE__ */ template(`<option> </option>`);
-var root_2$2 = /* @__PURE__ */ template(`<table class="actor-table"><thead><tr><th>Portrait</th><th>Name</th><th> </th><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
+var root_2$2 = /* @__PURE__ */ template(`<table><thead><tr><th>Portrait</th><th>Name</th><th> </th><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table>`);
 var root_4$2 = /* @__PURE__ */ template(`<div class="empty">No actors found</div>`);
 var root$3 = /* @__PURE__ */ template(`<div class="sheet-component"><div class="sr3e-inner-background-container"><div class="fake-shadow"></div> <div class="sr3e-inner-background"><div class="karma-manager"><div class="points-container"></div> <div class="player-handler"><select name="typeOfCharacter" class="typeOfCharacter"></select> <input type="text"> <button> </button> <button> </button> <button> </button></div> <div class="list-box"><!></div></div></div></div></div>`);
 function DicePoolManager($$anchor, $$props) {

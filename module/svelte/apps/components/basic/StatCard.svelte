@@ -2,18 +2,24 @@
    import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { localize } from "../../../../services/utilities.js";
    import { onDestroy } from "svelte";
-   let { actor, value, label, isButton = false, key = "", children } = $props();
 
-   const storeManager = StoreManager.Subscribe(actor);
-   let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
-   let isRollComposerOpen = storeManager.GetShallowStore(actor.id, stores.isrollcomposeropen, false);
+   let { document, value, label, isButton = false, key = "", children } = $props();
 
-   onDestroy(() => {
-      StoreManager.Unsubscribe(actor);
-   });
+   let currentDicePoolSelectionStore;
+   let isRollComposerOpen;
+
+   if (document) {
+      const storeManager = StoreManager.Subscribe(document);
+      currentDicePoolSelectionStore = storeManager.GetShallowStore(document.id, stores.dicepoolSelection);
+      isRollComposerOpen = storeManager.GetShallowStore(document.id, stores.isrollcomposeropen, false);
+
+      onDestroy(() => {
+         StoreManager.Unsubscribe(document);
+      });
+   }
 
    function provideSelectedDicepool(_) {
-      $currentDicePoolSelectionStore = key;
+      if (currentDicePoolSelectionStore) $currentDicePoolSelectionStore = key;
    }
 
    const handleKeyDown = (e) => {

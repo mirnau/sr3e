@@ -19,48 +19,9 @@
    }
 
    .list-box {
-      max-height: 50vh;
+      max-height: 20rem;
       overflow-y: auto;
       overflow-x: hidden;
-
-      table.actor-table {
-         width: 100%;
-         table-layout: fixed;
-         border-collapse: collapse;
-         text-align: left;
-
-         thead {
-            background: #222;
-            color: #fff;
-
-            th {
-               padding: 0.5rem;
-               font-weight: bold;
-               border-bottom: 1px solid #444;
-               white-space: nowrap;
-               overflow: hidden;
-               text-overflow: ellipsis;
-            }
-         }
-
-         tbody {
-            tr {
-               border-bottom: 1px solid #333;
-
-               &:hover {
-                  background: rgba(255, 255, 255, 0.05);
-               }
-            }
-
-            td {
-               padding: 0.5rem;
-               vertical-align: middle;
-               white-space: nowrap;
-               overflow: hidden;
-               text-overflow: ellipsis;
-            }
-         }
-      }
 
       .empty {
          text-align: center;

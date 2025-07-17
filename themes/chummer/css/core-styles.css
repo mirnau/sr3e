@@ -1424,14 +1424,6 @@
   menu.controls-dropdown.expanded {
     z-index: 999;
   }
-  .table-wrapper {
-    max-height: 50vh;
-    overflow-y: auto;
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-    background: transparent;
-  }
   thead {
     background: none;
   }
@@ -1443,56 +1435,70 @@
     padding: 0;
     margin: 0;
     background: transparent;
+    height: auto;
+    max-height: none;
   }
-  table tr {
-    max-height: 1rem;
-    background: transparent;
-  }
-  table thead tr {
-    max-height: 1rem;
-    background: transparent;
-  }
+  table tr,
+  table thead tr,
   table tbody tr {
-    max-height: 1rem;
+    height: 1.5rem;
+    min-height: 1.5rem;
+    max-height: 1.5rem;
     background: transparent;
+    overflow: hidden;
   }
   table td,
   table th {
-    max-height: 1rem;
+    height: 1.5rem;
+    min-height: 1.5rem;
+    max-height: 1.5rem;
     vertical-align: middle;
     padding: 0.125rem;
     background: transparent;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   table .cell-content {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    height: 1.5rem;
+    height: 100%;
+    min-height: 0;
     max-height: 1.5rem;
-    line-height: 1rem;
+    line-height: 1.5rem;
     overflow: hidden;
     min-width: 0;
     flex-wrap: nowrap;
   }
   table .cell-content > * {
+    height: 100%;
+    min-height: 0;
+    max-height: 1.5rem;
     min-width: 0;
     flex-shrink: 1;
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
   table .cell-content button {
     flex-shrink: 1;
     min-width: 0;
     width: auto;
+    height: 100%;
     padding: 0;
     margin: 0;
+    line-height: 1.5rem;
     white-space: nowrap;
     text-overflow: ellipsis;
     font-size: 0.75rem;
   }
-  table .cell-content img {
-    max-height: 100%;
-    max-width: 100%;
-    flex-shrink: 1;
+  table .portrait-cell {
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
   table .stat-card {
     background: transparent;
@@ -1515,14 +1521,20 @@
     white-space: nowrap;
     margin: 0.5rem;
     vertical-align: middle;
+    height: 1.5rem;
+    min-height: 1.5rem;
+    max-height: 1.5rem;
     box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
   td {
-    max-height: 1rem;
+    height: 1.5rem;
+    min-height: 1.5rem;
+    max-height: 1.5rem;
     margin: 0.5rem;
     background: transparent;
     vertical-align: middle;
     box-shadow: inset 0 0 30px var(--highlight-color-primary);
+    overflow: hidden;
   }
   td input[type="text"],
   td input[type="number"],
@@ -1534,6 +1546,12 @@
     box-sizing: border-box;
     max-width: 8rem;
     background: transparent;
+    height: 100%;
+    max-height: 1.5rem;
+    line-height: 1.5rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   table tr:nth-child(even) > td {
     box-shadow: inset 0 0 30px var(--highlight-color-secondary);
@@ -1558,8 +1576,6 @@
     background: transparent;
   }
   button {
-    margin: 0;
-    padding: 0;
     white-space: nowrap;
   }
   .chat-message.message {
@@ -1920,40 +1936,9 @@
     margin: 0;
   }
   .karma-manager .list-box {
-    max-height: 50vh;
+    max-height: 20rem;
     overflow-y: auto;
     overflow-x: hidden;
-  }
-  .karma-manager .list-box table.actor-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    text-align: left;
-  }
-  .karma-manager .list-box table.actor-table thead {
-    background: #222;
-    color: #fff;
-  }
-  .karma-manager .list-box table.actor-table thead th {
-    padding: 0.5rem;
-    font-weight: bold;
-    border-bottom: 1px solid #444;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .karma-manager .list-box table.actor-table tbody tr {
-    border-bottom: 1px solid #333;
-  }
-  .karma-manager .list-box table.actor-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .karma-manager .list-box table.actor-table tbody td {
-    padding: 0.5rem;
-    vertical-align: middle;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .karma-manager .list-box .empty {
     text-align: center;

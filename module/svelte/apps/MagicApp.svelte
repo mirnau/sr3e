@@ -131,7 +131,7 @@
   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
     <!-- Header -->
     <ItemSheetComponent>
-      <Image src={item.img} title={item.name} />
+      <Image entity={item}/>
       <div class="stat-grid single-column">
         <StatCard>
           <input

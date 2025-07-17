@@ -65,7 +65,7 @@
       <button class="fas fa-plus" type="button" onclick={addEffect}></button>
    </div>
 
-   <table>
+   <table class="shrink">
       <thead>
          <tr>
             <th><div class="cell-content"></div></th>
