@@ -36,7 +36,7 @@
       z-index: 1;
       margin-top: 0.25rem;
       padding: 0.5rem;
-      background: @accent-color;
+      background: var(--highlight-color-primary);
       .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
       &.static-full-width {
@@ -80,11 +80,6 @@
          i {
             margin: 0 0.5rem;
          }
-      }
-
-      &:hover {
-         background-color: @accent-color;
-         z-index: 10;
       }
    }
 }

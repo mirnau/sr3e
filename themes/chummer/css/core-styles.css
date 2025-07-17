@@ -919,7 +919,7 @@
     z-index: 1;
     margin-top: 0.25rem;
     padding: 0.5rem;
-    background: #ff2090;
+    background: var(--highlight-color-primary);
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
   .skill-container-masonry-grid .skill-category-container.static-full-width {
@@ -957,10 +957,6 @@
   }
   .skill-container-masonry-grid .skill-category-container .skill-label i {
     margin: 0 0.5rem;
-  }
-  .skill-container-masonry-grid .skill-category-container:hover {
-    background-color: #ff2090;
-    z-index: 10;
   }
   .search-container {
     position: relative;
