@@ -405,7 +405,7 @@
             class="karma-counter"
             bind:value={currentDicePoolAddition}
             min="0"
-            max={$displayCurrentDicePoolStore.sum}
+            max={$displayCurrentDicePoolStore}
             onIncrement={AddDiceFromPool}
             onDecrement={RemoveDiceFromPool}
          />

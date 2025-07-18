@@ -153,14 +153,14 @@
          "system.profile.weight": characterWeight,
          "system.creation.attributePoints": remainingPoints,
          "system.creation.activePoints": selectedSkillObj.points,
-         "system.attributes.body.value": 1,
-         "system.attributes.strength.value": 1,
-         "system.attributes.charisma.value": 1,
-         "system.attributes.willpower.value": 1,
-         "system.attributes.quickness.value": 1,
-         "system.attributes.intelligence.value": 1,
-         "system.attributes.initiative.value": 1,
-         "system.karma.karmaPool.value": 1
+         "system.attributes.body": 1,
+         "system.attributes.strength": 1,
+         "system.attributes.charisma": 1,
+         "system.attributes.willpower": 1,
+         "system.attributes.quickness": 1,
+         "system.attributes.intelligence": 1,
+         "system.attributes.initiative": 1,
+         "system.karma.karmaPool": 1,
       });
 
       // INFO: Mods handled by Active Effects system
@@ -173,7 +173,7 @@
 
          actor.setFlag(flags.sr3e, flags.actor.hasAwakened, true);
 
-         await actor.update({ "system.attributes.magic.value": 6 });
+         await actor.update({ "system.attributes.magic": 6 });
       }
 
       onSubmit?.(true);

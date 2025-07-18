@@ -76,8 +76,8 @@ export default class RollService {
       const storeManager = StoreManager.Subscribe(actor);
       const initiativeDiceStore = storeManager.GetSumROStore("attributes.initiative");
       const reactionStore = storeManager.GetSumROStore("attributes.reaction");
-      const initiativeDice = get(initiativeDiceStore).sum;
-      const reaction = get(reactionStore).sum;
+      const initiativeDice = get(initiativeDiceStore);
+      const reaction = get(reactionStore);
       StoreManager.Unsubscribe(actor);
 
       const roll = await new Roll(`${initiativeDice}d6`).evaluate();

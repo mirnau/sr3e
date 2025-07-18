@@ -9,67 +9,55 @@
    let { actor, localization, key } = $props();
 
    const storeManager = StoreManager.Subscribe(actor);
+   onDestroy(() => StoreManager.Unsubscribe(actor));
 
-   let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
-   let baseValueStore = storeManager.GetRWStore(`attributes.${key}.value`);
+   let valueStore = storeManager.GetRWStore(`attributes.${key}`);
    let attributePointStore = storeManager.GetRWStore("creation.attributePoints");
 
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
    let attributeAssignmentLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
 
    let metatype = $derived(actor.items.find((i) => i.type === "metatype") || []);
    let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
 
    let committedValue = null;
-
-   $effect(() => {
-      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue === null) {
-         committedValue = $valueROStore.value;
-      }
-   });
-
    let isMinLimit = $state(false);
 
    $effect(() => {
-      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue !== null) {
-         isMinLimit = $valueROStore.value <= committedValue;
-      } else {
-         isMinLimit = $valueROStore.value <= 1;
+      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue === null) {
+         committedValue = $valueStore;
       }
    });
 
-   let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
-
-   let valueRWStore = $derived($isShoppingState && !$attributeAssignmentLockedStore ? baseValueStore : null);
-
    $effect(() => {
-      if (
-         !$attributeAssignmentLockedStore &&
-         $isShoppingState &&
-         $valueROStore.value + $valueROStore.mod < 1 &&
-         $valueROStore.mod < 0 &&
-         valueRWStore
-      ) {
-         let deficit = 1 - ($valueROStore.value + $valueROStore.mod);
+      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue !== null) {
+         isMinLimit = $valueStore <= committedValue;
+      } else {
+         isMinLimit = $valueStore <= 1;
+      }
+   });
+
+   // Ensure minimum value of 1 if negative modifiers dropped it too low during assignment
+   $effect(() => {
+      if (!$attributeAssignmentLockedStore && $isShoppingState && $valueStore < 1) {
+         let deficit = 1 - $valueStore;
          while (deficit > 0 && $attributePointStore > 0) {
             $attributePointStore -= 1;
-            $valueRWStore += 1;
+            $valueStore += 1;
             deficit -= 1;
          }
       }
    });
 
-   let activeModal = null;
-   let isModalOpen = $state(false);
-
    function add(change) {
-      if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
+      if (!$attributeAssignmentLockedStore && $isShoppingState) {
          const newPoints = $attributePointStore - change;
-         const newValue = $valueRWStore + change;
+         const newValue = $valueStore + change;
 
          if (newPoints >= 0 && (attributeLimit === null || newValue <= attributeLimit)) {
             $attributePointStore = newPoints;
-            $valueRWStore = newValue;
+            $valueStore = newValue;
          }
       }
    }
@@ -79,25 +67,18 @@
       if (!isMinLimit) add(-1);
    };
 
+   let activeModal = null;
+   let isModalOpen = $state(false);
+
    function handleEscape(e) {
       if (e.key === "Escape" && activeModal) {
          e.preventDefault();
          e.stopImmediatePropagation();
-         e.stopPropagation();
          unmount(activeModal);
          isModalOpen = false;
          activeModal = null;
       }
    }
-
-   onDestroy(() => {
-      StoreManager.Unsubscribe(actor);
-      if (activeModal) {
-         unmount(activeModal);
-         isModalOpen = false;
-         activeModal = null;
-      }
-   });
 
    async function Roll(e) {
       if (e.shiftKey) {
@@ -110,7 +91,7 @@
                props: {
                   actor,
                   config: CONFIG.sr3e,
-                  caller: { key, value: $valueROStore.value, type: "attribute", dice: $valueROStore.sum },
+                  caller: { key, value: $valueStore, type: "attribute", dice: $valueStore },
                   onclose: (result) => {
                      unmount(activeModal);
                      isModalOpen = false;
@@ -125,7 +106,7 @@
             await actor.AttributeRoll(options.dice, options.attributeName, options.options);
          }
       } else {
-         await actor.AttributeRoll($valueROStore.sum, key);
+         await actor.AttributeRoll($valueStore, key);
       }
 
       e.preventDefault();
@@ -150,7 +131,7 @@
             ></i>
          {/if}
 
-         <h1 class="stat-value">{$valueROStore.sum}</h1>
+         <h1 class="stat-value">{$valueStore}</h1>
          {#if key !== "reaction"}
             <i
                class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
@@ -176,7 +157,7 @@
       <div class="stat-card-background"></div>
 
       <div class="stat-label">
-         <h1 class="stat-value">{$valueROStore.sum}</h1>
+         <h1 class="stat-value">{$valueStore}</h1>
       </div>
    </div>
 {/if}

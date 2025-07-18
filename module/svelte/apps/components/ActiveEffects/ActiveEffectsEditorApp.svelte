@@ -111,7 +111,7 @@
       }
 
       const newOptions = rawPaths
-         .filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod"))
+         .filter((path) => allowedPatterns.some((p) => path.startsWith(p)))
          .map((path) => ({
             value: path,
             label: getLocalizedPath(path),
@@ -124,9 +124,9 @@
    });
 
    function getLocalizedPath(path) {
-      if (!path.startsWith("system.") || !path.endsWith(".mod")) return path;
+      if (!path.startsWith("system.")) return path;
 
-      const configPath = path.replace(/^system\./, "").replace(/\.mod$/, "");
+      const configPath = path.replace(/^system\./, "");
       const segments = configPath.split(".");
 
       const localizedSegments = segments.map((segment) => {

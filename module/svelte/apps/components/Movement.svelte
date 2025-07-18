@@ -6,22 +6,19 @@
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
 
-   let { actor = {}, config = {}, id = {}, span = {} } = $props();
+   let { actor, config, id, span } = $props();
 
    const storeManager = StoreManager.Subscribe(actor);
    onDestroy(() => StoreManager.Unsubscribe(actor));
 
-   let quickness = storeManager.GetSumROStore("attributes.quickness");
+   const quickness = storeManager.GetRWStore("attributes.quickness");
 
-   let walking = storeManager.GetSumROStore("movement.walking");
-   let walkingValueStore = storeManager.GetRWStore("movement.walking.value");
-
-   let running = storeManager.GetSumROStore("movement.running");
-   let runningValueStore = storeManager.GetRWStore("movement.running.value");
+   const walking = storeManager.GetRWStore("movement.walking");
+   const running = storeManager.GetRWStore("movement.running");
 
    $effect(() => {
-      $walkingValueStore = $quickness.sum;
-      $runningValueStore = $quickness.sum;
+      $walking = $quickness;
+      $running = $quickness;
    });
 </script>
 
@@ -29,6 +26,6 @@
 <h1>{localize(config.movement.movement)}</h1>
 
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard {actor} label={config.movement.walking} value={$walking.sum} />
-   <StatCard {actor} label={config.movement.running} value={$running.sum} />
+   <StatCard {actor} label={config.movement.walking} value={$walking} />
+   <StatCard {actor} label={config.movement.running} value={$running} />
 </MasonryGrid>

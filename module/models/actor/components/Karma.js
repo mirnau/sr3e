@@ -7,7 +7,10 @@ export default class KarmaModel extends foundry.abstract.TypeDataModel {
             initial: 0,
             integer: true,
          }),
-         karmaPool: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+         karmaPool: new foundry.data.fields.NumberField({
+            initial: 0,
+            required: true,
+         }),
 
          //NOTE: Used to calculate the current karma pool reset, not exposed to the player
          karmaPoolCeiling: new foundry.data.fields.NumberField({

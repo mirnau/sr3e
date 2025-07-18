@@ -68,7 +68,6 @@ export class StoreManager {
          storeManagers.delete(document.id);
       }
    }
-
    GetRWStore(dataPath) {
       const fullPath = `system.${dataPath}`;
       const initial = foundry.utils.getProperty(this.#document.system, dataPath);
@@ -82,22 +81,26 @@ export class StoreManager {
 
          const unsub = store.subscribe((v) => {
             if (muted) return;
+
             foundry.utils.setProperty(this.#document.system, dataPath, v);
             this.#document.update({ [fullPath]: v }, { render: false });
          });
 
          const docType = this.#document.documentName;
-         const hook = (doc) => {
+         const updateHook = (doc) => {
             if (doc.id !== this.#document.id) return;
-            const v = foundry.utils.getProperty(doc.system, dataPath);
+
+            const newVal = foundry.utils.getProperty(doc.system, dataPath);
             muted = true;
-            store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
+            store.set(
+               newVal && typeof newVal === "object" ? (Array.isArray(newVal) ? [...newVal] : { ...newVal }) : newVal
+            );
             muted = false;
          };
 
-         Hooks.on(`update${docType}`, hook);
+         Hooks.on(`update${docType}`, updateHook);
          this.#hookDisposers.set(dataPath, () => {
-            Hooks.off(`update${docType}`, hook);
+            Hooks.off(`update${docType}`, updateHook);
             unsub();
          });
 
@@ -105,58 +108,6 @@ export class StoreManager {
       }
 
       return this.#persistentStore[dataPath];
-   }
-
- GetROStore(dataPath) {
-   const key = `RO:${dataPath}`;
-   const initial = foundry.utils.getProperty(this.#document.system, dataPath);
-
-   if (!this.#persistentStore[key]) {
-      const store = writable(
-         initial && typeof initial === "object"
-            ? (Array.isArray(initial) ? [...initial] : { ...initial })
-            : initial
-      );
-
-      const docType = this.#document.documentName;
-
-      const updateHook = (doc) => {
-         if (doc.id !== this.#document.id) return;
-         const v = foundry.utils.getProperty(doc.system, dataPath);
-         store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
-      };
-
-      const recalcHook = (actor) => {
-         if (actor.id !== this.#document.id) return;
-         const v = foundry.utils.getProperty(actor.system, dataPath);
-         store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
-      };
-
-      Hooks.on(`update${docType}`, updateHook);
-      Hooks.on("actorSystemRecalculated", recalcHook);
-
-      this.#hookDisposers.set(key, () => {
-         Hooks.off(`update${docType}`, updateHook);
-         Hooks.off("actorSystemRecalculated", recalcHook);
-      });
-
-      this.#persistentStore[key] = store;
-   }
-
-   return this.#persistentStore[key];
-}
-
-   GetSumROStore(dataPath) {
-      const value = this.GetRWStore(`${dataPath}.value`);
-      const mod = this.GetROStore(`${dataPath}.mod`); //Renders .mod stale, and preventes reactive updates
-
-      const total = derived([value, mod], ([$value, $mod]) => ({
-         value: $value,
-         mod: $mod,
-         sum: $value + $mod,
-      }));
-
-      return total;
    }
 
    GetShallowStore(docId, storeName, customValue = null) {

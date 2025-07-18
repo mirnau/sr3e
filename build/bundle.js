@@ -124,19 +124,50 @@ let AttributesModel$1 = class AttributesModel extends foundry.abstract.TypeDataM
   static defineSchema() {
     return {
       // Attributes using ComplexStat (with meta)
-      body: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      quickness: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      strength: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      charisma: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      intelligence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      willpower: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      body: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      quickness: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      strength: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      charisma: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      intelligence: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      willpower: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
       // NOTE: Active Effect driven attributes
-      reaction: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      magic: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      essence: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      initiative: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      reaction: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      magic: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      essence: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      initiative: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
       isBurnedOut: new foundry.data.fields.BooleanField({
-        initial: false
+        initial: false,
+        required: true
       })
     };
   }
@@ -175,7 +206,10 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
         initial: 0,
         integer: true
       }),
-      karmaPool: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      karmaPool: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
       //NOTE: Used to calculate the current karma pool reset, not exposed to the player
       karmaPoolCeiling: new foundry.data.fields.NumberField({
         required: true,
@@ -249,19 +283,40 @@ class HealthModel extends foundry.abstract.TypeDataModel {
 class DicePoolsModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      combat: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      astral: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      hacking: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      control: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      spell: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+      combat: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      astral: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      hacking: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      control: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      spell: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      })
     };
   }
 }
 class AttributesModel2 extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      walking: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
-      running: new foundry.data.fields.SchemaField(SimpleStat.defineSchema())
+      walking: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      }),
+      running: new foundry.data.fields.NumberField({
+        initial: 0,
+        required: true
+      })
     };
   }
 }
@@ -276,7 +331,7 @@ class CharacterModel extends foundry.abstract.TypeDataModel {
       karma: new foundry.data.fields.SchemaField(KarmaModel.defineSchema()),
       health: new foundry.data.fields.SchemaField(HealthModel.defineSchema()),
       journalEntryUuid: new foundry.data.fields.StringField({
-        required: false,
+        required: true,
         initial: ""
       })
     };
@@ -3684,53 +3739,21 @@ const _StoreManager = class _StoreManager {
         __privateGet(this, _document).update({ [fullPath]: v }, { render: false });
       });
       const docType = __privateGet(this, _document).documentName;
-      const hook = (doc) => {
+      const updateHook = (doc) => {
         if (doc.id !== __privateGet(this, _document).id) return;
-        const v = foundry.utils.getProperty(doc.system, dataPath);
+        const newVal = foundry.utils.getProperty(doc.system, dataPath);
         muted = true;
-        store.set(v && typeof v === "object" ? Array.isArray(v) ? [...v] : { ...v } : v);
+        store.set(newVal && typeof newVal === "object" ? Array.isArray(newVal) ? [...newVal] : { ...newVal } : newVal);
         muted = false;
       };
-      Hooks.on(`update${docType}`, hook);
+      Hooks.on(`update${docType}`, updateHook);
       __privateGet(this, _hookDisposers).set(dataPath, () => {
-        Hooks.off(`update${docType}`, hook);
+        Hooks.off(`update${docType}`, updateHook);
         unsub();
       });
       __privateGet(this, _persistentStore)[dataPath] = store;
     }
     return __privateGet(this, _persistentStore)[dataPath];
-  }
-  GetROStore(dataPath) {
-    const key = `RO:${dataPath}`;
-    const initial = foundry.utils.getProperty(__privateGet(this, _document).system, dataPath);
-    if (!__privateGet(this, _persistentStore)[key]) {
-      const store = writable(initial && typeof initial === "object" ? Array.isArray(initial) ? [...initial] : { ...initial } : initial);
-      const docType = __privateGet(this, _document).documentName;
-      const updateHook = (doc) => {
-        if (doc.id !== __privateGet(this, _document).id) return;
-        const v = foundry.utils.getProperty(doc.system, dataPath);
-        store.set(v && typeof v === "object" ? Array.isArray(v) ? [...v] : { ...v } : v);
-      };
-      const recalcHook = (actor) => {
-        if (actor.id !== __privateGet(this, _document).id) return;
-        const v = foundry.utils.getProperty(actor.system, dataPath);
-        store.set(v && typeof v === "object" ? Array.isArray(v) ? [...v] : { ...v } : v);
-      };
-      Hooks.on(`update${docType}`, updateHook);
-      Hooks.on("actorSystemRecalculated", recalcHook);
-      __privateGet(this, _hookDisposers).set(key, () => {
-        Hooks.off(`update${docType}`, updateHook);
-        Hooks.off("actorSystemRecalculated", recalcHook);
-      });
-      __privateGet(this, _persistentStore)[key] = store;
-    }
-    return __privateGet(this, _persistentStore)[key];
-  }
-  GetSumROStore(dataPath) {
-    const value = this.GetRWStore(`${dataPath}.value`);
-    const mod = this.GetROStore(`${dataPath}.mod`);
-    const total = derived([value, mod], ([$value, $mod]) => ({ value: $value, mod: $mod, sum: $value + $mod }));
-    return total;
   }
   GetShallowStore(docId, storeName, customValue = null) {
     var _a;
@@ -4541,7 +4564,7 @@ function RollComposerComponent($$anchor, $$props) {
         class: "karma-counter",
         min: "0",
         get max() {
-          return $displayCurrentDicePoolStore().sum;
+          return $displayCurrentDicePoolStore();
         },
         onIncrement: AddDiceFromPool,
         onDecrement: RemoveDiceFromPool,
@@ -4630,52 +4653,48 @@ function AttributeCard($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $isShoppingState = () => store_get(isShoppingState, "$isShoppingState", $$stores);
   const $attributeAssignmentLockedStore = () => store_get(attributeAssignmentLockedStore, "$attributeAssignmentLockedStore", $$stores);
-  const $valueROStore = () => store_get(valueROStore, "$valueROStore", $$stores);
+  const $valueStore = () => store_get(valueStore, "$valueStore", $$stores);
   const $attributePointStore = () => store_get(attributePointStore, "$attributePointStore", $$stores);
-  const $valueRWStore = () => store_get(get$1(valueRWStore), "$valueRWStore", $$stores);
   const storeManager2 = StoreManager.Subscribe($$props.actor);
-  let valueROStore = storeManager2.GetSumROStore(`attributes.${$$props.key}`);
-  let baseValueStore = storeManager2.GetRWStore(`attributes.${$$props.key}.value`);
+  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
+  let valueStore = storeManager2.GetRWStore(`attributes.${$$props.key}`);
   let attributePointStore = storeManager2.GetRWStore("creation.attributePoints");
   let isShoppingState = storeManager2.GetFlagStore(flags.actor.isShoppingState);
   let attributeAssignmentLockedStore = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
   let metatype = /* @__PURE__ */ derived$1(() => $$props.actor.items.find((i) => i.type === "metatype") || []);
   let attributeLimit = /* @__PURE__ */ derived$1(() => $$props.key === "magic" ? null : get$1(metatype).system.attributeLimits[$$props.key] ?? 0);
   let committedValue = null;
-  user_effect(() => {
-    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue === null) {
-      committedValue = $valueROStore().value;
-    }
-  });
   let isMinLimit = state(false);
   user_effect(() => {
-    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue !== null) {
-      set(isMinLimit, $valueROStore().value <= committedValue);
-    } else {
-      set(isMinLimit, $valueROStore().value <= 1);
+    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue === null) {
+      committedValue = $valueStore();
     }
   });
-  storeManager2.GetShallowStore($$props.actor.id, stores$1.dicepoolSelection);
-  let valueRWStore = /* @__PURE__ */ derived$1(() => $isShoppingState() && !$attributeAssignmentLockedStore() ? baseValueStore : null);
   user_effect(() => {
-    if (!$attributeAssignmentLockedStore() && $isShoppingState() && $valueROStore().value + $valueROStore().mod < 1 && $valueROStore().mod < 0 && get$1(valueRWStore)) {
-      let deficit = 1 - ($valueROStore().value + $valueROStore().mod);
+    if ($isShoppingState() && $attributeAssignmentLockedStore() && committedValue !== null) {
+      set(isMinLimit, $valueStore() <= committedValue);
+    } else {
+      set(isMinLimit, $valueStore() <= 1);
+    }
+  });
+  user_effect(() => {
+    if (!$attributeAssignmentLockedStore() && $isShoppingState() && $valueStore() < 1) {
+      let deficit = 1 - $valueStore();
       while (deficit > 0 && $attributePointStore() > 0) {
         store_set(attributePointStore, $attributePointStore() - 1);
-        store_set(get$1(valueRWStore), $valueRWStore() + 1);
+        store_set(valueStore, $valueStore() + 1);
         deficit -= 1;
       }
     }
   });
-  let activeModal = null;
-  let isModalOpen = state(false);
   function add(change) {
-    if (!$attributeAssignmentLockedStore() && $isShoppingState() && get$1(valueRWStore)) {
+    if (!$attributeAssignmentLockedStore() && $isShoppingState()) {
       const newPoints = $attributePointStore() - change;
-      const newValue = $valueRWStore() + change;
+      const newValue = $valueStore() + change;
       if (newPoints >= 0 && (get$1(attributeLimit) === null || newValue <= get$1(attributeLimit))) {
         store_set(attributePointStore, newPoints);
-        store_set(get$1(valueRWStore), newValue);
+        store_set(valueStore, newValue);
       }
     }
   }
@@ -4683,24 +4702,17 @@ function AttributeCard($$anchor, $$props) {
   const decrement2 = () => {
     if (!get$1(isMinLimit)) add(-1);
   };
+  let activeModal = null;
+  let isModalOpen = state(false);
   function handleEscape(e) {
     if (e.key === "Escape" && activeModal) {
       e.preventDefault();
       e.stopImmediatePropagation();
-      e.stopPropagation();
       unmount(activeModal);
       set(isModalOpen, false);
       activeModal = null;
     }
   }
-  onDestroy(() => {
-    StoreManager.Unsubscribe($$props.actor);
-    if (activeModal) {
-      unmount(activeModal);
-      set(isModalOpen, false);
-      activeModal = null;
-    }
-  });
   async function Roll2(e) {
     if (e.shiftKey) {
       if (get$1(isModalOpen)) return;
@@ -4713,9 +4725,9 @@ function AttributeCard($$anchor, $$props) {
             config: CONFIG.sr3e,
             caller: {
               key: $$props.key,
-              value: $valueROStore().value,
+              value: $valueStore(),
               type: "attribute",
-              dice: $valueROStore().sum
+              dice: $valueStore()
             },
             onclose: (result) => {
               unmount(activeModal);
@@ -4730,7 +4742,7 @@ function AttributeCard($$anchor, $$props) {
         await $$props.actor.AttributeRoll(options.dice, options.attributeName, options.options);
       }
     } else {
-      await $$props.actor.AttributeRoll($valueROStore().sum, $$props.key);
+      await $$props.actor.AttributeRoll($valueStore(), $$props.key);
     }
     e.preventDefault();
   }
@@ -4774,7 +4786,7 @@ function AttributeCard($$anchor, $$props) {
       template_effect(
         ($0) => {
           set_text(text2, $0);
-          set_text(text_1, $valueROStore().sum);
+          set_text(text_1, $valueStore());
         },
         [
           () => localize($$props.localization[$$props.key])
@@ -4794,7 +4806,7 @@ function AttributeCard($$anchor, $$props) {
       template_effect(
         ($0) => {
           set_text(text_2, $0);
-          set_text(text_3, $valueROStore().sum);
+          set_text(text_3, $valueStore());
         },
         [
           () => localize($$props.localization[$$props.key])
@@ -6370,12 +6382,136 @@ function setupMasonry({
   };
   return { masonryInstance: msnry, cleanup };
 }
+var root$K = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
+function MasonryGrid($$anchor, $$props) {
+  push($$props, true);
+  let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
+  let gridContainer;
+  let masonryInstance;
+  user_effect(() => {
+    if (!masonryInstance) {
+      parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const result = setupMasonry({
+        container: gridContainer,
+        itemSelector: `.${itemSelector()}`,
+        gridSizerSelector: `.${gridPrefix()}-grid-sizer`,
+        gutterSizerSelector: `.${gridPrefix()}-gutter-sizer`
+        //minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
+      });
+      masonryInstance = result.masonryInstance;
+      return result.cleanup;
+    }
+  });
+  user_effect(async () => {
+    gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
+  });
+  var div = root$K();
+  var div_1 = child(div);
+  var div_2 = sibling(div_1, 2);
+  var node = sibling(div_2, 2);
+  snippet(node, () => $$props.children ?? noop);
+  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
+  template_effect(() => {
+    set_class(div, `${gridPrefix()}-masonry-grid`);
+    set_class(div_1, `${gridPrefix()}-grid-sizer`);
+    set_class(div_2, `${gridPrefix()}-gutter-sizer`);
+  });
+  event$1("masonry-reflow", div, () => {
+    masonryInstance.layout();
+  });
+  append($$anchor, div);
+  pop();
+}
+var root_1$r = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root$J = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
+function Attributes($$anchor, $$props) {
+  push($$props, true);
+  const [$$stores, $$cleanup] = setup_stores();
+  const $magic = () => store_get(magic, "$magic", $$stores);
+  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  const attributes = proxy($$props.actor.system.attributes);
+  const items = proxy($$props.actor.items);
+  storeManager2.GetFlagStore(flags.attributeAssignmentLocked);
+  const intelligence = storeManager2.GetRWStore("attributes.intelligence");
+  const quickness = storeManager2.GetRWStore("attributes.quickness");
+  const reaction = storeManager2.GetRWStore("attributes.reaction");
+  const magic = storeManager2.GetRWStore("attributes.magic");
+  storeManager2.GetRWStore("attributes.essence");
+  let isAwakened = state(false);
+  user_effect(() => {
+    set(isAwakened, proxy(items.some((item2) => item2.type === "magic") && !$magic().isBurnedOut));
+  });
+  user_effect(() => {
+    store_set(reaction, proxy(Math.floor(($intelligence() + $quickness()) * 0.5)));
+  });
+  onDestroy(() => {
+    StoreManager.Unsubscribe($$props.actor);
+  });
+  var fragment = root$J();
+  var node = first_child(fragment);
+  CardToolbar(node, {
+    get id() {
+      return $$props.id;
+    }
+  });
+  var h1 = sibling(node, 2);
+  var text2 = child(h1);
+  var node_1 = sibling(h1, 2);
+  MasonryGrid(node_1, {
+    itemSelector: "stat-card",
+    gridPrefix: "attribute",
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_1 = root_1$r();
+      var node_2 = first_child(fragment_1);
+      each(node_2, 17, () => Object.keys(attributes).slice(0, 7), index, ($$anchor3, key) => {
+        AttributeCard($$anchor3, {
+          get actor() {
+            return $$props.actor;
+          },
+          get localization() {
+            return $$props.config.attributes;
+          },
+          get key() {
+            return get$1(key);
+          }
+        });
+      });
+      var node_3 = sibling(node_2, 2);
+      {
+        var consequent = ($$anchor3) => {
+          AttributeCard($$anchor3, {
+            get actor() {
+              return $$props.actor;
+            },
+            get localization() {
+              return $$props.config.attributes;
+            },
+            key: "magic"
+          });
+        };
+        if_block(node_3, ($$render) => {
+          if (get$1(isAwakened)) $$render(consequent);
+        });
+      }
+      append($$anchor2, fragment_1);
+    },
+    $$slots: { default: true }
+  });
+  template_effect(($0) => set_text(text2, $0), [
+    () => localize($$props.config.attributes.attributes)
+  ]);
+  append($$anchor, fragment);
+  pop();
+  $$cleanup();
+}
 const handleKeyDown$1 = (e, provideSelectedDicepool) => {
   if (e.key === "Enter" || e.key === " ") provideSelectedDicepool(e);
 };
 var root_2$i = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_4$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_1$r = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
+var root_1$q = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
 var root_6$5 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_5$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
@@ -6401,7 +6537,7 @@ function StatCard$1($$anchor, $$props) {
   var node = first_child(fragment);
   {
     var consequent_2 = ($$anchor2) => {
-      var div = root_1$r();
+      var div = root_1$q();
       div.__click = provideSelectedDicepool;
       div.__keydown = [handleKeyDown$1, provideSelectedDicepool];
       var node_1 = sibling(child(div), 2);
@@ -6485,180 +6621,53 @@ function StatCard$1($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click", "keydown"]);
-var root$K = /* @__PURE__ */ template(`<div><div></div> <div></div> <!></div>`);
-function MasonryGrid($$anchor, $$props) {
-  push($$props, true);
-  let itemSelector = prop($$props, "itemSelector", 3, ""), gridPrefix = prop($$props, "gridPrefix", 3, "");
-  let gridContainer;
-  let masonryInstance;
-  user_effect(() => {
-    if (!masonryInstance) {
-      parseFloat(getComputedStyle(document.documentElement).fontSize);
-      const result = setupMasonry({
-        container: gridContainer,
-        itemSelector: `.${itemSelector()}`,
-        gridSizerSelector: `.${gridPrefix()}-grid-sizer`,
-        gutterSizerSelector: `.${gridPrefix()}-gutter-sizer`
-        //minItemWidth: masonryMinWidthFallbackValue.attributeGrid * rem,
-      });
-      masonryInstance = result.masonryInstance;
-      return result.cleanup;
-    }
-  });
-  user_effect(async () => {
-    gridContainer == null ? void 0 : gridContainer.dispatchEvent(new CustomEvent("masonry-reflow", { bubbles: true }));
-  });
-  var div = root$K();
-  var div_1 = child(div);
-  var div_2 = sibling(div_1, 2);
-  var node = sibling(div_2, 2);
-  snippet(node, () => $$props.children ?? noop);
-  bind_this(div, ($$value) => gridContainer = $$value, () => gridContainer);
-  template_effect(() => {
-    set_class(div, `${gridPrefix()}-masonry-grid`);
-    set_class(div_1, `${gridPrefix()}-grid-sizer`);
-    set_class(div_2, `${gridPrefix()}-gutter-sizer`);
-  });
-  event$1("masonry-reflow", div, () => {
-    masonryInstance.layout();
-  });
-  append($$anchor, div);
-  pop();
-}
-var root_1$q = /* @__PURE__ */ template(`<!> <!>`, 1);
-var root$J = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
-function Attributes($$anchor, $$props) {
-  push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
-  const $quickness = () => store_get(quickness, "$quickness", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let attributes = proxy(actor().system.attributes);
-  proxy(actor().items);
-  let isAwakened = state(false);
-  let localization = config().attributes;
-  let storeManager2 = StoreManager.Subscribe(actor());
-  storeManager2.GetFlagStore(flags.attributeAssignmentLocked);
-  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
-  let quickness = storeManager2.GetSumROStore("attributes.quickness");
-  storeManager2.GetSumROStore("attributes.magic");
-  storeManager2.GetSumROStore("attributes.essence");
-  storeManager2.GetSumROStore("attributes.reaction");
-  let reactionValue = storeManager2.GetRWStore("attributes.reaction.value");
-  user_effect(() => {
-    store_set(reactionValue, proxy(Math.floor(($intelligence().sum + $quickness().sum) * 0.5)));
-  });
-  user_effect(() => {
-    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
-  });
-  onDestroy(() => {
-    StoreManager.Unsubscribe(actor());
-  });
-  var fragment = root$J();
-  var node = first_child(fragment);
-  CardToolbar(node, {
-    get id() {
-      return id();
-    }
-  });
-  var h1 = sibling(node, 2);
-  var text2 = child(h1);
-  var node_1 = sibling(h1, 2);
-  MasonryGrid(node_1, {
-    itemSelector: "stat-card",
-    gridPrefix: "attribute",
-    children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_1$q();
-      var node_2 = first_child(fragment_1);
-      each(node_2, 17, () => Object.keys(attributes).slice(0, 7), index, ($$anchor3, key) => {
-        AttributeCard($$anchor3, {
-          get actor() {
-            return actor();
-          },
-          localization,
-          get key() {
-            return get$1(key);
-          }
-        });
-      });
-      var node_3 = sibling(node_2, 2);
-      {
-        var consequent = ($$anchor3) => {
-          AttributeCard($$anchor3, {
-            get actor() {
-              return actor();
-            },
-            localization,
-            key: "magic"
-          });
-        };
-        if_block(node_3, ($$render) => {
-          if (get$1(isAwakened)) $$render(consequent);
-        });
-      }
-      append($$anchor2, fragment_1);
-    },
-    $$slots: { default: true }
-  });
-  template_effect(($0) => set_text(text2, $0), [() => localize(localization.attributes)]);
-  append($$anchor, fragment);
-  pop();
-  $$cleanup();
-}
 var root_2$h = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$p = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$I = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $magic = () => store_get(magic, "$magic", $$stores);
+  const $control = () => store_get(control, "$control", $$stores);
   const $reaction = () => store_get(reaction, "$reaction", $$stores);
+  const $combat = () => store_get(combat2, "$combat", $$stores);
   const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $willpower = () => store_get(willpower, "$willpower", $$stores);
-  const $charisma = () => store_get(charisma, "$charisma", $$stores);
-  const $magic = () => store_get(magic, "$magic", $$stores);
-  const $combat = () => store_get(combat2, "$combat", $$stores);
-  const $control = () => store_get(control, "$control", $$stores);
-  const $hacking = () => store_get(hacking, "$hacking", $$stores);
   const $astral = () => store_get(astral, "$astral", $$stores);
+  const $charisma = () => store_get(charisma, "$charisma", $$stores);
   const $spell = () => store_get(spell, "$spell", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
+  const $hacking = () => store_get(hacking, "$hacking", $$stores);
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  const intelligence = storeManager2.GetRWStore("attributes.intelligence");
+  const willpower = storeManager2.GetRWStore("attributes.willpower");
+  const charisma = storeManager2.GetRWStore("attributes.charisma");
+  const quickness = storeManager2.GetRWStore("attributes.quickness");
+  const reaction = storeManager2.GetRWStore("attributes.reaction");
+  const magic = storeManager2.GetRWStore("attributes.magic");
+  const combat2 = storeManager2.GetRWStore("dicePools.combat");
+  const control = storeManager2.GetRWStore("dicePools.control");
+  const hacking = storeManager2.GetRWStore("dicePools.hacking");
+  const astral = storeManager2.GetRWStore("dicePools.astral");
+  const spell = storeManager2.GetRWStore("dicePools.spell");
   let isAwakened = state(false);
   user_effect(() => {
-    set(isAwakened, proxy(actor().items.some((item2) => item2.type === "magic") && !actor().system.attributes.magic.isBurnedOut));
+    set(isAwakened, proxy($$props.actor.items.some((i) => i.type === "magic") && !$magic().isBurnedOut));
   });
-  const storeManager2 = StoreManager.Subscribe(actor());
-  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
-  let willpower = storeManager2.GetSumROStore("attributes.willpower");
-  let charisma = storeManager2.GetSumROStore("attributes.charisma");
-  let quickness = storeManager2.GetSumROStore("attributes.quickness");
-  let reaction = storeManager2.GetSumROStore("attributes.reaction");
-  let magic = storeManager2.GetSumROStore("attributes.magic");
-  let combat2 = storeManager2.GetSumROStore("dicePools.combat");
-  let combatValueStore = storeManager2.GetRWStore("dicePools.combat.value");
-  let control = storeManager2.GetSumROStore("dicePools.control");
-  let controlValueStore = storeManager2.GetRWStore("dicePools.control.value");
-  let hacking = storeManager2.GetSumROStore("dicePools.hacking");
-  let astral = storeManager2.GetSumROStore("dicePools.astral");
-  let astralValueStore = storeManager2.GetRWStore("dicePools.astral.value");
-  let spell = storeManager2.GetSumROStore("dicePools.spell");
-  let spellValueStore = storeManager2.GetRWStore("dicePools.spell.value");
   user_effect(() => {
-    store_set(controlValueStore, proxy($reaction().sum));
-    store_set(combatValueStore, proxy(Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5)));
-    store_set(astralValueStore, proxy(Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5)));
-    store_set(spellValueStore, proxy(Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5)));
+    store_set(control, proxy($reaction()));
+    store_set(combat2, proxy(Math.floor(($intelligence() + $quickness() + $willpower()) * 0.5)));
+    store_set(astral, proxy(Math.floor(($intelligence() + $charisma() + $willpower()) * 0.5)));
+    store_set(spell, proxy(Math.floor(($intelligence() + $magic() + $willpower()) * 0.5)));
   });
   onDestroy(() => {
-    StoreManager.Unsubscribe(actor());
+    StoreManager.Unsubscribe($$props.actor);
   });
   var fragment = root$I();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
-      return id();
+      return $$props.id;
     }
   });
   var h1 = sibling(node, 2);
@@ -6672,13 +6681,13 @@ function DicePools($$anchor, $$props) {
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get document() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
-          return config().dicepools.combat;
+          return $$props.config.dicepools.combat;
         },
         get value() {
-          return $combat().sum;
+          return $combat();
         },
         key: "combat",
         isButton: true
@@ -6686,13 +6695,13 @@ function DicePools($$anchor, $$props) {
       var node_3 = sibling(node_2, 2);
       StatCard$1(node_3, {
         get document() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
-          return config().dicepools.control;
+          return $$props.config.dicepools.control;
         },
         get value() {
-          return $control().sum;
+          return $control();
         },
         key: "control",
         isButton: true
@@ -6700,13 +6709,13 @@ function DicePools($$anchor, $$props) {
       var node_4 = sibling(node_3, 2);
       StatCard$1(node_4, {
         get document() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
-          return config().dicepools.hacking;
+          return $$props.config.dicepools.hacking;
         },
         get value() {
-          return $hacking().sum;
+          return $hacking();
         },
         key: "hacking",
         isButton: true
@@ -6718,13 +6727,13 @@ function DicePools($$anchor, $$props) {
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
             get document() {
-              return actor();
+              return $$props.actor;
             },
             get label() {
-              return config().dicepools.astral;
+              return $$props.config.dicepools.astral;
             },
             get value() {
-              return $astral().sum;
+              return $astral();
             },
             key: "astral",
             isButton: true
@@ -6732,13 +6741,13 @@ function DicePools($$anchor, $$props) {
           var node_7 = sibling(node_6, 2);
           StatCard$1(node_7, {
             get document() {
-              return actor();
+              return $$props.actor;
             },
             get label() {
-              return config().dicepools.spell;
+              return $$props.config.dicepools.spell;
             },
             get value() {
-              return $spell().sum;
+              return $spell();
             },
             key: "spell",
             isButton: true
@@ -6754,7 +6763,7 @@ function DicePools($$anchor, $$props) {
     $$slots: { default: true }
   });
   template_effect(($0) => set_text(text2, $0), [
-    () => localize(config().dicepools.dicepools)
+    () => localize($$props.config.dicepools.dicepools)
   ]);
   append($$anchor, fragment);
   pop();
@@ -6765,27 +6774,23 @@ var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $walking = () => store_get(walking, "$walking", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $running = () => store_get(running, "$running", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  const storeManager2 = StoreManager.Subscribe(actor());
-  onDestroy(() => StoreManager.Unsubscribe(actor()));
-  let quickness = storeManager2.GetSumROStore("attributes.quickness");
-  let walking = storeManager2.GetSumROStore("movement.walking");
-  let walkingValueStore = storeManager2.GetRWStore("movement.walking.value");
-  let running = storeManager2.GetSumROStore("movement.running");
-  let runningValueStore = storeManager2.GetRWStore("movement.running.value");
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
+  const quickness = storeManager2.GetRWStore("attributes.quickness");
+  const walking = storeManager2.GetRWStore("movement.walking");
+  const running = storeManager2.GetRWStore("movement.running");
   user_effect(() => {
-    store_set(walkingValueStore, proxy($quickness().sum));
-    store_set(runningValueStore, proxy($quickness().sum));
+    store_set(walking, proxy($quickness()));
+    store_set(running, proxy($quickness()));
   });
   var fragment = root$H();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
-      return id();
+      return $$props.id;
     }
   });
   var h1 = sibling(node, 2);
@@ -6799,25 +6804,25 @@ function Movement($$anchor, $$props) {
       var node_2 = first_child(fragment_1);
       StatCard$1(node_2, {
         get actor() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
-          return config().movement.walking;
+          return $$props.config.movement.walking;
         },
         get value() {
-          return $walking().sum;
+          return $walking();
         }
       });
       var node_3 = sibling(node_2, 2);
       StatCard$1(node_3, {
         get actor() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
-          return config().movement.running;
+          return $$props.config.movement.running;
         },
         get value() {
-          return $running().sum;
+          return $running();
         }
       });
       append($$anchor2, fragment_1);
@@ -6825,7 +6830,7 @@ function Movement($$anchor, $$props) {
     $$slots: { default: true }
   });
   template_effect(($0) => set_text(text2, $0), [
-    () => localize(config().movement.movement)
+    () => localize($$props.config.movement.movement)
   ]);
   append($$anchor, fragment);
   pop();
@@ -6984,18 +6989,16 @@ function Karma($$anchor, $$props) {
   const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
   const $essenceStore = () => store_get(essenceStore, "$essenceStore", $$stores);
   const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
-  let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
-  prop($$props, "span", 19, () => ({}));
-  let storeManager2 = StoreManager.Subscribe(actor());
-  let karmaPoolStore = storeManager2.GetSumROStore("karma.karmaPool");
-  let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
-  let essenceStore = storeManager2.GetSumROStore("attributes.essence");
-  let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  const karmaPoolStore = storeManager2.GetRWStore("karma.karmaPool");
+  const goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
+  const essenceStore = storeManager2.GetRWStore("attributes.essence");
+  const miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
   var fragment = root$F();
   var node = first_child(fragment);
   CardToolbar(node, {
     get id() {
-      return id();
+      return $$props.id;
     }
   });
   var h1 = sibling(node, 2);
@@ -7007,10 +7010,10 @@ function Karma($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$m();
       var node_2 = first_child(fragment_1);
-      const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
+      const expression = /* @__PURE__ */ derived$1(() => localize($$props.config.karma.goodkarma));
       StatCard$1(node_2, {
         get actor() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
           return get$1(expression);
@@ -7020,29 +7023,29 @@ function Karma($$anchor, $$props) {
         }
       });
       var node_3 = sibling(node_2, 2);
-      const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
+      const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.karma.karmapool));
       StatCard$1(node_3, {
         get actor() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
           return get$1(expression_1);
         },
         get value() {
-          return $karmaPoolStore().sum;
+          return $karmaPoolStore();
         }
       });
       var node_4 = sibling(node_3, 2);
-      const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
+      const expression_2 = /* @__PURE__ */ derived$1(() => localize($$props.config.attributes.essence));
       StatCard$1(node_4, {
         get actor() {
-          return actor();
+          return $$props.actor;
         },
         get label() {
           return get$1(expression_2);
         },
         get value() {
-          return $essenceStore().sum;
+          return $essenceStore();
         }
       });
       var node_5 = sibling(node_4, 2);
@@ -7052,22 +7055,19 @@ function Karma($$anchor, $$props) {
           var h4 = sibling(child(div), 2);
           var text_1 = child(h4);
           template_effect(($0) => set_text(text_1, $0), [
-            () => localize(config().karma.miraculoussurvival)
+            () => localize($$props.config.karma.miraculoussurvival)
           ]);
           append($$anchor3, div);
         };
-        var alternate = ($$anchor3) => {
-        };
         if_block(node_5, ($$render) => {
           if (!$miraculousSurvivalStore()) $$render(consequent);
-          else $$render(alternate, false);
         });
       }
       append($$anchor2, fragment_1);
     },
     $$slots: { default: true }
   });
-  template_effect(($0) => set_text(text2, $0), [() => localize(config().karma.karma)]);
+  template_effect(($0) => set_text(text2, $0), [() => localize($$props.config.karma.karma)]);
   append($$anchor, fragment);
   pop();
   $$cleanup();
@@ -9647,7 +9647,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         console.warn(`Unhandled target type: ${get$1(target)}`);
       }
     }
-    const newOptions = rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod")).map((path) => ({
+    const newOptions = rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p))).map((path) => ({
       value: path,
       label: getLocalizedPath(path)
     })).sort((a, b) => a.label.localeCompare(b.label));
@@ -9656,8 +9656,8 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
     }
   });
   function getLocalizedPath(path) {
-    if (!path.startsWith("system.") || !path.endsWith(".mod")) return path;
-    const configPath = path.replace(/^system\./, "").replace(/\.mod$/, "");
+    if (!path.startsWith("system.")) return path;
+    const configPath = path.replace(/^system\./, "");
     const segments = configPath.split(".");
     const localizedSegments = segments.map((segment) => {
       const configValue = getProperty($$props.config, `${segments[0]}.${segment}`);
@@ -11259,19 +11259,19 @@ function AttributePointsState($$anchor, $$props) {
   const $languagePointsStore = () => store_get(languagePointsStore, "$languagePointsStore", $$stores);
   const $intelligence = () => store_get(intelligence, "$intelligence", $$stores);
   const $attributeAssignmentLocked = () => store_get(attributeAssignmentLocked, "$attributeAssignmentLocked", $$stores);
-  let attributePointsText = localize($$props.config.attributes.attributes);
-  let activePointsText = localize($$props.config.skill.active);
-  let knowledgePointsText = localize($$props.config.skill.knowledge);
-  let languagePointsText = localize($$props.config.skill.language);
-  let storeManager2 = StoreManager.Subscribe($$props.actor);
-  let attributeAssignmentLocked = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
-  let intelligence = storeManager2.GetSumROStore("attributes.intelligence");
-  let attributePointsStore = storeManager2.GetRWStore("creation.attributePoints");
-  let activeSkillPointsStore = storeManager2.GetRWStore("creation.activePoints");
-  let knowledgePointsStore = storeManager2.GetRWStore("creation.knowledgePoints");
-  let languagePointsStore = storeManager2.GetRWStore("creation.languagePoints");
-  console.log("NEW ACTOR", $$props.actor);
-  let pointList = /* @__PURE__ */ derived$1(() => [
+  const attributePointsText = localize($$props.config.attributes.attributes);
+  const activePointsText = localize($$props.config.skill.active);
+  const knowledgePointsText = localize($$props.config.skill.knowledge);
+  const languagePointsText = localize($$props.config.skill.language);
+  const storeManager2 = StoreManager.Subscribe($$props.actor);
+  onDestroy(() => StoreManager.Unsubscribe($$props.actor));
+  const attributeAssignmentLocked = storeManager2.GetFlagStore(flags.actor.attributeAssignmentLocked);
+  const intelligence = storeManager2.GetRWStore("attributes.intelligence");
+  const attributePointsStore = storeManager2.GetRWStore("creation.attributePoints");
+  const activeSkillPointsStore = storeManager2.GetRWStore("creation.activePoints");
+  const knowledgePointsStore = storeManager2.GetRWStore("creation.knowledgePoints");
+  const languagePointsStore = storeManager2.GetRWStore("creation.languagePoints");
+  const pointList = /* @__PURE__ */ derived$1(() => [
     {
       value: $attributePointsStore(),
       text: attributePointsText
@@ -11290,11 +11290,11 @@ function AttributePointsState($$anchor, $$props) {
     }
   ]);
   user_effect(() => {
-    knowledgePointsStore.set($intelligence().sum * 5);
-    languagePointsStore.set(Math.floor($intelligence().sum * 1.5));
+    store_set(knowledgePointsStore, $intelligence() * 5);
+    store_set(languagePointsStore, proxy(Math.floor($intelligence() * 1.5)));
   });
   user_effect(() => {
-    if ($attributePointsStore() === 0 && $attributeAssignmentLocked() === false) {
+    if ($attributePointsStore() === 0 && !$attributeAssignmentLocked()) {
       (async () => {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
           window: {
@@ -11317,9 +11317,6 @@ function AttributePointsState($$anchor, $$props) {
         }
       })();
     }
-  });
-  onDestroy(() => {
-    StoreManager.Unsubscribe($$props.actor);
   });
   CreationPointList($$anchor, {
     get points() {
@@ -14284,14 +14281,14 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.profile.weight": get$1(characterWeight),
       "system.creation.attributePoints": remainingPoints,
       "system.creation.activePoints": selectedSkillObj.points,
-      "system.attributes.body.value": 1,
-      "system.attributes.strength.value": 1,
-      "system.attributes.charisma.value": 1,
-      "system.attributes.willpower.value": 1,
-      "system.attributes.quickness.value": 1,
-      "system.attributes.intelligence.value": 1,
-      "system.attributes.initiative.value": 1,
-      "system.karma.karmaPool.value": 1
+      "system.attributes.body": 1,
+      "system.attributes.strength": 1,
+      "system.attributes.charisma": 1,
+      "system.attributes.willpower": 1,
+      "system.attributes.quickness": 1,
+      "system.attributes.intelligence": 1,
+      "system.attributes.initiative": 1,
+      "system.karma.karmaPool": 1
     });
     await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
     const magic = get$1(magics).find((m) => m.id === get$1(selectedMagic));
@@ -14299,7 +14296,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       const worldMagic = game.items.get(magic.id);
       await actor().createEmbeddedDocuments("Item", [worldMagic.toObject()]);
       actor().setFlag(flags.sr3e, flags.actor.hasAwakened, true);
-      await actor().update({ "system.attributes.magic.value": 6 });
+      await actor().update({ "system.attributes.magic": 6 });
     }
     (_a = $$props.onSubmit) == null ? void 0 : _a.call($$props, true);
     console.log("Handle submit was exited");
@@ -14716,8 +14713,8 @@ class RollService {
     const storeManager2 = StoreManager.Subscribe(actor);
     const initiativeDiceStore = storeManager2.GetSumROStore("attributes.initiative");
     const reactionStore = storeManager2.GetSumROStore("attributes.reaction");
-    const initiativeDice = get(initiativeDiceStore).sum;
-    const reaction = get(reactionStore).sum;
+    const initiativeDice = get(initiativeDiceStore);
+    const reaction = get(reactionStore);
     StoreManager.Unsubscribe(actor);
     const roll = await new Roll(`${initiativeDice}d6`).evaluate();
     const totalInit = roll.total + reaction;
