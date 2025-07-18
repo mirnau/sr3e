@@ -5,7 +5,7 @@
    import { localize } from "../../../services/utilities.js";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
-   
+
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
    let isAwakened = $state(false);
@@ -40,9 +40,9 @@
 
    $effect(() => {
       $controlValueStore = $reaction.sum;
-      $combatValueStore = ($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5;
-      $astralValueStore = ($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5;
-      $spellValueStore = ($intelligence.sum + $magic.sum + $willpower.sum) * 0.5;
+      $combatValueStore = Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5);
+      $astralValueStore = Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5);
+      $spellValueStore = Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5);
    });
 
    onDestroy(() => {

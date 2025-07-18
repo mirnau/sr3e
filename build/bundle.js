@@ -5218,10 +5218,10 @@ function requireUtils() {
   })(utils);
   return utils.exports;
 }
-var item$1 = { exports: {} };
+var item = { exports: {} };
 var hasRequiredItem;
 function requireItem() {
-  if (hasRequiredItem) return item$1.exports;
+  if (hasRequiredItem) return item.exports;
   hasRequiredItem = 1;
   (function(module) {
     (function(window2, factory) {
@@ -5569,8 +5569,8 @@ function requireItem() {
       };
       return Item2;
     });
-  })(item$1);
-  return item$1.exports;
+  })(item);
+  return item.exports;
 }
 /*!
  * Outlayer v2.1.1
@@ -6377,7 +6377,7 @@ const handleKeyDown$1 = (e, provideSelectedDicepool) => {
 var root_2$i = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_4$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_1$r = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
-var root_6$6 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_6$5 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_5$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
@@ -6445,7 +6445,7 @@ function StatCard$1($$anchor, $$props) {
       var node_4 = sibling(child(div_1), 2);
       {
         var consequent_3 = ($$anchor3) => {
-          var h4_1 = root_6$6();
+          var h4_1 = root_6$5();
           var text_2 = child(h4_1);
           template_effect(($0) => set_text(text_2, $0), [() => localize($$props.label)]);
           append($$anchor3, h4_1);
@@ -6648,9 +6648,9 @@ function DicePools($$anchor, $$props) {
   let spellValueStore = storeManager2.GetRWStore("dicePools.spell.value");
   user_effect(() => {
     store_set(controlValueStore, proxy($reaction().sum));
-    store_set(combatValueStore, ($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5);
-    store_set(astralValueStore, ($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5);
-    store_set(spellValueStore, ($intelligence().sum + $magic().sum + $willpower().sum) * 0.5);
+    store_set(combatValueStore, proxy(Math.floor(($intelligence().sum + $quickness().sum + $willpower().sum) * 0.5)));
+    store_set(astralValueStore, proxy(Math.floor(($intelligence().sum + $charisma().sum + $willpower().sum) * 0.5)));
+    store_set(spellValueStore, proxy(Math.floor(($intelligence().sum + $magic().sum + $willpower().sum) * 0.5)));
   });
   onDestroy(() => {
     StoreManager.Unsubscribe(actor());
@@ -7951,7 +7951,7 @@ var on_click_1$7 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get
 var on_keydown_2$2 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
-var root_6$5 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_6$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$8 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$c = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$B = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
@@ -8094,7 +8094,7 @@ function ActiveSkillCard($$anchor, $$props) {
         var consequent_2 = ($$anchor3) => {
           var div_8 = root_5$8();
           each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
-            var div_9 = root_6$5();
+            var div_9 = root_6$4();
             div_9.__click = [on_click_1$7, Roll2, skill, specialization];
             div_9.__keydown = [on_keydown_2$2, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
@@ -8142,7 +8142,7 @@ var on_click_1$6 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get
 var on_keydown_2$1 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
-var root_6$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_5$7 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$b = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$A = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
@@ -8285,7 +8285,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
         var consequent_2 = ($$anchor3) => {
           var div_8 = root_5$7();
           each(div_8, 5, $specializations, index, ($$anchor4, specialization) => {
-            var div_9 = root_6$4();
+            var div_9 = root_6$3();
             div_9.__click = [on_click_1$6, Roll2, skill, specialization];
             div_9.__keydown = [on_keydown_2$1, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
@@ -9535,39 +9535,45 @@ function addChange(_, changes, commitChanges) {
   ]));
   commitChanges();
 }
-var root_2$b = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div>`);
 var on_change$7 = (e, setDurationField) => setDurationField("type", e.target.value);
 var on_input$1 = (e, setDurationField) => setDurationField("value", e.target.value);
-var root_3$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div>`);
-var root_1$f = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <!></div>`, 1);
-var root_6$3 = /* @__PURE__ */ template(`<option> </option>`);
-var root_5$6 = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
-var root_4$8 = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
+var root_2$b = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div>`);
+var root_1$f = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option>self</option><option disabled>item</option><option>character</option><option disabled>vehicle</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <!></div>`, 1);
+var root_5$6 = /* @__PURE__ */ template(`<option> </option>`);
+var root_4$8 = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
+var root_3$9 = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
 var root$q = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
 function ActiveEffectsEditorApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $durationStore = () => store_get(durationStore, "$durationStore", $$stores);
   const $nameStore = () => store_get(nameStore, "$nameStore", $$stores);
+  const $durationStore = () => store_get(durationStore, "$durationStore", $$stores);
   const $disabledStore = () => store_get(disabledStore, "$disabledStore", $$stores);
   let disabled = state(proxy($$props.activeEffect.disabled));
   let duration = state(proxy({ ...$$props.activeEffect.duration, value: 0 }));
   let changes = state(proxy([...$$props.activeEffect.changes]));
   let propertyOptions = state(proxy([]));
   let name = state(proxy($$props.activeEffect.name));
-  let isTransferable = state(false);
   let originIsItem = state(false);
+  let origin = state(proxy({}));
+  let target = state("self");
+  let isTransferable = state(false);
   let storeManager2 = StoreManager.Subscribe($$props.document);
   let nameStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:name`, $$props.activeEffect.name);
   let durationStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:duration`, $$props.activeEffect.duration);
   let disabledStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:disabled`, $$props.activeEffect.disabled);
+  let targetStore = storeManager2.GetShallowStore($$props.document.id, `${$$props.activeEffect.id}:target`, get$1(target));
   onMount(async () => {
-    const storedDuration = $durationStore();
+    set(origin, proxy(await foundry.utils.fromUuid($$props.activeEffect.origin)));
+    set(originIsItem, get$1(origin) instanceof Item);
     const storedName = $nameStore();
+    const storedDuration = $durationStore();
     const storedDisabled = $disabledStore();
-    const origin = await foundry.utils.fromUuid($$props.activeEffect.origin);
-    set(originIsItem, origin instanceof Item);
-    set(isTransferable, proxy(get$1(originIsItem) ? $$props.activeEffect.transfer ?? false : false));
+    const flagTarget = getProperty($$props.activeEffect, `flags.${flags.sr3e}.target`);
+    if (flagTarget) {
+      set(target, proxy(flagTarget));
+      store_set(targetStore, proxy(get$1(target)));
+    }
     const baseDuration = JSON.stringify(storedDuration) !== JSON.stringify($$props.activeEffect.duration) ? storedDuration : $$props.activeEffect.duration;
     set(duration, proxy({
       ...baseDuration,
@@ -9596,36 +9602,66 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   user_effect(() => {
     store_set(nameStore, proxy(get$1(name)));
   });
-  const allowedPatterns = [
-    "system.attributes",
-    "system.physical",
-    "system.dicePools"
-  ];
+  user_effect(() => {
+    store_set(targetStore, proxy(get$1(target)));
+  });
+  let allowedPatterns = [];
   user_effect(async () => {
+    var _a;
+    if (!((_a = get$1(origin)) == null ? void 0 : _a.toObject)) return;
     let rawPaths = [];
-    const origin = await foundry.utils.fromUuid($$props.activeEffect.origin);
-    const isActor = origin instanceof Actor;
-    const isItem = origin instanceof Item;
-    set(originIsItem, isItem);
-    if (isActor && !isItem) {
-      let actor = origin;
-      rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
-    } else if (isItem && !isActor) {
-      if ($$props.activeEffect.transfer) {
-        rawPaths = Object.keys(foundry.utils.flattenObject({ system: $$props.document.toObject().system }));
-      } else {
-        rawPaths = Object.keys(foundry.utils.flattenObject({ system: item.toObject().system }));
+    switch (get$1(target)) {
+      case "self": {
+        allowedPatterns = ["system"];
+        set(isTransferable, false);
+        rawPaths = Object.keys(foundry.utils.flattenObject({
+          system: get$1(origin).toObject().system
+        }));
+        break;
+      }
+      case "character": {
+        allowedPatterns = [
+          "system.attributes",
+          "system.dicePools",
+          "system.movement",
+          "system.karma"
+        ];
+        set(isTransferable, true);
+        const model = new CharacterModel({}, { parent: null });
+        const raw = model.toObject();
+        rawPaths = Object.keys(foundry.utils.flattenObject({ system: raw }));
+        break;
+      }
+      case "vehicle": {
+        throw new Error("Target 'vehicle' not yet supported in ActiveEffectsEditorApp.");
+      }
+      default: {
+        console.warn(`Unhandled target type: ${get$1(target)}`);
       }
     }
-    const newOptions = rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod")).map((path) => ({ value: path, label: path }));
+    const newOptions = rawPaths.filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod")).map((path) => ({
+      value: path,
+      label: getLocalizedPath(path)
+    })).sort((a, b) => a.label.localeCompare(b.label));
     if (JSON.stringify(newOptions) !== JSON.stringify(get$1(propertyOptions))) {
       set(propertyOptions, proxy(newOptions));
     }
   });
+  function getLocalizedPath(path) {
+    if (!path.startsWith("system.") || !path.endsWith(".mod")) return path;
+    const configPath = path.replace(/^system\./, "").replace(/\.mod$/, "");
+    const segments = configPath.split(".");
+    const localizedSegments = segments.map((segment) => {
+      const configValue = getProperty($$props.config, `${segments[0]}.${segment}`);
+      return configValue ? localize(configValue) : segment.charAt(0).toUpperCase() + segment.slice(1);
+    });
+    return localizedSegments.join(" > ");
+  }
   function extractValue(value) {
     return value && typeof value === "object" && "value" in value ? value.value : value;
   }
   async function commitChanges() {
+    var _a;
     const key = get$1(duration).type;
     const expandedDuration = {
       type: key,
@@ -9643,15 +9679,21 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         transfer: get$1(isTransferable),
         disabled: get$1(disabled),
         duration: expandedDuration,
-        changes: [...get$1(changes)]
+        changes: [...get$1(changes)],
+        flags: {
+          ...$$props.activeEffect.flags ?? {},
+          [flags.sr3e]: {
+            ...((_a = $$props.activeEffect.flags) == null ? void 0 : _a[flags.sr3e]) ?? {},
+            target: get$1(target)
+          }
+        }
       },
       { render: false }
     );
   }
   function updateChange(index2, field, value) {
     const extractedValue = extractValue(value);
-    const updated = get$1(changes).map((c, i) => i === index2 ? { ...c, [field]: extractedValue } : c);
-    set(changes, proxy(updated));
+    set(changes, proxy(get$1(changes).map((c, i) => i === index2 ? { ...c, [field]: extractedValue } : c)));
     commitChanges();
   }
   function deleteChange(index2) {
@@ -9684,91 +9726,88 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       var h4 = sibling(child(div_2), 2);
       var text_1 = child(h4);
       var input = sibling(h4, 2);
-      var node_2 = sibling(div_2, 2);
-      {
-        var consequent = ($$anchor3) => {
-          var div_3 = root_2$b();
-          var h4_1 = sibling(child(div_3), 2);
-          var text_2 = child(h4_1);
-          var input_1 = sibling(h4_1, 2);
-          input_1.__change = commitChanges;
-          template_effect(($0) => set_text(text_2, `${$0 ?? ""}:`), [
-            () => localize($$props.config.effects.transfer)
-          ]);
-          bind_checked(input_1, () => get$1(isTransferable), ($$value) => set(isTransferable, $$value));
-          append($$anchor3, div_3);
-        };
-        if_block(node_2, ($$render) => {
-          if (get$1(originIsItem)) $$render(consequent);
-        });
-      }
-      var div_4 = sibling(node_2, 2);
+      var div_3 = sibling(div_2, 2);
+      var h4_1 = sibling(child(div_3), 2);
+      var text_2 = child(h4_1);
+      var select = sibling(h4_1, 2);
+      select.__change = commitChanges;
+      var option = child(select);
+      option.value = null == (option.__value = "self") ? "" : "self";
+      var option_1 = sibling(option);
+      option_1.value = null == (option_1.__value = "item") ? "" : "item";
+      var option_2 = sibling(option_1);
+      option_2.value = null == (option_2.__value = "character") ? "" : "character";
+      var option_3 = sibling(option_2);
+      option_3.value = null == (option_3.__value = "vehicle") ? "" : "vehicle";
+      var div_4 = sibling(div_3, 2);
       var h4_2 = sibling(child(div_4), 2);
       var text_3 = child(h4_2);
-      var input_2 = sibling(h4_2, 2);
-      input_2.__change = commitChanges;
+      var input_1 = sibling(h4_2, 2);
+      input_1.__change = commitChanges;
       var div_5 = sibling(div_4, 2);
       var h4_3 = sibling(child(div_5), 2);
       var text_4 = child(h4_3);
-      var select = sibling(h4_3, 2);
-      select.__change = [on_change$7, setDurationField];
-      var option = child(select);
-      option.value = null == (option.__value = "none") ? "" : "none";
-      var text_5 = child(option);
-      var option_1 = sibling(option);
-      option_1.value = null == (option_1.__value = "turns") ? "" : "turns";
-      var text_6 = child(option_1);
-      var option_2 = sibling(option_1);
-      option_2.value = null == (option_2.__value = "rounds") ? "" : "rounds";
-      var text_7 = child(option_2);
-      var option_3 = sibling(option_2);
-      option_3.value = null == (option_3.__value = "seconds") ? "" : "seconds";
-      var text_8 = child(option_3);
-      var option_4 = sibling(option_3);
-      option_4.value = null == (option_4.__value = "minutes") ? "" : "minutes";
-      var text_9 = child(option_4);
+      var select_1 = sibling(h4_3, 2);
+      select_1.__change = [on_change$7, setDurationField];
+      var option_4 = child(select_1);
+      option_4.value = null == (option_4.__value = "none") ? "" : "none";
+      var text_5 = child(option_4);
       var option_5 = sibling(option_4);
-      option_5.value = null == (option_5.__value = "hours") ? "" : "hours";
-      var text_10 = child(option_5);
+      option_5.value = null == (option_5.__value = "turns") ? "" : "turns";
+      var text_6 = child(option_5);
       var option_6 = sibling(option_5);
-      option_6.value = null == (option_6.__value = "days") ? "" : "days";
-      var text_11 = child(option_6);
-      var node_3 = sibling(div_5, 2);
+      option_6.value = null == (option_6.__value = "rounds") ? "" : "rounds";
+      var text_7 = child(option_6);
+      var option_7 = sibling(option_6);
+      option_7.value = null == (option_7.__value = "seconds") ? "" : "seconds";
+      var text_8 = child(option_7);
+      var option_8 = sibling(option_7);
+      option_8.value = null == (option_8.__value = "minutes") ? "" : "minutes";
+      var text_9 = child(option_8);
+      var option_9 = sibling(option_8);
+      option_9.value = null == (option_9.__value = "hours") ? "" : "hours";
+      var text_10 = child(option_9);
+      var option_10 = sibling(option_9);
+      option_10.value = null == (option_10.__value = "days") ? "" : "days";
+      var text_11 = child(option_10);
+      var node_2 = sibling(div_5, 2);
       {
-        var consequent_1 = ($$anchor3) => {
-          var div_6 = root_3$9();
+        var consequent = ($$anchor3) => {
+          var div_6 = root_2$b();
           var h4_4 = sibling(child(div_6), 2);
           var text_12 = child(h4_4);
-          var input_3 = sibling(h4_4, 2);
-          input_3.__input = [on_input$1, setDurationField];
+          var input_2 = sibling(h4_4, 2);
+          input_2.__input = [on_input$1, setDurationField];
           template_effect(($0) => set_text(text_12, `${$0 ?? ""}:`), [
             () => localize($$props.config.effects.durationValue)
           ]);
-          event$1("blur", input_3, commitChanges);
-          bind_value(input_3, () => get$1(duration).value, ($$value) => get$1(duration).value = $$value);
+          event$1("blur", input_2, commitChanges);
+          bind_value(input_2, () => get$1(duration).value, ($$value) => get$1(duration).value = $$value);
           append($$anchor3, div_6);
         };
-        if_block(node_3, ($$render) => {
-          if (get$1(duration).type !== "none") $$render(consequent_1);
+        if_block(node_2, ($$render) => {
+          if (get$1(duration).type !== "none") $$render(consequent);
         });
       }
       template_effect(
-        ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10) => {
+        ($0, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) => {
           set_text(text2, $0);
           set_text(text_1, `${$1 ?? ""}:`);
-          set_text(text_3, `${$2 ?? ""}:`);
-          set_text(text_4, `${$3 ?? ""}:`);
-          set_text(text_5, $4);
-          set_text(text_6, $5);
-          set_text(text_7, $6);
-          set_text(text_8, $7);
-          set_text(text_9, $8);
-          set_text(text_10, $9);
-          set_text(text_11, $10);
+          set_text(text_2, `${$2 ?? ""}:`);
+          set_text(text_3, `${$3 ?? ""}:`);
+          set_text(text_4, `${$4 ?? ""}:`);
+          set_text(text_5, $5);
+          set_text(text_6, $6);
+          set_text(text_7, $7);
+          set_text(text_8, $8);
+          set_text(text_9, $9);
+          set_text(text_10, $10);
+          set_text(text_11, $11);
         },
         [
           () => localize($$props.config.effects.effectscomposer),
           () => localize($$props.config.effects.name),
+          () => localize($$props.config.effects.target),
           () => localize($$props.config.effects.disabled),
           () => localize($$props.config.effects.durationType),
           () => localize($$props.config.effects.permanent),
@@ -9782,15 +9821,16 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       );
       event$1("blur", input, commitChanges);
       bind_value(input, () => get$1(name), ($$value) => set(name, $$value));
-      bind_checked(input_2, () => get$1(disabled), ($$value) => set(disabled, $$value));
-      bind_select_value(select, () => get$1(duration).type, ($$value) => get$1(duration).type = $$value);
+      bind_select_value(select, () => get$1(target), ($$value) => set(target, $$value));
+      bind_checked(input_1, () => get$1(disabled), ($$value) => set(disabled, $$value));
+      bind_select_value(select_1, () => get$1(duration).type, ($$value) => get$1(duration).type = $$value);
       append($$anchor2, fragment);
     }
   });
-  var node_4 = sibling(node, 2);
-  ItemSheetComponent(node_4, {
+  var node_3 = sibling(node, 2);
+  ItemSheetComponent(node_3, {
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_4$8();
+      var fragment_1 = root_3$9();
       var h1 = first_child(fragment_1);
       var text_13 = child(h1);
       var button = sibling(h1, 2);
@@ -9812,13 +9852,13 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
       var text_19 = child(th_4);
       var tbody = sibling(thead);
       each(tbody, 21, () => get$1(changes), index, ($$anchor3, change, i) => {
-        var tr_1 = root_5$6();
+        var tr_1 = root_4$8();
         var td = child(tr_1);
         var div_8 = child(td);
-        var node_5 = sibling(child(div_8), 2);
+        var node_4 = sibling(child(div_8), 2);
         const expression_1 = /* @__PURE__ */ derived$1(() => localize($$props.config.effects.selectProperty));
         const expression_2 = /* @__PURE__ */ derived$1(() => localize($$props.config.effects.noMatch));
-        ComboSearch(node_5, {
+        ComboSearch(node_4, {
           get options() {
             return get$1(propertyOptions);
           },
@@ -9839,38 +9879,38 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         });
         var td_1 = sibling(td);
         var div_9 = child(td_1);
-        var select_1 = sibling(child(div_9), 2);
-        select_1.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
-        each(select_1, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
+        var select_2 = sibling(child(div_9), 2);
+        select_2.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
+        each(select_2, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
           let label = () => $$item[0];
           let val = () => $$item[1];
-          var option_7 = root_6$3();
-          var option_7_value = {};
-          var text_20 = child(option_7);
+          var option_11 = root_5$6();
+          var option_11_value = {};
+          var text_20 = child(option_11);
           template_effect(() => {
-            if (option_7_value !== (option_7_value = val())) {
-              option_7.value = null == (option_7.__value = val()) ? "" : val();
+            if (option_11_value !== (option_11_value = val())) {
+              option_11.value = null == (option_11.__value = val()) ? "" : val();
             }
             set_text(text_20, label());
           });
-          append($$anchor4, option_7);
+          append($$anchor4, option_11);
         });
         var td_2 = sibling(td_1);
         var div_10 = child(td_2);
-        var input_4 = sibling(child(div_10), 2);
-        input_4.__input = (e) => updateChange(i, "value", e.target.value);
+        var input_3 = sibling(child(div_10), 2);
+        input_3.__input = (e) => updateChange(i, "value", e.target.value);
         var td_3 = sibling(td_2);
         var div_11 = child(td_3);
-        var input_5 = sibling(child(div_11), 2);
-        input_5.__input = (e) => updateChange(i, "priority", +e.target.value);
+        var input_4 = sibling(child(div_11), 2);
+        input_4.__input = (e) => updateChange(i, "priority", +e.target.value);
         var td_4 = sibling(td_3);
         var button_1 = child(td_4);
         button_1.__click = () => deleteChange(i);
         template_effect(() => {
-          set_value(input_4, get$1(change).value);
-          set_value(input_5, get$1(change).priority);
+          set_value(input_3, get$1(change).value);
+          set_value(input_4, get$1(change).priority);
         });
-        bind_select_value(select_1, () => get$1(change).mode, ($$value) => get$1(change).mode = $$value);
+        bind_select_value(select_2, () => get$1(change).mode, ($$value) => get$1(change).mode = $$value);
         append($$anchor3, tr_1);
       });
       template_effect(
@@ -9967,7 +10007,7 @@ __publicField(_ActiveEffectsEditor, "DEFAULT_OPTIONS", {
 let ActiveEffectsEditor = _ActiveEffectsEditor;
 var on_click$4 = (_, openEditor, $$props) => openEditor($$props.activeEffect);
 var on_click_1$3 = (__1, deleteEffect, $$props) => deleteEffect($$props.activeEffect.id);
-var root$p = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button class="fas fa-edit"></button> <button class="fas fa-trash-can"></button></div></div></td></tr>`);
+var root$p = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button type="button" class="fas fa-edit"></button> <button type="button" class="fas fa-trash-can"></button></div></div></td></tr>`);
 function ActiveEffectsRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -11735,7 +11775,8 @@ sr3e.effects = {
   noMatch: "sr3e.effects.noMatch",
   selectProperty: "sr3e.effects.selectProperty",
   permanent: "sr3e.effects.permanent",
-  changesHeader: "sr3e.effects.changesHeader"
+  changesHeader: "sr3e.effects.changesHeader",
+  target: "sr3e.effects.target"
 };
 sr3e.health = {
   health: "sr3e.health.health",
@@ -12085,6 +12126,13 @@ class MetatypeModel extends foundry.abstract.TypeDataModel {
           initial: 0
         })
       }),
+      //Movementfactor
+      movement: new foundry.data.fields.SchemaField({
+        factor: new foundry.data.fields.NumberField({
+          required: true,
+          initial: 0
+        })
+      }),
       // Priority
       priority: new foundry.data.fields.StringField({
         required: true,
@@ -12408,6 +12456,7 @@ function StatCard($$anchor, $$props) {
           input_1.__change = update;
           template_effect(() => {
             set_attribute(input_1, "type", type());
+            set_attribute(input_1, "step", type() === "number" ? "any" : void 0);
             set_value(input_1, $$props.value);
           });
           append($$anchor3, input_1);

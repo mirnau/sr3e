@@ -75,16 +75,17 @@
       <div class="cell-content">
          <div class="buttons-vertical-distribution square">
             <button
+               type="button"
                aria-label={localize(config.sheet.delete)}
                class="fas fa-edit"
                onclick={() => openEditor(activeEffect)}
             ></button>
             <button
+               type="button"
                aria-label={localize(config.sheet.delete)}
                onclick={() => deleteEffect(activeEffect.id)}
                class="fas fa-trash-can"
-               disabled={!canDelete ||
-                  (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
+               disabled={!canDelete || (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
             ></button>
          </div>
       </div>

@@ -54,7 +54,8 @@ sr3e.effects = {
    noMatch: "sr3e.effects.noMatch",
    selectProperty: "sr3e.effects.selectProperty",
    permanent: "sr3e.effects.permanent",
-   changesHeader: "sr3e.effects.changesHeader"
+   changesHeader: "sr3e.effects.changesHeader",
+   target: "sr3e.effects.target"
 };
 
 sr3e.health = {

@@ -69,6 +69,7 @@
       "effects": {
          "effectscomposer": "Effects Composer",
          "name": "Name",
+         "target": "Target",
          "transfer": "Transfer",
          "disabled": "Disabled",
          "durationType": "Duration Type",

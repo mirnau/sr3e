@@ -30,6 +30,6 @@
       {/each}
     </select>
   {:else}
-    <input {type} {value} onchange={update} />
+    <input type={type} step={type === "number" ? "any" : undefined} {value} onchange={update} />
   {/if}
 </div>

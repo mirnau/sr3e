@@ -6,6 +6,7 @@
    import { localize } from "../../../../services/utilities.js";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy, onMount } from "svelte";
+   import CharacterModel from "../../../../models/actor/CharacterModel.js";
 
    let { document, activeEffect, config, updateEffectsState } = $props();
    let disabled = $state(activeEffect.disabled);
@@ -13,24 +14,31 @@
    let changes = $state([...activeEffect.changes]);
    let propertyOptions = $state([]);
    let name = $state(activeEffect.name);
-   let isTransferable = $state(false); // Initialize as false, will be set properly in onMount
    let originIsItem = $state(false);
+   let origin = $state({});
+   let target = $state("self");
+   let isTransferable = $state(false);
 
    let storeManager = StoreManager.Subscribe(document);
 
    let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
    let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
    let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
+   let targetStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:target`, target);
 
    onMount(async () => {
-      const storedDuration = $durationStore;
-      const storedName = $nameStore;
-      const storedDisabled = $disabledStore;
-      const origin = await foundry.utils.fromUuid(activeEffect.origin);
+      origin = await foundry.utils.fromUuid(activeEffect.origin);
       originIsItem = origin instanceof Item;
 
-      // Set isTransferable based on whether origin is an item and the activeEffect's transfer value
-      isTransferable = originIsItem ? (activeEffect.transfer ?? false) : false;
+      const storedName = $nameStore;
+      const storedDuration = $durationStore;
+      const storedDisabled = $disabledStore;
+
+      const flagTarget = getProperty(activeEffect, `flags.${flags.sr3e}.target`);
+      if (flagTarget) {
+         target = flagTarget;
+         $targetStore = target;
+      }
 
       const baseDuration =
          JSON.stringify(storedDuration) !== JSON.stringify(activeEffect.duration)
@@ -63,45 +71,71 @@
    $effect(() => {
       $disabledStore = disabled;
    });
+
    $effect(() => {
       $nameStore = name;
    });
 
-   const allowedPatterns = ["system.attributes", "system.physical", "system.dicePools"];
+   $effect(() => {
+      $targetStore = target;
+   });
+
+   let allowedPatterns = [];
 
    $effect(async () => {
-      // document is the object that opened the editor
+      if (!origin?.toObject) return;
+
       let rawPaths = [];
 
-      const origin = await foundry.utils.fromUuid(activeEffect.origin);
-
-      //NOTE: could also be other objects, so a single boolean does not capture that
-      const isActor = origin instanceof Actor;
-      const isItem = origin instanceof Item;
-      originIsItem = isItem;
-
-      if (isActor && !isItem) {
-         // NOTE: This probably happens only when the actor is both the target and the origin of the active effect
-         let actor = origin;
-         rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
-      } else if (isItem && !isActor) {
-         if (activeEffect.transfer) {
-            //NOTE: If the item is transerable the current taregt is the current editor holder
-            rawPaths = Object.keys(foundry.utils.flattenObject({ system: document.toObject().system }));
-         } else {
-            //NOTE: The effects are inherit to the item, and changes the items properties only
-            rawPaths = Object.keys(foundry.utils.flattenObject({ system: item.toObject().system }));
+      switch (target) {
+         case "self": {
+            allowedPatterns = ["system"];
+            isTransferable = false;
+            rawPaths = Object.keys(foundry.utils.flattenObject({ system: origin.toObject().system }));
+            break;
+         }
+         case "character": {
+            allowedPatterns = ["system.attributes", "system.dicePools", "system.movement", "system.karma"];
+            isTransferable = true;
+            const model = new CharacterModel({}, { parent: null });
+            const raw = model.toObject();
+            rawPaths = Object.keys(foundry.utils.flattenObject({ system: raw }));
+            break;
+         }
+         case "vehicle": {
+            throw new Error("Target 'vehicle' not yet supported in ActiveEffectsEditorApp.");
+         }
+         default: {
+            console.warn(`Unhandled target type: ${target}`);
          }
       }
 
       const newOptions = rawPaths
          .filter((path) => allowedPatterns.some((p) => path.startsWith(p)) && path.endsWith(".mod"))
-         .map((path) => ({ value: path, label: path }));
+         .map((path) => ({
+            value: path,
+            label: getLocalizedPath(path),
+         }))
+         .sort((a, b) => a.label.localeCompare(b.label));
 
       if (JSON.stringify(newOptions) !== JSON.stringify(propertyOptions)) {
          propertyOptions = newOptions;
       }
    });
+
+   function getLocalizedPath(path) {
+      if (!path.startsWith("system.") || !path.endsWith(".mod")) return path;
+
+      const configPath = path.replace(/^system\./, "").replace(/\.mod$/, "");
+      const segments = configPath.split(".");
+
+      const localizedSegments = segments.map((segment) => {
+         const configValue = getProperty(config, `${segments[0]}.${segment}`);
+         return configValue ? localize(configValue) : segment.charAt(0).toUpperCase() + segment.slice(1);
+      });
+
+      return localizedSegments.join(" > ");
+   }
 
    function extractValue(value) {
       return value && typeof value === "object" && "value" in value ? value.value : value;
@@ -127,6 +161,13 @@
             disabled,
             duration: expandedDuration,
             changes: [...changes],
+            flags: {
+               ...(activeEffect.flags ?? {}),
+               [flags.sr3e]: {
+                  ...(activeEffect.flags?.[flags.sr3e] ?? {}),
+                  target,
+               },
+            },
          },
          { render: false }
       );
@@ -139,8 +180,7 @@
 
    function updateChange(index, field, value) {
       const extractedValue = extractValue(value);
-      const updated = changes.map((c, i) => (i === index ? { ...c, [field]: extractedValue } : c));
-      changes = updated;
+      changes = changes.map((c, i) => (i === index ? { ...c, [field]: extractedValue } : c));
       commitChanges();
    }
 
@@ -163,13 +203,16 @@
             <input type="text" bind:value={name} onblur={commitChanges} />
          </div>
 
-         {#if originIsItem}
-            <div class="stat-card">
-               <div class="stat-card-background"></div>
-               <h4>{localize(config.effects.transfer)}:</h4>
-               <input type="checkbox" bind:checked={isTransferable} onchange={commitChanges} />
-            </div>
-         {/if}
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h4>{localize(config.effects.target)}:</h4>
+            <select bind:value={target} onchange={commitChanges}>
+               <option value="self">self</option>
+               <option value="item" disabled>item</option>
+               <option value="character">character</option>
+               <option value="vehicle" disabled>vehicle</option>
+            </select>
+         </div>
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
