@@ -2,12 +2,32 @@
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import { localize } from "../../../../services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
+   import { onMount, onDestroy } from "svelte";
 
    let { document, config, isSlim = false } = $props();
 
    let actorAttachedEffects = $state(document.effects.contents);
    let transferredEffects = $state([]);
    let isViewerInstanceOfActor = document instanceof Actor;
+
+   onMount(() => {
+      const handler = (actor) => {
+         if (document?.id !== actor.id) return;
+         actorAttachedEffects = [...document.effects.contents];
+         transferredEffects =
+            document instanceof Actor
+               ? document.items.contents.flatMap((item) =>
+                    item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
+                 )
+               : [];
+      };
+
+      Hooks.on("actorSystemRecalculated", handler);
+
+      onDestroy(() => {
+         Hooks.off("actorSystemRecalculated", handler);
+      });
+   });
 
    $effect(() => {
       actorAttachedEffects = [...document.effects.contents];
@@ -56,11 +76,9 @@
    }
 
    async function onHandleEffectTriggerUI() {
+      Hooks.callAll("actorSystemRecalculated", document);
       actorAttachedEffects = [...document.effects.contents];
       transferredEffects = [...transferredEffects];
-
-      //Updates stores
-      Hooks.callAll("actorSystemRecalculated", document);
    }
 </script>
 

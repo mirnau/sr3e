@@ -10093,14 +10093,26 @@ function ActiveEffectsViewer($$anchor, $$props) {
   let actorAttachedEffects = state(proxy($$props.document.effects.contents));
   let transferredEffects = state(proxy([]));
   let isViewerInstanceOfActor = $$props.document instanceof Actor;
+  onMount(() => {
+    const handler = (actor) => {
+      var _a;
+      if (((_a = $$props.document) == null ? void 0 : _a.id) !== actor.id) return;
+      set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
+      set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
+    };
+    Hooks.on("actorSystemRecalculated", handler);
+    onDestroy(() => {
+      Hooks.off("actorSystemRecalculated", handler);
+    });
+  });
   user_effect(() => {
     set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
     set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
   });
   async function onHandleEffectTriggerUI() {
+    Hooks.callAll("actorSystemRecalculated", $$props.document);
     set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
     set(transferredEffects, proxy([...get$1(transferredEffects)]));
-    Hooks.callAll("actorSystemRecalculated", $$props.document);
   }
   var div = root$o();
   var div_1 = child(div);
