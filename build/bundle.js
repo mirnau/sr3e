@@ -6766,13 +6766,24 @@ var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
+  const $quicknessStore = () => store_get(quicknessStore, "$quicknessStore", $$stores);
   const $walking = () => store_get(walking, "$walking", $$stores);
   const $running = () => store_get(running, "$running", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  let quicknessStore = storeManager2.GetSumROStore("attributes.quickness");
   let walking = storeManager2.GetSumROStore("movement.walking");
+  let walkingValue = storeManager2.GetRWStore("movement.walking");
   let running = storeManager2.GetSumROStore("movement.running");
+  let runningValue = storeManager2.GetRWStore("movement.running");
+  user_effect(() => {
+    store_set(walkingValue, proxy($quicknessStore().sum));
+    store_set(runningValue, proxy($quicknessStore().sum));
+  });
   var fragment = root$H();
   var node = first_child(fragment);
   CardToolbar(node, {
