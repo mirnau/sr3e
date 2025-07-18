@@ -10,10 +10,11 @@
    let { document, activeEffect, config, updateEffectsState } = $props();
    let disabled = $state(activeEffect.disabled);
    let duration = $state({ ...activeEffect.duration, value: 0 });
-   let sourceType = $state(activeEffect.transfer ? "character" : "item");
    let changes = $state([...activeEffect.changes]);
    let propertyOptions = $state([]);
    let name = $state(activeEffect.name);
+   let isTransferable = $state(false); // Initialize as false, will be set properly in onMount
+   let originIsItem = $state(false);
 
    let storeManager = StoreManager.Subscribe(document);
 
@@ -21,17 +22,24 @@
    let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
    let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
 
-   onMount(() => {
+   onMount(async () => {
       const storedDuration = $durationStore;
       const storedName = $nameStore;
       const storedDisabled = $disabledStore;
+      const origin = await foundry.utils.fromUuid(activeEffect.origin);
+      originIsItem = origin instanceof Item;
 
-      const baseDuration = JSON.stringify(storedDuration) !== JSON.stringify(activeEffect.duration)
-         ? storedDuration : activeEffect.duration;
+      // Set isTransferable based on whether origin is an item and the activeEffect's transfer value
+      isTransferable = originIsItem ? (activeEffect.transfer ?? false) : false;
+
+      const baseDuration =
+         JSON.stringify(storedDuration) !== JSON.stringify(activeEffect.duration)
+            ? storedDuration
+            : activeEffect.duration;
 
       duration = {
          ...baseDuration,
-         value: baseDuration[baseDuration.type] ?? 0
+         value: baseDuration[baseDuration.type] ?? 0,
       };
 
       if (storedName !== activeEffect.name) name = storedName;
@@ -52,22 +60,38 @@
       $durationStore = duration;
    }
 
-   $effect(() => { $disabledStore = disabled; });
-   $effect(() => { $nameStore = name; });
-
-   const allowedPatterns = ["system.attributes", "system.physical"];
-
    $effect(() => {
-      const transfer = sourceType !== "item";
+      $disabledStore = disabled;
+   });
+   $effect(() => {
+      $nameStore = name;
+   });
+
+   const allowedPatterns = ["system.attributes", "system.physical", "system.dicePools"];
+
+   $effect(async () => {
+      // document is the object that opened the editor
       let rawPaths = [];
 
-      if (transfer) {
-         const actor = game.actors.find((a) => a.type === sourceType);
-         if (actor) {
-            rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
+      const origin = await foundry.utils.fromUuid(activeEffect.origin);
+
+      //NOTE: could also be other objects, so a single boolean does not capture that
+      const isActor = origin instanceof Actor;
+      const isItem = origin instanceof Item;
+      originIsItem = isItem;
+
+      if (isActor && !isItem) {
+         // NOTE: This probably happens only when the actor is both the target and the origin of the active effect
+         let actor = origin;
+         rawPaths = Object.keys(foundry.utils.flattenObject({ system: actor.toObject().system }));
+      } else if (isItem && !isActor) {
+         if (activeEffect.transfer) {
+            //NOTE: If the item is transerable the current taregt is the current editor holder
+            rawPaths = Object.keys(foundry.utils.flattenObject({ system: document.toObject().system }));
+         } else {
+            //NOTE: The effects are inherit to the item, and changes the items properties only
+            rawPaths = Object.keys(foundry.utils.flattenObject({ system: item.toObject().system }));
          }
-      } else {
-         rawPaths = Object.keys(foundry.utils.flattenObject({ system: document.toObject().system }));
       }
 
       const newOptions = rawPaths
@@ -93,15 +117,19 @@
          startTime: duration.startTime,
          startRound: duration.startRound,
          startTurn: duration.startTurn,
-         combat: duration.combat
+         combat: duration.combat,
       };
 
-      await activeEffect.update({
-         name: extractValue(name),
-         disabled,
-         duration: expandedDuration,
-         changes: [...changes],
-      }, { render: false });
+      await activeEffect.update(
+         {
+            name: extractValue(name),
+            transfer: isTransferable,
+            disabled,
+            duration: expandedDuration,
+            changes: [...changes],
+         },
+         { render: false }
+      );
    }
 
    function addChange() {
@@ -135,15 +163,13 @@
             <input type="text" bind:value={name} onblur={commitChanges} />
          </div>
 
-         <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4>Source Type:</h4>
-            <select bind:value={sourceType}>
-               <option value="item">Item</option>
-               <option value="character">Character</option>
-               <option value="vehicle" disabled>Vehicle (TODO)</option>
-            </select>
-         </div>
+         {#if originIsItem}
+            <div class="stat-card">
+               <div class="stat-card-background"></div>
+               <h4>{localize(config.effects.transfer)}:</h4>
+               <input type="checkbox" bind:checked={isTransferable} onchange={commitChanges} />
+            </div>
+         {/if}
 
          <div class="stat-card">
             <div class="stat-card-background"></div>
@@ -166,16 +192,16 @@
          </div>
 
          {#if duration.type !== "none"}
-         <div class="stat-card">
-            <div class="stat-card-background"></div>
-            <h4>{localize(config.effects.durationValue)}:</h4>
-            <input
-               type="number"
-               bind:value={duration.value}
-               oninput={(e) => setDurationField("value", e.target.value)}
-               onblur={commitChanges}
-            />
-         </div>
+            <div class="stat-card">
+               <div class="stat-card-background"></div>
+               <h4>{localize(config.effects.durationValue)}:</h4>
+               <input
+                  type="number"
+                  bind:value={duration.value}
+                  oninput={(e) => setDurationField("value", e.target.value)}
+                  onblur={commitChanges}
+               />
+            </div>
          {/if}
       </div>
    </ItemSheetComponent>

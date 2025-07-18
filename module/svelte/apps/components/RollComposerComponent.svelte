@@ -112,13 +112,12 @@
    }
 
    function AddDiceFromPool() {
-      if (currentDicePoolAddition > 0) {
-         currentDicePoolAddition += 1;
-         currentDicePoolAddition -= 1;
-      }
+      //For effects only, incrementation is databound to the Count
    }
 
-   function RemoveDiceFromPool() {}
+   function RemoveDiceFromPool() {
+      //For effects only, incrementation is databound to the Count
+   }
 
    $effect(() => {
       isDefaulting = isDefaultingAsString === "true";
@@ -190,7 +189,7 @@
       canSubmit = targetNumber + modifiersTotal < 2;
    });
 
-   function Submit() {
+   async function Submit() {
       const isInCombat = game.combat !== null && game.combat !== undefined;
       if (isInCombat) {
          const combat = game.combat;
@@ -227,27 +226,29 @@
             },
          };
 
-         actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect]);
+         await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
       }
 
       if (currentDicePoolAddition > 0 && currentDicePoolName) {
          const effect = {
             name: `Dice Pool Drain (${currentDicePoolName})`,
             label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
-            icon: "icons/skills/melee/blade-tips-triple-white.webp",
+            icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
             changes: [
                {
                   key: `system.dicePools.${currentDicePoolName}.mod`,
                   mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                   value: `-${currentDicePoolAddition}`,
-                  priority: 20,
+                  priority: 1,
                },
             ],
             origin: actor.uuid,
+            transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
             ...(isInCombat
                ? {
                     duration: {
-                       rounds: 1,
+                       unit: "rounds",
+                       value: 1,
                        startRound: combat.round,
                        startTurn: combat.turn,
                     },
@@ -261,9 +262,11 @@
             },
          };
 
-         actor.createEmbeddedDocuments("ActiveEffect", [effect]);
-      }
+         await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
 
+         actor.applyActiveEffects();
+      }
+      
       onclose({
          dice: caller.dice + diceBought,
          attributeName: caller.key,
@@ -273,6 +276,8 @@
             explodes: !isDefaulting,
          },
       });
+
+      Hooks.callAll("actorSystemRecalculated", actor);
    }
 
    function getRoot(el) {

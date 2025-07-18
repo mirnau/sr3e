@@ -58,6 +58,9 @@
    async function onHandleEffectTriggerUI() {
       actorAttachedEffects = [...document.effects.contents];
       transferredEffects = [...transferredEffects];
+
+      //Updates stores
+      Hooks.callAll("actorSystemRecalculated", document);
    }
 </script>
 
@@ -82,7 +85,13 @@
          {/each}
          {#if document instanceof Actor}
             {#each transferredEffects as { activeEffect, item } (activeEffect.id)}
-               <ActiveEffectsRow document={item} {activeEffect} {config} {isViewerInstanceOfActor} {onHandleEffectTriggerUI} />
+               <ActiveEffectsRow
+                  document={item}
+                  {activeEffect}
+                  {config}
+                  {isViewerInstanceOfActor}
+                  {onHandleEffectTriggerUI}
+               />
             {/each}
          {/if}
       </tbody>

@@ -46,11 +46,11 @@
       if (
          !$attributeAssignmentLockedStore &&
          $isShoppingState &&
-         $valueROStore.sum < 1 &&
+         $valueROStore.value + $valueROStore.mod < 1 &&
          $valueROStore.mod < 0 &&
          valueRWStore
       ) {
-         let deficit = 1 - $valueROStore.sum;
+         let deficit = 1 - ($valueROStore.value + $valueROStore.mod);
          while (deficit > 0 && $attributePointStore > 0) {
             $attributePointStore -= 1;
             $valueRWStore += 1;
@@ -85,8 +85,7 @@
          e.stopImmediatePropagation();
          e.stopPropagation();
          unmount(activeModal);
-         isModalOpen
- = false;
+         isModalOpen = false;
          activeModal = null;
       }
    }
@@ -95,18 +94,15 @@
       StoreManager.Unsubscribe(actor);
       if (activeModal) {
          unmount(activeModal);
-         isModalOpen
- = false;
+         isModalOpen = false;
          activeModal = null;
       }
    });
 
    async function Roll(e) {
       if (e.shiftKey) {
-         if (isModalOpen
-) return;
-         isModalOpen
- = true;
+         if (isModalOpen) return;
+         isModalOpen = true;
 
          const options = await new Promise((resolve) => {
             activeModal = mount(RollComposerComponent, {
@@ -117,8 +113,7 @@
                   caller: { key, value: $valueROStore.value, type: "attribute", dice: $valueROStore.sum },
                   onclose: (result) => {
                      unmount(activeModal);
-                     isModalOpen
- = false;
+                     isModalOpen = false;
                      activeModal = null;
                      resolve(result);
                   },
