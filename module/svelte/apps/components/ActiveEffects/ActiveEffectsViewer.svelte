@@ -22,10 +22,7 @@
                : [];
       };
 
-      Hooks.on("actorSystemRecalculated", handler);
-
       onDestroy(() => {
-         Hooks.off("actorSystemRecalculated", handler);
       });
    });
 
@@ -76,7 +73,6 @@
    }
 
    async function onHandleEffectTriggerUI() {
-      Hooks.callAll("actorSystemRecalculated", document);
       actorAttachedEffects = [...document.effects.contents];
       transferredEffects = [...transferredEffects];
    }

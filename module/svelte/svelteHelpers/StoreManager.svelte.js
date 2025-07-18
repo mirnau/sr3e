@@ -148,7 +148,6 @@ export class StoreManager {
 
    GetSumROStore(dataPath) {
       const value = this.GetRWStore(`${dataPath}.value`);
-      //const mod = this.GetRWStore(`${dataPath}.mod`); //Causes an infinite loop balooning .mod
       const mod = this.GetROStore(`${dataPath}.mod`); //Renders .mod stale, and preventes reactive updates
 
       const total = derived([value, mod], ([$value, $mod]) => ({

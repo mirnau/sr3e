@@ -4430,7 +4430,6 @@ function RollComposerComponent($$anchor, $$props) {
         explodes: !get$1(isDefaulting)
       }
     });
-    Hooks.callAll("actorSystemRecalculated", $$props.actor);
   }
   function getRoot(el) {
     while (el && !focusables.includes(el)) el = el.parentElement;
@@ -6766,23 +6765,21 @@ var root$H = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Movement($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $quicknessStore = () => store_get(quicknessStore, "$quicknessStore", $$stores);
+  const $quickness = () => store_get(quickness, "$quickness", $$stores);
   const $walking = () => store_get(walking, "$walking", $$stores);
   const $running = () => store_get(running, "$running", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
-  let storeManager2 = StoreManager.Subscribe(actor());
-  onDestroy(() => {
-    StoreManager.Unsubscribe(actor());
-  });
-  let quicknessStore = storeManager2.GetSumROStore("attributes.quickness");
+  const storeManager2 = StoreManager.Subscribe(actor());
+  onDestroy(() => StoreManager.Unsubscribe(actor()));
+  let quickness = storeManager2.GetSumROStore("attributes.quickness");
   let walking = storeManager2.GetSumROStore("movement.walking");
-  let walkingValue = storeManager2.GetRWStore("movement.walking");
+  let walkingValueStore = storeManager2.GetRWStore("movement.walking.value");
   let running = storeManager2.GetSumROStore("movement.running");
-  let runningValue = storeManager2.GetRWStore("movement.running");
+  let runningValueStore = storeManager2.GetRWStore("movement.running.value");
   user_effect(() => {
-    store_set(walkingValue, proxy($quicknessStore().sum));
-    store_set(runningValue, proxy($quicknessStore().sum));
+    store_set(walkingValueStore, proxy($quickness().sum));
+    store_set(runningValueStore, proxy($quickness().sum));
   });
   var fragment = root$H();
   var node = first_child(fragment);
@@ -10145,15 +10142,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   let transferredEffects = state(proxy([]));
   let isViewerInstanceOfActor = $$props.document instanceof Actor;
   onMount(() => {
-    const handler = (actor) => {
-      var _a;
-      if (((_a = $$props.document) == null ? void 0 : _a.id) !== actor.id) return;
-      set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
-      set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
-    };
-    Hooks.on("actorSystemRecalculated", handler);
     onDestroy(() => {
-      Hooks.off("actorSystemRecalculated", handler);
     });
   });
   user_effect(() => {
@@ -10161,7 +10150,6 @@ function ActiveEffectsViewer($$anchor, $$props) {
     set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
   });
   async function onHandleEffectTriggerUI() {
-    Hooks.callAll("actorSystemRecalculated", $$props.document);
     set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
     set(transferredEffects, proxy([...get$1(transferredEffects)]));
   }
@@ -16795,6 +16783,21 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
   Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
+  Hooks.on("createActiveEffect", (effect2, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
+  Hooks.on("updateActiveEffect", (effect2, changes, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
+  Hooks.on("deleteActiveEffect", (effect2, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
   Hooks.on("ready", () => {
     getNewsService();
     const activeBroadcasters = game.actors.filter(

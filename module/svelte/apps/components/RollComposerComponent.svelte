@@ -277,7 +277,6 @@
          },
       });
 
-      Hooks.callAll("actorSystemRecalculated", actor);
    }
 
    function getRoot(el) {

@@ -219,7 +219,6 @@ function wrapChatMessage(message, html, context) {
 
    html.innerHTML = "";
    html.appendChild(wrapper);
-
 }
 
 function applyAuthorColorToChatMessage(message, html, context) {
@@ -312,6 +311,22 @@ function registerHooks() {
 
    Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
    Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
+
+   Hooks.on("createActiveEffect", (effect, options, userId) => {
+      if (effect.parent instanceof Actor) {
+         Hooks.callAll("actorSystemRecalculated", effect.parent);
+      }
+   });
+   Hooks.on("updateActiveEffect", (effect, changes, options, userId) => {
+      if (effect.parent instanceof Actor) {
+         Hooks.callAll("actorSystemRecalculated", effect.parent);
+      }
+   });
+   Hooks.on("deleteActiveEffect", (effect, options, userId) => {
+      if (effect.parent instanceof Actor) {
+         Hooks.callAll("actorSystemRecalculated", effect.parent);
+      }
+   });
 
    Hooks.on("ready", () => {
       getNewsService(); // forces initialization and sets CONFIG.sr3e.newsService
