@@ -35,6 +35,16 @@
    });
 
    $effect(() => {
+      if (!ecgService) return;
+
+      if (!$isAlive) {
+         ecgService.ecgAnimator.flatline();
+      } else {
+         ecgService.ecgAnimator.start();
+      }
+   });
+
+   $effect(() => {
       $penalty = ecgService?.calculatePenalty($stun, $physical);
    });
 

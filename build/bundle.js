@@ -8844,6 +8844,30 @@ class EcgAnimator {
     this._isAnimating = true;
     this._animate();
   }
+  flatline() {
+    this.stop();
+    this.lineCtx.clearRect(0, 0, this.width, this.height);
+    this.pointCtx.clearRect(0, 0, this.width, this.height);
+    const centerY = this.height / 2;
+    const xStart = 0;
+    const xEnd = this.width;
+    this.lineCtx.beginPath();
+    this.lineCtx.moveTo(xStart, centerY);
+    this.lineCtx.lineTo(xEnd, centerY);
+    this.lineCtx.strokeStyle = this.bottomColor;
+    this.lineCtx.lineWidth = this.lineWidth;
+    this.lineCtx.stroke();
+    const radius = 4;
+    const x = this.width - 10;
+    const y = centerY;
+    this.pointCtx.beginPath();
+    this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
+    this.pointCtx.fillStyle = this.topColor;
+    this.pointCtx.shadowBlur = 5;
+    this.pointCtx.shadowColor = this.topColor;
+    this.pointCtx.fill();
+    this.pointCtx.shadowBlur = 0;
+  }
   stop() {
     this._isAnimating = false;
     if (this._animFrame) cancelAnimationFrame(this._animFrame);
@@ -9053,6 +9077,7 @@ function Health($$anchor, $$props) {
   const [$$stores, $$cleanup] = setup_stores();
   const $stun = () => store_get(stun, "$stun", $$stores);
   const $physical = () => store_get(physical, "$physical", $$stores);
+  const $isAlive = () => store_get(isAlive, "$isAlive", $$stores);
   const $penalty = () => store_get(penalty, "$penalty", $$stores);
   const $overflow = () => store_get(overflow, "$overflow", $$stores);
   const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
@@ -9077,6 +9102,14 @@ function Health($$anchor, $$props) {
   user_effect(() => {
     set(stunBoxes, proxy(Array.from({ length: 10 }, (_, i) => i < $stun())));
     set(physicalBoxes, proxy(Array.from({ length: 10 }, (_, i) => i < $physical())));
+  });
+  user_effect(() => {
+    if (!get$1(ecgService)) return;
+    if (!$isAlive()) {
+      get$1(ecgService).ecgAnimator.flatline();
+    } else {
+      get$1(ecgService).ecgAnimator.start();
+    }
   });
   user_effect(() => {
     var _a;
