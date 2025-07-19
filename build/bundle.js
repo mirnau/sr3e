@@ -14331,6 +14331,7 @@ function CharacterCreationDialogApp($$anchor, $$props) {
       "system.attributes.quickness.value": 1,
       "system.attributes.intelligence.value": 1,
       "system.attributes.initiative.value": 1,
+      "system.attributes.essence.value": 6,
       "system.karma.karmaPool.value": 1
     });
     await actor().createEmbeddedDocuments("Item", [worldmetatype.toObject()]);
