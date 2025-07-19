@@ -14,7 +14,7 @@
    let karmaPoolStore = storeManager.GetSumROStore("karma.karmaPool");
    let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma");
    let essenceStore = storeManager.GetSumROStore("attributes.essence");
-   let miraculousSurvivalStore = storeManager.GetRWStore("karma.miraculousSurvival");
+
 </script>
 
 <CardToolbar {id} />
@@ -24,15 +24,5 @@
    <StatCard {actor} label={localize(config.karma.karmapool)} value={$karmaPoolStore.sum} />
    <StatCard {actor} label={localize(config.attributes.essence)} value={$essenceStore.sum} />
 
-   {#if !$miraculousSurvivalStore}
-      <div class="stat-card">
-         <div class="stat-card-background"></div>
-         <h4 class="no-margin">
-            {localize(config.karma.miraculoussurvival)}
-         </h4>
-         <i class="fa-solid fa-heart-circle-bolt"></i>
-      </div>
-   {:else}
-      <!--display nothing-->
-   {/if}
+
 </MasonryGrid>

@@ -2171,6 +2171,7 @@
     padding: 0;
   }
   .condition-monitor .condition-meter {
+    position: relative;
     min-height: 6rem;
     margin-top: 1rem;
     display: flex;
@@ -2179,6 +2180,11 @@
     padding: 0.5rem;
     justify-content: center;
     gap: 1rem;
+  }
+  .condition-monitor .condition-meter .revival-button {
+    position: absolute;
+    bottom: 0rem;
+    right: 0rem;
   }
   .condition-monitor .condition-meter .checkbox-label {
     min-width: 4rem;

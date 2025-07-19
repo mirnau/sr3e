@@ -50,11 +50,19 @@
    padding: 0;
 
    .condition-meter {
+      position: relative;
       min-height: 6rem;
       margin-top: 1rem;
       .apply-flex-distribute(column);
       justify-content: center;
       gap: 1rem;
+
+      .revival-button {
+         position:absolute;
+         bottom: 0rem;
+         right: 0rem;
+         
+      }
 
       .checkbox-label {
          min-width: 4rem;

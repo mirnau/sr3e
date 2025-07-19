@@ -1,5 +1,5 @@
 <script>
-   import { onMount } from "svelte";
+   import { onDestroy, onMount } from "svelte";
    import { localize } from "../../../services/utilities.js";
    import CardToolbar from "./CardToolbar.svelte";
    import ElectroCardiogramService from "../../../services/ElectroCardiogramService.js";
@@ -9,11 +9,16 @@
    let { actor = {}, config = {}, id = {} } = $props();
 
    let storeManager = StoreManager.Subscribe(actor);
+   onDestroy(() => {
+      StoreManager.Unsubscribe(actor);
+   });
 
-   let stun = storeManager.GetRWStore("health.stun");
-   let physical = storeManager.GetRWStore("health.physical");
-   let penalty = storeManager.GetRWStore("health.penalty");
-   let overflow = storeManager.GetRWStore("health.overflow");
+   let stun = storeManager.GetRWStore("health.stun.value");
+   let physical = storeManager.GetRWStore("health.physical.value");
+   let penalty = storeManager.GetRWStore("health.penalty.value");
+   let overflow = storeManager.GetRWStore("health.overflow.value");
+   let miraculousSurvivalStore = storeManager.GetRWStore("karma.miraculousSurvival");
+   let isAlive = storeManager.GetRWStore("health.isAlive");
 
    let maxDegree = $state(0);
    let ecgCanvas = $state();
@@ -32,6 +37,35 @@
    $effect(() => {
       $penalty = ecgService?.calculatePenalty($stun, $physical);
    });
+
+   async function revive() {
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: {
+            title: "Revive Character",
+         },
+         content: `
+         <p>Are you sure you want to use your one-time <strong>Miraculous Survival</strong>?</p>
+         <p>This action cannot be undone.</p>
+      `,
+         yes: {
+            icon: '<i class="fa-solid fa-heart-pulse"></i>',
+            label: "Yes, Revive",
+            default: true,
+         },
+         no: {
+            icon: '<i class="fa-solid fa-xmark"></i>',
+            label: "Cancel",
+         },
+         modal: true,
+         rejectClose: true,
+      });
+
+      if (!confirmed) return;
+
+      $overflow = 0;
+      $isAlive = true;
+      $miraculousSurvivalStore = true;
+   }
 
    function toggle(localIndex, isStun, willBeChecked) {
       const newValue = willBeChecked ? localIndex + 1 : localIndex;
@@ -81,6 +115,20 @@
 
 <div class="condition-monitor">
    <div class="condition-meter">
+      {#if !$miraculousSurvivalStore}
+         <div class="revival-button">
+            <i
+               class="fa-solid fa-heart-circle-bolt"
+               role="button"
+               tabindex="0"
+               aria-label="Revive"
+               onclick={revive}
+               onkeydown={(e) => handleButtonKeypress(e, revive)}
+            ></i>
+         </div>
+      {:else}
+         <!--display nothing-->
+      {/if}
       <div class="stun-damage">
          <h3 class="no-margin checkbox-label">Stun</h3>
          {#each stunBoxes as checked, i}

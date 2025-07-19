@@ -212,29 +212,13 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
 class HealthModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      stun: new foundry.data.fields.NumberField({
+      stun: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      physical: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      overflow: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      penalty: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      isAlive: new foundry.data.fields.BooleanField({
         required: true,
-        initial: 0,
-        integer: true,
-        min: 0,
-        max: 10
-      }),
-      physical: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true,
-        min: 0,
-        max: 10
-      }),
-      overflow: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true
-      }),
-      penalty: new foundry.data.fields.NumberField({
-        required: true,
-        initial: 0,
-        integer: true
+        initial: true
       })
     };
   }
@@ -4165,7 +4149,7 @@ var on_click$c = (__1, modifiersArray) => {
     { name: "Modifier", value: 0 }
   ]));
 };
-var root_2$k = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
+var root_2$j = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
 var root_3$f = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
 var root_4$f = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$t = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
@@ -4506,7 +4490,7 @@ function RollComposerComponent($$anchor, $$props) {
   var text_2 = child(h4_1);
   var node_1 = sibling(h4_1, 2);
   each(node_1, 17, () => get$1(modifiersArray), index, ($$anchor2, modifier, i) => {
-    var div_4 = root_2$k();
+    var div_4 = root_2$j();
     var h4_2 = child(div_4);
     var text_3 = child(h4_2);
     var node_2 = sibling(h4_2, 2);
@@ -4614,11 +4598,11 @@ function RollComposerComponent($$anchor, $$props) {
 }
 delegate(["keydown", "click"]);
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
-var root_2$j = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_2$i = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$4 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
 var root_3$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$s = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
-var on_keydown_2$3 = (e, Roll2) => {
+var on_keydown_2$4 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
 };
 var root_4$e = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><h1 class="stat-value"> </h1></div></div>`);
@@ -4743,7 +4727,7 @@ function AttributeCard($$anchor, $$props) {
       var node_1 = child(div_1);
       {
         var consequent = ($$anchor3) => {
-          var i_1 = root_2$j();
+          var i_1 = root_2$i();
           i_1.__click = decrement2;
           i_1.__keydown = [on_keydown$7, decrement2];
           template_effect(() => set_class(i_1, `fa-solid fa-circle-chevron-down decrement-attribute ${(get$1(isMinLimit) ? "disabled" : "") ?? ""}`));
@@ -4782,7 +4766,7 @@ function AttributeCard($$anchor, $$props) {
     var alternate = ($$anchor2) => {
       var div_2 = root_4$e();
       div_2.__click = Roll2;
-      div_2.__keydown = [on_keydown_2$3, Roll2];
+      div_2.__keydown = [on_keydown_2$4, Roll2];
       var h4_1 = child(div_2);
       var text_2 = child(h4_1);
       var div_3 = sibling(h4_1, 4);
@@ -6370,12 +6354,12 @@ function setupMasonry({
 const handleKeyDown$1 = (e, provideSelectedDicepool) => {
   if (e.key === "Enter" || e.key === " ") provideSelectedDicepool(e);
 };
-var root_2$i = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
+var root_2$h = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_4$d = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_1$r = /* @__PURE__ */ template(`<div class="stat-card button" role="button" tabindex="0"><div class="stat-card-background"></div> <!> <!></div>`);
 var root_6$5 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
-var root_5$9 = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
+var root_5$a = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
 function StatCard$1($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -6404,7 +6388,7 @@ function StatCard$1($$anchor, $$props) {
       var node_1 = sibling(child(div), 2);
       {
         var consequent = ($$anchor3) => {
-          var h4 = root_2$i();
+          var h4 = root_2$h();
           var text2 = child(h4);
           template_effect(($0) => set_text(text2, $0), [() => localize($$props.label)]);
           append($$anchor3, h4);
@@ -6437,7 +6421,7 @@ function StatCard$1($$anchor, $$props) {
       append($$anchor2, div);
     };
     var alternate_2 = ($$anchor2) => {
-      var div_1 = root_5$9();
+      var div_1 = root_5$a();
       var node_4 = sibling(child(div_1), 2);
       {
         var consequent_3 = ($$anchor3) => {
@@ -6603,7 +6587,7 @@ function Attributes($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-var root_2$h = /* @__PURE__ */ template(`<!> <!>`, 1);
+var root_2$g = /* @__PURE__ */ template(`<!> <!>`, 1);
 var root_1$p = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 var root$I = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function DicePools($$anchor, $$props) {
@@ -6711,7 +6695,7 @@ function DicePools($$anchor, $$props) {
       var node_5 = sibling(node_4, 2);
       {
         var consequent = ($$anchor3) => {
-          var fragment_2 = root_2$h();
+          var fragment_2 = root_2$g();
           var node_6 = first_child(fragment_2);
           StatCard$1(node_6, {
             get document() {
@@ -6974,8 +6958,7 @@ class KarmaShoppingService {
     return 0;
   }
 }
-var root_2$g = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4 class="no-margin"> </h4> <i class="fa-solid fa-heart-circle-bolt"></i></div>`);
-var root_1$m = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
+var root_1$m = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
 var root$F = /* @__PURE__ */ template(`<!> <h1> </h1> <!>`, 1);
 function Karma($$anchor, $$props) {
   push($$props, true);
@@ -6983,14 +6966,12 @@ function Karma($$anchor, $$props) {
   const $goodKarmaStore = () => store_get(goodKarmaStore, "$goodKarmaStore", $$stores);
   const $karmaPoolStore = () => store_get(karmaPoolStore, "$karmaPoolStore", $$stores);
   const $essenceStore = () => store_get(essenceStore, "$essenceStore", $$stores);
-  const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
   let karmaPoolStore = storeManager2.GetSumROStore("karma.karmaPool");
   let goodKarmaStore = storeManager2.GetRWStore("karma.goodKarma");
   let essenceStore = storeManager2.GetSumROStore("attributes.essence");
-  let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
   var fragment = root$F();
   var node = first_child(fragment);
   CardToolbar(node, {
@@ -7045,24 +7026,6 @@ function Karma($$anchor, $$props) {
           return $essenceStore().sum;
         }
       });
-      var node_5 = sibling(node_4, 2);
-      {
-        var consequent = ($$anchor3) => {
-          var div = root_2$g();
-          var h4 = sibling(child(div), 2);
-          var text_1 = child(h4);
-          template_effect(($0) => set_text(text_1, $0), [
-            () => localize(config().karma.miraculoussurvival)
-          ]);
-          append($$anchor3, div);
-        };
-        var alternate = ($$anchor3) => {
-        };
-        if_block(node_5, ($$render) => {
-          if (!$miraculousSurvivalStore()) $$render(consequent);
-          else $$render(alternate, false);
-        });
-      }
       append($$anchor2, fragment_1);
     },
     $$slots: { default: true }
@@ -7956,11 +7919,11 @@ var on_keydown_1$3 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
 var on_click_1$7 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
-var on_keydown_2$2 = (e, Roll2, skill, specialization) => {
+var on_keydown_2$3 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
 var root_6$4 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_5$8 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_5$9 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$c = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$B = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function ActiveSkillCard($$anchor, $$props) {
@@ -8100,11 +8063,11 @@ function ActiveSkillCard($$anchor, $$props) {
       var node_2 = sibling(div_7, 2);
       {
         var consequent_2 = ($$anchor3) => {
-          var div_8 = root_5$8();
+          var div_8 = root_5$9();
           each(div_8, 5, $specializationsStore, index, ($$anchor4, specialization) => {
             var div_9 = root_6$4();
             div_9.__click = [on_click_1$7, Roll2, skill, specialization];
-            div_9.__keydown = [on_keydown_2$2, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2$3, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
             var text_6 = child(div_10);
             var h1_3 = sibling(div_10, 2);
@@ -8147,11 +8110,11 @@ var on_keydown_1$2 = (e, Roll2, skill) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id);
 };
 var on_click_1$6 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, get$1(specialization).name);
-var on_keydown_2$1 = (e, Roll2, skill, specialization) => {
+var on_keydown_2$2 = (e, Roll2, skill, specialization) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e, skill().id, get$1(specialization).name);
 };
 var root_6$3 = /* @__PURE__ */ template(`<div class="skill-specialization-card" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_5$7 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_5$8 = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_4$b = /* @__PURE__ */ template(`<div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!></div>`);
 var root$A = /* @__PURE__ */ template(`<div class="skill-card-container"><!></div>`);
 function KnowledgeSkillCard($$anchor, $$props) {
@@ -8291,11 +8254,11 @@ function KnowledgeSkillCard($$anchor, $$props) {
       var node_2 = sibling(div_7, 2);
       {
         var consequent_2 = ($$anchor3) => {
-          var div_8 = root_5$7();
+          var div_8 = root_5$8();
           each(div_8, 5, $specializations, index, ($$anchor4, specialization) => {
             var div_9 = root_6$3();
             div_9.__click = [on_click_1$6, Roll2, skill, specialization];
-            div_9.__keydown = [on_keydown_2$1, Roll2, skill, specialization];
+            div_9.__keydown = [on_keydown_2$2, Roll2, skill, specialization];
             var div_10 = sibling(child(div_9), 2);
             var text_6 = child(div_10);
             var h1_3 = sibling(div_10, 2);
@@ -8334,7 +8297,7 @@ var root_1$j = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i>`);
 var on_click$6 = (e, Roll2, skill, $valueStore, valueStore) => Roll2(e, skill().id, "language", skill().name, $valueStore());
 var on_keydown_1$1 = (e, Roll2, skill, $valueStore, valueStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "language", skill().name, $valueStore());
 var on_click_1$5 = (e, Roll2, skill, $readWriteStore, readWriteStore) => Roll2(e, skill().id, "language", "Read/Write", $readWriteStore());
-var on_keydown_2 = (e, Roll2, skill, $readWriteStore, readWriteStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "language", "Read/Write", $readWriteStore());
+var on_keydown_2$1 = (e, Roll2, skill, $readWriteStore, readWriteStore) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "language", "Read/Write", $readWriteStore());
 var root_2$d = /* @__PURE__ */ template(`<div class="specialization-container"><div class="skill-specialization-card button" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name">Read/Write</div> <h1 class="embedded-value"> </h1></div></div>`);
 var on_click_2$3 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
 var on_keydown_3 = (e, Roll2, skill, specialization) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
@@ -8465,7 +8428,7 @@ function LanguageSkillCard($$anchor, $$props) {
         readWriteStore
       ];
       div_4.__keydown = [
-        on_keydown_2,
+        on_keydown_2$1,
         Roll2,
         skill,
         $readWriteStore,
@@ -9076,13 +9039,15 @@ setPace_fn = function(freq, amp) {
     this.ecgAnimator.setAmplitude(amp);
   }
 };
-var root_2$c = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
-var root_1$h = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
-var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
-var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
-var on_keydown$3 = (e, handleButtonKeypress, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
-var on_keydown_1 = (e, handleButtonKeypress, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
-var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-plus" role="button" tabindex="0" aria-label="Increase overflow"></i></div></div> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-minus" role="button" tabindex="0" aria-label="Decrease overflow"></i></div></div></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
+var on_keydown$3 = (e, handleButtonKeypress, revive) => handleButtonKeypress(e, revive);
+var root_1$h = /* @__PURE__ */ template(`<div class="revival-button"><i class="fa-solid fa-heart-circle-bolt" role="button" tabindex="0" aria-label="Revive"></i></div>`);
+var root_3$a = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_2$c = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var root_5$7 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
+var root_4$9 = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
+var on_keydown_1 = (e, handleButtonKeypress, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
+var on_keydown_2 = (e, handleButtonKeypress, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
+var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><!> <div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-plus" role="button" tabindex="0" aria-label="Increase overflow"></i></div></div> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-minus" role="button" tabindex="0" aria-label="Decrease overflow"></i></div></div></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -9090,12 +9055,18 @@ function Health($$anchor, $$props) {
   const $physical = () => store_get(physical, "$physical", $$stores);
   const $penalty = () => store_get(penalty, "$penalty", $$stores);
   const $overflow = () => store_get(overflow, "$overflow", $$stores);
+  const $miraculousSurvivalStore = () => store_get(miraculousSurvivalStore, "$miraculousSurvivalStore", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let stun = storeManager2.GetRWStore("health.stun");
-  let physical = storeManager2.GetRWStore("health.physical");
-  let penalty = storeManager2.GetRWStore("health.penalty");
-  let overflow = storeManager2.GetRWStore("health.overflow");
+  onDestroy(() => {
+    StoreManager.Unsubscribe(actor());
+  });
+  let stun = storeManager2.GetRWStore("health.stun.value");
+  let physical = storeManager2.GetRWStore("health.physical.value");
+  let penalty = storeManager2.GetRWStore("health.penalty.value");
+  let overflow = storeManager2.GetRWStore("health.overflow.value");
+  let miraculousSurvivalStore = storeManager2.GetRWStore("karma.miraculousSurvival");
+  let isAlive = storeManager2.GetRWStore("health.isAlive");
   let maxDegree = state(0);
   let ecgCanvas = state(void 0);
   let ecgPointCanvas = state(void 0);
@@ -9111,6 +9082,30 @@ function Health($$anchor, $$props) {
     var _a;
     store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stun(), $physical())));
   });
+  async function revive() {
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Revive Character" },
+      content: `
+         <p>Are you sure you want to use your one-time <strong>Miraculous Survival</strong>?</p>
+         <p>This action cannot be undone.</p>
+      `,
+      yes: {
+        icon: '<i class="fa-solid fa-heart-pulse"></i>',
+        label: "Yes, Revive",
+        default: true
+      },
+      no: {
+        icon: '<i class="fa-solid fa-xmark"></i>',
+        label: "Cancel"
+      },
+      modal: true,
+      rejectClose: true
+    });
+    if (!confirmed) return;
+    store_set(overflow, 0);
+    store_set(isAlive, true);
+    store_set(miraculousSurvivalStore, true);
+  }
   function toggle(localIndex, isStun, willBeChecked) {
     const newValue = willBeChecked ? localIndex + 1 : localIndex;
     if (isStun) {
@@ -9157,18 +9152,34 @@ function Health($$anchor, $$props) {
   bind_this(div, ($$value) => ecg = $$value, () => ecg);
   var div_1 = sibling(div, 2);
   var div_2 = child(div_1);
-  var div_3 = child(div_2);
-  var node_1 = sibling(child(div_3), 2);
-  each(node_1, 17, () => get$1(stunBoxes), index, ($$anchor2, checked, i) => {
-    var div_4 = root_1$h();
-    var input = child(div_4);
+  var node_1 = child(div_2);
+  {
+    var consequent = ($$anchor2) => {
+      var div_3 = root_1$h();
+      var i_1 = child(div_3);
+      i_1.__click = revive;
+      i_1.__keydown = [on_keydown$3, handleButtonKeypress, revive];
+      append($$anchor2, div_3);
+    };
+    var alternate = ($$anchor2) => {
+    };
+    if_block(node_1, ($$render) => {
+      if (!$miraculousSurvivalStore()) $$render(consequent);
+      else $$render(alternate, false);
+    });
+  }
+  var div_4 = sibling(node_1, 2);
+  var node_2 = sibling(child(div_4), 2);
+  each(node_2, 17, () => get$1(stunBoxes), index, ($$anchor2, checked, i) => {
+    var div_5 = root_2$c();
+    var input = child(div_5);
     set_attribute(input, "id", `healthBox${i + 1}`);
     input.__change = (e) => toggle(i, true, e.target.checked);
-    var node_2 = sibling(input, 2);
+    var node_3 = sibling(input, 2);
     {
-      var consequent = ($$anchor3) => {
-        var div_5 = root_2$c();
-        var h4 = child(div_5);
+      var consequent_1 = ($$anchor3) => {
+        var div_6 = root_3$a();
+        var h4 = child(div_6);
         var text2 = child(h4);
         template_effect(() => {
           set_class(h4, `no-margin ${(get$1(checked) ? "lit" : "unlit") ?? ""}`);
@@ -9185,27 +9196,27 @@ function Health($$anchor, $$props) {
             "Deadly"
           ][i]);
         });
-        append($$anchor3, div_5);
+        append($$anchor3, div_6);
       };
-      if_block(node_2, ($$render) => {
-        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent);
+      if_block(node_3, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_1);
       });
     }
     template_effect(() => set_checked(input, get$1(checked)));
-    append($$anchor2, div_4);
+    append($$anchor2, div_5);
   });
-  var div_6 = sibling(div_3, 2);
-  var node_3 = sibling(child(div_6), 2);
-  each(node_3, 17, () => get$1(physicalBoxes), index, ($$anchor2, checked, i) => {
-    var div_7 = root_3$a();
-    var input_1 = child(div_7);
+  var div_7 = sibling(div_4, 2);
+  var node_4 = sibling(child(div_7), 2);
+  each(node_4, 17, () => get$1(physicalBoxes), index, ($$anchor2, checked, i) => {
+    var div_8 = root_4$9();
+    var input_1 = child(div_8);
     set_attribute(input_1, "id", `healthBox${i + 11}`);
     input_1.__change = (e) => toggle(i, false, e.target.checked);
-    var node_4 = sibling(input_1, 2);
+    var node_5 = sibling(input_1, 2);
     {
-      var consequent_1 = ($$anchor3) => {
-        var div_8 = root_4$9();
-        var h4_1 = child(div_8);
+      var consequent_2 = ($$anchor3) => {
+        var div_9 = root_5$7();
+        var h4_1 = child(div_9);
         var text_1 = child(h4_1);
         template_effect(() => {
           set_class(h4_1, `no-margin ${(get$1(checked) ? "lit" : "unlit") ?? ""}`);
@@ -9222,38 +9233,38 @@ function Health($$anchor, $$props) {
             "Deadly"
           ][i]);
         });
-        append($$anchor3, div_8);
+        append($$anchor3, div_9);
       };
-      if_block(node_4, ($$render) => {
-        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_1);
+      if_block(node_5, ($$render) => {
+        if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_2);
       });
     }
     template_effect(() => set_checked(input_1, get$1(checked)));
-    append($$anchor2, div_7);
+    append($$anchor2, div_8);
   });
-  var div_9 = sibling(node_3, 2);
-  var div_10 = child(div_9);
-  var i_1 = child(div_10);
-  i_1.__click = incrementOverflow;
-  i_1.__keydown = [
-    on_keydown$3,
-    handleButtonKeypress,
-    incrementOverflow
-  ];
-  var div_11 = sibling(div_9, 2);
-  var div_12 = child(div_11);
-  var i_2 = child(div_12);
-  i_2.__click = decrementOverflow;
+  var div_10 = sibling(node_4, 2);
+  var div_11 = child(div_10);
+  var i_2 = child(div_11);
+  i_2.__click = incrementOverflow;
   i_2.__keydown = [
     on_keydown_1,
     handleButtonKeypress,
+    incrementOverflow
+  ];
+  var div_12 = sibling(div_10, 2);
+  var div_13 = child(div_12);
+  var i_3 = child(div_13);
+  i_3.__click = decrementOverflow;
+  i_3.__keydown = [
+    on_keydown_2,
+    handleButtonKeypress,
     decrementOverflow
   ];
-  var div_13 = sibling(div_2, 2);
-  var div_14 = child(div_13);
-  var node_5 = child(div_14);
+  var div_14 = sibling(div_2, 2);
+  var div_15 = child(div_14);
+  var node_6 = child(div_15);
   const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
-  StatCard$1(node_5, {
+  StatCard$1(node_6, {
     get actor() {
       return actor();
     },
@@ -9264,9 +9275,9 @@ function Health($$anchor, $$props) {
       return get$1(expression);
     }
   });
-  var node_6 = sibling(node_5, 2);
+  var node_7 = sibling(node_6, 2);
   const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().health.overflow));
-  StatCard$1(node_6, {
+  StatCard$1(node_7, {
     get actor() {
       return actor();
     },
@@ -9281,7 +9292,7 @@ function Health($$anchor, $$props) {
   pop();
   $$cleanup();
 }
-delegate(["change", "click", "keydown"]);
+delegate(["click", "keydown", "change"]);
 function Garage($$anchor) {
   var text$1 = text("Hello garage!");
   append($$anchor, text$1);
