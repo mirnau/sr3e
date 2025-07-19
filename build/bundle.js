@@ -10145,7 +10145,7 @@ async function addEffect(e, $$props, onHandleEffectTriggerUI) {
   );
   await onHandleEffectTriggerUI();
 }
-var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"><button class="fas fa-plus" type="button"></button></div> <table><thead><tr><th><div class="cell-content"></div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
+var root$o = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"></div> <table><thead><tr><th><button class="fas fa-plus" type="button"></button></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
 function ActiveEffectsViewer($$anchor, $$props) {
   push($$props, true);
   let isSlim = prop($$props, "isSlim", 3, false);
@@ -10174,24 +10174,24 @@ function ActiveEffectsViewer($$anchor, $$props) {
     set(transferredEffects, proxy([...get$1(transferredEffects)]));
   }
   var div = root$o();
-  var div_1 = child(div);
-  var button = child(div_1);
-  button.__click = [addEffect, $$props, onHandleEffectTriggerUI];
-  var table = sibling(div_1, 2);
+  var table = sibling(child(div), 2);
   var thead = child(table);
   var tr = child(thead);
-  var th = sibling(child(tr));
-  var div_2 = child(th);
-  var text2 = child(div_2);
+  var th = child(tr);
+  var button = child(th);
+  button.__click = [addEffect, $$props, onHandleEffectTriggerUI];
   var th_1 = sibling(th);
-  var div_3 = child(th_1);
-  var text_1 = child(div_3);
+  var div_1 = child(th_1);
+  var text2 = child(div_1);
   var th_2 = sibling(th_1);
-  var div_4 = child(th_2);
-  var text_2 = child(div_4);
+  var div_2 = child(th_2);
+  var text_1 = child(div_2);
   var th_3 = sibling(th_2);
-  var div_5 = child(th_3);
-  var text_3 = child(div_5);
+  var div_3 = child(th_3);
+  var text_2 = child(div_3);
+  var th_4 = sibling(th_3);
+  var div_4 = child(th_4);
+  var text_3 = child(div_4);
   var tbody = sibling(thead);
   var node = child(tbody);
   each(node, 17, () => get$1(actorAttachedEffects), (activeEffect) => activeEffect.id, ($$anchor2, activeEffect) => {
@@ -12026,7 +12026,7 @@ sr3e.commodity = {
 };
 sr3e.portability = {
   portability: "sr3e.portability.portability",
-  concealability: "sr3e.portability.portability",
+  concealability: "sr3e.portability.concealability",
   weight: "sr3e.portability.weight"
 };
 function injectCssSelectors(app, element, ctx, data) {
@@ -13352,11 +13352,11 @@ function Portability($$anchor, $$props) {
   append($$anchor, div);
   pop();
 }
-var on_change$4 = (e, item2) => item2().update({ name: e.target.value });
+var on_change$4 = (e, item2) => item2().update({ ["name"]: e.target.value });
 var root_2$6 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
 var root_1$7 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
 var root_3$4 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
-var root$c = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!></div></div>`);
+var root$c = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let layoutMode = "double";
@@ -13422,11 +13422,8 @@ function WeaponApp($$anchor, $$props) {
       var fragment = root_1$7();
       var node_1 = first_child(fragment);
       Image(node_1, {
-        get src() {
-          return item2().img;
-        },
-        get title() {
-          return item2().name;
+        get entity() {
+          return item2();
         }
       });
       var div_2 = sibling(node_1, 2);
@@ -13463,17 +13460,21 @@ function WeaponApp($$anchor, $$props) {
     }
   });
   var node_5 = sibling(node_3, 2);
-  Commodity(node_5, {
-    get item() {
-      return item2();
-    },
-    get config() {
-      return config();
-    },
-    gridCss: "two-column"
+  ItemSheetComponent(node_5, {
+    children: ($$anchor2, $$slotProps) => {
+      ActiveEffectsViewer($$anchor2, {
+        get document() {
+          return item2();
+        },
+        get config() {
+          return config();
+        },
+        isSlim: true
+      });
+    }
   });
   var node_6 = sibling(node_5, 2);
-  Portability(node_6, {
+  Commodity(node_6, {
     get item() {
       return item2();
     },
@@ -13483,7 +13484,17 @@ function WeaponApp($$anchor, $$props) {
     gridCss: "two-column"
   });
   var node_7 = sibling(node_6, 2);
-  JournalViewer(node_7, {
+  Portability(node_7, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    },
+    gridCss: "two-column"
+  });
+  var node_8 = sibling(node_7, 2);
+  JournalViewer(node_8, {
     get document() {
       return item2();
     },
@@ -13582,6 +13593,10 @@ class PortabilityModel extends foundry.abstract.TypeDataModel {
         weight: new foundry.data.fields.NumberField({
           required: true,
           initial: 0
+        }),
+        isCarriedOnPerson: new foundry.data.fields.BooleanField({
+          required: true,
+          initial: false
         })
       })
     };

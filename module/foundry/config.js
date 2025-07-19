@@ -309,6 +309,6 @@ sr3e.commodity = {
 
 sr3e.portability = {
    portability: "sr3e.portability.portability",
-   concealability: "sr3e.portability.portability",
+   concealability: "sr3e.portability.concealability",
    weight: "sr3e.portability.weight",
 };

@@ -83,14 +83,12 @@
 </script>
 
 <div class="effects-viewer">
-   <div class="effects-header">
-      <button class="fas fa-plus" type="button" onclick={addEffect}></button>
-   </div>
+   <div class="effects-header"></div>
 
    <table class:slim={isSlim}>
       <thead>
          <tr>
-            <th><div class="cell-content"></div></th>
+            <th><button class="fas fa-plus" type="button" onclick={addEffect}></button></th>
             <th><div class="cell-content">{localize(config.effects.name)}</div></th>
             <th><div class="cell-content">{localize(config.effects.durationType)}</div></th>
             <th><div class="cell-content">{localize(config.effects.disabled)}</div></th>
