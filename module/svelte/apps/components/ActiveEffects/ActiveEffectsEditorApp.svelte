@@ -287,7 +287,7 @@
                               bind:value={change.mode}
                               onchange={(e) => updateChange(i, "mode", parseInt(e.target.value))}
                            >
-                              {#each Object.entries(CONST.ACTIVE_EFFECT_MODES) as [label, val]}
+                              {#each Object.entries(CONST.ACTIVE_EFFECT_MODES).filter(([label]) => label !== "CUSTOM" && label !== "MULTIPLY") as [label, val]}
                                  <option value={val}>{label}</option>
                               {/each}
                            </select>

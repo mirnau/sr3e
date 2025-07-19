@@ -42,7 +42,7 @@ export default class ItemDataService {
       return {
          name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
          type: "metatype",
-         img: "systems/sr3e/textures/ai-generated/humans.webp",
+         img: "systems/sr3e/textures/ai/humans.webp",
          system: {
             agerange: { min: 0, average: 30, max: 100 },
             physical: {
@@ -59,6 +59,9 @@ export default class ItemDataService {
             },
             karma: {
                factor: 0.1,
+            },
+            movement: {
+               factor: 3,
             },
             priority: "E",
             journalId: "", // Set to a real JournalEntry ID if needed

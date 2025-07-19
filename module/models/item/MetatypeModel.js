@@ -100,7 +100,7 @@ export default class MetatypeModel extends foundry.abstract.TypeDataModel {
           initial: 0,
         })
       }),
-      //Movementfactor
+      //RunningModifier
       movement: new foundry.data.fields.SchemaField({
         factor: new foundry.data.fields.NumberField({
           required: true,

@@ -118,6 +118,18 @@
       },
    ]);
 
+   const movement = $derived([
+      {
+         item,
+         key: "runningModifier",
+         label: localize(config.movement.runSpeedModifier), // consider `localize(config.movement.runningMod)` if you have config
+         value: system.movement.factor,
+         path: "system.movement",
+         type: "number",
+         options: [],
+      },
+   ]);
+
    const attributeLimits = $derived([
       {
          item,
@@ -242,6 +254,15 @@
          <h3 class="item">{localize(attributes.limits)}</h3>
          <div class="stat-grid">
             {#each attributeLimits as entry}
+               <StatCard {...entry} />
+            {/each}
+         </div>
+      </ItemSheetComponent>
+
+      <ItemSheetComponent>
+         <h3 class="item">Movement</h3>
+         <div class="stat-grid single-column">
+            {#each movement as entry}
                <StatCard {...entry} />
             {/each}
          </div>

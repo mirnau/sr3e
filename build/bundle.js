@@ -4096,7 +4096,7 @@ class ItemDataService {
     return {
       name: localize(CONFIG.sr3e.placeholders.human) ?? "Localization Error in metatype",
       type: "metatype",
-      img: "systems/sr3e/textures/ai-generated/humans.webp",
+      img: "systems/sr3e/textures/ai/humans.webp",
       system: {
         agerange: { min: 0, average: 30, max: 100 },
         physical: {
@@ -4113,6 +4113,9 @@ class ItemDataService {
         },
         karma: {
           factor: 0.1
+        },
+        movement: {
+          factor: 3
         },
         priority: "E",
         journalId: ""
@@ -6772,17 +6775,18 @@ function Movement($$anchor, $$props) {
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   prop($$props, "span", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  onDestroy(() => {
-    StoreManager.Unsubscribe(actor());
-  });
+  onDestroy(() => StoreManager.Unsubscribe(actor()));
   let quicknessStore = storeManager2.GetSumROStore("attributes.quickness");
   let walking = storeManager2.GetSumROStore("movement.walking");
-  let walkingValue = storeManager2.GetRWStore("movement.walking");
+  let walkingValue = storeManager2.GetRWStore("movement.walking.value");
   let running = storeManager2.GetSumROStore("movement.running");
-  let runningValue = storeManager2.GetRWStore("movement.running");
+  let runningValue = storeManager2.GetRWStore("movement.running.value");
+  let metatype = actor().items.find((i) => i.type === "metatype");
   user_effect(() => {
+    if (!metatype) return;
+    const runningMod = metatype.system.movement.factor ?? 3;
     store_set(walkingValue, proxy($quicknessStore().sum));
-    store_set(runningValue, proxy($quicknessStore().sum));
+    store_set(runningValue, proxy(Math.floor($quicknessStore().sum * runningMod)));
   });
   var fragment = root$H();
   var node = first_child(fragment);
@@ -9892,7 +9896,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         var div_9 = child(td_1);
         var select_2 = sibling(child(div_9), 2);
         select_2.__change = (e) => updateChange(i, "mode", parseInt(e.target.value));
-        each(select_2, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES), index, ($$anchor4, $$item) => {
+        each(select_2, 20, () => Object.entries(CONST.ACTIVE_EFFECT_MODES).filter(([label]) => label !== "CUSTOM" && label !== "MULTIPLY"), index, ($$anchor4, $$item) => {
           let label = () => $$item[0];
           let val = () => $$item[1];
           var option_11 = root_5$6();
@@ -12137,7 +12141,7 @@ class MetatypeModel extends foundry.abstract.TypeDataModel {
           initial: 0
         })
       }),
-      //Movementfactor
+      //RunningModifier
       movement: new foundry.data.fields.SchemaField({
         factor: new foundry.data.fields.NumberField({
           required: true,
@@ -12499,8 +12503,9 @@ var root_3$6 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="sta
 var root_6$2 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_9$1 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
 var root_11 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid"></div>`, 1);
-var root_13 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
-var root$f = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
+var root_13 = /* @__PURE__ */ template(`<h3 class="item">Movement</h3> <div class="stat-grid single-column"></div>`, 1);
+var root_15 = /* @__PURE__ */ template(`<h3 class="item"> </h3> <div class="stat-grid single-column"></div>`, 1);
+var root$f = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!> <!> <!> <!></div></div>`);
 function MetatypeApp($$anchor, $$props) {
   push($$props, true);
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
@@ -12604,6 +12609,18 @@ function MetatypeApp($$anchor, $$props) {
       label: localize(karmaConfig.advancementratio),
       value: system.karma.factor,
       path: "system.karma",
+      type: "number",
+      options: []
+    }
+  ]);
+  const movement = /* @__PURE__ */ derived$1(() => [
+    {
+      item: item2(),
+      key: "runningModifier",
+      label: localize(config().movement.runSpeedModifier),
+      // consider `localize(config.movement.runningMod)` if you have config
+      value: system.movement.factor,
+      path: "system.movement",
       type: "number",
       options: []
     }
@@ -12774,18 +12791,29 @@ function MetatypeApp($$anchor, $$props) {
   ItemSheetComponent(node_7, {
     children: ($$anchor2, $$slotProps) => {
       var fragment_12 = root_13();
-      var h3_4 = first_child(fragment_12);
-      var text_4 = child(h3_4);
-      var div_6 = sibling(h3_4, 2);
-      each(div_6, 21, () => get$1(karma), index, ($$anchor3, entry) => {
+      var div_6 = sibling(first_child(fragment_12), 2);
+      each(div_6, 21, () => get$1(movement), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      template_effect(($0) => set_text(text_4, $0), [() => localize(config().karma.karma)]);
       append($$anchor2, fragment_12);
     }
   });
   var node_8 = sibling(node_7, 2);
   ItemSheetComponent(node_8, {
+    children: ($$anchor2, $$slotProps) => {
+      var fragment_14 = root_15();
+      var h3_4 = first_child(fragment_14);
+      var text_4 = child(h3_4);
+      var div_7 = sibling(h3_4, 2);
+      each(div_7, 21, () => get$1(karma), index, ($$anchor3, entry) => {
+        StatCard($$anchor3, spread_props(() => get$1(entry)));
+      });
+      template_effect(($0) => set_text(text_4, $0), [() => localize(config().karma.karma)]);
+      append($$anchor2, fragment_14);
+    }
+  });
+  var node_9 = sibling(node_8, 2);
+  ItemSheetComponent(node_9, {
     children: ($$anchor2, $$slotProps) => {
       ActiveEffectsViewer($$anchor2, {
         get document() {
@@ -12798,8 +12826,8 @@ function MetatypeApp($$anchor, $$props) {
       });
     }
   });
-  var node_9 = sibling(node_8, 2);
-  JournalViewer(node_9, {
+  var node_10 = sibling(node_9, 2);
+  JournalViewer(node_10, {
     get document() {
       return item2();
     },
