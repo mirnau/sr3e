@@ -212,33 +212,26 @@ class KarmaModel extends foundry.abstract.TypeDataModel {
 class HealthModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      stun: new foundry.data.fields.ArrayField(
-        new foundry.data.fields.BooleanField({
-          required: true
-        }),
-        {
-          required: true,
-          initial: Array(10).fill(false)
-          // Default to 10 false values
-        }
-      ),
-      physical: new foundry.data.fields.ArrayField(
-        new foundry.data.fields.BooleanField({
-          required: true
-        }),
-        {
-          required: true,
-          initial: Array(10).fill(false)
-          // Default to 10 false values
-        }
-      ),
+      stun: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true,
+        min: 0,
+        max: 10
+      }),
+      physical: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true,
+        min: 0,
+        max: 10
+      }),
       overflow: new foundry.data.fields.NumberField({
         required: true,
         initial: 0,
         integer: true
       }),
       penalty: new foundry.data.fields.NumberField({
-        // Fix the typo here
         required: true,
         initial: 0,
         integer: true
@@ -9019,62 +9012,14 @@ class ElectroCardiogramService {
     });
     this.ecgAnimator.start();
   }
-  async onHealthBoxChange(event2) {
-    const clicked = event2.currentTarget;
-    const clickedIndex = parseInt(clicked.id.replace("healthBox", ""), 10);
-    const isStun = clickedIndex <= 10;
-    const localIndex = isStun ? clickedIndex - 1 : clickedIndex - 11;
-    const stunArray = [...__privateGet(this, _actor).system.health.stun];
-    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
-    const currentArray = isStun ? stunArray : physicalArray;
-    const wasChecked = currentArray[localIndex];
-    const willBeChecked = clicked.checked;
-    const checkedCount = currentArray.filter(Boolean).length;
-    if (wasChecked && !willBeChecked && checkedCount === 1) {
-      currentArray[localIndex] = false;
-      clicked.checked = false;
-      const siblingH4 = $(clicked).closest(".damage-input").find("h4");
-      siblingH4.removeClass("lit").addClass("unlit");
-    } else {
-      for (let i = 0; i < 10; i++) {
-        const shouldCheck = i <= localIndex;
-        currentArray[i] = shouldCheck;
-        const globalId = isStun ? i + 1 : i + 11;
-        const box = __privateGet(this, _html).find(`#healthBox${globalId}`);
-        box.prop("checked", shouldCheck);
-        const siblingH4 = box.closest(".damage-input").find("h4");
-        if (siblingH4.length) {
-          siblingH4.toggleClass("lit", shouldCheck);
-          siblingH4.toggleClass("unlit", !shouldCheck);
-        }
-      }
-    }
-    if (isStun) {
-      __privateGet(this, _actor).system.health.stun = stunArray;
-    } else {
-      __privateGet(this, _actor).system.health.physical = physicalArray;
-    }
-    const penalty = this.calculatePenalty(stunArray, physicalArray);
-    __privateGet(this, _html).find(".health-penalty").text(penalty);
-    await __privateGet(this, _actor).update(
-      {
-        ["system.health.stun"]: stunArray,
-        ["system.health.physical"]: physicalArray,
-        ["system.health.penalty"]: penalty
-      },
-      { render: false }
-    );
-  }
   updateHealthOnStart() {
-    const stunArray = [...__privateGet(this, _actor).system.health.stun];
-    const physicalArray = [...__privateGet(this, _actor).system.health.physical];
-    const penalty = this.calculatePenalty(stunArray, physicalArray);
+    const stun = __privateGet(this, _actor).system.health.stun ?? 0;
+    const physical = __privateGet(this, _actor).system.health.physical ?? 0;
+    const penalty = this.calculatePenalty(stun, physical);
     __privateGet(this, _html).find(".health-penalty").text(penalty);
   }
-  calculatePenalty(stunArray, physicalArray) {
-    const degreeStun = stunArray.filter(Boolean).length;
-    const degreePhysical = physicalArray.filter(Boolean).length;
-    const maxDegree = Math.max(degreeStun, degreePhysical);
+  calculatePenalty(stun, physical) {
+    const maxDegree = Math.max(stun, physical);
     return this._calculateSeverity(maxDegree);
   }
   _calculateSeverity(degree = 0) {
@@ -9117,10 +9062,7 @@ resizeCanvas_fn = function() {
   resize(__privateGet(this, _ecgCanvas), __privateGet(this, _ctxLine));
   resize(__privateGet(this, _ecgPointCanvas), __privateGet(this, _ctxPoint));
   if (this.ecgAnimator) {
-    this.ecgAnimator.updateDimensions(
-      __privateGet(this, _ecgCanvas).offsetWidth,
-      __privateGet(this, _ecgCanvas).offsetHeight
-    );
+    this.ecgAnimator.updateDimensions(__privateGet(this, _ecgCanvas).offsetWidth, __privateGet(this, _ecgCanvas).offsetHeight);
     if (wasAnimating) {
       setTimeout(() => {
         this.ecgAnimator.start();
@@ -9138,46 +9080,46 @@ var root_2$c = /* @__PURE__ */ template(`<div class="damage-description stun"><h
 var root_1$h = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
-var on_keydown$3 = (e, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
-var on_keydown_1 = (e, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
+var on_keydown$3 = (e, handleButtonKeypress, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
+var on_keydown_1 = (e, handleButtonKeypress, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
 var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
-  const $stunArray = () => store_get(stunArray, "$stunArray", $$stores);
-  const $physicalArray = () => store_get(physicalArray, "$physicalArray", $$stores);
+  const $stun = () => store_get(stun, "$stun", $$stores);
+  const $physical = () => store_get(physical, "$physical", $$stores);
   const $penalty = () => store_get(penalty, "$penalty", $$stores);
   const $overflow = () => store_get(overflow, "$overflow", $$stores);
   let actor = prop($$props, "actor", 19, () => ({})), config = prop($$props, "config", 19, () => ({})), id = prop($$props, "id", 19, () => ({}));
   let storeManager2 = StoreManager.Subscribe(actor());
-  let stunArray = storeManager2.GetRWStore("health.stun");
-  let physicalArray = storeManager2.GetRWStore("health.physical");
+  let stun = storeManager2.GetRWStore("health.stun");
+  let physical = storeManager2.GetRWStore("health.physical");
   let penalty = storeManager2.GetRWStore("health.penalty");
   let overflow = storeManager2.GetRWStore("health.overflow");
   let maxDegree = state(0);
   let ecgCanvas = state(void 0);
   let ecgPointCanvas = state(void 0);
   let ecgService = state(void 0);
-  function toggle(localIndex, isStun, willBeChecked) {
-    const currentArray = isStun ? $stunArray().slice() : $physicalArray().slice();
-    if (willBeChecked) {
-      for (let i = 0; i <= localIndex; i++) currentArray[i] = true;
-      for (let i = localIndex + 1; i < 10; i++) currentArray[i] = false;
-    } else {
-      for (let i = localIndex; i < 10; i++) currentArray[i] = false;
-    }
-    if (isStun) {
-      store_set(stunArray, proxy(currentArray));
-    } else {
-      store_set(physicalArray, proxy(currentArray));
-    }
-    set(maxDegree, proxy(Math.max($stunArray().filter(Boolean).length, $physicalArray().filter(Boolean).length)));
-  }
+  let ecg;
+  let stunBoxes = state(proxy([]));
+  let physicalBoxes = state(proxy([]));
+  user_effect(() => {
+    set(stunBoxes, proxy(Array.from({ length: 10 }, (_, i) => i < $stun())));
+    set(physicalBoxes, proxy(Array.from({ length: 10 }, (_, i) => i < $physical())));
+  });
   user_effect(() => {
     var _a;
-    store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stunArray(), $physicalArray())));
+    store_set(penalty, proxy((_a = get$1(ecgService)) == null ? void 0 : _a.calculatePenalty($stun(), $physical())));
   });
-  let ecg;
+  function toggle(localIndex, isStun, willBeChecked) {
+    const newValue = willBeChecked ? localIndex + 1 : localIndex;
+    if (isStun) {
+      store_set(stun, proxy(newValue));
+    } else {
+      store_set(physical, proxy(newValue));
+    }
+    set(maxDegree, proxy(Math.max($stun(), $physical())));
+  }
   onMount(() => {
     set(ecgService, proxy(new ElectroCardiogramService(actor(), {
       find: (selector) => {
@@ -9193,6 +9135,12 @@ function Health($$anchor, $$props) {
   }
   function decrementOverflow() {
     store_set(overflow, proxy(Math.max($overflow() - 1, 0)));
+  }
+  function handleButtonKeypress(e, fn) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fn();
+    }
   }
   var fragment = root$u();
   var node = first_child(fragment);
@@ -9211,7 +9159,7 @@ function Health($$anchor, $$props) {
   var div_2 = child(div_1);
   var div_3 = child(div_2);
   var node_1 = sibling(child(div_3), 2);
-  each(node_1, 16, () => Array(10), index, ($$anchor2, _, i) => {
+  each(node_1, 17, () => get$1(stunBoxes), index, ($$anchor2, checked, i) => {
     var div_4 = root_1$h();
     var input = child(div_4);
     set_attribute(input, "id", `healthBox${i + 1}`);
@@ -9223,7 +9171,7 @@ function Health($$anchor, $$props) {
         var h4 = child(div_5);
         var text2 = child(h4);
         template_effect(() => {
-          set_class(h4, `no-margin ${($stunArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_class(h4, `no-margin ${(get$1(checked) ? "lit" : "unlit") ?? ""}`);
           set_text(text2, [
             "Light",
             "",
@@ -9243,12 +9191,12 @@ function Health($$anchor, $$props) {
         if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent);
       });
     }
-    template_effect(() => set_checked(input, $stunArray()[i]));
+    template_effect(() => set_checked(input, get$1(checked)));
     append($$anchor2, div_4);
   });
   var div_6 = sibling(div_3, 2);
   var node_3 = sibling(child(div_6), 2);
-  each(node_3, 16, () => Array(10), index, ($$anchor2, _, i) => {
+  each(node_3, 17, () => get$1(physicalBoxes), index, ($$anchor2, checked, i) => {
     var div_7 = root_3$a();
     var input_1 = child(div_7);
     set_attribute(input_1, "id", `healthBox${i + 11}`);
@@ -9260,7 +9208,7 @@ function Health($$anchor, $$props) {
         var h4_1 = child(div_8);
         var text_1 = child(h4_1);
         template_effect(() => {
-          set_class(h4_1, `no-margin ${($physicalArray()[i] ? "lit" : "unlit") ?? ""}`);
+          set_class(h4_1, `no-margin ${(get$1(checked) ? "lit" : "unlit") ?? ""}`);
           set_text(text_1, [
             "Light",
             "",
@@ -9280,15 +9228,23 @@ function Health($$anchor, $$props) {
         if (i === 0 || i === 2 || i === 5 || i === 9) $$render(consequent_1);
       });
     }
-    template_effect(() => set_checked(input_1, $physicalArray()[i]));
+    template_effect(() => set_checked(input_1, get$1(checked)));
     append($$anchor2, div_7);
   });
   var a = sibling(node_3, 2);
   a.__click = incrementOverflow;
-  a.__keydown = [on_keydown$3, incrementOverflow];
+  a.__keydown = [
+    on_keydown$3,
+    handleButtonKeypress,
+    incrementOverflow
+  ];
   var a_1 = sibling(a, 2);
   a_1.__click = decrementOverflow;
-  a_1.__keydown = [on_keydown_1, decrementOverflow];
+  a_1.__keydown = [
+    on_keydown_1,
+    handleButtonKeypress,
+    decrementOverflow
+  ];
   var div_9 = sibling(div_2, 2);
   var div_10 = child(div_9);
   var node_5 = child(div_10);
