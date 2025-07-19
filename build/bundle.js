@@ -9082,7 +9082,7 @@ var root_4$9 = /* @__PURE__ */ template(`<div class="damage-description physical
 var root_3$a = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var on_keydown$3 = (e, handleButtonKeypress, incrementOverflow) => handleButtonKeypress(e, incrementOverflow);
 var on_keydown_1 = (e, handleButtonKeypress, decrementOverflow) => handleButtonKeypress(e, decrementOverflow);
-var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <a class="overflow-button plus" role="button" tabindex="0" aria-label="Increase overflow"><i class="fa-solid fa-plus"></i></a> <a class="overflow-button minus" role="button" tabindex="0" aria-label="Decrease overflow"><i class="fa-solid fa-minus"></i></a></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
+var root$u = /* @__PURE__ */ template(`<!> <div class="ecg-container"><canvas id="ecg-canvas" class="ecg-animation"></canvas> <canvas id="ecg-point-canvas"></canvas> <div class="left-gradient"></div> <div class="right-gradient"></div></div> <div class="condition-monitor"><div class="condition-meter"><div class="stun-damage"><h3 class="no-margin checkbox-label">Stun</h3> <!></div> <div class="physical-damage"><h3 class="no-margin checkbox-label">Physical</h3> <!> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-plus" role="button" tabindex="0" aria-label="Increase overflow"></i></div></div> <div class="damage-control"><div class="overflow-button"><i class="fa-solid fa-minus" role="button" tabindex="0" aria-label="Decrease overflow"></i></div></div></div></div> <div class="health-card-container"><div class="stat-grid single-column"><!> <!></div></div></div>`, 1);
 function Health($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
@@ -9231,23 +9231,27 @@ function Health($$anchor, $$props) {
     template_effect(() => set_checked(input_1, get$1(checked)));
     append($$anchor2, div_7);
   });
-  var a = sibling(node_3, 2);
-  a.__click = incrementOverflow;
-  a.__keydown = [
+  var div_9 = sibling(node_3, 2);
+  var div_10 = child(div_9);
+  var i_1 = child(div_10);
+  i_1.__click = incrementOverflow;
+  i_1.__keydown = [
     on_keydown$3,
     handleButtonKeypress,
     incrementOverflow
   ];
-  var a_1 = sibling(a, 2);
-  a_1.__click = decrementOverflow;
-  a_1.__keydown = [
+  var div_11 = sibling(div_9, 2);
+  var div_12 = child(div_11);
+  var i_2 = child(div_12);
+  i_2.__click = decrementOverflow;
+  i_2.__keydown = [
     on_keydown_1,
     handleButtonKeypress,
     decrementOverflow
   ];
-  var div_9 = sibling(div_2, 2);
-  var div_10 = child(div_9);
-  var node_5 = child(div_10);
+  var div_13 = sibling(div_2, 2);
+  var div_14 = child(div_13);
+  var node_5 = child(div_14);
   const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
   StatCard$1(node_5, {
     get actor() {

@@ -2178,6 +2178,7 @@
     justify-content: space-between;
     padding: 0.5rem;
     justify-content: center;
+    gap: 1rem;
   }
   .condition-monitor .condition-meter .checkbox-label {
     min-width: 4rem;
@@ -2216,6 +2217,14 @@
     text-shadow: none;
     opacity: 0.2;
   }
+  .condition-monitor .condition-meter .checkbox {
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+    line-height: 1.25rem;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
   .condition-monitor .condition-meter .stun-damage,
   .condition-monitor .condition-meter .physical-damage {
     display: flex;
@@ -2225,6 +2234,54 @@
     row-gap: 1rem;
     margin: 0;
     padding: 0;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control,
+  .condition-monitor .condition-meter .physical-damage .damage-control {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--highlight-color-primary);
+    background-color: var(--highlight-color-primary);
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button i,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button i {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button::before,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    background: var(--background-color);
+    z-index: -1;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
   .condition-monitor .condition-meter .stun-damage .damage-input,
   .condition-monitor .condition-meter .physical-damage .damage-input {

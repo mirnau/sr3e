@@ -89,7 +89,7 @@
                   class="checkbox"
                   type="checkbox"
                   id={`healthBox${i + 1}`}
-                  checked={checked}
+                  {checked}
                   onchange={(e) => toggle(i, true, e.target.checked)}
                />
                {#if i === 0 || i === 2 || i === 5 || i === 9}
@@ -111,7 +111,7 @@
                   class="checkbox"
                   type="checkbox"
                   id={`healthBox${i + 11}`}
-                  checked={checked}
+                  {checked}
                   onchange={(e) => toggle(i, false, e.target.checked)}
                />
                {#if i === 0 || i === 2 || i === 5 || i === 9}
@@ -124,27 +124,31 @@
             </div>
          {/each}
 
-         <a
-            class="overflow-button plus"
-            role="button"
-            tabindex="0"
-            aria-label="Increase overflow"
-            onclick={incrementOverflow}
-            onkeydown={(e) => handleButtonKeypress(e, incrementOverflow)}
-         >
-            <i class="fa-solid fa-plus"></i>
-         </a>
+         <div class="damage-control">
+            <div class="overflow-button">
+               <i
+                  class="fa-solid fa-plus"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Increase overflow"
+                  onclick={incrementOverflow}
+                  onkeydown={(e) => handleButtonKeypress(e, incrementOverflow)}
+               ></i>
+            </div>
+         </div>
 
-         <a
-            class="overflow-button minus"
-            role="button"
-            tabindex="0"
-            aria-label="Decrease overflow"
-            onclick={decrementOverflow}
-            onkeydown={(e) => handleButtonKeypress(e, decrementOverflow)}
-         >
-            <i class="fa-solid fa-minus"></i>
-         </a>
+         <div class="damage-control">
+            <div class="overflow-button">
+               <i
+                  class="fa-solid fa-minus"
+                  role="button"
+                  tabindex="0"
+                  aria-label="Decrease overflow"
+                  onclick={decrementOverflow}
+                  onkeydown={(e) => handleButtonKeypress(e, decrementOverflow)}
+               ></i>
+            </div>
+         </div>
       </div>
    </div>
 
