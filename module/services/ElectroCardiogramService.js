@@ -48,7 +48,7 @@ export default class ElectroCardiogramService {
          .trim();
 
       const highlightColorTertiary = getComputedStyle(document.documentElement)
-         .getPropertyValue("--highlight-color-tertiary")
+         .getPropertyValue("--accent-color-tertiary")
          .trim();
 
       this.ecgAnimator = new EcgAnimator(this.#ecgCanvas, this.#ecgPointCanvas, {

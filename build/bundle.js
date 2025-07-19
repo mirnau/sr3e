@@ -8989,7 +8989,7 @@ class ElectroCardiogramService {
     __privateGet(this, _resizeObserver).observe(html2);
     __privateMethod(this, _ElectroCardiogramService_instances, resizeCanvas_fn).call(this);
     const highlightColorPrimary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-primary").trim();
-    const highlightColorTertiary = getComputedStyle(document.documentElement).getPropertyValue("--highlight-color-tertiary").trim();
+    const highlightColorTertiary = getComputedStyle(document.documentElement).getPropertyValue("--accent-color-tertiary").trim();
     this.ecgAnimator = new EcgAnimator(__privateGet(this, _ecgCanvas), __privateGet(this, _ecgPointCanvas), {
       freq: 2,
       amp: 30,
