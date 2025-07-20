@@ -12,7 +12,11 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
             required: true,
             initial: "N/A",
          }),
-         damage: new foundry.data.fields.StringField({
+         damage: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+         }),
+         damageType: new foundry.data.fields.StringField({
             required: true,
             initial: "N/A",
          }),

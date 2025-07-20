@@ -11,6 +11,7 @@
 
    let layoutMode = $state("double");
    let { item = {}, config = {} } = $props();
+   let name = $state(item.name);
    const system = $state(item.system);
 
    const weaponMode = $derived({
@@ -20,7 +21,7 @@
       value: system.mode,
       path: "system",
       type: "select",
-      options: Object.values(config.weaponMode).map(localize)
+      options: Object.values(config.weaponMode).map(localize),
    });
 
    const ammoClassEntry = $derived({
@@ -30,29 +31,40 @@
       value: system.ammunitionClass,
       path: "system",
       type: "select",
-      options: Object.values(config.ammunitionClass).map(localize)
+      options: Object.values(config.ammunitionClass).map(localize),
    });
 
-   const damageEntry = $derived({
+   const damageTypeEntry = $derived({
       item,
-      key: "damage",
+      key: "damageType",
       label: localize(config.weapon.damageType),
-      value: system.damage,
+      value: system.damageType,
       path: "system",
       type: "select",
-      options: Object.values(config.damageType).map(localize)
+      options: Object.values(config.damageType).map(localize),
    });
 
    function attack() {
-      //if fire weapon
-      //if melee or blunt
+      console.log("Pew pew");
+   }
+   
+   function reload() {
+      console.log("Pew pew");
+   }
+   
+   function newClip() {
+      console.log("Pew pew");
    }
 
-   function reload() {}
-
-   function newClip() {}
-
    const weaponEntries = [
+      {
+         item,
+         key: "damage",
+         label: localize(config.weapon.damage),
+         value: system.damage,
+         path: "system",
+         type: "number",
+      },
       {
          item,
          key: "range",
@@ -69,14 +81,6 @@
          path: "system",
          type: "number",
       },
-      {
-         item,
-         key: "currentClipId",
-         label: localize(config.weapon.currentClip),
-         value: system.currentClipId,
-         path: "system",
-         type: "text",
-      },
    ];
 </script>
 
@@ -85,15 +89,13 @@
       <ItemSheetComponent>
          <Image entity={item} />
          <div class="stat-grid single-column">
-            <StatCard>
-               <input
-                  class="large"
-                  name="name"
-                  type="text"
-                  bind:value={item.name}
-                  onchange={(e) => item.update({ ["name"]: e.target.value })}
-               />
-            </StatCard>
+            <input
+               class="large"
+               name="name"
+               type="text"
+               value={name}
+               onchange={(e) => item.update({ ["name"]: e.target.value })}
+            />
          </div>
       </ItemSheetComponent>
 
@@ -101,7 +103,7 @@
          <h3>{localize(config.common.details)}</h3>
          <div class="stat-grid single-column">
             <StatCard {...weaponMode} />
-            <StatCard {...damageEntry} />
+            <StatCard {...damageTypeEntry} />
             <StatCard {...ammoClassEntry} />
          </div>
 
