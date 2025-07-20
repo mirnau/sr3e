@@ -1,6 +1,6 @@
 <script>
    import MasonryGrid from "./basic/MasonryGrid.svelte";
-   import StatCard from "./basic/StatCard.svelte";
+   import StatCard from "./basic/DerivedAttributeCard.svelte";
    import CardToolbar from "./CardToolbar.svelte";
    import { localize } from "../../../services/utilities.js";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";

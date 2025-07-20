@@ -3,7 +3,8 @@
       "ammunition": {
          "ammunition": "Ammunition",
          "type": "Ammuntion Type",
-         "rounds": "Rounds"
+         "rounds": "Rounds",
+         "class": "Weapon Class"
       },
       "attributes": {
          "attributes": "Attributes",
@@ -191,7 +192,6 @@
          "skillpoints": "Skill Points",
          "resources": "Resources",
          "viewbackground": "View Background"
-         
       },
       "skill": {
          "active": "Active Skill",
@@ -285,6 +285,50 @@
          "explosive": "Explosive Weapon",
          "blunt": "Blunt Weapon",
          "energy": "Energy Weapon"
+      },
+      "legalityType": {
+         "legal": "Legal",
+         "restricted": "Restricted",
+         "forbidden": "Forbidden",
+         "unlicensed": "Unlicensed"
+      },
+      "legalityCategory": {
+         "civilian": "Civilian",
+         "security": "Security",
+         "military": "Military",
+         "magical": "Magical",
+         "cyberware": "Cyberware",
+         "biotech": "Biotech"
+      },
+      "ammunitionType": {
+         "regular": "Regular",
+         "apds": "APDS",
+         "explosive": "Explosive",
+         "gel": "Gel",
+         "capsule": "Capsule",
+         "tracer": "Tracer",
+         "flechette": "Flechette",
+         "incendiary": "Incendiary",
+         "tracker": "Tracker"
+      },
+      "ammunitionClass": {
+         "holdout": "Hold-Out Pistols",
+         "lightPistol": "Light Pistols",
+         "heavyPistol": "Heavy Pistols",
+         "smg": "Submachine Guns",
+         "shotgun": "Shotguns",
+         "assaultRifle": "Assault Rifles",
+         "sportingRifle": "Sporting Rifles",
+         "sniperRifle": "Sniper Rifles",
+         "lmg": "Light Machine Guns",
+         "mmg": "Medium Machine Guns",
+         "hmg": "Heavy Machine Guns",
+         "assaultCannon": "Assault Cannons",
+         "grenadeLauncher": "Grenade Launchers",
+         "missileLauncher": "Missile Launchers",
+         "taser": "Tasers",
+         "bow": "Bows",
+         "crossbow": "Crossbows"
       }
    }
 }

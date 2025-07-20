@@ -3,7 +3,7 @@
    import { localize } from "../../../services/utilities.js";
    import CardToolbar from "./CardToolbar.svelte";
    import ElectroCardiogramService from "../../../services/ElectroCardiogramService.js";
-   import StatCard from "./basic/StatCard.svelte";
+   import StatCard from "./basic/DerivedAttributeCard.svelte";
    import { StoreManager } from "../../../svelte/svelteHelpers/StoreManager.svelte.js";
 
    let { actor = {}, config = {}, id = {} } = $props();

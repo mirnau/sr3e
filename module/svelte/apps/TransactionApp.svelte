@@ -6,7 +6,7 @@
   import JournalViewer from "./components/JournalViewer.svelte";
   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
   import Image from "./components/basic/Image.svelte";
-  import StatCard from "./components/basic/StatCard.svelte";
+  import StatCard from "./components/basic/DerivedAttributeCard.svelte";
 
   let { item, config } = $props();
 

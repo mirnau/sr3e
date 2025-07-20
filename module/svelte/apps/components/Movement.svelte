@@ -1,5 +1,5 @@
 <script>
-   import StatCard from "./basic/StatCard.svelte";
+   import StatCard from "./basic/DerivedAttributeCard.svelte";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import CardToolbar from "./CardToolbar.svelte";
    import { localize } from "../../../services/utilities.js";

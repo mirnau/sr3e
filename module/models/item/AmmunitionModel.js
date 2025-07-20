@@ -4,9 +4,13 @@ import PortabilityModel from "./components/Portability.js";
 export default class AmmunitionModel extends foundry.abstract.TypeDataModel {
     static defineSchema() {
         return {
-            type: new foundry.data.fields.StringField({
+            class: new foundry.data.fields.StringField({
                 required: true,
                 initial: "regular",
+            }),
+            type: new foundry.data.fields.StringField({
+                required: true,
+                initial: "lightPistol",
             }),
             rounds: new foundry.data.fields.NumberField({
                 required: true,

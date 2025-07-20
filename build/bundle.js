@@ -6360,7 +6360,7 @@ var root_1$r = /* @__PURE__ */ template(`<div class="stat-card button" role="but
 var root_6$5 = /* @__PURE__ */ template(`<h4 class="no-margin uppercase"> </h4>`);
 var root_8$2 = /* @__PURE__ */ template(`<h1 class="stat-value"> </h1>`);
 var root_5$a = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <!> <!></div>`);
-function StatCard$1($$anchor, $$props) {
+function DerivedAttributeCard($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $shouldDisplaySheen = () => store_get(shouldDisplaySheen, "$shouldDisplaySheen", $$stores);
@@ -6651,7 +6651,7 @@ function DicePools($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$p();
       var node_2 = first_child(fragment_1);
-      StatCard$1(node_2, {
+      DerivedAttributeCard(node_2, {
         get document() {
           return actor();
         },
@@ -6665,7 +6665,7 @@ function DicePools($$anchor, $$props) {
         isButton: true
       });
       var node_3 = sibling(node_2, 2);
-      StatCard$1(node_3, {
+      DerivedAttributeCard(node_3, {
         get document() {
           return actor();
         },
@@ -6679,7 +6679,7 @@ function DicePools($$anchor, $$props) {
         isButton: true
       });
       var node_4 = sibling(node_3, 2);
-      StatCard$1(node_4, {
+      DerivedAttributeCard(node_4, {
         get document() {
           return actor();
         },
@@ -6697,7 +6697,7 @@ function DicePools($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var fragment_2 = root_2$g();
           var node_6 = first_child(fragment_2);
-          StatCard$1(node_6, {
+          DerivedAttributeCard(node_6, {
             get document() {
               return actor();
             },
@@ -6711,7 +6711,7 @@ function DicePools($$anchor, $$props) {
             isButton: true
           });
           var node_7 = sibling(node_6, 2);
-          StatCard$1(node_7, {
+          DerivedAttributeCard(node_7, {
             get document() {
               return actor();
             },
@@ -6781,7 +6781,7 @@ function Movement($$anchor, $$props) {
     children: ($$anchor2, $$slotProps) => {
       var fragment_1 = root_1$o();
       var node_2 = first_child(fragment_1);
-      StatCard$1(node_2, {
+      DerivedAttributeCard(node_2, {
         get actor() {
           return actor();
         },
@@ -6793,7 +6793,7 @@ function Movement($$anchor, $$props) {
         }
       });
       var node_3 = sibling(node_2, 2);
-      StatCard$1(node_3, {
+      DerivedAttributeCard(node_3, {
         get actor() {
           return actor();
         },
@@ -6989,7 +6989,7 @@ function Karma($$anchor, $$props) {
       var fragment_1 = root_1$m();
       var node_2 = first_child(fragment_1);
       const expression = /* @__PURE__ */ derived$1(() => localize(config().karma.goodkarma));
-      StatCard$1(node_2, {
+      DerivedAttributeCard(node_2, {
         get actor() {
           return actor();
         },
@@ -7002,7 +7002,7 @@ function Karma($$anchor, $$props) {
       });
       var node_3 = sibling(node_2, 2);
       const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().karma.karmapool));
-      StatCard$1(node_3, {
+      DerivedAttributeCard(node_3, {
         get actor() {
           return actor();
         },
@@ -7015,7 +7015,7 @@ function Karma($$anchor, $$props) {
       });
       var node_4 = sibling(node_3, 2);
       const expression_2 = /* @__PURE__ */ derived$1(() => localize(config().attributes.essence));
-      StatCard$1(node_4, {
+      DerivedAttributeCard(node_4, {
         get actor() {
           return actor();
         },
@@ -9297,7 +9297,7 @@ function Health($$anchor, $$props) {
   var div_15 = child(div_14);
   var node_6 = child(div_15);
   const expression = /* @__PURE__ */ derived$1(() => localize(config().health.penalty));
-  StatCard$1(node_6, {
+  DerivedAttributeCard(node_6, {
     get actor() {
       return actor();
     },
@@ -9310,7 +9310,7 @@ function Health($$anchor, $$props) {
   });
   var node_7 = sibling(node_6, 2);
   const expression_1 = /* @__PURE__ */ derived$1(() => localize(config().health.overflow));
-  StatCard$1(node_7, {
+  DerivedAttributeCard(node_7, {
     get actor() {
       return actor();
     },
@@ -11747,7 +11747,8 @@ const sr3e = {};
 sr3e.ammunition = {
   ammunition: "sr3e.ammunition.ammunition",
   type: "sr3e.ammunition.type",
-  rounds: "sr3e.ammunition.rounds"
+  rounds: "sr3e.ammunition.rounds",
+  class: "sr3e.ammunition.class"
 };
 sr3e.attributes = {
   attributes: "sr3e.attributes.attributes",
@@ -12028,6 +12029,50 @@ sr3e.portability = {
   portability: "sr3e.portability.portability",
   concealability: "sr3e.portability.concealability",
   weight: "sr3e.portability.weight"
+};
+sr3e.legalityType = {
+  legal: "sr3e.legalityType.legal",
+  restricted: "sr3e.legalityType.restricted",
+  forbidden: "sr3e.legalityType.forbidden",
+  unlicensed: "sr3e.legalityType.unlicensed"
+};
+sr3e.legalityCategory = {
+  civilian: "sr3e.legalityCategory.civilian",
+  security: "sr3e.legalityCategory.security",
+  military: "sr3e.legalityCategory.military",
+  magical: "sr3e.legalityCategory.magical",
+  cyberware: "sr3e.legalityCategory.cyberware",
+  biotech: "sr3e.legalityCategory.biotech"
+};
+sr3e.ammunitionType = {
+  regular: "sr3e.ammunitionType.regular",
+  apds: "sr3e.ammunitionType.apds",
+  explosive: "sr3e.ammunitionType.explosive",
+  gel: "sr3e.ammunitionType.gel",
+  capsule: "sr3e.ammunitionType.capsule",
+  tracer: "sr3e.ammunitionType.tracer",
+  flechette: "sr3e.ammunitionType.flechette",
+  incendiary: "sr3e.ammunitionType.incendiary",
+  tracker: "sr3e.ammunitionType.tracker"
+};
+sr3e.ammunitionClass = {
+  holdout: "sr3e.ammunitionClass.holdout",
+  lightPistol: "sr3e.ammunitionClass.lightPistol",
+  heavyPistol: "sr3e.ammunitionClass.heavyPistol",
+  smg: "sr3e.ammunitionClass.smg",
+  shotgun: "sr3e.ammunitionClass.shotgun",
+  assaultRifle: "sr3e.ammunitionClass.assaultRifle",
+  sportingRifle: "sr3e.ammunitionClass.sportingRifle",
+  sniperRifle: "sr3e.ammunitionClass.sniperRifle",
+  lmg: "sr3e.ammunitionClass.lmg",
+  mmg: "sr3e.ammunitionClass.mmg",
+  hmg: "sr3e.ammunitionClass.hmg",
+  assaultCannon: "sr3e.ammunitionClass.assaultCannon",
+  grenadeLauncher: "sr3e.ammunitionClass.grenadeLauncher",
+  missileLauncher: "sr3e.ammunitionClass.missileLauncher",
+  taser: "sr3e.ammunitionClass.taser",
+  bow: "sr3e.ammunitionClass.bow",
+  crossbow: "sr3e.ammunitionClass.crossbow"
 };
 function injectCssSelectors(app, element, ctx, data) {
   const header = element.querySelector(".window-header");
@@ -13636,9 +13681,13 @@ class WeaponModel extends foundry.abstract.TypeDataModel {
 class AmmunitionModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      type: new foundry.data.fields.StringField({
+      class: new foundry.data.fields.StringField({
         required: true,
         initial: "regular"
+      }),
+      type: new foundry.data.fields.StringField({
+        required: true,
+        initial: "lightPistol"
       }),
       rounds: new foundry.data.fields.NumberField({
         required: true,
@@ -13654,31 +13703,45 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
   }
 }
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
-var root_1$6 = /* @__PURE__ */ template(`<!> <input> <div class="stat-grid two-column"></div>`, 1);
+var root_1$6 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><input type="text"> <!></div>`, 1);
 var root$b = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!></div></div>`);
 function AmmunitionApp($$anchor, $$props) {
   push($$props, true);
-  let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
-  const ammunition = item2().system;
+  let item2 = prop($$props, "item", 19, () => ({})), config = prop($$props, "config", 19, () => ({}));
+  const system = proxy(item2().system);
   let layoutMode = "single";
-  const ammoEntries = [
+  let name = state(proxy(item2().name));
+  const ammunitionTypeOptions = Object.values(config().ammunitionType).map(localize);
+  const ammunitionClassOptions = Object.values(config().ammunitionClass).map(localize);
+  const ammoEntries = /* @__PURE__ */ derived$1(() => [
+    {
+      item: item2(),
+      key: "class",
+      label: localize(config().ammunition.class),
+      value: system.class,
+      path: "system",
+      type: "select",
+      options: ammunitionClassOptions
+    },
     {
       item: item2(),
       key: "type",
       label: localize(config().ammunition.type),
-      value: ammunition.type,
-      path: "system.ammunition",
-      type: "text"
+      value: system.type,
+      path: "system",
+      type: "select",
+      options: ammunitionTypeOptions
     },
     {
       item: item2(),
       key: "rounds",
       label: localize(config().ammunition.rounds),
-      value: ammunition.rounds,
-      path: "system.ammunition",
-      type: "number"
+      value: system.rounds,
+      path: "system",
+      type: "number",
+      options: []
     }
-  ];
+  ]);
   var div = root$b();
   var div_1 = child(div);
   var node = child(div_1);
@@ -13687,35 +13750,23 @@ function AmmunitionApp($$anchor, $$props) {
       var fragment = root_1$6();
       var node_1 = first_child(fragment);
       Image(node_1, {
-        get src() {
-          return item2().img;
-        },
-        get title() {
-          return item2().name;
+        get entity() {
+          return item2();
         }
       });
-      var input = sibling(node_1, 2);
+      var div_2 = sibling(node_1, 2);
+      var input = child(div_2);
       input.__change = [on_change$3, item2];
-      var div_2 = sibling(input, 2);
-      each(div_2, 21, () => ammoEntries, index, ($$anchor3, entry) => {
+      var node_2 = sibling(input, 2);
+      each(node_2, 17, () => get$1(ammoEntries), index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
       });
-      bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
+      bind_value(input, () => get$1(name), ($$value) => set(name, $$value));
       append($$anchor2, fragment);
     }
   });
-  var node_2 = sibling(node, 2);
-  Commodity(node_2, {
-    get item() {
-      return item2();
-    },
-    get config() {
-      return config();
-    },
-    gridCss: "two-column"
-  });
-  var node_3 = sibling(node_2, 2);
-  Portability(node_3, {
+  var node_3 = sibling(node, 2);
+  Commodity(node_3, {
     get item() {
       return item2();
     },
@@ -13725,7 +13776,17 @@ function AmmunitionApp($$anchor, $$props) {
     gridCss: "two-column"
   });
   var node_4 = sibling(node_3, 2);
-  JournalViewer(node_4, {
+  Portability(node_4, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    },
+    gridCss: "two-column"
+  });
+  var node_5 = sibling(node_4, 2);
+  JournalViewer(node_5, {
     get document() {
       return item2();
     },
@@ -13867,7 +13928,7 @@ function SkillApp($$anchor, $$props) {
       });
       var div_2 = sibling(node_1, 2);
       var node_2 = child(div_2);
-      StatCard$1(node_2, {
+      DerivedAttributeCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var fragment_1 = root_2$5();
           var input = sibling(first_child(fragment_1), 2);
@@ -13878,7 +13939,7 @@ function SkillApp($$anchor, $$props) {
         $$slots: { default: true }
       });
       var node_3 = sibling(node_2, 2);
-      StatCard$1(node_3, {
+      DerivedAttributeCard(node_3, {
         children: ($$anchor3, $$slotProps2) => {
           var select = root_3$3();
           init_select(select, () => get$1(value));
@@ -13910,7 +13971,7 @@ function SkillApp($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var fragment_2 = root_5$3();
           var node_5 = first_child(fragment_2);
-          StatCard$1(node_5, {
+          DerivedAttributeCard(node_5, {
             children: ($$anchor4, $$slotProps2) => {
               var select_1 = root_6$1();
               init_select(select_1, () => item2().system.activeSkill.linkedAttribute);
@@ -13948,7 +14009,7 @@ function SkillApp($$anchor, $$props) {
             $$slots: { default: true }
           });
           var node_7 = sibling(node_5, 2);
-          StatCard$1(node_7, {
+          DerivedAttributeCard(node_7, {
             children: ($$anchor4, $$slotProps2) => {
               var select_2 = root_8$1();
               init_select(select_2, () => item2().system.activeSkill.associatedDicePool);
@@ -15961,7 +16022,7 @@ function TransactionApp($$anchor, $$props) {
       var input = sibling(child(div_3), 2);
       input.__change = [on_change, item2];
       var node_2 = sibling(div_3, 2);
-      StatCard$1(node_2, {
+      DerivedAttributeCard(node_2, {
         children: ($$anchor3, $$slotProps2) => {
           var input_1 = root_2$1();
           input_1.__input = handleInput;
@@ -15974,7 +16035,7 @@ function TransactionApp($$anchor, $$props) {
         $$slots: { default: true }
       });
       var node_3 = sibling(node_2, 2);
-      StatCard$1(node_3, {
+      DerivedAttributeCard(node_3, {
         children: ($$anchor3, $$slotProps2) => {
           var select = root_3$1();
           select.__change = [on_change_1, item2];
@@ -16015,7 +16076,7 @@ function TransactionApp($$anchor, $$props) {
         $$slots: { default: true }
       });
       var node_4 = sibling(node_3, 2);
-      StatCard$1(node_4, {
+      DerivedAttributeCard(node_4, {
         children: ($$anchor3, $$slotProps2) => {
           var input_2 = root_4$1();
           bind_value(input_2, () => get$1(interest), ($$value) => set(interest, $$value));
@@ -16025,7 +16086,7 @@ function TransactionApp($$anchor, $$props) {
       });
       var div_4 = sibling(node_4, 2);
       var node_5 = child(div_4);
-      StatCard$1(node_5, {
+      DerivedAttributeCard(node_5, {
         get label() {
           return $$props.config.transaction.recurrent;
         },
@@ -16037,7 +16098,7 @@ function TransactionApp($$anchor, $$props) {
         $$slots: { default: true }
       });
       var node_6 = sibling(node_5, 2);
-      StatCard$1(node_6, {
+      DerivedAttributeCard(node_6, {
         get label() {
           return $$props.config.transaction.creditstick;
         },

@@ -4,6 +4,7 @@ sr3e.ammunition = {
    ammunition: "sr3e.ammunition.ammunition",
    type: "sr3e.ammunition.type",
    rounds: "sr3e.ammunition.rounds",
+   class: "sr3e.ammunition.class",
 };
 
 sr3e.attributes = {
@@ -23,8 +24,8 @@ sr3e.attributes = {
 };
 
 sr3e.broadcaster = {
-   broadcaster: "sr3e.broadcaster.broadcaster"
-}
+   broadcaster: "sr3e.broadcaster.broadcaster",
+};
 
 sr3e.difficulty = {
    simple: "sr3e.difficulty.simple",
@@ -55,7 +56,7 @@ sr3e.effects = {
    selectProperty: "sr3e.effects.selectProperty",
    permanent: "sr3e.effects.permanent",
    changesHeader: "sr3e.effects.changesHeader",
-   target: "sr3e.effects.target"
+   target: "sr3e.effects.target",
 };
 
 sr3e.health = {
@@ -169,7 +170,7 @@ sr3e.sheet = {
    resources: "sr3e.sheet.resources",
    quote: "sr3e.sheet.quote",
    delete: "sr3e.sheet.delete",
-   edit: "sr3e.sheet.edit"
+   edit: "sr3e.sheet.edit",
 };
 
 sr3e.traits = {
@@ -311,4 +312,52 @@ sr3e.portability = {
    portability: "sr3e.portability.portability",
    concealability: "sr3e.portability.concealability",
    weight: "sr3e.portability.weight",
+};
+
+sr3e.legalityType = {
+   legal: "sr3e.legalityType.legal",
+   restricted: "sr3e.legalityType.restricted",
+   forbidden: "sr3e.legalityType.forbidden",
+   unlicensed: "sr3e.legalityType.unlicensed",
+};
+
+sr3e.legalityCategory = {
+   civilian: "sr3e.legalityCategory.civilian",
+   security: "sr3e.legalityCategory.security",
+   military: "sr3e.legalityCategory.military",
+   magical: "sr3e.legalityCategory.magical",
+   cyberware: "sr3e.legalityCategory.cyberware",
+   biotech: "sr3e.legalityCategory.biotech",
+};
+
+sr3e.ammunitionType = {
+   regular: "sr3e.ammunitionType.regular",
+   apds: "sr3e.ammunitionType.apds",
+   explosive: "sr3e.ammunitionType.explosive",
+   gel: "sr3e.ammunitionType.gel",
+   capsule: "sr3e.ammunitionType.capsule",
+   tracer: "sr3e.ammunitionType.tracer",
+   flechette: "sr3e.ammunitionType.flechette",
+   incendiary: "sr3e.ammunitionType.incendiary",
+   tracker: "sr3e.ammunitionType.tracker",
+};
+
+sr3e.ammunitionClass = {
+   holdout: "sr3e.ammunitionClass.holdout",
+   lightPistol: "sr3e.ammunitionClass.lightPistol",
+   heavyPistol: "sr3e.ammunitionClass.heavyPistol",
+   smg: "sr3e.ammunitionClass.smg",
+   shotgun: "sr3e.ammunitionClass.shotgun",
+   assaultRifle: "sr3e.ammunitionClass.assaultRifle",
+   sportingRifle: "sr3e.ammunitionClass.sportingRifle",
+   sniperRifle: "sr3e.ammunitionClass.sniperRifle",
+   lmg: "sr3e.ammunitionClass.lmg",
+   mmg: "sr3e.ammunitionClass.mmg",
+   hmg: "sr3e.ammunitionClass.hmg",
+   assaultCannon: "sr3e.ammunitionClass.assaultCannon",
+   grenadeLauncher: "sr3e.ammunitionClass.grenadeLauncher",
+   missileLauncher: "sr3e.ammunitionClass.missileLauncher",
+   taser: "sr3e.ammunitionClass.taser",
+   bow: "sr3e.ammunitionClass.bow",
+   crossbow: "sr3e.ammunitionClass.crossbow",
 };

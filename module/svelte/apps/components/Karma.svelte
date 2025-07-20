@@ -5,7 +5,7 @@
    import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
    import CardToolbar from "./CardToolbar.svelte";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
-   import StatCard from "./basic/StatCard.svelte";
+   import StatCard from "./basic/DerivedAttributeCard.svelte";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte.js";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();

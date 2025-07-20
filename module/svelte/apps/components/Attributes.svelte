@@ -3,7 +3,7 @@
    import { localize } from "../../../services/utilities.js";
    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
    import CardToolbar from "./CardToolbar.svelte";
-   import StatCard from "./basic/StatCard.svelte";
+   import StatCard from "./basic/DerivedAttributeCard.svelte";
    import { flags, masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
