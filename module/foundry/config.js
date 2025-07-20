@@ -281,6 +281,8 @@ sr3e.transaction = {
 };
 
 sr3e.weapon = {
+   damageType: "sr3e.weapon.damageType",
+   ammunitionClass: "sr3e.weapon.ammunitionClass",
    weapon: "sr3e.weapon.weapon",
    weaponStats: "sr3e.weapon.weaponStats",
    damage: "sr3e.weapon.damage",
@@ -360,4 +362,25 @@ sr3e.ammunitionClass = {
    taser: "sr3e.ammunitionClass.taser",
    bow: "sr3e.ammunitionClass.bow",
    crossbow: "sr3e.ammunitionClass.crossbow",
+};
+
+sr3e.damageType = {
+   l: "sr3e.damageType.l",
+   m: "sr3e.damageType.m",
+   s: "sr3e.damageType.s",
+   d: "sr3e.damageType.d",
+   lStun: "sr3e.damageType.lStun",
+   mStun: "sr3e.damageType.mStun",
+   sStun: "sr3e.damageType.sStun",
+   dStun: "sr3e.damageType.dStun",
+};
+
+sr3e.weaponMode = {
+   manual: "sr3e.weaponMode.manual",
+   semiauto: "sr3e.weaponMode.semiauto",
+   fullauto: "sr3e.weaponMode.fullauto",
+   blade: "sr3e.weaponMode.blade",
+   explosive: "sr3e.weaponMode.explosive",
+   energy: "sr3e.weaponMode.energy",
+   blunt: "sr3e.weaponMode.blunt",
 };

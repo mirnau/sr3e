@@ -12,57 +12,69 @@
    let layoutMode = $state("double");
    let { item = {}, config = {} } = $props();
    const system = $state(item.system);
-   const weapon = system.weapon;
 
-   const weaponMode = {
+   const weaponMode = $derived({
       item,
       key: "mode",
-      label: "Mode",
-      value: weapon.mode,
-      path: "system.weapon",
+      label: localize(config.weapon.mode),
+      value: system.mode,
+      path: "system",
       type: "select",
-      options: [
-         localize(config.weapon.manual),
-         localize(config.weapon.semiauto),
-         localize(config.weapon.fullauto),
-         localize(config.weapon.blade),
-         localize(config.weapon.explosive),
-         localize(config.weapon.energy),
-         localize(config.weapon.blunt),
-      ],
-   };
+      options: Object.values(config.weaponMode).map(localize)
+   });
+
+   const ammoClassEntry = $derived({
+      item,
+      key: "ammunitionClass",
+      label: localize(config.weapon.ammunitionClass),
+      value: system.ammunitionClass,
+      path: "system",
+      type: "select",
+      options: Object.values(config.ammunitionClass).map(localize)
+   });
+
+   const damageEntry = $derived({
+      item,
+      key: "damage",
+      label: localize(config.weapon.damageType),
+      value: system.damage,
+      path: "system",
+      type: "select",
+      options: Object.values(config.damageType).map(localize)
+   });
+
+   function attack() {
+      //if fire weapon
+      //if melee or blunt
+   }
+
+   function reload() {}
+
+   function newClip() {}
 
    const weaponEntries = [
       {
          item,
-         key: "damage",
-         label: localize(config.weapon.damage),
-         value: weapon.damage,
-         path: "system.weapon",
-         type: "text",
-      },
-      {
-         item,
          key: "range",
          label: localize(config.weapon.range),
-         value: weapon.range,
-         path: "system.weapon",
+         value: system.range,
+         path: "system",
          type: "number",
       },
       {
          item,
          key: "recoilComp",
          label: localize(config.weapon.recoilCompensation),
-         value: weapon.recoilComp,
-         path: "system.weapon",
+         value: system.recoilComp,
+         path: "system",
          type: "number",
       },
       {
          item,
          key: "currentClipId",
          label: localize(config.weapon.currentClip),
-         value: weapon.currentClipId,
-         path: "system.weapon",
+         value: system.currentClipId,
+         path: "system",
          type: "text",
       },
    ];
@@ -89,6 +101,8 @@
          <h3>{localize(config.common.details)}</h3>
          <div class="stat-grid single-column">
             <StatCard {...weaponMode} />
+            <StatCard {...damageEntry} />
+            <StatCard {...ammoClassEntry} />
          </div>
 
          <div class="stat-grid two-column">

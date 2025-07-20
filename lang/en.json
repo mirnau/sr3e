@@ -271,6 +271,8 @@
          "lowlight": "Low-light vision"
       },
       "weapon": {
+         "ammunitionClass": "Ammunition Class",
+         "damageType": "Damage Type",
          "weapon": "Weapon",
          "weaponStats": "Weapon Stats",
          "damage": "Damage",
@@ -329,6 +331,25 @@
          "taser": "Tasers",
          "bow": "Bows",
          "crossbow": "Crossbows"
+      },
+      "damageType": {
+         "l": "Light",
+         "m": "Moderate",
+         "s": "Serious",
+         "d": "Deadly",
+         "lStun": "Light (Stun)",
+         "mStun": "Moderate (Stun)",
+         "sStun": "Serious (Stun)",
+         "dStun": "Deadly (Stun)"
+      },
+      "weaponMode": {
+         "manual": "Manual",
+         "semiauto": "Semi-Automatic",
+         "fullauto": "Full-Automatic",
+         "blade": "Blade",
+         "explosive": "Explosive",
+         "energy": "Energy",
+         "blunt": "Blunt"
       }
    }
 }

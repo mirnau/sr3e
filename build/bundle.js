@@ -12000,6 +12000,8 @@ sr3e.transaction = {
   select: "sr3e.transaction.select"
 };
 sr3e.weapon = {
+  damageType: "sr3e.weapon.damageType",
+  ammunitionClass: "sr3e.weapon.ammunitionClass",
   weapon: "sr3e.weapon.weapon",
   weaponStats: "sr3e.weapon.weaponStats",
   damage: "sr3e.weapon.damage",
@@ -12073,6 +12075,25 @@ sr3e.ammunitionClass = {
   taser: "sr3e.ammunitionClass.taser",
   bow: "sr3e.ammunitionClass.bow",
   crossbow: "sr3e.ammunitionClass.crossbow"
+};
+sr3e.damageType = {
+  l: "sr3e.damageType.l",
+  m: "sr3e.damageType.m",
+  s: "sr3e.damageType.s",
+  d: "sr3e.damageType.d",
+  lStun: "sr3e.damageType.lStun",
+  mStun: "sr3e.damageType.mStun",
+  sStun: "sr3e.damageType.sStun",
+  dStun: "sr3e.damageType.dStun"
+};
+sr3e.weaponMode = {
+  manual: "sr3e.weaponMode.manual",
+  semiauto: "sr3e.weaponMode.semiauto",
+  fullauto: "sr3e.weaponMode.fullauto",
+  blade: "sr3e.weaponMode.blade",
+  explosive: "sr3e.weaponMode.explosive",
+  energy: "sr3e.weaponMode.energy",
+  blunt: "sr3e.weaponMode.blunt"
 };
 function injectCssSelectors(app, element, ctx, data) {
   const header = element.querySelector(".window-header");
@@ -13400,62 +13421,63 @@ function Portability($$anchor, $$props) {
 var on_change$4 = (e, item2) => item2().update({ ["name"]: e.target.value });
 var root_2$6 = /* @__PURE__ */ template(`<input class="large" name="name" type="text">`);
 var root_1$7 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!></div>`, 1);
-var root_3$4 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!></div> <div class="stat-grid two-column"></div>`, 1);
+var root_3$4 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <!> <!></div> <div class="stat-grid two-column"></div>`, 1);
 var root$c = /* @__PURE__ */ template(`<div class="sr3e-waterfall-wrapper"><div><!> <!> <!> <!> <!> <!></div></div>`);
 function WeaponApp($$anchor, $$props) {
   push($$props, true);
   let layoutMode = "double";
   let item2 = prop($$props, "item", 23, () => ({})), config = prop($$props, "config", 19, () => ({}));
   const system = proxy(item2().system);
-  const weapon = system.weapon;
-  const weaponMode = {
+  const weaponMode = /* @__PURE__ */ derived$1(() => ({
     item: item2(),
     key: "mode",
-    label: "Mode",
-    value: weapon.mode,
-    path: "system.weapon",
+    label: localize(config().weapon.mode),
+    value: system.mode,
+    path: "system",
     type: "select",
-    options: [
-      localize(config().weapon.manual),
-      localize(config().weapon.semiauto),
-      localize(config().weapon.fullauto),
-      localize(config().weapon.blade),
-      localize(config().weapon.explosive),
-      localize(config().weapon.energy),
-      localize(config().weapon.blunt)
-    ]
-  };
+    options: Object.values(config().weaponMode).map(localize)
+  }));
+  const ammoClassEntry = /* @__PURE__ */ derived$1(() => ({
+    item: item2(),
+    key: "ammunitionClass",
+    label: localize(config().weapon.ammunitionClass),
+    value: system.ammunitionClass,
+    path: "system",
+    type: "select",
+    options: Object.values(config().ammunitionClass).map(localize)
+  }));
+  const damageEntry = /* @__PURE__ */ derived$1(() => ({
+    item: item2(),
+    key: "damage",
+    label: localize(config().weapon.damageType),
+    value: system.damage,
+    path: "system",
+    type: "select",
+    options: Object.values(config().damageType).map(localize)
+  }));
   const weaponEntries = [
-    {
-      item: item2(),
-      key: "damage",
-      label: localize(config().weapon.damage),
-      value: weapon.damage,
-      path: "system.weapon",
-      type: "text"
-    },
     {
       item: item2(),
       key: "range",
       label: localize(config().weapon.range),
-      value: weapon.range,
-      path: "system.weapon",
+      value: system.range,
+      path: "system",
       type: "number"
     },
     {
       item: item2(),
       key: "recoilComp",
       label: localize(config().weapon.recoilCompensation),
-      value: weapon.recoilComp,
-      path: "system.weapon",
+      value: system.recoilComp,
+      path: "system",
       type: "number"
     },
     {
       item: item2(),
       key: "currentClipId",
       label: localize(config().weapon.currentClip),
-      value: weapon.currentClipId,
-      path: "system.weapon",
+      value: system.currentClipId,
+      path: "system",
       type: "text"
     }
   ];
@@ -13493,7 +13515,11 @@ function WeaponApp($$anchor, $$props) {
       var text2 = child(h3);
       var div_3 = sibling(h3, 2);
       var node_4 = child(div_3);
-      StatCard(node_4, spread_props(weaponMode));
+      StatCard(node_4, spread_props(() => get$1(weaponMode)));
+      var node_5 = sibling(node_4, 2);
+      StatCard(node_5, spread_props(() => get$1(damageEntry)));
+      var node_6 = sibling(node_5, 2);
+      StatCard(node_6, spread_props(() => get$1(ammoClassEntry)));
       var div_4 = sibling(div_3, 2);
       each(div_4, 21, () => weaponEntries, index, ($$anchor3, entry) => {
         StatCard($$anchor3, spread_props(() => get$1(entry)));
@@ -13504,8 +13530,8 @@ function WeaponApp($$anchor, $$props) {
       append($$anchor2, fragment_1);
     }
   });
-  var node_5 = sibling(node_3, 2);
-  ItemSheetComponent(node_5, {
+  var node_7 = sibling(node_3, 2);
+  ItemSheetComponent(node_7, {
     children: ($$anchor2, $$slotProps) => {
       ActiveEffectsViewer($$anchor2, {
         get document() {
@@ -13518,28 +13544,28 @@ function WeaponApp($$anchor, $$props) {
       });
     }
   });
-  var node_6 = sibling(node_5, 2);
-  Commodity(node_6, {
-    get item() {
-      return item2();
-    },
-    get config() {
-      return config();
-    },
-    gridCss: "two-column"
-  });
-  var node_7 = sibling(node_6, 2);
-  Portability(node_7, {
-    get item() {
-      return item2();
-    },
-    get config() {
-      return config();
-    },
-    gridCss: "two-column"
-  });
   var node_8 = sibling(node_7, 2);
-  JournalViewer(node_8, {
+  Commodity(node_8, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    },
+    gridCss: "two-column"
+  });
+  var node_9 = sibling(node_8, 2);
+  Portability(node_9, {
+    get item() {
+      return item2();
+    },
+    get config() {
+      return config();
+    },
+    gridCss: "two-column"
+  });
+  var node_10 = sibling(node_9, 2);
+  JournalViewer(node_10, {
     get document() {
       return item2();
     },
@@ -13650,28 +13676,30 @@ class PortabilityModel extends foundry.abstract.TypeDataModel {
 class WeaponModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      weapon: new foundry.data.fields.SchemaField({
-        damage: new foundry.data.fields.StringField({
-          required: true,
-          initial: "N/A"
-        }),
-        mode: new foundry.data.fields.StringField({
-          required: true,
-          initial: "semi-automatic"
-        }),
-        range: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0,
-          integer: true
-        }),
-        recoilComp: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0
-        }),
-        currentClipId: new foundry.data.fields.StringField({
-          required: false,
-          nullable: true
-        })
+      mode: new foundry.data.fields.StringField({
+        required: true,
+        initial: "semi-automatic"
+      }),
+      ammunitionClass: new foundry.data.fields.StringField({
+        required: true,
+        initial: "N/A"
+      }),
+      damage: new foundry.data.fields.StringField({
+        required: true,
+        initial: "N/A"
+      }),
+      shotsPerRound: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 1
+      }),
+      range: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0,
+        integer: true
+      }),
+      recoilComp: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
       }),
       ...PortabilityModel.defineSchema(),
       ...CommodityModel.defineSchema()
