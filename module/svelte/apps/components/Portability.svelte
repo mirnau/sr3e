@@ -1,6 +1,6 @@
 <script>
-    import { localize } from "../../../services/utilities.js";
-    import StatCard from "./StatCard.svelte";
+    import { localize } from "@services/utilities.js";
+    import StatCard from "@sveltecomponent/StatCard.svelte";
     let { item, config,  gridCss } = $props();
     const system = $state(item.system);
     const portability = system.portability;

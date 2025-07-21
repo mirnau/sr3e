@@ -34,6 +34,7 @@ export default defineConfig({
          "@documents": path.resolve(__dirname, "module/foundry/documents"),
          "@apps": path.resolve(__dirname, "module/svelte/apps"),
          "@config": path.resolve(__dirname, "module/foundry"),
+         "@sveltecomponent": path.resolve(__dirname, "module/svelte/apps/components"),
       },
    },
 

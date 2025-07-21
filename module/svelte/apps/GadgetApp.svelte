@@ -1,6 +1,6 @@
 <script>
-   import Commodity from "./components/Commodity.svelte";
-   import Portability from "./components/Portability.svelte";
+   import Commodity from "@sveltecomponent/Commodity.svelte";
+   import Portability from "@sveltecomponent/Portability.svelte";
 
    let { item, config } = $props();
 </script>

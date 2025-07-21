@@ -1,13 +1,13 @@
 <script>
-   import { localize, openFilePicker } from "../../services/utilities.js";
+   import { localize, openFilePicker } from "@services/utilities.js";
    import { onMount } from "svelte";
-   import JournalViewer from "./components/JournalViewer.svelte";
-   import StatCard from "./components/StatCard.svelte";
-   import Commodity from "./components/Commodity.svelte";
-   import Portability from "./components/Portability.svelte";
-   import Image from "./components/basic/Image.svelte";
-   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
-   import ActiveEffectsViewer from "./components/ActiveEffects/ActiveEffectsViewer.svelte";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import Commodity from "@sveltecomponent/Commodity.svelte";
+   import Portability from "@sveltecomponent/Portability.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
 
    let layoutMode = $state("double");
    let { item = {}, config = {} } = $props();
