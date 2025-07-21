@@ -124,6 +124,11 @@ sr3e.dicepools = {
    spell: "sr3e.dicepools.spell",
    associateselect: "sr3e.dicepools.associateselect",
 };
+
+sr3e.gadget = {
+   gadget: "sr3e.gadget.gadget"
+}
+
 sr3e.karma = {
    karma: "sr3e.karma.karma",
    goodkarma: "sr3e.karma.goodkarma",
@@ -305,8 +310,10 @@ sr3e.commodity = {
    cost: "sr3e.commodity.cost",
    streetIndex: "sr3e.commodity.streetIndex",
    restrictionLevel: "sr3e.commodity.restrictionLevel",
-   legalityType: "sr3e.commodity.legalityType",
-   legalityCategory: "sr3e.commodity.legalityCategory",
+   legalstatus: "sr3e.commodity.legalstatus",
+   legalpermit: "sr3e.commodity.legalpermit",
+   legalenforcementpriority: "sr3e.commodity.legalenforcementpriority",
+
    isBroken: "sr3e.commodity.isBroken",
 };
 
@@ -314,22 +321,6 @@ sr3e.portability = {
    portability: "sr3e.portability.portability",
    concealability: "sr3e.portability.concealability",
    weight: "sr3e.portability.weight",
-};
-
-sr3e.legalityType = {
-   legal: "sr3e.legalityType.legal",
-   restricted: "sr3e.legalityType.restricted",
-   forbidden: "sr3e.legalityType.forbidden",
-   unlicensed: "sr3e.legalityType.unlicensed",
-};
-
-sr3e.legalityCategory = {
-   civilian: "sr3e.legalityCategory.civilian",
-   security: "sr3e.legalityCategory.security",
-   military: "sr3e.legalityCategory.military",
-   magical: "sr3e.legalityCategory.magical",
-   cyberware: "sr3e.legalityCategory.cyberware",
-   biotech: "sr3e.legalityCategory.biotech",
 };
 
 sr3e.ammunitionType = {
@@ -383,4 +374,26 @@ sr3e.weaponMode = {
    explosive: "sr3e.weaponMode.explosive",
    energy: "sr3e.weaponMode.energy",
    blunt: "sr3e.weaponMode.blunt",
+};
+
+sr3e.legalstatus = {
+   L: "sr3e.legalstatus.L",
+   R: "sr3e.legalstatus.R",
+   I: "sr3e.legalstatus.I",
+};
+
+sr3e.legalpermit = {
+   1: "sr3e.legalpermit.1",
+   2: "sr3e.legalpermit.2",
+   3: "sr3e.legalpermit.3",
+   4: "sr3e.legalpermit.4",
+   N: "sr3e.legalpermit.N",
+};
+
+sr3e.legalpriority = {
+   1: "sr3e.legalpriority.1",
+   2: "sr3e.legalpriority.2",
+   3: "sr3e.legalpriority.3",
+   4: "sr3e.legalpriority.4",
+   X: "sr3e.legalpriority.X",
 };

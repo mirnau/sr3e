@@ -23,7 +23,8 @@
         "Actor": {
             "character": {},
             "storytellerscreen": {},
-            "broadcaster": {}
+            "broadcaster": {},
+            "mechanical": {}
         },
         "Item": {
             "metatype": {},
@@ -31,7 +32,10 @@
             "weapon": {},
             "ammunition": {},
             "skill": {},
-            "transaction": {}
+            "transaction": {},
+            "spell": {},
+            "foci": {},
+            "gadget": {}
         }
     },
     "styles": [

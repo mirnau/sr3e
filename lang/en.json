@@ -33,9 +33,9 @@
          "days": "Days",
          "cost": "Cost",
          "streetIndex": "Street Index",
-         "restrictionLevel": "Restriction Level",
-         "legalityType": "Legality Type",
-         "legalityCategory": "Legality Category",
+         "legalstatus": "Legal Status",
+         "legalpermit": "Permit Requirement",
+         "legalenforcementpriority": "Enforcement Priority",
          "isBroken": "Broken"
       },
       "common": {
@@ -86,6 +86,9 @@
          "noMatch": "No Match",
          "permanent": "Permanent",
          "changesHeader": "Changes"
+      },
+      "gadget": {
+         "gadget": "Gadget"
       },
       "health": {
          "health": "Health",
@@ -231,7 +234,7 @@
          "age": "Age",
          "agerange": "Playable Age Range",
          "height": "Height",
-         "metatype": "metatype",
+         "metatype": "Metatype",
          "weight": "Weight",
          "child": "Child",
          "adolecent": "Adolecent",
@@ -288,20 +291,6 @@
          "blunt": "Blunt Weapon",
          "energy": "Energy Weapon"
       },
-      "legalityType": {
-         "legal": "Legal",
-         "restricted": "Restricted",
-         "forbidden": "Forbidden",
-         "unlicensed": "Unlicensed"
-      },
-      "legalityCategory": {
-         "civilian": "Civilian",
-         "security": "Security",
-         "military": "Military",
-         "magical": "Magical",
-         "cyberware": "Cyberware",
-         "biotech": "Biotech"
-      },
       "ammunitionType": {
          "regular": "Regular",
          "apds": "APDS",
@@ -350,6 +339,25 @@
          "explosive": "Explosive",
          "energy": "Energy",
          "blunt": "Blunt"
+      },
+      "legalstatus": {
+         "L": "Legal",
+         "R": "Restricted",
+         "I": "Illegal"
+      },
+      "legalpermit": {
+         "1": "Permit Level 1",
+         "2": "Permit Level 2",
+         "3": "Permit Level 3",
+         "4": "Permit Level 4",
+         "N": "No Permit Allowed"
+      },
+      "legalpriority": {
+         "1": "Priority 1",
+         "2": "Priority 2",
+         "3": "Priority 3",
+         "4": "Priority 4",
+         "X": "Extreme Priority"
       }
    }
 }

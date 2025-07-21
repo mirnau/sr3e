@@ -1,35 +1,44 @@
-import Log from "./Log.js";
-import CharacterModel from "./module/models/actor/CharacterModel.js";
-import CharacterActorSheet from "./module/foundry/sheets/CharacterActorSheet.js";
-import { sr3e } from "./module/foundry/config.js";
-import { hooks, flags } from "./module/services/commonConsts.js";
-import { localize } from "./module/services/utilities.js";
-import injectCssSelectors from "./module/foundry/hooks/renderApplicationV2/injectCssSelectors.js";
-import MetatypeModel from "./module/models/item/MetatypeModel.js";
-import MetatypeItemSheet from "./module/foundry/sheets/MetatypeItemSheet.js";
-import MagicItemSheet from "./module/foundry/sheets/MagicItemSheet.js";
-import MagicModel from "./module/models/item/MagicModel.js";
-import WeaponItemSheet from "./module/foundry/sheets/WeaponItemSheet.js";
-import WeaponModel from "./module/models/item/WeaponModel.js";
-import AmmunitionModel from "./module/models/item/AmmunitionModel.js";
-import AmmunitionItemSheet from "./module/foundry/sheets/AmmunitionItemSheet.js";
-import SkillItemSheet from "./module/foundry/sheets/SkillItemSheet.js";
-import SkillModel from "./module/models/item/SkillModel.js";
-import CharacterCreationDialogApp from "./module/svelte/apps/dialogs/CharacterCreationDialogApp.svelte";
-import displayCreationDialog from "./module/foundry/hooks/createActor/displayCreationDialogHook.js";
-import stopDefaultCharacterSheetRenderOnCreation from "./module/foundry/hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
-import SR3EActor from "./module/foundry/documents/SR3EActor.js";
-import { attachLightEffect } from "./module/foundry/hooks/renderApplicationV2/attachLightEffect.js";
-import StorytellerScreenModel from "./module/models/actor/StorytellerScreenModel.js";
-import StorytellerScreenActorSheet from "./module/foundry/sheets/StorytellerScreenActorSheet.js";
-import TransactionModel from "./module/models/item/TransactionModel.js";
-import TransactionItemSheet from "./module/foundry/sheets/TransactionItemSheet.js";
-import SR3ECombat from "./module/foundry/documents/SR3ECombat.js";
-import SR3Edie from "./module/foundry/documents/SR3Edie.js";
-import SR3ERoll from "./module/foundry/documents/SR3ERoll.js";
-import BroadcasterModel from "./module/models/actor/BroadcasterModel.js";
-import BroadcasterActorSheet from "./module/foundry/sheets/BroadcasterActorSheet.js";
-import { getNewsService, broadcastNews } from "./module/services/NewsService.svelte.js";
+import Log from "@/Log.js";
+
+import CharacterModel from "@models/actor/CharacterModel.js";
+import StorytellerScreenModel from "@models/actor/StorytellerScreenModel.js";
+import BroadcasterModel from "@models/actor/BroadcasterModel.js";
+import MetatypeModel from "@models/item/MetatypeModel.js";
+import MagicModel from "@models/item/MagicModel.js";
+import WeaponModel from "@models/item/WeaponModel.js";
+import AmmunitionModel from "@models/item/AmmunitionModel.js";
+import SkillModel from "@models/item/SkillModel.js";
+import TransactionModel from "@models/item/TransactionModel.js";
+import GadgetModel from "@models/item/GadgetModel.js";
+
+import CharacterActorSheet from "@sheets/CharacterActorSheet.js";
+import MetatypeItemSheet from "@sheets/MetatypeItemSheet.js";
+import MagicItemSheet from "@sheets/MagicItemSheet.js";
+import WeaponItemSheet from "@sheets/WeaponItemSheet.js";
+import AmmunitionItemSheet from "@sheets/AmmunitionItemSheet.js";
+import SkillItemSheet from "@sheets/SkillItemSheet.js";
+import TransactionItemSheet from "@sheets/TransactionItemSheet.js";
+import StorytellerScreenActorSheet from "@sheets/StorytellerScreenActorSheet.js";
+import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
+import GadgetItemSheet from "@sheets/GadgetSheet.js";
+
+import { sr3e } from "@config/config.js";
+
+import { hooks, flags } from "@services/commonConsts.js";
+import { localize } from "@services/utilities.js";
+import { getNewsService, broadcastNews } from "@services/NewsService.svelte.js";
+
+import injectCssSelectors from "@hooks/renderApplicationV2/injectCssSelectors.js";
+import { attachLightEffect } from "@hooks/renderApplicationV2/attachLightEffect.js";
+import displayCreationDialog from "@hooks/createActor/displayCreationDialogHook.js";
+import stopDefaultCharacterSheetRenderOnCreation from "@hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
+
+import SR3EActor from "@documents/SR3EActor.js";
+import SR3ECombat from "@documents/SR3ECombat.js";
+import SR3Edie from "@documents/SR3Edie.js";
+import SR3ERoll from "@documents/SR3ERoll.js";
+
+import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -90,6 +99,7 @@ function configureProject() {
       skill: localize(CONFIG.sr3e.skill.skill),
       transaction: localize(CONFIG.sr3e.transaction.transaction),
       weapon: localize(CONFIG.sr3e.weapon.weapon),
+      gadget: localize(CONFIG.sr3e.gadget.gadget),
    };
 
    DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
@@ -219,7 +229,6 @@ function wrapChatMessage(message, html, context) {
 
    html.innerHTML = "";
    html.appendChild(wrapper);
-
 }
 
 function applyAuthorColorToChatMessage(message, html, context) {
@@ -383,6 +392,12 @@ function registerHooks() {
                type: "transaction",
                model: TransactionModel,
                sheet: TransactionItemSheet,
+            },
+            {
+               docClass: Item,
+               type: "gadget",
+               model: GadgetModel,
+               sheet: GadgetItemSheet,
             },
          ],
       });
