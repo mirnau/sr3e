@@ -1,6 +1,5 @@
 <script>
-   import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
-   import { localize } from "../../../../services/utilities.js";
+   import { localize } from "@services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
    import { onMount, onDestroy } from "svelte";
 

@@ -1,10 +1,11 @@
 <script>
-   import { localize, openFilePicker } from "../../services/utilities.js";
-   import JournalViewer from "./components/JournalViewer.svelte";
-   import StatCard from "./components/StatCard.svelte";
-   import Image from "./components/basic/Image.svelte";
-   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
-   import ActiveEffectsViewer from "./components/ActiveEffects/ActiveEffectsViewer.svelte";
+   import { localize, openFilePicker } from "@services/utilities.js";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
+   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
 
    let { item = {}, config = {} } = $props();
 
@@ -14,7 +15,6 @@
    const common = config.common;
    const karmaConfig = config.karma;
    const traits = config.traits;
-   let layoutMode = $state("double");
 
    const agerange = $derived([
       {
@@ -198,89 +198,87 @@
    });
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
-      <!-- Name and Priority -->
+<ItemSheetWrapper csslayout={"double"}>
+   <!-- Name and Priority -->
+   <ItemSheetComponent>
+      <Image entity={item} />
+      <input
+         class="large"
+         name="name"
+         type="text"
+         bind:value={item.name}
+         onchange={(e) => item.update({ name: e.target.value })}
+      />
+      <StatCard {...priorityEntry} />
+   </ItemSheetComponent>
+
+   <!-- Age Range -->
+   {#if agerange}
       <ItemSheetComponent>
-         <Image entity={item} />
-         <input
-            class="large"
-            name="name"
-            type="text"
-            bind:value={item.name}
-            onchange={(e) => item.update({ name: e.target.value })}
-         />
-         <StatCard {...priorityEntry} />
-      </ItemSheetComponent>
-
-      <!-- Age Range -->
-      {#if agerange}
-         <ItemSheetComponent>
-            <h3 class="item">{localize(traits.agerange)}</h3>
-            <div class="stat-grid">
-               {#each agerange as entry}
-                  <StatCard {...entry} />
-               {/each}
-            </div>
-         </ItemSheetComponent>
-      {/if}
-
-      <!-- Height -->
-      {#if height}
-         <ItemSheetComponent>
-            <h3 class="item">{localize(traits.height)}</h3>
-            <div class="stat-grid">
-               {#each height as entry}
-                  <StatCard {...entry} />
-               {/each}
-            </div>
-         </ItemSheetComponent>
-      {/if}
-
-      <!-- Weight -->
-      {#if weight}
-         <ItemSheetComponent>
-            <h3 class="item">{localize(traits.weight)}</h3>
-            <div class="stat-grid">
-               {#each weight as entry}
-                  <StatCard {...entry} />
-               {/each}
-            </div>
-         </ItemSheetComponent>
-      {/if}
-
-      <!-- Attribute Limits -->
-      <ItemSheetComponent>
-         <h3 class="item">{localize(attributes.limits)}</h3>
+         <h3 class="item">{localize(traits.agerange)}</h3>
          <div class="stat-grid">
-            {#each attributeLimits as entry}
+            {#each agerange as entry}
                <StatCard {...entry} />
             {/each}
          </div>
       </ItemSheetComponent>
+   {/if}
 
+   <!-- Height -->
+   {#if height}
       <ItemSheetComponent>
-         <h3 class="item">Movement</h3>
-         <div class="stat-grid single-column">
-            {#each movement as entry}
+         <h3 class="item">{localize(traits.height)}</h3>
+         <div class="stat-grid">
+            {#each height as entry}
                <StatCard {...entry} />
             {/each}
          </div>
       </ItemSheetComponent>
+   {/if}
 
-      <!-- Karma -->
+   <!-- Weight -->
+   {#if weight}
       <ItemSheetComponent>
-         <h3 class="item">{localize(config.karma.karma)}</h3>
-         <div class="stat-grid single-column">
-            {#each karma as entry}
+         <h3 class="item">{localize(traits.weight)}</h3>
+         <div class="stat-grid">
+            {#each weight as entry}
                <StatCard {...entry} />
             {/each}
          </div>
       </ItemSheetComponent>
-      <ItemSheetComponent>
-         <ActiveEffectsViewer document={item} {config} isSlim={true} />
-      </ItemSheetComponent>
-      <!-- Journal Viewer -->
-      <JournalViewer document={item} {config} />
-   </div>
-</div>
+   {/if}
+
+   <!-- Attribute Limits -->
+   <ItemSheetComponent>
+      <h3 class="item">{localize(attributes.limits)}</h3>
+      <div class="stat-grid">
+         {#each attributeLimits as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+   </ItemSheetComponent>
+
+   <ItemSheetComponent>
+      <h3 class="item">Movement</h3>
+      <div class="stat-grid single-column">
+         {#each movement as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+   </ItemSheetComponent>
+
+   <!-- Karma -->
+   <ItemSheetComponent>
+      <h3 class="item">{localize(config.karma.karma)}</h3>
+      <div class="stat-grid single-column">
+         {#each karma as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+   </ItemSheetComponent>
+   <ItemSheetComponent>
+      <ActiveEffectsViewer document={item} {config} isSlim={true} />
+   </ItemSheetComponent>
+   <!-- Journal Viewer -->
+   <JournalViewer document={item} {config} />
+</ItemSheetWrapper>

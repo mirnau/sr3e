@@ -1,5 +1,4 @@
-import SkillSpecialization from "./components/SkillSpecialization.js";
-
+import SkillSpecialization from "@models/item/components/SkillSpecialization.js";
 export default class SkillModel extends foundry.abstract.TypeDataModel {
    static defineSchema() {
       return {

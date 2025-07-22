@@ -1,9 +1,10 @@
 <script>
-  import { localize, openFilePicker } from "../../services/utilities.js";
-  import StatCard from "./components/StatCard.svelte";
-  import JournalViewer from "./components/JournalViewer.svelte";
-  import Image from "./components/basic/Image.svelte";
-  import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
+  import { localize, openFilePicker } from "@services/utilities.js";
+  import StatCard from "@sveltecomponent/StatCard.svelte";
+  import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+  import Image from "@sveltecomponent/basic/Image.svelte";
+  import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+     import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
 
   let { item = {}, config = {} } = $props();
 
@@ -12,7 +13,7 @@
   const magicianData = $state(system.magicianData);
   const adeptData = $state(awakened.adeptData);
   const labels = config.magic;
-  let layoutMode = $state("double");
+
 
   const archetypeOptions = [localize(labels.adept), localize(labels.magician)];
 
@@ -127,8 +128,7 @@
   });
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-  <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+<ItemSheetWrapper csslayout={"double"}>
     <!-- Header -->
     <ItemSheetComponent>
       <Image entity={item}/>
@@ -172,5 +172,4 @@
     {/if}
 
     <JournalViewer document={item} {config} />
-  </div>
-</div>
+</ItemSheetWrapper>

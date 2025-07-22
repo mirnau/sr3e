@@ -1,7 +1,7 @@
 <script>
    import { onDestroy, onMount } from "svelte";
-   import { localize } from "../../../../services/utilities.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { localize } from "@services/utilities.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
 
    let { document, activeEffect, config, isViewerInstanceOfActor = false, onHandleEffectTriggerUI } = $props();

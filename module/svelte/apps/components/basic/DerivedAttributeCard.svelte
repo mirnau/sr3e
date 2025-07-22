@@ -1,6 +1,6 @@
 <script>
-   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
-   import { localize } from "../../../../services/utilities.js";
+   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
+   import { localize } from "@services/utilities.js";
    import { onDestroy } from "svelte";
 
    let { document, value, label, isButton = false, key = "", children } = $props();

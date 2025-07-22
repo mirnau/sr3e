@@ -1,4 +1,4 @@
-import Log from "@/Log.js";
+import Log from "@services/Log.js";
 
 import CharacterModel from "@models/actor/CharacterModel.js";
 import StorytellerScreenModel from "@models/actor/StorytellerScreenModel.js";

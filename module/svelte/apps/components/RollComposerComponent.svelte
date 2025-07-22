@@ -1,9 +1,9 @@
 <script>
    import { onDestroy, onMount } from "svelte";
    import Counter from "./basic/Counter.svelte";
-   import ItemDataService from "../../../services/ItemDataService.js";
+   import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
-   import { localize } from "../../../services/utilities.js";
+   import { localize } from "@services/utilities.js";
 
    let { actor, config, caller, onclose } = $props();
 

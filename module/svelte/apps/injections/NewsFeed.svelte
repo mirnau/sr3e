@@ -1,6 +1,6 @@
 <script lang="ts">
    import { onMount } from "svelte";
-   import { getNewsService } from "../../../services/NewsService.svelte.js";
+   import { getNewsService } from "@services/NewsService.svelte.js";
 
    const SCROLL_SPEED = 100;
    const NewsService = getNewsService();

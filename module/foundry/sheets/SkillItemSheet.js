@@ -1,6 +1,6 @@
 import SkillApp from "../../svelte/apps/SkillApp.svelte";
 import { mount, unmount } from "svelte";
-import { localize } from "../../services/utilities.js";
+import { localize } from "@services/utilities.js";
 
 export default class SkillItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 

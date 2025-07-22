@@ -28,7 +28,10 @@ export default class CommodityModel extends foundry.abstract.TypeDataModel {
                   initial: "",
                }),
             }),
-            isBroken: new foundry.data.fields.BooleanField({ initial: false }),
+            isBroken: new foundry.data.fields.BooleanField({
+               required: true,
+               initial: false,
+            }),
          }),
       };
    }

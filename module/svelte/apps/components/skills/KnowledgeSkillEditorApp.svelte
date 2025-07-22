@@ -1,11 +1,11 @@
 <script>
-   import { openFilePicker, localize } from "../../../../services/utilities.js";
+   import { openFilePicker, localize } from "@services/utilities.js";
    import SpecializationCard from "./SpecializationCard.svelte";
    import { onDestroy, tick } from "svelte";
-   import { flags } from "../../../../services/commonConsts.js";
+   import { flags } from "@services/commonConsts.js";
    import { get, set } from "svelte/store";
-   import KarmaShoppingService from "../../../../services/KarmaShoppingService.js";
-   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import KarmaShoppingService from "@services/KarmaShoppingService.js";
+   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
    import Karma from "../Karma.svelte";
    import { onMount } from "svelte";
 

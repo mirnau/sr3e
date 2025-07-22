@@ -2,9 +2,9 @@
    import SkillCategory from "./SkillCategory.svelte";
    import MasonryGrid from "../basic/MasonryGrid.svelte";
    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
-   import { masonryMinWidthFallbackValue } from "../../../../services/commonConsts.js";
+   import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
    import { tick } from "svelte";
-   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte";
+   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte";
 
    let { actor = {}, config = {} } = $props();
 

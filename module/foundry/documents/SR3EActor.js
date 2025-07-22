@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import RollService from "../../services/RollService.svelte.js";
+import RollService from "@services/RollService.svelte.js";
 export default class SR3EActor extends Actor {
    /*
    getRollData() {

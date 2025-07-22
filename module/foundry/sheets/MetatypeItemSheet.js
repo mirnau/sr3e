@@ -1,4 +1,4 @@
-import { localize } from "../../services/utilities.js";
+import { localize } from "@services/utilities.js";
 import metatypeApp from "../../svelte/apps/metatypeApp.svelte";
 import { mount, unmount } from "svelte";
 

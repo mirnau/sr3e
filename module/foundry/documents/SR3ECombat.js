@@ -1,4 +1,4 @@
-import * as CombatService from "../../services/CombatService.js";
+import * as CombatService from "@services/CombatService.js";
 
 export default class SR3ECombat extends foundry.documents.Combat {
    async startCombat() {

@@ -3,10 +3,10 @@ import NeonName from "../../svelte/apps/injections/NeonName.svelte";
 import NewsFeed from "../../svelte/apps/injections/NewsFeed.svelte";
 import CharacterCreationManager from "../../svelte/apps/injections/charactercreation/CharacterCreationManager.svelte";
 import ShoppingCart from "../../svelte/apps/injections/ShoppingCart.svelte";
-import SR3DLog from "../../../Log.js";
+import SR3DLog from "../../services/Log.js";
 import { mount, unmount } from "svelte";
-import ActorDataService from "../../services/ActorDataService.js";
-import { flags } from "../../services/commonConsts.js";
+import ActorDataService from "@services/ActorDataService.js";
+import { flags } from "@services/commonConsts.js";
 import { StoreManager, stores } from "../../svelte/svelteHelpers/StoreManager.svelte";
 import RollComposerComponent from "../../svelte/apps/components/RollComposerComponent.svelte";
 

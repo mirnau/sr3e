@@ -1,6 +1,6 @@
 import GadgetApp from "../../svelte/apps/GadgetApp.svelte";
 import { mount, unmount } from "svelte";
-import { localize } from "../../services/utilities.js";
+import { localize } from "@services/utilities.js";
 
 export default class GadgetItemSheet extends foundry.applications.sheets.ItemSheetV2 {
    #gadget;

@@ -3,9 +3,8 @@ import { svelte } from "@sveltejs/vite-plugin-svelte";
 import path from "path";
 import fs from "fs";
 
-const projectRoot = path.resolve(__dirname, "systems/sr3e");
+const projectRoot = path.resolve(__dirname);
 
-// Dynamically map all folders under systems/sr3e to @/folder
 const generateFolderAliases = () => {
    const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
    return Object.fromEntries(
@@ -26,15 +25,18 @@ export default defineConfig({
 
    resolve: {
       alias: {
-         "@": path.resolve(__dirname), // root of your system
-         "@models": path.resolve(__dirname, "module/models"),
-         "@sheets": path.resolve(__dirname, "module/foundry/sheets"),
-         "@services": path.resolve(__dirname, "module/services"),
-         "@hooks": path.resolve(__dirname, "module/foundry/hooks"),
-         "@documents": path.resolve(__dirname, "module/foundry/documents"),
-         "@apps": path.resolve(__dirname, "module/svelte/apps"),
-         "@config": path.resolve(__dirname, "module/foundry"),
-         "@sveltecomponent": path.resolve(__dirname, "module/svelte/apps/components"),
+         ...generateFolderAliases(),
+         "@models": path.resolve(projectRoot, "module/models"),
+         "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
+         "@services": path.resolve(projectRoot, "module/services"),
+         "@hooks": path.resolve(projectRoot, "module/foundry/hooks"),
+         "@documents": path.resolve(projectRoot, "module/foundry/documents"),
+         "@apps": path.resolve(projectRoot, "module/svelte/apps"),
+         "@config": path.resolve(projectRoot, "module/foundry"),
+         "@sveltecomponent": path.resolve(projectRoot, "module/svelte/apps/components"),
+         "@sveltehelpers": path.resolve(projectRoot, "module/svelte/svelteHelpers"),
+         "@injections": path.resolve(projectRoot, "module/svelte/apps/injections"),
+
       },
    },
 
@@ -52,6 +54,7 @@ export default defineConfig({
          },
       },
    },
+
    server: {
       port: 3000,
       open: false,

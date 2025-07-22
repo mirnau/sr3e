@@ -1,5 +1,5 @@
 import { writable, get, derived } from "svelte/store";
-import { flags } from "../../services/commonConsts.js";
+import { flags } from "@services/commonConsts.js";
 
 const storeManagers = new Map();
 

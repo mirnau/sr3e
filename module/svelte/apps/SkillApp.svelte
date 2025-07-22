@@ -1,13 +1,12 @@
 <script>
-   import { localize, openFilePicker } from "../../services/utilities.js";
-   import JournalViewer from "./components/JournalViewer.svelte";
-   import Image from "./components/basic/Image.svelte";
-   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
-   import StatCard from "./components/basic/DerivedAttributeCard.svelte";
+   import { localize, openFilePicker } from "@services/utilities.js";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+      import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+   import StatCard from "@sveltecomponent/basic/DerivedAttributeCard.svelte";
 
    let { item, config } = $props();
-
-   let layoutMode = $state("single");
 
    let value = $state(item.system.skillType);
 
@@ -80,8 +79,7 @@
    }
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+<ItemSheetWrapper csslayout={"single"}>
       <ItemSheetComponent>
          <Image src={item.img} title={item.name} />
          <div class="stat-grid single-column">
@@ -142,5 +140,4 @@
          </div>
       </ItemSheetComponent>
       <JournalViewer document={item} {config} />
-   </div>
-</div>
+</ItemSheetWrapper>

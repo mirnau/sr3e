@@ -8,8 +8,8 @@
    import Image from "@sveltecomponent/basic/Image.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
+   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
 
-   let layoutMode = $state("double");
    let { item = {}, config = {} } = $props();
    let name = $state(item.name);
    const system = $state(item.system);
@@ -47,11 +47,11 @@
    function attack() {
       console.log("Pew pew");
    }
-   
+
    function reload() {
       console.log("Pew pew");
    }
-   
+
    function newClip() {
       console.log("Pew pew");
    }
@@ -84,8 +84,7 @@
    ];
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-   <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
+<ItemSheetWrapper csslayout={"double"}>
       <ItemSheetComponent>
          <Image entity={item} />
          <div class="stat-grid single-column">
@@ -119,5 +118,4 @@
       <Commodity {item} {config} gridCss="two-column" />
       <Portability {item} {config} gridCss="two-column" />
       <JournalViewer document={item} {config} />
-   </div>
-</div>
+</ItemSheetWrapper>

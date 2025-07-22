@@ -1,5 +1,5 @@
 import { CharacterCreationApp } from "../../applications/CharacterCreationApp.js"; // Adjust path as needed
-import Log from "../../../../Log.js";
+import Log from "../../../services/Log.js";
 
 export default async function displayCreationDialog(actor, options, userId) {
    if (actor.type !== "character") return true;

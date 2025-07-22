@@ -2,9 +2,9 @@
    import Image from "../basic/Image.svelte";
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ComboSearch from "../basic/ComboSearch.svelte";
-   import { flags } from "../../../../services/commonConsts.js";
-   import { localize } from "../../../../services/utilities.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { flags } from "@services/commonConsts.js";
+   import { localize } from "@services/utilities.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy, onMount } from "svelte";
    import CharacterModel from "../../../../models/actor/CharacterModel.js";
 

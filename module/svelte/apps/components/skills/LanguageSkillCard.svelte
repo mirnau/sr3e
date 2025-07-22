@@ -1,9 +1,9 @@
 <script>
-   import { localize } from "../../../../services/utilities.js";
-   import { flags } from "../../../../services/commonConsts.js";
+   import { localize } from "@services/utilities.js";
+   import { flags } from "@services/commonConsts.js";
    import ActiveSkillEditorSheet from "../../../../foundry/applications/SkillEditorApp.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
-   import RollComposerComponent from "../../components/RollComposerComponent.svelte";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
+   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
    import { mount, unmount } from "svelte";
    import { onDestroy } from "svelte";
 

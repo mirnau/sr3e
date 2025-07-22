@@ -1,9 +1,9 @@
 <script>
-   import MasonryGrid from "./basic/MasonryGrid.svelte";
-   import StatCard from "./basic/DerivedAttributeCard.svelte";
-   import CardToolbar from "./CardToolbar.svelte";
-   import { localize } from "../../../services/utilities.js";
-   import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
+   import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";
+   import StatCard from "@sveltecomponent/basic/DerivedAttributeCard.svelte";
+   import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
+   import { localize } from "@services/utilities.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();

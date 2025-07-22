@@ -1,10 +1,11 @@
 <script>
-   import { localize } from "../../../services/utilities.js";
-   import StatCard from "./StatCard.svelte";
-   import ItemSheetComponent from "./basic/ItemSheetComponent.svelte";
+   import { localize } from "@services/utilities.js";
+   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    let { item, config, gridCss = "" } = $props();
    const system = $state(item.system);
-   const commodity = system.commodity;
+   const commodity = system.commodity ?? {};
+   const legality = commodity.legality ?? {};
 
    const entries = [
       {
@@ -46,7 +47,7 @@
          item,
          key: "status",
          label: localize(config.commodity.legalstatus),
-         value: commodity.legality.status,
+         value: legality.status,
          path: "system.commodity.legality",
          type: "select",
          options: Object.values(config.legalstatus).map(localize),
@@ -55,7 +56,7 @@
          item,
          key: "permit",
          label: localize(config.commodity.legalpermit),
-         value: commodity.legality.permit,
+         value: legality.permit,
          path: "system.commodity.legality",
          type: "select",
          options: Object.values(config.legalpermit).map(localize),
@@ -64,7 +65,7 @@
          item,
          key: "priority",
          label: localize(config.commodity.legalenforcementpriority),
-         value: commodity.legality.priority,
+         value: legality.priority,
          path: "system.commodity.legality",
          type: "select",
          options: Object.values(config.legalpriority).map(localize),

@@ -1,6 +1,6 @@
 import AmmunitionApp from "../../svelte/apps/AmmunitionApp.svelte";
 import { mount, unmount } from "svelte";
-import { localize } from "../../services/utilities.js";
+import { localize } from "@services/utilities.js";
 
 export default class AmmunitionItemSheet extends foundry.applications.sheets
   .ItemSheetV2 {

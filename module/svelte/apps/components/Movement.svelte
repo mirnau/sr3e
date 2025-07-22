@@ -2,10 +2,10 @@
    import StatCard from "./basic/DerivedAttributeCard.svelte";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import CardToolbar from "./CardToolbar.svelte";
-   import { localize } from "../../../services/utilities.js";
+   import { localize } from "@services/utilities.js";
    import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
    import { shoppingState } from "../../../svelteStore.js";
-   import { masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
+   import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
 

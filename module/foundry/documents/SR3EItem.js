@@ -1,4 +1,4 @@
-export class SR3EItem extends Item {
+export class SR3EItem extends EmbeddedCollectionMixin(Item)  {
   prepareEmbeddedDocuments() {
     this.items = new foundry.abstract.EmbeddedCollection("Item", [], this);
   }

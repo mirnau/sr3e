@@ -1,7 +1,7 @@
 <script>
    import { StoreManager } from "../../../svelte/svelteHelpers/StoreManager.svelte.js";
-   import { flags } from "../../../services/commonConsts.js";
-   import { localize } from "../../../services/utilities.js";
+   import { flags } from "@services/commonConsts.js";
+   import { localize } from "@services/utilities.js";
    import { shoppingState } from "../../../svelteStore.js";
    import { onDestroy } from "svelte";
 

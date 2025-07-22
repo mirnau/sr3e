@@ -1,11 +1,11 @@
 <script>
-   import { localize } from "../../services/utilities.js";
-   import { broadcastNews, stopBroadcast } from "../../services/NewsService.svelte.js";
-   import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
-   import Image from "./components/basic/Image.svelte";
+   import { localize } from "@services/utilities.js";
+   import { broadcastNews, stopBroadcast } from "@services/NewsService.svelte.js";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
    import { StoreManager, stores } from "../svelteHelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
-   import JournalViewer from "./components/JournalViewer.svelte";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
 
    let { actor, config } = $props();
 

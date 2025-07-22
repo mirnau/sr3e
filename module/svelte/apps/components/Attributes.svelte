@@ -1,10 +1,8 @@
 <script>
    import AttributeCard from "./basic/AttributeCard.svelte";
-   import { localize } from "../../../services/utilities.js";
-   import { setupMasonry } from "../../../foundry/masonry/responsiveMasonry.js";
+   import { localize } from "@services/utilities.js";
    import CardToolbar from "./CardToolbar.svelte";
-   import StatCard from "./basic/DerivedAttributeCard.svelte";
-   import { flags, masonryMinWidthFallbackValue } from "../../../services/commonConsts.js";
+   import { flags } from "@services/commonConsts.js";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
