@@ -20,7 +20,7 @@ import SkillItemSheet from "@sheets/SkillItemSheet.js";
 import TransactionItemSheet from "@sheets/TransactionItemSheet.js";
 import StorytellerScreenActorSheet from "@sheets/StorytellerScreenActorSheet.js";
 import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
-import GadgetItemSheet from "@sheets/GadgetSheet.js";
+import GadgetItemSheet from "@sheets/GadgetItemSheet.js";
 
 import { sr3e } from "@config/config.js";
 
@@ -34,6 +34,7 @@ import displayCreationDialog from "@hooks/createActor/displayCreationDialogHook.
 import stopDefaultCharacterSheetRenderOnCreation from "@hooks/preCreateActor/stopDefaultCharacterSheetRenderOnCreation.js";
 
 import SR3EActor from "@documents/SR3EActor.js";
+import SR3EItem from "@documents/SR3EItem.js";
 import SR3ECombat from "@documents/SR3ECombat.js";
 import SR3Edie from "@documents/SR3Edie.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
@@ -59,6 +60,7 @@ function configureProject() {
    SR3ECombat.Register();
    SR3Edie.Register();
    SR3ERoll.Register();
+   SR3EItem.Register();
 
    CONFIG.sr3e = sr3e;
    CONFIG.Actor.dataModels = {};
@@ -401,6 +403,7 @@ function registerHooks() {
             },
          ],
       });
+
       Log.success("Initialization Completed", "sr3e.js");
    });
 }

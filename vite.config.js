@@ -26,6 +26,7 @@ export default defineConfig({
    resolve: {
       alias: {
          ...generateFolderAliases(),
+         "@root": projectRoot,
          "@models": path.resolve(projectRoot, "module/models"),
          "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
          "@services": path.resolve(projectRoot, "module/services"),
@@ -36,7 +37,6 @@ export default defineConfig({
          "@sveltecomponent": path.resolve(projectRoot, "module/svelte/apps/components"),
          "@sveltehelpers": path.resolve(projectRoot, "module/svelte/svelteHelpers"),
          "@injections": path.resolve(projectRoot, "module/svelte/apps/injections"),
-
       },
    },
 

@@ -1,0 +1,1 @@
+export default class SR3EGadget Actor

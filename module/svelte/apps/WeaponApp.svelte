@@ -9,6 +9,7 @@
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+   import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
 
    let { item = {}, config = {} } = $props();
    let name = $state(item.name);
@@ -85,37 +86,43 @@
 </script>
 
 <ItemSheetWrapper csslayout={"double"}>
-      <ItemSheetComponent>
-         <Image entity={item} />
-         <div class="stat-grid single-column">
-            <input
-               class="large"
-               name="name"
-               type="text"
-               value={name}
-               onchange={(e) => item.update({ ["name"]: e.target.value })}
-            />
-         </div>
-      </ItemSheetComponent>
+   <ItemSheetComponent>
+      <Image entity={item} />
+      <div class="stat-grid single-column">
+         <input
+            class="large"
+            name="name"
+            type="text"
+            value={name}
+            onchange={(e) => item.update({ ["name"]: e.target.value })}
+         />
+      </div>
+   </ItemSheetComponent>
 
-      <ItemSheetComponent>
-         <h3>{localize(config.common.details)}</h3>
-         <div class="stat-grid single-column">
-            <StatCard {...weaponMode} />
-            <StatCard {...damageTypeEntry} />
-            <StatCard {...ammoClassEntry} />
-         </div>
+   <ItemSheetComponent>
+      <h3>{localize(config.common.details)}</h3>
+      <div class="stat-grid single-column">
+         <StatCard {...weaponMode} />
+         <StatCard {...damageTypeEntry} />
+         <StatCard {...ammoClassEntry} />
+      </div>
 
-         <div class="stat-grid two-column">
-            {#each weaponEntries as entry}
-               <StatCard {...entry} />
-            {/each}
-         </div>
-      </ItemSheetComponent>
-      <ItemSheetComponent>
-         <ActiveEffectsViewer document={item} {config} isSlim={true} />
-      </ItemSheetComponent>
-      <Commodity {item} {config} gridCss="two-column" />
-      <Portability {item} {config} gridCss="two-column" />
-      <JournalViewer document={item} {config} />
+      <div class="stat-grid two-column">
+         {#each weaponEntries as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+   </ItemSheetComponent>
+   <ItemSheetComponent>
+      <div>
+         <h3>{localize(config.gadget.gadget)}</h3>
+      </div>
+      <GadgetViewer {item} {config} />
+   </ItemSheetComponent>
+   <ItemSheetComponent>
+      <ActiveEffectsViewer document={item} {config} isSlim={true} />
+   </ItemSheetComponent>
+   <Commodity {item} {config} gridCss="two-column" />
+   <Portability {item} {config} gridCss="two-column" />
+   <JournalViewer document={item} {config} />
 </ItemSheetWrapper>

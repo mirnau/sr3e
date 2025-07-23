@@ -1,4 +1,4 @@
-import GadgetApp from "../../svelte/apps/GadgetApp.svelte";
+import GadgetApp from "@apps/GadgetApp.svelte";
 import { mount, unmount } from "svelte";
 import { localize } from "@services/utilities.js";
 

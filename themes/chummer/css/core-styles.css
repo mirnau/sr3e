@@ -3415,4 +3415,37 @@
     background-color: #262626;
     color: var(--h1-color);
   }
+  .drop-zone {
+    position: relative;
+    inset: 0;
+    transition: all 0.2s ease;
+  }
+  .drag-active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  .drag-hover {
+    border: 2px dashed #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+  .drag-overlay {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 123, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .drop-indicator {
+    background: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
 }

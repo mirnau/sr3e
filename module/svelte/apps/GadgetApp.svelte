@@ -15,8 +15,8 @@
       StoreManager.Unsubscribe(item);
    });
 
-   let isOnStore = StoreManager.GetRWStore("isOn");
-   let isBrokenStore = StoremManager.GetRWStore("commodity.isBroken");
+   let isOnStore = itemStoreManager.GetRWStore("isOn");
+   let isBrokenStore = itemStoreManager.GetRWStore("commodity.isBroken");
 
    $effect(() => {
       if ($isOnStore) {
