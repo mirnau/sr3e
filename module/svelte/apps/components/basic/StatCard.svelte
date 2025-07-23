@@ -1,6 +1,4 @@
 <script>
-  import ItemSheetComponent from "./basic/ItemSheetComponent.svelte";
-  import Image from "./basic/Image.svelte";
   let { item, key, label, value, path, type = "text", options = [] } = $props();
 
   function update(e) {

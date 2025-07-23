@@ -18,6 +18,6 @@
     "**/*.js",
     "foundry-globals.js",
     "module/svelte/apps/JournalEditorApp.svelte"
-  ],
+, "module/foundry/types/Gadget.ts", "module/foundry/types/Gadget.ts"  ],
   "exclude": ["node_modules"]
 }

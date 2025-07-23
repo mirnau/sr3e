@@ -522,6 +522,41 @@ class PortabilityModel extends foundry.abstract.TypeDataModel {
     };
   }
 }
+class GadgetCreatorModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      gadget: new foundry.data.fields.SchemaField({
+        isOn: new foundry.data.fields.BooleanField({
+          required: true,
+          initial: false
+        }),
+        target: new foundry.data.fields.StringField({
+          required: true,
+          initial: "weaponmod"
+        })
+      }),
+      portability: new foundry.data.fields.SchemaField(
+        PortabilityModel.defineSchema()
+      ),
+      commodity: new foundry.data.fields.SchemaField(
+        CommodityModel.defineSchema()
+      )
+    };
+  }
+}
+class GadgetModel extends foundry.abstract.TypeDataModel {
+  static defineSchema() {
+    return {
+      _id: new foundry.data.fields.StringField({ required: true }),
+      name: new foundry.data.fields.StringField({ required: true }),
+      type: new foundry.data.fields.StringField({ required: true }),
+      img: new foundry.data.fields.StringField(),
+      system: new foundry.data.fields.SchemaField(GadgetCreatorModel.defineSchema()),
+      effects: new foundry.data.fields.ArrayField(new foundry.data.fields.ObjectField()),
+      flags: new foundry.data.fields.ObjectField({ initial: {} })
+    };
+  }
+}
 class WeaponModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
@@ -555,7 +590,10 @@ class WeaponModel extends foundry.abstract.TypeDataModel {
         initial: 0
       }),
       portability: new foundry.data.fields.SchemaField(PortabilityModel.defineSchema()),
-      commodity: new foundry.data.fields.SchemaField(CommodityModel.defineSchema())
+      commodity: new foundry.data.fields.SchemaField(CommodityModel.defineSchema()),
+      gadgets: new foundry.data.fields.ArrayField(new foundry.data.fields.SchemaField(GadgetModel.defineSchema()), {
+        initial: []
+      })
     };
   }
 }
@@ -718,18 +756,6 @@ class TransactionModel extends foundry.abstract.TypeDataModel {
         required: true,
         initial: ""
       })
-    };
-  }
-}
-class GadgetModel extends foundry.abstract.TypeDataModel {
-  static defineSchema() {
-    return {
-      isOn: new foundry.data.fields.BooleanField({
-        required: true,
-        initial: false
-      }),
-      portability: new foundry.data.fields.SchemaField(PortabilityModel.defineSchema()),
-      commodity: new foundry.data.fields.SchemaField(CommodityModel.defineSchema())
     };
   }
 }
@@ -4234,7 +4260,7 @@ _hookDisposers = new WeakMap();
 _actorSubscriptions = new WeakMap();
 let StoreManager = _StoreManager;
 var on_keydown$8 = (e, toggleDetails) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails());
-var root_3$g = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
+var root_3$h = /* @__PURE__ */ template(`<div><div><input type="text" id="actor-name" name="name"></div></div> <div class="flavor-edit-block"><div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">yrs</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div> <div class="editable-row"><div class="label-line-wrap"><div class="label"> </div> <div class="dotted-line"></div></div> <div class="value-unit"><div class="editable-field" contenteditable="true"> </div> <span class="unit">kg</span></div></div></div> <div class="flavor-edit-block last-flavor-edit-block"><h4> </h4> <div class="editable-field quote" role="presentation" contenteditable="true"> </div></div>`, 1);
 var root$J = /* @__PURE__ */ template(`<!> <div class="dossier"><!> <div class="dossier-details"><div class="details-foldout" role="button" tabindex="0"><span><i class="fa-solid fa-magnifying-glass"></i></span> </div> <!></div></div>`, 1);
 function Dossier($$anchor, $$props) {
   push($$props, true);
@@ -4338,7 +4364,7 @@ function Dossier($$anchor, $$props) {
   var node_2 = sibling(div_2, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var fragment_3 = root_3$g();
+      var fragment_3 = root_3$h();
       var div_3 = first_child(fragment_3);
       var div_4 = child(div_3);
       var input = child(div_4);
@@ -4609,7 +4635,7 @@ var on_click$d = (__1, modifiersArray) => {
   ]));
 };
 var root_2$n = /* @__PURE__ */ template(`<div class="roll-composer-card array"><h4 contenteditable="true"> </h4> <!> <button class="regular" aria-label="Remove a modifier"><i class="fa-solid fa-minus"></i></button></div>`);
-var root_3$f = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
+var root_3$g = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1> </h1> <h4> </h4> <!></div>`);
 var root_4$h = /* @__PURE__ */ template(`<div class="roll-composer-card"><h1>Karma</h1> <h4> </h4> <!></div>`);
 var root_1$v = /* @__PURE__ */ template(`<div class="roll-composer-container" role="group" tabindex="-1"><div class="roll-composer-card"><h1> </h1> <h1>Roll Type</h1> <select><option>Regular roll</option><option>Defaulting</option></select></div> <div class="roll-composer-card"><h1>Target Number</h1> <h4> </h4> <!></div> <div class="roll-composer-card"><h1>T.N. Modifiers</h1> <button aria-label="Add a modifier" class="regular"><i class="fa-solid fa-plus"></i></button> <h4> </h4> <!></div> <!> <!> <button class="regular" type="submit">Roll!</button> <button class="regular" type="reset">Clear</button></div>`);
 function RollComposerComponent($$anchor, $$props) {
@@ -4971,7 +4997,7 @@ function RollComposerComponent($$anchor, $$props) {
   var node_3 = sibling(div_3, 2);
   {
     var consequent = ($$anchor2) => {
-      var div_5 = root_3$f();
+      var div_5 = root_3$g();
       var h1_1 = child(div_5);
       var text_4 = child(h1_1);
       var h4_3 = sibling(h1_1, 2);
@@ -5059,7 +5085,7 @@ delegate(["keydown", "click"]);
 var on_keydown$7 = (e, decrement2) => (e.key === "ArrowDown" || e.key === "s") && decrement2();
 var root_2$m = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var on_keydown_1$4 = (e, increment2) => (e.key === "ArrowUp" || e.key === "w") && increment2();
-var root_3$e = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
+var root_3$f = /* @__PURE__ */ template(`<i role="button" tabindex="0"></i>`);
 var root_1$u = /* @__PURE__ */ template(`<div class="stat-card" role="button" tabindex="0"><h4 class="no-margin uppercase"> </h4> <div class="stat-card-background"></div> <div class="stat-label"><!> <h1 class="stat-value"> </h1> <!></div></div>`);
 var on_keydown_2$4 = (e, Roll2) => {
   if (e.key === "Enter" || e.key === " ") Roll2(e);
@@ -5201,7 +5227,7 @@ function AttributeCard($$anchor, $$props) {
       var node_2 = sibling(h1, 2);
       {
         var consequent_1 = ($$anchor3) => {
-          var i_2 = root_3$e();
+          var i_2 = root_3$f();
           i_2.__click = increment2;
           i_2.__keydown = [on_keydown_1$4, increment2];
           template_effect(() => set_class(i_2, `fa-solid fa-circle-chevron-up increment-attribute ${($attributePointStore() === 0 ? "disabled" : "") ?? ""}`));
@@ -8405,7 +8431,7 @@ __publicField(_ActiveSkillEditorSheet, "DEFAULT_OPTIONS", {
 });
 let ActiveSkillEditorSheet = _ActiveSkillEditorSheet;
 var on_keydown$6 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_3$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_3$e = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$j = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$n = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$9 = (e, Roll2, skill) => Roll2(e, skill().id);
@@ -8516,7 +8542,7 @@ function ActiveSkillCard($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var div_3 = root_2$j();
           each(div_3, 5, $specializationsStore, index, ($$anchor4, specialization) => {
-            var div_4 = root_3$d();
+            var div_4 = root_3$e();
             var div_5 = sibling(child(div_4), 2);
             var text_2 = child(div_5);
             var h1_1 = sibling(div_5, 2);
@@ -8596,7 +8622,7 @@ function ActiveSkillCard($$anchor, $$props) {
 }
 delegate(["click", "keydown"]);
 var on_keydown$5 = (e, openSkill) => e.key === "Enter" && openSkill();
-var root_3$c = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
+var root_3$d = /* @__PURE__ */ template(`<div class="skill-specialization-card"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
 var root_2$i = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root_1$m = /* @__PURE__ */ template(`<i tabindex="0" role="button"></i> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container"><h1 class="skill-value"> </h1></div> <!></div>`, 1);
 var on_click$8 = (e, Roll2, skill) => Roll2(e, skill().id);
@@ -8707,7 +8733,7 @@ function KnowledgeSkillCard($$anchor, $$props) {
         var consequent = ($$anchor3) => {
           var div_3 = root_2$i();
           each(div_3, 5, $specializations, index, ($$anchor4, specialization) => {
-            var div_4 = root_3$c();
+            var div_4 = root_3$d();
             var div_5 = sibling(child(div_4), 2);
             var text_2 = child(div_5);
             var h1_1 = sibling(div_5, 2);
@@ -8796,7 +8822,7 @@ var root_2$h = /* @__PURE__ */ template(`<div class="specialization-container"><
 var on_click_2$3 = (e, Roll2, skill, specialization) => Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
 var on_keydown_3 = (e, Roll2, skill, specialization) => (e.key === "Enter" || e.key === " ") && Roll2(e, skill().id, "specialization", get$1(specialization).name, get$1(specialization).value);
 var root_4$c = /* @__PURE__ */ template(`<div class="skill-specialization-card button" role="button" tabindex="0"><div class="specialization-background"></div> <div class="specialization-name"> </div> <h1 class="embedded-value"> </h1></div>`);
-var root_3$b = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
+var root_3$c = /* @__PURE__ */ template(`<div class="specialization-container"></div>`);
 var root$v = /* @__PURE__ */ template(`<div class="skill-card-container"><!> <div class="skill-card"><div class="skill-background-layer"></div> <h6 class="no-margin skill-name"> </h6> <div class="skill-main-container button" role="button" tabindex="0"><h1 class="skill-value"> </h1></div> <!> <!></div></div>`);
 function LanguageSkillCard($$anchor, $$props) {
   push($$props, true);
@@ -8940,7 +8966,7 @@ function LanguageSkillCard($$anchor, $$props) {
   var node_2 = sibling(node_1, 2);
   {
     var consequent_2 = ($$anchor2) => {
-      var div_5 = root_3$b();
+      var div_5 = root_3$c();
       each(div_5, 5, $specializationsStore, index, ($$anchor3, specialization) => {
         var div_6 = root_4$c();
         div_6.__click = [on_click_2$3, Roll2, skill, specialization];
@@ -9559,7 +9585,7 @@ setPace_fn = function(freq, amp) {
 };
 var on_keydown$3 = (e, handleButtonKeypress, revive) => handleButtonKeypress(e, revive);
 var root_1$j = /* @__PURE__ */ template(`<div class="revival-button"><i class="fa-solid fa-heart-circle-bolt" role="button" tabindex="0" aria-label="Revive"></i></div>`);
-var root_3$a = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
+var root_3$b = /* @__PURE__ */ template(`<div class="damage-description stun"><h4> </h4></div>`);
 var root_2$g = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
 var root_5$8 = /* @__PURE__ */ template(`<div class="damage-description physical"><h4> </h4></div>`);
 var root_4$b = /* @__PURE__ */ template(`<div class="damage-input"><input class="checkbox" type="checkbox"> <!></div>`);
@@ -9705,7 +9731,7 @@ function Health($$anchor, $$props) {
     var node_3 = sibling(input, 2);
     {
       var consequent_1 = ($$anchor3) => {
-        var div_6 = root_3$a();
+        var div_6 = root_3$b();
         var h4 = child(div_6);
         var text2 = child(h4);
         template_effect(() => {
@@ -10054,7 +10080,7 @@ var root_2$f = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat
 var root_1$h = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option>self</option><option disabled>item</option><option>character</option><option disabled>vehicle</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <!></div>`, 1);
 var root_5$7 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4$a = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
-var root_3$9 = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
+var root_3$a = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
 var root$m = /* @__PURE__ */ template(`<div class="effects-editor"><!> <!></div>`);
 function ActiveEffectsEditorApp($$anchor, $$props) {
   push($$props, true);
@@ -10343,7 +10369,7 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
   var node_3 = sibling(node, 2);
   ItemSheetComponent(node_3, {
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_3$9();
+      var fragment_1 = root_3$a();
       var h1 = first_child(fragment_1);
       var text_13 = child(h1);
       var button = sibling(h1, 2);
@@ -11647,7 +11673,7 @@ derived(() => {
   return $store.subscribe(set2);
 });
 var root_2$d = /* @__PURE__ */ template(`<span class="marquee-item"> </span>`);
-var root_3$8 = /* @__PURE__ */ template(`<span></span>`);
+var root_3$9 = /* @__PURE__ */ template(`<span></span>`);
 var root$h = /* @__PURE__ */ template(`<div class="ticker"><div class="marquee-outer"><div class="marquee-inner" role="status" aria-live="polite" aria-label="News Feed"><!></div></div></div>`);
 function NewsFeed($$anchor, $$props) {
   push($$props, true);
@@ -11729,7 +11755,7 @@ function NewsFeed($$anchor, $$props) {
       append($$anchor2, fragment);
     };
     var alternate = ($$anchor2) => {
-      var span_1 = root_3$8();
+      var span_1 = root_3$9();
       append($$anchor2, span_1);
     };
     if_block(node, ($$render) => {
@@ -12484,7 +12510,7 @@ function JournalViewer($$anchor, $$props) {
 }
 var root_1$d = /* @__PURE__ */ template(`<input type="checkbox">`);
 var root_4$8 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3$7 = /* @__PURE__ */ template(`<select></select>`);
+var root_3$8 = /* @__PURE__ */ template(`<select></select>`);
 var root_5$5 = /* @__PURE__ */ template(`<input>`);
 var root$c = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <div class="title-container"><h4 class="no-margin uppercase"> </h4></div> <!></div>`);
 function StatCard($$anchor, $$props) {
@@ -12518,7 +12544,7 @@ function StatCard($$anchor, $$props) {
       var node_1 = first_child(fragment);
       {
         var consequent_1 = ($$anchor3) => {
-          var select = root_3$7();
+          var select = root_3$8();
           init_select(select, () => $$props.value);
           var select_value;
           select.__change = update;
@@ -12979,7 +13005,7 @@ class MetatypeItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 }
 _metatype = new WeakMap();
 var on_change$6 = (e, item2) => item2().update({ name: e.target.value });
-var root_3$6 = /* @__PURE__ */ template(`<input>`);
+var root_3$7 = /* @__PURE__ */ template(`<input>`);
 var root_2$a = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><!> <!> <!></div>`, 1);
 var root_4$6 = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
 var root_1$b = /* @__PURE__ */ template(`<!> <!> <!>`, 1);
@@ -13112,7 +13138,7 @@ function MagicApp($$anchor, $$props) {
           var node_2 = child(div);
           StatCard(node_2, {
             children: ($$anchor4, $$slotProps3) => {
-              var input = root_3$6();
+              var input = root_3$7();
               input.__change = [on_change$6, item2];
               bind_value(input, () => item2().name, ($$value) => item2().name = $$value);
               append($$anchor4, input);
@@ -13393,10 +13419,10 @@ function Portability($$anchor, $$props) {
   pop();
 }
 var root_2$9 = /* @__PURE__ */ template(`<img>`);
-var on_click$2 = (_, $$props, gadget) => $$props.item.openGadgetEditor(get$1(gadget).id);
-var on_click_1$2 = (__1, $$props, gadget) => $$props.item.removeGadget(get$1(gadget).id);
+var on_click$2 = (_, $$props, gadget) => $$props.document.openGadgetEditor(get$1(gadget).id);
+var on_click_1$2 = (__1, $$props, gadget) => $$props.document.removeGadget(get$1(gadget).id);
 var root_1$9 = /* @__PURE__ */ template(`<tr><td><!></td><td> </td><td><button>Edit</button> <button>Remove</button></td></tr>`);
-var root_3$5 = /* @__PURE__ */ template(`<div class="drag-overlay"><div class="drop-indicator">Drop here</div></div>`);
+var root_3$6 = /* @__PURE__ */ template(`<div class="drag-overlay"><div class="drop-indicator">Drop here</div></div>`);
 var root$9 = /* @__PURE__ */ template(`<div role="region" aria-label="Gadget drop target"><div class="content"><table><thead><tr><th></th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table></div> <!></div>`);
 function GadgetViewer($$anchor, $$props) {
   push($$props, true);
@@ -13406,8 +13432,8 @@ function GadgetViewer($$anchor, $$props) {
   function handleDragStart(event2) {
     set(dragActive, true);
     const data = {
-      type: $$props.item.type,
-      uuid: $$props.item.uuid
+      type: $$props.document.type,
+      uuid: $$props.document.uuid
     };
     event2.dataTransfer.setData("text/plain", JSON.stringify(data));
     event2.dataTransfer.effectAllowed = "move";
@@ -13430,14 +13456,18 @@ function GadgetViewer($$anchor, $$props) {
     }
   }
   async function handleDrop(event2) {
-    console.log("handleDrop was touched", $$props.item.gadgets.length);
+    console.log("handleDrop was touched", $$props.document.gadgets.length);
     event2.preventDefault();
     set(dragHover, false);
     const raw = event2.dataTransfer.getData("text/plain");
     const droppedData = JSON.parse(raw);
-    const droppedItem = await fromUuid(droppedData.uuid);
-    await $$props.item.addGadget(droppedItem);
-    await $$props.item.prepareData();
+    const droppedDocument = await fromUuid(droppedData.uuid);
+    if (!(droppedDocument instanceof Item) || droppedDocument.type !== "gadget") {
+      ui.notifications.warn("Only gadget items can be dropped here.");
+      return;
+    }
+    await $$props.document.addGadget(droppedDocument);
+    await $$props.document.prepareData();
   }
   const dropZoneClass = `drop-zone ${get$1(dragActive) ? "drag-active" : ""} ${get$1(dragHover) ? "drag-hover" : ""}`;
   var div = root$9();
@@ -13445,7 +13475,7 @@ function GadgetViewer($$anchor, $$props) {
   var div_1 = child(div);
   var table = child(div_1);
   var tbody = sibling(child(table));
-  each(tbody, 21, () => $$props.item.gadgets, (gadget) => gadget.id, ($$anchor2, gadget) => {
+  each(tbody, 21, () => $$props.document.gadgets, (gadget) => gadget.id, ($$anchor2, gadget) => {
     var tr = root_1$9();
     var td = child(tr);
     var node = child(td);
@@ -13475,7 +13505,7 @@ function GadgetViewer($$anchor, $$props) {
   var node_1 = sibling(div_1, 2);
   {
     var consequent_1 = ($$anchor2) => {
-      var div_2 = root_3$5();
+      var div_2 = root_3$6();
       append($$anchor2, div_2);
     };
     if_block(node_1, ($$render) => {
@@ -13495,7 +13525,7 @@ function GadgetViewer($$anchor, $$props) {
 delegate(["click"]);
 var on_change$5 = (e, item2) => item2().update({ ["name"]: e.target.value });
 var root_2$8 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><input class="large" name="name" type="text"></div>`, 1);
-var root_3$4 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <!> <!></div> <div class="stat-grid two-column"></div>`, 1);
+var root_3$5 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <!> <!></div> <div class="stat-grid two-column"></div>`, 1);
 var root_5$4 = /* @__PURE__ */ template(`<div><h3> </h3></div> <!>`, 1);
 var root_1$8 = /* @__PURE__ */ template(`<!> <!> <!> <!> <!> <!> <!>`, 1);
 function WeaponApp($$anchor, $$props) {
@@ -13580,7 +13610,7 @@ function WeaponApp($$anchor, $$props) {
       var node_2 = sibling(node, 2);
       ItemSheetComponent(node_2, {
         children: ($$anchor3, $$slotProps2) => {
-          var fragment_3 = root_3$4();
+          var fragment_3 = root_3$5();
           var h3 = first_child(fragment_3);
           var text2 = child(h3);
           var div_1 = sibling(h3, 2);
@@ -13609,7 +13639,7 @@ function WeaponApp($$anchor, $$props) {
           var text_1 = child(h3_1);
           var node_7 = sibling(div_3, 2);
           GadgetViewer(node_7, {
-            get item() {
+            get document() {
               return item2();
             },
             get config() {
@@ -13862,7 +13892,7 @@ class AmmunitionItemSheet extends foundry.applications.sheets.ItemSheetV2 {
 }
 _ammunition = new WeakMap();
 var on_change$3 = (e, item2) => item2().update({ name: e.target.value });
-var root_3$3 = /* @__PURE__ */ template(`<div class="stat-card-background"></div> <input class="large" name="name" type="text">`, 1);
+var root_3$4 = /* @__PURE__ */ template(`<div class="stat-card-background"></div> <input class="large" name="name" type="text">`, 1);
 var on_change_1$1 = (e, updateSkillType) => updateSkillType(e.target.value);
 var root_5$3 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4$5 = /* @__PURE__ */ template(`<select></select>`);
@@ -13947,7 +13977,7 @@ function SkillApp($$anchor, $$props) {
           var node_2 = child(div);
           DerivedAttributeCard(node_2, {
             children: ($$anchor4, $$slotProps3) => {
-              var fragment_3 = root_3$3();
+              var fragment_3 = root_3$4();
               var input = sibling(first_child(fragment_3), 2);
               input.__change = [on_change$3, item2];
               template_effect(() => set_value(input, item2().name));
@@ -14151,7 +14181,7 @@ function handleKeyDown(e) {
   }
 }
 var on_change$2 = (e, item2) => item2().update({ name: e.target.value });
-var root_3$2 = /* @__PURE__ */ template(`<input name="amount" type="text">`);
+var root_3$3 = /* @__PURE__ */ template(`<input name="amount" type="text">`);
 var on_change_1 = (e, item2) => item2().update({ "system.type": e.target.value });
 var root_4$4 = /* @__PURE__ */ template(`<select name="type"><option disabled> </option><option> </option><option> </option><option> </option><option> </option></select>`);
 var root_5$2 = /* @__PURE__ */ template(`<input type="text" placeholder="0.00%">`);
@@ -14222,7 +14252,7 @@ function TransactionApp($$anchor, $$props) {
           var node_2 = sibling(div_1, 2);
           DerivedAttributeCard(node_2, {
             children: ($$anchor4, $$slotProps3) => {
-              var input_1 = root_3$2();
+              var input_1 = root_3$3();
               input_1.__input = handleInput;
               input_1.__keydown = [handleKeyDown];
               template_effect(() => set_value(input_1, get$1(formattedAmount)));
@@ -15298,7 +15328,7 @@ var root_1$2 = /* @__PURE__ */ template(`<div class="broadcaster-info"><!> <div 
 var root_2$2 = /* @__PURE__ */ template(`<div class="news-input"><input type="text"> <div class="buttons-vertical-distribution"><button type="button" class="link-button"><i></i></button> <button type="button" class="link-button" title="Delete Headline" aria-label="Delete Headline"><i class="fas fa-trash-can"></i></button></div></div>`);
 var root_4$1 = /* @__PURE__ */ template(`<option> </option>`);
 var root_5$1 = /* @__PURE__ */ template(`<option> </option>`);
-var root_3$1 = /* @__PURE__ */ template(`<div class="list-box"><h3>Prepared Headlines</h3> <select size="5" multiple></select></div> <div class="buttons-vertical-distribution"><button type="button" class="link-button" title="Move to Rolling News" aria-label="Move to Rolling News"><i class="fas fa-arrow-down"></i></button> <button type="button" class="link-button" title="Move to Prepared News" aria-label="Move to Prepared News"><i class="fas fa-arrow-up"></i></button></div> <div class="list-box"><h3>Rolling Headlines</h3> <select size="5" multiple></select></div>`, 1);
+var root_3$2 = /* @__PURE__ */ template(`<div class="list-box"><h3>Prepared Headlines</h3> <select size="5" multiple></select></div> <div class="buttons-vertical-distribution"><button type="button" class="link-button" title="Move to Rolling News" aria-label="Move to Rolling News"><i class="fas fa-arrow-down"></i></button> <button type="button" class="link-button" title="Move to Prepared News" aria-label="Move to Prepared News"><i class="fas fa-arrow-up"></i></button></div> <div class="list-box"><h3>Rolling Headlines</h3> <select size="5" multiple></select></div>`, 1);
 var root$1 = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 function BroadcasterApp($$anchor, $$props) {
   push($$props, true);
@@ -15434,7 +15464,7 @@ function BroadcasterApp($$anchor, $$props) {
   var node_3 = sibling(node_2, 2);
   ItemSheetComponent(node_3, {
     children: ($$anchor2, $$slotProps) => {
-      var fragment_1 = root_3$1();
+      var fragment_1 = root_3$2();
       var div_6 = first_child(fragment_1);
       var select = sibling(child(div_6), 2);
       select.__change = updateSelectedHeadline;
@@ -15550,22 +15580,25 @@ class BroadcasterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
 _app6 = new WeakMap();
 _footer2 = new WeakMap();
 var on_change = (e, $$props) => $$props.item.update({ name: e.target.value });
-var root_2$1 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><input type="text"></div>`, 1);
+var root_3$1 = /* @__PURE__ */ template(`<div class="stat-grid single-column"><!></div>`);
+var root_2$1 = /* @__PURE__ */ template(`<!> <div class="stat-grid single-column"><input type="text"></div> <!>`, 1);
 var root_1$1 = /* @__PURE__ */ template(`<!> <!> <!> <!>`, 1);
 function GadgetApp($$anchor, $$props) {
+  var _a, _b;
   push($$props, true);
-  const [$$stores, $$cleanup] = setup_stores();
-  const $isOnStore = () => store_get(isOnStore, "$isOnStore", $$stores);
   let name = proxy($$props.item.name);
-  let itemStoreManager = StoreManager.Subscribe($$props.item);
-  onDestroy(() => {
-    StoreManager.Unsubscribe($$props.item);
-  });
-  let isOnStore = itemStoreManager.GetRWStore("isOn");
-  itemStoreManager.GetRWStore("commodity.isBroken");
-  user_effect(() => {
-    if ($isOnStore()) ;
-  });
+  let target = proxy(((_b = (_a = $$props.item.system) == null ? void 0 : _a.gadget) == null ? void 0 : _b.target) ?? "weaponmod");
+  let entries = [
+    {
+      item: $$props.item,
+      key: "target",
+      label: "Modification Type",
+      value: target,
+      path: "system.gadget",
+      type: "select",
+      options: Object.values($$props.config.gadgettypes).map(localize)
+    }
+  ];
   ItemSheetWrapper$1($$anchor, {
     csslayout: "single",
     children: ($$anchor2, $$slotProps) => {
@@ -15583,12 +15616,19 @@ function GadgetApp($$anchor, $$props) {
           var div = sibling(node_1, 2);
           var input = child(div);
           input.__change = [on_change, $$props];
+          var node_2 = sibling(div, 2);
+          each(node_2, 17, () => entries, index, ($$anchor4, entry) => {
+            var div_1 = root_3$1();
+            var node_3 = child(div_1);
+            StatCard(node_3, spread_props(() => get$1(entry)));
+            append($$anchor4, div_1);
+          });
           template_effect(() => set_value(input, name));
           append($$anchor3, fragment_2);
         }
       });
-      var node_2 = sibling(node, 2);
-      Commodity(node_2, {
+      var node_4 = sibling(node, 2);
+      Commodity(node_4, {
         get item() {
           return $$props.item;
         },
@@ -15596,8 +15636,8 @@ function GadgetApp($$anchor, $$props) {
           return $$props.config;
         }
       });
-      var node_3 = sibling(node_2, 2);
-      Portability(node_3, {
+      var node_5 = sibling(node_4, 2);
+      Portability(node_5, {
         get item() {
           return $$props.item;
         },
@@ -15605,8 +15645,8 @@ function GadgetApp($$anchor, $$props) {
           return $$props.config;
         }
       });
-      var node_4 = sibling(node_3, 2);
-      ItemSheetComponent(node_4, {
+      var node_6 = sibling(node_5, 2);
+      ItemSheetComponent(node_6, {
         children: ($$anchor3, $$slotProps2) => {
           ActiveEffectsViewer($$anchor3, {
             get document() {
@@ -15623,7 +15663,6 @@ function GadgetApp($$anchor, $$props) {
     }
   });
   pop();
-  $$cleanup();
 }
 delegate(["change"]);
 class GadgetItemSheet extends foundry.applications.sheets.ItemSheetV2 {
@@ -16032,6 +16071,9 @@ sr3e.legalpriority = {
   3: "sr3e.legalpriority.3",
   4: "sr3e.legalpriority.4",
   X: "sr3e.legalpriority.X"
+};
+sr3e.gadgettypes = {
+  weaponmod: "sr3e.gadgettypes.weaponmod"
 };
 function injectCssSelectors(app, element, ctx, data) {
   const header = element.querySelector(".window-header");
@@ -16836,91 +16878,149 @@ class SR3EActor extends Actor {
     console.log("sr3e /// ---> SR3EActor registered");
   }
 }
+class SR3EGadget extends foundry.abstract.Document {
+  static get metadata() {
+    return {
+      name: "Gadget",
+      collection: "gadgets",
+      label: "Gadget",
+      labelPlural: "Gadgets",
+      isPrimary: false,
+      embedded: {},
+      permissions: { create: "ITEM_CREATE" },
+      hasSystemData: true,
+      indexed: false,
+      types: ["weaponmod"]
+    };
+  }
+  static defineSchema() {
+    return GadgetModel.defineSchema();
+  }
+  get uuid() {
+    return this._uuid ?? (this._uuid = `Gadget.${foundry.utils.randomID()}`);
+  }
+  // ✅ Use the source-backed data directly
+  get effects() {
+    var _a;
+    return ((_a = this._source) == null ? void 0 : _a.effects) ?? [];
+  }
+  set effects(value) {
+    if (Array.isArray(value)) this._source.effects = value;
+  }
+  get hydratedEffects() {
+    return this._hydratedEffects ?? [];
+  }
+  static Register() {
+    CONFIG.SR3EGadget = {
+      documentClass: SR3EGadget,
+      dataModels: {
+        weaponmod: GadgetModel
+      }
+    };
+  }
+  hydrateEffects() {
+    this._hydratedEffects = this.effects.map((eff) => new ActiveEffect(eff, { parent: this }));
+  }
+  async applyEffectsTo(target) {
+    if (!(target == null ? void 0 : target.uuid) || !Array.isArray(this._hydratedEffects)) return;
+    const newEffects = this._hydratedEffects.map((effect2) => {
+      const clone = effect2.clone({
+        origin: this.uuid ?? `Gadget|${foundry.utils.randomID()}`,
+        disabled: effect2.disabled,
+        transfer: false
+      });
+      return foundry.utils.duplicate(clone.toObject());
+    });
+    return target.createEmbeddedDocuments("ActiveEffect", newEffects);
+  }
+  async removeEffectsFrom(target) {
+    if (!(target == null ? void 0 : target.effects)) return;
+    const origin = this.uuid ?? "Gadget";
+    const toRemove = target.effects.filter((e) => {
+      var _a;
+      return (_a = e.origin) == null ? void 0 : _a.startsWith(origin);
+    }).map((e) => e.id);
+    if (toRemove.length > 0) {
+      await target.deleteEmbeddedDocuments("ActiveEffect", toRemove);
+    }
+  }
+  async autoApply(item2) {
+    var _a;
+    const actor = item2.parent;
+    const target = ((_a = this.system) == null ? void 0 : _a.transferTo) === "actor" && actor ? actor : item2;
+    await this.applyEffectsTo(target);
+  }
+  async autoRemove(item2) {
+    var _a;
+    const actor = item2.parent;
+    const target = ((_a = this.system) == null ? void 0 : _a.transferTo) === "actor" && actor ? actor : item2;
+    await this.removeEffectsFrom(target);
+  }
+  toJSON() {
+    return this.toObject();
+  }
+}
 class SR3EItem extends Item {
   static Register() {
     CONFIG.Item.documentClass = SR3EItem;
-    const meta = this.metadata;
-    meta.embedded ?? (meta.embedded = {});
-    meta.embedded.Item = "gadgets";
-    foundry.documents.BaseItem.metadata = meta;
-    this.embeddedClasses = {
-      ActiveEffect: CONFIG.ActiveEffect.documentClass,
-      Item: CONFIG.Item.documentClass
-    };
-    const originalGetEmbeddedCollection = this.prototype.getEmbeddedCollection;
-    this.prototype.getEmbeddedCollection = function(embeddedName) {
-      var _a;
-      if (embeddedName === "Item") {
-        if (!this._embedded) this._embedded = {};
-        if (!this._embedded.collections) this._embedded.collections = {};
-        if (!this._embedded.collections.gadgets) {
-          const cls = CONFIG.Item.documentClass;
-          const rawData = ((_a = this._source) == null ? void 0 : _a.gadgets) ?? [];
-          const collection = new Collection();
-          for (let datum of rawData) {
-            const doc = new cls(datum, { parent: this });
-            collection.set(doc.id, doc);
-          }
-          this._embedded.collections.gadgets = collection;
-        }
-        return this._embedded.collections.gadgets;
-      }
-      return originalGetEmbeddedCollection.call(this, embeddedName);
-    };
-  }
-  static get metadata() {
-    return foundry.utils.mergeObject(super.metadata, {
-      embedded: {
-        ActiveEffect: "effects",
-        Item: "gadgets"
-      }
-    });
   }
   prepareBaseData() {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     super.prepareBaseData();
     (_b = (_a = this.effects) == null ? void 0 : _a.prepareData) == null ? void 0 : _b.call(_a);
-    for (const gadget of ((_c = this.gadgets) == null ? void 0 : _c.contents) ?? []) {
+    for (const gadget of this.gadgets) {
+      (_c = gadget.hydrateEffects) == null ? void 0 : _c.call(gadget);
       (_d = gadget.prepareData) == null ? void 0 : _d.call(gadget);
       (_f = (_e = gadget.effects) == null ? void 0 : _e.prepareData) == null ? void 0 : _f.call(_e);
       (_g = gadget.applyActiveEffects) == null ? void 0 : _g.call(gadget);
+      (_h = gadget.autoApply) == null ? void 0 : _h.call(gadget, this);
     }
   }
   get gadgets() {
-    return this.getEmbeddedCollection("Item");
+    return (this.system.gadgets ?? []).map(
+      (data) => new SR3EGadget(data, { parent: this })
+    );
   }
   async addGadget(gadgetItem) {
     const gadgetId = foundry.utils.randomID();
+    const clonedEffects = gadgetItem.effects.contents.map((effect2) => {
+      const data = effect2.toObject();
+      data._id = foundry.utils.randomID();
+      data.origin = `Item.${this.id}.gadgets.${gadgetId}`;
+      return data;
+    });
     const gadgetData = {
       _id: gadgetId,
       name: gadgetItem.name,
-      type: gadgetItem.type,
+      type: gadgetItem.system.gadget.target,
       img: gadgetItem.img,
       system: foundry.utils.deepClone(gadgetItem.system),
-      effects: gadgetItem.effects.contents.map((effect2) => {
-        const data = effect2.toObject();
-        data._id = foundry.utils.randomID();
-        data.origin = `Item.${this.id}.gadgets.${gadgetId}`;
-        return data;
-      }),
+      effects: clonedEffects,
       flags: {
         sr3e: {
           embeddedFrom: gadgetItem.uuid
         }
       }
     };
-    await this.createEmbeddedDocuments("Item", [gadgetData]);
-    await this.createEmbeddedDocuments("ActiveEffect", gadgetData.effects);
+    const updated = [...this.system.gadgets ?? [], gadgetData];
+    await this.update({ "system.gadgets": updated });
+    const hydrated = new SR3EGadget(gadgetData, { parent: this });
+    hydrated.hydrateEffects();
+    await hydrated.autoApply(this);
   }
   async removeGadget(gadgetId) {
-    const origin = `Item.${this.id}.gadgets.${gadgetId}`;
-    const effectIds = this.effects.contents.filter((e) => e.origin === origin).map((e) => e.id);
-    if (effectIds.length > 0) await this.deleteEmbeddedDocuments("ActiveEffect", effectIds);
-    await this.deleteEmbeddedDocuments("Item", [gadgetId]);
+    const gadgets = this.system.gadgets ?? [];
+    const removed = gadgets.find((g) => g._id === gadgetId);
+    if (!removed) return;
+    const gadget = new SR3EGadget(removed, { parent: this });
+    gadget.hydrateEffects();
+    await gadget.autoRemove(this);
+    const filtered = gadgets.filter((g) => g._id !== gadgetId);
+    await this.update({ "system.gadgets": filtered });
   }
   async openGadgetEditor(gadgetId) {
-    const gadget = this.gadgets.get(gadgetId);
-    if (!gadget) return;
+    const gadget = this.gadgets.find((g) => g.id === gadgetId || g._id === gadgetId);
+    if (!(gadget == null ? void 0 : gadget.sheet)) return;
     gadget.sheet.render(true);
   }
 }
@@ -17118,6 +17218,7 @@ function configureProject() {
   SR3Edie.Register();
   SR3ERoll.Register();
   SR3EItem.Register();
+  SR3EGadget.Register();
   CONFIG.sr3e = sr3e;
   CONFIG.Actor.dataModels = {};
   CONFIG.Item.dataModels = {};
@@ -17411,7 +17512,7 @@ function registerHooks() {
         {
           docClass: Item,
           type: "gadget",
-          model: GadgetModel,
+          model: GadgetCreatorModel,
           sheet: GadgetItemSheet
         }
       ]

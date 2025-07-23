@@ -90,6 +90,9 @@
       "gadget": {
          "gadget": "Gadget"
       },
+      "gadgettype": {
+         "weaponmod": "Weapon Mod"
+      },
       "health": {
          "health": "Health",
          "overflow": "Overflow",

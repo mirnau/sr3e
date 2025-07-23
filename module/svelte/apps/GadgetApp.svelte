@@ -4,27 +4,25 @@
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
-   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
-   import { onDestroy } from "svelte";
+   import { localize } from "@services/utilities.js";
    let { item, config } = $props();
    let name = $state(item.name);
 
-   let itemStoreManager = StoreManager.Subscribe(item);
-   onDestroy(() => {
-      StoreManager.Unsubscribe(item);
-   });
+   let target = $state(item.system?.gadget?.target ?? "weaponmod");
 
-   let isOnStore = itemStoreManager.GetRWStore("isOn");
-   let isBrokenStore = itemStoreManager.GetRWStore("commodity.isBroken");
-
-   $effect(() => {
-      if ($isOnStore) {
-         // foreach active effect on this object enable
-      } else {
-         // disable all active effects
-      }
-   });
+   let entries = [
+      {
+         item,
+         key: "target",
+         label: "Modification Type",
+         value: target,
+         path: "system.gadget",
+         type: "select",
+         options: Object.values(config.gadgettypes).map(localize),
+      },
+   ];
 </script>
 
 <ItemSheetWrapper csslayout={"single"}>
@@ -33,6 +31,11 @@
       <div class="stat-grid single-column">
          <input type="text" value={name} onchange={(e) => item.update({ name: e.target.value })} />
       </div>
+      {#each entries as entry}
+         <div class="stat-grid single-column">
+            <StatCard {...entry} />
+         </div>
+      {/each}
    </ItemSheetComponent>
    <Commodity {item} {config} />
    <Portability {item} {config} />

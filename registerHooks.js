@@ -5,7 +5,7 @@ import BroadcasterModel from "@models/actor/BroadcasterModel.js";
 import CharacterModel from "@models/actor/CharacterModel.js";
 import StorytellerScreenModel from "@models/actor/StorytellerScreenModel.js";
 import AmmunitionModel from "@models/item/AmmunitionModel.js";
-import GadgetModel from "@models/item/GadgetModel.js";
+import GadgetCreatorModel from "@models/item/GadgetCreatorModel.js";
 import MagicModel from "@models/item/MagicModel.js";
 import MetatypeModel from "@models/item/MetatypeModel.js";
 import SkillModel from "@models/item/SkillModel.js";
@@ -242,7 +242,7 @@ export function registerHooks() {
             {
                docClass: Item,
                type: "gadget",
-               model: GadgetModel,
+               model: GadgetCreatorModel,
                sheet: GadgetItemSheet,
             },
          ],

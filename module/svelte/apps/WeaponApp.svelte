@@ -2,7 +2,7 @@
    import { localize, openFilePicker } from "@services/utilities.js";
    import { onMount } from "svelte";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
-   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
    import Portability from "@sveltecomponent/Portability.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
@@ -117,7 +117,7 @@
       <div>
          <h3>{localize(config.gadget.gadget)}</h3>
       </div>
-      <GadgetViewer {item} {config} />
+      <GadgetViewer document={item} {config} />
    </ItemSheetComponent>
    <ItemSheetComponent>
       <ActiveEffectsViewer document={item} {config} isSlim={true} />

@@ -1,5 +1,5 @@
 <script>
-   let { item, config } = $props();
+   let { document, config } = $props();
 
    let dropZone;
    let dragActive = $state(false);
@@ -7,7 +7,7 @@
 
    function handleDragStart(event) {
       dragActive = true;
-      const data = { type: item.type, uuid: item.uuid };
+      const data = { type: document.type, uuid: document.uuid };
       event.dataTransfer.setData("text/plain", JSON.stringify(data));
       event.dataTransfer.effectAllowed = "move";
    }
@@ -34,17 +34,22 @@
    }
 
    async function handleDrop(event) {
-      console.log("handleDrop was touched", item.gadgets.length);
+      console.log("handleDrop was touched", document.gadgets.length);
 
       event.preventDefault();
       dragHover = false;
 
       const raw = event.dataTransfer.getData("text/plain");
       const droppedData = JSON.parse(raw);
-      const droppedItem = await fromUuid(droppedData.uuid);
+      const droppedDocument = await fromUuid(droppedData.uuid);
 
-      await item.addGadget(droppedItem);
-      await item.prepareData();
+      if (!(droppedDocument instanceof Item) || droppedDocument.type !== "gadget") {
+         ui.notifications.warn("Only gadget items can be dropped here.");
+         return;
+      }
+
+      await document.addGadget(droppedDocument);
+      await document.prepareData();
    }
 
    const dropZoneClass = `drop-zone ${dragActive ? "drag-active" : ""} ${dragHover ? "drag-hover" : ""}`;
@@ -72,15 +77,15 @@
             </tr>
          </thead>
          <tbody>
-            {#each item.gadgets as gadget (gadget.id)}
+            {#each document.gadgets as gadget (gadget.id)}
                <tr>
                   <td
                      >{#if gadget.img}<img src={gadget.img} alt={gadget.name} />{/if}</td
                   >
                   <td>{gadget.name}</td>
                   <td>
-                     <button onclick={() => item.openGadgetEditor(gadget.id)}>Edit</button>
-                     <button onclick={() => item.removeGadget(gadget.id)}>Remove</button>
+                     <button onclick={() => document.openGadgetEditor(gadget.id)}>Edit</button>
+                     <button onclick={() => document.removeGadget(gadget.id)}>Remove</button>
                   </td>
                </tr>
             {/each}

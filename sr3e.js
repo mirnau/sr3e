@@ -9,7 +9,7 @@ import WeaponModel from "@models/item/WeaponModel.js";
 import AmmunitionModel from "@models/item/AmmunitionModel.js";
 import SkillModel from "@models/item/SkillModel.js";
 import TransactionModel from "@models/item/TransactionModel.js";
-import GadgetModel from "@models/item/GadgetModel.js";
+import GadgetCreatorModel from "@models/item/GadgetCreatorModel.js";
 
 import CharacterActorSheet from "@sheets/CharacterActorSheet.js";
 import MetatypeItemSheet from "@sheets/MetatypeItemSheet.js";
@@ -38,6 +38,7 @@ import SR3EItem from "@documents/SR3EItem.js";
 import SR3ECombat from "@documents/SR3ECombat.js";
 import SR3Edie from "@documents/SR3Edie.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import SR3EGadget from "@documents/SR3EGadget.js";
 
 import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
 
@@ -61,6 +62,7 @@ function configureProject() {
    SR3Edie.Register();
    SR3ERoll.Register();
    SR3EItem.Register();
+   SR3EGadget.Register();
 
    CONFIG.sr3e = sr3e;
    CONFIG.Actor.dataModels = {};
@@ -398,7 +400,7 @@ function registerHooks() {
             {
                docClass: Item,
                type: "gadget",
-               model: GadgetModel,
+               model: GadgetCreatorModel,
                sheet: GadgetItemSheet,
             },
          ],

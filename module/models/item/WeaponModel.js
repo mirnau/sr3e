@@ -1,5 +1,6 @@
 import CommodityModel from "@models/item/components/Commodity.js";
 import PortabilityModel from "@models/item/components/Portability.js";
+import GadgetModel from "@models/gadget/GadgetModel.js";
 
 export default class WeaponModel extends foundry.abstract.TypeDataModel {
    static defineSchema() {
@@ -36,6 +37,9 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
 
          portability: new foundry.data.fields.SchemaField(PortabilityModel.defineSchema()),
          commodity: new foundry.data.fields.SchemaField(CommodityModel.defineSchema()),
+         gadgets: new foundry.data.fields.ArrayField(new foundry.data.fields.SchemaField(GadgetModel.defineSchema()), {
+            initial: [],
+         }),
       };
    }
 }

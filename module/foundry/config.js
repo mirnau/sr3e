@@ -397,3 +397,7 @@ sr3e.legalpriority = {
    4: "sr3e.legalpriority.4",
    X: "sr3e.legalpriority.X",
 };
+
+sr3e.gadgettypes = {
+   weaponmod: "sr3e.gadgettypes.weaponmod",
+}
