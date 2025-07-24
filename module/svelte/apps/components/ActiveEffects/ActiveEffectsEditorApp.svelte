@@ -94,6 +94,13 @@
             rawPaths = Object.keys(foundry.utils.flattenObject({ system: origin.toObject().system }));
             break;
          }
+         case "item:": {
+            allowedPatterns = ["system"];
+            isTransferable = true;
+            
+
+            break;
+         }
          case "character": {
             allowedPatterns = ["system.attributes", "system.dicePools", "system.movement", "system.karma"];
             isTransferable = true;
@@ -208,7 +215,7 @@
             <h4>{localize(config.effects.target)}:</h4>
             <select bind:value={target} onchange={commitChanges}>
                <option value="self">self</option>
-               <option value="item" disabled>item</option>
+               <option value="item">item</option>
                <option value="character">character</option>
                <option value="vehicle" disabled>vehicle</option>
             </select>

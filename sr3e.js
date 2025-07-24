@@ -10,6 +10,7 @@ import AmmunitionModel from "@models/item/AmmunitionModel.js";
 import SkillModel from "@models/item/SkillModel.js";
 import TransactionModel from "@models/item/TransactionModel.js";
 import GadgetCreatorModel from "@models/item/GadgetCreatorModel.js";
+import GadgetModel from "@models/gadget/GadgetModel.js";
 
 import CharacterActorSheet from "@sheets/CharacterActorSheet.js";
 import MetatypeItemSheet from "@sheets/MetatypeItemSheet.js";
@@ -21,6 +22,7 @@ import TransactionItemSheet from "@sheets/TransactionItemSheet.js";
 import StorytellerScreenActorSheet from "@sheets/StorytellerScreenActorSheet.js";
 import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
 import GadgetItemSheet from "@sheets/GadgetItemSheet.js";
+import GadgetSheet from "@sheets/GadgetSheet.js";
 
 import { sr3e } from "@config/config.js";
 
@@ -38,7 +40,7 @@ import SR3EItem from "@documents/SR3EItem.js";
 import SR3ECombat from "@documents/SR3ECombat.js";
 import SR3Edie from "@documents/SR3Edie.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
-import SR3EGadget from "@documents/SR3EGadget.js";
+import Gadget from "@documents/Gadget.js";
 
 import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
 
@@ -47,8 +49,12 @@ const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
    args.forEach(({ docClass, type, model, sheet }) => {
       const docName = docClass.documentName;
+      CONFIG[docName] ||= {};
       CONFIG[docName].dataModels ||= {};
       CONFIG[docName].dataModels[type] = model;
+      CONFIG[docName].sheetClasses ||= {};
+      CONFIG[docName].sheetClasses[type] ||= [];
+
       DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
          types: [type],
          makeDefault: true,
@@ -62,11 +68,9 @@ function configureProject() {
    SR3Edie.Register();
    SR3ERoll.Register();
    SR3EItem.Register();
-   SR3EGadget.Register();
+   Gadget.Register();
 
    CONFIG.sr3e = sr3e;
-   CONFIG.Actor.dataModels = {};
-   CONFIG.Item.dataModels = {};
    CONFIG.canvasTextStyle.fontFamily = "VT323";
    CONFIG.defaultFontFamily = "VT323";
    CONFIG.fontDefinitions["Neanderthaw"] = {

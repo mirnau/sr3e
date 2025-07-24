@@ -4,20 +4,21 @@
     "module": "ESNext",
     "allowJs": true,
     "checkJs": false,
-    "baseUrl": ".",
+    "baseUrl": ".", 
     "paths": {
       "@/*": ["systems/sr3e/*"],
       "foundry/*": ["node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
     },
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types"]
   },
   "include": [
-    "systems/sr3e",
-    "**/*.js",
-    "foundry-globals.js",
-    "module/svelte/apps/JournalEditorApp.svelte"
-, "module/foundry/types/Gadget.ts", "module/foundry/types/Gadget.ts"  ],
+    "systems/sr3e/**/*",
+    "module/**/*",
+    "foundry-globals.js"
+  ],
   "exclude": ["node_modules"]
 }

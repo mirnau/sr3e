@@ -1,30 +1,32 @@
-import SR3EGadget from "@documents/SR3EGadget.js";
+import Gadget from "@documents/Gadget.js";
+import GadgetSheet from "@sheets/GadgetSheet.js";
 
 export default class SR3EItem extends Item {
    static Register() {
+      console.log("SR3EItem.Register() is hit");
       CONFIG.Item.documentClass = SR3EItem;
    }
 
-   prepareBaseData() {
-      super.prepareBaseData();
-      this.effects?.prepareData?.();
+   prepareDerivedData() {
+      super.prepareDerivedData();
 
       for (const gadget of this.gadgets) {
-         gadget.hydrateEffects?.();
-         gadget.prepareData?.();
-         gadget.effects?.prepareData?.();
-         gadget.applyActiveEffects?.();
-         gadget.autoApply?.(this); // optional, if not applied yet
+         for (const effect of gadget.effects.values()) {
+            if (effect.transfer && (!gadget.system?.transferTo || gadget.system.transferTo === "item")) {
+               effect.parent = this;
+               this.effects.set(effect.id, effect);
+            }
+         }
       }
    }
 
    get gadgets() {
-      return (this.system.gadgets ?? []).map(data =>
-         new SR3EGadget(data, { parent: this })
-      );
+      const stored = this.system.gadgets ?? [];
+      return stored.map((data) => new Gadget(data, { parent: this }));
    }
 
    async addGadget(gadgetItem) {
+      console.log("addGadget invoked with:", gadgetItem.name);
       const gadgetId = foundry.utils.randomID();
 
       const clonedEffects = gadgetItem.effects.contents.map((effect) => {
@@ -34,10 +36,16 @@ export default class SR3EItem extends Item {
          return data;
       });
 
+      const typeKey = gadgetItem.system.gadget?.target?.split(".").pop() ?? "generic";
+
+      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      console.log("Type Key", typeKey);
+      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
       const gadgetData = {
          _id: gadgetId,
          name: gadgetItem.name,
-         type: gadgetItem.system.gadget.target,
+         type: typeKey,
          img: gadgetItem.img,
          system: foundry.utils.deepClone(gadgetItem.system),
          effects: clonedEffects,
@@ -48,30 +56,31 @@ export default class SR3EItem extends Item {
          },
       };
 
-      const updated = [...(this.system.gadgets ?? []), gadgetData];
-      await this.update({ "system.gadgets": updated });
-
-      const hydrated = new SR3EGadget(gadgetData, { parent: this });
-      hydrated.hydrateEffects();
-      await hydrated.autoApply(this);
+      const existing = this.system.gadgets ?? [];
+      await this.update({ "system.gadgets": [...existing, gadgetData] });
    }
 
    async removeGadget(gadgetId) {
-      const gadgets = this.system.gadgets ?? [];
-      const removed = gadgets.find((g) => g._id === gadgetId);
-      if (!removed) return;
-
-      const gadget = new SR3EGadget(removed, { parent: this });
-      gadget.hydrateEffects();
-      await gadget.autoRemove(this);
-
-      const filtered = gadgets.filter((g) => g._id !== gadgetId);
+      const existing = this.system.gadgets ?? [];
+      const filtered = existing.filter((g) => g._id !== gadgetId);
       await this.update({ "system.gadgets": filtered });
    }
 
    async openGadgetEditor(gadgetId) {
-      const gadget = this.gadgets.find((g) => g.id === gadgetId || g._id === gadgetId);
-      if (!gadget?.sheet) return;
-      gadget.sheet.render(true);
+      if (!gadgetId || typeof gadgetId !== "string") {
+         throw new Error("Gadget ID must be a string.");
+      }
+
+      const raw = this.system.gadgets?.find((g) => g._id === gadgetId);
+      if (!raw) {
+         throw new Error(`No gadget with ID "${gadgetId}" found on item "${this.name}".`);
+      }
+
+      // ✅ Pass the parent in the second argument
+      const gadget = new Gadget(raw, { parent: this });
+
+      console.log("Opening Gadget editor for:", gadgetId, gadget);
+
+      return gadget.sheet.render(true);
    }
 }

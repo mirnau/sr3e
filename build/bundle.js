@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app3, _neon, _feed, _cart, _creation, _footer, _metatype, _magic, _weapon, _ammunition, _skill, _app4, _app5, _app6, _footer2, _gadget, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
+var _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _app2, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app3, _neon, _feed, _cart, _creation, _footer, _metatype, _magic, _weapon, _ammunition, _skill, _app4, _app5, _app6, _footer2, _gadget, _gadget2, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -10077,7 +10077,7 @@ function addChange(_, changes, commitChanges) {
 var on_change$8 = (e, setDurationField) => setDurationField("type", e.target.value);
 var on_input$1 = (e, setDurationField) => setDurationField("value", e.target.value);
 var root_2$f = /* @__PURE__ */ template(`<div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="number"></div>`);
-var root_1$h = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option>self</option><option disabled>item</option><option>character</option><option disabled>vehicle</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <!></div>`, 1);
+var root_1$h = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid single-column"><!> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="text"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option>self</option><option>item</option><option>character</option><option disabled>vehicle</option></select></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <input type="checkbox"></div> <div class="stat-card"><div class="stat-card-background"></div> <h4> </h4> <select><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option><option> </option></select></div> <!></div>`, 1);
 var root_5$7 = /* @__PURE__ */ template(`<option> </option>`);
 var root_4$a = /* @__PURE__ */ template(`<tr><td><div class="stat-card"><div class="stat-card-background"></div> <!></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <select></select></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="text"></div></td><td><div class="stat-card"><div class="stat-card-background"></div> <input type="number"></div></td><td><button>🗑</button></td></tr>`);
 var root_3$a = /* @__PURE__ */ template(`<h1> </h1> <button> </button> <div class="table-wrapper"><table><thead><tr><th> </th><th> </th><th> </th><th> </th><th> </th></tr></thead><tbody></tbody></table></div>`, 1);
@@ -10156,6 +10156,11 @@ function ActiveEffectsEditorApp($$anchor, $$props) {
         rawPaths = Object.keys(foundry.utils.flattenObject({
           system: get$1(origin).toObject().system
         }));
+        break;
+      }
+      case "item:": {
+        allowedPatterns = ["system"];
+        set(isTransferable, true);
         break;
       }
       case "character": {
@@ -15711,6 +15716,56 @@ class GadgetItemSheet extends foundry.applications.sheets.ItemSheetV2 {
   }
 }
 _gadget = new WeakMap();
+class GadgetSheet extends foundry.applications.api.DocumentSheetV2 {
+  constructor() {
+    super(...arguments);
+    __privateAdd(this, _gadget2);
+  }
+  get title() {
+    return `${localize(CONFIG.sr3e.gadget.gadget)}: ${this.document.name}`;
+  }
+  static get DEFAULT_OPTIONS() {
+    return {
+      ...super.DEFAULT_OPTIONS,
+      id: `sr3e-character-sheet-${foundry.utils.randomID()}`,
+      classes: ["sr3e", "sheet", "item"],
+      template: null,
+      position: { width: "auto", height: "auto" },
+      window: {
+        resizable: false
+      },
+      tag: "form",
+      submitOnChange: false,
+      closeOnSubmit: false
+    };
+  }
+  _onFirstRender() {
+    return super._onFirstRender();
+  }
+  _renderHTML() {
+    return null;
+  }
+  _replaceHTML(_, windowContent) {
+    console.log("Gadget Sheet hit");
+    if (__privateGet(this, _gadget2)) {
+      unmount(__privateGet(this, _gadget2));
+      __privateSet(this, _gadget2, null);
+    }
+    __privateSet(this, _gadget2, mount(GadgetApp, {
+      target: windowContent,
+      props: {
+        item: this.document,
+        config: CONFIG.sr3e
+      }
+    }));
+    return windowContent;
+  }
+  /** @override prevent submission, since Svelte is managing state */
+  _onSubmit(event2) {
+    return;
+  }
+}
+_gadget2 = new WeakMap();
 const sr3e = {};
 sr3e.ammunition = {
   ammunition: "sr3e.ammunition.ammunition",
@@ -16878,110 +16933,183 @@ class SR3EActor extends Actor {
     console.log("sr3e /// ---> SR3EActor registered");
   }
 }
-class SR3EGadget extends foundry.abstract.Document {
+class Gadget extends foundry.abstract.Document {
+  constructor(data = {}, context = {}) {
+    super(data, context);
+    this.apps = {};
+  }
   static get metadata() {
     return {
       name: "Gadget",
       collection: "gadgets",
       label: "Gadget",
       labelPlural: "Gadgets",
-      isPrimary: false,
+      isPrimary: true,
       embedded: {},
       permissions: { create: "ITEM_CREATE" },
       hasSystemData: true,
-      indexed: false,
+      indexed: true,
       types: ["weaponmod"]
     };
+  }
+  static Register() {
+    CONFIG.Gadget = foundry.utils.mergeObject(
+      CONFIG.Gadget ?? {},
+      {
+        documentClass: Gadget,
+        dataModels: {
+          weaponmod: GadgetModel
+        },
+        sheetClasses: {
+          weaponmod: {
+            id: "sr3e.gadget.weaponmod",
+            label: "Gadget Sheet",
+            types: ["weaponmod"],
+            cls: GadgetSheet,
+            default: true
+          }
+        }
+      },
+      { inplace: true }
+    );
+    Hooks.once("ready", () => {
+      console.log(">>> CONFIG.Gadget at ready", CONFIG.Gadget);
+    });
   }
   static defineSchema() {
     return GadgetModel.defineSchema();
   }
-  get uuid() {
-    return this._uuid ?? (this._uuid = `Gadget.${foundry.utils.randomID()}`);
+  get documentName() {
+    return "Gadget";
   }
-  // ✅ Use the source-backed data directly
+  get uuid() {
+    var _a;
+    if (!this._uuid) {
+      const id = this.id ?? ((_a = this._source) == null ? void 0 : _a._id) ?? foundry.utils.randomID();
+      this._uuid = `Gadget.${id}`;
+    }
+    return this._uuid;
+  }
   get effects() {
     var _a;
-    return ((_a = this._source) == null ? void 0 : _a.effects) ?? [];
+    if (!this._effects) {
+      const raw = ((_a = this._source) == null ? void 0 : _a.effects) ?? [];
+      const col = new foundry.utils.Collection();
+      for (const effectData of raw) {
+        const effect2 = new CONFIG.ActiveEffect.documentClass(effectData, { parent: this });
+        col.set(effect2.id, effect2);
+      }
+      this._effects = col;
+    }
+    return this._effects;
   }
   set effects(value) {
-    if (Array.isArray(value)) this._source.effects = value;
-  }
-  get hydratedEffects() {
-    return this._hydratedEffects ?? [];
-  }
-  static Register() {
-    CONFIG.SR3EGadget = {
-      documentClass: SR3EGadget,
-      dataModels: {
-        weaponmod: GadgetModel
-      }
-    };
-  }
-  hydrateEffects() {
-    this._hydratedEffects = this.effects.map((eff) => new ActiveEffect(eff, { parent: this }));
-  }
-  async applyEffectsTo(target) {
-    if (!(target == null ? void 0 : target.uuid) || !Array.isArray(this._hydratedEffects)) return;
-    const newEffects = this._hydratedEffects.map((effect2) => {
-      const clone = effect2.clone({
-        origin: this.uuid ?? `Gadget|${foundry.utils.randomID()}`,
-        disabled: effect2.disabled,
-        transfer: false
+    this._effects = void 0;
+    if (value instanceof foundry.utils.Collection) value = Array.from(value.values());
+    if (Array.isArray(value)) {
+      this._source.effects = value.map((e) => {
+        if (typeof e.toObject === "function") return e.toObject();
+        return structuredClone(e);
       });
-      return foundry.utils.duplicate(clone.toObject());
-    });
-    return target.createEmbeddedDocuments("ActiveEffect", newEffects);
-  }
-  async removeEffectsFrom(target) {
-    if (!(target == null ? void 0 : target.effects)) return;
-    const origin = this.uuid ?? "Gadget";
-    const toRemove = target.effects.filter((e) => {
-      var _a;
-      return (_a = e.origin) == null ? void 0 : _a.startsWith(origin);
-    }).map((e) => e.id);
-    if (toRemove.length > 0) {
-      await target.deleteEmbeddedDocuments("ActiveEffect", toRemove);
+    } else {
+      throw new TypeError("Gadget.effects must be an array or Collection of effects.");
     }
   }
-  async autoApply(item2) {
-    var _a;
-    const actor = item2.parent;
-    const target = ((_a = this.system) == null ? void 0 : _a.transferTo) === "actor" && actor ? actor : item2;
-    await this.applyEffectsTo(target);
+  get sheet() {
+    var _a, _b;
+    console.log("Gadget type check", this.constructor.name, this instanceof Gadget);
+    console.log("Gadget.get sheet(): type =", this.type);
+    console.log("Gadget.js from instance:", import.meta.url);
+    console.log("CONFIG.Gadget", CONFIG.Gadget);
+    if (!this._sheet) {
+      const entry = (_b = (_a = CONFIG.Gadget) == null ? void 0 : _a.sheetClasses) == null ? void 0 : _b[this.type];
+      const SheetClass = entry == null ? void 0 : entry.cls;
+      if (!SheetClass) {
+        throw new Error(`No sheet registered for Gadget subtype '${this.type}'`);
+      }
+      console.log("Gadget type check", this.constructor.name, this instanceof Gadget);
+      this._sheet = new SheetClass({
+        document: this,
+        editable: true,
+        id: `gadget-sheet-${this.id}`
+      });
+    }
+    return this._sheet;
   }
-  async autoRemove(item2) {
+  get name() {
     var _a;
-    const actor = item2.parent;
-    const target = ((_a = this.system) == null ? void 0 : _a.transferTo) === "actor" && actor ? actor : item2;
-    await this.removeEffectsFrom(target);
+    return (_a = this._source) == null ? void 0 : _a.name;
+  }
+  set name(value) {
+    this._source.name = value;
+  }
+  get type() {
+    var _a;
+    return (_a = this._source) == null ? void 0 : _a.type;
+  }
+  set type(value) {
+    this._source.type = value;
+  }
+  get img() {
+    var _a;
+    return (_a = this._source) == null ? void 0 : _a.img;
+  }
+  set img(value) {
+    this._source.img = value;
+  }
+  get system() {
+    var _a;
+    return (_a = this._source) == null ? void 0 : _a.system;
+  }
+  set system(value) {
+    this._source.system = value;
+  }
+  get flags() {
+    var _a;
+    return ((_a = this._source) == null ? void 0 : _a.flags) ?? {};
+  }
+  set flags(value) {
+    this._source.flags = value;
   }
   toJSON() {
     return this.toObject();
   }
+  toObject() {
+    return {
+      _id: this.id,
+      name: this.name,
+      type: this.type,
+      img: this.img,
+      system: foundry.utils.deepClone(this.system),
+      flags: foundry.utils.deepClone(this.flags),
+      effects: Array.from(this.effects.values()).map((e) => e.toObject())
+    };
+  }
 }
 class SR3EItem extends Item {
   static Register() {
+    console.log("SR3EItem.Register() is hit");
     CONFIG.Item.documentClass = SR3EItem;
   }
-  prepareBaseData() {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
-    super.prepareBaseData();
-    (_b = (_a = this.effects) == null ? void 0 : _a.prepareData) == null ? void 0 : _b.call(_a);
+  prepareDerivedData() {
+    var _a;
+    super.prepareDerivedData();
     for (const gadget of this.gadgets) {
-      (_c = gadget.hydrateEffects) == null ? void 0 : _c.call(gadget);
-      (_d = gadget.prepareData) == null ? void 0 : _d.call(gadget);
-      (_f = (_e = gadget.effects) == null ? void 0 : _e.prepareData) == null ? void 0 : _f.call(_e);
-      (_g = gadget.applyActiveEffects) == null ? void 0 : _g.call(gadget);
-      (_h = gadget.autoApply) == null ? void 0 : _h.call(gadget, this);
+      for (const effect2 of gadget.effects.values()) {
+        if (effect2.transfer && (!((_a = gadget.system) == null ? void 0 : _a.transferTo) || gadget.system.transferTo === "item")) {
+          effect2.parent = this;
+          this.effects.set(effect2.id, effect2);
+        }
+      }
     }
   }
   get gadgets() {
-    return (this.system.gadgets ?? []).map(
-      (data) => new SR3EGadget(data, { parent: this })
-    );
+    const stored = this.system.gadgets ?? [];
+    return stored.map((data) => new Gadget(data, { parent: this }));
   }
   async addGadget(gadgetItem) {
+    var _a, _b;
+    console.log("addGadget invoked with:", gadgetItem.name);
     const gadgetId = foundry.utils.randomID();
     const clonedEffects = gadgetItem.effects.contents.map((effect2) => {
       const data = effect2.toObject();
@@ -16989,10 +17117,14 @@ class SR3EItem extends Item {
       data.origin = `Item.${this.id}.gadgets.${gadgetId}`;
       return data;
     });
+    const typeKey = ((_b = (_a = gadgetItem.system.gadget) == null ? void 0 : _a.target) == null ? void 0 : _b.split(".").pop()) ?? "generic";
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    console.log("Type Key", typeKey);
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     const gadgetData = {
       _id: gadgetId,
       name: gadgetItem.name,
-      type: gadgetItem.system.gadget.target,
+      type: typeKey,
       img: gadgetItem.img,
       system: foundry.utils.deepClone(gadgetItem.system),
       effects: clonedEffects,
@@ -17002,26 +17134,26 @@ class SR3EItem extends Item {
         }
       }
     };
-    const updated = [...this.system.gadgets ?? [], gadgetData];
-    await this.update({ "system.gadgets": updated });
-    const hydrated = new SR3EGadget(gadgetData, { parent: this });
-    hydrated.hydrateEffects();
-    await hydrated.autoApply(this);
+    const existing = this.system.gadgets ?? [];
+    await this.update({ "system.gadgets": [...existing, gadgetData] });
   }
   async removeGadget(gadgetId) {
-    const gadgets = this.system.gadgets ?? [];
-    const removed = gadgets.find((g) => g._id === gadgetId);
-    if (!removed) return;
-    const gadget = new SR3EGadget(removed, { parent: this });
-    gadget.hydrateEffects();
-    await gadget.autoRemove(this);
-    const filtered = gadgets.filter((g) => g._id !== gadgetId);
+    const existing = this.system.gadgets ?? [];
+    const filtered = existing.filter((g) => g._id !== gadgetId);
     await this.update({ "system.gadgets": filtered });
   }
   async openGadgetEditor(gadgetId) {
-    const gadget = this.gadgets.find((g) => g.id === gadgetId || g._id === gadgetId);
-    if (!(gadget == null ? void 0 : gadget.sheet)) return;
-    gadget.sheet.render(true);
+    var _a;
+    if (!gadgetId || typeof gadgetId !== "string") {
+      throw new Error("Gadget ID must be a string.");
+    }
+    const raw = (_a = this.system.gadgets) == null ? void 0 : _a.find((g) => g._id === gadgetId);
+    if (!raw) {
+      throw new Error(`No gadget with ID "${gadgetId}" found on item "${this.name}".`);
+    }
+    const gadget = new Gadget(raw, { parent: this });
+    console.log("Opening Gadget editor for:", gadgetId, gadget);
+    return gadget.sheet.render(true);
   }
 }
 function Print(message = "Combat Service Print Function") {
@@ -17202,10 +17334,13 @@ class SR3ERoll extends Roll {
 const { DocumentSheetConfig } = foundry.applications.apps;
 function registerDocumentTypes({ args }) {
   args.forEach(({ docClass, type, model, sheet }) => {
-    var _a;
+    var _a, _b, _c;
     const docName = docClass.documentName;
+    CONFIG[docName] || (CONFIG[docName] = {});
     (_a = CONFIG[docName]).dataModels || (_a.dataModels = {});
     CONFIG[docName].dataModels[type] = model;
+    (_b = CONFIG[docName]).sheetClasses || (_b.sheetClasses = {});
+    (_c = CONFIG[docName].sheetClasses)[type] || (_c[type] = []);
     DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
       types: [type],
       makeDefault: true
@@ -17218,10 +17353,8 @@ function configureProject() {
   SR3Edie.Register();
   SR3ERoll.Register();
   SR3EItem.Register();
-  SR3EGadget.Register();
+  Gadget.Register();
   CONFIG.sr3e = sr3e;
-  CONFIG.Actor.dataModels = {};
-  CONFIG.Item.dataModels = {};
   CONFIG.canvasTextStyle.fontFamily = "VT323";
   CONFIG.defaultFontFamily = "VT323";
   CONFIG.fontDefinitions["Neanderthaw"] = {
