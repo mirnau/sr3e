@@ -5,11 +5,11 @@
       openFilePicker,
       getRandomIntinRange,
       getRandomBellCurveWithMode,
-   } from "../../../services/utilities";
-   import ActorDataService from "../../../services/ActorDataService.js";
-   import ItemDataService from "../../../services/ItemDataService.js";
-   import CharacterGeneratorService from "../../../services/CharacterGeneratorService.js";
-   import { flags } from "../../../services/commonConsts.js";
+   } from "@services/utilities";
+   import ActorDataService from "@services/ActorDataService.js";
+   import ItemDataService from "@services/ItemDataService.js";
+   import CharacterGeneratorService from "@services/CharacterGeneratorService.js";
+   import { flags } from "@services/commonConsts.js";
 
    let { actor, config, onSubmit, onCancel } = $props();
    let layoutMode = $state("double");
@@ -160,6 +160,7 @@
          "system.attributes.quickness.value": 1,
          "system.attributes.intelligence.value": 1,
          "system.attributes.initiative.value": 1,
+         "system.attributes.essence.value": 6,
          "system.karma.karmaPool.value": 1
       });
 

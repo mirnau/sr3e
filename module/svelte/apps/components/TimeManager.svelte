@@ -1,8 +1,8 @@
 <script>
     import TimeActuatorInput from "./TimeActuatorInput.svelte";
-    import TimeService from "../../../services/TimeService.js";
+    import TimeService from "@services/TimeService.js";
     import { onMount } from "svelte";
-    import { localize } from "../../../services/utilities.js";
+    import { localize } from "@services/utilities.js";
 
     let { config = {} } = $props();
 

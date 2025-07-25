@@ -1,14 +1,14 @@
 <script>
-  import { getRandomIntinRange, localize } from "../../../../services/utilities.js";
+  import { getRandomIntinRange, localize } from "@services/utilities.js";
   import {
     flags,
     inventory,
-  } from "../../../../services/commonConsts.js";
+  } from "@services/commonConsts.js";
   import CardToolbar from "../CardToolbar.svelte";
   import Garage from "./Garage.svelte";
   import Arsenal from "./Arsenal.svelte";
   import Effects from "./Effects.svelte";
-  import ActorDataService from "../../../../services/ActorDataService.js";
+  import ActorDataService from "@services/ActorDataService.js";
 
   let { actor = {}, config = {}, id = {}, span = {} } = $props();
   let activeTab = $state(inventory.arsenal);

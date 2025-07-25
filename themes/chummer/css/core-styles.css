@@ -41,11 +41,12 @@
     --component-grid-gap: 0.25rem;
     --background-color: linear-gradient(35deg, #242424, #282828 30%, #2e2e2e 60%, #282828 85%, #242424);
     --background-with-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 90%), linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 100%), url("../../../textures/metal.jpg"), linear-gradient(to right, #444, #222);
-    --highlight-color-primary: #11e6bf;
-    --highlight-color-secondary: #16a48d;
-    --highlight-color-tertiary: #ff0000;
-    --accent-color-primary: #d91587;
+    --highlight-color-primary: #41e9ca;
+    --highlight-color-secondary: #27c0a1;
+    --highlight-color-tertiary: #1cd8b9;
+    --accent-color-primary: #f824a0;
     --accent-color-secondary: #ff4f4f;
+    --accent-color-tertiary: #b04fff;
   }
   * {
     --color-scrollbar: #ff009572;
@@ -66,11 +67,11 @@
   }
   :root {
     font-family: 'VT323', monospace;
-    --h1-color: var(--highlight-color-primary);
-    --h1-bloom: 0 0 1px #004659, 0 0 10px #4affb4, 0 0 20px #0064a2;
-    --h3-color: #d0b72b;
-    --h3-bloom: 0 0 1px #7d7703, 0 0 10px #ffd54a, 0 0 20px #a27400;
-    --h4-color: var(--highlight-color-primary);
+    --h1-color: var(--highlight-color-tertiary);
+    --h1-bloom: 0 0 1px #217288, 0 0 10px #4affb4, 0 0 20px #0064a2;
+    --h3-color: var(--highlight-color-secondary);
+    --h3-bloom: 0 0 1px #68aeff, 0 0 10px #833bff, 0 0 20px #f172ff;
+    --h4-color: var(--highlight-color-tertiary);
     --h5-color: violet;
   }
   .system-sr3e form.p.hint,
@@ -2171,6 +2172,7 @@
     padding: 0;
   }
   .condition-monitor .condition-meter {
+    position: relative;
     min-height: 6rem;
     margin-top: 1rem;
     display: flex;
@@ -2178,6 +2180,12 @@
     justify-content: space-between;
     padding: 0.5rem;
     justify-content: center;
+    gap: 1rem;
+  }
+  .condition-monitor .condition-meter .revival-button {
+    position: absolute;
+    bottom: 0rem;
+    right: 0rem;
   }
   .condition-monitor .condition-meter .checkbox-label {
     min-width: 4rem;
@@ -2216,6 +2224,14 @@
     text-shadow: none;
     opacity: 0.2;
   }
+  .condition-monitor .condition-meter .checkbox {
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+    line-height: 1.25rem;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
   .condition-monitor .condition-meter .stun-damage,
   .condition-monitor .condition-meter .physical-damage {
     display: flex;
@@ -2225,6 +2241,54 @@
     row-gap: 1rem;
     margin: 0;
     padding: 0;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control,
+  .condition-monitor .condition-meter .physical-damage .damage-control {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button {
+    align-self: flex-start;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--highlight-color-primary);
+    background-color: var(--highlight-color-primary);
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button i,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button i {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+  }
+  .condition-monitor .condition-meter .stun-damage .damage-control .overflow-button::before,
+  .condition-monitor .condition-meter .physical-damage .damage-control .overflow-button::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    background: var(--background-color);
+    z-index: -1;
+    clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.25rem), calc(100% - 0.25rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
   .condition-monitor .condition-meter .stun-damage .damage-input,
   .condition-monitor .condition-meter .physical-damage .damage-input {
@@ -2939,7 +3003,7 @@
   .form,
   .app.window-content {
     background-image: none;
-    background: red;
+    background: transparent;
   }
   .application {
     background: none;
@@ -3350,5 +3414,43 @@
     background-image: none;
     background-color: #262626;
     color: var(--h1-color);
+  }
+  .drop-zone {
+    position: relative;
+    inset: 0;
+    transition: all 0.2s ease;
+    border: 2px dashed transparent;
+    border-radius: 4px;
+    background-color: transparent;
+  }
+  .drop-zone.drag-active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  .drop-zone.drag-hover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+  .drag-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 123, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 10;
+    border-radius: 4px;
+  }
+  .drop-indicator {
+    background: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   }
 }

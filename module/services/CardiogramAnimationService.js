@@ -39,6 +39,36 @@ export default class EcgAnimator {
       this._animate();
    }
 
+   flatline() {
+      this.stop();
+
+      this.lineCtx.clearRect(0, 0, this.width, this.height);
+      this.pointCtx.clearRect(0, 0, this.width, this.height);
+
+      const centerY = this.height / 2;
+      const xStart = 0;
+      const xEnd = this.width;
+
+      this.lineCtx.beginPath();
+      this.lineCtx.moveTo(xStart, centerY);
+      this.lineCtx.lineTo(xEnd, centerY);
+      this.lineCtx.strokeStyle = this.bottomColor;
+      this.lineCtx.lineWidth = this.lineWidth;
+      this.lineCtx.stroke();
+
+      const radius = 4;
+      const x = this.width - 10;
+      const y = centerY;
+
+      this.pointCtx.beginPath();
+      this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
+      this.pointCtx.fillStyle = this.topColor;
+      this.pointCtx.shadowBlur = 5;
+      this.pointCtx.shadowColor = this.topColor;
+      this.pointCtx.fill();
+      this.pointCtx.shadowBlur = 0;
+   }
+
    stop() {
       this._isAnimating = false;
       if (this._animFrame) cancelAnimationFrame(this._animFrame);

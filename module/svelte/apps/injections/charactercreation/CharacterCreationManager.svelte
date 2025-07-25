@@ -1,8 +1,9 @@
 <script>
-   import AttributePointsState from "./AttributePointsState.svelte";
-   import SkillPointsState from "./SkillPointsState.svelte";
-   import { flags } from "../../../../services/commonConsts.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
+   import AttributePointsState from "@injections/charactercreation/AttributePointsState.svelte";
+   import SkillPointsState from "@injections/charactercreation/SkillPointsState.svelte";
+
+   import { flags } from "@services/commonConsts.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
    let { actor = {}, config = {} } = $props();
 

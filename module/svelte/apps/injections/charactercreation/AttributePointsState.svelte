@@ -1,8 +1,8 @@
 <script>
-   import { localize } from "../../../../services/utilities.js";
-   import { flags } from "../../../../services/commonConsts.js";
-   import CreationPointList from "../../components/CreationPointList.svelte";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { localize } from "@services/utilities.js";
+   import { flags } from "@services/commonConsts.js";
+   import CreationPointList from "@sveltecomponent/CreationPointList.svelte";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
 
    let { actor, config } = $props();

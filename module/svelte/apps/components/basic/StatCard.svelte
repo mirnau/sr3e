@@ -1,61 +1,33 @@
 <script>
-   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
-   import { localize } from "../../../../services/utilities.js";
-   import { onDestroy } from "svelte";
+  let { item, key, label, value, path, type = "text", options = [] } = $props();
 
-   let { document, value, label, isButton = false, key = "", children } = $props();
-
-   let currentDicePoolSelectionStore;
-   let shouldDisplaySheen;
-
-   if (document) {
-      const storeManager = StoreManager.Subscribe(document);
-      currentDicePoolSelectionStore = storeManager.GetShallowStore(document.id, stores.dicepoolSelection);
-      shouldDisplaySheen = storeManager.GetShallowStore(document.id, stores.shouldDisplaySheen, false);
-
-      onDestroy(() => {
-         StoreManager.Unsubscribe(document);
-      });
-   }
-
-   function provideSelectedDicepool(_) {
-      if (currentDicePoolSelectionStore) $currentDicePoolSelectionStore = key;
-   }
-
-   const handleKeyDown = (e) => {
-      if (e.key === "Enter" || e.key === " ") provideSelectedDicepool(e);
-   };
+  function update(e) {
+    let val;
+    if (type === "checkbox") {
+      val = e.target.checked;
+    } else {
+      val = e.target.value;
+      if (type === "number") val = Number(val);
+    }
+    item.update({ [`${path}.${key}`]: val });
+    console.log(`Updated ${path}.${key} to`, val);
+  }
 </script>
 
-{#if isButton && $shouldDisplaySheen}
-   <div
-      class="stat-card button"
-      class:alert-animation={$shouldDisplaySheen}
-      role="button"
-      tabindex="0"
-      onclick={provideSelectedDicepool}
-      onkeydown={handleKeyDown}
-   >
-      <div class="stat-card-background"></div>
-      {#if label?.length > 0}
-         <h4 class="no-margin uppercase">{localize(label)}</h4>
-      {/if}
-      {#if children}
-         {@render children?.()}
-      {:else}
-         <h1 class="stat-value">{value}</h1>
-      {/if}
-   </div>
-{:else}
-   <div class="stat-card">
-      <div class="stat-card-background"></div>
-      {#if label?.length > 0}
-         <h4 class="no-margin uppercase">{localize(label)}</h4>
-      {/if}
-      {#if children}
-         {@render children?.()}
-      {:else}
-         <h1 class="stat-value">{value}</h1>
-      {/if}
-   </div>
-{/if}
+<div class="stat-card">
+  <div class="stat-card-background"></div>
+  <div class="title-container">
+    <h4 class="no-margin uppercase">{label}</h4>
+  </div>
+  {#if type === "checkbox"}
+    <input type="checkbox" checked={value} onchange={update} />
+  {:else if type === "select"}
+    <select {value} onchange={update}>
+      {#each options as option}
+        <option value={option} selected={value === option}>{option}</option>
+      {/each}
+    </select>
+  {:else}
+    <input type={type} step={type === "number" ? "any" : undefined} {value} onchange={update} />
+  {/if}
+</div>

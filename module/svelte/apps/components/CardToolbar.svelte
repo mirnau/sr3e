@@ -1,9 +1,9 @@
-<script lang="ts">
-  import { toggleCardSpanById, moveCardById } from "../../../services/utilities.js";
+<script>
+  import { toggleCardSpanById, moveCardById } from "@services/utilities.js";
 
   const { id } = $props();
 
-  function handleMove(direction: "up" | "down") {
+  function handleMove(direction) {
     console.log("handle move called");
     moveCardById(id, direction);
   }

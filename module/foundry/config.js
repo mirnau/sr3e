@@ -4,6 +4,7 @@ sr3e.ammunition = {
    ammunition: "sr3e.ammunition.ammunition",
    type: "sr3e.ammunition.type",
    rounds: "sr3e.ammunition.rounds",
+   class: "sr3e.ammunition.class",
 };
 
 sr3e.attributes = {
@@ -23,8 +24,8 @@ sr3e.attributes = {
 };
 
 sr3e.broadcaster = {
-   broadcaster: "sr3e.broadcaster.broadcaster"
-}
+   broadcaster: "sr3e.broadcaster.broadcaster",
+};
 
 sr3e.difficulty = {
    simple: "sr3e.difficulty.simple",
@@ -55,7 +56,7 @@ sr3e.effects = {
    selectProperty: "sr3e.effects.selectProperty",
    permanent: "sr3e.effects.permanent",
    changesHeader: "sr3e.effects.changesHeader",
-   target: "sr3e.effects.target"
+   target: "sr3e.effects.target",
 };
 
 sr3e.health = {
@@ -123,6 +124,11 @@ sr3e.dicepools = {
    spell: "sr3e.dicepools.spell",
    associateselect: "sr3e.dicepools.associateselect",
 };
+
+sr3e.gadget = {
+   gadget: "sr3e.gadget.gadget"
+}
+
 sr3e.karma = {
    karma: "sr3e.karma.karma",
    goodkarma: "sr3e.karma.goodkarma",
@@ -169,7 +175,7 @@ sr3e.sheet = {
    resources: "sr3e.sheet.resources",
    quote: "sr3e.sheet.quote",
    delete: "sr3e.sheet.delete",
-   edit: "sr3e.sheet.edit"
+   edit: "sr3e.sheet.edit",
 };
 
 sr3e.traits = {
@@ -280,6 +286,8 @@ sr3e.transaction = {
 };
 
 sr3e.weapon = {
+   damageType: "sr3e.weapon.damageType",
+   ammunitionClass: "sr3e.weapon.ammunitionClass",
    weapon: "sr3e.weapon.weapon",
    weaponStats: "sr3e.weapon.weaponStats",
    damage: "sr3e.weapon.damage",
@@ -302,13 +310,94 @@ sr3e.commodity = {
    cost: "sr3e.commodity.cost",
    streetIndex: "sr3e.commodity.streetIndex",
    restrictionLevel: "sr3e.commodity.restrictionLevel",
-   legalityType: "sr3e.commodity.legalityType",
-   legalityCategory: "sr3e.commodity.legalityCategory",
+   legalstatus: "sr3e.commodity.legalstatus",
+   legalpermit: "sr3e.commodity.legalpermit",
+   legalenforcementpriority: "sr3e.commodity.legalenforcementpriority",
+
    isBroken: "sr3e.commodity.isBroken",
 };
 
 sr3e.portability = {
    portability: "sr3e.portability.portability",
-   concealability: "sr3e.portability.portability",
+   concealability: "sr3e.portability.concealability",
    weight: "sr3e.portability.weight",
 };
+
+sr3e.ammunitionType = {
+   regular: "sr3e.ammunitionType.regular",
+   apds: "sr3e.ammunitionType.apds",
+   explosive: "sr3e.ammunitionType.explosive",
+   gel: "sr3e.ammunitionType.gel",
+   capsule: "sr3e.ammunitionType.capsule",
+   tracer: "sr3e.ammunitionType.tracer",
+   flechette: "sr3e.ammunitionType.flechette",
+   incendiary: "sr3e.ammunitionType.incendiary",
+   tracker: "sr3e.ammunitionType.tracker",
+};
+
+sr3e.ammunitionClass = {
+   holdout: "sr3e.ammunitionClass.holdout",
+   lightPistol: "sr3e.ammunitionClass.lightPistol",
+   heavyPistol: "sr3e.ammunitionClass.heavyPistol",
+   smg: "sr3e.ammunitionClass.smg",
+   shotgun: "sr3e.ammunitionClass.shotgun",
+   assaultRifle: "sr3e.ammunitionClass.assaultRifle",
+   sportingRifle: "sr3e.ammunitionClass.sportingRifle",
+   sniperRifle: "sr3e.ammunitionClass.sniperRifle",
+   lmg: "sr3e.ammunitionClass.lmg",
+   mmg: "sr3e.ammunitionClass.mmg",
+   hmg: "sr3e.ammunitionClass.hmg",
+   assaultCannon: "sr3e.ammunitionClass.assaultCannon",
+   grenadeLauncher: "sr3e.ammunitionClass.grenadeLauncher",
+   missileLauncher: "sr3e.ammunitionClass.missileLauncher",
+   taser: "sr3e.ammunitionClass.taser",
+   bow: "sr3e.ammunitionClass.bow",
+   crossbow: "sr3e.ammunitionClass.crossbow",
+};
+
+sr3e.damageType = {
+   l: "sr3e.damageType.l",
+   m: "sr3e.damageType.m",
+   s: "sr3e.damageType.s",
+   d: "sr3e.damageType.d",
+   lStun: "sr3e.damageType.lStun",
+   mStun: "sr3e.damageType.mStun",
+   sStun: "sr3e.damageType.sStun",
+   dStun: "sr3e.damageType.dStun",
+};
+
+sr3e.weaponMode = {
+   manual: "sr3e.weaponMode.manual",
+   semiauto: "sr3e.weaponMode.semiauto",
+   fullauto: "sr3e.weaponMode.fullauto",
+   blade: "sr3e.weaponMode.blade",
+   explosive: "sr3e.weaponMode.explosive",
+   energy: "sr3e.weaponMode.energy",
+   blunt: "sr3e.weaponMode.blunt",
+};
+
+sr3e.legalstatus = {
+   L: "sr3e.legalstatus.L",
+   R: "sr3e.legalstatus.R",
+   I: "sr3e.legalstatus.I",
+};
+
+sr3e.legalpermit = {
+   1: "sr3e.legalpermit.1",
+   2: "sr3e.legalpermit.2",
+   3: "sr3e.legalpermit.3",
+   4: "sr3e.legalpermit.4",
+   N: "sr3e.legalpermit.N",
+};
+
+sr3e.legalpriority = {
+   1: "sr3e.legalpriority.1",
+   2: "sr3e.legalpriority.2",
+   3: "sr3e.legalpriority.3",
+   4: "sr3e.legalpriority.4",
+   X: "sr3e.legalpriority.X",
+};
+
+sr3e.gadgettypes = {
+   weaponmod: "sr3e.gadgettypes.weaponmod",
+}

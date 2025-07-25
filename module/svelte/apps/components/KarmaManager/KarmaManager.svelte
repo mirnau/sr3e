@@ -1,5 +1,5 @@
 <script>
-   import { localize } from "../../../../services/utilities.js";
+   import { localize } from "@services/utilities.js";
    import KarmaRow from "./KarmaRow.svelte";
 
    let { config } = $props();

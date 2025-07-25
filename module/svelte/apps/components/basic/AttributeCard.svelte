@@ -1,10 +1,10 @@
 <script>
-   import { localize } from "../../../../services/utilities.js";
-   import { flags } from "../../../../services/commonConsts.js";
-   import { StoreManager, stores } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { localize } from "@services/utilities.js";
+   import { flags } from "@services/commonConsts.js";
+   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
    import { mount, unmount } from "svelte";
-   import RollComposerComponent from "../../components/RollComposerComponent.svelte";
+   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 
    let { actor, localization, key } = $props();
 

@@ -1,5 +1,5 @@
 <script>
-   import { localize } from "../../../../services/utilities.js";
+   import { localize } from "@services/utilities.js";
    import DicePoolRow from "./DicePoolRow.svelte";
 
    let { config } = $props();

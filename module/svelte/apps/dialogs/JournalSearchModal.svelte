@@ -1,5 +1,5 @@
 <script>
-    import { localize } from "../../../services/utilities.js";
+    import { localize } from "@services/utilities.js";
     const { config, onclose } = $props();
 
     let visible = $state(true);

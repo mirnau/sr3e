@@ -1,33 +1,15 @@
+import SimpleStat from "./SimpleStat.js";
+
 export default class HealthModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      stun: new foundry.data.fields.ArrayField(
-        new foundry.data.fields.BooleanField({
-          required: true,
-        }),
-        {
-          required: true,
-          initial: Array(10).fill(false), // Default to 10 false values
-        }
-      ),
-      physical: new foundry.data.fields.ArrayField(
-        new foundry.data.fields.BooleanField({
-          required: true,
-        }),
-        {
-          required: true,
-          initial: Array(10).fill(false), // Default to 10 false values
-        }
-      ),
-      overflow: new foundry.data.fields.NumberField({
+      stun: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      physical: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      overflow: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      penalty: new foundry.data.fields.SchemaField(SimpleStat.defineSchema()),
+      isAlive: new foundry.data.fields.BooleanField({
         required: true,
-        initial: 0,
-        integer: true,
-      }),
-      penalty: new foundry.data.fields.NumberField({ // Fix the typo here
-        required: true,
-        initial: 0,
-        integer: true,
+        initial: true,
       }),
     };
   }

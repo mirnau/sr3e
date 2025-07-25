@@ -3,7 +3,8 @@
       "ammunition": {
          "ammunition": "Ammunition",
          "type": "Ammuntion Type",
-         "rounds": "Rounds"
+         "rounds": "Rounds",
+         "class": "Weapon Class"
       },
       "attributes": {
          "attributes": "Attributes",
@@ -32,9 +33,9 @@
          "days": "Days",
          "cost": "Cost",
          "streetIndex": "Street Index",
-         "restrictionLevel": "Restriction Level",
-         "legalityType": "Legality Type",
-         "legalityCategory": "Legality Category",
+         "legalstatus": "Legal Status",
+         "legalpermit": "Permit Requirement",
+         "legalenforcementpriority": "Enforcement Priority",
          "isBroken": "Broken"
       },
       "common": {
@@ -85,6 +86,12 @@
          "noMatch": "No Match",
          "permanent": "Permanent",
          "changesHeader": "Changes"
+      },
+      "gadget": {
+         "gadget": "Gadget"
+      },
+      "gadgettype": {
+         "weaponmod": "Weapon Mod"
       },
       "health": {
          "health": "Health",
@@ -191,7 +198,6 @@
          "skillpoints": "Skill Points",
          "resources": "Resources",
          "viewbackground": "View Background"
-         
       },
       "skill": {
          "active": "Active Skill",
@@ -231,7 +237,7 @@
          "age": "Age",
          "agerange": "Playable Age Range",
          "height": "Height",
-         "metatype": "metatype",
+         "metatype": "Metatype",
          "weight": "Weight",
          "child": "Child",
          "adolecent": "Adolecent",
@@ -271,6 +277,8 @@
          "lowlight": "Low-light vision"
       },
       "weapon": {
+         "ammunitionClass": "Ammunition Class",
+         "damageType": "Damage Type",
          "weapon": "Weapon",
          "weaponStats": "Weapon Stats",
          "damage": "Damage",
@@ -285,6 +293,74 @@
          "explosive": "Explosive Weapon",
          "blunt": "Blunt Weapon",
          "energy": "Energy Weapon"
+      },
+      "ammunitionType": {
+         "regular": "Regular",
+         "apds": "APDS",
+         "explosive": "Explosive",
+         "gel": "Gel",
+         "capsule": "Capsule",
+         "tracer": "Tracer",
+         "flechette": "Flechette",
+         "incendiary": "Incendiary",
+         "tracker": "Tracker"
+      },
+      "ammunitionClass": {
+         "holdout": "Hold-Out Pistols",
+         "lightPistol": "Light Pistols",
+         "heavyPistol": "Heavy Pistols",
+         "smg": "Submachine Guns",
+         "shotgun": "Shotguns",
+         "assaultRifle": "Assault Rifles",
+         "sportingRifle": "Sporting Rifles",
+         "sniperRifle": "Sniper Rifles",
+         "lmg": "Light Machine Guns",
+         "mmg": "Medium Machine Guns",
+         "hmg": "Heavy Machine Guns",
+         "assaultCannon": "Assault Cannons",
+         "grenadeLauncher": "Grenade Launchers",
+         "missileLauncher": "Missile Launchers",
+         "taser": "Tasers",
+         "bow": "Bows",
+         "crossbow": "Crossbows"
+      },
+      "damageType": {
+         "l": "Light",
+         "m": "Moderate",
+         "s": "Serious",
+         "d": "Deadly",
+         "lStun": "Light (Stun)",
+         "mStun": "Moderate (Stun)",
+         "sStun": "Serious (Stun)",
+         "dStun": "Deadly (Stun)"
+      },
+      "weaponMode": {
+         "manual": "Manual",
+         "semiauto": "Semi-Automatic",
+         "fullauto": "Full-Automatic",
+         "blade": "Blade",
+         "explosive": "Explosive",
+         "energy": "Energy",
+         "blunt": "Blunt"
+      },
+      "legalstatus": {
+         "L": "Legal",
+         "R": "Restricted",
+         "I": "Illegal"
+      },
+      "legalpermit": {
+         "1": "Permit Level 1",
+         "2": "Permit Level 2",
+         "3": "Permit Level 3",
+         "4": "Permit Level 4",
+         "N": "No Permit Allowed"
+      },
+      "legalpriority": {
+         "1": "Priority 1",
+         "2": "Priority 2",
+         "3": "Priority 3",
+         "4": "Priority 4",
+         "X": "Extreme Priority"
       }
    }
 }

@@ -1,6 +1,6 @@
 <script>
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
-   import { flags } from "../../../../services/commonConsts.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
+   import { flags } from "@services/commonConsts.js";
    import { createEventDispatcher, onDestroy } from "svelte";
    import TextInput from "../basic/TextInput.svelte";
 

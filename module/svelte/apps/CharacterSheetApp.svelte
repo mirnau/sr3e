@@ -1,14 +1,14 @@
 <script>
-  import Dossier from "./components/Dossier.svelte";
-  import Attributes from "./components/Attributes.svelte";
-  import DicePools from "./components/DicePools.svelte";
-  import Movement from "./components/Movement.svelte";
-  import Skills from "./components/skills/Skills.svelte";
-  import Health from "./components/Health.svelte";
-  import Karma from "./components/Karma.svelte";
-  import Inventory from "./components/Inventory/Inventory.svelte";
-  import MasonryGrid from "./components/basic/MasonryGrid.svelte";
-  import { masonryMinWidthFallbackValue } from "../../services/commonConsts.js";
+  import Dossier from "@sveltecomponent/Dossier.svelte";
+  import Attributes from "@sveltecomponent/Attributes.svelte";
+  import DicePools from "@sveltecomponent/DicePools.svelte";
+  import Movement from "@sveltecomponent/Movement.svelte";
+  import Skills from "@sveltecomponent/skills/Skills.svelte";
+  import Health from "@sveltecomponent/Health.svelte";
+  import Karma from "@sveltecomponent/Karma.svelte";
+  import Inventory from "@sveltecomponent/Inventory/Inventory.svelte";
+  import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";
+  import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
   import { cardLayout } from "../../svelteStore.js";
   import { tick } from "svelte";

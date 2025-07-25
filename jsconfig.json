@@ -1,18 +1,24 @@
 {
-    "compilerOptions": {
-      "target": "ESNext",
-      "module": "ESNext",
-      "allowJs": true,
-      "checkJs": false,
-      "baseUrl": ".",
-      "paths": {
-        "foundry/*": ["node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
-      },
-      "typeRoots": [
-        "node_modules/@types"
-      ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "allowJs": true,
+    "checkJs": false,
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["systems/sr3e/*"],
+      "foundry/*": ["node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
     },
-    "include": ["**/*.js", "foundry-globals.js", "module/svelte/apps/JournalEditorApp.svelte"],
-    "exclude": ["node_modules"]
-  }
-  
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+  "include": [
+    "systems/sr3e/**/*",
+    "module/**/*",
+    "foundry-globals.js"
+  ],
+  "exclude": ["node_modules"]
+}

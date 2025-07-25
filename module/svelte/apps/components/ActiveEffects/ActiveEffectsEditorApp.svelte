@@ -2,9 +2,9 @@
    import Image from "../basic/Image.svelte";
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ComboSearch from "../basic/ComboSearch.svelte";
-   import { flags } from "../../../../services/commonConsts.js";
-   import { localize } from "../../../../services/utilities.js";
-   import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte.js";
+   import { flags } from "@services/commonConsts.js";
+   import { localize } from "@services/utilities.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy, onMount } from "svelte";
    import CharacterModel from "../../../../models/actor/CharacterModel.js";
 
@@ -92,6 +92,13 @@
             allowedPatterns = ["system"];
             isTransferable = false;
             rawPaths = Object.keys(foundry.utils.flattenObject({ system: origin.toObject().system }));
+            break;
+         }
+         case "item:": {
+            allowedPatterns = ["system"];
+            isTransferable = true;
+            
+
             break;
          }
          case "character": {
@@ -208,7 +215,7 @@
             <h4>{localize(config.effects.target)}:</h4>
             <select bind:value={target} onchange={commitChanges}>
                <option value="self">self</option>
-               <option value="item" disabled>item</option>
+               <option value="item">item</option>
                <option value="character">character</option>
                <option value="vehicle" disabled>vehicle</option>
             </select>
@@ -287,7 +294,7 @@
                               bind:value={change.mode}
                               onchange={(e) => updateChange(i, "mode", parseInt(e.target.value))}
                            >
-                              {#each Object.entries(CONST.ACTIVE_EFFECT_MODES) as [label, val]}
+                              {#each Object.entries(CONST.ACTIVE_EFFECT_MODES).filter(([label]) => label !== "CUSTOM" && label !== "MULTIPLY") as [label, val]}
                                  <option value={val}>{label}</option>
                               {/each}
                            </select>

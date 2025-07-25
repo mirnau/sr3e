@@ -1,104 +1,128 @@
 <script>
-  import { localize, openFilePicker } from "../../services/utilities.js";
-  import { onMount } from "svelte";
-  import JournalViewer from "./components/JournalViewer.svelte";
-  import StatCard from "./components/StatCard.svelte";
-  import Commodity from "./components/Commodity.svelte";
-  import Portability from "./components/Portability.svelte";
-  import Image from "./components/basic/Image.svelte";
-  import ItemSheetComponent from "./components/basic/ItemSheetComponent.svelte";
+   import { localize, openFilePicker } from "@services/utilities.js";
+   import { onMount } from "svelte";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
+   import Commodity from "@sveltecomponent/Commodity.svelte";
+   import Portability from "@sveltecomponent/Portability.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
+   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+   import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
 
-  let layoutMode = $state("double");
-  let { item = {}, config = {} } = $props();
-  const system = $state(item.system);
-  const weapon = system.weapon;
+   let { item = {}, config = {} } = $props();
+   let name = $state(item.name);
+   const system = $state(item.system);
 
-  const weaponMode = {
-    item,
-    key: "mode",
-    label: "Mode",
-    value: weapon.mode,
-    path: "system.weapon",
-    type: "select",
-    options: [
-      localize(config.weapon.manual),
-      localize(config.weapon.semiauto),
-      localize(config.weapon.fullauto),
-      localize(config.weapon.blade),
-      localize(config.weapon.explosive),
-      localize(config.weapon.energy),
-      localize(config.weapon.blunt),
-    ],
-  };
+   const weaponMode = $derived({
+      item,
+      key: "mode",
+      label: localize(config.weapon.mode),
+      value: system.mode,
+      path: "system",
+      type: "select",
+      options: Object.values(config.weaponMode).map(localize),
+   });
 
-  const weaponEntries = [
-    {
+   const ammoClassEntry = $derived({
       item,
-      key: "damage",
-      label: localize(config.weapon.damage),
-      value: weapon.damage,
-      path: "system.weapon",
-      type: "text",
-    },
-    {
+      key: "ammunitionClass",
+      label: localize(config.weapon.ammunitionClass),
+      value: system.ammunitionClass,
+      path: "system",
+      type: "select",
+      options: Object.values(config.ammunitionClass).map(localize),
+   });
+
+   const damageTypeEntry = $derived({
       item,
-      key: "range",
-      label: localize(config.weapon.range),
-      value: weapon.range,
-      path: "system.weapon",
-      type: "number",
-    },
-    {
-      item,
-      key: "recoilComp",
-      label: localize(config.weapon.recoilCompensation),
-      value: weapon.recoilComp,
-      path: "system.weapon",
-      type: "number",
-    },
-    {
-      item,
-      key: "currentClipId",
-      label: localize(config.weapon.currentClip),
-      value: weapon.currentClipId,
-      path: "system.weapon",
-      type: "text",
-    },
-  ];
+      key: "damageType",
+      label: localize(config.weapon.damageType),
+      value: system.damageType,
+      path: "system",
+      type: "select",
+      options: Object.values(config.damageType).map(localize),
+   });
+
+   function attack() {
+      console.log("Pew pew");
+   }
+
+   function reload() {
+      console.log("Pew pew");
+   }
+
+   function newClip() {
+      console.log("Pew pew");
+   }
+
+   const weaponEntries = [
+      {
+         item,
+         key: "damage",
+         label: localize(config.weapon.damage),
+         value: system.damage,
+         path: "system",
+         type: "number",
+      },
+      {
+         item,
+         key: "range",
+         label: localize(config.weapon.range),
+         value: system.range,
+         path: "system",
+         type: "number",
+      },
+      {
+         item,
+         key: "recoilComp",
+         label: localize(config.weapon.recoilCompensation),
+         value: system.recoilComp,
+         path: "system",
+         type: "number",
+      },
+   ];
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-  <div class={`sr3e-waterfall sr3e-waterfall--${layoutMode}`}>
-    <ItemSheetComponent>
-      <Image src={item.img} title={item.name} />
+<ItemSheetWrapper csslayout={"double"}>
+   <ItemSheetComponent>
+      <Image entity={item} />
       <div class="stat-grid single-column">
-        <StatCard>
-          <input
-          class="large"
-          name="name"
-          type="text"
-          bind:value={item.name}
-          onchange={(e) => item.update({ name: e.target.value })}
-          />
-        </StatCard>
+         <input
+            class="large"
+            name="name"
+            type="text"
+            value={name}
+            onchange={(e) => item.update({ ["name"]: e.target.value })}
+         />
       </div>
-    </ItemSheetComponent>
+   </ItemSheetComponent>
 
-    <ItemSheetComponent>
+   <ItemSheetComponent>
       <h3>{localize(config.common.details)}</h3>
       <div class="stat-grid single-column">
-        <StatCard {...weaponMode} />
+         <StatCard {...weaponMode} />
+         <StatCard {...damageTypeEntry} />
+         <StatCard {...ammoClassEntry} />
       </div>
 
       <div class="stat-grid two-column">
-        {#each weaponEntries as entry}
-          <StatCard {...entry} />
-        {/each}
+         {#each weaponEntries as entry}
+            <StatCard {...entry} />
+         {/each}
       </div>
-    </ItemSheetComponent>
-
-    <Commodity {item} {config} gridCss="two-column" />
-    <Portability {item} {config} gridCss="two-column" />
-    <JournalViewer document={item} {config} />
-  </div>
-</div>
+   </ItemSheetComponent>
+   <ItemSheetComponent>
+      <div>
+         <h3>{localize(config.gadget.gadget)}</h3>
+      </div>
+      <GadgetViewer document={item} {config} />
+   </ItemSheetComponent>
+   <ItemSheetComponent>
+      <ActiveEffectsViewer document={item} {config} isSlim={true} />
+   </ItemSheetComponent>
+   <Commodity {item} {config} gridCss="two-column" />
+   <Portability {item} {config} gridCss="two-column" />
+   <JournalViewer document={item} {config} />
+</ItemSheetWrapper>

@@ -1,11 +1,9 @@
 <script>
    import { slide } from "svelte/transition";
-   import { openFilePicker, localize } from "../../../services/utilities.js";
-   import CardToolbar from "./CardToolbar.svelte";
-   import { tick } from "svelte";
-   import Image from "./basic/Image.svelte";
-   import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte.js";
-   import TextInput from "./basic/TextInput.svelte";
+   import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
+   import { localize } from "@services/utilities.js";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
    let storeManager = StoreManager.Subscribe(actor);
@@ -75,10 +73,7 @@
       </div>
 
       {#if $isDetailsOpenStore}
-         <div
-            in:slide={{ duration: 100, easing: cubicInOut }}
-            out:slide={{ duration: 50, easing: cubicInOut }}
-         >
+         <div in:slide={{ duration: 100, easing: cubicInOut }} out:slide={{ duration: 50, easing: cubicInOut }}>
             <div>
                <input
                   type="text"
