@@ -467,37 +467,35 @@ class MagicModel extends foundry.abstract.TypeDataModel {
 class CommodityModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      commodity: new foundry.data.fields.SchemaField({
-        days: new foundry.data.fields.NumberField({
+      days: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      cost: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      streetIndex: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 1
+      }),
+      legality: new foundry.data.fields.SchemaField({
+        status: new foundry.data.fields.StringField({
           required: true,
           initial: 0
         }),
-        cost: new foundry.data.fields.NumberField({
+        permit: new foundry.data.fields.StringField({
           required: true,
-          initial: 0
+          initial: ""
         }),
-        streetIndex: new foundry.data.fields.NumberField({
+        priority: new foundry.data.fields.StringField({
           required: true,
-          initial: 1
-        }),
-        legality: new foundry.data.fields.SchemaField({
-          status: new foundry.data.fields.StringField({
-            required: true,
-            initial: 0
-          }),
-          permit: new foundry.data.fields.StringField({
-            required: true,
-            initial: ""
-          }),
-          priority: new foundry.data.fields.StringField({
-            required: true,
-            initial: ""
-          })
-        }),
-        isBroken: new foundry.data.fields.BooleanField({
-          required: true,
-          initial: false
+          initial: ""
         })
+      }),
+      isBroken: new foundry.data.fields.BooleanField({
+        required: true,
+        initial: false
       })
     };
   }
@@ -505,19 +503,17 @@ class CommodityModel extends foundry.abstract.TypeDataModel {
 class PortabilityModel extends foundry.abstract.TypeDataModel {
   static defineSchema() {
     return {
-      portability: new foundry.data.fields.SchemaField({
-        conceal: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0
-        }),
-        weight: new foundry.data.fields.NumberField({
-          required: true,
-          initial: 0
-        }),
-        isCarriedOnPerson: new foundry.data.fields.BooleanField({
-          required: true,
-          initial: false
-        })
+      conceal: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      weight: new foundry.data.fields.NumberField({
+        required: true,
+        initial: 0
+      }),
+      isCarriedOnPerson: new foundry.data.fields.BooleanField({
+        required: true,
+        initial: false
       })
     };
   }
@@ -578,8 +574,8 @@ class AmmunitionModel extends foundry.abstract.TypeDataModel {
       compatibleWeaponIds: new foundry.data.fields.ArrayField(
         new foundry.data.fields.StringField()
       ),
-      ...PortabilityModel.defineSchema(),
-      ...CommodityModel.defineSchema()
+      commodity: CommodityModel.defineSchema(),
+      portability: PortabilityModel.defineSchema()
     };
   }
 }

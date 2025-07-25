@@ -20,8 +20,8 @@ export default class AmmunitionModel extends foundry.abstract.TypeDataModel {
             compatibleWeaponIds: new foundry.data.fields.ArrayField(
                 new foundry.data.fields.StringField()),
                 
-            ...PortabilityModel.defineSchema(),
-            ...CommodityModel.defineSchema(),
+            commodity: CommodityModel.defineSchema(),
+            portability: PortabilityModel.defineSchema(),
         };
     }
 }
