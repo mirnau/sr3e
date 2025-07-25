@@ -12,16 +12,24 @@ export default class Gadget extends foundry.abstract.Document {
    static get metadata() {
       return {
          name: "Gadget",
-         collection: "gadgets",
          label: "Gadget",
          labelPlural: "Gadgets",
-         isPrimary: true,
-         embedded: {},
-         permissions: { create: "ITEM_CREATE" },
+         collection: "gadgets", // symbolic only
+         isEmbedded: true,
+         embedded: {
+            ActiveEffect: "effects",
+         },
          hasSystemData: true,
-         indexed: true,
-         types: ["weaponmod"],
+         permissions: { create: "ITEM_CREATE" },
       };
+   }
+
+   get effects() {
+      return this._getEmbeddedCollection("ActiveEffect");
+   }
+
+   get id() {
+      return this._source._id;
    }
 
    static Register() {
@@ -31,6 +39,9 @@ export default class Gadget extends foundry.abstract.Document {
             documentClass: Gadget,
             dataModels: {
                weaponmod: GadgetModel,
+            },
+            embedded: {
+               ActiveEffect: "effects",
             },
             sheetClasses: {
                weaponmod: {
@@ -65,19 +76,6 @@ export default class Gadget extends foundry.abstract.Document {
          this._uuid = `Gadget.${id}`;
       }
       return this._uuid;
-   }
-
-   get effects() {
-      if (!this._effects) {
-         const raw = this._source?.effects ?? [];
-         const col = new foundry.utils.Collection();
-         for (const effectData of raw) {
-            const effect = new CONFIG.ActiveEffect.documentClass(effectData, { parent: this });
-            col.set(effect.id, effect);
-         }
-         this._effects = col;
-      }
-      return this._effects;
    }
 
    set effects(value) {
@@ -119,6 +117,62 @@ export default class Gadget extends foundry.abstract.Document {
       }
 
       return this._sheet;
+   }
+
+   async createEmbeddedDocuments(embeddedName, data, context = {}) {
+      if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+      const parentItem = this.parent;
+      if (!parentItem) throw new Error("Cannot create ActiveEffects — Gadget has no parent");
+
+      const incoming = Array.isArray(data) ? data : [data];
+      const current = this._source.effects ?? [];
+
+      const newEffects = incoming.map((d) => {
+         const clone = foundry.utils.deepClone(d);
+         clone._id ??= foundry.utils.randomID();
+         return clone;
+      });
+
+      const updated = [...current, ...newEffects];
+
+      const newGadgets = parentItem.system.gadgets.map((g) => (g._id === this.id ? { ...g, effects: updated } : g));
+
+      await parentItem.update({ "system.gadgets": newGadgets });
+      this._collections = {};
+      return this.effects.filter((e) => newEffects.some((n) => n._id === e.id));
+   }
+
+   async deleteEmbeddedDocuments(embeddedName, ids, context = {}) {
+      if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+      const parentItem = this.parent;
+      if (!parentItem) throw new Error("Cannot delete ActiveEffects — Gadget has no parent");
+
+      const current = this._source.effects ?? [];
+      const remaining = current.filter((e) => !ids.includes(e._id));
+
+      const newGadgets = parentItem.system.gadgets.map((g) => (g._id === this.id ? { ...g, effects: remaining } : g));
+
+      await parentItem.update({ "system.gadgets": newGadgets });
+      this._collections = {};
+      return ids;
+   }
+
+   async updateEmbeddedDocuments(embeddedName, updates = [], context = {}) {
+      if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+      const parentItem = this.parent;
+      if (!parentItem) throw new Error("Cannot update ActiveEffects — Gadget has no parent");
+
+      const current = this._source.effects ?? [];
+      const updated = current.map((e) => {
+         const patch = updates.find((u) => u._id === e._id);
+         return patch ? foundry.utils.mergeObject(e, patch, { inplace: false }) : e;
+      });
+
+      const newGadgets = parentItem.system.gadgets.map((g) => (g._id === this.id ? { ...g, effects: updated } : g));
+
+      await parentItem.update({ "system.gadgets": newGadgets });
+      this._collections = {};
+      return this.effects.filter((e) => updates.some((u) => u._id === e.id));
    }
 
    get name() {

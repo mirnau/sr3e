@@ -2,9 +2,28 @@ import Gadget from "@documents/Gadget.js";
 import GadgetSheet from "@sheets/GadgetSheet.js";
 
 export default class SR3EItem extends Item {
+   static get metadata() {
+      const base = super.metadata;
+      return {
+         ...base,
+         embedded: {
+            ...base.embedded,
+            Gadget: "system.gadgets",
+         },
+      };
+   }
    static Register() {
-      console.log("SR3EItem.Register() is hit");
+      CONFIG.Item ??= {};
+      CONFIG.Item.embedded ??= {};
+      CONFIG.Item.embedded.Gadget = Gadget;
       CONFIG.Item.documentClass = SR3EItem;
+   }
+
+   get gadgets() {
+      const gadgetData = this.system?.gadgets ?? [];
+      return new foundry.utils.Collection(
+         gadgetData.map((g) => [g._id, new CONFIG.Gadget.documentClass(g, { parent: this })])
+      );
    }
 
    prepareDerivedData() {
@@ -20,13 +39,7 @@ export default class SR3EItem extends Item {
       }
    }
 
-   get gadgets() {
-      const stored = this.system.gadgets ?? [];
-      return stored.map((data) => new Gadget(data, { parent: this }));
-   }
-
    async addGadget(gadgetItem) {
-      console.log("addGadget invoked with:", gadgetItem.name);
       const gadgetId = foundry.utils.randomID();
 
       const clonedEffects = gadgetItem.effects.contents.map((effect) => {
@@ -37,10 +50,6 @@ export default class SR3EItem extends Item {
       });
 
       const typeKey = gadgetItem.system.gadget?.target?.split(".").pop() ?? "generic";
-
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      console.log("Type Key", typeKey);
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
       const gadgetData = {
          _id: gadgetId,
@@ -56,30 +65,18 @@ export default class SR3EItem extends Item {
          },
       };
 
-      const existing = this.system.gadgets ?? [];
-      await this.update({ "system.gadgets": [...existing, gadgetData] });
+      await this.createEmbeddedDocuments("Gadget", [gadgetData]);
    }
 
    async removeGadget(gadgetId) {
-      const existing = this.system.gadgets ?? [];
-      const filtered = existing.filter((g) => g._id !== gadgetId);
-      await this.update({ "system.gadgets": filtered });
+      await this.deleteEmbeddedDocuments("Gadget", [gadgetId]);
    }
 
    async openGadgetEditor(gadgetId) {
-      if (!gadgetId || typeof gadgetId !== "string") {
-         throw new Error("Gadget ID must be a string.");
-      }
-
-      const raw = this.system.gadgets?.find((g) => g._id === gadgetId);
-      if (!raw) {
+      const gadget = this.gadgets.get(gadgetId);
+      if (!gadget) {
          throw new Error(`No gadget with ID "${gadgetId}" found on item "${this.name}".`);
       }
-
-      // ✅ Pass the parent in the second argument
-      const gadget = new Gadget(raw, { parent: this });
-
-      console.log("Opening Gadget editor for:", gadgetId, gadget);
 
       return gadget.sheet.render(true);
    }

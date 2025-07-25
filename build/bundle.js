@@ -4895,7 +4895,6 @@ function RollComposerComponent($$anchor, $$props) {
         explodes: !get$1(isDefaulting)
       }
     });
-    Hooks.callAll("actorSystemRecalculated", $$props.actor);
   }
   function getRoot(el) {
     while (el && !focusables.includes(el)) el = el.parentElement;
@@ -10678,15 +10677,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   let transferredEffects = state(proxy([]));
   let isViewerInstanceOfActor = $$props.document instanceof Actor;
   onMount(() => {
-    const handler = (actor) => {
-      var _a;
-      if (((_a = $$props.document) == null ? void 0 : _a.id) !== actor.id) return;
-      set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
-      set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
-    };
-    Hooks.on("actorSystemRecalculated", handler);
     onDestroy(() => {
-      Hooks.off("actorSystemRecalculated", handler);
     });
   });
   user_effect(() => {
@@ -10694,7 +10685,6 @@ function ActiveEffectsViewer($$anchor, $$props) {
     set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({ activeEffect, item: item2 }))) : []));
   });
   async function onHandleEffectTriggerUI() {
-    Hooks.callAll("actorSystemRecalculated", $$props.document);
     set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
     set(transferredEffects, proxy([...get$1(transferredEffects)]));
   }
@@ -16941,16 +16931,23 @@ class Gadget extends foundry.abstract.Document {
   static get metadata() {
     return {
       name: "Gadget",
-      collection: "gadgets",
       label: "Gadget",
       labelPlural: "Gadgets",
-      isPrimary: true,
-      embedded: {},
-      permissions: { create: "ITEM_CREATE" },
+      collection: "gadgets",
+      // symbolic only
+      isEmbedded: true,
+      embedded: {
+        ActiveEffect: "effects"
+      },
       hasSystemData: true,
-      indexed: true,
-      types: ["weaponmod"]
+      permissions: { create: "ITEM_CREATE" }
     };
+  }
+  get effects() {
+    return this._getEmbeddedCollection("ActiveEffect");
+  }
+  get id() {
+    return this._source._id;
   }
   static Register() {
     CONFIG.Gadget = foundry.utils.mergeObject(
@@ -16959,6 +16956,9 @@ class Gadget extends foundry.abstract.Document {
         documentClass: Gadget,
         dataModels: {
           weaponmod: GadgetModel
+        },
+        embedded: {
+          ActiveEffect: "effects"
         },
         sheetClasses: {
           weaponmod: {
@@ -16989,19 +16989,6 @@ class Gadget extends foundry.abstract.Document {
       this._uuid = `Gadget.${id}`;
     }
     return this._uuid;
-  }
-  get effects() {
-    var _a;
-    if (!this._effects) {
-      const raw = ((_a = this._source) == null ? void 0 : _a.effects) ?? [];
-      const col = new foundry.utils.Collection();
-      for (const effectData of raw) {
-        const effect2 = new CONFIG.ActiveEffect.documentClass(effectData, { parent: this });
-        col.set(effect2.id, effect2);
-      }
-      this._effects = col;
-    }
-    return this._effects;
   }
   set effects(value) {
     this._effects = void 0;
@@ -17035,6 +17022,48 @@ class Gadget extends foundry.abstract.Document {
       });
     }
     return this._sheet;
+  }
+  async createEmbeddedDocuments(embeddedName, data, context = {}) {
+    if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+    const parentItem = this.parent;
+    if (!parentItem) throw new Error("Cannot create ActiveEffects — Gadget has no parent");
+    const incoming = Array.isArray(data) ? data : [data];
+    const current = this._source.effects ?? [];
+    const newEffects = incoming.map((d) => {
+      const clone = foundry.utils.deepClone(d);
+      clone._id ?? (clone._id = foundry.utils.randomID());
+      return clone;
+    });
+    const updated = [...current, ...newEffects];
+    const newGadgets = parentItem.system.gadgets.map((g) => g._id === this.id ? { ...g, effects: updated } : g);
+    await parentItem.update({ "system.gadgets": newGadgets });
+    this._collections = {};
+    return this.effects.filter((e) => newEffects.some((n) => n._id === e.id));
+  }
+  async deleteEmbeddedDocuments(embeddedName, ids, context = {}) {
+    if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+    const parentItem = this.parent;
+    if (!parentItem) throw new Error("Cannot delete ActiveEffects — Gadget has no parent");
+    const current = this._source.effects ?? [];
+    const remaining = current.filter((e) => !ids.includes(e._id));
+    const newGadgets = parentItem.system.gadgets.map((g) => g._id === this.id ? { ...g, effects: remaining } : g);
+    await parentItem.update({ "system.gadgets": newGadgets });
+    this._collections = {};
+    return ids;
+  }
+  async updateEmbeddedDocuments(embeddedName, updates = [], context = {}) {
+    if (embeddedName !== "ActiveEffect") throw new Error(`Unsupported embedded type: ${embeddedName}`);
+    const parentItem = this.parent;
+    if (!parentItem) throw new Error("Cannot update ActiveEffects — Gadget has no parent");
+    const current = this._source.effects ?? [];
+    const updated = current.map((e) => {
+      const patch = updates.find((u) => u._id === e._id);
+      return patch ? foundry.utils.mergeObject(e, patch, { inplace: false }) : e;
+    });
+    const newGadgets = parentItem.system.gadgets.map((g) => g._id === this.id ? { ...g, effects: updated } : g);
+    await parentItem.update({ "system.gadgets": newGadgets });
+    this._collections = {};
+    return this.effects.filter((e) => updates.some((u) => u._id === e.id));
   }
   get name() {
     var _a;
@@ -17087,9 +17116,29 @@ class Gadget extends foundry.abstract.Document {
   }
 }
 class SR3EItem extends Item {
+  static get metadata() {
+    const base = super.metadata;
+    return {
+      ...base,
+      embedded: {
+        ...base.embedded,
+        Gadget: "system.gadgets"
+      }
+    };
+  }
   static Register() {
-    console.log("SR3EItem.Register() is hit");
+    var _a;
+    CONFIG.Item ?? (CONFIG.Item = {});
+    (_a = CONFIG.Item).embedded ?? (_a.embedded = {});
+    CONFIG.Item.embedded.Gadget = Gadget;
     CONFIG.Item.documentClass = SR3EItem;
+  }
+  get gadgets() {
+    var _a;
+    const gadgetData = ((_a = this.system) == null ? void 0 : _a.gadgets) ?? [];
+    return new foundry.utils.Collection(
+      gadgetData.map((g) => [g._id, new CONFIG.Gadget.documentClass(g, { parent: this })])
+    );
   }
   prepareDerivedData() {
     var _a;
@@ -17103,13 +17152,8 @@ class SR3EItem extends Item {
       }
     }
   }
-  get gadgets() {
-    const stored = this.system.gadgets ?? [];
-    return stored.map((data) => new Gadget(data, { parent: this }));
-  }
   async addGadget(gadgetItem) {
     var _a, _b;
-    console.log("addGadget invoked with:", gadgetItem.name);
     const gadgetId = foundry.utils.randomID();
     const clonedEffects = gadgetItem.effects.contents.map((effect2) => {
       const data = effect2.toObject();
@@ -17118,9 +17162,6 @@ class SR3EItem extends Item {
       return data;
     });
     const typeKey = ((_b = (_a = gadgetItem.system.gadget) == null ? void 0 : _a.target) == null ? void 0 : _b.split(".").pop()) ?? "generic";
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    console.log("Type Key", typeKey);
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     const gadgetData = {
       _id: gadgetId,
       name: gadgetItem.name,
@@ -17134,25 +17175,16 @@ class SR3EItem extends Item {
         }
       }
     };
-    const existing = this.system.gadgets ?? [];
-    await this.update({ "system.gadgets": [...existing, gadgetData] });
+    await this.createEmbeddedDocuments("Gadget", [gadgetData]);
   }
   async removeGadget(gadgetId) {
-    const existing = this.system.gadgets ?? [];
-    const filtered = existing.filter((g) => g._id !== gadgetId);
-    await this.update({ "system.gadgets": filtered });
+    await this.deleteEmbeddedDocuments("Gadget", [gadgetId]);
   }
   async openGadgetEditor(gadgetId) {
-    var _a;
-    if (!gadgetId || typeof gadgetId !== "string") {
-      throw new Error("Gadget ID must be a string.");
-    }
-    const raw = (_a = this.system.gadgets) == null ? void 0 : _a.find((g) => g._id === gadgetId);
-    if (!raw) {
+    const gadget = this.gadgets.get(gadgetId);
+    if (!gadget) {
       throw new Error(`No gadget with ID "${gadgetId}" found on item "${this.name}".`);
     }
-    const gadget = new Gadget(raw, { parent: this });
-    console.log("Opening Gadget editor for:", gadgetId, gadget);
     return gadget.sheet.render(true);
   }
 }
@@ -17573,6 +17605,21 @@ function registerHooks() {
   Hooks.on(hooks.renderApplicationV2, injectCssSelectors);
   Hooks.on(hooks.renderChatMessageHTML, wrapChatMessage);
   Hooks.on(hooks.renderChatMessageHTML, applyAuthorColorToChatMessage);
+  Hooks.on("createActiveEffect", (effect2, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
+  Hooks.on("updateActiveEffect", (effect2, changes, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
+  Hooks.on("deleteActiveEffect", (effect2, options, userId) => {
+    if (effect2.parent instanceof Actor) {
+      Hooks.callAll("actorSystemRecalculated", effect2.parent);
+    }
+  });
   Hooks.on("ready", () => {
     getNewsService();
     const activeBroadcasters = game.actors.filter(
