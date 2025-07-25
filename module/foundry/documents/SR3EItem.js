@@ -8,22 +8,31 @@ export default class SR3EItem extends Item {
          ...base,
          embedded: {
             ...base.embedded,
-            Gadget: "system.gadgets",
+            Gadget: "gadgets", // ✅ store directly on root, not system.gadgets
          },
       };
    }
+
    static Register() {
-      CONFIG.Item ??= {};
+      CONFIG.Item.documentClass = SR3EItem;
+      CONFIG.Item.embeddedDocumentClasses ??= {};
+      CONFIG.Item.embeddedDocumentClasses.Gadget = Gadget;
+
+      // Optional: helpful for introspection
       CONFIG.Item.embedded ??= {};
       CONFIG.Item.embedded.Gadget = Gadget;
-      CONFIG.Item.documentClass = SR3EItem;
+   }
+
+   static defineSchema() {
+      const schema = super.defineSchema();
+      schema.gadgets = new foundry.data.fields.EmbeddedCollectionField(Gadget, {
+         initial: [],
+      });
+      return schema;
    }
 
    get gadgets() {
-      const gadgetData = this.system?.gadgets ?? [];
-      return new foundry.utils.Collection(
-         gadgetData.map((g) => [g._id, new CONFIG.Gadget.documentClass(g, { parent: this })])
-      );
+      return this.getEmbeddedCollection("Gadget");
    }
 
    prepareDerivedData() {
@@ -65,11 +74,11 @@ export default class SR3EItem extends Item {
          },
       };
 
-      await this.createEmbeddedDocuments("Gadget", [gadgetData]);
+      return this.createEmbeddedDocuments("Gadget", [gadgetData]);
    }
 
    async removeGadget(gadgetId) {
-      await this.deleteEmbeddedDocuments("Gadget", [gadgetId]);
+      return this.deleteEmbeddedDocuments("Gadget", [gadgetId]);
    }
 
    async openGadgetEditor(gadgetId) {
