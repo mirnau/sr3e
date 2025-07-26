@@ -3,6 +3,7 @@
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
+   import GadgetEditorSheet from "@sheets/GadgetEditorSheet.js";
 
    let { document, activeEffect, config, isViewerInstanceOfActor = false, onHandleEffectTriggerUI } = $props();
 
@@ -78,8 +79,9 @@
                type="button"
                aria-label={localize(config.sheet.delete)}
                class="fas fa-edit"
-               onclick={() => openEditor(activeEffect)}
+               onclick={() => new GadgetEditorSheet(document, activeEffect, config).render(true)}
             ></button>
+
             <button
                type="button"
                aria-label={localize(config.sheet.delete)}

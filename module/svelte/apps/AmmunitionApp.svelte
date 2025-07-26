@@ -1,5 +1,5 @@
 <script>
-   import { localize, openFilePicker } from "@services/utilities.js";
+   import { localize } from "@services/utilities.js";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
    import Portability from "@sveltecomponent/Portability.svelte";
