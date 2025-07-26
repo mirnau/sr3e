@@ -1,6 +1,6 @@
 <script>
    import { localize } from "@services/utilities.js";
-   import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
+   import ActiveEffectsRow from "./GadgetRow.svelte";
    import { onMount, onDestroy } from "svelte";
 
    let { document, config, isSlim = false } = $props();
@@ -92,11 +92,11 @@
          </tr>
       </thead>
       <tbody>
-         {#each actorAttachedEffects as activeEffect (activeEffect.id)}
+         {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.type) as activeEffect (activeEffect.id)}
             <ActiveEffectsRow {document} {activeEffect} {config} {onHandleEffectTriggerUI} />
          {/each}
-         {#if document instanceof Actor}
-            {#each transferredEffects as { activeEffect, item } (activeEffect.id)}
+         {#if isViewerInstanceOfActor}
+            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.type) as { activeEffect, item } (activeEffect.id)}
                <ActiveEffectsRow
                   document={item}
                   {activeEffect}

@@ -1,4 +1,5 @@
 <script>
+   import { localize } from "@services/utilities.js";
    let { item, key, label, value, path, type = "text", options = [] } = $props();
 
    function update(e) {
@@ -23,6 +24,7 @@
       <input type="checkbox" checked={value} onchange={update} />
    {:else if type === "select"}
       <select {value} onchange={update}>
+         <option value="" disabled selected hidden>{game.i18n.localize(CONFIG.sr3e.placeholders.selectanoption)}</option>
          {#each options as option}
             <option value={option} selected={value === option}>{option}</option>
          {/each}

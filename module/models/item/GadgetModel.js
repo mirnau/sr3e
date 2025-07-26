@@ -6,7 +6,7 @@ export default class GadgetModel extends foundry.abstract.TypeDataModel {
       return {
          type: new foundry.data.fields.StringField({
             required: true,
-            initial: "weaponmod",
+            initial: "",
          }),
 
          portability: new foundry.data.fields.SchemaField(PortabilityModel.defineSchema()),

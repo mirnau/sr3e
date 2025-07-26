@@ -1,5 +1,5 @@
 <script>
-   import Commodity from "@sveltecomponent/basic/StatCard.svelte";
+   import Commodity from "@sveltecomponent/Commodity.svelte";
    import { localize } from "@services/utilities.js";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
@@ -8,13 +8,14 @@
    import Image from "@sveltecomponent/basic/Image.svelte";
    let { item, config } = $props();
    let name = $state(item.name);
+   const system = $state(item.system);
 
    const entries = $derived([
       {
          item,
-         key: "class",
+         key: "type",
          label: localize(config.gadget.type),
-         value: item.system.type,
+         value: system.type,
          path: "system",
          type: "select",
          options: Object.values(config.gadgettypes).map(localize),

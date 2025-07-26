@@ -168,11 +168,13 @@
       "notifications": {
          "assignattributesfirst": "You need to assign all attributes before assigning skills",
          "skillpointsrefund": "Your skillpoints have been refunded!",
-         "skillpricecrossedthreshold": "Points over the attribute limit will cost two skill points."
+         "skillpricecrossedthreshold": "Points over the attribute limit will cost two skill points.",
+         "warnnogadgettypeselected": "No gadget subtype has been selected, please pick one in the dropdown of the gadget item!"
       },
       "placeholders": {
          "human": "Human",
-         "fullshaman": "Full Mage Bear Shaman"
+         "fullshaman": "Full Mage Bear Shaman",
+         "selectanoption": "Select an Option..."
       },
       "portability": {
          "portability": "Portability",

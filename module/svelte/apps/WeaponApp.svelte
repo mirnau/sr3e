@@ -117,7 +117,7 @@
       <div>
          <h3>{localize(config.gadget.gadget)}</h3>
       </div>
-      <GadgetViewer {item} {config} />
+      <GadgetViewer document={item} {config} isSlim={true} />
    </ItemSheetComponent>
    <ItemSheetComponent>
       <ActiveEffectsViewer document={item} {config} isSlim={true} />

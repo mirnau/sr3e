@@ -128,7 +128,7 @@ sr3e.dicepools = {
 sr3e.gadget = {
    gadget: "sr3e.gadget.gadget",
    type: "sr3e.gadget.type"
-}
+};
 
 sr3e.karma = {
    karma: "sr3e.karma.karma",
@@ -153,6 +153,7 @@ sr3e.movement = {
 sr3e.placeholders = {
    human: "sr3e.placeholders.human",
    fullshaman: "sr3e.placeholders.fullshaman",
+   selectanoption: "sr3e.placeholders.selectanoption"
 };
 
 sr3e.karmamanager = {
@@ -257,6 +258,7 @@ sr3e.notifications = {
    assignattributesfirst: "sr3e.notifications.assignattributesfirst",
    skillpointsrefund: "sr3e.notifications.skillpointsrefund",
    skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold",
+   warnnogadgettypeselected: "sr3e.notifications.warnnogadgettypeselected"
 };
 
 sr3e.time = {
