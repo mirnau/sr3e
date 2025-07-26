@@ -88,7 +88,8 @@
          "changesHeader": "Changes"
       },
       "gadget": {
-         "gadget": "Gadget"
+         "gadget": "Gadget",
+         "type": "Gadget Type"
       },
       "health": {
          "health": "Health",
@@ -358,6 +359,9 @@
          "3": "Priority 3",
          "4": "Priority 4",
          "X": "Extreme Priority"
+      },
+      "gadgettypes": {
+         "weaponmod": "Weapon Modification"
       }
    }
 }

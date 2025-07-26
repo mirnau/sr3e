@@ -126,7 +126,8 @@ sr3e.dicepools = {
 };
 
 sr3e.gadget = {
-   gadget: "sr3e.gadget.gadget"
+   gadget: "sr3e.gadget.gadget",
+   type: "sr3e.gadget.type"
 }
 
 sr3e.karma = {
@@ -397,3 +398,7 @@ sr3e.legalpriority = {
    4: "sr3e.legalpriority.4",
    X: "sr3e.legalpriority.X",
 };
+
+sr3e.gadgettypes = {
+   weaponmod: "sr3e.gadgettypes.weaponmod",
+}

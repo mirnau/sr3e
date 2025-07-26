@@ -10,6 +10,11 @@ import AmmunitionModel from "@models/item/AmmunitionModel.js";
 import SkillModel from "@models/item/SkillModel.js";
 import TransactionModel from "@models/item/TransactionModel.js";
 import GadgetModel from "@models/item/GadgetModel.js";
+import FocusModel from "@models/item/FocusModel.js";
+import TechInterfaceModel from "@models/item/TechInterfaceModel.js";
+import SpellModel from "@models/item/SpellModel.js";
+import WearableModel from "@models/item/WearableModel.js";
+import WearableItemSheet from "@sheets/WearableItemSheet.js";
 
 import CharacterActorSheet from "@sheets/CharacterActorSheet.js";
 import MetatypeItemSheet from "@sheets/MetatypeItemSheet.js";
@@ -21,6 +26,9 @@ import TransactionItemSheet from "@sheets/TransactionItemSheet.js";
 import StorytellerScreenActorSheet from "@sheets/StorytellerScreenActorSheet.js";
 import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
 import GadgetItemSheet from "@sheets/GadgetItemSheet.js";
+import FocusItemSheet from "@sheets/FocusItemSheet.js";
+import TechInterfaceItemSheet from "@sheets/TechInterfaceItemSheet.js";
+import SpellItemSheet from "@sheets/SpellItemSheet.js";
 
 import { sr3e } from "@config/config.js";
 
@@ -400,6 +408,30 @@ function registerHooks() {
                type: "gadget",
                model: GadgetModel,
                sheet: GadgetItemSheet,
+            },
+            {
+               docClass: Item,
+               type: "focus",
+               model: FocusModel,
+               sheet: FocusItemSheet,
+            },
+            {
+               docClass: Item,
+               type: "techinterface",
+               model: TechInterfaceModel,
+               sheet: TechInterfaceItemSheet,
+            },
+            {
+               docClass: Item,
+               type: "spell",
+               model: SpellModel,
+               sheet: SpellItemSheet,
+            },
+            {
+               docClass: Item,
+               type: "wearable",
+               model: WearableModel,
+               sheet: WearableItemSheet,
             },
          ],
       });

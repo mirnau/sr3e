@@ -1,13 +1,15 @@
 <script>
-   let { item, config } = $props();
+   let { document, config } = $props();
 
    let dropZone;
    let dragActive = $state(false);
    let dragHover = $state(false);
+   const isReady = $derived(document?.effects instanceof foundry.utils.Collection);
+
 
    function handleDragStart(event) {
       dragActive = true;
-      const data = { type: item.type, uuid: item.uuid };
+      const data = { type: document.type, uuid: document.uuid };
       event.dataTransfer.setData("text/plain", JSON.stringify(data));
       event.dataTransfer.effectAllowed = "move";
    }
@@ -33,18 +35,46 @@
       }
    }
 
-   async function handleDrop(event) {
-      console.log("handleDrop was touched", item.gadgets.length);
+   async function addEffect(droppedItem) {
+      const commodity = droppedItem.system.commodity;
+      const type = droppedItem.system.type;
 
+      const effectsToAdd = droppedItem.effects.contents.map((effect) => {
+         const data = effect.toObject();
+
+         return {
+            ...data,
+            _id: foundry.utils.randomID(),
+            flags: {
+               ...data.flags,
+               sr3e: {
+                  ...data.flags?.sr3e,
+                  type,
+                  source: "manual",
+                  commodity, // ← straight from the dropped item
+               },
+            },
+         };
+      });
+
+      await document.createEmbeddedDocuments("ActiveEffect", effectsToAdd, { render: false });
+   }
+
+   async function handleDrop(event) {
       event.preventDefault();
       dragHover = false;
 
       const raw = event.dataTransfer.getData("text/plain");
+      if (!raw) return;
+
       const droppedData = JSON.parse(raw);
       const droppedItem = await fromUuid(droppedData.uuid);
 
-      await item.addGadget(droppedItem);
-      await item.prepareData();
+      if (!(droppedItem instanceof Item)) return;
+      if (droppedItem.type !== "gadget") return;
+
+      await addEffect(droppedItem);
+      await document.prepareData();
    }
 
    const dropZoneClass = `drop-zone ${dragActive ? "drag-active" : ""} ${dragHover ? "drag-hover" : ""}`;
@@ -66,24 +96,26 @@
       <table>
          <thead>
             <tr>
-               <th></th>
+               <th><button onclick={() => document.openGadgetEditor(gadget.id)}>Edit</button></th>
                <th>Name</th>
                <th>Actions</th>
             </tr>
          </thead>
          <tbody>
-            {#each item.gadgets as gadget (gadget.id)}
-               <tr>
-                  <td
-                     >{#if gadget.img}<img src={gadget.img} alt={gadget.name} />{/if}</td
-                  >
-                  <td>{gadget.name}</td>
-                  <td>
-                     <button onclick={() => item.openGadgetEditor(gadget.id)}>Edit</button>
-                     <button onclick={() => item.removeGadget(gadget.id)}>Remove</button>
-                  </td>
-               </tr>
-            {/each}
+            {#if isReady }
+               {#each document.effects.contents.filter((e) => e.flags?.sr3e?.type === "weaponmod") as weaponmod (weaponmod.id)}
+                  <tr>
+                     <td
+                        >{#if weaponmod.img}<img src={weaponmod.img} alt={weaponmod.name} />{/if}</td
+                     >
+                     <td>{weaponmod.name}</td>
+                     <td>
+                        <button onclick={() => document.openGadgetEditor(weaponmod.id)}>Edit</button>
+                        <button onclick={() => document.removeGadget(weaponmod.id)}>Remove</button>
+                     </td>
+                  </tr>
+               {/each}
+            {/if}
          </tbody>
       </table>
    </div>

@@ -1,19 +1,17 @@
 <script>
    import { localize, openFilePicker } from "@services/utilities.js";
-   import StatCard from "@sveltecomponent/StatCard.svelte";
-   import Commodity from "@sveltecomponent/Commodity.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
+   import Commodity from "@sveltecomponent/basic/StatCard.svelte";
    import Portability from "@sveltecomponent/Portability.svelte";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
 
    let { item = {}, config = {} } = $props();
 
    const system = $state(item.system);
    let name = $state(item.name);
-
-   const ammunitionTypeOptions = Object.values(config.ammunitionType).map(localize);
-   const ammunitionClassOptions = Object.values(config.ammunitionClass).map(localize);
 
    const ammoEntries = $derived([
       {
@@ -23,7 +21,7 @@
          value: system.class,
          path: "system",
          type: "select",
-         options: ammunitionClassOptions,
+         options: Object.values(config.ammunitionClass).map(localize),
       },
       {
          item,
@@ -32,7 +30,7 @@
          value: system.type,
          path: "system",
          type: "select",
-         options: ammunitionTypeOptions,
+         options: Object.values(config.ammunitionType).map(localize),
       },
       {
          item,

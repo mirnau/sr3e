@@ -33,8 +33,10 @@
             "ammunition": {},
             "skill": {},
             "transaction": {},
+            "wearable": {},
+            "techinterface": {},
             "spell": {},
-            "foci": {},
+            "focus": {},
             "gadget": {}
         }
     },

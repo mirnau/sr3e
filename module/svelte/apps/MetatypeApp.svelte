@@ -1,7 +1,7 @@
 <script>
    import { localize, openFilePicker } from "@services/utilities.js";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
-   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";

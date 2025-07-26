@@ -1,30 +1,25 @@
 <script>
-   import Commodity from "@sveltecomponent/Commodity.svelte";
-   import Portability from "@sveltecomponent/Portability.svelte";
+   import Commodity from "@sveltecomponent/basic/StatCard.svelte";
+   import { localize } from "@services/utilities.js";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
-   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
-   import { onDestroy } from "svelte";
    let { item, config } = $props();
    let name = $state(item.name);
 
-   let itemStoreManager = StoreManager.Subscribe(item);
-   onDestroy(() => {
-      StoreManager.Unsubscribe(item);
-   });
-
-   let isOnStore = itemStoreManager.GetRWStore("isOn");
-   let isBrokenStore = itemStoreManager.GetRWStore("commodity.isBroken");
-
-   $effect(() => {
-      if ($isOnStore) {
-         // foreach active effect on this object enable
-      } else {
-         // disable all active effects
-      }
-   });
+   const entries = $derived([
+      {
+         item,
+         key: "class",
+         label: localize(config.gadget.type),
+         value: item.system.type,
+         path: "system",
+         type: "select",
+         options: Object.values(config.gadgettypes).map(localize),
+      },
+   ]);
 </script>
 
 <ItemSheetWrapper csslayout={"single"}>
@@ -32,10 +27,12 @@
       <Image entity={item} />
       <div class="stat-grid single-column">
          <input type="text" value={name} onchange={(e) => item.update({ name: e.target.value })} />
+         {#each entries as entry}
+            <StatCard {...entry} />
+         {/each}
       </div>
    </ItemSheetComponent>
-   <Commodity {item} {config} />
-   <Portability {item} {config} />
+   <Commodity {item} {config} gridCss="two-column" />
    <ItemSheetComponent>
       <ActiveEffectsViewer document={item} {config} isSlim={true} />
    </ItemSheetComponent>

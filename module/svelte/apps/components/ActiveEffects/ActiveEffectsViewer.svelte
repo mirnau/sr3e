@@ -40,9 +40,6 @@
    });
 
    async function addEffect(e) {
-      event?.stopPropagation();
-      event?.preventDefault();
-
       await document.createEmbeddedDocuments(
          "ActiveEffect",
          [

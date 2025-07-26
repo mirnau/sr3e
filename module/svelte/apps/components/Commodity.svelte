@@ -1,11 +1,11 @@
 <script>
    import { localize } from "@services/utilities.js";
-   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    let { item, config, gridCss = "" } = $props();
    const system = $state(item.system);
-   const commodity = system.commodity ?? {};
-   const legality = commodity.legality ?? {};
+   const commodity = system.commodity;
+   const legality = commodity.legality;
 
    const entries = [
       {

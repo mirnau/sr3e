@@ -2,7 +2,7 @@
    import { localize, openFilePicker } from "@services/utilities.js";
    import { onMount } from "svelte";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
-   import StatCard from "@sveltecomponent/StatCard.svelte";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
    import Portability from "@sveltecomponent/Portability.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
