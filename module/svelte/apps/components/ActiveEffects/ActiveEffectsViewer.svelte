@@ -1,4 +1,3 @@
-
 <script>
    import { localize } from "@services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
@@ -29,39 +28,42 @@
 
    function refreshEffects() {
       actorAttachedEffects = [...document.effects.contents];
-      
-      transferredEffects = document instanceof Actor
-         ? document.items.contents.flatMap((item) =>
-              item.effects.contents.map((activeEffect) => ({ 
-                 activeEffect, 
-                 sourceDocument: item,
-                 canDelete: false 
-              }))
-           )
-         : [];
+
+      transferredEffects =
+         document instanceof Actor
+            ? document.items.contents.flatMap((item) =>
+                 item.effects.contents.map((activeEffect) => ({
+                    activeEffect,
+                    sourceDocument: item,
+                    canDelete: false,
+                 }))
+              )
+            : [];
    }
 
    async function addEffect() {
       await document.createEmbeddedDocuments(
          "ActiveEffect",
-         [{
-            name: "New Effect",
-            icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
-            origin: document.uuid,
-            disabled: false,
-            transfer: true,
-            duration: {
-               startTime: game.time.worldTime,
-               type: "none",
-               value: 0,
-            },
-            changes: [],
-            flags: {
-               sr3e: {
-                  source: "manual",
+         [
+            {
+               name: "New Effect",
+               icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
+               origin: document.uuid,
+               disabled: false,
+               transfer: true,
+               duration: {
+                  startTime: game.time.worldTime,
+                  type: "none",
+                  value: 0,
+               },
+               changes: [],
+               flags: {
+                  sr3e: {
+                     source: "manual",
+                  },
                },
             },
-         }],
+         ],
          { render: false }
       );
       await triggerRefresh();
@@ -104,12 +106,12 @@
          </tr>
       </thead>
       <tbody>
-         {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.type) as activeEffect (activeEffect.id)}
-            <ActiveEffectsRow 
-               effectData={{ 
-                  activeEffect, 
-                  sourceDocument: document, 
-                  canDelete: true 
+         {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.gadget) as activeEffect (activeEffect.id)}
+            <ActiveEffectsRow
+               effectData={{
+                  activeEffect,
+                  sourceDocument: document,
+                  canDelete: true,
                }}
                {config}
                onEdit={editEffect}
@@ -118,8 +120,8 @@
             />
          {/each}
          {#if isViewerInstanceOfActor}
-            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.type) as effectData (effectData.activeEffect.id)}
-               <ActiveEffectsRow 
+            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.gadget) as effectData (effectData.activeEffect.id)}
+               <ActiveEffectsRow
                   {effectData}
                   {config}
                   onEdit={editEffect}

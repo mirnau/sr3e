@@ -8,6 +8,7 @@
    let { document, effects = [], config, onHandleEffectTriggerUI } = $props();
 
    const primary = effects[0];
+   let sheetInstance = null;
 
    const storeManager = StoreManager.Subscribe(primary);
    onDestroy(() => StoreManager.Unsubscribe(primary));
@@ -16,6 +17,8 @@
    const disabledStore = storeManager.GetFlagStore("gadget.isEnabled");
 
    async function deleteEffectGroup() {
+      sheetInstance?.close();
+      sheetInstance = null;
       const ids = effects.map((e) => e.id);
       await document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
       await onHandleEffectTriggerUI();
@@ -28,7 +31,7 @@
       for (const effect of effects) {
          let effectStoreManager = StoreManager.Subscribe(effect);
 
-         let disabled = effectStoreManager.GetRWStore("disabled");
+         let disabled = effectStoreManager.GetRWStore("disabled", true);
          disabled.set(!isEnabled);
 
          let enabled = effectStoreManager.GetFlagStore("gadtget.isEnabled");
@@ -42,7 +45,8 @@
    }
 
    function openEditor() {
-      new GadgetEditorSheet(document, effects, config).render(true);
+      sheetInstance = new GadgetEditorSheet(document, effects, config);
+      sheetInstance.render(true);
    }
 </script>
 

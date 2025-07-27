@@ -69,11 +69,11 @@ export class StoreManager {
       }
    }
 
-   GetRWStore(dataPath) {
-      const fullPath = `system.${dataPath}`;
-      const initial = foundry.utils.getProperty(this.#document.system, dataPath);
+   GetRWStore(dataPath, isRoot = false) {
+      const fullPath = isRoot ? dataPath : `system.${dataPath}`;
+      const initial = foundry.utils.getProperty(isRoot ? this.#document : this.#document.system, dataPath);
 
-      if (!this.#persistentStore[dataPath]) {
+      if (!this.#persistentStore[fullPath]) {
          const cloned =
             initial && typeof initial === "object" ? (Array.isArray(initial) ? [...initial] : { ...initial }) : initial;
 
@@ -82,69 +82,67 @@ export class StoreManager {
 
          const unsub = store.subscribe((v) => {
             if (muted) return;
-            foundry.utils.setProperty(this.#document.system, dataPath, v);
+            foundry.utils.setProperty(isRoot ? this.#document : this.#document.system, dataPath, v);
             this.#document.update({ [fullPath]: v }, { render: false });
          });
 
          const docType = this.#document.documentName;
          const hook = (doc) => {
             if (doc.id !== this.#document.id) return;
-            const v = foundry.utils.getProperty(doc.system, dataPath);
+            const v = foundry.utils.getProperty(isRoot ? doc : doc.system, dataPath);
             muted = true;
             store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
             muted = false;
          };
 
          Hooks.on(`update${docType}`, hook);
-         this.#hookDisposers.set(dataPath, () => {
+         this.#hookDisposers.set(fullPath, () => {
             Hooks.off(`update${docType}`, hook);
             unsub();
          });
 
-         this.#persistentStore[dataPath] = store;
+         this.#persistentStore[fullPath] = store;
       }
 
-      return this.#persistentStore[dataPath];
+      return this.#persistentStore[fullPath];
    }
 
- GetROStore(dataPath) {
-   const key = `RO:${dataPath}`;
-   const initial = foundry.utils.getProperty(this.#document.system, dataPath);
+   GetROStore(dataPath) {
+      const key = `RO:${dataPath}`;
+      const initial = foundry.utils.getProperty(this.#document.system, dataPath);
 
-   if (!this.#persistentStore[key]) {
-      const store = writable(
-         initial && typeof initial === "object"
-            ? (Array.isArray(initial) ? [...initial] : { ...initial })
-            : initial
-      );
+      if (!this.#persistentStore[key]) {
+         const store = writable(
+            initial && typeof initial === "object" ? (Array.isArray(initial) ? [...initial] : { ...initial }) : initial
+         );
 
-      const docType = this.#document.documentName;
+         const docType = this.#document.documentName;
 
-      const updateHook = (doc) => {
-         if (doc.id !== this.#document.id) return;
-         const v = foundry.utils.getProperty(doc.system, dataPath);
-         store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
-      };
+         const updateHook = (doc) => {
+            if (doc.id !== this.#document.id) return;
+            const v = foundry.utils.getProperty(doc.system, dataPath);
+            store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
+         };
 
-      const recalcHook = (actor) => {
-         if (actor.id !== this.#document.id) return;
-         const v = foundry.utils.getProperty(actor.system, dataPath);
-         store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
-      };
+         const recalcHook = (actor) => {
+            if (actor.id !== this.#document.id) return;
+            const v = foundry.utils.getProperty(actor.system, dataPath);
+            store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
+         };
 
-      Hooks.on(`update${docType}`, updateHook);
-      Hooks.on("actorSystemRecalculated", recalcHook);
+         Hooks.on(`update${docType}`, updateHook);
+         Hooks.on("actorSystemRecalculated", recalcHook);
 
-      this.#hookDisposers.set(key, () => {
-         Hooks.off(`update${docType}`, updateHook);
-         Hooks.off("actorSystemRecalculated", recalcHook);
-      });
+         this.#hookDisposers.set(key, () => {
+            Hooks.off(`update${docType}`, updateHook);
+            Hooks.off("actorSystemRecalculated", recalcHook);
+         });
 
-      this.#persistentStore[key] = store;
+         this.#persistentStore[key] = store;
+      }
+
+      return this.#persistentStore[key];
    }
-
-   return this.#persistentStore[key];
-}
 
    GetSumROStore(dataPath) {
       const value = this.GetRWStore(`${dataPath}.value`);

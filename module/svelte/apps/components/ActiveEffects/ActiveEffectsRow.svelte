@@ -15,9 +15,9 @@
       StoreManager.Unsubscribe(activeEffect);
    });
 
-   let nameStore = storeManager.GetRWStore("name");
-   let durationStore = storeManager.GetRWStore("duration");
-   let disabledStore = storeManager.GetRWStore("disabled");
+   let nameStore = storeManager.GetRWStore("name", true);
+   let durationStore = storeManager.GetRWStore("duration", true);
+   let disabledStore = storeManager.GetRWStore("disabled", true);
 
    let duration = $state("");
 

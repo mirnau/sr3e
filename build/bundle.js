@@ -4209,34 +4209,34 @@ const _StoreManager = class _StoreManager {
       storeManagers.delete(document2.id);
     }
   }
-  GetRWStore(dataPath) {
-    const fullPath = `system.${dataPath}`;
-    const initial = foundry.utils.getProperty(__privateGet(this, _document).system, dataPath);
-    if (!__privateGet(this, _persistentStore)[dataPath]) {
+  GetRWStore(dataPath, isRoot = false) {
+    const fullPath = isRoot ? dataPath : `system.${dataPath}`;
+    const initial = foundry.utils.getProperty(isRoot ? __privateGet(this, _document) : __privateGet(this, _document).system, dataPath);
+    if (!__privateGet(this, _persistentStore)[fullPath]) {
       const cloned = initial && typeof initial === "object" ? Array.isArray(initial) ? [...initial] : { ...initial } : initial;
       const store = writable(cloned);
       let muted = false;
       const unsub = store.subscribe((v) => {
         if (muted) return;
-        foundry.utils.setProperty(__privateGet(this, _document).system, dataPath, v);
+        foundry.utils.setProperty(isRoot ? __privateGet(this, _document) : __privateGet(this, _document).system, dataPath, v);
         __privateGet(this, _document).update({ [fullPath]: v }, { render: false });
       });
       const docType = __privateGet(this, _document).documentName;
       const hook = (doc) => {
         if (doc.id !== __privateGet(this, _document).id) return;
-        const v = foundry.utils.getProperty(doc.system, dataPath);
+        const v = foundry.utils.getProperty(isRoot ? doc : doc.system, dataPath);
         muted = true;
         store.set(v && typeof v === "object" ? Array.isArray(v) ? [...v] : { ...v } : v);
         muted = false;
       };
       Hooks.on(`update${docType}`, hook);
-      __privateGet(this, _hookDisposers).set(dataPath, () => {
+      __privateGet(this, _hookDisposers).set(fullPath, () => {
         Hooks.off(`update${docType}`, hook);
         unsub();
       });
-      __privateGet(this, _persistentStore)[dataPath] = store;
+      __privateGet(this, _persistentStore)[fullPath] = store;
     }
-    return __privateGet(this, _persistentStore)[dataPath];
+    return __privateGet(this, _persistentStore)[fullPath];
   }
   GetROStore(dataPath) {
     const key = `RO:${dataPath}`;
@@ -10017,9 +10017,9 @@ function ActiveEffectsRow($$anchor, $$props) {
   onDestroy(() => {
     StoreManager.Unsubscribe(activeEffect);
   });
-  let nameStore = storeManager2.GetRWStore("name");
-  let durationStore = storeManager2.GetRWStore("duration");
-  let disabledStore = storeManager2.GetRWStore("disabled");
+  let nameStore = storeManager2.GetRWStore("name", true);
+  let durationStore = storeManager2.GetRWStore("duration", true);
+  let disabledStore = storeManager2.GetRWStore("disabled", true);
   let duration = state("");
   user_effect(() => {
     set(duration, proxy(formatDuration($durationStore())));
@@ -10201,7 +10201,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   var node = child(tbody);
   each(node, 17, () => get$1(actorAttachedEffects).filter((e) => {
     var _a, _b;
-    return !((_b = (_a = e.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.type);
+    return !((_b = (_a = e.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget);
   }), (activeEffect) => activeEffect.id, ($$anchor2, activeEffect) => {
     const expression = /* @__PURE__ */ derived$1(() => ({
       activeEffect: get$1(activeEffect),
@@ -10227,7 +10227,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
       var node_2 = first_child(fragment_1);
       each(node_2, 17, () => get$1(transferredEffects).filter(({ activeEffect }) => {
         var _a, _b;
-        return !((_b = (_a = activeEffect.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.type);
+        return !((_b = (_a = activeEffect.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget);
       }), (effectData) => effectData.activeEffect.id, ($$anchor3, effectData) => {
         ActiveEffectsRow($$anchor3, {
           get effectData() {
@@ -13279,14 +13279,6 @@ _app3 = new WeakMap();
 _svelteapp = new WeakMap();
 _document2 = new WeakMap();
 _effects = new WeakMap();
-async function deleteEffectGroup(_, effects, $$props) {
-  const ids = effects().map((e) => e.id);
-  await $$props.document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
-  await $$props.onHandleEffectTriggerUI();
-}
-function openEditor(__1, $$props, effects) {
-  new GadgetEditorApp($$props.document, effects(), $$props.config).render(true);
-}
 var root$e = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><!></div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button type="button" class="fas fa-edit"></button> <button type="button" class="fas fa-trash-can"></button></div></div></td></tr>`);
 function GadgetRow($$anchor, $$props) {
   push($$props, true);
@@ -13295,16 +13287,24 @@ function GadgetRow($$anchor, $$props) {
   const $disabledStore = () => store_get(disabledStore, "$disabledStore", $$stores);
   let effects = prop($$props, "effects", 19, () => []);
   const primary = effects()[0];
+  let sheetInstance = null;
   const storeManager2 = StoreManager.Subscribe(primary);
   onDestroy(() => StoreManager.Unsubscribe(primary));
   const nameStore = storeManager2.GetFlagStore("gadget.name");
   const disabledStore = storeManager2.GetFlagStore("gadget.isEnabled");
+  async function deleteEffectGroup() {
+    sheetInstance == null ? void 0 : sheetInstance.close();
+    sheetInstance = null;
+    const ids = effects().map((e) => e.id);
+    await $$props.document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
+    await $$props.onHandleEffectTriggerUI();
+  }
   function updateAll(event2) {
     var _a;
     const isEnabled = event2.currentTarget.checked;
     for (const effect2 of effects()) {
       let effectStoreManager = StoreManager.Subscribe(effect2);
-      let disabled = effectStoreManager.GetRWStore("disabled");
+      let disabled = effectStoreManager.GetRWStore("disabled", true);
       disabled.set(!isEnabled);
       let enabled = effectStoreManager.GetFlagStore("gadtget.isEnabled");
       enabled.set(isEnabled);
@@ -13312,6 +13312,10 @@ function GadgetRow($$anchor, $$props) {
       StoreManager.Unsubscribe(effect2);
     }
     (_a = $$props.onHandleEffectTriggerUI) == null ? void 0 : _a.call($$props);
+  }
+  function openEditor() {
+    sheetInstance = new GadgetEditorApp($$props.document, effects(), $$props.config);
+    sheetInstance.render(true);
   }
   var tr = root$e();
   var td = child(tr);
@@ -13341,9 +13345,9 @@ function GadgetRow($$anchor, $$props) {
   var div_3 = child(td_3);
   var div_4 = child(div_3);
   var button = child(div_4);
-  button.__click = [openEditor, $$props, effects];
+  button.__click = openEditor;
   var button_1 = sibling(button, 2);
-  button_1.__click = [deleteEffectGroup, effects, $$props];
+  button_1.__click = deleteEffectGroup;
   template_effect(
     ($0, $1) => {
       set_attribute(img, "src", primary.img ?? "icons/svg/mystery-man.svg");
