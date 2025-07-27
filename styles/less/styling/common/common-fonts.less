@@ -1,161 +1,149 @@
 @font-face {
-    font-family: 'VT323';
-    src: url('../../../fonts/VT323/VT323-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
+   font-family: "VT323";
+   src: url("../../../fonts/VT323/VT323-Regular.ttf") format("truetype");
+   font-weight: normal;
+   font-style: normal;
+   font-display: swap;
 }
 
 @font-face {
-    font-family: 'Neonderthaw';
-    src: url('../../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
+   font-family: "Neonderthaw";
+   src: url("../../../fonts/Neonderthaw/Neonderthaw-Regular.ttf") format("truetype");
+   font-weight: bold;
+   font-style: normal;
+   font-display: swap;
 }
 
 :root {
-    font-family: 'VT323', monospace;
+   font-family: "VT323", monospace;
 
-    --h1-color: var(--highlight-color-tertiary);
-    --h1-bloom: 
-    0 0 1px #217288, 
-    0 0 10px #4affb4, 
-    0 0 20px rgb(0, 100, 162);
+   --h1-color: var(--highlight-color-tertiary);
+   --h1-bloom: 0 0 1px #217288, 0 0 10px #4affb4, 0 0 20px rgb(0, 100, 162);
 
-    
-    
-    --h3-color: var(--highlight-color-secondary);
-    --h3-bloom:     
-    0 0 1px #68aeff, 
-    0 0 10px #833bff, 
-    0 0 20px rgb(241, 114, 255);
-    
-    --h4-color: var(--highlight-color-tertiary);
+   --h3-color: var(--highlight-color-secondary);
+   --h3-bloom: 0 0 1px #68aeff, 0 0 10px #833bff, 0 0 20px rgb(241, 114, 255);
 
-    --h5-color: violet;
+   --h4-color: var(--highlight-color-tertiary);
 
+   --h5-color: violet;
 }
 
 .VTT323-header() {
-    .VTT323();
+   .VTT323();
 
-    &.uppercase {
-        text-transform: uppercase;
-    }
+   &.uppercase {
+      text-transform: uppercase;
+   }
 
-    &.no-margin {
-        padding: 0rem;
-        margin: 0rem;
-    }
+   &.no-margin {
+      padding: 0rem;
+      margin: 0rem;
+   }
 }
 
 .VTT323() {
-    font-family: 'VT323', monospace;
-    margin: 0.33rem 0;
-    line-height: @line-height;
-    color: var(--h1-color);
-    font-size: 0.9rem;
+   font-family: "VT323", monospace;
+   margin: 0.33rem 0;
+   line-height: @line-height;
+   color: var(--h1-color);
+   font-size: 0.9rem;
 }
 
-.system-sr3e {
+form.p.hint,
+p.hint {
+   color: @accent-color;
+}
 
-    form.p.hint,
-    p.hint {
-        color: @accent-color;
-    }
+div {
+   color: var(--h1-color);
+}
 
-    div {
-        color: var(--h1-color);
-    }
+h1 {
+   .VTT323-header();
+   color: var(--h1-color);
+   text-shadow: var(--h1-bloom);
+   margin-bottom: 0.7rem;
+   font-size: 1.2rem;
+}
 
-    h1 {
-        .VTT323-header();
-        color: var(--h1-color);
-        text-shadow: var(--h1-bloom);
-        margin-bottom: 0.7rem;
-        font-size: 1.2rem;
-    }
+summary,
+h2 {
+   .VTT323-header();
+   color: var(--h2-color);
+   font-size: 1.1rem;
+}
 
-    summary,
-    h2 {
-        .VTT323-header();
-        color: var(--h2-color);
-        font-size: 1.1rem;
-    }
+h3 {
+   .VTT323-header();
+   color: var(--h3-color);
+   text-shadow: var(--h3-bloom);
+   font-size: 1rem;
+}
 
-    h3 {
-        .VTT323-header();
-        color: var(--h3-color);
-        text-shadow: var(--h3-bloom);
-        font-size: 1.0rem;
-    }
+label,
+span,
+h4 {
+   .VTT323-header();
+   color: var(--h4-color);
+   font-size: 0.9rem;
+}
 
-    label,
-    span,
-    h4 {
-        .VTT323-header();
-        color: var(--h4-color);
-        font-size: 0.9rem;
-    }
+h5 {
+   .VTT323-header();
+   font-size: 1.1rem;
+   color: var(--h5-color);
+}
 
-    h5 {
-        .VTT323-header();
-        font-size: 1.1rem;
-        color: var(--h5-color);
-    }
+h6 {
+   .VTT323-header();
+   color: var(--h6-color);
+}
 
-    h6 {
-        .VTT323-header();
-        color: var(--h6-color);
-    }
+span {
+   .VTT323();
+   color: var(--h4-color);
+   border: none;
+   text-shadow: var(--h3-bloom);
+   font-size: 1rem;
 
-    span {
-        .VTT323();
-        color: var(--h4-color);
-        border: none;
-        text-shadow: var(--h3-bloom);
-        font-size: 1rem;
+   &.no-margin {
+      margin: 0;
+   }
+}
 
-        &.no-margin {
-            margin: 0;
-        }
-    }
+a,
+p,
+span,
+select,
+input {
+   .VTT323();
 
-    a,
-    p,
-    span,
-    select,
-    input {
-        .VTT323();
+   &::placeholder {
+      color: @text-color;
+   }
+}
 
-        &::placeholder {
-            color: @text-color;
-        }
-    }
+button {
+   .VTT323();
 
-    button {
-        .VTT323();
+   /* Restore FA icon font for any button that is or becomes an icon */
+   &.fa,
+   &.fas,
+   &.far,
+   &.fal,
+   &.fad,
+   &.fab {
+      font: var(--fa-font-solid) !important;
+      -webkit-font-smoothing: antialiased;
+   }
 
-        /* Restore FA icon font for any button that is or becomes an icon */
-        &.fa,
-        &.fas,
-        &.far,
-        &.fal,
-        &.fad,
-        &.fab {
-            font: var(--fa-font-solid) !important;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Also fix nested icons and pseudo-elements in other buttons */
-        i,
-        i::before,
-        i::after,
-        &::before,
-        &::after {
-            font: var(--fa-font-solid) !important;
-            -webkit-font-smoothing: antialiased;
-        }
-    }
+   /* Also fix nested icons and pseudo-elements in other buttons */
+   i,
+   i::before,
+   i::after,
+   &::before,
+   &::after {
+      font: var(--fa-font-solid) !important;
+      -webkit-font-smoothing: antialiased;
+   }
 }

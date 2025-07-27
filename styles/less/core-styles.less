@@ -27,6 +27,12 @@
       box-sizing: border-box;
       cursor: pointer;
    }
+
+   .switch label.sr3e-switch,
+   .switch .sr3e-switch .slider {
+      margin: 0;
+      padding: 0;
+   }
 }
 
 @layer sr3e {
@@ -104,6 +110,7 @@
    @import "./styling/custom-components/sr3e-input-component.less";
    @import "./styling/custom-components/sr3e-counter-component.less";
    @import "./styling/custom-components/sr3e-active-effects-viewer.less";
+   @import "./styling/custom-components/sr3e-switch.less";
 
    // Injections
    @import "./styling/injections/neoname.less";

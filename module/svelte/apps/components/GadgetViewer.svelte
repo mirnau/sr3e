@@ -8,45 +8,66 @@
    let dropZone;
    let dragActive = $state(false);
    let dragHover = $state(false);
-   let actorAttachedGadgetEffects = $state(document.effects.contents);
-   let transferredGadgetEffects = $state([]);
-   let isViewerInstanceOfActor = document instanceof Actor;
    let dropZoneClass = $state("drop-zone");
+
+   let groupedAttachedGadgets = $state([]);
+   let groupedTransferredGadgets = $state([]);
+   let isViewerInstanceOfActor = document instanceof Actor;
+
+   // Group effects by source item (origin ID)
+   function groupByOrigin(effects, itemSourceMap = new Map()) {
+      const groups = new Map();
+
+      for (const effect of effects) {
+         const origin = effect.flags?.sr3e?.gadget?.origin;
+         if (!origin) continue;
+
+         if (!groups.has(origin)) {
+            const source = itemSourceMap.get?.(origin) ?? null;
+            groups.set(origin, { origin, effects: [], source });
+         }
+
+         groups.get(origin).effects.push(effect);
+      }
+
+      return Array.from(groups.values());
+   }
+
+   function refreshEffects() {
+      const ownEffects = document.effects.contents.filter((e) => e.flags?.sr3e?.gadget?.type === "gadget");
+      groupedAttachedGadgets = groupByOrigin(ownEffects);
+
+      if (document instanceof Actor) {
+         const items = document.items.contents;
+         const itemMap = new Map(items.map((i) => [i.id, i]));
+         const transferred = items.flatMap((item) =>
+            item.effects.contents.filter((e) => e.flags?.sr3e?.gadget?.type === "gadget")
+         );
+         groupedTransferredGadgets = groupByOrigin(transferred, itemMap);
+      } else {
+         groupedTransferredGadgets = [];
+      }
+   }
 
    onMount(() => {
       const handler = (actor) => {
-         if (document?.id !== actor.id) return;
-         actorAttachedGadgetEffects = [...document.effects.contents];
-         transferredGadgetEffects =
-            document instanceof Actor
-               ? document.items.contents.flatMap((item) =>
-                    item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
-                 )
-               : [];
+         if (actor?.id !== document.id) return;
+         refreshEffects();
       };
 
       Hooks.on("actorSystemRecalculated", handler);
+      refreshEffects();
 
       onDestroy(() => {
          Hooks.off("actorSystemRecalculated", handler);
       });
    });
 
-   $effect(() => {
-      actorAttachedGadgetEffects = [...document.effects.contents];
-
-      transferredGadgetEffects =
-         document instanceof Actor
-            ? document.items.contents.flatMap((item) =>
-                 item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
-              )
-            : [];
-   });
+   $effect(refreshEffects);
 
    async function onHandleEffectTriggerUI() {
       Hooks.callAll("actorSystemRecalculated", document);
-      actorAttachedGadgetEffects = [...document.effects.contents];
-      transferredGadgetEffects = [...transferredGadgetEffects];
+      refreshEffects();
    }
 
    function handleDragStart(event) {
@@ -78,8 +99,20 @@
    }
 
    async function addEffect(sourceItem) {
+      console.log("INCOMING", sourceItem);
+
       const commodity = sourceItem.system.commodity;
       const sourceItemType = sourceItem.system.type;
+
+      const gadgetFlags = {
+         name: sourceItem.name,
+         img: sourceItem.img,
+         isEnabled: true,
+         type: "gadget",
+         origin: sourceItem.id,
+         gadgetType: sourceItemType,
+         commodity,
+      };
 
       let effectsToAdd = sourceItem.effects.contents.map((effect) => {
          const data = effect.toObject();
@@ -90,10 +123,7 @@
                ...data.flags,
                sr3e: {
                   ...data.flags?.sr3e,
-                  type: "gadget",
-                  gadgetType: sourceItemType,
-                  source: "manual",
-                  commodity,
+                  gadget: gadgetFlags,
                },
             },
          };
@@ -103,18 +133,13 @@
          effectsToAdd = [
             {
                _id: foundry.utils.randomID(),
-               name: sourceItem.name ?? "Unnamed Gadget",
-               icon: sourceItem.img ?? "icons/svg/mystery-man.svg",
+               name: gadgetFlags.name ?? "Unnamed Gadget",
+               img: gadgetFlags.img ?? "icons/svg/mystery-man.svg",
                changes: [],
                duration: {},
                disabled: false,
                flags: {
-                  sr3e: {
-                     type: "gadget",
-                     gadgetType: sourceItemType,
-                     source: "manual",
-                     commodity,
-                  },
+                  sr3e: { gadget: gadgetFlags },
                },
             },
          ];
@@ -168,24 +193,17 @@
             <tr>
                <th></th>
                <th>{localize(config.effects.name)}</th>
-               <th>{localize(config.effects.durationType)}</th>
                <th>{localize(config.effects.disabled)}</th>
                <th>{localize(config.effects.actions)}</th>
             </tr>
          </thead>
          <tbody>
-            {#each actorAttachedGadgetEffects.filter((e) => e.flags?.sr3e?.type === "gadget") as activeEffect (activeEffect.id)}
-               <GadgetRow {document} {activeEffect} {config} {onHandleEffectTriggerUI} />
+            {#each groupedAttachedGadgets as { origin, effects } (origin)}
+               <GadgetRow {document} {effects} {config} {onHandleEffectTriggerUI} />
             {/each}
             {#if isViewerInstanceOfActor}
-               {#each transferredGadgetEffects.filter(({ activeEffect }) => activeEffect.flags?.sr3e?.type === "gadget") as { activeEffect, item } (activeEffect.id)}
-                  <GadgetRow
-                     document={item}
-                     {activeEffect}
-                     {config}
-                     {isViewerInstanceOfActor}
-                     {onHandleEffectTriggerUI}
-                  />
+               {#each groupedTransferredGadgets as { origin, effects } (origin)}
+                  <GadgetRow {document} {effects} {config} {isViewerInstanceOfActor} {onHandleEffectTriggerUI} />
                {/each}
             {/if}
          </tbody>

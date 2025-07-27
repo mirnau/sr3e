@@ -1,93 +1,76 @@
 <script>
-   import { onDestroy, onMount } from "svelte";
+   import { onDestroy } from "svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
-   import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
    import GadgetEditorSheet from "@sheets/GadgetEditorSheet.js";
+   import Switch from "@sveltecomponent/Switch.svelte";
 
-   let { document, activeEffect, config, isViewerInstanceOfActor = false, onHandleEffectTriggerUI } = $props();
+   let { document, effects = [], config, onHandleEffectTriggerUI } = $props();
 
-   let storeManager = StoreManager.Subscribe(document);
-   onDestroy(() => {
-      StoreManager.Unsubscribe(document);
-   });
-   let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
-   let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
-   let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
-   let canDelete = !isViewerInstanceOfActor;
+   const primary = effects[0];
 
-   let duration = $state("");
+   const storeManager = StoreManager.Subscribe(primary);
+   onDestroy(() => StoreManager.Unsubscribe(primary));
 
-   $effect(() => {
-      duration = formatDuration($durationStore);
-   });
+   const nameStore = storeManager.GetFlagStore("gadget.name");
+   const disabledStore = storeManager.GetFlagStore("gadget.isEnabled");
 
-   function formatDuration(duration) {
-      if (!duration || duration.type === "none") return "Permanent";
+   async function deleteEffectGroup() {
+      const ids = effects.map((e) => e.id);
+      await document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
+      await onHandleEffectTriggerUI();
+   }
 
-      const value = duration[duration.type] ?? 0;
+   function updateAll(event) {
+      const isEnabled = event.currentTarget.checked;
 
-      if (duration.type === "seconds") {
-         const minutes = Math.floor(value / 60);
-         const hours = Math.floor(minutes / 60);
-         const days = Math.floor(hours / 24);
+      //INFO: Updating the effect to correlate, through stores, to leverage reactivity
+      for (const effect of effects) {
+         let effectStoreManager = StoreManager.Subscribe(effect);
 
-         if (days) return `${days}d ${hours % 24}h ${minutes % 60}m`;
-         if (hours) return `${hours}h ${minutes % 60}m`;
-         if (minutes) return `${minutes}m ${value % 60}s`;
-         return `${value}s`;
+         let disabled = effectStoreManager.GetRWStore("disabled");
+         disabled.set(!isEnabled);
+
+         let enabled = effectStoreManager.GetFlagStore("gadtget.isEnabled");
+         enabled.set(isEnabled);
+
+         if (effect.id === primary.id) continue;
+         StoreManager.Unsubscribe(effect);
       }
 
-      if (duration.type === "rounds") return `${value} rounds`;
-      if (duration.type === "turns") return `${value} turns`;
-      if (duration.type === "minutes") return `${value} min`;
-      if (duration.type === "hours") return `${value} h`;
-      if (duration.type === "days") return `${value} d`;
-
-      return "Unknown";
+      onHandleEffectTriggerUI?.();
    }
 
-   function openEditor(activeEffect) {
-      ActiveEffectsEditor.launch(document, activeEffect, config, onHandleEffectTriggerUI);
-   }
-
-   async function deleteEffect(effectId) {
-      await document.deleteEmbeddedDocuments("ActiveEffect", [effectId], { render: false });
-      await onHandleEffectTriggerUI();
+   function openEditor() {
+      new GadgetEditorSheet(document, effects, config).render(true);
    }
 </script>
 
 <tr>
    <td>
       <div class="cell-content">
-         <img src={activeEffect.img} alt={$nameStore} />
+         <img src={primary.img ?? "icons/svg/mystery-man.svg"} alt={$nameStore} />
       </div>
    </td>
    <td>
       <div class="cell-content">{$nameStore}</div>
    </td>
    <td>
-      <div class="cell-content">{duration}</div>
-   </td>
-   <td>
-      <div class="cell-content">{$disabledStore ? "Yes" : "No"}</div>
+      <div class="cell-content">
+         <Switch bind:checked={$disabledStore} ariaLabel={localize(config.sheet.enabled)} onChange={updateAll} />
+      </div>
    </td>
    <td>
       <div class="cell-content">
          <div class="buttons-vertical-distribution square">
-            <button
-               type="button"
-               aria-label={localize(config.sheet.delete)}
-               class="fas fa-edit"
-               onclick={() => new GadgetEditorSheet(document, activeEffect, config).render(true)}
+            <button type="button" aria-label={localize(config.sheet.edit)} class="fas fa-edit" onclick={openEditor}
             ></button>
 
             <button
                type="button"
                aria-label={localize(config.sheet.delete)}
-               onclick={() => deleteEffect(activeEffect.id)}
                class="fas fa-trash-can"
-               disabled={!canDelete || (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
+               onclick={deleteEffectGroup}
             ></button>
          </div>
       </div>

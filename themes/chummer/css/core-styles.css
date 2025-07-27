@@ -22,6 +22,11 @@
     box-sizing: border-box;
     cursor: pointer;
   }
+  .switch label.sr3e-switch,
+  .switch .sr3e-switch .slider {
+    margin: 0;
+    padding: 0;
+  }
 }
 @layer sr3e {
   /*
@@ -52,21 +57,21 @@
     --color-scrollbar: #ff009572;
   }
   @font-face {
-    font-family: 'VT323';
-    src: url('../../../fonts/VT323/VT323-Regular.ttf') format('truetype');
+    font-family: "VT323";
+    src: url("../../../fonts/VT323/VT323-Regular.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
   }
   @font-face {
-    font-family: 'Neonderthaw';
-    src: url('../../../fonts/Neonderthaw/Neonderthaw-Regular.ttf') format('truetype');
+    font-family: "Neonderthaw";
+    src: url("../../../fonts/Neonderthaw/Neonderthaw-Regular.ttf") format("truetype");
     font-weight: bold;
     font-style: normal;
     font-display: swap;
   }
   :root {
-    font-family: 'VT323', monospace;
+    font-family: "VT323", monospace;
     --h1-color: var(--highlight-color-tertiary);
     --h1-bloom: 0 0 1px #217288, 0 0 10px #4affb4, 0 0 20px #0064a2;
     --h3-color: var(--highlight-color-secondary);
@@ -74,15 +79,15 @@
     --h4-color: var(--highlight-color-tertiary);
     --h5-color: violet;
   }
-  .system-sr3e form.p.hint,
-  .system-sr3e p.hint {
+  form.p.hint,
+  p.hint {
     color: #ff2090;
   }
-  .system-sr3e div {
+  div {
     color: var(--h1-color);
   }
-  .system-sr3e h1 {
-    font-family: 'VT323', monospace;
+  h1 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     font-size: 0.9rem;
@@ -91,16 +96,16 @@
     margin-bottom: 0.7rem;
     font-size: 1.2rem;
   }
-  .system-sr3e h1.uppercase {
+  h1.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e h1.no-margin {
+  h1.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e summary,
-  .system-sr3e h2 {
-    font-family: 'VT323', monospace;
+  summary,
+  h2 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -108,17 +113,17 @@
     color: var(--h2-color);
     font-size: 1.1rem;
   }
-  .system-sr3e summary.uppercase,
-  .system-sr3e h2.uppercase {
+  summary.uppercase,
+  h2.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e summary.no-margin,
-  .system-sr3e h2.no-margin {
+  summary.no-margin,
+  h2.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e h3 {
-    font-family: 'VT323', monospace;
+  h3 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -127,36 +132,36 @@
     text-shadow: var(--h3-bloom);
     font-size: 1rem;
   }
-  .system-sr3e h3.uppercase {
+  h3.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e h3.no-margin {
+  h3.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e label,
-  .system-sr3e span,
-  .system-sr3e h4 {
-    font-family: 'VT323', monospace;
+  label,
+  span,
+  h4 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
     color: var(--h4-color);
     font-size: 0.9rem;
   }
-  .system-sr3e label.uppercase,
-  .system-sr3e span.uppercase,
-  .system-sr3e h4.uppercase {
+  label.uppercase,
+  span.uppercase,
+  h4.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e label.no-margin,
-  .system-sr3e span.no-margin,
-  .system-sr3e h4.no-margin {
+  label.no-margin,
+  span.no-margin,
+  h4.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e h5 {
-    font-family: 'VT323', monospace;
+  h5 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -164,30 +169,30 @@
     font-size: 1.1rem;
     color: var(--h5-color);
   }
-  .system-sr3e h5.uppercase {
+  h5.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e h5.no-margin {
+  h5.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e h6 {
-    font-family: 'VT323', monospace;
+  h6 {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
     font-size: 0.9rem;
     color: var(--h6-color);
   }
-  .system-sr3e h6.uppercase {
+  h6.uppercase {
     text-transform: uppercase;
   }
-  .system-sr3e h6.no-margin {
+  h6.no-margin {
     padding: 0rem;
     margin: 0rem;
   }
-  .system-sr3e span {
-    font-family: 'VT323', monospace;
+  span {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -197,29 +202,29 @@
     text-shadow: var(--h3-bloom);
     font-size: 1rem;
   }
-  .system-sr3e span.no-margin {
+  span.no-margin {
     margin: 0;
   }
-  .system-sr3e a,
-  .system-sr3e p,
-  .system-sr3e span,
-  .system-sr3e select,
-  .system-sr3e input {
-    font-family: 'VT323', monospace;
+  a,
+  p,
+  span,
+  select,
+  input {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
     font-size: 0.9rem;
   }
-  .system-sr3e a::placeholder,
-  .system-sr3e p::placeholder,
-  .system-sr3e span::placeholder,
-  .system-sr3e select::placeholder,
-  .system-sr3e input::placeholder {
+  a::placeholder,
+  p::placeholder,
+  span::placeholder,
+  select::placeholder,
+  input::placeholder {
     color: var(--highlight-color-primary);
   }
-  .system-sr3e button {
-    font-family: 'VT323', monospace;
+  button {
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -227,20 +232,20 @@
     /* Restore FA icon font for any button that is or becomes an icon */
     /* Also fix nested icons and pseudo-elements in other buttons */
   }
-  .system-sr3e button.fa,
-  .system-sr3e button.fas,
-  .system-sr3e button.far,
-  .system-sr3e button.fal,
-  .system-sr3e button.fad,
-  .system-sr3e button.fab {
+  button.fa,
+  button.fas,
+  button.far,
+  button.fal,
+  button.fad,
+  button.fab {
     font: var(--fa-font-solid) !important;
     -webkit-font-smoothing: antialiased;
   }
-  .system-sr3e button i,
-  .system-sr3e button i::before,
-  .system-sr3e button i::after,
-  .system-sr3e button::before,
-  .system-sr3e button::after {
+  button i,
+  button i::before,
+  button i::after,
+  button::before,
+  button::after {
     font: var(--fa-font-solid) !important;
     -webkit-font-smoothing: antialiased;
   }
@@ -1519,7 +1524,7 @@
     flex-wrap: nowrap;
   }
   table .cell-content > * {
-    height: 100%;
+    height: auto;
     min-height: 0;
     max-height: 1.5rem;
     min-width: 0;
@@ -1680,7 +1685,7 @@
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   textarea#chat-message {
-    font-family: 'VT323', monospace;
+    font-family: "VT323", monospace;
     margin: 0.33rem 0;
     line-height: 1rem;
     color: var(--h1-color);
@@ -2468,6 +2473,67 @@
     100% {
       box-shadow: inset 0 0 0.5rem var(--highlight-color-primary), 0 0 0.5rem var(--highlight-color-primary);
     }
+  }
+  .switch {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .switch label,
+  .switch span {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .switch .sr3e-switch {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    width: 2rem;
+    height: 1rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+  }
+  .switch .sr3e-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+  }
+  .switch .sr3e-switch .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1rem;
+    background: var(--background-color);
+    transition: 0.2s;
+    border-radius: 0.5rem;
+  }
+  .switch .sr3e-switch .slider::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1rem;
+    height: 1rem;
+    background: var(--highlight-color-primary);
+    transition: 0.2s;
+    border-radius: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  .switch .sr3e-switch input:checked + .slider {
+    background: var(--background-color);
+    box-shadow: inset 0 0 1rem var(--highlight-color-primary);
+  }
+  .switch .sr3e-switch input:checked + .slider::before {
+    transform: translateX(1rem);
+  }
+  .switch .sr3e-switch input:disabled + .slider {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
   .sr3e.sheet.character {
     overflow: visible !important;

@@ -1,6 +1,7 @@
+
 <script>
    import { localize } from "@services/utilities.js";
-   import ActiveEffectsRow from "./GadgetRow.svelte";
+   import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
    import { onMount, onDestroy } from "svelte";
 
    let { document, config, isSlim = false } = $props();
@@ -12,13 +13,7 @@
    onMount(() => {
       const handler = (actor) => {
          if (document?.id !== actor.id) return;
-         actorAttachedEffects = [...document.effects.contents];
-         transferredEffects =
-            document instanceof Actor
-               ? document.items.contents.flatMap((item) =>
-                    item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
-                 )
-               : [];
+         refreshEffects();
       };
 
       Hooks.on("actorSystemRecalculated", handler);
@@ -29,52 +24,69 @@
    });
 
    $effect(() => {
-      actorAttachedEffects = [...document.effects.contents];
-
-      transferredEffects =
-         document instanceof Actor
-            ? document.items.contents.flatMap((item) =>
-                 item.effects.contents.map((activeEffect) => ({ activeEffect, item }))
-              )
-            : [];
+      refreshEffects();
    });
 
-   async function addEffect(e) {
-      await document.createEmbeddedDocuments(
-         "ActiveEffect",
-         [
-            {
-               name: "New Effect",
-               icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
-               origin: document.uuid,
-               disabled: false,
-               transfer: true,
-
-               duration: {
-                  startTime: game.time.worldTime, // use worldTime, not seconds, to align with system
-                  type: "none", // default for permanent
-                  value: 0,
-               },
-
-               changes: [],
-
-               flags: {
-                  sr3e: {
-                     source: "manual",
-                     // Any other default flags useful for tracking
-                  },
-               },
-            },
-         ],
-         { render: false }
-      );
-      await onHandleEffectTriggerUI();
+   function refreshEffects() {
+      actorAttachedEffects = [...document.effects.contents];
+      
+      transferredEffects = document instanceof Actor
+         ? document.items.contents.flatMap((item) =>
+              item.effects.contents.map((activeEffect) => ({ 
+                 activeEffect, 
+                 sourceDocument: item,
+                 canDelete: false 
+              }))
+           )
+         : [];
    }
 
-   async function onHandleEffectTriggerUI() {
+   async function addEffect() {
+      await document.createEmbeddedDocuments(
+         "ActiveEffect",
+         [{
+            name: "New Effect",
+            icon: "systems/sr3e/textures/ai/icons/activeeffects.png",
+            origin: document.uuid,
+            disabled: false,
+            transfer: true,
+            duration: {
+               startTime: game.time.worldTime,
+               type: "none",
+               value: 0,
+            },
+            changes: [],
+            flags: {
+               sr3e: {
+                  source: "manual",
+               },
+            },
+         }],
+         { render: false }
+      );
+      await triggerRefresh();
+   }
+
+   async function editEffect(effectData) {
+      const { activeEffect, sourceDocument } = effectData;
+      const ActiveEffectsEditor = await import("../../../../foundry/applications/ActiveEffectsEditor.js");
+      ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, config, triggerRefresh);
+   }
+
+   async function deleteEffect(effectData) {
+      const { activeEffect, sourceDocument } = effectData;
+      await sourceDocument.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
+      await triggerRefresh();
+   }
+
+   async function triggerRefresh() {
       Hooks.callAll("actorSystemRecalculated", document);
-      actorAttachedEffects = [...document.effects.contents];
-      transferredEffects = [...transferredEffects];
+      refreshEffects();
+   }
+
+   function canDeleteEffect(effectData) {
+      const { activeEffect, canDelete } = effectData;
+      return canDelete && !(activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1);
    }
 </script>
 
@@ -87,22 +99,32 @@
             <th><button class="fas fa-plus" type="button" onclick={addEffect}></button></th>
             <th><div class="cell-content">{localize(config.effects.name)}</div></th>
             <th><div class="cell-content">{localize(config.effects.durationType)}</div></th>
-            <th><div class="cell-content">{localize(config.effects.disabled)}</div></th>
+            <th><div class="cell-content">{localize(config.effects.enabled)}</div></th>
             <th><div class="cell-content">{localize(config.effects.actions)}</div></th>
          </tr>
       </thead>
       <tbody>
          {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.type) as activeEffect (activeEffect.id)}
-            <ActiveEffectsRow {document} {activeEffect} {config} {onHandleEffectTriggerUI} />
+            <ActiveEffectsRow 
+               effectData={{ 
+                  activeEffect, 
+                  sourceDocument: document, 
+                  canDelete: true 
+               }}
+               {config}
+               onEdit={editEffect}
+               onDelete={deleteEffect}
+               canDelete={canDeleteEffect}
+            />
          {/each}
          {#if isViewerInstanceOfActor}
-            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.type) as { activeEffect, item } (activeEffect.id)}
-               <ActiveEffectsRow
-                  document={item}
-                  {activeEffect}
+            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.type) as effectData (effectData.activeEffect.id)}
+               <ActiveEffectsRow 
+                  {effectData}
                   {config}
-                  {isViewerInstanceOfActor}
-                  {onHandleEffectTriggerUI}
+                  onEdit={editEffect}
+                  onDelete={deleteEffect}
+                  canDelete={canDeleteEffect}
                />
             {/each}
          {/if}

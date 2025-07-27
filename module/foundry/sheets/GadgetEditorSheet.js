@@ -7,20 +7,21 @@ export default class GadgetEditorApp extends foundry.applications.api.Applicatio
    #app;
    #svelteapp;
    #document;
+   #effects;
 
-   constructor(document, effect, config, options = {}) {
+   constructor(document, effects, config, options = {}) {
       super(options);
       this.#document = document;
+      this.#effects = effects;
 
-      const type = effect.flags.sr3e.gadgetType;
-      console.log("TYPE", type);
-      console.log("TYPE", config.gadgettypes.weaponmod);
+      const primary = effects[0];
+      const type = primary.flags.sr3e.gadget.gadgetType;
 
       const typeMap = {
          [localize(config.gadgettypes.weaponmod)]: WeaponModApp,
       };
 
-      this.#svelteapp = typeMap[type] ?? GadgetApp;
+      this.#svelteapp = typeMap[type];
    }
 
    static get DEFAULT_OPTIONS() {
@@ -46,7 +47,8 @@ export default class GadgetEditorApp extends foundry.applications.api.Applicatio
       this.#app = mount(this.#svelteapp, {
          target: html,
          props: {
-            item: this.#document,
+            document: this.#document,
+            effects: this.#effects,
             config: CONFIG.sr3e,
          },
       });

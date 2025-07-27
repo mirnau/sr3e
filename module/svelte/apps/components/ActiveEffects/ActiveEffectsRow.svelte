@@ -1,25 +1,44 @@
 <script>
-   import { onDestroy, onMount } from "svelte";
+   import { onDestroy } from "svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
-   import ActiveEffectsEditor from "../../../../foundry/applications/ActiveEffectsEditor.js";
+   import Switch from "@sveltecomponent/Switch.svelte";
+   import { derived } from "svelte/store";
 
-   let { document, activeEffect, config, isViewerInstanceOfActor = false, onHandleEffectTriggerUI } = $props();
+   let { effectData, config, onEdit, onDelete, canDelete } = $props();
 
-   let storeManager = StoreManager.Subscribe(document);
+   const { activeEffect, sourceDocument } = effectData;
+   let enabled = $state(!activeEffect.disabled);
+
+   let storeManager = StoreManager.Subscribe(activeEffect);
    onDestroy(() => {
-      StoreManager.Unsubscribe(document);
+      StoreManager.Unsubscribe(activeEffect);
    });
-   let nameStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:name`, activeEffect.name);
-   let durationStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:duration`, activeEffect.duration);
-   let disabledStore = storeManager.GetShallowStore(document.id, `${activeEffect.id}:disabled`, activeEffect.disabled);
-   let canDelete = !isViewerInstanceOfActor;
+
+   let nameStore = storeManager.GetRWStore("name");
+   let durationStore = storeManager.GetRWStore("duration");
+   let disabledStore = storeManager.GetRWStore("disabled");
 
    let duration = $state("");
 
    $effect(() => {
       duration = formatDuration($durationStore);
    });
+
+   $effect(() => {
+      enabled = !activeEffect.disabled;
+   });
+
+   async function onToggleEnabled(event) {
+      enabled = event.currentTarget.checked;
+
+      const updates = {
+         disabled: !enabled,
+         "flags.sr3e.gadget.isEnabled": enabled,
+      };
+
+      await activeEffect.update(updates, { render: false });
+   }
 
    function formatDuration(duration) {
       if (!duration || duration.type === "none") return "Permanent";
@@ -37,22 +56,15 @@
          return `${value}s`;
       }
 
-      if (duration.type === "rounds") return `${value} rounds`;
-      if (duration.type === "turns") return `${value} turns`;
-      if (duration.type === "minutes") return `${value} min`;
-      if (duration.type === "hours") return `${value} h`;
-      if (duration.type === "days") return `${value} d`;
+      const typeMap = {
+         rounds: `${value} rounds`,
+         turns: `${value} turns`,
+         minutes: `${value} min`,
+         hours: `${value} h`,
+         days: `${value} d`,
+      };
 
-      return "Unknown";
-   }
-
-   function openEditor(activeEffect) {
-      ActiveEffectsEditor.launch(document, activeEffect, config, onHandleEffectTriggerUI);
-   }
-
-   async function deleteEffect(effectId) {
-      await document.deleteEmbeddedDocuments("ActiveEffect", [effectId], { render: false });
-      await onHandleEffectTriggerUI();
+      return typeMap[duration.type] ?? "Unknown";
    }
 </script>
 
@@ -69,23 +81,23 @@
       <div class="cell-content">{duration}</div>
    </td>
    <td>
-      <div class="cell-content">{$disabledStore ? "Yes" : "No"}</div>
+      <Switch checked={!$disabledStore} ariaLabel={localize(config.sheet.enabled)} onChange={onToggleEnabled} />
    </td>
    <td>
       <div class="cell-content">
          <div class="buttons-vertical-distribution square">
             <button
                type="button"
-               aria-label={localize(config.sheet.delete)}
+               aria-label={localize(config.sheet.edit)}
                class="fas fa-edit"
-               onclick={() => openEditor(activeEffect)}
+               onclick={() => onEdit(effectData)}
             ></button>
             <button
                type="button"
                aria-label={localize(config.sheet.delete)}
-               onclick={() => deleteEffect(activeEffect.id)}
+               onclick={() => onDelete(effectData)}
                class="fas fa-trash-can"
-               disabled={!canDelete || (activeEffect.duration?.type === "permanent" && activeEffect.changes.length > 1)}
+               disabled={!canDelete(effectData)}
             ></button>
          </div>
       </div>
