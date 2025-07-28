@@ -26,6 +26,34 @@
       await onHandleEffectTriggerUI();
    }
 
+   async function createEmbeddedGadget() {
+      const actor = document.parent;
+
+      // Clone and reparent effects
+      const effectData = activeEffects.map((effect) => {
+         const data = foundry.utils.deepClone(effect.toObject());
+         delete data._id;
+         return data;
+      });
+
+      // Create the gadget Item on the actor
+      const [gadget] = await actor.createEmbeddedDocuments("Item", [
+         {
+            name: $nameStore ?? game.i18n.localize(config.sheet.newGadget),
+            type: "gadget",
+            img: primary.img,
+            system: {}, // Empty unless schema demands otherwise
+            effects: effectData,
+         },
+      ]);
+
+      // Delete original effects from the weapon
+      const ids = activeEffects.map((e) => e.id);
+      await document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
+
+      await onHandleEffectTriggerUI?.();
+   }
+
    function updateAll(event) {
       const isEnabled = event.currentTarget.checked;
 
@@ -72,6 +100,13 @@
                aria-label={localize(config.sheet.delete)}
                class="fas fa-trash-can"
                onclick={deleteEffectGroup}
+            ></button>
+            <button
+               type="button"
+               aria-label={localize(config.sheet.detatch)}
+               class="fas fa-link-slash"
+               onclick={createEmbeddedGadget}
+               disabled={!document.isEmbedded || !(document.parent instanceof Actor)}
             ></button>
          </div>
       </div>
