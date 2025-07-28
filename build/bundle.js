@@ -10107,7 +10107,7 @@ function ActiveEffectsRow($$anchor, $$props) {
   $$cleanup();
 }
 delegate(["click"]);
-async function addEffect$1(_, $$props, triggerRefresh) {
+async function addEffect$1(_, $$props) {
   await $$props.document.createEmbeddedDocuments(
     "ActiveEffect",
     [
@@ -10128,50 +10128,55 @@ async function addEffect$1(_, $$props, triggerRefresh) {
     ],
     { render: false }
   );
-  await triggerRefresh();
 }
 var root$q = /* @__PURE__ */ template(`<div class="effects-viewer"><div class="effects-header"></div> <table><thead><tr><th><button class="fas fa-plus" type="button"></button></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody><!><!></tbody></table></div>`);
 function ActiveEffectsViewer($$anchor, $$props) {
   push($$props, true);
   let isSlim = prop($$props, "isSlim", 3, false);
-  let actorAttachedEffects = state(proxy($$props.document.effects.contents));
+  let actorAttachedEffects = state(proxy([]));
   let transferredEffects = state(proxy([]));
-  let isViewerInstanceOfActor = $$props.document instanceof Actor;
-  onMount(() => {
-    const handler = (actor) => {
-      var _a;
-      if (((_a = $$props.document) == null ? void 0 : _a.id) !== actor.id) return;
-      refreshEffects();
-    };
-    Hooks.on("actorSystemRecalculated", handler);
-    onDestroy(() => {
-      Hooks.off("actorSystemRecalculated", handler);
-    });
-  });
-  user_effect(() => {
-    refreshEffects();
-  });
+  const isViewerInstanceOfActor = $$props.document instanceof Actor;
   function refreshEffects() {
-    set(actorAttachedEffects, proxy([...$$props.document.effects.contents]));
-    set(transferredEffects, proxy($$props.document instanceof Actor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({
+    set(actorAttachedEffects, proxy($$props.document.effects.contents.filter((e) => {
+      var _a, _b;
+      return !((_b = (_a = e.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget);
+    })));
+    set(transferredEffects, proxy(isViewerInstanceOfActor ? $$props.document.items.contents.flatMap((item2) => item2.effects.contents.map((activeEffect) => ({
       activeEffect,
       sourceDocument: item2,
       canDelete: false
     }))) : []));
   }
+  let cleanupHooks = [];
+  onMount(() => {
+    const relevant = (effect2) => {
+      var _a, _b, _c;
+      return ((_a = effect2 == null ? void 0 : effect2.parent) == null ? void 0 : _a.id) === $$props.document.id || isViewerInstanceOfActor && ((_c = (_b = effect2 == null ? void 0 : effect2.parent) == null ? void 0 : _b.parent) == null ? void 0 : _c.id) === $$props.document.id;
+    };
+    const update = () => refreshEffects();
+    const hookTypes = [
+      "createActiveEffect",
+      "updateActiveEffect",
+      "deleteActiveEffect"
+    ];
+    for (const type of hookTypes) {
+      const handler = (effect2) => relevant(effect2) && update();
+      Hooks.on(type, handler);
+      cleanupHooks.push(() => Hooks.off(type, handler));
+    }
+    refreshEffects();
+  });
+  onDestroy(() => {
+    cleanupHooks.forEach((fn) => fn());
+  });
   async function editEffect(effectData) {
     const { activeEffect, sourceDocument } = effectData;
     const ActiveEffectsEditor = await __vitePreload(() => import("./assets/ActiveEffectsEditor-CZCeJj3c.js"), true ? [] : void 0);
-    ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, $$props.config, triggerRefresh);
+    ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, $$props.config);
   }
   async function deleteEffect(effectData) {
     const { activeEffect, sourceDocument } = effectData;
     await sourceDocument.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
-    await triggerRefresh();
-  }
-  async function triggerRefresh() {
-    Hooks.callAll("actorSystemRecalculated", $$props.document);
-    refreshEffects();
   }
   function canDeleteEffect(effectData) {
     var _a;
@@ -10184,7 +10189,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   var tr = child(thead);
   var th = child(tr);
   var button = child(th);
-  button.__click = [addEffect$1, $$props, triggerRefresh];
+  button.__click = [addEffect$1, $$props];
   var th_1 = sibling(th);
   var div_1 = child(th_1);
   var text2 = child(div_1);
@@ -10199,10 +10204,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   var text_3 = child(div_4);
   var tbody = sibling(thead);
   var node = child(tbody);
-  each(node, 17, () => get$1(actorAttachedEffects).filter((e) => {
-    var _a, _b;
-    return !((_b = (_a = e.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget);
-  }), (activeEffect) => activeEffect.id, ($$anchor2, activeEffect) => {
+  each(node, 17, () => get$1(actorAttachedEffects), (activeEffect) => activeEffect.id, ($$anchor2, activeEffect) => {
     const expression = /* @__PURE__ */ derived$1(() => ({
       activeEffect: get$1(activeEffect),
       sourceDocument: $$props.document,
@@ -10225,10 +10227,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
     var consequent = ($$anchor2) => {
       var fragment_1 = comment();
       var node_2 = first_child(fragment_1);
-      each(node_2, 17, () => get$1(transferredEffects).filter(({ activeEffect }) => {
-        var _a, _b;
-        return !((_b = (_a = activeEffect.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget);
-      }), (effectData) => effectData.activeEffect.id, ($$anchor3, effectData) => {
+      each(node_2, 17, () => get$1(transferredEffects), (effectData) => effectData.activeEffect.id, ($$anchor3, effectData) => {
         ActiveEffectsRow($$anchor3, {
           get effectData() {
             return get$1(effectData);

@@ -1,45 +1,50 @@
 <script>
+   import { onMount, onDestroy } from "svelte";
    import { localize } from "@services/utilities.js";
    import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
-   import { onMount, onDestroy } from "svelte";
 
    let { document, config, isSlim = false } = $props();
 
-   let actorAttachedEffects = $state(document.effects.contents);
+   let actorAttachedEffects = $state([]);
    let transferredEffects = $state([]);
-   let isViewerInstanceOfActor = document instanceof Actor;
+   const isViewerInstanceOfActor = document instanceof Actor;
+
+   function refreshEffects() {
+      actorAttachedEffects = document.effects.contents.filter((e) => !e.flags?.sr3e?.gadget);
+
+      transferredEffects = isViewerInstanceOfActor
+         ? document.items.contents.flatMap((item) =>
+              item.effects.contents.map((activeEffect) => ({
+                 activeEffect,
+                 sourceDocument: item,
+                 canDelete: false,
+              }))
+           )
+         : [];
+   }
+
+   let cleanupHooks = [];
 
    onMount(() => {
-      const handler = (actor) => {
-         if (document?.id !== actor.id) return;
-         refreshEffects();
-      };
+      const relevant = (effect) =>
+         effect?.parent?.id === document.id ||
+         (isViewerInstanceOfActor && effect?.parent?.parent?.id === document.id);
 
-      Hooks.on("actorSystemRecalculated", handler);
+      const update = () => refreshEffects();
+      const hookTypes = ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"];
 
-      onDestroy(() => {
-         Hooks.off("actorSystemRecalculated", handler);
-      });
-   });
+      for (const type of hookTypes) {
+         const handler = (effect) => relevant(effect) && update();
+         Hooks.on(type, handler);
+         cleanupHooks.push(() => Hooks.off(type, handler));
+      }
 
-   $effect(() => {
       refreshEffects();
    });
 
-   function refreshEffects() {
-      actorAttachedEffects = [...document.effects.contents];
-
-      transferredEffects =
-         document instanceof Actor
-            ? document.items.contents.flatMap((item) =>
-                 item.effects.contents.map((activeEffect) => ({
-                    activeEffect,
-                    sourceDocument: item,
-                    canDelete: false,
-                 }))
-              )
-            : [];
-   }
+   onDestroy(() => {
+      cleanupHooks.forEach((fn) => fn());
+   });
 
    async function addEffect() {
       await document.createEmbeddedDocuments(
@@ -66,24 +71,17 @@
          ],
          { render: false }
       );
-      await triggerRefresh();
    }
 
    async function editEffect(effectData) {
       const { activeEffect, sourceDocument } = effectData;
       const ActiveEffectsEditor = await import("@applications/ActiveEffectsEditor.js");
-      ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, config, triggerRefresh);
+      ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, config);
    }
 
    async function deleteEffect(effectData) {
       const { activeEffect, sourceDocument } = effectData;
       await sourceDocument.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
-      await triggerRefresh();
-   }
-
-   async function triggerRefresh() {
-      Hooks.callAll("actorSystemRecalculated", document);
-      refreshEffects();
    }
 
    function canDeleteEffect(effectData) {
@@ -106,8 +104,7 @@
          </tr>
       </thead>
       <tbody>
-
-         {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.gadget) as activeEffect (activeEffect.id)}
+         {#each actorAttachedEffects as activeEffect (activeEffect.id)}
             <ActiveEffectsRow
                effectData={{
                   activeEffect,
@@ -121,7 +118,7 @@
             />
          {/each}
          {#if isViewerInstanceOfActor}
-            {#each transferredEffects.filter(({ activeEffect }) => !activeEffect.flags?.sr3e?.gadget) as effectData (effectData.activeEffect.id)}
+            {#each transferredEffects as effectData (effectData.activeEffect.id)}
                <ActiveEffectsRow
                   {effectData}
                   {config}
