@@ -5,9 +5,11 @@
    import GadgetEditorSheet from "@sheets/GadgetEditorSheet.js";
    import Switch from "@sveltecomponent/Switch.svelte";
 
-   let { document, effects = [], config, onHandleEffectTriggerUI } = $props();
+   let { document, activeEffects = [], config, onHandleEffectTriggerUI } = $props();
 
-   const primary = effects[0];
+   const primary = activeEffects[0];
+   if (!primary) throw new Error("No primary effect provided to GadgetRow");
+
    let sheetInstance = null;
 
    const storeManager = StoreManager.Subscribe(primary);
@@ -19,7 +21,7 @@
    async function deleteEffectGroup() {
       sheetInstance?.close();
       sheetInstance = null;
-      const ids = effects.map((e) => e.id);
+      const ids = activeEffects.map((e) => e.id);
       await document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
       await onHandleEffectTriggerUI();
    }
@@ -27,25 +29,20 @@
    function updateAll(event) {
       const isEnabled = event.currentTarget.checked;
 
-      //INFO: Updating the effect to correlate, through stores, to leverage reactivity
-      for (const effect of effects) {
-         let effectStoreManager = StoreManager.Subscribe(effect);
+      for (const effect of activeEffects) {
+         const sm = StoreManager.Subscribe(effect);
 
-         let disabled = effectStoreManager.GetRWStore("disabled", true);
-         disabled.set(!isEnabled);
+         sm.GetRWStore("disabled", true).set(!isEnabled);
+         sm.GetFlagStore("gadget.isEnabled").set(isEnabled);
 
-         let enabled = effectStoreManager.GetFlagStore("gadtget.isEnabled");
-         enabled.set(isEnabled);
-
-         if (effect.id === primary.id) continue;
-         StoreManager.Unsubscribe(effect);
+         if (effect.id !== primary.id) StoreManager.Unsubscribe(effect);
       }
 
       onHandleEffectTriggerUI?.();
    }
 
    function openEditor() {
-      sheetInstance = new GadgetEditorSheet(document, effects, config);
+      sheetInstance = new GadgetEditorSheet(document, activeEffects, config);
       sheetInstance.render(true);
    }
 </script>

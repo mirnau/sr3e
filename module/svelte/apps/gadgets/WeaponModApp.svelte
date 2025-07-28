@@ -1,5 +1,5 @@
 <script>
-   import { onDestroy } from "svelte";
+   import { onDestroy, onMount } from "svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
 
@@ -9,25 +9,58 @@
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
    import ActiveEffectsRow from "@sveltecomponent/ActiveEffects/ActiveEffectsRow.svelte";
-   import Switch from "@sveltecomponent/Switch.svelte";
 
-   let { document, effects = [], config } = $props();
+   let { document, activeEffects = [], config } = $props();
 
-   const primary = effects[0];
+   let effectsList = $state([]);
+   const primary = activeEffects[0];
+   if (!primary) throw new Error("No primary effect passed to gadget editor");
+
    const storeManager = StoreManager.Subscribe(primary);
    onDestroy(() => StoreManager.Unsubscribe(primary));
 
    const commodityStore = storeManager.GetFlagStore("commodity");
-   const commodity = new CommodityModel({ ...$commodityStore });
+   const commodity = new CommodityModel($commodityStore);
 
-   const days = $state(commodity.days);
-   const cost = $state(commodity.cost);
-   const streetIndex = $state(commodity.streetIndex);
-   const legalityStatus = $state(commodity.legality.status);
-   const legalityPermit = $state(commodity.legality.permit);
-   const legalityPriority = $state(commodity.legality.priority);
-   const isBroken = $state(commodity.isBroken);
-   const name = $state(primary.name);
+   let days = $state(commodity.days);
+   let cost = $state(commodity.cost);
+   let streetIndex = $state(commodity.streetIndex);
+   let legalityStatus = $state(commodity.legality.status);
+   let legalityPermit = $state(commodity.legality.permit);
+   let legalityPriority = $state(commodity.legality.priority);
+   let isBroken = $state(commodity.isBroken);
+   let name = $state(primary.name);
+   let refreshHook;
+
+   onMount(() => {
+      const handler = (actor) => {
+         if (actor.id !== document.id) return;
+         refreshEffects();
+      };
+
+      Hooks.on("actorSystemRecalculated", handler);
+      refreshHook = handler;
+
+      refreshEffects();
+   });
+
+   onDestroy(() => {
+      if (refreshHook) Hooks.off("actorSystemRecalculated", refreshHook);
+   });
+
+   function refreshEffects() {
+      const origin = primary.flags?.sr3e?.gadget?.origin;
+      effectsList = document.effects.contents.filter((e) => e.flags?.sr3e?.gadget?.origin === origin);
+   }
+
+   async function triggerRefresh() {
+      Hooks.callAll("actorSystemRecalculated", document);
+      refreshEffects();
+   }
+
+   $effect(() => {
+      refreshEffects();
+   });
 
    $effect(() => {
       commodity.days = days;
@@ -40,43 +73,54 @@
       commodityStore.set(commodity.toObject());
    });
 
-   function updateName(e) {
-      primary.update({ name: e.target.value });
-   }
+   const updateName = (e) => primary.update({ name: e.target.value });
 
-   function addEffect() {
-      primary.parent?.createEmbeddedDocuments("ActiveEffect", [
-         {
-            _id: foundry.utils.randomID(),
-            name: "New Effect",
-            icon: primary.icon,
-            changes: [],
-            duration: {},
-            disabled: false,
-            flags: {
-               sr3e: {
-                  type: "gadget",
-                  origin: primary.flags?.sr3e?.origin,
-                  gadgetType: primary.flags?.sr3e?.gadgetType,
-                  source: "manual",
-                  commodity: primary.flags?.sr3e?.commodity ?? {},
-               },
+   const addEffect = async () => {
+      const gadgetFlags = {
+         name: "New Effect",
+         img: primary.img,
+         isEnabled: true,
+         type: "gadget",
+         origin: primary.flags.sr3e.gadget.origin,
+         gadgetType: primary.flags.sr3e.gadget.gadgetType,
+         commodity: primary.flags.sr3e.gadget.commodity,
+      };
+
+      const newEffectData = {
+         _id: foundry.utils.randomID(),
+         name: "New Effect",
+         icon: primary.img,
+         changes: [],
+         duration: {},
+         disabled: false,
+         flags: {
+            sr3e: {
+               gadget: gadgetFlags,
             },
          },
-      ]);
-   }
+      };
 
-   function editEffect(effect) {
-      effect.sheet?.render(true);
-   }
+      const [newEffect] = await document.createEmbeddedDocuments("ActiveEffect", [newEffectData]);
+      const { default: ActiveEffectsEditor } = await import("@applications/ActiveEffectsEditor.js");
+      ActiveEffectsEditor.launch(document, newEffect, config, triggerRefresh);
+   };
 
-   function deleteEffect(effect) {
-      primary.parent?.deleteEmbeddedDocuments("ActiveEffect", [effect.id], { render: false });
-   }
+   const editEffect = async ({ activeEffect }) => {
+      const { default: ActiveEffectsEditor } = await import("@applications/ActiveEffectsEditor.js");
+      ActiveEffectsEditor.launch(document, activeEffect, config, triggerRefresh);
+   };
 
-   function canDeleteEffect(effect) {
-      return true;
-   }
+   const deleteEffect = async ({ activeEffect }) => {
+      if (!activeEffect?.id) {
+         console.warn("Attempted to delete effect without ID:", activeEffect);
+         return;
+      }
+
+      await document.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
+      await triggerRefresh();
+   };
+
+   const canDeleteEffect = () => true;
 
    const entries = [
       {
@@ -177,7 +221,7 @@
                </tr>
             </thead>
             <tbody>
-               {#each effects as childEffect (childEffect.id)}
+               {#each effectsList as childEffect (childEffect.id)}
                   <ActiveEffectsRow
                      effectData={{
                         activeEffect: childEffect,

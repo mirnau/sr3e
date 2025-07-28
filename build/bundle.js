@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _wearable, _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _metatype, _magic, _app3, _svelteapp, _document2, _effects, _weapon, _ammunition, _skill, _app4, _app5, _app6, _footer2, _gadget, _focus, _techinterface, _spell, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
+var _wearable, _document, _persistentStore, _actorStores, _hookDisposers, _actorSubscriptions, _app, _ecgCanvas, _ecgPointCanvas, _ctxLine, _ctxPoint, _actor, _html, _resizeObserver, _isResizing, _ElectroCardiogramService_instances, resizeCanvas_fn, setPace_fn, _feedBuffer, _currentIndices, _maxVisible, _lastBroadcasterIndex, _frameUpdateInterval, _initialized, _nextTick, _broadcastController, _isController, _controllerHeartbeat, _lastHeartbeat, _syncRequestTimeout, _electionCandidates, _electionInProgress, _defaultMessages, _instance, _NewsService_instances, loadActiveBroadcasters_fn, startControllerHealthCheck_fn, setupSocket_fn, requestControllerElection_fn, resolveElection_fn, handleControllerElection_fn, becomeController_fn, announceController_fn, requestControllerStatus_fn, handleControllerStatusRequest_fn, handleControllerStatusResponse_fn, startControllerHeartbeat_fn, handleControllerHeartbeat_fn, checkControllerHealth_fn, scheduleNextFrame_fn, receiveFrameUpdate_fn, guessDuration_fn, handleStateSyncRequest_fn, handleStateSyncResponse_fn, receiveBroadcastSync_fn, stopBroadcaster_fn, pumpNextHeadline_fn, fillFeedBuffer_fn, updateFeedBuffer_fn, publishFeed_fn, _app2, _neon, _feed, _cart, _creation, _footer, _metatype, _magic, _app3, _svelteapp, _document2, _activeEffects, _weapon, _ammunition, _skill, _app4, _app5, _app6, _footer2, _gadget, _focus, _techinterface, _spell, _actor2, _onSubmit, _onCancel, _svelteApp, _wasSubmitted;
 class Log {
   static error(message, sender, obj) {
     this._print("❌", "coral", message, sender, obj);
@@ -10161,7 +10161,7 @@ function ActiveEffectsViewer($$anchor, $$props) {
   }
   async function editEffect(effectData) {
     const { activeEffect, sourceDocument } = effectData;
-    const ActiveEffectsEditor = await __vitePreload(() => import("./assets/ActiveEffectsEditor-ZoaVD867.js"), true ? [] : void 0);
+    const ActiveEffectsEditor = await __vitePreload(() => import("./assets/ActiveEffectsEditor-CZCeJj3c.js"), true ? [] : void 0);
     ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, $$props.config, triggerRefresh);
   }
   async function deleteEffect(effectData) {
@@ -12995,31 +12995,33 @@ function GadgetApp($$anchor, $$props) {
   pop();
 }
 delegate(["change"]);
-function updateName(e, primary) {
-  primary.update({ name: e.target.value });
-}
-function addEffect(_, primary) {
-  var _a, _b, _c, _d, _e, _f, _g;
-  (_g = primary.parent) == null ? void 0 : _g.createEmbeddedDocuments("ActiveEffect", [
-    {
-      _id: foundry.utils.randomID(),
-      name: "New Effect",
-      icon: primary.icon,
-      changes: [],
-      duration: {},
-      disabled: false,
-      flags: {
-        sr3e: {
-          type: "gadget",
-          origin: (_b = (_a = primary.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.origin,
-          gadgetType: (_d = (_c = primary.flags) == null ? void 0 : _c.sr3e) == null ? void 0 : _d.gadgetType,
-          source: "manual",
-          commodity: ((_f = (_e = primary.flags) == null ? void 0 : _e.sr3e) == null ? void 0 : _f.commodity) ?? {}
-        }
-      }
-    }
-  ]);
-}
+const updateName = (e, primary) => primary.update({ name: e.target.value });
+const addEffect = async (_, primary, $$props, triggerRefresh) => {
+  const gadgetFlags = {
+    name: "New Effect",
+    img: primary.img,
+    isEnabled: true,
+    type: "gadget",
+    origin: primary.flags.sr3e.gadget.origin,
+    gadgetType: primary.flags.sr3e.gadget.gadgetType,
+    commodity: primary.flags.sr3e.gadget.commodity
+  };
+  const newEffectData = {
+    _id: foundry.utils.randomID(),
+    name: "New Effect",
+    icon: primary.img,
+    changes: [],
+    duration: {},
+    disabled: false,
+    flags: { sr3e: { gadget: gadgetFlags } }
+  };
+  const [newEffect] = await $$props.document.createEmbeddedDocuments("ActiveEffect", [newEffectData]);
+  const { default: ActiveEffectsEditor } = await __vitePreload(async () => {
+    const { default: ActiveEffectsEditor2 } = await import("./assets/ActiveEffectsEditor-CZCeJj3c.js");
+    return { default: ActiveEffectsEditor2 };
+  }, true ? [] : void 0);
+  ActiveEffectsEditor.launch($$props.document, newEffect, $$props.config, triggerRefresh);
+};
 var root_2$8 = /* @__PURE__ */ template(`<!> <input type="text">`, 1);
 var root_3$5 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid two-column"></div> <div class="stat-grid single-column"></div>`, 1);
 var root_6$2 = /* @__PURE__ */ template(`<div class="effects-viewer"><table class="slim"><thead><tr><th><button class="fas fa-plus" type="button"></button></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th><th><div class="cell-content"> </div></th></tr></thead><tbody></tbody></table></div>`);
@@ -13028,20 +13030,50 @@ function WeaponModApp($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $commodityStore = () => store_get(commodityStore, "$commodityStore", $$stores);
-  let effects = prop($$props, "effects", 19, () => []);
-  const primary = effects()[0];
+  let activeEffects = prop($$props, "activeEffects", 19, () => []);
+  let effectsList = state(proxy([]));
+  const primary = activeEffects()[0];
+  if (!primary) throw new Error("No primary effect passed to gadget editor");
   const storeManager2 = StoreManager.Subscribe(primary);
   onDestroy(() => StoreManager.Unsubscribe(primary));
   const commodityStore = storeManager2.GetFlagStore("commodity");
-  const commodity = new CommodityModel({ ...$commodityStore() });
-  const days = proxy(commodity.days);
-  const cost = proxy(commodity.cost);
-  const streetIndex = proxy(commodity.streetIndex);
-  const legalityStatus = proxy(commodity.legality.status);
-  const legalityPermit = proxy(commodity.legality.permit);
-  const legalityPriority = proxy(commodity.legality.priority);
-  const isBroken = proxy(commodity.isBroken);
-  const name = proxy(primary.name);
+  const commodity = new CommodityModel($commodityStore());
+  let days = proxy(commodity.days);
+  let cost = proxy(commodity.cost);
+  let streetIndex = proxy(commodity.streetIndex);
+  let legalityStatus = proxy(commodity.legality.status);
+  let legalityPermit = proxy(commodity.legality.permit);
+  let legalityPriority = proxy(commodity.legality.priority);
+  let isBroken = proxy(commodity.isBroken);
+  let name = proxy(primary.name);
+  let refreshHook;
+  onMount(() => {
+    const handler = (actor) => {
+      if (actor.id !== $$props.document.id) return;
+      refreshEffects();
+    };
+    Hooks.on("actorSystemRecalculated", handler);
+    refreshHook = handler;
+    refreshEffects();
+  });
+  onDestroy(() => {
+    if (refreshHook) Hooks.off("actorSystemRecalculated", refreshHook);
+  });
+  function refreshEffects() {
+    var _a, _b, _c;
+    const origin = (_c = (_b = (_a = primary.flags) == null ? void 0 : _a.sr3e) == null ? void 0 : _b.gadget) == null ? void 0 : _c.origin;
+    set(effectsList, proxy($$props.document.effects.contents.filter((e) => {
+      var _a2, _b2, _c2;
+      return ((_c2 = (_b2 = (_a2 = e.flags) == null ? void 0 : _a2.sr3e) == null ? void 0 : _b2.gadget) == null ? void 0 : _c2.origin) === origin;
+    })));
+  }
+  async function triggerRefresh() {
+    Hooks.callAll("actorSystemRecalculated", $$props.document);
+    refreshEffects();
+  }
+  user_effect(() => {
+    refreshEffects();
+  });
   user_effect(() => {
     commodity.days = days;
     commodity.cost = cost;
@@ -13052,17 +13084,22 @@ function WeaponModApp($$anchor, $$props) {
     commodity.isBroken = isBroken;
     commodityStore.set(commodity.toObject());
   });
-  function editEffect(effect2) {
-    var _a;
-    (_a = effect2.sheet) == null ? void 0 : _a.render(true);
-  }
-  function deleteEffect(effect2) {
-    var _a;
-    (_a = primary.parent) == null ? void 0 : _a.deleteEmbeddedDocuments("ActiveEffect", [effect2.id], { render: false });
-  }
-  function canDeleteEffect(effect2) {
-    return true;
-  }
+  const editEffect = async ({ activeEffect }) => {
+    const { default: ActiveEffectsEditor } = await __vitePreload(async () => {
+      const { default: ActiveEffectsEditor2 } = await import("./assets/ActiveEffectsEditor-CZCeJj3c.js");
+      return { default: ActiveEffectsEditor2 };
+    }, true ? [] : void 0);
+    ActiveEffectsEditor.launch($$props.document, activeEffect, $$props.config, triggerRefresh);
+  };
+  const deleteEffect = async ({ activeEffect }) => {
+    if (!(activeEffect == null ? void 0 : activeEffect.id)) {
+      console.warn("Attempted to delete effect without ID:", activeEffect);
+      return;
+    }
+    await $$props.document.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
+    await triggerRefresh();
+  };
+  const canDeleteEffect = () => true;
   const entries = [
     {
       item: primary,
@@ -13171,7 +13208,7 @@ function WeaponModApp($$anchor, $$props) {
           var tr = child(thead);
           var th = child(tr);
           var button = child(th);
-          button.__click = [addEffect, primary];
+          button.__click = [addEffect, primary, $$props, triggerRefresh];
           var th_1 = sibling(th);
           var div_3 = child(th_1);
           var text_1 = child(div_3);
@@ -13185,7 +13222,7 @@ function WeaponModApp($$anchor, $$props) {
           var div_6 = child(th_4);
           var text_4 = child(div_6);
           var tbody = sibling(thead);
-          each(tbody, 21, effects, (childEffect) => childEffect.id, ($$anchor4, childEffect) => {
+          each(tbody, 21, () => get$1(effectsList), (childEffect) => childEffect.id, ($$anchor4, childEffect) => {
             const expression = /* @__PURE__ */ derived$1(() => ({
               activeEffect: get$1(childEffect),
               sourceDocument: $$props.document,
@@ -13233,9 +13270,9 @@ class GadgetEditorApp extends foundry.applications.api.ApplicationV2 {
     __privateAdd(this, _app3);
     __privateAdd(this, _svelteapp);
     __privateAdd(this, _document2);
-    __privateAdd(this, _effects);
+    __privateAdd(this, _activeEffects);
     __privateSet(this, _document2, document2);
-    __privateSet(this, _effects, effects);
+    __privateSet(this, _activeEffects, effects);
     const primary = effects[0];
     const type = primary.flags.sr3e.gadget.gadgetType;
     const typeMap = {
@@ -13264,7 +13301,7 @@ class GadgetEditorApp extends foundry.applications.api.ApplicationV2 {
       target: html2,
       props: {
         document: __privateGet(this, _document2),
-        effects: __privateGet(this, _effects),
+        activeEffects: __privateGet(this, _activeEffects),
         config: CONFIG.sr3e
       }
     }));
@@ -13278,15 +13315,16 @@ class GadgetEditorApp extends foundry.applications.api.ApplicationV2 {
 _app3 = new WeakMap();
 _svelteapp = new WeakMap();
 _document2 = new WeakMap();
-_effects = new WeakMap();
+_activeEffects = new WeakMap();
 var root$e = /* @__PURE__ */ template(`<tr><td><div class="cell-content"><img></div></td><td><div class="cell-content"> </div></td><td><div class="cell-content"><!></div></td><td><div class="cell-content"><div class="buttons-vertical-distribution square"><button type="button" class="fas fa-edit"></button> <button type="button" class="fas fa-trash-can"></button></div></div></td></tr>`);
 function GadgetRow($$anchor, $$props) {
   push($$props, true);
   const [$$stores, $$cleanup] = setup_stores();
   const $nameStore = () => store_get(nameStore, "$nameStore", $$stores);
   const $disabledStore = () => store_get(disabledStore, "$disabledStore", $$stores);
-  let effects = prop($$props, "effects", 19, () => []);
-  const primary = effects()[0];
+  let activeEffects = prop($$props, "activeEffects", 19, () => []);
+  const primary = activeEffects()[0];
+  if (!primary) throw new Error("No primary effect provided to GadgetRow");
   let sheetInstance = null;
   const storeManager2 = StoreManager.Subscribe(primary);
   onDestroy(() => StoreManager.Unsubscribe(primary));
@@ -13295,26 +13333,23 @@ function GadgetRow($$anchor, $$props) {
   async function deleteEffectGroup() {
     sheetInstance == null ? void 0 : sheetInstance.close();
     sheetInstance = null;
-    const ids = effects().map((e) => e.id);
+    const ids = activeEffects().map((e) => e.id);
     await $$props.document.deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
     await $$props.onHandleEffectTriggerUI();
   }
   function updateAll(event2) {
     var _a;
     const isEnabled = event2.currentTarget.checked;
-    for (const effect2 of effects()) {
-      let effectStoreManager = StoreManager.Subscribe(effect2);
-      let disabled = effectStoreManager.GetRWStore("disabled", true);
-      disabled.set(!isEnabled);
-      let enabled = effectStoreManager.GetFlagStore("gadtget.isEnabled");
-      enabled.set(isEnabled);
-      if (effect2.id === primary.id) continue;
-      StoreManager.Unsubscribe(effect2);
+    for (const effect2 of activeEffects()) {
+      const sm = StoreManager.Subscribe(effect2);
+      sm.GetRWStore("disabled", true).set(!isEnabled);
+      sm.GetFlagStore("gadget.isEnabled").set(isEnabled);
+      if (effect2.id !== primary.id) StoreManager.Unsubscribe(effect2);
     }
     (_a = $$props.onHandleEffectTriggerUI) == null ? void 0 : _a.call($$props);
   }
   function openEditor() {
-    sheetInstance = new GadgetEditorApp($$props.document, effects(), $$props.config);
+    sheetInstance = new GadgetEditorApp($$props.document, activeEffects(), $$props.config);
     sheetInstance.render(true);
   }
   var tr = root$e();
@@ -13531,7 +13566,7 @@ function GadgetViewer($$anchor, $$props) {
       get document() {
         return $$props.document;
       },
-      get effects() {
+      get activeEffects() {
         return effects();
       },
       get config() {
@@ -13551,7 +13586,7 @@ function GadgetViewer($$anchor, $$props) {
           get document() {
             return $$props.document;
           },
-          get effects() {
+          get activeEffects() {
             return effects();
           },
           get config() {
@@ -17741,43 +17776,43 @@ function registerHooks() {
 }
 registerHooks();
 export {
-  each as A,
-  ComboSearch as B,
+  setup_stores as A,
+  flags as B,
   CharacterModel as C,
-  index as D,
-  set_value as E,
-  pop as F,
-  setup_stores as G,
-  delegate as H,
+  delegate as D,
+  store_get as E,
+  ComboSearch as F,
+  index as G,
+  set_value as H,
   ItemSheetComponent as I,
   unmount as J,
   mount as K,
   StoreManager as S,
   proxy as a,
-  set as b,
-  store_get as c,
-  store_set as d,
-  onDestroy as e,
-  flags as f,
+  onDestroy as b,
+  store_set as c,
+  set as d,
+  sibling as e,
+  first_child as f,
   get$1 as g,
-  first_child as h,
-  sibling as i,
-  Image as j,
-  derived$1 as k,
+  Image as h,
+  derived$1 as i,
+  child as j,
+  if_block as k,
   localize as l,
-  child as m,
-  if_block as n,
+  template_effect as m,
+  set_text as n,
   onMount as o,
   push as p,
-  template_effect as q,
-  set_text as r,
+  event as q,
+  bind_value as r,
   state as s,
   template as t,
   user_effect as u,
-  event as v,
-  bind_value as w,
-  bind_select_value as x,
-  bind_checked as y,
-  append as z
+  bind_select_value as v,
+  bind_checked as w,
+  append as x,
+  each as y,
+  pop as z
 };
 //# sourceMappingURL=bundle.js.map

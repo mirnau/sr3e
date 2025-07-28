@@ -199,11 +199,17 @@
          </thead>
          <tbody>
             {#each groupedAttachedGadgets as { origin, effects } (origin)}
-               <GadgetRow {document} {effects} {config} {onHandleEffectTriggerUI} />
+               <GadgetRow {document} activeEffects={effects} {config} {onHandleEffectTriggerUI} />
             {/each}
             {#if isViewerInstanceOfActor}
                {#each groupedTransferredGadgets as { origin, effects } (origin)}
-                  <GadgetRow {document} {effects} {config} {isViewerInstanceOfActor} {onHandleEffectTriggerUI} />
+                  <GadgetRow
+                     {document}
+                     activeEffects={effects}
+                     {config}
+                     {isViewerInstanceOfActor}
+                     {onHandleEffectTriggerUI}
+                  />
                {/each}
             {/if}
          </tbody>

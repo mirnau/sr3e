@@ -26,7 +26,9 @@ export default defineConfig({
    resolve: {
       alias: {
          ...generateFolderAliases(),
+
          "@root": projectRoot,
+         "@applications": path.resolve(projectRoot, "module/foundry/applications"),
          "@models": path.resolve(projectRoot, "module/models"),
          "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
          "@services": path.resolve(projectRoot, "module/services"),

@@ -7,12 +7,12 @@ export default class GadgetEditorApp extends foundry.applications.api.Applicatio
    #app;
    #svelteapp;
    #document;
-   #effects;
+   #activeEffects;
 
    constructor(document, effects, config, options = {}) {
       super(options);
       this.#document = document;
-      this.#effects = effects;
+      this.#activeEffects = effects;
 
       const primary = effects[0];
       const type = primary.flags.sr3e.gadget.gadgetType;
@@ -48,7 +48,7 @@ export default class GadgetEditorApp extends foundry.applications.api.Applicatio
          target: html,
          props: {
             document: this.#document,
-            effects: this.#effects,
+            activeEffects: this.#activeEffects,
             config: CONFIG.sr3e,
          },
       });

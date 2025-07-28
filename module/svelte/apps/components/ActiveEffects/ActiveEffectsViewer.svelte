@@ -71,7 +71,7 @@
 
    async function editEffect(effectData) {
       const { activeEffect, sourceDocument } = effectData;
-      const ActiveEffectsEditor = await import("../../../../foundry/applications/ActiveEffectsEditor.js");
+      const ActiveEffectsEditor = await import("@applications/ActiveEffectsEditor.js");
       ActiveEffectsEditor.default.launch(sourceDocument, activeEffect, config, triggerRefresh);
    }
 
@@ -106,6 +106,7 @@
          </tr>
       </thead>
       <tbody>
+
          {#each actorAttachedEffects.filter((e) => !e.flags?.sr3e?.gadget) as activeEffect (activeEffect.id)}
             <ActiveEffectsRow
                effectData={{
