@@ -99,8 +99,6 @@
    }
 
    async function addEffect(sourceItem) {
-      console.log("INCOMING", sourceItem);
-
       const commodity = sourceItem.system.commodity;
       const sourceItemType = sourceItem.system.type;
 

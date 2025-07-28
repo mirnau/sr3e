@@ -10,25 +10,21 @@
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
    import ActiveEffectsRow from "@sveltecomponent/ActiveEffects/ActiveEffectsRow.svelte";
 
-   let { document, activeEffects = [], config } = $props();
+   let { document, activeEffects, config, sheet } = $props();
 
    let effectsList = $state([]);
    const primary = activeEffects[0];
-   if (!primary) throw new Error("No primary effect passed to gadget editor");
 
    const storeManager = StoreManager.Subscribe(primary);
    onDestroy(() => StoreManager.Unsubscribe(primary));
 
-   const commodityStore = storeManager.GetFlagStore("commodity");
-   const commodity = new CommodityModel($commodityStore);
+   const commodityStore = storeManager.GetFlagStore("gadget.commodity");
 
-   let days = $state(commodity.days);
-   let cost = $state(commodity.cost);
-   let streetIndex = $state(commodity.streetIndex);
-   let legalityStatus = $state(commodity.legality.status);
-   let legalityPermit = $state(commodity.legality.permit);
-   let legalityPriority = $state(commodity.legality.priority);
-   let isBroken = $state(commodity.isBroken);
+   // Initialize store with empty CommodityModel if it doesn't exist
+   if (!$commodityStore) {
+      $commodityStore = new CommodityModel({});
+   }
+
    let name = $state(primary.name);
    let cleanupCreate, cleanupDelete;
 
@@ -69,18 +65,29 @@
       refreshEffects();
    }
 
-   $effect(() => {
-      commodity.days = days;
-      commodity.cost = cost;
-      commodity.streetIndex = streetIndex;
-      commodity.legality.status = legalityStatus;
-      commodity.legality.permit = legalityPermit;
-      commodity.legality.priority = legalityPriority;
-      commodity.isBroken = isBroken;
-      commodityStore.set(commodity.toObject());
-   });
+   // Direct store update function
+   function updateCommodityStore(updates) {
+      $commodityStore = { ...$commodityStore, ...updates };
+
+      for (const effect of effectsList) {
+         effect.update({ [`flags.sr3e.gadget.commodity`]: $commodityStore }, { render: false });
+      }
+   }
+
+   // Direct store update for nested legality
+   function updateLegality(key, value) {
+      $commodityStore = {
+         ...$commodityStore,
+         legality: { ...$commodityStore.legality, [key]: value },
+      };
+
+      for (const effect of effectsList) {
+         effect.update({ [`flags.sr3e.gadget.commodity`]: $commodityStore }, { render: false });
+      }
+   }
 
    const updateName = (e) => primary.update({ name: e.target.value });
+
    const addEffect = async () => {
       const gadgetFlags = {
          name: "New Effect",
@@ -117,81 +124,97 @@
    };
 
    const deleteEffect = async ({ activeEffect }) => {
-      if (!activeEffect?.id) {
-         console.warn("Attempted to delete effect without ID:", activeEffect);
-         return;
-      }
-
       await document.deleteEmbeddedDocuments("ActiveEffect", [activeEffect.id], { render: false });
       await triggerRefresh();
    };
 
+   $effect(() => {
+      if (effectsList.length === 0) {
+         console.warn("Closing GadgetEditorApp — no gadget effects left.");
+         sheet.close();
+      }
+   });
+
    const canDeleteEffect = () => true;
+   let entries = $state([]);
+   let singleColumnEntries = $state([]);
 
-   const entries = [
-      {
-         item: primary,
-         key: "days",
-         label: localize(config.commodity.days),
-         value: days,
-         path: "flags.sr3e.commodity",
-         type: "number",
-      },
-      {
-         item: primary,
-         key: "cost",
-         label: localize(config.commodity.cost),
-         value: cost,
-         path: "flags.sr3e.commodity",
-         type: "number",
-      },
-      {
-         item: primary,
-         key: "streetIndex",
-         label: localize(config.commodity.streetIndex),
-         value: streetIndex,
-         path: "flags.sr3e.commodity",
-         type: "number",
-      },
-      {
-         item: primary,
-         key: "isBroken",
-         label: localize(config.commodity.isBroken),
-         value: isBroken,
-         path: "flags.sr3e.commodity",
-         type: "checkbox",
-      },
-   ];
+   // Computed entries using direct store access
+   $effect(() => {
+      entries = [
+         {
+            item: primary,
+            key: "days",
+            label: localize(config.commodity.days),
+            value: $commodityStore.days,
+            path: "flags.sr3e.commodity",
+            type: "number",
+            onUpdate: (val) => updateCommodityStore({ days: val }),
+         },
+         {
+            item: primary,
+            key: "cost",
+            label: localize(config.commodity.cost),
+            value: $commodityStore.cost,
+            path: "flags.sr3e.commodity",
+            type: "number",
+            onUpdate: (val) => updateCommodityStore({ cost: val }),
+         },
+         {
+            item: primary,
+            key: "streetIndex",
+            label: localize(config.commodity.streetIndex),
+            value: $commodityStore.streetIndex,
+            path: "flags.sr3e.commodity",
+            type: "number",
+            onUpdate: (val) => updateCommodityStore({ streetIndex: val }),
+         },
+         {
+            item: primary,
+            key: "isBroken",
+            label: localize(config.commodity.isBroken),
+            value: $commodityStore.isBroken,
+            path: "flags.sr3e.commodity",
+            type: "checkbox",
+            onUpdate: (val) => updateCommodityStore({ isBroken: val }),
+         },
+      ];
+   });
 
-   const singleColumnEntries = [
-      {
-         item: primary,
-         key: "status",
-         label: localize(config.commodity.legalstatus),
-         value: legalityStatus,
-         path: "flags.sr3e.commodity.legality",
-         type: "select",
-         options: Object.values(config.legalstatus).map(localize),
-      },
-      {
-         item: primary,
-         key: "permit",
-         label: localize(config.commodity.legalpermit),
-         value: legalityPermit,
-         path: "flags.sr3e.commodity.legality",
-         type: "select",
-         options: Object.values(config.legalpermit).map(localize),
-      },
-      {
-         item: primary,
-         key: "priority",
-         label: localize(config.commodity.legalenforcementpriority),
-         value: legalityPriority,
-         path: "flags.sr3e.commodity.legality",
-         type: "select",
-         options: Object.values(config.legalpriority).map(localize),
-      },
-   ];
+   $effect(() => {
+      singleColumnEntries = [
+         {
+            item: primary,
+            key: "status",
+            label: localize(config.commodity.legalstatus),
+            value: $commodityStore.legality?.status,
+            path: "flags.sr3e.commodity.legality",
+            type: "select",
+            options: Object.values(config.legalstatus).map(localize),
+            onUpdate: (val) => updateLegality("status", val),
+         },
+         {
+            item: primary,
+            key: "permit",
+            label: localize(config.commodity.legalpermit),
+            value: $commodityStore.legality?.permit,
+            path: "flags.sr3e.commodity.legality",
+            type: "select",
+            options: Object.values(config.legalpermit).map(localize),
+            onUpdate: (val) => updateLegality("permit", val),
+         },
+         {
+            item: primary,
+            key: "priority",
+            label: localize(config.commodity.legalenforcementpriority),
+            value: $commodityStore.legality?.priority,
+            path: "flags.sr3e.commodity.legality",
+            type: "select",
+            options: Object.values(config.legalpriority).map(localize),
+            onUpdate: (val) => updateLegality("priority", val),
+         },
+      ];
+   });
 </script>
 
 <ItemSheetWrapper csslayout="single">

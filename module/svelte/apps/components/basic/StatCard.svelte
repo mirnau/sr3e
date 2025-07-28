@@ -1,6 +1,6 @@
 <script>
    import { localize } from "@services/utilities.js";
-   let { item, key, label, value, path, type = "text", options = [] } = $props();
+   let { item, key, label, value, path, type = "text", options = [], onUpdate } = $props();
 
    function update(e) {
       let val;
@@ -10,8 +10,15 @@
          val = e.target.value;
          if (type === "number") val = Number(val);
       }
-      item.update({ [`${path}.${key}`]: val });
-      console.log(`Updated ${path}.${key} to`, val);
+      
+      // Use onUpdate callback if provided, otherwise fall back to direct item update
+      if (onUpdate) {
+         onUpdate(val);
+      } else {
+         item.update({ [`${path}.${key}`]: val });
+      }
+      
+      console.log(`Updated ${key} to`, val);
    }
 </script>
 

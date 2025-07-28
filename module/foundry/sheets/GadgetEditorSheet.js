@@ -50,6 +50,7 @@ export default class GadgetEditorApp extends foundry.applications.api.Applicatio
             document: this.#document,
             activeEffects: this.#activeEffects,
             config: CONFIG.sr3e,
+            sheet: this
          },
       });
 
