@@ -12996,7 +12996,7 @@ function GadgetApp($$anchor, $$props) {
 }
 delegate(["change"]);
 const updateName = (e, primary) => primary.update({ name: e.target.value });
-const addEffect = async (_, primary, $$props, triggerRefresh) => {
+const addEffect = async (_, primary, $$props) => {
   const gadgetFlags = {
     name: "New Effect",
     img: primary.img,
@@ -13020,7 +13020,7 @@ const addEffect = async (_, primary, $$props, triggerRefresh) => {
     const { default: ActiveEffectsEditor2 } = await import("./assets/ActiveEffectsEditor-CZCeJj3c.js");
     return { default: ActiveEffectsEditor2 };
   }, true ? [] : void 0);
-  ActiveEffectsEditor.launch($$props.document, newEffect, $$props.config, triggerRefresh);
+  ActiveEffectsEditor.launch($$props.document, newEffect, $$props.config);
 };
 var root_2$8 = /* @__PURE__ */ template(`<!> <input type="text">`, 1);
 var root_3$5 = /* @__PURE__ */ template(`<h3> </h3> <div class="stat-grid two-column"></div> <div class="stat-grid single-column"></div>`, 1);
@@ -13046,18 +13046,27 @@ function WeaponModApp($$anchor, $$props) {
   let legalityPriority = proxy(commodity.legality.priority);
   let isBroken = proxy(commodity.isBroken);
   let name = proxy(primary.name);
-  let refreshHook;
+  let cleanupCreate, cleanupDelete;
   onMount(() => {
-    const handler = (actor) => {
-      if (actor.id !== $$props.document.id) return;
-      refreshEffects();
+    const filter = (effect2) => {
+      var _a, _b, _c, _d, _e, _f, _g;
+      return ((_a = effect2 == null ? void 0 : effect2.parent) == null ? void 0 : _a.id) === $$props.document.id && ((_d = (_c = (_b = effect2 == null ? void 0 : effect2.flags) == null ? void 0 : _b.sr3e) == null ? void 0 : _c.gadget) == null ? void 0 : _d.origin) === ((_g = (_f = (_e = primary.flags) == null ? void 0 : _e.sr3e) == null ? void 0 : _f.gadget) == null ? void 0 : _g.origin);
     };
-    Hooks.on("actorSystemRecalculated", handler);
-    refreshHook = handler;
+    const handleCreate = (effect2) => {
+      if (filter(effect2)) refreshEffects();
+    };
+    const handleDelete = (effect2) => {
+      if (filter(effect2)) refreshEffects();
+    };
+    Hooks.on("createActiveEffect", handleCreate);
+    Hooks.on("deleteActiveEffect", handleDelete);
+    cleanupCreate = () => Hooks.off("createActiveEffect", handleCreate);
+    cleanupDelete = () => Hooks.off("deleteActiveEffect", handleDelete);
     refreshEffects();
   });
   onDestroy(() => {
-    if (refreshHook) Hooks.off("actorSystemRecalculated", refreshHook);
+    if (cleanupCreate) cleanupCreate();
+    if (cleanupDelete) cleanupDelete();
   });
   function refreshEffects() {
     var _a, _b, _c;
@@ -13071,9 +13080,6 @@ function WeaponModApp($$anchor, $$props) {
     Hooks.callAll("actorSystemRecalculated", $$props.document);
     refreshEffects();
   }
-  user_effect(() => {
-    refreshEffects();
-  });
   user_effect(() => {
     commodity.days = days;
     commodity.cost = cost;
@@ -13208,7 +13214,7 @@ function WeaponModApp($$anchor, $$props) {
           var tr = child(thead);
           var th = child(tr);
           var button = child(th);
-          button.__click = [addEffect, primary, $$props, triggerRefresh];
+          button.__click = [addEffect, primary, $$props];
           var th_1 = sibling(th);
           var div_3 = child(th_1);
           var text_1 = child(div_3);

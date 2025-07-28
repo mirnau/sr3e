@@ -30,22 +30,33 @@
    let legalityPriority = $state(commodity.legality.priority);
    let isBroken = $state(commodity.isBroken);
    let name = $state(primary.name);
-   let refreshHook;
+   let cleanupCreate, cleanupDelete;
 
    onMount(() => {
-      const handler = (actor) => {
-         if (actor.id !== document.id) return;
-         refreshEffects();
+      const filter = (effect) =>
+         effect?.parent?.id === document.id &&
+         effect?.flags?.sr3e?.gadget?.origin === primary.flags?.sr3e?.gadget?.origin;
+
+      const handleCreate = (effect) => {
+         if (filter(effect)) refreshEffects();
       };
 
-      Hooks.on("actorSystemRecalculated", handler);
-      refreshHook = handler;
+      const handleDelete = (effect) => {
+         if (filter(effect)) refreshEffects();
+      };
+
+      Hooks.on("createActiveEffect", handleCreate);
+      Hooks.on("deleteActiveEffect", handleDelete);
+
+      cleanupCreate = () => Hooks.off("createActiveEffect", handleCreate);
+      cleanupDelete = () => Hooks.off("deleteActiveEffect", handleDelete);
 
       refreshEffects();
    });
 
    onDestroy(() => {
-      if (refreshHook) Hooks.off("actorSystemRecalculated", refreshHook);
+      if (cleanupCreate) cleanupCreate();
+      if (cleanupDelete) cleanupDelete();
    });
 
    function refreshEffects() {
@@ -59,10 +70,6 @@
    }
 
    $effect(() => {
-      refreshEffects();
-   });
-
-   $effect(() => {
       commodity.days = days;
       commodity.cost = cost;
       commodity.streetIndex = streetIndex;
@@ -74,7 +81,6 @@
    });
 
    const updateName = (e) => primary.update({ name: e.target.value });
-
    const addEffect = async () => {
       const gadgetFlags = {
          name: "New Effect",
@@ -102,7 +108,7 @@
 
       const [newEffect] = await document.createEmbeddedDocuments("ActiveEffect", [newEffectData]);
       const { default: ActiveEffectsEditor } = await import("@applications/ActiveEffectsEditor.js");
-      ActiveEffectsEditor.launch(document, newEffect, config, triggerRefresh);
+      ActiveEffectsEditor.launch(document, newEffect, config);
    };
 
    const editEffect = async ({ activeEffect }) => {
