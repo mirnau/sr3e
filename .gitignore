@@ -2,6 +2,8 @@
 node_modules/
 themes/chummer/css/core-styles.css
 themes/chummer/css/core-styles.css
-build/bundle.js
-build/bundle.js
 themes/chummer/css/core-styles.css
+
+#Files
+build/bundle.js
+build/bundle.js.map
