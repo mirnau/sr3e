@@ -62,39 +62,72 @@
 
          .asset-card {
             display: flex;
+            flex-wrap: nowrap;
+            white-space: nowrap;
             flex-direction: row;
             gap: 0.25rem;
             box-sizing: border-box;
             position: relative;
             background: var(--highlight-color-primary);
-            text-align: center;
             padding: 0.25rem;
-            height: 4rem;
+            height: 6rem;
+            min-width: 0; /* Critical */
+
             .clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
 
             .image-mask {
-               width: 3.5rem;
-               height: 3.5rem;
+               width: 5.5rem;
+               height: 5.5rem;
             }
             .asset-card-column {
-               display: flex;
-               flex-direction: column; // stack rows vertically
-               justify-content: flex-end; // ⬇️ push rows to bottom
-               align-items: flex-start; // ⬅️ align rows to the left
-               height: 100%; // required for bottom anchoring
+               /* Your existing outer column styles */
+               height: 100%;
                width: 100%;
+               display: flex;
+               flex-direction: column;
+               justify-content: flex-end;
+               align-items: flex-start;
+               min-width: 0;
 
                .asset-card-row {
                   display: flex;
                   flex-direction: row;
-                  justify-content: flex-start; // ⬅️ buttons left inside row
+                  justify-content: flex-start;
                   gap: 0.25rem;
+                  width: 100%; /* Ensure full width */
+                  min-width: 0;
+
+                  /* Target the INNER .asset-card-column */
+                  .asset-card-column {
+                     flex: 1; /* Take available space */
+                     width: 100%;
+                     min-width: 0; /* Critical */
+
+                     h3,
+                     h4 {
+                        width: 100%;
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        min-width: 0;
+                     }
+                  }
 
                   button {
-                     height: 1rem;
-                     width: 0.5rem;
+                     font-size: 0.75rem;
+                     height: 1.5rem;
+                     width: 1.5rem;
+                     aspect-ratio: 1/1;
+                     flex-shrink: 0; /* Don't let buttons shrink */
                   }
                }
+            }
+
+            .asset-toggles {
+               margin-bottom: 0.25rem;
+               position: absolute;
+               right: 0.25rem;
+               top: 0.25rem;
             }
 
             .asset-background-layer {

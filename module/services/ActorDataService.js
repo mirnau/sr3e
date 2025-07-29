@@ -114,17 +114,6 @@ export default class ActorDataService {
 
    static getInventory(actor, types) {
       if (!types?.length) return [];
-
-      return actor.items
-         .filter((item) => types.includes(item.type))
-         .map((item) => ({
-            id: item.id,
-            name: item.name,
-            img: item.img,
-            type: item.type,
-            get item() {
-               return actor.items.get(this.id); // lazy-resolves the live Item
-            },
-         }));
+      return actor.items.filter((item) => types.includes(item.type));
    }
 }

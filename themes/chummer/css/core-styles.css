@@ -1183,7 +1183,7 @@
     height: 100%;
     aspect-ratio: 1/1;
     position: relative;
-    background: #ff2090;
+    background: var(--highlight-color-primary);
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
   .image-mask::before {
@@ -2650,37 +2650,71 @@
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card {
     display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     flex-direction: row;
     gap: 0.25rem;
     box-sizing: border-box;
     position: relative;
     background: var(--highlight-color-primary);
-    text-align: center;
     padding: 0.25rem;
-    height: 4rem;
+    height: 6rem;
+    min-width: 0;
+    /* Critical */
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .image-mask {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column {
+    /* Your existing outer column styles */
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-start;
-    height: 100%;
-    width: 100%;
+    min-width: 0;
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     gap: 0.25rem;
+    width: 100%;
+    /* Ensure full width */
+    min-width: 0;
+    /* Target the INNER .asset-card-column */
+  }
+  .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row .asset-card-column {
+    flex: 1;
+    /* Take available space */
+    width: 100%;
+    min-width: 0;
+    /* Critical */
+  }
+  .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row .asset-card-column h3,
+  .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row .asset-card-column h4 {
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row button {
-    height: 1rem;
-    width: 0.5rem;
+    font-size: 0.75rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    aspect-ratio: 1/1;
+    flex-shrink: 0;
+    /* Don't let buttons shrink */
+  }
+  .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-toggles {
+    margin-bottom: 0.25rem;
+    position: absolute;
+    right: 0.25rem;
+    top: 0.25rem;
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-background-layer {
     position: absolute;
