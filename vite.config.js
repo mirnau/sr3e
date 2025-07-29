@@ -29,6 +29,7 @@ export default defineConfig({
 
          "@root": projectRoot,
          "@applications": path.resolve(projectRoot, "module/foundry/applications"),
+         "@masonry": path.resolve(projectRoot, "module/foundry/masonry"),
          "@models": path.resolve(projectRoot, "module/models"),
          "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
          "@services": path.resolve(projectRoot, "module/services"),

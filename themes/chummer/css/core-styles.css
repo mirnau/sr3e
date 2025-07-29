@@ -2535,6 +2535,62 @@
     cursor: not-allowed;
     opacity: 0.6;
   }
+  .toggle-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.75rem;
+    background-color: var(--highlight-color-primary);
+    width: fit-content;
+    height: fit-content;
+    clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
+  }
+  .toggle-card h4 {
+    line-height: 0rem;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+  }
+  .toggle-card.button {
+    cursor: pointer;
+    transition: transform 0.2s ease-out, background-color 0.5s ease;
+    will-change: transform;
+  }
+  .toggle-card.button:hover {
+    transform: scale(1.05);
+  }
+  .toggle-card.button:hover .stat-card-background {
+    box-shadow: inset 0 0 10px var(--highlight-color-primary);
+  }
+  .toggle-card.button:active {
+    transform: scale(0.97);
+  }
+  .toggle-card.button:active .stat-card-background {
+    box-shadow: inset 0 0 30px var(--highlight-color-primary);
+  }
+  .toggle-card:active {
+    transform: scale(0.97);
+  }
+  .svg-wrapper {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    flex-grow: 0;
+    align-self: center;
+  }
+  .svg-wrapper svg {
+    width: 100%;
+    height: 100%;
+    fill: black;
+    filter: drop-shadow(0 0 1px var(--highlight-color-primary)) drop-shadow(0 0 2px var(--highlight-color-primary));
+    transition: fill 0.2s ease, filter 0.2s ease;
+  }
+  .svg-wrapper[data-active="true"] svg {
+    fill: var(--highlight-color-primary);
+    filter: none;
+  }
   .sr3e.sheet.character {
     overflow: visible !important;
   }
@@ -3500,18 +3556,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 123, 255, 0.2);
+    background-color: var(--background-color);
     display: flex;
     align-items: center;
     justify-content: center;
     pointer-events: none;
     z-index: 10;
-  }
-  .drop-indicator {
-    background: #007bff;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 4px;
-    font-weight: 500;
   }
 }

@@ -102,6 +102,8 @@ sr3e.initiative = {
 
 sr3e.inventory = {
    inventory: "sr3e.inventory.inventory",
+   favourites: "sr3e.inventory.favourites",
+   equipped: "sr3e.inventory.equipped",
 };
 
 sr3e.common = {
@@ -127,7 +129,7 @@ sr3e.dicepools = {
 
 sr3e.gadget = {
    gadget: "sr3e.gadget.gadget",
-   type: "sr3e.gadget.type"
+   type: "sr3e.gadget.type",
 };
 
 sr3e.karma = {
@@ -153,7 +155,7 @@ sr3e.movement = {
 sr3e.placeholders = {
    human: "sr3e.placeholders.human",
    fullshaman: "sr3e.placeholders.fullshaman",
-   selectanoption: "sr3e.placeholders.selectanoption"
+   selectanoption: "sr3e.placeholders.selectanoption",
 };
 
 sr3e.karmamanager = {
@@ -258,7 +260,7 @@ sr3e.notifications = {
    assignattributesfirst: "sr3e.notifications.assignattributesfirst",
    skillpointsrefund: "sr3e.notifications.skillpointsrefund",
    skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold",
-   warnnogadgettypeselected: "sr3e.notifications.warnnogadgettypeselected"
+   warnnogadgettypeselected: "sr3e.notifications.warnnogadgettypeselected",
 };
 
 sr3e.time = {
@@ -305,6 +307,11 @@ sr3e.weapon = {
    explosive: "sr3e.weapon.explosive",
    blunt: "sr3e.weapon.blunt",
    energy: "sr3e.weapon.energy",
+   rangebandshort: "sr3e.weapon.rangebandshort",
+   rangebandmedium: "sr3e.weapon.rangebandmedium",
+   rangebandlong: "sr3e.weapon.rangebandlong",
+   rangebandextreme: "sr3e.weapon.rangebandextreme",
+   rangeband: "sr3e.weapon.rangeband"
 };
 
 sr3e.commodity = {
@@ -403,4 +410,8 @@ sr3e.legalpriority = {
 
 sr3e.gadgettypes = {
    weaponmod: "sr3e.gadgettypes.weaponmod",
-}
+};
+
+sr3e.wearable = {
+   wearables: "sr3e.wearable.wearables",
+};

@@ -126,7 +126,7 @@ export default class ActorDataService {
     ];
   }
 
-  static getInventoryCategory(actor, types) {
+  static getInventory(actor, types) {
     if (!types?.length) return [];
 
     let all = [];

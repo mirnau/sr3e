@@ -6,7 +6,7 @@
   import Skills from "@sveltecomponent/skills/Skills.svelte";
   import Health from "@sveltecomponent/Health.svelte";
   import Karma from "@sveltecomponent/Karma.svelte";
-  import Inventory from "@sveltecomponent/Inventory/Inventory.svelte";
+  import AssetManager from "@sveltecomponent/AssetManager/AssetManager.svelte";
   import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";
   import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
   import { setupMasonry } from "../../../module/foundry/masonry/responsiveMasonry";
@@ -23,7 +23,7 @@
     { comp: Karma, props: { actor, config, id: 4, span: 1 } },
     { comp: Skills, props: { actor, config, id: 5, span: 2 } },
     { comp: Health, props: { actor, config, id: 6, span: 2 } },
-    { comp: Inventory, props: { actor, config, id: 7, span: 2 } },
+    { comp: AssetManager, props: { actor, config, id: 7, span: 2 } },
   ];
 
   $effect(async () => {

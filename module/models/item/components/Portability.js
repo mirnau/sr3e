@@ -9,10 +9,6 @@ export default class PortabilityModel extends foundry.abstract.TypeDataModel {
             required: true,
             initial: 0.0,
          }),
-         isCarriedOnPerson: new foundry.data.fields.BooleanField({
-            required: true,
-            initial: false,
-         }),
       };
    }
 }

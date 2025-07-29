@@ -105,7 +105,9 @@
          "reactionPenalty": "Reaction Penalty"
       },
       "inventory": {
-         "inventory": "Inventory"
+         "inventory": "Inventory",
+         "favourites": "Favourites",
+         "equipped": "Equipped"
       },
       "karma": {
          "karma": "Karma",
@@ -292,7 +294,15 @@
          "blade": "Melee Weapon",
          "explosive": "Explosive Weapon",
          "blunt": "Blunt Weapon",
-         "energy": "Energy Weapon"
+         "energy": "Energy Weapon",
+         "rangebandshort": "Short Range",
+         "rangebandmedium": "Medium Range",
+         "rangebandlong": "Long Range",
+         "rangebandextreme": "Extreme Range",
+         "rangeband": "Range Band"
+      },
+      "wearable": {
+         "wearables": "Wearables"
       },
       "ammunitionType": {
          "regular": "Regular",

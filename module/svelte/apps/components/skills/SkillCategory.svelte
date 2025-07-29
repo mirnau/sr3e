@@ -41,17 +41,12 @@
         <div class="skill-grid-sizer"></div>
         <div class="skill-gutter-sizer"></div>
         {#each categoryOfSkills as skill (skill._id)}
-            {@html `<script>console.log(${JSON.stringify(skill)})</script>`}
             {#if skill.system.skillType === "active"}
                 <ActiveSkillCard {skill} {actor} {config} />
             {:else if skill.system.skillType === "knowledge"}
                 <KnowledgeSkillCard {skill} {actor} {config} />
             {:else if skill.system.skillType === "language"}
                 <LanguageSkillCard {skill} {actor} {config} />
-            {:else}
-                <div class="debug-unknown">
-                    Unknown skill type: {skill.name}
-                </div>
             {/if}
         {/each}
     </div>

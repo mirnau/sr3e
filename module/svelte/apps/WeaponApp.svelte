@@ -57,6 +57,41 @@
       console.log("Pew pew");
    }
 
+   const rangeBandEntries = [
+      {
+         item,
+         key: "rangeBand.short",
+         label: localize(config.weapon.rangebandshort),
+         value: system.rangeBand.short,
+         path: "system",
+         type: "number",
+      },
+      {
+         item,
+         key: "rangeBand.medium",
+         label: localize(config.weapon.rangebandmedium),
+         value: system.rangeBand.medium,
+         path: "system",
+         type: "number",
+      },
+      {
+         item,
+         key: "rangeBand.long",
+         label: localize(config.weapon.rangebandlong),
+         value: system.rangeBand.long,
+         path: "system",
+         type: "number",
+      },
+      {
+         item,
+         key: "rangeBand.extreme",
+         label: localize(config.weapon.rangebandextreme),
+         value: system.rangeBand.extreme,
+         path: "system",
+         type: "number",
+      },
+   ];
+
    const weaponEntries = [
       {
          item,
@@ -113,6 +148,16 @@
          {/each}
       </div>
    </ItemSheetComponent>
+
+   <ItemSheetComponent>
+      <h3>{localize(config.weapon.rangeband)}</h3>
+      <div class="stat-grid two-column">
+         {#each rangeBandEntries as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+   </ItemSheetComponent>
+
    <ItemSheetComponent>
       <div>
          <h3>{localize(config.gadget.gadget)}</h3>

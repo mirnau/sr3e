@@ -111,6 +111,7 @@
    @import "./styling/custom-components/sr3e-counter-component.less";
    @import "./styling/custom-components/sr3e-active-effects-viewer.less";
    @import "./styling/custom-components/sr3e-switch.less";
+   @import "./styling/custom-components/sr3e-category-box.less";
 
    // Injections
    @import "./styling/injections/neoname.less";
@@ -159,19 +160,11 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(0, 123, 255, 0.2);
+      background-color: var(--background-color);
       display: flex;
       align-items: center;
       justify-content: center;
       pointer-events: none;
       z-index: 10;
-   }
-
-   .drop-indicator {
-      background: #007bff;
-      color: white;
-      padding: 8px 16px;
-      border-radius: 4px;
-      font-weight: 500;
    }
 }
