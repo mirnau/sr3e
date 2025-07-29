@@ -25,9 +25,25 @@
    onDestroy(() => {
       StoreManager.Unsubscribe(item);
    });
+
+   // Generic macro-bar-compatible drag payload
+   function onDragStart(event) {
+      if (!item?.uuid) return;
+      const payload = {
+         type: item.documentName ?? "Item",
+         uuid: item.uuid
+      };
+      event.dataTransfer?.setData("text/plain", JSON.stringify(payload));
+      if (event.currentTarget instanceof HTMLElement)
+         event.dataTransfer.setDragImage(event.currentTarget, 16, 16);
+   }
 </script>
 
-<div class="asset-card">
+<div
+   class="asset-card"
+   draggable="true"
+   ondragstart={onDragStart}
+>
    <div class="asset-background-layer"></div>
    <div class="image-mask">
       <img src={item.img} role="presentation" alt={item.name} />
@@ -40,7 +56,10 @@
          </div>
       </div>
       <div class="asset-card-row">
-         <button class="sr3e-toolbar-button fa-solid fa-dice" aria-label="Roll" onclick={() => console.log("Roll")}
+         <button
+            class="sr3e-toolbar-button fa-solid fa-dice"
+            aria-label="Roll"
+            onclick={() => console.log("Roll")}
          ></button>
          <button
             class="sr3e-toolbar-button fa-solid fa-pencil"
@@ -49,8 +68,10 @@
                item.sheet.render(true);
             }}
          ></button>
-
-         <button class="sr3e-toolbar-button fa-solid fa-trash-can" aria-label="Roll" onclick={() => console.log("Roll")}
+         <button
+            class="sr3e-toolbar-button fa-solid fa-trash-can"
+            aria-label="Trash"
+            onclick={() => console.log("Trash")}
          ></button>
       </div>
    </div>
