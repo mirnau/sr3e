@@ -39,7 +39,7 @@ export function attachLightEffect(html, activeTheme) {
       const globalX = lastMouse.x;
       const globalY = lastMouse.y;
 
-      const selectors = [".stat-card-background", ".skill-background-layer"];
+      const selectors = [".stat-card-background", ".skill-background-layer", ".asset-background-layer"];
       const targetElements = html.querySelectorAll(selectors.join(", "));
 
       targetElements.forEach((element) => {
