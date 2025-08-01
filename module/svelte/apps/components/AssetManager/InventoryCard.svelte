@@ -5,12 +5,17 @@
    import { localize } from "@services/utilities.js";
 
    let { item, config } = $props();
+   const inventoryCardStoreManager = StoreManager.Subscribe(item);
+
    let isFavorite = $state(false);
    let isEquipped = $state(false);
 
-   const storeManager = StoreManager.Subscribe(item);
-   const isFavoriteStore = storeManager.GetFlagStore("isFavorite");
-   const isEquippedStore = storeManager.GetFlagStore("isEquipped");
+   const resolvingItemIdStore = inventoryCardStoreManager.GetRWStore("linkedSkilliD");
+   const hasLinkedSkill = $derived($resolvingItemIdStore && $resolvingItemIdStore !== "");
+   let resolvingItemName = $state("");
+
+   const isFavoriteStore = inventoryCardStoreManager.GetFlagStore("isFavorite");
+   const isEquippedStore = inventoryCardStoreManager.GetFlagStore("isEquipped");
 
    onMount(() => {
       isFavorite = $isFavoriteStore;
@@ -22,19 +27,26 @@
       $isEquippedStore = isEquipped;
    });
 
+   $effect(() => {
+      if (hasLinkedSkill) {
+         const skill = item.parent.items.get($resolvingItemIdStore);
+         resolvingItemName = skill.name;
+      }
+   });
+
    onDestroy(() => {
       StoreManager.Unsubscribe(item);
    });
 
-   // Generic macro-bar-compatible drag payload
    function onDragStart(event) {
-      if (!item?.uuid) return;
       const payload = {
          type: item.documentName ?? "Item",
          uuid: item.uuid,
       };
-      event.dataTransfer?.setData("text/plain", JSON.stringify(payload));
-      if (event.currentTarget instanceof HTMLElement) event.dataTransfer.setDragImage(event.currentTarget, 16, 16);
+      event.dataTransfer.setData("text/plain", JSON.stringify(payload));
+      if (event.currentTarget instanceof HTMLElement) {
+         event.dataTransfer.setDragImage(event.currentTarget, 16, 16);
+      }
    }
 </script>
 
@@ -48,21 +60,26 @@
       <div class="asset-card-row">
          <div class="asset-card-column">
             <h3 class="no-margin uppercase">{item.name}</h3>
-            <h3 class="no-margin uppercase">Skill : {item.name}</h3>
+            {#if hasLinkedSkill}
+               <h3 class="no-margin uppercase">{localize(config.skill.skill)}: {resolvingItemName}</h3>
+            {/if}
             {#if item.type === "weapon"}
                <h4 class="no-margin uppercase">¥ {item.system.commodity.cost} - {item.system.mode}</h4>
             {/if}
          </div>
       </div>
       <div class="asset-card-row">
-         <button class="sr3e-toolbar-button fa-solid fa-dice" aria-label="Roll" onclick={() => console.log("Roll")}
+         <button
+            class="sr3e-toolbar-button fa-solid fa-dice"
+            aria-label="Roll"
+            onclick={() => console.log("Roll")}
+            disabled={!hasLinkedSkill}
          ></button>
+
          <button
             class="sr3e-toolbar-button fa-solid fa-pencil"
             aria-label="Edit"
-            onclick={() => {
-               item.sheet.render(true);
-            }}
+            onclick={() => item.sheet.render(true)}
          ></button>
          <button
             class="sr3e-toolbar-button fa-solid fa-trash-can"

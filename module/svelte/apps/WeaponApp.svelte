@@ -1,6 +1,6 @@
 <script>
    import { localize, openFilePicker } from "@services/utilities.js";
-   import { onMount } from "svelte";
+   import { onDestroy, onMount } from "svelte";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
@@ -11,14 +11,22 @@
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
    import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
    import ComboSearch from "@sveltecomponent/basic/ComboSearch.svelte";
+   import { StoreManager } from "../svelteHelpers/StoreManager.svelte";
 
    let { item = {}, config = {} } = $props();
    let name = $state(item.name);
    const system = $state(item.system);
-   let boundSkill = $state({ id: "", name: "" });
    let allSkillsMap = new Map();
    let options = $state([]);
    let comboSearchValue = $state(system.linkedSkilliD);
+   let storeManager = StoreManager.Subscribe(item);
+   let skillIdStore = storeManager.GetRWStore("linkedSkilliD");
+   onDestroy(() => {
+      StoreManager.Unsubscribe(item);
+   });
+   $effect(() => {
+      $skillIdStore = comboSearchValue;
+   });
 
    $effect(() => {
       item.update({ ["system.linkedSkilliD"]: comboSearchValue }, { render: false });
@@ -30,18 +38,8 @@
 
       const skills = parent.items.filter((i) => i.type === "skill");
 
-      allSkillsMap = new Map();
-      options = skills.map(({ id, name }) => {
-         allSkillsMap.set(id, name);
-         return { value: id, label: name };
-      });
-
-      const linkedId = system.linkedSkilliD;
-      if (linkedId && allSkillsMap.has(linkedId)) {
-         boundSkill = { id: linkedId, name: allSkillsMap.get(linkedId) };
-      } else {
-         boundSkill = { id: "", name: "" };
-      }
+      allSkillsMap = new Map(skills.map(({ id, name }) => [id, name]));
+      options = skills.map(({ id, name }) => ({ value: id, label: name }));
    }
 
    onMount(() => {
@@ -181,17 +179,17 @@
          />
       </div>
       {#if item.parent}
-      <div class="stat-card">
-         <div class="stat-card-background"></div>
-         <h3>Skill for resolving rolls</h3>
-         <ComboSearch
-            bind:value={comboSearchValue}
-            {options}
-            placeholder="Select linked skill..."
-            nomatchplaceholder="No matching skill"
-            disabled={!options.length}
-         />
-      </div>
+         <div class="stat-card">
+            <div class="stat-card-background"></div>
+            <h3>Skill for resolving rolls</h3>
+            <ComboSearch
+               bind:value={comboSearchValue}
+               {options}
+               placeholder="Select linked skill..."
+               nomatchplaceholder="No matching skill"
+               disabled={!options.length}
+            />
+         </div>
       {/if}
    </ItemSheetComponent>
 
