@@ -2708,18 +2708,15 @@
     width: 1.5rem;
     aspect-ratio: 1/1;
     flex-shrink: 0;
-    /* Don't let buttons shrink */
     background: var(--highlight-color-primary);
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row button::before {
     box-shadow: none;
     background: var(--background-color);
-    filter: scale(1.1);
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column .asset-card-row button::after {
     box-shadow: none;
     background: var(--background-color);
-    filter: scale(1.1);
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-toggles {
     margin-bottom: 0.25rem;

@@ -10,10 +10,58 @@
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
    import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
    import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
+   import ComboSearch from "@sveltecomponent/basic/ComboSearch.svelte";
 
    let { item = {}, config = {} } = $props();
    let name = $state(item.name);
    const system = $state(item.system);
+   let boundSkill = $state({ id: "", name: "" });
+   let allSkillsMap = new Map();
+   let options = $state([]);
+   let comboSearchValue = $state(system.linkedSkilliD);
+
+   $effect(() => {
+      item.update({ ["system.linkedSkilliD"]: comboSearchValue }, { render: false });
+   });
+
+   function updateSkillOptions() {
+      const parent = item.parent;
+      if (!parent) return;
+
+      const skills = parent.items.filter((i) => i.type === "skill");
+
+      allSkillsMap = new Map();
+      options = skills.map(({ id, name }) => {
+         allSkillsMap.set(id, name);
+         return { value: id, label: name };
+      });
+
+      const linkedId = system.linkedSkilliD;
+      if (linkedId && allSkillsMap.has(linkedId)) {
+         boundSkill = { id: linkedId, name: allSkillsMap.get(linkedId) };
+      } else {
+         boundSkill = { id: "", name: "" };
+      }
+   }
+
+   onMount(() => {
+      updateSkillOptions();
+
+      // Observe mutations on embedded items
+      const collection = item.parent?.items.collection;
+      if (collection) {
+         collection.on("update", updateSkillOptions);
+         collection.on("create", updateSkillOptions);
+         collection.on("delete", updateSkillOptions);
+      }
+
+      return () => {
+         // Cleanup
+         collection?.off("update", updateSkillOptions);
+         collection?.off("create", updateSkillOptions);
+         collection?.off("delete", updateSkillOptions);
+      };
+   });
 
    const weaponMode = $derived({
       item,
@@ -44,18 +92,6 @@
       type: "select",
       options: Object.values(config.damageType).map(localize),
    });
-
-   function attack() {
-      console.log("Pew pew");
-   }
-
-   function reload() {
-      console.log("Pew pew");
-   }
-
-   function newClip() {
-      console.log("Pew pew");
-   }
 
    const rangeBandEntries = [
       {
@@ -118,6 +154,18 @@
          type: "number",
       },
    ];
+
+   function attack() {
+      console.log("Pew pew");
+   }
+
+   function reload() {
+      console.log("Pew pew");
+   }
+
+   function newClip() {
+      console.log("Pew pew");
+   }
 </script>
 
 <ItemSheetWrapper csslayout={"double"}>
@@ -132,6 +180,19 @@
             onchange={(e) => item.update({ ["name"]: e.target.value })}
          />
       </div>
+      {#if item.parent}
+      <div class="stat-card">
+         <div class="stat-card-background"></div>
+         <h3>Skill for resolving rolls</h3>
+         <ComboSearch
+            bind:value={comboSearchValue}
+            {options}
+            placeholder="Select linked skill..."
+            nomatchplaceholder="No matching skill"
+            disabled={!options.length}
+         />
+      </div>
+      {/if}
    </ItemSheetComponent>
 
    <ItemSheetComponent>
