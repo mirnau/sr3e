@@ -17,7 +17,7 @@
       if (onUpdate) {
          onUpdate(val);
       } else {
-         item.update({ [`${path}.${key}`]: val });
+         item.update({ [`${path}.${key}`]: val }, { render: false });
       }
 
       console.log(`Updated ${key} to`, val);

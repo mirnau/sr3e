@@ -311,7 +311,8 @@ sr3e.weapon = {
    rangebandmedium: "sr3e.weapon.rangebandmedium",
    rangebandlong: "sr3e.weapon.rangebandlong",
    rangebandextreme: "sr3e.weapon.rangebandextreme",
-   rangeband: "sr3e.weapon.rangeband"
+   rangeband: "sr3e.weapon.rangeband",
+   reloadMechanism:"sr3e.weapon.reloadMechanism"
 };
 
 sr3e.commodity = {
@@ -406,6 +407,14 @@ sr3e.legalpriority = {
    3: "sr3e.legalpriority.3",
    4: "sr3e.legalpriority.4",
    X: "sr3e.legalpriority.X",
+};
+
+sr3e.reloadMechanism = {
+   c: "sr3e.reloadMechanism.c",
+   b: "sr3e.reloadMechanism.b",
+   m: "sr3e.reloadMechanism.m",
+   cy: "sr3e.reloadMechanism.cy",
+   belt: "sr3e.reloadMechanism.belt",
 };
 
 sr3e.gadgettypes = {

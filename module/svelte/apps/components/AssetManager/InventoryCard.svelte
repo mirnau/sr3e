@@ -81,6 +81,13 @@
             aria-label="Edit"
             onclick={() => item.sheet.render(true)}
          ></button>
+         {#if item.type === "weapon"}
+            <button
+               class="sr3e-toolbar-button fa-solid fa-repeat"
+               aria-label="Trash"
+               onclick={() => console.log("Reload")}
+            ></button>
+         {/if}
          <button
             class="sr3e-toolbar-button fa-solid fa-trash-can"
             aria-label="Trash"

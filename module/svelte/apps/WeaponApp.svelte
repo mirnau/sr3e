@@ -61,6 +61,16 @@
       };
    });
 
+   const reloadMechanism = $derived({
+      item,
+      key: "reloadMechanism",
+      label: localize(config.weapon.reloadMechanism),
+      value: system.reloadMechanism,
+      path: "system",
+      type: "select",
+      options: Object.values(config.reloadMechanism).map(localize),
+   });
+
    const weaponMode = $derived({
       item,
       key: "mode",
@@ -196,9 +206,11 @@
    <ItemSheetComponent>
       <h3>{localize(config.common.details)}</h3>
       <div class="stat-grid single-column">
+         
          <StatCard {...weaponMode} />
          <StatCard {...damageTypeEntry} />
          <StatCard {...ammoClassEntry} />
+         <StatCard {...reloadMechanism} />
       </div>
 
       <div class="stat-grid two-column">

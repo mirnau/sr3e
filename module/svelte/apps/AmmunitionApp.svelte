@@ -34,6 +34,15 @@
       },
       {
          item,
+         key: "reloadMechanism",
+         label: localize(config.weapon.reloadMechanism),
+         value: system.reloadMechanism,
+         path: "system",
+         type: "select",
+         options: Object.values(config.reloadMechanism).map(localize),
+      },
+      {
+         item,
          key: "rounds",
          label: localize(config.ammunition.rounds),
          value: system.rounds,

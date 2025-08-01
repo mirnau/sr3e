@@ -299,7 +299,8 @@
          "rangebandmedium": "Medium Range",
          "rangebandlong": "Long Range",
          "rangebandextreme": "Extreme Range",
-         "rangeband": "Range Band"
+         "rangeband": "Range Band",
+         "reloadMechanism": "Reload Mechanism"
       },
       "wearable": {
          "wearables": "Wearables"
@@ -372,6 +373,14 @@
          "4": "Priority 4",
          "X": "Extreme Priority"
       },
+      "reloadMechanism": {
+         "c": "Clip",
+         "b": "Break-Action",
+         "m": "Internal Magazine",
+         "cy": "Cylinder",
+         "belt": "Belt-Fed"
+      },
+
       "gadgettypes": {
          "weaponmod": "Weapon Modification"
       }
