@@ -28,10 +28,34 @@
    });
 
    $effect(() => {
-      if (hasLinkedSkill) {
-         const skill = item.parent.items.get($resolvingItemIdStore);
-         resolvingItemName = skill.name;
+      if (!hasLinkedSkill) return;
+
+      const [skillId, specIndex] = $resolvingItemIdStore.split("::");
+      const skill = item.parent.items.get(skillId);
+      if (!skill) return;
+
+      if (specIndex !== undefined) {
+         let specs = [];
+         switch (skill.system.skillType) {
+            case "active":
+               specs = skill.system.activeSkill?.specializations ?? [];
+               break;
+            case "knowledge":
+               specs = skill.system.knowledgeSkill?.specializations ?? [];
+               break;
+            case "language":
+               specs = skill.system.languageSkill?.specializations ?? [];
+               break;
+         }
+
+         const spec = specs[parseInt(specIndex)];
+         if (spec) {
+            resolvingItemName = `${skill.name} - ${spec.name}`;
+            return;
+         }
       }
+
+      resolvingItemName = skill.name;
    });
 
    onDestroy(() => {

@@ -38,8 +38,40 @@
 
       const skills = parent.items.filter((i) => i.type === "skill");
 
-      allSkillsMap = new Map(skills.map(({ id, name }) => [id, name]));
-      options = skills.map(({ id, name }) => ({ value: id, label: name }));
+      const newOptions = [];
+      const newMap = new Map();
+
+      for (const skill of skills) {
+         const baseLabel = skill.name;
+         newOptions.push({ value: skill.id, label: baseLabel });
+         newMap.set(skill.id, baseLabel);
+
+         const system = skill.system;
+         let specializations = [];
+
+         switch (system.skillType) {
+            case "active":
+               specializations = system.activeSkill?.specializations || [];
+               break;
+            case "knowledge":
+               specializations = system.knowledgeSkill?.specializations || [];
+               break;
+            case "language":
+               specializations = system.languageSkill?.specializations || [];
+               break;
+         }
+
+         for (let i = 0; i < specializations.length; i++) {
+            const spec = specializations[i];
+            const id = `${skill.id}::${i}`;
+            const label = `${baseLabel} - ${spec.name}`;
+            newOptions.push({ value: id, label });
+            newMap.set(id, label);
+         }
+      }
+
+      allSkillsMap = newMap;
+      options = newOptions;
    }
 
    onMount(() => {
@@ -206,7 +238,6 @@
    <ItemSheetComponent>
       <h3>{localize(config.common.details)}</h3>
       <div class="stat-grid single-column">
-         
          <StatCard {...weaponMode} />
          <StatCard {...damageTypeEntry} />
          <StatCard {...ammoClassEntry} />
