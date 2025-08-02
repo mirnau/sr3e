@@ -13,14 +13,9 @@
       StoreManager.Unsubscribe(actor);
    });
 
-   let karmaPoolStore = actorStoreManager.GetSumROStore("karma.karmaPool");
+   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
    let penalty = actorStoreManager.GetRWStore("health.penalty");
-
-   let maxDice = $state(0);
-   $effect(() => {
-      const k = $karmaPoolStore.sum;
-      maxDice = Math.floor((Math.sqrt(8 * k + 1) - 1) / 2);
-   });
+   let karmaPoolBacking = $karmaPoolStore;
 
    let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
    let currentDicePoolName = $state("");
@@ -199,8 +194,6 @@
       if (isInCombat) {
          const combat = game.combat;
       }
-
-      if (karmaCost > $karmaPoolStore.sum) return;
 
       if (karmaCost > 0) {
          const karmaEffect = {
@@ -428,7 +421,7 @@
             class="karma-counter"
             bind:value={diceBought}
             min={0}
-            max={maxDice}
+            max={actor.system.karma.karmaPool.value}
             onIncrement={KarmaCostCalculator}
             onDecrement={KarmaCostCalculator}
          />
