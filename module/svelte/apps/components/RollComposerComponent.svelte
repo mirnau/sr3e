@@ -198,96 +198,97 @@
       canSubmit = targetNumber + modifiersTotal < 2;
    });
 
-   async function Submit() {
-      const isInCombat = game.combat !== null && game.combat !== undefined;
-      if (isInCombat) {
-         const combat = game.combat;
-      }
-
-      if (karmaCost > 0) {
-         const karmaEffect = {
-            name: `Karma Drain (${karmaCost})`,
-            label: `Used ${karmaCost} Karma Pool`,
-            icon: "icons/magic/light/explosion-star-glow-blue.webp",
-            changes: [
-               {
-                  key: "system.karma.karmaPool.mod",
-                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                  value: `-${karmaCost}`,
-                  priority: 1,
-               },
-            ],
-            origin: actor.uuid,
-            ...(isInCombat
-               ? {
-                    duration: {
-                       rounds: 1,
-                       startRound: combat.round,
-                       startTurn: combat.turn,
-                    },
-                 }
-               : {}),
-            flags: {
-               sr3e: {
-                  temporaryKarmaPoolDrain: true,
-                  expiresOutsideCombat: !isInCombat,
-               },
-            },
-         };
-
-         await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
-      }
-
-      if (currentDicePoolAddition > 0 && currentDicePoolName) {
-         const effect = {
-            name: `Dice Pool Drain (${currentDicePoolName})`,
-            label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
-            icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
-            changes: [
-               {
-                  key: `system.dicePools.${currentDicePoolName}.mod`,
-                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                  value: `-${currentDicePoolAddition}`,
-                  priority: 1,
-               },
-            ],
-            origin: actor.uuid,
-            transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
-            ...(isInCombat
-               ? {
-                    duration: {
-                       unit: "rounds",
-                       value: 1,
-                       startRound: combat.round,
-                       startTurn: combat.turn,
-                    },
-                 }
-               : {}),
-            flags: {
-               sr3e: {
-                  temporaryDicePoolDrain: true,
-                  expiresOutsideCombat: !isInCombat, // storyteller UI can target these
-               },
-            },
-         };
-
-         await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
-
-         actor.applyActiveEffects();
-      }
-
-      onclose({
-         dice: caller.dice + diceBought,
-         attributeName: caller.key,
-         options: {
-            targetNumber: targetNumber,
-            modifiers: modifiersArray,
-            explodes: !isDefaulting,
-         },
-      });
-
-      Hooks.callAll("actorSystemRecalculated", actor);
+async function Submit() {
+   const isInCombat = game.combat !== null && game.combat !== undefined;
+   if (isInCombat) {
+      const combat = game.combat;
    }
+
+   if (karmaCost > 0) {
+      const karmaEffect = {
+         name: `Karma Drain (${karmaCost})`,
+         label: `Used ${karmaCost} Karma Pool`,
+         icon: "icons/magic/light/explosion-star-glow-blue.webp",
+         changes: [
+            {
+               key: "system.karma.karmaPool.mod",
+               mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+               value: `-${karmaCost}`,
+               priority: 1,
+            },
+         ],
+         origin: actor.uuid,
+         ...(isInCombat
+            ? {
+                 duration: {
+                    unit: "rounds",
+                    value: 1,
+                    startRound: combat.round,
+                    startTurn: combat.turn,
+                 },
+              }
+            : {}),
+         flags: {
+            sr3e: {
+               temporaryKarmaPoolDrain: true,
+               expiresOutsideCombat: !isInCombat,
+            },
+         },
+      };
+
+      await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
+   }
+
+   if (currentDicePoolAddition > 0 && currentDicePoolName) {
+      const effect = {
+         name: `Dice Pool Drain (${currentDicePoolName})`,
+         label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
+         icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
+         changes: [
+            {
+               key: `system.dicePools.${currentDicePoolName}.mod`,
+               mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+               value: `-${currentDicePoolAddition}`,
+               priority: 1,
+            },
+         ],
+         origin: actor.uuid,
+         transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
+         ...(isInCombat
+            ? {
+                 duration: {
+                    unit: "rounds",
+                    value: 1,
+                    startRound: combat.round,
+                    startTurn: combat.turn,
+                 },
+              }
+            : {}),
+         flags: {
+            sr3e: {
+               temporaryDicePoolDrain: true,
+               expiresOutsideCombat: !isInCombat, // storyteller UI can target these
+            },
+         },
+      };
+
+      await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
+
+      actor.applyActiveEffects();
+   }
+
+   onclose({
+      dice: caller.dice + diceBought,
+      attributeName: caller.key,
+      options: {
+         targetNumber: targetNumber,
+         modifiers: modifiersArray,
+         explodes: !isDefaulting,
+      },
+   });
+
+   Hooks.callAll("actorSystemRecalculated", actor);
+}
 
    function getRoot(el) {
       while (el && !focusables.includes(el)) el = el.parentElement;
