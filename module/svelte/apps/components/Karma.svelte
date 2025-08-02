@@ -23,6 +23,4 @@
    <StatCard {actor} label={localize(config.karma.goodkarma)} value={$goodKarmaStore} />
    <StatCard {actor} label={localize(config.karma.karmapool)} value={$karmaPoolStore.sum} />
    <StatCard {actor} label={localize(config.attributes.essence)} value={$essenceStore.sum} />
-
-
 </MasonryGrid>

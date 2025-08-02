@@ -33,7 +33,7 @@
    let charismaStore = storeManager.GetRWStore("attributes.charisma");
 
    let karmaPoolCeilingStore = storeManager.GetRWStore("karma.karmaPoolCeiling");
-   let karmaPoolStore = storeManager.GetRWStore("karma.karmaPool");
+   let karmaPoolStore = storeManager.GetSumROStore("karma.karmaPool");
    let combatPoolStore = storeManager.GetRWStore("dicePools.combat.value");
    let astralPoolStore = storeManager.GetRWStore("dicePools.astral.value");
    let hackingPoolStore = storeManager.GetRWStore("dicePools.hacking.value");
@@ -83,7 +83,7 @@
    </td>
 
    <td>
-      <h3>{$karmaPoolStore} / {$karmaPoolCeilingStore}</h3>
+      <h3>{$karmaPoolStore.sum} / {$karmaPoolCeilingStore}</h3>
       <button aria-label={localize(config.storytellerscreen.refreshkarmapool)} onclick={() => actor.RefreshKarmaPool()}>
          {localize(config.storytellerscreen.refresh)} <i class="fa-solid fa-dharmachakra"></i>
       </button>

@@ -145,17 +145,38 @@ export class StoreManager {
    }
 
    GetSumROStore(dataPath) {
-      const value = this.GetRWStore(`${dataPath}.value`);
-      //const mod = this.GetRWStore(`${dataPath}.mod`); //Causes an infinite loop balooning .mod
-      const mod = this.GetROStore(`${dataPath}.mod`); //Renders .mod stale, and preventes reactive updates
+      let value, mod;
 
-      const total = derived([value, mod], ([$value, $mod]) => ({
-         value: $value,
-         mod: $mod,
-         sum: $value + $mod,
-      }));
+      console.log("GET SUM STORE WAS ENTERED")
 
-      return total;
+      try {
+         value = this.GetRWStore(`${dataPath}.value`);
+      } catch (e) {
+         console.error(`Failed to get RW store for ${dataPath}.value`, e);
+         throw e;
+      }
+
+      try {
+         mod = this.GetROStore(`${dataPath}.mod`);
+      } catch (e) {
+         console.error(`Failed to get RO store for ${dataPath}.mod`, e);
+         throw e;
+      }
+
+      try {
+         const total = derived([value, mod], ([$value, $mod]) => ({
+            value: $value,
+            mod: $mod,
+            sum: $value + $mod,
+         }));
+
+         console.log("GET SUM STORE WAS LEFT")
+         return total;
+      } catch (e) {
+         console.error(`Failed to create derived store for ${dataPath}`, e);
+         throw e;
+      }
+
    }
 
    GetShallowStore(docId, storeName, customValue = null) {

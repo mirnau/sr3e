@@ -13,7 +13,7 @@
       StoreManager.Unsubscribe(actor);
    });
 
-   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool");
+   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
    let penalty = actorStoreManager.GetRWStore("health.penalty");
    let karmaPoolBacking = $karmaPoolStore;
 
@@ -202,10 +202,10 @@
             icon: "icons/magic/light/explosion-star-glow-blue.webp",
             changes: [
                {
-                  key: "system.karma.karmaPool", // Not a simple stat, has no mod!
+                  key: "system.karma.karmaPool.mod",
                   mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                   value: `-${karmaCost}`,
-                  priority: 20,
+                  priority: 1,
                },
             ],
             origin: actor.uuid,
@@ -405,7 +405,7 @@
          <Counter
             class="karma-counter"
             bind:value={currentDicePoolAddition}
-            min="0"
+            min={0}
             max={$displayCurrentDicePoolStore.sum}
             onIncrement={AddDiceFromPool}
             onDecrement={RemoveDiceFromPool}
@@ -420,8 +420,8 @@
          <Counter
             class="karma-counter"
             bind:value={diceBought}
-            min="0"
-            max={actor.system.karma.karmaPool}
+            min={0}
+            max={actor.system.karma.karmaPool.value}
             onIncrement={KarmaCostCalculator}
             onDecrement={KarmaCostCalculator}
          />

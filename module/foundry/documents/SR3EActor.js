@@ -1,57 +1,30 @@
+// src/actors/SR3EActor.js
 import { get } from "svelte/store";
-import RollService from "@services/RollService.svelte.js";
-export default class SR3EActor extends Actor {
-   /*
-   getRollData() {
-      const data = super.getRollData();
-      
-      console.log("I WAS CALLED! getRollData");
-      
-      // Debug: Log the structure to see what we're working with
-      console.log("Base getRollData result:", data);
-      console.log("this.system:", this.system);
-      console.log("this.system.attributes:", this.system.attributes);
-      console.log("this.system.attributes.quickness:", this.system.attributes.quickness);
-      
-      // The system data should already be in the data object
-      // Check if attributes are already there
-      if (data.attributes) {
-         console.log("Attributes found in data:", data.attributes);
-         // Flatten attributes to root level
-         for (const [k, v] of Object.entries(data.attributes)) {
-            data[k] = v;
-            console.log(`Set data.${k} = ${v}`);
-         }
-      } else {
-         console.log("No attributes in data, adding manually");
-      // Add attributes manually from this.system
-      data.quickness = this.system.attributes.quickness;
-      data.intelligence = this.system.attributes.intelligence;
-      data.willpower = this.system.attributes.willpower;
-      data.strength = this.system.attributes.strength;
-      data.body = this.system.attributes.body;
-      data.charisma = this.system.attributes.charisma;
-   }
-   
-   console.log("Final roll data:", data);
-   return data;
-}
-*/
+import SR3ERoll from "@documents/SR3ERoll.js";
 
+export default class SR3EActor extends Actor {
    async InitiativeRoll() {
-      return await RollService.Initiaitve(this);
+      const formula = SR3ERoll.buildFormula(this.system.attributes.quickness.value, { targetNumber: 4 });
+      const roll = new SR3ERoll(formula, null, { attributeName: "quickness" });
+      await roll.evaluate();
    }
 
    async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
-      await RollService.AttributeRoll(this, attributeName, dice, options);
+      const formula = SR3ERoll.buildFormula(dice, options);
+      const roll = new SR3ERoll(formula, null, { ...options, attributeName });
+      await roll.evaluate();
    }
 
    async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
-      await RollService.SkillRoll(this, skillName, dice, options);
+      const formula = SR3ERoll.buildFormula(dice, options);
+      const roll = new SR3ERoll(formula, null, { ...options, skillName });
+      await roll.evaluate();
    }
 
    async SpecializationRoll(dice, specializationName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
-      await RollService.SpecializationRoll(this, specializationName, dice, options);
+      const formula = SR3ERoll.buildFormula(dice, options);
+      const roll = new SR3ERoll(formula, null, { ...options, specializationName });
+      await roll.evaluate();
    }
 
    async canAcceptmetatype(incomingItem) {
