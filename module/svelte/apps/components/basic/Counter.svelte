@@ -1,6 +1,12 @@
 <script>
    import { onMount } from "svelte";
-   let { value = $bindable(), min = -Infinity, max = Infinity, onIncrement, onDecrement } = $props();
+   let {
+      value = $bindable(),
+      min = $bindable(-Infinity),
+      max = $bindable(Infinity),
+      onIncrement,
+      onDecrement,
+   } = $props();
    let editableDiv;
 
    function increment() {

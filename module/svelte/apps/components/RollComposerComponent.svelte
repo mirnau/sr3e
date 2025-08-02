@@ -14,6 +14,7 @@
    });
 
    let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
+   let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
    let penalty = actorStoreManager.GetRWStore("health.penalty");
    let karmaPoolBacking = $karmaPoolStore;
 
@@ -33,6 +34,7 @@
    let isDefaulting = $state(false);
    let title = $state("");
    let associatedDicePoolString = $state("");
+   let maxAffordableDice = $state(0);
 
    let associatedDicePoolStore;
    let containerEl;
@@ -73,8 +75,6 @@
       if (caller.skillId) {
          let skill = actor.items.get(caller.skillId);
          title = caller.key;
-
-         console.log("Resolved skill:", skill); // OK
 
          if (skill.system.skillType === "active") {
             linkedAttributeString = skill.system.activeSkill.linkedAttribute;
@@ -122,6 +122,15 @@
    $effect(() => {
       isDefaulting = isDefaultingAsString === "true";
       updateFocusables();
+   });
+
+   $effect(() => {
+      const sum = Number($karmaPoolSumStore?.sum);
+      if (sum > 0) {
+         maxAffordableDice = Math.floor((-1 + Math.sqrt(1 + 8 * sum)) * 0.5);
+      } else {
+         maxAffordableDice = 0;
+      }
    });
 
    $effect(() => {
@@ -266,7 +275,7 @@
 
          actor.applyActiveEffects();
       }
-      
+
       onclose({
          dice: caller.dice + diceBought,
          attributeName: caller.key,
@@ -421,7 +430,7 @@
             class="karma-counter"
             bind:value={diceBought}
             min={0}
-            max={actor.system.karma.karmaPool.value}
+            max={maxAffordableDice}
             onIncrement={KarmaCostCalculator}
             onDecrement={KarmaCostCalculator}
          />
