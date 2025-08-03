@@ -372,32 +372,92 @@ function registerHooks() {
       }
    });
 
-   Hooks.once("ready", () => {
-      game.socket.on("system.sr3e", async ({ action, data }) => {
-         if (action === "opposeRoll") {
-            if (data.targetUserId !== game.user.id) return;
+   Hooks.on("renderChatMessageHTML", (message, html, data) => {
+      console.log("🔊 Chat message rendered:", message?.flags?.sr3e?.opposed);
+      const contestId = message?.flags?.sr3e?.opposed;
+      if (!contestId) return;
 
-            const initiator = game.actors.get(data.initiatorId);
-            const target = game.actors.get(data.targetId);
-            if (!initiator || !target) return;
+      const button = html.querySelector(".sr3e-response-button");
+      if (!button) return;
 
-            OpposeRollService.registerContest({
-               contestId: data.contestId,
-               initiator,
-               target,
-               rollData: data.rollData,
+      button.addEventListener("click", async () => {
+         console.log("Respond clicked, looking for contest", contestId);
+
+         const contest = OpposeRollService.getContestById(contestId);
+         if (!contest) {
+            console.warn("Contest not found:", contestId);
+            return ui.notifications.warn("Contest not found.");
+         }
+
+         const target = contest.target;
+         const wasOpen = target.sheet.rendered;
+         if (!wasOpen) {
+            await target.sheet.render(true);
+            await new Promise((r) => setTimeout(r, 100));
+         }
+
+         const composerTarget = target.sheet.element[0]?.querySelector(".composer-position");
+         if (!composerTarget) {
+            return ui.notifications.error("Composer target not found on actor sheet.");
+         }
+
+         mount(RollComposerComponent, {
+            target: composerTarget,
+            props: {
+               actor: target,
+               config: CONFIG.sr3e,
+               caller: {
+                  key: "",
+                  type: "attribute",
+                  dice: contest.rollData?.dice ?? 0,
+               },
+               onclose: async (result) => {
+                  if (!result) return;
+                  const roll = SR3ERoll.create(
+                     SR3ERoll.buildFormula(result.dice, result.options),
+                     { actor: target },
+                     { ...result.options, callerType: result.type }
+                  );
+                  await roll.evaluate();
+               },
+            },
+         });
+      });
+   });
+
+Hooks.once("ready", () => {
+   console.log(`[sr3e] Socket handler registered. User ID: ${game.user.id}, Character: ${game.user.character?.name}`);
+
+   if (game.__sr3eOpposeRollSocketRegistered) return;
+   game.__sr3eOpposeRollSocketRegistered = true;
+
+   game.socket.on("system.sr3e", async ({ action, data }) => {
+      console.log("[sr3e] Socket received:", action, data);
+
+      if (action === "opposeRoll") {
+         if (data.targetUserId !== game.user.id) return;
+
+         const initiator = game.actors.get(data.initiatorId);
+         const target = game.actors.get(data.targetId);
+         if (!initiator || !target) {
+            console.warn("❌ Socket handler could not resolve actors:", {
+               initiator: !!initiator,
+               target: !!target,
             });
             return;
          }
 
-         if (action !== "resolveOpposedRoll") return;
+         OpposeRollService.registerContest({
+            contestId: data.contestId,
+            initiator,
+            target,
+            rollData: data.rollData,
+         });
 
-         const contest = OpposeRollService.getContestById(data.contestId);
-         if (!contest || contest.initiator.id !== game.user.character?.id) return;
-
-         await OpposeRollService.resolveTargetRoll(data.contestId, data.rollData);
-      });
+         console.log(`[sr3e] Contest registered: ${data.contestId}`);
+      }
    });
+});
 
    Hooks.once(hooks.init, () => {
       configureProject();

@@ -4,9 +4,8 @@ export default class OpposeRollService {
    static getContestById(id) {
       return activeContests.get(id);
    }
-   static registerContest({ contestId, initiator, target, rollData }) {
-      if (activeContests.has(contestId)) return;
 
+   static registerContest({ contestId, initiator, target, rollData }) {
       activeContests.set(contestId, {
          id: contestId,
          initiator,
@@ -15,16 +14,18 @@ export default class OpposeRollService {
          targetRoll: null,
          isResolved: false,
       });
+      console.log("[sr3e] Contest map now contains:", [...activeContests.keys()]);
    }
 
    static async start({ initiator, target, rollData }) {
-      const existing = [...activeContests.values()].find(
-         (c) => c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
-      );
-      if (existing) return;
+      // Replace any unresolved contest between the same initiator and target
+      for (const [id, contest] of activeContests.entries()) {
+         if (contest.initiator.id === initiator.id && contest.target.id === target.id && !contest.isResolved) {
+            activeContests.delete(id);
+         }
+      }
 
       const contestId = foundry.utils.randomID(16);
-
       this.registerContest({ contestId, initiator, target, rollData });
 
       // Determine target user(s), excluding GMs
@@ -57,10 +58,49 @@ export default class OpposeRollService {
          await ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: initiator }),
             whisper: whisperIds,
-            content: `<p>${initiator.name} has initiated an opposed roll against ${target.name}.</p>`,
+            content: `
+               <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${
+               target.name
+            }</strong>.</p>
+               <button class="sr3e-response-button" data-contest-id="${contestId}">
+                  ${game.i18n.localize("sr3e.chat.respond")}
+               </button>
+            `,
             flags: { "sr3e.opposed": contestId },
          });
       }
+
+      return contestId;
+   }
+
+   static async abortOpposedRoll(contestId) {
+      const contest = activeContests.get(contestId);
+      if (!contest) return;
+
+      const { initiator, target } = contest;
+
+      // Optionally: notify target user(s) via socket
+      const targetUsers = game.users.filter(
+         (u) =>
+            !u.isGM &&
+            u.active &&
+            (u.character?.id === target.id || target.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER))
+      );
+
+      const whisperIds = [initiator?.user?.id, ...targetUsers.map((u) => u.id)].filter(Boolean);
+
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: initiator }),
+         whisper: whisperIds,
+         content: `<p>${initiator.name} has aborted the opposed roll against ${target.name}.</p>`,
+         flags: { "sr3e.opposedAborted": true },
+      });
+
+      // Close any open dialog
+      const dialogId = `sr3e-opposed-roll-${contestId}`;
+      ui.windows[dialogId]?.close();
+
+      activeContests.delete(contestId);
    }
 
    static async resolveTargetRoll(contestId, rollData) {

@@ -36,6 +36,8 @@
    let title = $state("");
    let associatedDicePoolString = $state("");
    let maxAffordableDice = $state(0);
+   let hasTarget = $state(false);
+   let hasChallenged = $state(false);
 
    let associatedDicePoolStore;
    let containerEl;
@@ -59,6 +61,10 @@
       } else {
          $shouldDisplaySheen = false;
       }
+   });
+
+   $effect(() => {
+      hasTarget = game.user.targets.size > 0;
    });
 
    onMount(() => {
@@ -120,6 +126,51 @@
       if (skillType === "language") {
          readwrite = skillData?.readwrite;
       }
+   }
+
+   async function Challange(e) {
+      e?.preventDefault?.();
+      hasChallenged = true;
+      console.warn("Challange: Initiating opposed rolls.");
+
+      const targets = [...game.user.targets].map((t) => t.actor);
+
+      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
+
+      const baseRoll = SR3ERoll.create(
+         SR3ERoll.buildFormula(totalDice, {
+            targetNumber,
+            explodes: !isDefaulting,
+         }),
+         { actor },
+         {
+            attributeName: caller.key,
+            skillName: caller.name,
+            specializationName: caller.specialization,
+            modifiers: modifiersArray,
+            callerType: caller.type,
+            targetNumber,
+            opposed: true,
+         }
+      );
+
+      await baseRoll.evaluate();
+
+      for (const target of targets) {
+         await OpposeRollService.start({
+            initiator: actor,
+            target,
+            rollData: baseRoll.export(),
+         });
+      }
+
+      console.log("Challange: Awaiting defender responses.");
+   }
+
+   function Abort() {
+      const contest = OpposeRollService.getContestForTarget(actor);
+      OpposeRollService.abortOpposedRoll(contest.id);
+      onclose?.();
    }
 
    function updateFocusables() {
@@ -220,18 +271,17 @@
       canSubmit = targetNumber + modifiersTotal < 2;
    });
 
-   async function HandleRoll() {
+   async function HandleRoll(e) {
+      e?.preventDefault?.();
       console.warn("HandleRoll triggered");
 
       const totalDice = caller.dice + diceBought + currentDicePoolAddition;
 
-      const rollFormula = SR3ERoll.buildFormula(totalDice, {
-         targetNumber,
-         explodes: !isDefaulting,
-      });
-
       const roll = SR3ERoll.create(
-         rollFormula,
+         SR3ERoll.buildFormula(totalDice, {
+            targetNumber,
+            explodes: !isDefaulting,
+         }),
          { actor },
          {
             attributeName: caller.key,
@@ -244,19 +294,25 @@
       );
 
       await roll.evaluate();
+      await roll.waitForResolution(); // 🧠 block here until contested rolls resolve
 
-      await CommitEffects(false);
+      await CommitEffects();
 
-      onclose?.();
+      onclose?.({
+         dice: totalDice,
+         attributeName: caller.key,
+         options: {
+            targetNumber,
+            modifiers: modifiersArray,
+            explodes: !isDefaulting,
+         },
+      });
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 
-   async function CommitEffects(suppress = false) {
+   async function CommitEffects() {
       const isInCombat = game.combat !== null && game.combat !== undefined;
-      if (isInCombat) {
-         const combat = game.combat;
-      }
 
       if (karmaCost > 0) {
          const karmaEffect = {
@@ -277,8 +333,8 @@
                     duration: {
                        unit: "rounds",
                        value: 1,
-                       startRound: combat.round,
-                       startTurn: combat.turn,
+                       startRound: game.combat.round,
+                       startTurn: game.combat.turn,
                     },
                  }
                : {}),
@@ -307,21 +363,21 @@
                },
             ],
             origin: actor.uuid,
-            transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
+            transfer: false,
             ...(isInCombat
                ? {
                     duration: {
                        unit: "rounds",
                        value: 1,
-                       startRound: combat.round,
-                       startTurn: combat.turn,
+                       startRound: game.combat.round,
+                       startTurn: game.combat.turn,
                     },
                  }
                : {}),
             flags: {
                sr3e: {
                   temporaryDicePoolDrain: true,
-                  expiresOutsideCombat: !isInCombat, // storyteller UI can target these
+                  expiresOutsideCombat: !isInCombat,
                },
             },
          };
@@ -330,20 +386,6 @@
 
          actor.applyActiveEffects();
       }
-
-      if (!suppress) {
-         onclose({
-            dice: caller.dice + diceBought,
-            attributeName: caller.key,
-            options: {
-               targetNumber,
-               modifiers: modifiersArray,
-               explodes: !isDefaulting,
-            },
-         });
-      }
-
-      Hooks.callAll("actorSystemRecalculated", actor);
    }
 
    function getRoot(el) {
@@ -494,7 +536,17 @@
       </div>
    {/if}
 
-   <button class="regular" type="submit" disabled={canSubmit} bind:this={rollBtn} onclick={HandleRoll}> Roll! </button>
+   {#if !hasTarget}
+      <button class="regular" type="button" disabled={canSubmit} bind:this={rollBtn} onclick={HandleRoll}>
+         Roll!
+      </button>
+   {:else}
+      <button class="regular" type="button" disabled={canSubmit || hasChallenged} onclick={Challange}>
+         Challenge!
+      </button>
 
-   <button class="regular" type="reset" bind:this={clearBtn} onclick={Reset}> Clear </button>
+      <button class="regular" type="button" onclick={Abort}> Abort Challange </button>
+   {/if}
+
+   <button class="regular" type="reset" bind:this={clearBtn} disabled={hasChallenged} onclick={Reset}> Clear </button>
 </div>
