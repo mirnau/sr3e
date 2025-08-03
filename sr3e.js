@@ -382,6 +382,22 @@ function registerHooks() {
 
    Hooks.once("ready", () => {
       game.socket.on("system.sr3e", async ({ action, data }) => {
+         if (action === "opposeRoll") {
+            if (data.targetUserId !== game.user.id) return;
+
+            const initiator = game.actors.get(data.initiatorId);
+            const target = game.actors.get(data.targetId);
+            if (!initiator || !target) return;
+
+            OpposeRollService.registerContest({
+               contestId: data.contestId,
+               initiator,
+               target,
+               rollData: data.rollData,
+            });
+            return;
+         }
+
          if (action !== "resolveOpposedRoll") return;
 
          const contest = OpposeRollService.getContestById(data.contestId);

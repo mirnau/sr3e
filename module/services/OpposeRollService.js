@@ -1,19 +1,11 @@
-import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
-import { mount, unmount } from "svelte";
-
 const activeContests = new Map();
 
 export default class OpposeRollService {
    static getContestById(id) {
       return activeContests.get(id);
    }
-   static async start({ initiator, target, rollData, isSilent = false }) {
-      const existing = [...activeContests.values()].find(
-         (c) => c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
-      );
-      if (existing) return;
-
-      const contestId = foundry.utils.randomID(16);
+   static registerContest({ contestId, initiator, target, rollData }) {
+      if (activeContests.has(contestId)) return;
 
       activeContests.set(contestId, {
          id: contestId,
@@ -23,6 +15,17 @@ export default class OpposeRollService {
          targetRoll: null,
          isResolved: false,
       });
+   }
+
+   static async start({ initiator, target, rollData }) {
+      const existing = [...activeContests.values()].find(
+         (c) => c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
+      );
+      if (existing) return;
+
+      const contestId = foundry.utils.randomID(16);
+
+      this.registerContest({ contestId, initiator, target, rollData });
 
       // Determine target user(s), excluding GMs
       const targetUsers = game.users.filter(
@@ -34,9 +37,7 @@ export default class OpposeRollService {
 
       const targetUser = targetUsers[0];
 
-      if (targetUser && game.user.id === targetUser.id) {
-         await this.promptTargetRoll(contestId, initiator, target);
-      } else if (targetUser) {
+      if (targetUser && targetUser.id !== game.user.id) {
          game.socket.emit("system.sr3e", {
             action: "opposeRoll",
             data: {
