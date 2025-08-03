@@ -11,13 +11,14 @@ export default class SR3ERoll extends Roll {
       return new this(formula, data, options);
    }
 
-   static buildFormula(dice, { explodes = true, targetNumber = 4 } = {}) {
-      const parsedDice = Number(dice);
-      if (!Number.isFinite(parsedDice) || parsedDice <= 0) {
+   static buildFormula(dice, { explodes = true, targetNumber } = {}) {
+      if (dice <= 0) {
          throw new Error(`Invalid dice value: ${dice}`);
       }
-      const base = `${parsedDice}d6`;
-      const mod = explodes ? `x${targetNumber}` : "";
+
+      const base = `${dice}d6`;
+      const mod = explodes ? (targetNumber != null ? `x${targetNumber}` : `x`) : "";
+
       return `${base}${mod}`;
    }
 
@@ -30,9 +31,9 @@ export default class SR3ERoll extends Roll {
          .filter(Boolean);
       const uniqueTargets = [...new Map(rawTargets.map((a) => [a.id, a])).values()];
 
-      const isSilent = canvas.tokens.ownedTokens.some((t) => t.actor?.id === actor.id && t.document.hidden);
-
       if (actor && uniqueTargets.length > 0) {
+         const isSilent = canvas.tokens.ownedTokens.some((t) => t.actor?.id === actor.id && t.document.hidden);
+
          for (const target of uniqueTargets) {
             await OpposeRollService.start({
                initiator: actor,
@@ -46,7 +47,7 @@ export default class SR3ERoll extends Roll {
       }
 
       // Defender response logic
-      const contest = OpposeRollService.getContestForTarget(actor);
+      const contest = actor && OpposeRollService.getContestForTarget(actor);
       if (contest && !contest.isResolved) {
          game.socket.emit("system.sr3e", {
             action: "resolveOpposedRoll",

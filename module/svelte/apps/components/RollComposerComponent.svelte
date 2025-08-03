@@ -6,7 +6,7 @@
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
 
-   let { actor, config, caller, onclose, contestId = null } = $props();
+   let { actor, config, caller, onclose } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
@@ -110,13 +110,11 @@
          associatedDicePoolString = skillData?.associatedDicePool ?? "";
          if (associatedDicePoolString) {
             associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
-            console.log("associatedDicePoolStore", $associatedDicePoolStore);
          }
       }
 
       if (linkedAttributeString) {
          linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
-         console.log("linkedAttributeStore", $linkedAttributeStore);
       }
 
       if (skillType === "language") {
@@ -223,6 +221,8 @@
    });
 
    async function HandleRoll() {
+      console.warn("HandleRoll triggered");
+
       const totalDice = caller.dice + diceBought + currentDicePoolAddition;
 
       const rollFormula = SR3ERoll.buildFormula(totalDice, {
@@ -245,35 +245,9 @@
 
       await roll.evaluate();
 
-      if (contestId) {
-         // Apply drain effects if applicable
-         await CommitEffects(true);
-
-         // Send result via socket
-         game.socket.emit("system.sr3e", {
-            action: "returnOpposedRollResult",
-            payload: {
-               contestId,
-               rollData: roll.toJSON(),
-            },
-         });
-
-         onclose?.(); // Still close the modal
-         return;
-      }
-
-      // Not a contest — apply effects + pass roll result back
       await CommitEffects(false);
 
-      onclose({
-         dice: totalDice,
-         attributeName: caller.key,
-         options: {
-            targetNumber,
-            modifiers: modifiersArray,
-            explodes: !isDefaulting,
-         },
-      });
+      onclose?.();
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }

@@ -217,14 +217,6 @@ function debugFlagsOnActor(actor, options, userId) {
 
 function wrapChatMessage(message, html, context) {
    const isPopup = context?.canClose && !context?.canDelete;
-
-   if (isPopup) {
-      console.log("=== POPUP CHAT MESSAGE DETECTED ===");
-      console.log("HTML Element:\n", html.outerHTML);
-      console.log("Message:\n", message);
-      console.log("Context:\n", context);
-   }
-
    const wrapper = document.createElement("div");
    const dynamicBackground = document.createElement("div");
    const dynamicMessage = document.createElement("div");

@@ -5,6 +5,7 @@
    import { onDestroy } from "svelte";
    import { mount, unmount } from "svelte";
    import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
+   import SR3ERoll from "@documents/SR3ERoll.js";
 
    let { actor, localization, key } = $props();
 
@@ -60,7 +61,6 @@
    });
 
    let activeModal = null;
-   let isModalOpen = $state(false);
 
    function add(change) {
       if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
@@ -85,7 +85,6 @@
          e.stopImmediatePropagation();
          e.stopPropagation();
          unmount(activeModal);
-         isModalOpen = false;
          activeModal = null;
       }
    }
@@ -94,38 +93,47 @@
       StoreManager.Unsubscribe(actor);
       if (activeModal) {
          unmount(activeModal);
-         isModalOpen = false;
          activeModal = null;
       }
    });
 
    async function Roll(e) {
-      if (e.shiftKey) {
-         if (isModalOpen) return;
-         isModalOpen = true;
+      const dice = $valueROStore?.sum ?? 0;
 
-         const options = await new Promise((resolve) => {
+      if (e.shiftKey) {
+         if (activeModal) return;
+
+         new Promise((resolve) => {
             activeModal = mount(RollComposerComponent, {
                target: document.querySelector(".composer-position"),
                props: {
                   actor,
                   config: CONFIG.sr3e,
-                  caller: { key, value: $valueROStore.value, type: "attribute", dice: $valueROStore.sum },
-                  onclose: (result) => {
+                  caller: {
+                     key,
+                     value: $valueROStore.value,
+                     type: "attribute",
+                     dice,
+                  },
+                  onclose: async (result) => {
                      unmount(activeModal);
-                     isModalOpen = false;
                      activeModal = null;
-                     resolve(result);
                   },
                },
             });
          });
-
-         if (options) {
-            await actor.AttributeRoll(options.dice, options.attributeName, options.options);
-         }
       } else {
-         await actor.AttributeRoll($valueROStore.sum, key);
+         const roll = SR3ERoll.create(
+            SR3ERoll.buildFormula(dice, { explodes: true }),
+            { actor },
+            {
+               attributeName: key,
+               callerType: "attribute",
+               opposed: game.user.targets.size > 0,
+            }
+         );
+
+         await roll.evaluate();
       }
 
       e.preventDefault();

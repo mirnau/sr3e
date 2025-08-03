@@ -25,55 +25,45 @@
       ActiveSkillEditorSheet.launch(actor, skill, config);
    }
 
-   async function Roll(e, skillId, rollType, rollName, diceValue) {
-      if (e.shiftKey) {
-         if (isModalOpen) return;
-         isModalOpen = true;
+   async function Roll() {
+      const actor = item.parent;
+      const skillData = item.system.activeSkill;
+      const skillName = item.name;
 
-         const options = await new Promise((resolve) => {
-            activeModal = mount(RollComposerComponent, {
-               target: document.querySelector(".composer-position"),
-               props: {
-                  actor,
-                  config,
-                  caller: {
-                     key: rollName,
-                     type: rollType,
-                     dice: diceValue,
-                     skillId,
-                  },
-                  onclose: (result) => {
-                     unmount(activeModal);
-                     isModalOpen = false;
-                     activeModal = null;
-                     resolve(result);
-                  },
-               },
-            });
-         });
+      // Determine total dice
+      const specIndex = parseInt(selectedSpecializationIndex);
+      const spec = skillData.specializations?.[specIndex];
+      const dice = spec ? spec.value : skillData.value;
+      const specializationName = spec?.name;
 
-         if (options) {
-            if (rollType === "specialization") {
-               await actor.SpecializationRoll(options.dice, rollName, options.options);
-            } else {
-               await actor.SkillRoll(options.dice, rollName, options.options);
-            }
+      const caller = {
+         key: spec ? `${skillName} - ${specializationName}` : skillName,
+         value: 0,
+         type: spec ? "specialization" : "skill",
+         dice,
+         skillId: item.id,
+         specialization: spec,
+      };
+
+      const roll = SR3ERoll.create(
+         SR3ERoll.buildFormula(dice, { explodes: false }),
+         { actor },
+         {
+            skillName,
+            specializationName,
+            attributeName: skillData.linkedAttribute,
+            callerType: caller.type,
+            opposed: game.user.targets.size > 0,
          }
-      } else {
-         if (rollType === "specialization") {
-            await actor.SpecializationRoll(diceValue, rollName);
-         } else {
-            await actor.SkillRoll(diceValue, rollName);
-         }
-      }
+      );
 
-      e.preventDefault();
+      await roll.evaluate();
    }
 
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
    });
-   
+
    function handleEscape(e) {
       if (e.key === "Escape" && activeModal) {
          e.preventDefault();

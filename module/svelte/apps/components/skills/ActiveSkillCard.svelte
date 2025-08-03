@@ -16,8 +16,7 @@
    let specializationsStore = skillStoreManager.GetRWStore("activeSkill.specializations");
 
    let isShoppingState = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
-   
-   let isModalOpen = $state(false);
+
    let activeModal = null;
 
    function openSkill() {
@@ -26,47 +25,33 @@
 
    async function Roll(e, skillId, specializationName = null) {
       if (e.shiftKey) {
-         if (isModalOpen) return;
-         isModalOpen = true;
+         if (activeModal) return;
 
-         const rollName = specializationName || skill.name;
-         const dice = specializationName ? 
-            $specializationsStore.find(s => s.name === specializationName)?.value : 
-            $valueStore;
-
-         const options = await new Promise((resolve) => {
-            activeModal = mount(RollComposerComponent, {
-               target: document.querySelector(".composer-position"),
-               props: {
-                  actor,
-                  config: config,
-                  caller: { 
-                     key: rollName, 
-                     type: "active", 
-                     dice: dice,
-                     skillId: skillId
-                  },
-                  onclose: (result) => {
-                     unmount(activeModal);
-                     isModalOpen = false;
-                     activeModal = null;
-                     resolve(result);
-                  },
+         activeModal = mount(RollComposerComponent, {
+            target: document.querySelector(".composer-position"),
+            props: {
+               actor,
+               config,
+               caller: {
+                  key: skill.name,
+                  type: "skill",
+                  dice: specializationName
+                     ? $specializationsStore.find((s) => s.name === specializationName)?.value
+                     : $valueStore,
+                  skillId,
+                  specialization: specializationName,
+                  name: skill.name,
                },
-            });
+               onclose: () => {
+                  unmount(activeModal);
+                  activeModal = null;
+               },
+            },
          });
-
-         if (options) {
-            if (specializationName) {
-               await actor.SpecializationRoll(options.dice, specializationName.name, options.options);
-            } else {
-               await actor.SkillRoll(options.dice, skill.name, options.options);
-            }
-         }
       } else {
          if (specializationName) {
-            const specValue = $specializationsStore.find(s => s.name === specializationName)?.value;
-            await actor.SpecializationRoll(specValue, skill.name);
+            const specValue = $specializationsStore.find((s) => s.name === specializationName)?.value;
+            await actor.SpecializationRoll(specValue, specializationName);
          } else {
             await actor.SkillRoll($valueStore, skill.name);
          }
@@ -79,19 +64,18 @@
       StoreManager.Unsubscribe(skill);
    });
    function handleEscape(e) {
-   if (e.key === "Escape" && activeModal) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      e.stopPropagation();
-      unmount(activeModal);
-      isModalOpen = false;
-      activeModal = null;
+      if (e.key === "Escape" && activeModal) {
+         e.preventDefault();
+         e.stopImmediatePropagation();
+         e.stopPropagation();
+         unmount(activeModal);
+         isModalOpen = false;
+         activeModal = null;
+      }
    }
-}
-
 </script>
-<svelte:window on:keydown|capture={handleEscape} />
 
+<svelte:window on:keydown|capture={handleEscape} />
 
 <div class="skill-card-container">
    {#if $isShoppingState}

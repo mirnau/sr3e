@@ -24,54 +24,41 @@
       ActiveSkillEditorSheet.launch(actor, skill, config);
    }
 
-   async function Roll(e, skillId, specializationName = null) {
-      if (e.shiftKey) {
-         if (isModalOpen) return;
-         isModalOpen = true;
+   async function Roll() {
+      const actor = item.parent;
+      const skillData = item.system.activeSkill;
+      const skillName = item.name;
 
-         const rollName = specializationName || skill.name;
-         const dice = specializationName ? $specializations.find((s) => s.name === specializationName)?.value : $value;
+      // Determine total dice
+      const specIndex = parseInt(selectedSpecializationIndex);
+      const spec = skillData.specializations?.[specIndex];
+      const dice = spec ? spec.value : skillData.value;
+      const specializationName = spec?.name;
 
-         const options = await new Promise((resolve) => {
-            activeModal = mount(RollComposerComponent, {
-               target: document.querySelector(".composer-position"),
-               props: {
-                  actor,
-                  config,
-                  caller: {
-                     key: rollName,
-                     type: "knowledge",
-                     dice,
-                     skillId,
-                  },
-                  onclose: (result) => {
-                     unmount(activeModal);
-                     isModalOpen = false;
-                     activeModal = null;
-                     resolve(result);
-                  },
-               },
-            });
-         });
+      const caller = {
+         key: spec ? `${skillName} - ${specializationName}` : skillName,
+         value: 0,
+         type: spec ? "specialization" : "skill",
+         dice,
+         skillId: item.id,
+         specialization: spec,
+      };
 
-         if (options) {
-            if (specializationName) {
-               await actor.SpecializationRoll(options.dice, specializationName.name, options.options);
-            } else {
-               await actor.SkillRoll(options.dice, skill.name, options.options);
-            }
+      const roll = SR3ERoll.create(
+         SR3ERoll.buildFormula(dice, { explodes: false }),
+         { actor },
+         {
+            skillName,
+            specializationName,
+            attributeName: skillData.linkedAttribute,
+            callerType: caller.type,
+            opposed: game.user.targets.size > 0,
          }
-      } else {
-         if (specializationName) {
-            const specValue = $specializations.find((s) => s.name === specializationName)?.value;
-            await actor.SpecializationRoll(specValue, skill.name);
-         } else {
-            await actor.SkillRoll($value, skill.name);
-         }
-      }
+      );
 
-      e.preventDefault();
+      await roll.evaluate();
    }
+
 
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);

@@ -124,23 +124,6 @@
                   unmount(activeModal);
                   isModalOpen = false;
                   activeModal = null;
-
-                  if (!result) return;
-
-                  const roll = SR3ERoll.create(
-                     SR3ERoll.buildFormula(result.dice, result.options),
-                     { actor },
-                     {
-                        ...result.options,
-                        attributeName: result.attributeName,
-                        skillName: caller?.skillId ? actor.items.get(caller.skillId)?.name : undefined,
-                        specializationName: caller.specialization?.name,
-                        speaker: ChatMessage.getSpeaker({ actor }),
-                        opposed: !!game.user.targets.size,
-                     }
-                  );
-
-                  roll.evaluate();
                },
             },
          });
