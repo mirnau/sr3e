@@ -425,39 +425,45 @@ function registerHooks() {
       });
    });
 
-Hooks.once("ready", () => {
-   console.log(`[sr3e] Socket handler registered. User ID: ${game.user.id}, Character: ${game.user.character?.name}`);
+   Hooks.once("ready", () => {
+      console.log(
+         `[sr3e] Socket handler registered. User ID: ${game.user.id}, Character: ${game.user.character?.name}`
+      );
 
-   if (game.__sr3eOpposeRollSocketRegistered) return;
-   game.__sr3eOpposeRollSocketRegistered = true;
+      if (game.__sr3eOpposeRollSocketRegistered) return;
+      game.__sr3eOpposeRollSocketRegistered = true;
 
-   game.socket.on("system.sr3e", async ({ action, data }) => {
-      console.log("[sr3e] Socket received:", action, data);
+      game.socket.on("system.sr3e", async ({ action, data }) => {
+         console.log("[sr3e] Socket received:", action, data);
 
-      if (action === "opposeRoll") {
-         if (data.targetUserId !== game.user.id) return;
+         if (action === "opposeRoll") {
+            const ownedActorIds = game.actors.filter((a) => a.testUserPermission(game.user, "OWNER")).map((a) => a.id);
 
-         const initiator = game.actors.get(data.initiatorId);
-         const target = game.actors.get(data.targetId);
-         if (!initiator || !target) {
-            console.warn("❌ Socket handler could not resolve actors:", {
-               initiator: !!initiator,
-               target: !!target,
+            // Skip if this user owns the initiator — they've already seen the message
+            if (ownedActorIds.includes(data.initiatorId)) return;
+
+            // Only continue if this user owns the target
+            if (!ownedActorIds.includes(data.targetId)) return;
+
+            // Now we are the target’s owner and not the initiator — proceed
+            const initiator = game.actors.get(data.initiatorId);
+            const target = game.actors.get(data.targetId);
+            if (!initiator || !target) {
+               console.warn("❌ Could not resolve actors for contest:", { initiator, target });
+               return;
+            }
+
+            OpposeRollService.registerContest({
+               contestId: data.contestId,
+               initiator,
+               target,
+               rollData: data.rollData,
             });
-            return;
+
+            console.log(`[sr3e] Contest registered: ${data.contestId}`);
          }
-
-         OpposeRollService.registerContest({
-            contestId: data.contestId,
-            initiator,
-            target,
-            rollData: data.rollData,
-         });
-
-         console.log(`[sr3e] Contest registered: ${data.contestId}`);
-      }
+      });
    });
-});
 
    Hooks.once(hooks.init, () => {
       configureProject();

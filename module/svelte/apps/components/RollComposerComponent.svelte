@@ -5,6 +5,7 @@
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
+   import OpposeRollService from "@services/OpposeRollService.js";
 
    let { actor, config, caller, onclose } = $props();
 
@@ -133,9 +134,19 @@
       hasChallenged = true;
       console.warn("Challange: Initiating opposed rolls.");
 
-      const targets = [...game.user.targets].map((t) => t.actor);
+      const targets = [...game.user.targets].map((t) => t.actor).filter((actor) => !!actor);
 
       const totalDice = caller.dice + diceBought + currentDicePoolAddition;
+
+      const options = {
+         attributeName: caller.key,
+         skillName: caller.name,
+         specializationName: caller.specialization,
+         modifiers: modifiersArray,
+         callerType: caller.type,
+         targetNumber,
+         opposed: true,
+      };
 
       const baseRoll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
@@ -143,15 +154,7 @@
             explodes: !isDefaulting,
          }),
          { actor },
-         {
-            attributeName: caller.key,
-            skillName: caller.name,
-            specializationName: caller.specialization,
-            modifiers: modifiersArray,
-            callerType: caller.type,
-            targetNumber,
-            opposed: true,
-         }
+         options
       );
 
       await baseRoll.evaluate();
@@ -160,7 +163,10 @@
          await OpposeRollService.start({
             initiator: actor,
             target,
-            rollData: baseRoll.export(),
+            rollData: {
+               dice: totalDice,
+               options,
+            },
          });
       }
 

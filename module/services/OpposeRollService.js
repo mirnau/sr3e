@@ -18,7 +18,7 @@ export default class OpposeRollService {
    }
 
    static async start({ initiator, target, rollData }) {
-      // Replace any unresolved contest between the same initiator and target
+      // Remove existing unresolved contest between the same pair
       for (const [id, contest] of activeContests.entries()) {
          if (contest.initiator.id === initiator.id && contest.target.id === target.id && !contest.isResolved) {
             activeContests.delete(id);
@@ -28,49 +28,48 @@ export default class OpposeRollService {
       const contestId = foundry.utils.randomID(16);
       this.registerContest({ contestId, initiator, target, rollData });
 
-      // Determine target user(s), excluding GMs
-      const targetUsers = game.users.filter(
-         (u) =>
-            !u.isGM &&
-            u.active &&
-            (u.character?.id === target.id || target.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER))
-      );
+      // Emit to all clients — receiving end filters for actor ownership
+      game.socket.emit("system.sr3e", {
+         action: "opposeRoll",
+         data: {
+            contestId,
+            initiatorId: initiator.id,
+            targetId: target.id, // Actor-based targeting
+            rollData,
+         },
+      });
 
-      const targetUser = targetUsers[0];
+      // Whisper to GM and initiator only — the rest is handled client-side via socket filters
 
-      if (targetUser && targetUser.id !== game.user.id) {
-         game.socket.emit("system.sr3e", {
-            action: "opposeRoll",
-            data: {
-               contestId,
-               initiatorId: initiator.id,
-               targetId: target.id,
-               rollData,
-               targetUserId: targetUser.id,
-            },
-         });
-      }
+      const initiatorUser = OpposeRollService.resolveControllingUser(initiator);
+      const targetUser = OpposeRollService.resolveControllingUser(target);
 
-      const defenderIds = targetUsers.map((u) => u.id);
-      const whisperIds = [initiator?.user?.id, ...defenderIds].filter(Boolean);
+      const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
 
-      if (game.user.isGM || game.user.id === initiator?.user?.id) {
+      if (whisperIds.includes(game.user.id)) {
          await ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: initiator }),
             whisper: whisperIds,
             content: `
-               <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${
+         <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${
                target.name
             }</strong>.</p>
-               <button class="sr3e-response-button" data-contest-id="${contestId}">
-                  ${game.i18n.localize("sr3e.chat.respond")}
-               </button>
-            `,
+         <button class="sr3e-response-button" data-contest-id="${contestId}">
+            ${game.i18n.localize("sr3e.chat.respond")}
+         </button>`,
             flags: { "sr3e.opposed": contestId },
          });
       }
 
       return contestId;
+   }
+
+   static resolveControllingUser(actor) {
+      return (
+         actor.user ??
+         game.users.find((u) => actor.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) ??
+         game.users.find((u) => u.isGM)
+      );
    }
 
    static async abortOpposedRoll(contestId) {
