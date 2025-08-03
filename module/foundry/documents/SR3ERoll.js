@@ -25,18 +25,23 @@ export default class SR3ERoll extends Roll {
       await super.evaluate(options);
 
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
-      const targets = Array.from(game.user.targets).map(t => t.actor).filter(Boolean);
 
-      // Centralized detection of opposed rolls
-      if (actor && targets.length > 0) {
-         const isSilent = canvas.tokens.ownedTokens.find(t => t.actor?.id === actor.id)?.document?.hidden ?? false;
+      // Extract unique actors from targeted tokens
+      const rawTargets = Array.from(game.user.targets)
+         .map((t) => t.actor)
+         .filter(Boolean);
 
-         for (const target of targets) {
+      const uniqueTargets = [...new Map(rawTargets.map((a) => [a.id, a])).values()];
+
+      if (actor && uniqueTargets.length > 0) {
+         const isSilent = canvas.tokens.ownedTokens.some((t) => t.actor?.id === actor.id && t.document.hidden);
+
+         for (const target of uniqueTargets) {
             await OpposeRollService.start({
                initiator: actor,
                target,
                rollData: this.toJSON(),
-               isSilent
+               isSilent,
             });
          }
 

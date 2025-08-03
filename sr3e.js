@@ -381,19 +381,22 @@ function registerHooks() {
    });
 
    Hooks.once("ready", () => {
-      game.socket.on("system.sr3e", async ({ action, payload }) => {
+      game.socket.on("system.sr3e", async ({ action, data }) => {
          switch (action) {
-            case "requestOpposedRoll": {
-               const target = await fromUuid(payload.targetUuid);
-               const initiator = await fromUuid(payload.initiatorUuid);
-               if (target?.id !== game.user.character?.id) return;
+            case "opposeRoll": {
+               const target = game.actors.get(data.targetId);
+               const initiator = game.actors.get(data.initiatorId);
+               if (!target || !initiator) return;
 
-               await OpposeRollService.promptTargetRoll(payload.contestId, initiator, target);
+               // Only execute on the target's session
+               if (!target.testUserPermission(game.user, "OWNER")) return;
+
+               await OpposeRollService.promptTargetRoll(data.contestId, initiator, target);
                break;
             }
 
             case "resolveOpposedRoll": {
-               await OpposeRollService.resolveTargetRoll(payload.contestId, payload.rollData);
+               await OpposeRollService.resolveTargetRoll(data.contestId, data.rollData);
                break;
             }
          }

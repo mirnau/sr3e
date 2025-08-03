@@ -5,9 +5,13 @@ const activeContests = new Map();
 
 export default class OpposeRollService {
    static async start({ initiator, target, rollData, isSilent = false }) {
-      const contestId = foundry.utils.randomID(16);
+      // Prevent duplicate contests for the same actor pair
+      const existing = [...activeContests.values()].find(c =>
+         c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
+      );
+      if (existing) return;
 
-      if (activeContests.has(contestId)) return;
+      const contestId = foundry.utils.randomID(16);
 
       activeContests.set(contestId, {
          id: contestId,
@@ -18,8 +22,8 @@ export default class OpposeRollService {
          isResolved: false,
       });
 
-      const targetUser = game.users.find(
-         (u) => u.active && (u.character?.id === target.id || target.testUserPermission(u, "OWNER"))
+      const targetUser = game.users.find(u =>
+         u.active && (u.character?.id === target.id || target.testUserPermission(u, "OWNER"))
       );
 
       if (!targetUser) {
@@ -27,25 +31,26 @@ export default class OpposeRollService {
          return;
       }
 
-      if (targetUser.id === game.user.id) {
-         // Target is on this client
-         await OpposeRollService.promptTargetRoll(contestId, initiator, target);
+      // Only render prompt on the defender's session
+      if (game.user.id === targetUser.id) {
+         await this.promptTargetRoll(contestId, initiator, target);
       } else {
-         // Send socket request
          game.socket.emit("system.sr3e", {
-            action: "requestOpposedRoll",
-            payload: {
+            action: "opposeRoll",
+            data: {
                contestId,
-               initiatorUuid: initiator.uuid,
-               targetUuid: target.uuid,
-               prompt: `You are being opposed by ${initiator.name}. Select any roll to respond.`,
-            },
+               initiatorId: initiator.id,
+               targetId: target.id,
+               rollData,
+            }
          });
       }
 
-      if (!isSilent) {
+      // Only initiator (or GM) posts the message
+      if (game.user.isGM || game.user.id === initiator?.user?.id) {
          await ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: initiator }),
+            whisper: [initiator?.user?.id, targetUser.id].filter(Boolean),
             content: `<p>${initiator.name} has initiated an opposed roll against ${target.name}.</p>`,
             flags: { "sr3e.opposed": contestId },
          });
