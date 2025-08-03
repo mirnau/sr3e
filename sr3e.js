@@ -35,6 +35,7 @@ import { sr3e } from "@config/config.js";
 import { hooks, flags } from "@services/commonConsts.js";
 import { localize } from "@services/utilities.js";
 import { getNewsService, broadcastNews } from "@services/NewsService.svelte.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 
 import injectCssSelectors from "@hooks/renderApplicationV2/injectCssSelectors.js";
 import { attachLightEffect } from "@hooks/renderApplicationV2/attachLightEffect.js";
@@ -377,6 +378,26 @@ function registerHooks() {
       } catch (err) {
          console.error("[SR3E] Transfer error:", err);
       }
+   });
+
+   Hooks.once("ready", () => {
+      game.socket.on("system.sr3e", async ({ action, payload }) => {
+         switch (action) {
+            case "requestOpposedRoll": {
+               const target = await fromUuid(payload.targetUuid);
+               const initiator = await fromUuid(payload.initiatorUuid);
+               if (target?.id !== game.user.character?.id) return;
+
+               await OpposeRollService.promptTargetRoll(payload.contestId, initiator, target);
+               break;
+            }
+
+            case "resolveOpposedRoll": {
+               await OpposeRollService.resolveTargetRoll(payload.contestId, payload.rollData);
+               break;
+            }
+         }
+      });
    });
 
    Hooks.once(hooks.init, () => {

@@ -1,85 +1,97 @@
-export default class OpenRollService {
-   static #sessions = new Map();
+import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
+import { mount, unmount } from "svelte";
 
-   /** Start an opposed roll initiated by an actor */
+const activeContests = new Map();
+
+export default class OpposeRollService {
    static async start({ initiator, target, rollData, isSilent = false }) {
-      const initiatorRoll = await SR3eRoll.fromData(rollData).evaluate({ async: true });
+      const contestId = foundry.utils.randomID(16);
 
-      const session = {
-         id: randomID(),
+      if (activeContests.has(contestId)) return;
+
+      activeContests.set(contestId, {
+         id: contestId,
          initiator,
          target,
-         initiatorRoll,
+         initiatorRoll: rollData,
          targetRoll: null,
-         isSilent,
-         timestamp: Date.now(),
-         resolved: false,
-      };
+         isResolved: false,
+      });
 
-      this.#sessions.set(session.id, session);
-
-      if (isSilent) {
-         await this.#handleSilent(session);
-      } else {
-         await this.#promptTarget(session);
-      }
-   }
-
-   static async resolveTargetRoll(sessionId, targetRoll) {
-      const session = this.#sessions.get(sessionId);
-      if (!session) throw new Error(`No session found for ID ${sessionId}`);
-
-      session.targetRoll = targetRoll;
-      session.resolved = true;
-
-      const initiatorHits = this.#countSuccesses(session.initiatorRoll);
-      const targetHits = this.#countSuccesses(session.targetRoll);
-      const netSuccesses = initiatorHits - targetHits;
-
-      if (!session.isSilent) {
-         await ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor: session.initiator }),
-            content: await renderOpposedRollMessage(session, netSuccesses),
-         });
-      } else {
-         if (netSuccesses <= 0) {
-            Hooks.callAll("sr3e.stealthBroken", {
-               attacker: session.initiator,
-               target: session.target,
-               netSuccesses,
-            });
-         }
-      }
-
-      Hooks.callAll("sr3e.opposedRollResolved", { session, netSuccesses });
-   }
-
-   static #countSuccesses(roll) {
-      return roll.terms[0].results.filter(r => r.result >= 5).length;
-   }
-
-   static async #promptTarget(session) {
-      game.sr3e.promptOpposedRoll?.(session.target, session.id);
-   }
-
-   static async #handleSilent(session) {
-      const perceptionSkill = session.target.items.find(i =>
-         i.system?.skillType === "active" && i.name.toLowerCase().includes("perception"),
+      const targetUser = game.users.find(
+         (u) => u.active && (u.character?.id === target.id || target.testUserPermission(u, "OWNER"))
       );
 
-      const perceptionRoll = await SR3eRoll.fromData({
-         dice: perceptionSkill?.system.dice ?? 0,
-         options: {
-            targetNumber: 4,
-            modifiers: [],
-            explodes: true,
-         },
-      }).evaluate({ async: true });
+      if (!targetUser) {
+         console.warn(`No active user found for target actor "${target.name}"`);
+         return;
+      }
 
-      await this.resolveTargetRoll(session.id, perceptionRoll);
+      if (targetUser.id === game.user.id) {
+         // Target is on this client
+         await OpposeRollService.promptTargetRoll(contestId, initiator, target);
+      } else {
+         // Send socket request
+         game.socket.emit("system.sr3e", {
+            action: "requestOpposedRoll",
+            payload: {
+               contestId,
+               initiatorUuid: initiator.uuid,
+               targetUuid: target.uuid,
+               prompt: `You are being opposed by ${initiator.name}. Select any roll to respond.`,
+            },
+         });
+      }
+
+      if (!isSilent) {
+         await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ actor: initiator }),
+            content: `<p>${initiator.name} has initiated an opposed roll against ${target.name}.</p>`,
+            flags: { "sr3e.opposed": contestId },
+         });
+      }
    }
 
-   static getSession(id) {
-      return this.#sessions.get(id);
+   static async resolveTargetRoll(contestId, rollData) {
+      const contest = activeContests.get(contestId);
+      if (!contest) throw new Error(`No contest found for ID ${contestId}`);
+
+      contest.targetRoll = rollData;
+      contest.isResolved = true;
+
+      const netSuccesses = computeNetSuccesses(contest.initiatorRoll, contest.targetRoll);
+      const winner = netSuccesses > 0 ? contest.initiator : contest.target;
+
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: winner }),
+         content: `<p>${contest.initiator.name} attacks ${contest.target.name}.<br>
+            ${contest.target.name} responds.<br>
+            ${winner.name} wins the opposed roll (${Math.abs(netSuccesses)} net successes).</p>`,
+         flags: { "sr3e.opposedResolved": true },
+      });
+
+      const dialogId = `sr3e-opposed-roll-${contestId}`;
+      ui.windows[dialogId]?.close();
+
+      activeContests.delete(contestId);
+   }
+
+   static async promptTargetRoll(contestId, initiator, target) {
+      new Dialog({
+         title: game.i18n.localize("sr3e.opposedRoll.title") ?? "Opposed Roll Incoming",
+         content: `
+            <p>${initiator.name} is initiating an opposed roll against you.</p>
+            <p>Please respond by clicking a skill, attribute, or item in your character sheet.</p>
+            <p>This dialog will close automatically when you roll.</p>
+         `,
+         buttons: {},
+         close: () => {},
+         default: null
+      }, {
+         id: `sr3e-opposed-roll-${contestId}`,
+         classes: ["sr3e", "opposed-roll-dialog"],
+         resizable: false,
+         width: 400
+      }).render(true);
    }
 }

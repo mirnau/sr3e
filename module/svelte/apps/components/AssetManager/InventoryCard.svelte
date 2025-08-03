@@ -1,14 +1,18 @@
 <script>
-   import { onDestroy, onMount } from "svelte";
+   import { mount, unmount, onDestroy, onMount } from "svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
+   import SR3ERoll from "@documents/SR3ERoll.js";
+   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 
    let { item, config } = $props();
    const inventoryCardStoreManager = StoreManager.Subscribe(item);
 
    let isFavorite = $state(false);
    let isEquipped = $state(false);
+   let isModalOpen = false;
+   let activeModal = null;
 
    const resolvingItemIdStore = inventoryCardStoreManager.GetRWStore("linkedSkilliD");
    const hasLinkedSkill = $derived($resolvingItemIdStore && $resolvingItemIdStore !== "");
@@ -72,6 +76,76 @@
          event.dataTransfer.setDragImage(event.currentTarget, 16, 16);
       }
    }
+   function performItemAction() {
+      const actor = item.parent;
+      const [skillId, specIndex] = item.system.linkedSkilliD.split("::");
+      const skill = actor.items.get(skillId);
+      const skillData = skill.system.activeSkill;
+
+      let specialization = null;
+      let dice = 0;
+      let key = skill.name;
+      let type = "skill";
+
+      if (specIndex !== undefined) {
+         specialization = skillData.specializations[parseInt(specIndex)];
+         dice = specialization.value;
+         key = `${skill.name} - ${specialization.name}`;
+         type = "specialization";
+      } else {
+         dice = skillData.value;
+      }
+
+      const caller = {
+         key,
+         value: 0,
+         type,
+         dice,
+         skillId,
+         specialization,
+         item,
+      };
+
+      openRollComposer(actor, caller);
+   }
+
+   function openRollComposer(actor, caller) {
+      if (isModalOpen) return;
+      isModalOpen = true;
+
+      new Promise((resolve) => {
+         activeModal = mount(RollComposerComponent, {
+            target: document.querySelector(".composer-position"),
+            props: {
+               actor,
+               config: CONFIG.sr3e,
+               caller,
+               onclose: async (result) => {
+                  unmount(activeModal);
+                  isModalOpen = false;
+                  activeModal = null;
+
+                  if (!result) return;
+
+                  const roll = SR3ERoll.create(
+                     SR3ERoll.buildFormula(result.dice, result.options),
+                     { actor },
+                     {
+                        ...result.options,
+                        attributeName: result.attributeName,
+                        skillName: caller?.skillId ? actor.items.get(caller.skillId)?.name : undefined,
+                        specializationName: caller.specialization?.name,
+                        speaker: ChatMessage.getSpeaker({ actor }),
+                        opposed: !!game.user.targets.size,
+                     }
+                  );
+
+                  roll.evaluate();
+               },
+            },
+         });
+      });
+   }
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -96,7 +170,7 @@
          <button
             class="sr3e-toolbar-button fa-solid fa-dice"
             aria-label="Roll"
-            onclick={() => console.log("Roll")}
+            onclick={performItemAction}
             disabled={!hasLinkedSkill}
          ></button>
 

@@ -1,5 +1,5 @@
 // src/dice/SR3ERoll.js
-import OpenRollService from "@services/OpposeRollService.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 
 export default class SR3ERoll extends Roll {
    constructor(formula, data = {}, options = {}) {
@@ -22,16 +22,24 @@ export default class SR3ERoll extends Roll {
    }
 
    async evaluate(options = {}) {
-      const result = await super.evaluate();
-      const opposed = this.options.opposed === true;
+      await super.evaluate(options);
+
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
       const targets = Array.from(game.user.targets).map(t => t.actor).filter(Boolean);
 
-      if (opposed && actor && targets.length > 0) {
+      // Centralized detection of opposed rolls
+      if (actor && targets.length > 0) {
          const isSilent = canvas.tokens.ownedTokens.find(t => t.actor?.id === actor.id)?.document?.hidden ?? false;
-         for (let target of targets) {
-            await OpenRollService.start({ initiator: actor, target, rollData: this, isSilent });
+
+         for (const target of targets) {
+            await OpposeRollService.start({
+               initiator: actor,
+               target,
+               rollData: this.toJSON(),
+               isSilent
+            });
          }
+
          return this;
       }
 

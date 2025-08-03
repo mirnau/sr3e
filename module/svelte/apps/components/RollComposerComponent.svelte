@@ -1,11 +1,12 @@
 <script>
+   import SR3ERoll from "@documents/SR3ERoll.js";
    import { onDestroy, onMount } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
 
-   let { actor, config, caller, onclose } = $props();
+   let { actor, config, caller, onclose, contestId = null } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
@@ -68,37 +69,60 @@
          modifiersArray = [{ name: localize(config.health.penalty), value: -$penalty }];
       }
 
-      if (caller.type === "attribute") {
-         title = localize(config.attributes[caller.key]);
-      }
-
-      if (caller.skillId) {
-         let skill = actor.items.get(caller.skillId);
-         title = caller.key;
-
-         if (skill.system.skillType === "active") {
-            linkedAttributeString = skill.system.activeSkill.linkedAttribute;
-
-            console.log("linkedAttributeString", linkedAttributeString); //OK
-
-            associatedDicePoolString = skill.system.activeSkill.associatedDicePool;
-            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
-
-            console.log("associatedDicePoolStore", $associatedDicePoolStore); // OK
-         } else if (skill.system.skillType === "knowledge") {
-            linkedAttributeString = skill.system.knowledgeSkill.linkedAttribute;
-         } else if (skill.system.skillType === "language") {
-            linkedAttributeString = skill.system.languageSkill.linkedAttribute;
-            readwrite = skill.system.languageSkill.readwrite;
+      switch (caller.type) {
+         case "attribute": {
+            title = localize(config.attributes[caller.key]);
+            break;
          }
 
-         if (linkedAttributeString !== "") {
-            linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
-
-            console.log("linkedAttributeStore", $linkedAttributeStore); // OK
+         case "skill":
+         case "specialization": {
+            const skill = actor.items.get(caller.skillId);
+            prepareSkillBasedRoll(skill, caller.key);
+            break;
          }
+
+         case "item": {
+            // If the item has a linked skill, resolve it
+            const [skillId] = item.system.linkedSkilliD?.split("::") ?? [];
+            const skill = actor.items.get(skillId);
+            prepareSkillBasedRoll(skill);
+            break;
+         }
+
+         default:
+            console.warn("Unhandled caller type in RollComposer:", caller.type);
+            break;
       }
    });
+
+   function prepareSkillBasedRoll(skill, titleOverride) {
+      if (!skill) return;
+
+      const skillType = skill.system.skillType;
+      const skillData = skill.system[skillType + "Skill"];
+
+      title = titleOverride ?? skill.name;
+
+      linkedAttributeString = skillData?.linkedAttribute ?? "";
+
+      if (skillType === "active") {
+         associatedDicePoolString = skillData?.associatedDicePool ?? "";
+         if (associatedDicePoolString) {
+            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
+            console.log("associatedDicePoolStore", $associatedDicePoolStore);
+         }
+      }
+
+      if (linkedAttributeString) {
+         linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
+         console.log("linkedAttributeStore", $linkedAttributeStore);
+      }
+
+      if (skillType === "language") {
+         readwrite = skillData?.readwrite;
+      }
+   }
 
    function updateFocusables() {
       const selector = isDefaulting
@@ -198,97 +222,155 @@
       canSubmit = targetNumber + modifiersTotal < 2;
    });
 
-async function Submit() {
-   const isInCombat = game.combat !== null && game.combat !== undefined;
-   if (isInCombat) {
-      const combat = game.combat;
-   }
+   async function HandleRoll() {
+      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
 
-   if (karmaCost > 0) {
-      const karmaEffect = {
-         name: `Karma Drain (${karmaCost})`,
-         label: `Used ${karmaCost} Karma Pool`,
-         icon: "icons/magic/light/explosion-star-glow-blue.webp",
-         changes: [
-            {
-               key: "system.karma.karmaPool.mod",
-               mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-               value: `-${karmaCost}`,
-               priority: 1,
-            },
-         ],
-         origin: actor.uuid,
-         ...(isInCombat
-            ? {
-                 duration: {
-                    unit: "rounds",
-                    value: 1,
-                    startRound: combat.round,
-                    startTurn: combat.turn,
-                 },
-              }
-            : {}),
-         flags: {
-            sr3e: {
-               temporaryKarmaPoolDrain: true,
-               expiresOutsideCombat: !isInCombat,
-            },
-         },
-      };
-
-      await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
-   }
-
-   if (currentDicePoolAddition > 0 && currentDicePoolName) {
-      const effect = {
-         name: `Dice Pool Drain (${currentDicePoolName})`,
-         label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
-         icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
-         changes: [
-            {
-               key: `system.dicePools.${currentDicePoolName}.mod`,
-               mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-               value: `-${currentDicePoolAddition}`,
-               priority: 1,
-            },
-         ],
-         origin: actor.uuid,
-         transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
-         ...(isInCombat
-            ? {
-                 duration: {
-                    unit: "rounds",
-                    value: 1,
-                    startRound: combat.round,
-                    startTurn: combat.turn,
-                 },
-              }
-            : {}),
-         flags: {
-            sr3e: {
-               temporaryDicePoolDrain: true,
-               expiresOutsideCombat: !isInCombat, // storyteller UI can target these
-            },
-         },
-      };
-
-      await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
-
-      actor.applyActiveEffects();
-   }
-
-   onclose({
-      dice: caller.dice + diceBought,
-      attributeName: caller.key,
-      options: {
-         targetNumber: targetNumber,
-         modifiers: modifiersArray,
+      const rollFormula = SR3ERoll.buildFormula(totalDice, {
+         targetNumber,
          explodes: !isDefaulting,
-      },
-   });
+      });
 
-   Hooks.callAll("actorSystemRecalculated", actor);
-}
+      const roll = SR3ERoll.create(
+         rollFormula,
+         { actor },
+         {
+            attributeName: caller.key,
+            skillName: caller.name,
+            specializationName: caller.specialization,
+            modifiers: modifiersArray,
+            callerType: caller.type,
+            targetNumber,
+         }
+      );
+
+      await roll.evaluate();
+
+      if (contestId) {
+         // Apply drain effects if applicable
+         await CommitEffects(true);
+
+         // Send result via socket
+         game.socket.emit("system.sr3e", {
+            action: "returnOpposedRollResult",
+            payload: {
+               contestId,
+               rollData: roll.toJSON(),
+            },
+         });
+
+         onclose?.(); // Still close the modal
+         return;
+      }
+
+      // Not a contest — apply effects + pass roll result back
+      await CommitEffects(false);
+
+      onclose({
+         dice: totalDice,
+         attributeName: caller.key,
+         options: {
+            targetNumber,
+            modifiers: modifiersArray,
+            explodes: !isDefaulting,
+         },
+      });
+
+      Hooks.callAll("actorSystemRecalculated", actor);
+   }
+
+   async function CommitEffects(suppress = false) {
+      const isInCombat = game.combat !== null && game.combat !== undefined;
+      if (isInCombat) {
+         const combat = game.combat;
+      }
+
+      if (karmaCost > 0) {
+         const karmaEffect = {
+            name: `Karma Drain (${karmaCost})`,
+            label: `Used ${karmaCost} Karma Pool`,
+            icon: "icons/magic/light/explosion-star-glow-blue.webp",
+            changes: [
+               {
+                  key: "system.karma.karmaPool.mod",
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${karmaCost}`,
+                  priority: 1,
+               },
+            ],
+            origin: actor.uuid,
+            ...(isInCombat
+               ? {
+                    duration: {
+                       unit: "rounds",
+                       value: 1,
+                       startRound: combat.round,
+                       startTurn: combat.turn,
+                    },
+                 }
+               : {}),
+            flags: {
+               sr3e: {
+                  temporaryKarmaPoolDrain: true,
+                  expiresOutsideCombat: !isInCombat,
+               },
+            },
+         };
+
+         await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
+      }
+
+      if (currentDicePoolAddition > 0 && currentDicePoolName) {
+         const effect = {
+            name: `Dice Pool Drain (${currentDicePoolName})`,
+            label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
+            icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
+            changes: [
+               {
+                  key: `system.dicePools.${currentDicePoolName}.mod`,
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${currentDicePoolAddition}`,
+                  priority: 1,
+               },
+            ],
+            origin: actor.uuid,
+            transfer: false, //NOTE: Not applied through an item, but directly on the actor itself
+            ...(isInCombat
+               ? {
+                    duration: {
+                       unit: "rounds",
+                       value: 1,
+                       startRound: combat.round,
+                       startTurn: combat.turn,
+                    },
+                 }
+               : {}),
+            flags: {
+               sr3e: {
+                  temporaryDicePoolDrain: true,
+                  expiresOutsideCombat: !isInCombat, // storyteller UI can target these
+               },
+            },
+         };
+
+         await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
+
+         actor.applyActiveEffects();
+      }
+
+      if (!suppress) {
+         onclose({
+            dice: caller.dice + diceBought,
+            attributeName: caller.key,
+            options: {
+               targetNumber,
+               modifiers: modifiersArray,
+               explodes: !isDefaulting,
+            },
+         });
+      }
+
+      Hooks.callAll("actorSystemRecalculated", actor);
+   }
 
    function getRoot(el) {
       while (el && !focusables.includes(el)) el = el.parentElement;
@@ -306,7 +388,7 @@ async function Submit() {
          e.stopPropagation();
          const root = getRoot(document.activeElement);
          if (root === rollBtn) {
-            Submit();
+            CommitEffects();
             return;
          }
          if (root === clearBtn) {
@@ -438,6 +520,7 @@ async function Submit() {
       </div>
    {/if}
 
-   <button class="regular" type="submit" disabled={canSubmit} bind:this={rollBtn} onclick={Submit}> Roll! </button>
+   <button class="regular" type="submit" disabled={canSubmit} bind:this={rollBtn} onclick={HandleRoll}> Roll! </button>
+
    <button class="regular" type="reset" bind:this={clearBtn} onclick={Reset}> Clear </button>
 </div>
