@@ -4,10 +4,12 @@ import { mount, unmount } from "svelte";
 const activeContests = new Map();
 
 export default class OpposeRollService {
+   static getContestById(id) {
+      return activeContests.get(id);
+   }
    static async start({ initiator, target, rollData, isSilent = false }) {
-      // Prevent duplicate contests for the same actor pair
-      const existing = [...activeContests.values()].find(c =>
-         c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
+      const existing = [...activeContests.values()].find(
+         (c) => c.initiator.id === initiator.id && c.target.id === target.id && !c.isResolved
       );
       if (existing) return;
 
@@ -22,19 +24,19 @@ export default class OpposeRollService {
          isResolved: false,
       });
 
-      const targetUser = game.users.find(u =>
-         u.active && (u.character?.id === target.id || target.testUserPermission(u, "OWNER"))
+      // Determine target user(s), excluding GMs
+      const targetUsers = game.users.filter(
+         (u) =>
+            !u.isGM &&
+            u.active &&
+            (u.character?.id === target.id || target.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER))
       );
 
-      if (!targetUser) {
-         console.warn(`No active user found for target actor "${target.name}"`);
-         return;
-      }
+      const targetUser = targetUsers[0];
 
-      // Only render prompt on the defender's session
-      if (game.user.id === targetUser.id) {
+      if (targetUser && game.user.id === targetUser.id) {
          await this.promptTargetRoll(contestId, initiator, target);
-      } else {
+      } else if (targetUser) {
          game.socket.emit("system.sr3e", {
             action: "opposeRoll",
             data: {
@@ -42,15 +44,18 @@ export default class OpposeRollService {
                initiatorId: initiator.id,
                targetId: target.id,
                rollData,
-            }
+               targetUserId: targetUser.id,
+            },
          });
       }
 
-      // Only initiator (or GM) posts the message
+      const defenderIds = targetUsers.map((u) => u.id);
+      const whisperIds = [initiator?.user?.id, ...defenderIds].filter(Boolean);
+
       if (game.user.isGM || game.user.id === initiator?.user?.id) {
          await ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: initiator }),
-            whisper: [initiator?.user?.id, targetUser.id].filter(Boolean),
+            whisper: whisperIds,
             content: `<p>${initiator.name} has initiated an opposed roll against ${target.name}.</p>`,
             flags: { "sr3e.opposed": contestId },
          });
@@ -81,22 +86,7 @@ export default class OpposeRollService {
       activeContests.delete(contestId);
    }
 
-   static async promptTargetRoll(contestId, initiator, target) {
-      new Dialog({
-         title: game.i18n.localize("sr3e.opposedRoll.title") ?? "Opposed Roll Incoming",
-         content: `
-            <p>${initiator.name} is initiating an opposed roll against you.</p>
-            <p>Please respond by clicking a skill, attribute, or item in your character sheet.</p>
-            <p>This dialog will close automatically when you roll.</p>
-         `,
-         buttons: {},
-         close: () => {},
-         default: null
-      }, {
-         id: `sr3e-opposed-roll-${contestId}`,
-         classes: ["sr3e", "opposed-roll-dialog"],
-         resizable: false,
-         width: 400
-      }).render(true);
+   static getContestForTarget(target) {
+      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
    }
 }

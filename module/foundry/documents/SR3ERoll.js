@@ -25,17 +25,14 @@ export default class SR3ERoll extends Roll {
       await super.evaluate(options);
 
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
-
-      // Extract unique actors from targeted tokens
       const rawTargets = Array.from(game.user.targets)
          .map((t) => t.actor)
          .filter(Boolean);
-
       const uniqueTargets = [...new Map(rawTargets.map((a) => [a.id, a])).values()];
 
-      if (actor && uniqueTargets.length > 0) {
-         const isSilent = canvas.tokens.ownedTokens.some((t) => t.actor?.id === actor.id && t.document.hidden);
+      const isSilent = canvas.tokens.ownedTokens.some((t) => t.actor?.id === actor.id && t.document.hidden);
 
+      if (actor && uniqueTargets.length > 0) {
          for (const target of uniqueTargets) {
             await OpposeRollService.start({
                initiator: actor,
@@ -45,6 +42,19 @@ export default class SR3ERoll extends Roll {
             });
          }
 
+         return this;
+      }
+
+      // Defender response logic
+      const contest = OpposeRollService.getContestForTarget(actor);
+      if (contest && !contest.isResolved) {
+         game.socket.emit("system.sr3e", {
+            action: "resolveOpposedRoll",
+            data: {
+               contestId: contest.id,
+               rollData: this.toJSON(),
+            },
+         });
          return this;
       }
 
