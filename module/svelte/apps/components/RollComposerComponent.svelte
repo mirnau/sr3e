@@ -252,6 +252,7 @@
    }
 
    function updateFocusables() {
+      if (!containerEl) return;
       const selector = isDefaulting
          ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]"
          : "select, .counter-component[tabindex='0'], button[type]";
@@ -618,7 +619,8 @@
       {/if}
 
       {#if isResponding}
-         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Respond}>Respond!</button>
+         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Respond}>Respond!</button
+         >
          <button class="regular" type="button" onclick={Abort}>Abort Challenge</button>
       {:else if hasTarget}
          <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Challenge}
