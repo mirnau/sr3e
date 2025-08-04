@@ -21,44 +21,34 @@ export default class OpposeRollService {
       console.log("[sr3e] Contest registered:", contestId);
    }
 
-   static onSocketRegisterContest({ contestId, initiatorId, targetId, rollData }) {
-      const initiator = game.actors.get(initiatorId);
-      const target = game.actors.get(targetId);
+   static async start({ initiator, target, rollData }) {
+      const contestId = foundry.utils.randomID(16);
 
-      if (!initiator || !target) {
-         console.warn("[sr3e] Could not resolve actors for synced contest:", { initiatorId, targetId });
+      // Register locally first
+      this.registerContest({ contestId, initiator, target, rollData });
+
+      // Send query to target user
+      const targetUser = this.resolveControllingUser(target);
+      if (!targetUser) {
+         console.warn("[sr3e] No controlling user for target", target.name);
          return;
       }
 
-      this.registerContest({ contestId, initiator, target, rollData });
-
-      // Re-render the related chat message
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
-      if (msg) msg.render(true);
-   }
-
-   static async start({ initiator, target, rollData }) {
-      for (const [id, contest] of activeContests.entries()) {
-         if (contest.initiator.id === initiator.id && contest.target.id === target.id && !contest.isResolved) {
-            activeContests.delete(id);
-         }
-      }
-
-      const contestId = foundry.utils.randomID(16);
-      game.socket.emit("system.sr3e", {
-         action: "register",
-         data: {
+      try {
+         await targetUser.query("sr3e.opposeRollPrompt", {
             contestId,
             initiatorId: initiator.id,
             targetId: target.id,
             rollData,
-         },
-      });
+         });
+      } catch (err) {
+         console.warn("[sr3e] Target user did not respond to opposeRollPrompt:", err);
+         // Optional: clean up
+         return;
+      }
 
-      OpposeRollService.registerContest({ contestId, initiator, target, rollData });
-
+      // Proceed with chat message
       const initiatorUser = this.resolveControllingUser(initiator);
-      const targetUser = this.resolveControllingUser(target);
       const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
 
       await ChatMessage.create({
@@ -73,6 +63,7 @@ export default class OpposeRollService {
 
       return contestId;
    }
+
    static resolveControllingUser(actor) {
       const connectedUsers = game.users.filter((u) => u.active);
 
