@@ -101,26 +101,11 @@
       const dice = $valueROStore?.sum ?? 0;
 
       if (e.shiftKey) {
-         if (activeModal) return;
-
-         new Promise((resolve) => {
-            activeModal = mount(RollComposerComponent, {
-               target: document.querySelector(".composer-position"),
-               props: {
-                  actor,
-                  config: CONFIG.sr3e,
-                  caller: {
-                     key,
-                     value: $valueROStore.value,
-                     type: "attribute",
-                     dice,
-                  },
-                  onclose: async (result) => {
-                     unmount(activeModal);
-                     activeModal = null;
-                  },
-               },
-            });
+         actor.sheet.setRollComposerData({
+            key,
+            value: $valueROStore.value,
+            type: "attribute",
+            dice,
          });
       } else {
          const roll = SR3ERoll.create(

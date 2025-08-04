@@ -7,7 +7,7 @@
    import { localize } from "@services/utilities.js";
    import OpposeRollService from "@services/OpposeRollService.js";
 
-   let { actor, config, caller, onclose } = $props();
+   let { actor, config, onclose, visible = false } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
@@ -25,7 +25,7 @@
    let currentDicePoolAddition = $state(0);
    let displayCurrentDicePoolStore = null;
 
-   let targetNumber = $state(5);
+   let targetNumber = $state(4);
    let modifiersArray = $state([]);
    let karmaCost = $state(0);
    let diceBought = $state(0);
@@ -39,6 +39,21 @@
    let maxAffordableDice = $state(0);
    let hasTarget = $state(false);
    let hasChallenged = $state(false);
+   let isResponding = $state(false);
+   let modifiedTargetNumber = $state(0);
+
+   // Initialize caller with default values
+   let caller = $state({
+      type: null,
+      key: null,
+      dice: 0,
+      value: 0,
+      skillId: "",
+      specialization: "",
+      name: "",
+      responseMode: false,
+      contestId: null,
+   });
 
    let associatedDicePoolStore;
    let containerEl;
@@ -55,8 +70,36 @@
 
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
+   export function setCallerData(callerData, options = {}) {
+      resetToDefaults();
+
+      Object.assign(caller, callerData);
+
+      if (options.visible !== undefined) {
+         visible = options.visible;
+      }
+
+      isResponding = caller.responseMode || false;
+   }
+
+   function resetToDefaults() {
+      targetNumber = 4;
+      modifiersArray = [];
+      diceBought = 0;
+      currentDicePoolAddition = 0;
+      karmaCost = 0;
+      isDefaultingAsString = "false";
+      isDefaulting = false;
+      hasChallenged = false;
+      title = "";
+      associatedDicePoolString = "";
+   }
+
    $effect(() => {
+      if (!caller.type) return;
+
       console.log("caller type", caller.type);
+
       if (caller.type === "active" || caller.type === "attribute") {
          $shouldDisplaySheen = true;
       } else {
@@ -68,7 +111,9 @@
       hasTarget = game.user.targets.size > 0;
    });
 
-   onMount(() => {
+   $effect(() => {
+      if (!caller.type) return;
+
       updateFocusables();
       selectEl?.focus();
 
@@ -149,19 +194,18 @@
          modifiers: modifiersArray,
          callerType: caller.type,
          targetNumber,
-         opposed: true, // This triggers the opposed logic in SR3ERoll
+         opposed: true,
       };
 
       const baseRoll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
-            targetNumber,
+            targetNumber: modifiedTargetNumber,,
             explodes: !isDefaulting,
          }),
          { actor },
          options
       );
 
-      // The roll will automatically handle contest creation via evaluate()
       await baseRoll.evaluate(options);
       await baseRoll.waitForResolution();
 
@@ -169,10 +213,38 @@
 
       await CommitEffects();
 
-      //onclose?.();
+      Hooks.callAll("actorSystemRecalculated", actor);
+   }
+
+   async function Respond() {
+      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
+
+      const roll = SR3ERoll.create(
+         SR3ERoll.buildFormula(totalDice, {
+            targetNumber: modifiedTargetNumber,,
+            explodes: !isDefaulting,
+         }),
+         { actor },
+         {
+            attributeName: caller.key,
+            skillName: caller.name,
+            specializationName: caller.specialization,
+            modifiers: modifiersArray,
+            callerType: caller.type,
+            targetNumber,
+            opposed: true,
+         }
+      );
+
+      await roll.evaluate();
+      OpposeRollService.deliverResponse(caller.contestId, roll.toJSON());
+
+      await CommitEffects();
+      onclose?.();
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }
+
    function Abort() {
       const contest = OpposeRollService.getContestForTarget(actor);
       OpposeRollService.abortOpposedRoll(contest.id);
@@ -274,10 +346,10 @@
    });
 
    $effect(() => {
-      canSubmit = targetNumber + modifiersTotal < 2;
+      modifiedTargetNumber = targetNumber + modifiersTotal;
+      canSubmit = modifiedTargetNumber > 1;
    });
 
-   // HandleRoll - for normal rolls
    async function HandleRoll(e) {
       e?.preventDefault?.();
       console.warn("HandleRoll triggered");
@@ -286,7 +358,7 @@
 
       const roll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
-            targetNumber,
+            targetNumber: modifiedTargetNumber,
             explodes: !isDefaulting,
          }),
          { actor },
@@ -297,7 +369,7 @@
             modifiers: modifiersArray,
             callerType: caller.type,
             targetNumber,
-            opposed: false, // Explicitly not opposed
+            opposed: false,
          }
       );
 
@@ -316,6 +388,8 @@
       });
 
       Hooks.callAll("actorSystemRecalculated", actor);
+
+      visible = false;
    }
 
    async function CommitEffects() {
@@ -458,102 +532,106 @@
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+{#if visible}
+   <div
+      class="roll-composer-container"
+      bind:this={containerEl}
+      role="group"
+      tabindex="-1"
+      onkeydowncapture={handleKey}
+      onkeydown={swallowDirectional}
+   >
+      <div class="roll-composer-card">
+         <h1>{title}</h1>
+         <h1>Roll Type</h1>
+         <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
+            <option value="false">Regular roll</option>
+            <option value="true">Defaulting</option>
+         </select>
+      </div>
 
-<div
-   class="roll-composer-container"
-   bind:this={containerEl}
-   role="group"
-   tabindex="-1"
-   onkeydowncapture={handleKey}
-   onkeydown={swallowDirectional}
->
-   <div class="roll-composer-card">
-      <h1>{title}</h1>
-      <h1>Roll Type</h1>
-      <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
-         <option value="false">Regular roll</option>
-         <option value="true">Defaulting</option>
-      </select>
-   </div>
+      <div class="roll-composer-card">
+         <h1>Target Number</h1>
+         <h4>{difficulty}</h4>
+         <Counter bind:value={targetNumber} min="2" />
+      </div>
 
-   <div class="roll-composer-card">
-      <h1>Target Number</h1>
-      <h4>{difficulty}</h4>
-      <Counter bind:value={targetNumber} min="2" />
-   </div>
+      <div class="roll-composer-card">
+         <h1>T.N. Modifiers</h1>
+         <button
+            aria-label="Add a modifier"
+            class="regular"
+            onclick={() => {
+               modifiersArray = [...modifiersArray, { name: "Modifier", value: 0 }];
+            }}
+         >
+            <i class="fa-solid fa-plus"></i>
+         </button>
 
-   <div class="roll-composer-card">
-      <h1>T.N. Modifiers</h1>
-      <button
-         aria-label="Add a modifier"
-         class="regular"
-         onclick={() => {
-            modifiersArray = [...modifiersArray, { name: "Modifier", value: 0 }];
-         }}
-      >
-         <i class="fa-solid fa-plus"></i>
-      </button>
+         <h4>Modifiers Total: {modifiersTotal}</h4>
 
-      <h4>Modifiers Total: {modifiersTotal}</h4>
+         {#each modifiersArray as modifier, i (i)}
+            <div class="roll-composer-card array">
+               <h4 contenteditable="true">{modifier.name}</h4>
+               <Counter bind:value={modifier.value} />
+               <button
+                  class="regular"
+                  aria-label="Remove a modifier"
+                  onclick={() => {
+                     modifiersArray = modifiersArray.filter((_, j) => j !== i);
+                  }}
+               >
+                  <i class="fa-solid fa-minus"></i>
+               </button>
+            </div>
+         {/each}
+      </div>
 
-      {#each modifiersArray as modifier, i (i)}
-         <div class="roll-composer-card array">
-            <h4 contenteditable="true">{modifier.name}</h4>
-            <Counter bind:value={modifier.value} />
-            <button
-               class="regular"
-               aria-label="Remove a modifier"
-               onclick={() => {
-                  modifiersArray = modifiersArray.filter((_, j) => j !== i);
-               }}
-            >
-               <i class="fa-solid fa-minus"></i>
-            </button>
+      {#if !(caller?.type === "attribute" && isDefaulting) && currentDicePoolName}
+         <div class="roll-composer-card">
+            <h1>{localize(config.dicepools[currentDicePoolName])}</h1>
+            <h4>Dice Added: {currentDicePoolAddition}</h4>
+            <Counter
+               class="karma-counter"
+               bind:value={currentDicePoolAddition}
+               min={0}
+               max={$displayCurrentDicePoolStore.sum}
+               onIncrement={AddDiceFromPool}
+               onDecrement={RemoveDiceFromPool}
+            />
          </div>
-      {/each}
+      {/if}
+
+      {#if !isDefaulting}
+         <div class="roll-composer-card">
+            <h1>Karma</h1>
+            <h4>Extra Dice Cost: {karmaCost}</h4>
+            <Counter
+               class="karma-counter"
+               bind:value={diceBought}
+               min={0}
+               max={maxAffordableDice}
+               onIncrement={KarmaCostCalculator}
+               onDecrement={KarmaCostCalculator}
+            />
+         </div>
+      {/if}
+
+      {#if isResponding}
+         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Respond}>Respond!</button>
+         <button class="regular" type="button" onclick={Abort}>Abort Challenge</button>
+      {:else if hasTarget}
+         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Challenge}
+            >Challenge!</button
+         >
+      {:else}
+         <button class="regular" type="button" disabled={!canSubmit} bind:this={rollBtn} onclick={HandleRoll}
+            >Roll!</button
+         >
+      {/if}
+
+      <button class="regular" type="reset" bind:this={clearBtn} disabled={hasChallenged} onclick={Reset}>
+         Clear
+      </button>
    </div>
-
-   {#if !(caller.type === "attribute" && isDefaulting) && currentDicePoolName}
-      <div class="roll-composer-card">
-         <h1>{localize(config.dicepools[currentDicePoolName])}</h1>
-         <h4>Dice Added: {currentDicePoolAddition}</h4>
-         <Counter
-            class="karma-counter"
-            bind:value={currentDicePoolAddition}
-            min={0}
-            max={$displayCurrentDicePoolStore.sum}
-            onIncrement={AddDiceFromPool}
-            onDecrement={RemoveDiceFromPool}
-         />
-      </div>
-   {/if}
-
-   {#if !isDefaulting}
-      <div class="roll-composer-card">
-         <h1>Karma</h1>
-         <h4>Extra Dice Cost: {karmaCost}</h4>
-         <Counter
-            class="karma-counter"
-            bind:value={diceBought}
-            min={0}
-            max={maxAffordableDice}
-            onIncrement={KarmaCostCalculator}
-            onDecrement={KarmaCostCalculator}
-         />
-      </div>
-   {/if}
-
-   {#if !hasTarget}
-      <button class="regular" type="button" disabled={canSubmit} bind:this={rollBtn} onclick={HandleRoll}>
-         Roll!
-      </button>
-   {:else}
-      <button class="regular" type="button" disabled={canSubmit || hasChallenged} onclick={Challenge}>
-         Challenge!
-      </button>
-
-      <button class="regular" type="button" onclick={Abort}> Abort Challange </button>
-   {/if}
-
-   <button class="regular" type="reset" bind:this={clearBtn} disabled={hasChallenged} onclick={Reset}> Clear </button>
-</div>
+{/if}

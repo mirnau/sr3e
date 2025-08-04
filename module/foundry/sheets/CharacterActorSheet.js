@@ -17,6 +17,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    #cart;
    #creation;
    #footer;
+   #composer;
 
    static get DEFAULT_OPTIONS() {
       return {
@@ -61,7 +62,11 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       }
       if (this.#footer) {
          unmount(this.#footer);
-         this.#creation = null;
+         this.#footer = null;
+      }
+      if (this.#composer) {
+         unmount(this.#composer);
+         this.#composer = null;
       }
 
       windowContent.innerHTML = "";
@@ -85,7 +90,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       this._injectNewsFeed(form, header);
 
       this._injectFooter(form);
-      
+
       this._injectRollComposer(header);
 
       let isCharacterCreation = this.document.getFlag(flags.sr3e, flags.actor.isCharacterCreation);
@@ -97,14 +102,27 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       return windowContent;
    }
 
-   // Injects from the svelte component later
    _injectRollComposer(header) {
+      if (this.#composer) return;
+
       let anchor = header?.previousElementSibling;
       if (!anchor?.classList?.contains("composer-position")) {
          anchor = document.createElement("div");
          anchor.classList.add("composer-position");
          header.parentElement.insertBefore(anchor, header);
       }
+
+      this.#composer = mount(RollComposerComponent, {
+         target: anchor,
+         props: {
+            actor: this.document,
+            config: CONFIG.sr3e,
+            caller: null, // empty initially
+            onclose: () => {
+               // could hide if needed
+            },
+         },
+      });
    }
 
    _injectFooter(form) {
@@ -197,8 +215,13 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       if (this.#feed) await unmount(this.#feed);
       if (this.#cart) await unmount(this.#cart);
       if (this.#creation) await unmount(this.#creation);
-      this.#app = this.#neon = this.#feed = this.#cart = this.#creation = this.#footer = null;
+      if (this.#composer) await unmount(this.#composer);
+      this.#app = this.#neon = this.#feed = this.#cart = this.#creation = this.#footer = this.#composer = null;
       return super._tearDown();
+   }
+
+   setRollComposerData(callerData) {
+      this.#composer.setCallerData(callerData, { visible: true });
    }
 
    _onSubmit() {
