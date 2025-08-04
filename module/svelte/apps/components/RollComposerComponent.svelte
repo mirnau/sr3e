@@ -199,7 +199,7 @@
 
       const baseRoll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,,
+            targetNumber: modifiedTargetNumber,
             explodes: !isDefaulting,
          }),
          { actor },
@@ -221,7 +221,7 @@
 
       const roll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,,
+            targetNumber: modifiedTargetNumber,
             explodes: !isDefaulting,
          }),
          { actor },
