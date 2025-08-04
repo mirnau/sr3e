@@ -26,21 +26,30 @@ export default class SR3ERoll extends Roll {
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
 
       // Check if this is a defender responding to an existing contest
+      // Check if this is a defender responding to an existing contest
       const contest = actor && OpposeRollService.getContestForTarget(actor);
       if (contest && !contest.isResolved) {
          console.log(`[SR3ERoll] Defender ${actor.name} responding to contest ${contest.id}`);
 
-         game.socket.emit("system.sr3e", {
-            action: "resolveOpposedRoll",
-            data: {
+         const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
+         if (!initiatorUser) {
+            console.warn("[sr3e] Could not resolve controlling user for contest initiator");
+            return this;
+         }
+
+         try {
+            await initiatorUser.query("sr3e.resolveOpposedRoll", {
                contestId: contest.id,
                rollData: this.toJSON(),
-            },
-         });
+            });
 
-         this._contested = true;
-         this._waitingOn = contest.id;
-         return this;
+            this._contested = true;
+            this._waitingOn = contest.id;
+            return this;
+         } catch (err) {
+            console.warn("[sr3e] Failed to deliver contest response via query:", err);
+            return this;
+         }
       }
 
       // Check if this is an opposed roll (initiator)

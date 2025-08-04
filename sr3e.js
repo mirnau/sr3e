@@ -173,7 +173,7 @@ function wrapContent(root) {
 
 function configureQueries() {
    CONFIG.queries ??= {};
-   CONFIG.queries["sr3e.opposeRollPrompt"] = async ({ contestId, initiatorId, targetId, rollData }) => {
+   CONFIG.queries["sr3e.opposeRollPrompt"] = async ({ contestId, initiatorId, targetId, rollData, options }) => {
       console.log("[sr3e] Received opposeRollPrompt query", { contestId, initiatorId, targetId });
 
       const initiator = game.actors.get(initiatorId);
