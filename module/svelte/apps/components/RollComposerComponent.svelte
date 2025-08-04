@@ -129,7 +129,7 @@
       }
    }
 
-   async function Challenge () {
+   async function Challenge() {
       hasChallenged = true;
       console.warn("Challenge: Initiating opposed rolls.");
 
@@ -162,23 +162,14 @@
       );
 
       // The roll will automatically handle contest creation via evaluate()
-      await baseRoll.evaluate();
+      await baseRoll.evaluate(options);
       await baseRoll.waitForResolution();
 
       console.log("Challenge: All contests resolved.");
 
       await CommitEffects();
 
-      onclose?.({
-         dice: totalDice,
-         attributeName: caller.key,
-         options: {
-            targetNumber,
-            modifiers: modifiersArray,
-            explodes: !isDefaulting,
-            opposed: true,
-         },
-      });
+      //onclose?.();
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }

@@ -189,6 +189,7 @@ function configureQueries() {
          initiator,
          target,
          rollData,
+         options,
       });
 
       // Re-render any associated chat message
@@ -404,7 +405,7 @@ function registerHooks() {
       }
    });
 
-   Hooks.on("renderChatMessageHTML", (message, html, data) => {
+   Hooks.on("renderChatMessageHTML", async (message, html, data) => {
       const contestId = message.flags?.sr3e?.opposed;
       if (!contestId) return;
 
@@ -432,9 +433,63 @@ function registerHooks() {
       btn.dataset.contestId = contestId;
       btn.innerText = game.i18n.localize("sr3e.chat.respond");
 
-      btn.onclick = () => {
-         console.log(`[sr3e] Response button clicked by ${game.user.name} for contest ${contestId}`);
-         // TODO: Open RollComposerComponent and resolve the contest
+      btn.onclick = async () => {
+         console.log(`[sr3e] Respond button clicked by ${game.user.name} for contest ${contestId}`);
+
+         const actorSheet = actor.sheet;
+         if (!actorSheet.rendered) {
+            await actorSheet.render(true);
+         }
+
+         const caller = {
+            key: contest.options.attributeName,
+            type: contest.options.callerType,
+            dice: 0,
+            value: 0,
+            responseMode: true,
+            contestId,
+         };
+
+         const waitForComposer = () => {
+            const mountTarget = actorSheet.element[0].querySelector(".composer-position");
+            if (!mountTarget) {
+               console.warn("[sr3e] Could not find composer-position in actor sheet.");
+               return;
+            }
+
+            const composer = mount(RollComposerComponent, {
+               target: mountTarget,
+               props: {
+                  actor,
+                  config: CONFIG.sr3e,
+                  caller,
+                  onclose: async (result) => {
+                     unmount(composer);
+                     if (!result) return;
+
+                     const roll = SR3ERoll.create(
+                        SR3ERoll.buildFormula(result.dice, result.options),
+                        { actor },
+                        result.options
+                     );
+
+                     await roll.evaluate();
+                     OpposeRollService.deliverResponse(contestId, roll.toJSON());
+                  },
+               },
+            });
+         };
+
+         // Mount immediately if the sheet is ready, otherwise wait briefly
+         if (actorSheet.rendered) {
+            waitForComposer();
+         } else {
+            setTimeout(waitForComposer, 50);
+         }
+
+         // Wait for the response, then send it to the instigator
+         const rollData = await OpposeRollService.waitForResponse(contestId);
+         await game.queries.call("sr3e.resolveOpposedRoll", { contestId, rollData });
       };
 
       container.appendChild(btn);

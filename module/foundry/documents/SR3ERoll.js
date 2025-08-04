@@ -20,6 +20,7 @@ export default class SR3ERoll extends Roll {
    }
 
    async evaluate(options = {}) {
+      this.options = foundry.utils.mergeObject(this.options ?? {}, options ?? {});
       await super.evaluate(options);
 
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
@@ -60,6 +61,7 @@ export default class SR3ERoll extends Roll {
                   initiator: actor,
                   target,
                   rollData: this.toJSON(),
+                  options: this.options,
                });
 
                if (contestId) this._waitingOn.push(contestId);
@@ -76,10 +78,10 @@ export default class SR3ERoll extends Roll {
 
    async toMessage() {
       const flavor = this.getFlavor();
-      return ChatMessage.create({ 
-         content: await this.render(), 
-         speaker: ChatMessage.getSpeaker(), 
-         flavor 
+      return ChatMessage.create({
+         content: await this.render(),
+         speaker: ChatMessage.getSpeaker(),
+         flavor,
       });
    }
 

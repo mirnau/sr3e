@@ -1,31 +1,50 @@
 const activeContests = new Map();
+const pendingResponses = new Map();
 
 export default class OpposeRollService {
    static getContestById(id) {
       return activeContests.get(id);
+
+      
+   }
+
+      static waitForResponse(contestId) {
+      return new Promise((resolve) => {
+         pendingResponses.set(contestId, resolve);
+      });
+   }
+
+   static deliverResponse(contestId, rollData) {
+      const resolver = pendingResponses.get(contestId);
+      if (resolver) {
+         resolver(rollData);
+         pendingResponses.delete(contestId);
+      }
    }
 
    static getContestForTarget(target) {
       return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
    }
 
-   static registerContest({ contestId, initiator, target, rollData }) {
+   static registerContest({ contestId, initiator, target, rollData, options }) {
       activeContests.set(contestId, {
          id: contestId,
          initiator,
          target,
          initiatorRoll: rollData,
          targetRoll: null,
+         options,
          isResolved: false,
       });
       console.log("[sr3e] Contest registered:", contestId);
    }
 
-   static async start({ initiator, target, rollData }) {
+   static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
 
       // Register locally first
-      this.registerContest({ contestId, initiator, target, rollData });
+      this.registerContest({ contestId, initiator, target, rollData, options });
+
 
       // Send query to target user
       const targetUser = this.resolveControllingUser(target);
@@ -40,6 +59,7 @@ export default class OpposeRollService {
             initiatorId: initiator.id,
             targetId: target.id,
             rollData,
+            options: options,
          });
       } catch (err) {
          console.warn("[sr3e] Target user did not respond to opposeRollPrompt:", err);
