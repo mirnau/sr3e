@@ -52,6 +52,7 @@
             "path": "lang/en.json"
         }
     ],
+    "socket": true,
     "primaryTokenAttribute": "wounds",
     "initiative": "1D6 + @reaction"
 }

@@ -372,100 +372,71 @@ function registerHooks() {
       }
    });
 
-   Hooks.on("renderChatMessageHTML", (message, html, data) => {
-      console.log("🔊 Chat message rendered:", message?.flags?.sr3e?.opposed);
-      const contestId = message?.flags?.sr3e?.opposed;
-      if (!contestId) return;
+   Hooks.on("renderChatMessageHTML", (message, html, messageData) => {
+      const contestId = message.flags?.sr3e?.opposed;
+      if (!contestId) {
+         console.log("[sr3e] No contest ID in message flags.");
+         return;
+      }
 
-      const button = html.querySelector(".sr3e-response-button");
-      if (!button) return;
+      const contest = OpposeRollService.getContestById(contestId);
+      if (!contest) {
+         console.warn("[sr3e] No local contest found for ID:", contestId);
+         return;
+      }
 
-      button.addEventListener("click", async () => {
-         console.log("Respond clicked, looking for contest", contestId);
+      const actor = contest.target;
+      const isOwner = actor?.testUserPermission(game.user, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER);
+      const alreadyResponded = contest.targetRoll !== null;
 
-         const contest = OpposeRollService.getContestById(contestId);
-         if (!contest) {
-            console.warn("Contest not found:", contestId);
-            return ui.notifications.warn("Contest not found.");
-         }
-
-         const target = contest.target;
-         const wasOpen = target.sheet.rendered;
-         if (!wasOpen) {
-            await target.sheet.render(true);
-            await new Promise((r) => setTimeout(r, 100));
-         }
-
-         const composerTarget = target.sheet.element[0]?.querySelector(".composer-position");
-         if (!composerTarget) {
-            return ui.notifications.error("Composer target not found on actor sheet.");
-         }
-
-         mount(RollComposerComponent, {
-            target: composerTarget,
-            props: {
-               actor: target,
-               config: CONFIG.sr3e,
-               caller: {
-                  key: "",
-                  type: "attribute",
-                  dice: contest.rollData?.dice ?? 0,
-               },
-               onclose: async (result) => {
-                  if (!result) return;
-                  const roll = SR3ERoll.create(
-                     SR3ERoll.buildFormula(result.dice, result.options),
-                     { actor: target },
-                     { ...result.options, callerType: result.type }
-                  );
-                  await roll.evaluate();
-               },
-            },
-         });
+      console.log(`[sr3e] renderChatMessageHTML`, {
+         user: game.user.name,
+         isOwner,
+         alreadyResponded,
+         contestId,
+         actor: actor?.name,
       });
-   });
 
-   Hooks.once("ready", () => {
-      console.log(
-         `[sr3e] Socket handler registered. User ID: ${game.user.id}, Character: ${game.user.character?.name}`
-      );
+      if (!isOwner || alreadyResponded) return;
 
-      if (game.__sr3eOpposeRollSocketRegistered) return;
-      game.__sr3eOpposeRollSocketRegistered = true;
+      const container = html.querySelector(".sr3e-response-button-container");
+      if (!container) {
+         console.warn("[sr3e] Could not find button container for contest", contestId);
+         return;
+      }
 
-      game.socket.on("system.sr3e", async ({ action, data }) => {
-         console.log("[sr3e] Socket received:", action, data);
+      const btn = document.createElement("button");
+      btn.classList.add("sr3e-response-button");
+      btn.dataset.contestId = contestId;
+      btn.innerText = game.i18n.localize("sr3e.chat.respond");
 
-         if (action === "opposeRoll") {
-            const ownedActorIds = game.actors.filter((a) => a.testUserPermission(game.user, "OWNER")).map((a) => a.id);
+      btn.onclick = () => {
+         console.log(`[sr3e] Response button clicked by ${game.user.name} for contest ${contestId}`);
+      };
 
-            // Skip if this user owns the initiator — they've already seen the message
-            if (ownedActorIds.includes(data.initiatorId)) return;
-
-            // Only continue if this user owns the target
-            if (!ownedActorIds.includes(data.targetId)) return;
-
-            // Now we are the target’s owner and not the initiator — proceed
-            const initiator = game.actors.get(data.initiatorId);
-            const target = game.actors.get(data.targetId);
-            if (!initiator || !target) {
-               console.warn("❌ Could not resolve actors for contest:", { initiator, target });
-               return;
-            }
-
-            OpposeRollService.registerContest({
-               contestId: data.contestId,
-               initiator,
-               target,
-               rollData: data.rollData,
-            });
-
-            console.log(`[sr3e] Contest registered: ${data.contestId}`);
-         }
-      });
+      container.appendChild(btn);
    });
 
    Hooks.once(hooks.init, () => {
+      if (game.__sr3eOpposeRollSyncRegistered === false) {
+         game.__sr3eOpposeRollSyncRegistered = true;
+
+         game.socket.on("system.sr3e", async ({ action, data }) => {
+            switch (action) {
+               case "register":
+                  OpposeRollService.onSocketRegisterContest(data);
+                  break;
+
+               case "resolve":
+                  OpposeRollService.onSocketRegisterContest(data);
+                  break;
+
+               // future cases
+               // case "cancel": ...
+            }
+         });
+      }
+
       configureProject();
       configureThemes();
       registerDocumentTypes({

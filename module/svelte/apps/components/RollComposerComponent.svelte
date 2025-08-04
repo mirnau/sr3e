@@ -129,12 +129,16 @@
       }
    }
 
-   async function Challange(e) {
-      e?.preventDefault?.();
+   async function Challenge () {
       hasChallenged = true;
-      console.warn("Challange: Initiating opposed rolls.");
+      console.warn("Challenge: Initiating opposed rolls.");
 
-      const targets = [...game.user.targets].map((t) => t.actor).filter((actor) => !!actor);
+      const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
+
+      if (targets.length === 0) {
+         console.warn("No targets selected for opposed roll");
+         return;
+      }
 
       const totalDice = caller.dice + diceBought + currentDicePoolAddition;
 
@@ -145,7 +149,7 @@
          modifiers: modifiersArray,
          callerType: caller.type,
          targetNumber,
-         opposed: true,
+         opposed: true, // This triggers the opposed logic in SR3ERoll
       };
 
       const baseRoll = SR3ERoll.create(
@@ -157,22 +161,27 @@
          options
       );
 
+      // The roll will automatically handle contest creation via evaluate()
       await baseRoll.evaluate();
+      await baseRoll.waitForResolution();
 
-      for (const target of targets) {
-         await OpposeRollService.start({
-            initiator: actor,
-            target,
-            rollData: {
-               dice: totalDice,
-               options,
-            },
-         });
-      }
+      console.log("Challenge: All contests resolved.");
 
-      console.log("Challange: Awaiting defender responses.");
+      await CommitEffects();
+
+      onclose?.({
+         dice: totalDice,
+         attributeName: caller.key,
+         options: {
+            targetNumber,
+            modifiers: modifiersArray,
+            explodes: !isDefaulting,
+            opposed: true,
+         },
+      });
+
+      Hooks.callAll("actorSystemRecalculated", actor);
    }
-
    function Abort() {
       const contest = OpposeRollService.getContestForTarget(actor);
       OpposeRollService.abortOpposedRoll(contest.id);
@@ -277,6 +286,7 @@
       canSubmit = targetNumber + modifiersTotal < 2;
    });
 
+   // HandleRoll - for normal rolls
    async function HandleRoll(e) {
       e?.preventDefault?.();
       console.warn("HandleRoll triggered");
@@ -296,12 +306,12 @@
             modifiers: modifiersArray,
             callerType: caller.type,
             targetNumber,
+            opposed: false, // Explicitly not opposed
          }
       );
 
       await roll.evaluate();
-      await roll.waitForResolution(); // 🧠 block here until contested rolls resolve
-
+      await roll.waitForResolution();
       await CommitEffects();
 
       onclose?.({
@@ -547,7 +557,7 @@
          Roll!
       </button>
    {:else}
-      <button class="regular" type="button" disabled={canSubmit || hasChallenged} onclick={Challange}>
+      <button class="regular" type="button" disabled={canSubmit || hasChallenged} onclick={Challenge}>
          Challenge!
       </button>
 

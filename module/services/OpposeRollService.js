@@ -5,6 +5,10 @@ export default class OpposeRollService {
       return activeContests.get(id);
    }
 
+   static getContestForTarget(target) {
+      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
+   }
+
    static registerContest({ contestId, initiator, target, rollData }) {
       activeContests.set(contestId, {
          id: contestId,
@@ -14,11 +18,26 @@ export default class OpposeRollService {
          targetRoll: null,
          isResolved: false,
       });
-      console.log("[sr3e] Contest map now contains:", [...activeContests.keys()]);
+      console.log("[sr3e] Contest registered:", contestId);
+   }
+
+   static onSocketRegisterContest({ contestId, initiatorId, targetId, rollData }) {
+      const initiator = game.actors.get(initiatorId);
+      const target = game.actors.get(targetId);
+
+      if (!initiator || !target) {
+         console.warn("[sr3e] Could not resolve actors for synced contest:", { initiatorId, targetId });
+         return;
+      }
+
+      this.registerContest({ contestId, initiator, target, rollData });
+
+      // Re-render the related chat message
+      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
+      if (msg) msg.render(true);
    }
 
    static async start({ initiator, target, rollData }) {
-      // Remove existing unresolved contest between the same pair
       for (const [id, contest] of activeContests.entries()) {
          if (contest.initiator.id === initiator.id && contest.target.id === target.id && !contest.isResolved) {
             activeContests.delete(id);
@@ -26,85 +45,59 @@ export default class OpposeRollService {
       }
 
       const contestId = foundry.utils.randomID(16);
-      this.registerContest({ contestId, initiator, target, rollData });
-
-      // Emit to all clients — receiving end filters for actor ownership
       game.socket.emit("system.sr3e", {
-         action: "opposeRoll",
+         action: "register",
          data: {
             contestId,
             initiatorId: initiator.id,
-            targetId: target.id, // Actor-based targeting
+            targetId: target.id,
             rollData,
          },
       });
 
-      // Whisper to GM and initiator only — the rest is handled client-side via socket filters
+      OpposeRollService.registerContest({ contestId, initiator, target, rollData });
 
-      const initiatorUser = OpposeRollService.resolveControllingUser(initiator);
-      const targetUser = OpposeRollService.resolveControllingUser(target);
-
+      const initiatorUser = this.resolveControllingUser(initiator);
+      const targetUser = this.resolveControllingUser(target);
       const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
-
-      if (whisperIds.includes(game.user.id)) {
-         await ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor: initiator }),
-            whisper: whisperIds,
-            content: `
-         <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${
-               target.name
-            }</strong>.</p>
-         <button class="sr3e-response-button" data-contest-id="${contestId}">
-            ${game.i18n.localize("sr3e.chat.respond")}
-         </button>`,
-            flags: { "sr3e.opposed": contestId },
-         });
-      }
-
-      return contestId;
-   }
-
-   static resolveControllingUser(actor) {
-      return (
-         actor.user ??
-         game.users.find((u) => actor.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)) ??
-         game.users.find((u) => u.isGM)
-      );
-   }
-
-   static async abortOpposedRoll(contestId) {
-      const contest = activeContests.get(contestId);
-      if (!contest) return;
-
-      const { initiator, target } = contest;
-
-      // Optionally: notify target user(s) via socket
-      const targetUsers = game.users.filter(
-         (u) =>
-            !u.isGM &&
-            u.active &&
-            (u.character?.id === target.id || target.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER))
-      );
-
-      const whisperIds = [initiator?.user?.id, ...targetUsers.map((u) => u.id)].filter(Boolean);
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
-         content: `<p>${initiator.name} has aborted the opposed roll against ${target.name}.</p>`,
-         flags: { "sr3e.opposedAborted": true },
+         content: `
+         <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
+         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
+      `,
+         flags: { "sr3e.opposed": contestId },
       });
 
-      // Close any open dialog
-      const dialogId = `sr3e-opposed-roll-${contestId}`;
-      ui.windows[dialogId]?.close();
+      return contestId;
+   }
+   static resolveControllingUser(actor) {
+      const connectedUsers = game.users.filter((u) => u.active);
 
-      activeContests.delete(contestId);
+      // 1. If character is assigned and user is online
+      const assignedUser = connectedUsers.find((u) => u.character?.id === actor?.id);
+      if (assignedUser) return assignedUser;
+
+      // 2. If any *non-GM* connected user has OWNER permission
+      const playerOwner = connectedUsers.find(
+         (u) => !u.isGM && actor?.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
+      );
+      if (playerOwner) return playerOwner;
+
+      // 3. Fallback to any connected GM
+      const gmUser = connectedUsers.find((u) => u.isGM);
+      return gmUser;
+   }
+
+   static async abortOpposedRoll(contestId) {
+      //TODO
    }
 
    static async resolveTargetRoll(contestId, rollData) {
       const contest = activeContests.get(contestId);
-      if (!contest) throw new Error(`No contest found for ID ${contestId}`);
+      if (!contest) return;
 
       contest.targetRoll = rollData;
       contest.isResolved = true;
@@ -124,9 +117,5 @@ export default class OpposeRollService {
       ui.windows[dialogId]?.close();
 
       activeContests.delete(contestId);
-   }
-
-   static getContestForTarget(target) {
-      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
    }
 }
