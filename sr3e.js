@@ -47,8 +47,10 @@ import SR3EItem from "@documents/SR3EItem.js";
 import SR3ECombat from "@documents/SR3ECombat.js";
 import SR3Edie from "@documents/SR3Edie.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 
 import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
+import { mount, unmount } from "svelte";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
@@ -451,12 +453,14 @@ function registerHooks() {
          };
 
          const waitForComposer = () => {
-            const mountTarget = actorSheet.element[0].querySelector(".composer-position");
+            const mountTarget = actorSheet.element.querySelector(".composer-position");
+            console.log("actorSheet", actorSheet);
+            console.log("MOUNT TARGET ", mountTarget); // Is null
+
             if (!mountTarget) {
                console.warn("[sr3e] Could not find composer-position in actor sheet.");
                return;
             }
-
             const composer = mount(RollComposerComponent, {
                target: mountTarget,
                props: {
