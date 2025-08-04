@@ -18,7 +18,6 @@
    let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
    let penalty = actorStoreManager.GetRWStore("health.penalty");
-   let karmaPoolBacking = $karmaPoolStore;
 
    let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
    let currentDicePoolName = $state("");
@@ -35,20 +34,14 @@
    let isDefaultingAsString = $state("false");
    let isDefaulting = $state(false);
    let title = $state("");
-   let associatedDicePoolString = $state("");
    let maxAffordableDice = $state(0);
    let hasTarget = $state(false);
    let hasChallenged = $state(false);
 
-   let associatedDicePoolStore;
    let containerEl;
    let selectEl;
    let rollBtn;
    let clearBtn;
-   let callingSkill;
-   let linkedAttributeString;
-   let linkedAttributeStore;
-   let readwrite;
    let focusables = [];
 
    let difficulties = ItemDataService.getDifficultyGradings(config);
@@ -56,12 +49,7 @@
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
    $effect(() => {
-      console.log("caller type", caller.type);
-      if (caller.type === "active" || caller.type === "attribute") {
-         $shouldDisplaySheen = true;
-      } else {
-         $shouldDisplaySheen = false;
-      }
+      $shouldDisplaySheen = caller.type === "active" || caller.type === "attribute";
    });
 
    $effect(() => {
@@ -111,27 +99,16 @@
 
       title = titleOverride ?? skill.name;
 
-      linkedAttributeString = skillData?.linkedAttribute ?? "";
-
       if (skillType === "active") {
-         associatedDicePoolString = skillData?.associatedDicePool ?? "";
-         if (associatedDicePoolString) {
-            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
+         const associatedDicePool = skillData?.associatedDicePool;
+         if (associatedDicePool) {
+            actorStoreManager.GetRWStore(`dicePools.${associatedDicePool}`);
          }
-      }
-
-      if (linkedAttributeString) {
-         linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
-      }
-
-      if (skillType === "language") {
-         readwrite = skillData?.readwrite;
       }
    }
 
    async function Challenge() {
       hasChallenged = true;
-      console.warn("Challenge: Initiating opposed rolls.");
 
       const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
 
@@ -165,11 +142,7 @@
       await baseRoll.evaluate(options);
       await baseRoll.waitForResolution();
 
-      console.log("Challenge: All contests resolved.");
-
       await CommitEffects();
-
-      //onclose?.();
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }
@@ -188,14 +161,6 @@
 
    function KarmaCostCalculator() {
       karmaCost = 0.5 * diceBought * (diceBought + 1);
-   }
-
-   function AddDiceFromPool() {
-      //For effects only, incrementation is databound to the Count
-   }
-
-   function RemoveDiceFromPool() {
-      //For effects only, incrementation is databound to the Count
    }
 
    $effect(() => {
@@ -280,8 +245,6 @@
    // HandleRoll - for normal rolls
    async function HandleRoll(e) {
       e?.preventDefault?.();
-      console.warn("HandleRoll triggered");
-
       const totalDice = caller.dice + diceBought + currentDicePoolAddition;
 
       const roll = SR3ERoll.create(
@@ -522,8 +485,6 @@
             bind:value={currentDicePoolAddition}
             min={0}
             max={$displayCurrentDicePoolStore.sum}
-            onIncrement={AddDiceFromPool}
-            onDecrement={RemoveDiceFromPool}
          />
       </div>
    {/if}
