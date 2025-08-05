@@ -263,14 +263,6 @@
       karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
 
-   function AddDiceFromPool() {
-      //For effects only, incrementation is databound to the Count
-   }
-
-   function RemoveDiceFromPool() {
-      //For effects only, incrementation is databound to the Count
-   }
-
    $effect(() => {
       isDefaulting = isDefaultingAsString === "true";
       updateFocusables();

@@ -407,97 +407,47 @@ function registerHooks() {
       }
    });
 
-   Hooks.on("renderChatMessageHTML", async (message, html, data) => {
-      const contestId = message.flags?.sr3e?.opposed;
-      if (!contestId) return;
+Hooks.on("renderChatMessageHTML", async (message, html, data) => {
+   const contestId = message.flags?.sr3e?.opposed;
+   if (!contestId) return;
 
-      const contest = OpposeRollService.getContestById(contestId);
-      if (!contest) {
-         console.warn("[sr3e] No local contest found for ID:", contestId);
-         return;
-      }
+   const contest = OpposeRollService.getContestById(contestId);
+   const actor = contest.target;
+   const controllingUser = OpposeRollService.resolveControllingUser(actor);
+   const isControllingUser = game.user.id === controllingUser?.id;
+   const alreadyResponded = contest.targetRoll !== null;
 
-      const actor = contest.target;
-      const controllingUser = OpposeRollService.resolveControllingUser(actor);
-      const isControllingUser = game.user.id === controllingUser?.id;
-      const alreadyResponded = contest.targetRoll !== null;
+   if (!isControllingUser || alreadyResponded) return;
 
-      if (!isControllingUser || alreadyResponded) return;
+   const container = html.querySelector(".sr3e-response-button-container");
+   const btn = document.createElement("button");
+   btn.classList.add("sr3e-response-button");
+   btn.dataset.contestId = contestId;
+   btn.innerText = game.i18n.localize("sr3e.chat.respond");
 
-      const container = html.querySelector(".sr3e-response-button-container");
-      if (!container) {
-         console.warn("[sr3e] No .sr3e-response-button-container in chat message", message.id);
-         return;
-      }
+   btn.onclick = async () => {
+      console.log(`[sr3e] Respond button clicked by ${game.user.name} for contest ${contestId}`);
 
-      const btn = document.createElement("button");
-      btn.classList.add("sr3e-response-button");
-      btn.dataset.contestId = contestId;
-      btn.innerText = game.i18n.localize("sr3e.chat.respond");
+      const actorSheet = actor.sheet;
+      if (!actorSheet.rendered) await actorSheet.render(true);
 
-      btn.onclick = async () => {
-         console.log(`[sr3e] Respond button clicked by ${game.user.name} for contest ${contestId}`);
-
-         const actorSheet = actor.sheet;
-         if (!actorSheet.rendered) {
-            await actorSheet.render(true);
-         }
-
-         const caller = {
-            key: contest.options.attributeName,
-            type: contest.options.callerType,
-            dice: 0,
-            value: 0,
-            responseMode: true,
-            contestId,
-         };
-
-         const waitForComposer = () => {
-            const mountTarget = actorSheet.element.querySelector(".composer-position");
-            console.log("actorSheet", actorSheet);
-            console.log("MOUNT TARGET ", mountTarget); // Is null
-
-            if (!mountTarget) {
-               console.warn("[sr3e] Could not find composer-position in actor sheet.");
-               return;
-            }
-            const composer = mount(RollComposerComponent, {
-               target: mountTarget,
-               props: {
-                  actor,
-                  config: CONFIG.sr3e,
-                  caller,
-                  onclose: async (result) => {
-                     unmount(composer);
-                     if (!result) return;
-
-                     const roll = SR3ERoll.create(
-                        SR3ERoll.buildFormula(result.dice, result.options),
-                        { actor },
-                        result.options
-                     );
-
-                     await roll.evaluate();
-                     OpposeRollService.deliverResponse(contestId, roll.toJSON());
-                  },
-               },
-            });
-         };
-
-         // Mount immediately if the sheet is ready, otherwise wait briefly
-         if (actorSheet.rendered) {
-            waitForComposer();
-         } else {
-            setTimeout(waitForComposer, 50);
-         }
-
-         // Wait for the response, then send it to the instigator
-         const rollData = await OpposeRollService.waitForResponse(contestId);
-         await game.queries.call("sr3e.resolveOpposedRoll", { contestId, rollData });
+      const caller = {
+         key: contest.options.attributeName,
+         type: contest.options.callerType,
+         dice: 0,
+         value: 0,
+         responseMode: true,
+         contestId,
       };
 
-      container.appendChild(btn);
-   });
+      actorSheet.setRollComposerData(caller);
+
+      const rollData = await OpposeRollService.waitForResponse(contestId);
+      await CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData });
+   };
+
+   container.appendChild(btn);
+});
 
    Hooks.once(hooks.init, () => {
       configureProject();

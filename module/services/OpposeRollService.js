@@ -4,11 +4,9 @@ const pendingResponses = new Map();
 export default class OpposeRollService {
    static getContestById(id) {
       return activeContests.get(id);
-
-      
    }
 
-      static waitForResponse(contestId) {
+   static waitForResponse(contestId) {
       return new Promise((resolve) => {
          pendingResponses.set(contestId, resolve);
       });
@@ -16,10 +14,8 @@ export default class OpposeRollService {
 
    static deliverResponse(contestId, rollData) {
       const resolver = pendingResponses.get(contestId);
-      if (resolver) {
-         resolver(rollData);
-         pendingResponses.delete(contestId);
-      }
+      resolver(rollData);
+      pendingResponses.delete(contestId);
    }
 
    static getContestForTarget(target) {
@@ -36,40 +32,25 @@ export default class OpposeRollService {
          options,
          isResolved: false,
       });
-      console.log("[sr3e] Contest registered:", contestId);
    }
 
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
-
-      // Register locally first
+      
       this.registerContest({ contestId, initiator, target, rollData, options });
 
-
-      // Send query to target user
       const targetUser = this.resolveControllingUser(target);
-      if (!targetUser) {
-         console.warn("[sr3e] No controlling user for target", target.name);
-         return;
-      }
+      
+      await targetUser.query("sr3e.opposeRollPrompt", {
+         contestId,
+         initiatorId: initiator.id,
+         targetId: target.id,
+         rollData,
+         options: options,
+      });
 
-      try {
-         await targetUser.query("sr3e.opposeRollPrompt", {
-            contestId,
-            initiatorId: initiator.id,
-            targetId: target.id,
-            rollData,
-            options: options,
-         });
-      } catch (err) {
-         console.warn("[sr3e] Target user did not respond to opposeRollPrompt:", err);
-         // Optional: clean up
-         return;
-      }
-
-      // Proceed with chat message
       const initiatorUser = this.resolveControllingUser(initiator);
-      const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
+      const whisperIds = [initiatorUser.id, targetUser.id];
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
@@ -87,33 +68,24 @@ export default class OpposeRollService {
    static resolveControllingUser(actor) {
       const connectedUsers = game.users.filter((u) => u.active);
 
-      // 1. If character is assigned and user is online
       const assignedUser = connectedUsers.find((u) => u.character?.id === actor?.id);
       if (assignedUser) return assignedUser;
 
-      // 2. If any *non-GM* connected user has OWNER permission
       const playerOwner = connectedUsers.find(
          (u) => !u.isGM && actor?.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
       );
       if (playerOwner) return playerOwner;
 
-      // 3. Fallback to any connected GM
-      const gmUser = connectedUsers.find((u) => u.isGM);
-      return gmUser;
-   }
-
-   static async abortOpposedRoll(contestId) {
-      //TODO
+      return connectedUsers.find((u) => u.isGM);
    }
 
    static async resolveTargetRoll(contestId, rollData) {
       const contest = activeContests.get(contestId);
-      if (!contest) return;
-
+      
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
-      const netSuccesses = computeNetSuccesses(contest.initiatorRoll, contest.targetRoll);
+      const netSuccesses = this.computeNetSuccesses(contest.initiatorRoll, contest.targetRoll);
       const winner = netSuccesses > 0 ? contest.initiator : contest.target;
 
       await ChatMessage.create({
@@ -128,5 +100,17 @@ export default class OpposeRollService {
       ui.windows[dialogId]?.close();
 
       activeContests.delete(contestId);
+   }
+
+   static computeNetSuccesses(initiatorRollData, targetRollData) {
+      const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
+      const targetSuccesses = this.getSuccessCount(targetRollData);
+      return initiatorSuccesses - targetSuccesses;
+   }
+
+   static getSuccessCount(rollData) {
+      const diceTerm = rollData.terms.find((t) => t.class === "Die" && t.faces === 6);
+      const targetNumber = parseInt(rollData.options.targetNumber, 10);
+      return diceTerm.results.filter((r) => r.result >= targetNumber && !r.discarded).length;
    }
 }
