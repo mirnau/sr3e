@@ -236,12 +236,18 @@
          }
       );
 
-      await roll.evaluate();
-      OpposeRollService.deliverResponse(caller.contestId, roll.toJSON());
+      await roll.evaluate({ suppressMessage: true });
+
+      const contest = OpposeRollService.getContestById(caller.contestId);
+      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
+
+      await initiatorUser.query("sr3e.resolveOpposedRoll", {
+         contestId: caller.contestId,
+         rollData: roll.toJSON(),
+      });
 
       await CommitEffects();
-      onclose?.();
-
+      visible = false;
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 

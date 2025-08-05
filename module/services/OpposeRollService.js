@@ -36,11 +36,11 @@ export default class OpposeRollService {
 
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
-      
+
       this.registerContest({ contestId, initiator, target, rollData, options });
 
       const targetUser = this.resolveControllingUser(target);
-      
+
       await targetUser.query("sr3e.opposeRollPrompt", {
          contestId,
          initiatorId: initiator.id,
@@ -80,19 +80,68 @@ export default class OpposeRollService {
    }
 
    static async resolveTargetRoll(contestId, rollData) {
+      console.log("rollData", rollData);
+
       const contest = activeContests.get(contestId);
-      
+
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
-      const netSuccesses = this.computeNetSuccesses(contest.initiatorRoll, contest.targetRoll);
-      const winner = netSuccesses > 0 ? contest.initiator : contest.target;
+      const { initiator, target, initiatorRoll, targetRoll } = contest;
+      const netSuccesses = OpposeRollService.computeNetSuccesses(initiatorRoll, targetRoll);
+      const winner = netSuccesses > 0 ? initiator : target;
+      const speaker = initiator;
+
+      const buildDiceHTML = (actor, rollData) => {
+         const term = rollData.terms?.[0];
+         const results = term?.results ?? [];
+         const formula =
+            rollData.formula ??
+            `${term?.number ?? "?"}d${term?.faces ?? "?"}x${rollData?.options?.targetNumber ?? "?"}`;
+         const total = results.reduce((sum, d) => sum + d.result, 0);
+
+         const rolls = results
+            .map((d) => {
+               const cls = ["roll", "_sr3edie", "d6"];
+               if (d.result === 6) cls.push("max");
+               return `<li class="${cls.join(" ")}">${d.result}</li>`;
+            })
+            .join("");
+
+         return `
+      <div class="dice-roll expanded">
+         <div class="dice-result">
+            <div class="dice-formula">${formula}</div>
+            <div class="dice-tooltip">
+               <div class="wrapper">
+                  <section class="tooltip-part">
+                     <div class="dice">
+                        <header class="part-header flexrow">
+                           <span class="part-formula">${formula}</span>
+                           <span class="part-total">${total}</span>
+                        </header>
+                        <ol class="dice-rolls">${rolls}</ol>
+                     </div>
+                  </section>
+               </div>
+            </div>
+            <h4 class="dice-total">${total}</h4>
+         </div>
+      </div>`;
+      };
+
+      const content = `
+      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+      <h4>${initiator.name}</h4>
+      ${buildDiceHTML(initiator, initiatorRoll)}
+      <h4>${target.name}</h4>
+      ${buildDiceHTML(target, targetRoll)}
+      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+   `;
 
       await ChatMessage.create({
-         speaker: ChatMessage.getSpeaker({ actor: winner }),
-         content: `<p>${contest.initiator.name} attacks ${contest.target.name}.<br>
-            ${contest.target.name} responds.<br>
-            ${winner.name} wins the opposed roll (${Math.abs(netSuccesses)} net successes).</p>`,
+         speaker: ChatMessage.getSpeaker({ actor: speaker }),
+         content,
          flags: { "sr3e.opposedResolved": true },
       });
 
@@ -111,6 +160,9 @@ export default class OpposeRollService {
    static getSuccessCount(rollData) {
       const diceTerm = rollData.terms.find((t) => t.class === "Die" && t.faces === 6);
       const targetNumber = parseInt(rollData.options.targetNumber, 10);
+
+      if (!diceTerm?.results) return 0;
+
       return diceTerm.results.filter((r) => r.result >= targetNumber && !r.discarded).length;
    }
 }

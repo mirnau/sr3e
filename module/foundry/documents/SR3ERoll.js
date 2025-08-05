@@ -21,11 +21,11 @@ export default class SR3ERoll extends Roll {
 
    async evaluate(options = {}) {
       this.options = foundry.utils.mergeObject(this.options ?? {}, options ?? {});
-      await super.evaluate(options);
+      await super.evaluate(this.options);
 
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
 
-      // Check if this is an opposed roll (initiator)
+      // If this is an opposed roll (initiator), send to targets and exit
       if (this.options.opposed && actor) {
          const targets = Array.from(game.user.targets)
             .map((t) => t.actor)
@@ -53,8 +53,10 @@ export default class SR3ERoll extends Roll {
          }
       }
 
-      // Normal non-contested roll
-      await this.toMessage();
+      if (!this.options.suppressMessage) {
+         await this.toMessage();
+      }
+
       return this;
    }
 
