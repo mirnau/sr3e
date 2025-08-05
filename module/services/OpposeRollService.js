@@ -92,6 +92,39 @@ export default class OpposeRollService {
       const winner = netSuccesses > 0 ? initiator : target;
       const speaker = initiator;
 
+      const rollMode = game.settings.get("core", "rollMode");
+
+      const initiatorUser = this.resolveControllingUser(initiator);
+      const targetUser = this.resolveControllingUser(target);
+
+      const chatData = {
+         speaker: ChatMessage.getSpeaker({ actor: speaker }),
+         user: initiatorUser?.id ?? game.user.id,
+         content,
+         flags: { "sr3e.opposedResolved": true },
+      };
+
+      // Respect roll visibility settings
+      switch (rollMode) {
+         case "gmroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            break;
+
+         case "blindroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            chatData.blind = true;
+            break;
+
+         case "selfroll":
+            chatData.whisper = [initiatorUser.id, targetUser.id];
+            break;
+
+         case "public":
+         default:
+            // No whisper — make message public
+            break;
+      }
+
       const buildDiceHTML = (actor, rollData) => {
          const term = rollData.terms?.[0];
          const results = term?.results ?? [];
@@ -139,11 +172,7 @@ export default class OpposeRollService {
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
    `;
 
-      await ChatMessage.create({
-         speaker: ChatMessage.getSpeaker({ actor: speaker }),
-         content,
-         flags: { "sr3e.opposedResolved": true },
-      });
+      await ChatMessage.create(chatData);
 
       const dialogId = `sr3e-opposed-roll-${contestId}`;
       ui.windows[dialogId]?.close();
