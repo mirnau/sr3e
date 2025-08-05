@@ -80,6 +80,8 @@
       }
 
       isResponding = caller.responseMode || false;
+
+      hasTarget = game.user.targets.size > 0;
    }
 
    function resetToDefaults() {
@@ -105,10 +107,6 @@
       } else {
          $shouldDisplaySheen = false;
       }
-   });
-
-   $effect(() => {
-      hasTarget = game.user.targets.size > 0;
    });
 
    $effect(() => {
@@ -248,7 +246,7 @@
 
       await CommitEffects();
       visible = false;
-      OpposeRollService.expireContest(contestId);
+      OpposeRollService.expireContest(caller.contestId);
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 
@@ -374,7 +372,6 @@
       );
 
       await roll.evaluate();
-      await roll.waitForResolution();
       await CommitEffects();
 
       onclose?.({
@@ -620,11 +617,11 @@
       {#if isResponding}
          <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Respond}>Respond!</button
          >
-         <button class="regular" type="button" onclick={Abort}>Abort Challenge</button>
       {:else if hasTarget}
          <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Challenge}
             >Challenge!</button
          >
+         <button class="regular" type="button" onclick={Abort}>Abort Challenge</button>
       {:else}
          <button class="regular" type="button" disabled={!canSubmit} bind:this={rollBtn} onclick={HandleRoll}
             >Roll!</button

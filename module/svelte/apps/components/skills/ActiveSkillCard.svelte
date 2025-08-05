@@ -24,51 +24,26 @@
    }
 
    async function Roll(e, skillId, specializationName = null) {
+      const dice = specializationName
+         ? $specializationsStore.find((s) => s.name === specializationName)?.value
+         : $valueStore;
+
       if (e.shiftKey) {
-         if (activeModal) return;
-
-         let resolveModal;
-         const modalPromise = new Promise((resolve) => (resolveModal = resolve));
-
-         activeModal = mount(RollComposerComponent, {
-            target: document.querySelector(".composer-position"),
-            props: {
-               actor,
-               config,
-               caller: {
-                  key: skill.name,
-                  type: "skill",
-                  dice: specializationName
-                     ? $specializationsStore.find((s) => s.name === specializationName)?.value
-                     : $valueStore,
-                  skillId,
-                  specialization: specializationName,
-                  name: skill.name,
-               },
-               onclose: (result) => resolveModal(result),
-            },
+         actor.sheet.setRollComposerData({
+            type: "skill",
+            key: skill.name,
+            dice,
+            value: dice,
+            skillId,
+            specialization: specializationName,
+            name: skill.name,
          });
-
-         const result = await modalPromise;
-
-         // Component stays mounted until roll resolution completes
-         unmount(activeModal);
-         activeModal = null;
-
-         // Optional: handle the result
-         if (result) {
-            console.log("Roll completed", result);
-         }
-
-         return;
-      }
-
-      // Normal (non-shift) roll
-      if (specializationName) {
-         const specValue = $specializationsStore.find((s) => s.name === specializationName)?.value;
-         await actor.SpecializationRoll(specValue, specializationName);
       } else {
-         await actor.SkillRoll($valueStore, skill.name);
+         if (specializationName) {
+            await actor.SpecializationRoll(dice, specializationName);
+         } else {
+            await actor.SkillRoll(dice, skill.name);
+         }
       }
 
       e.preventDefault();

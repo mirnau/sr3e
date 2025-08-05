@@ -110,24 +110,7 @@
    }
 
    function openRollComposer(actor, caller) {
-      if (isModalOpen) return;
-      isModalOpen = true;
-
-      new Promise((resolve) => {
-         activeModal = mount(RollComposerComponent, {
-            target: document.querySelector(".composer-position"),
-            props: {
-               actor,
-               config: CONFIG.sr3e,
-               caller,
-               onclose: async (result) => {
-                  unmount(activeModal);
-                  isModalOpen = false;
-                  activeModal = null;
-               },
-            },
-         });
-      });
+      actor.sheet.setRollComposerData(caller);
    }
 </script>
 

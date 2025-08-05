@@ -24,62 +24,36 @@
       ActiveSkillEditorSheet.launch(actor, skill, config);
    }
 
-async function Roll(e, skillId, specializationName = null) {
-   if (e.shiftKey) {
-      if (activeModal) return;
+   async function Roll(e, skillId, specializationName = null) {
+      const dice = specializationName
+         ? $specializationsStore.find((s) => s.name === specializationName)?.value
+         : $valueStore;
 
-      let resolveModal;
-      const modalPromise = new Promise((resolve) => (resolveModal = resolve));
-
-      activeModal = mount(RollComposerComponent, {
-         target: document.querySelector(".composer-position"),
-         props: {
-            actor,
-            config,
-            caller: {
-               key: skill.name,
-               type: "skill",
-               dice: specializationName
-                  ? $specializationsStore.find((s) => s.name === specializationName)?.value
-                  : $valueStore,
-               skillId,
-               specialization: specializationName,
-               name: skill.name,
-            },
-            onclose: (result) => resolveModal(result),
-         },
-      });
-
-      const result = await modalPromise;
-
-      // Component stays mounted until roll resolution completes
-      unmount(activeModal);
-      activeModal = null;
-
-      // Optional: handle the result
-      if (result) {
-         console.log("Roll completed", result);
+      if (e.shiftKey) {
+         actor.sheet.setRollComposerData({
+            type: "skill",
+            key: skill.name,
+            dice,
+            value: dice,
+            skillId,
+            specialization: specializationName,
+            name: skill.name,
+         });
+      } else {
+         if (specializationName) {
+            await actor.SpecializationRoll(dice, specializationName);
+         } else {
+            await actor.SkillRoll(dice, skill.name);
+         }
       }
 
-      return;
+      e.preventDefault();
    }
-
-   // Normal (non-shift) roll
-   if (specializationName) {
-      const specValue = $specializationsStore.find((s) => s.name === specializationName)?.value;
-      await actor.SpecializationRoll(specValue, specializationName);
-   } else {
-      await actor.SkillRoll($valueStore, skill.name);
-   }
-
-   e.preventDefault();
-}
-
 
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
    });
-   
+
    function handleEscape(e) {
       if (e.key === "Escape" && activeModal) {
          e.preventDefault();
