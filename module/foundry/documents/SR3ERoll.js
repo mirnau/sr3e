@@ -45,7 +45,7 @@ export default class SR3ERoll extends Roll {
                   rollData: this.toJSON(),
                   options: this.options,
                });
-
+               this.options.contestId = contestId;
                if (contestId) this._waitingOn.push(contestId);
             }
 

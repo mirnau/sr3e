@@ -18,6 +18,10 @@ export default class OpposeRollService {
       pendingResponses.delete(contestId);
    }
 
+   static expireContest(contestId) {
+      activeContests.delete(contestId);
+   }
+
    static getContestForTarget(target) {
       return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
    }
@@ -83,7 +87,6 @@ export default class OpposeRollService {
       console.log("rollData", rollData);
 
       const contest = activeContests.get(contestId);
-
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
@@ -91,84 +94,38 @@ export default class OpposeRollService {
       const netSuccesses = OpposeRollService.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
       const speaker = initiator;
-
       const rollMode = game.settings.get("core", "rollMode");
 
       const initiatorUser = this.resolveControllingUser(initiator);
       const targetUser = this.resolveControllingUser(target);
 
-      // Define this BEFORE chatData
-      const buildDiceHTML = (actor, rollData) => {
-         const term = rollData.terms?.[0];
-         const results = term?.results ?? [];
-         const tn = rollData?.options?.targetNumber ?? "?";
-         const successes = results.filter((r) => r.result >= tn && !r.discarded).length;
+      const content = this.#buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses });
+      const chatData = this.#prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode });
 
-         const skill = rollData.options.skillName;
-         const specialization = rollData.options.specializationName;
-         const attribute = rollData.options.attributeName;
-         const formula = rollData.formula ?? `${term?.number ?? "?"}d6x${tn}`;
+      await ChatMessage.create(chatData);
 
-         let description = "";
-         if (skill) {
-            description += skill;
-            if (specialization) {
-               description += ` (${specialization})`;
-            }
-         } else if (attribute) {
-            description += game.i18n.localize(`sr3e.attributes.${attribute}`);
-         } else {
-            description += "Unspecified roll";
-         }
+      const dialogId = `sr3e-opposed-roll-${contestId}`;
+      ui.windows[dialogId]?.close();
 
-         return `
-   <div class="dice-roll expanded">
-      <div class="dice-result">
-         <div class="dice-context">
-            <em>${description} vs TN ${tn} using ${formula}</em>
-         </div>
-         <div class="dice-formula">${formula}</div>
-         <div class="dice-tooltip">
-            <div class="wrapper">
-               <section class="tooltip-part">
-                  <div class="dice">
-                     <header class="part-header flexrow">
-                        <span class="part-formula">${term?.number ?? "?"}d6x${tn}</span>
-                        <span class="part-total">${successes} successes (TN: ${tn})</span>
-                     </header>
-                     <ol class="dice-rolls">
-                        ${results
-                           .map((d) => {
-                              const cls = ["roll", "_sr3edie", "d6"];
-                              if (d.result === 6) cls.push("max");
-                              if (d.result >= tn) cls.push("success");
-                              return `<li class="${cls.join(" ")}">${d.result}</li>`;
-                           })
-                           .join("")}
-                     </ol>
-                  </div>
-               </section>
-            </div>
-         </div>
-         <h4 class="dice-total">${successes} successes (TN: ${tn})</h4>
-      </div>
-   </div>`;
-      };
+      activeContests.delete(contestId);
+   }
 
-      // Must be defined BEFORE you use it in chatData
-      const content = `
+   static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses }) {
+      return `
       <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
       <h4>${initiator.name}</h4>
-      ${buildDiceHTML(initiator, initiatorRoll)}
+      ${this.#buildDiceHTML(initiator, initiatorRoll)}
       <h4>${target.name}</h4>
-      ${buildDiceHTML(target, targetRoll)}
+      ${this.#buildDiceHTML(target, targetRoll)}
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
    `;
+   }
 
+   static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
       const chatData = {
          speaker: ChatMessage.getSpeaker({ actor: speaker }),
          user: initiatorUser?.id ?? game.user.id,
-         content, // now defined
+         content,
          flags: { "sr3e.opposedResolved": true },
       };
 
@@ -185,15 +142,63 @@ export default class OpposeRollService {
             break;
          case "public":
          default:
-            break; // do nothing
+            break;
       }
 
-      await ChatMessage.create(chatData);
+      return chatData;
+   }
 
-      const dialogId = `sr3e-opposed-roll-${contestId}`;
-      ui.windows[dialogId]?.close();
+   static #buildDiceHTML(actor, rollData) {
+      const term = rollData.terms?.[0];
+      const results = term?.results ?? [];
+      const tn = rollData?.options?.targetNumber ?? "?";
+      const successes = results.filter((r) => r.result >= tn && !r.discarded).length;
 
-      activeContests.delete(contestId);
+      const skill = rollData.options.skillName;
+      const specialization = rollData.options.specializationName;
+      const attribute = rollData.options.attributeName;
+      const formula = rollData.formula ?? `${term?.number ?? "?"}d6x${tn}`;
+
+      let description = skill
+         ? specialization
+            ? `${skill} (${specialization})`
+            : skill
+         : attribute
+         ? game.i18n.localize(`sr3e.attributes.${attribute}`)
+         : "Unspecified roll";
+
+      return `
+      <div class="dice-roll expanded">
+         <div class="dice-result">
+            <div class="dice-context">
+               <em>${description} vs TN ${tn} using ${formula}</em>
+            </div>
+            <div class="dice-formula">${formula}</div>
+            <div class="dice-tooltip">
+               <div class="wrapper">
+                  <section class="tooltip-part">
+                     <div class="dice">
+                        <header class="part-header flexrow">
+                           <span class="part-formula">${term?.number ?? "?"}d6x${tn}</span>
+                           <span class="part-total">${successes} successes (TN: ${tn})</span>
+                        </header>
+                        <ol class="dice-rolls">
+                           ${results
+                              .map((d) => {
+                                 const cls = ["roll", "_sr3edie", "d6"];
+                                 if (d.result === 6) cls.push("max");
+                                 if (d.result >= tn) cls.push("success");
+                                 return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                              })
+                              .join("")}
+                        </ol>
+                     </div>
+                  </section>
+               </div>
+            </div>
+            <h4 class="dice-total">${successes} successes (TN: ${tn})</h4>
+         </div>
+      </div>`;
    }
 
    static computeNetSuccesses(initiatorRollData, targetRollData) {

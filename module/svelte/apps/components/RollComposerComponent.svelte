@@ -206,14 +206,14 @@
          options
       );
 
-      await baseRoll.evaluate(options);
+      const roll = await baseRoll.evaluate(options);
       await baseRoll.waitForResolution();
 
       console.log("Challenge: All contests resolved.");
-
       await CommitEffects();
-
       Hooks.callAll("actorSystemRecalculated", actor);
+      OpposeRollService.expireContest(roll.options.contestId);
+      visible = false;
    }
 
    async function Respond() {
@@ -248,6 +248,7 @@
 
       await CommitEffects();
       visible = false;
+      OpposeRollService.expireContest(contestId);
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 
