@@ -97,72 +97,45 @@ export default class OpposeRollService {
       const initiatorUser = this.resolveControllingUser(initiator);
       const targetUser = this.resolveControllingUser(target);
 
-      const chatData = {
-         speaker: ChatMessage.getSpeaker({ actor: speaker }),
-         user: initiatorUser?.id ?? game.user.id,
-         content,
-         flags: { "sr3e.opposedResolved": true },
-      };
-
-      // Respect roll visibility settings
-      switch (rollMode) {
-         case "gmroll":
-            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-            break;
-
-         case "blindroll":
-            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-            chatData.blind = true;
-            break;
-
-         case "selfroll":
-            chatData.whisper = [initiatorUser.id, targetUser.id];
-            break;
-
-         case "public":
-         default:
-            // No whisper — make message public
-            break;
-      }
-
+      // Define this BEFORE chatData
       const buildDiceHTML = (actor, rollData) => {
          const term = rollData.terms?.[0];
          const results = term?.results ?? [];
-         const formula =
-            rollData.formula ??
-            `${term?.number ?? "?"}d${term?.faces ?? "?"}x${rollData?.options?.targetNumber ?? "?"}`;
-         const total = results.reduce((sum, d) => sum + d.result, 0);
+         const tn = rollData?.options?.targetNumber ?? "?";
+         const successes = results.filter((r) => r.result >= tn && !r.discarded).length;
 
          const rolls = results
             .map((d) => {
                const cls = ["roll", "_sr3edie", "d6"];
                if (d.result === 6) cls.push("max");
+               if (d.result >= tn) cls.push("success");
                return `<li class="${cls.join(" ")}">${d.result}</li>`;
             })
             .join("");
 
          return `
-      <div class="dice-roll expanded">
-         <div class="dice-result">
-            <div class="dice-formula">${formula}</div>
-            <div class="dice-tooltip">
-               <div class="wrapper">
-                  <section class="tooltip-part">
-                     <div class="dice">
-                        <header class="part-header flexrow">
-                           <span class="part-formula">${formula}</span>
-                           <span class="part-total">${total}</span>
-                        </header>
-                        <ol class="dice-rolls">${rolls}</ol>
-                     </div>
-                  </section>
-               </div>
+   <div class="dice-roll expanded">
+      <div class="dice-result">
+         <div class="dice-formula">${rollData.formula ?? `${term?.number ?? "?"}d6x${tn}`}</div>
+         <div class="dice-tooltip">
+            <div class="wrapper">
+               <section class="tooltip-part">
+                  <div class="dice">
+                     <header class="part-header flexrow">
+                        <span class="part-formula">${term?.number ?? "?"}d6x${tn}</span>
+                        <span class="part-total">${successes} successes (TN: ${tn})</span>
+                     </header>
+                     <ol class="dice-rolls">${rolls}</ol>
+                  </div>
+               </section>
             </div>
-            <h4 class="dice-total">${total}</h4>
          </div>
-      </div>`;
+         <h4 class="dice-total">${successes} successes (TN: ${tn})</h4>
+      </div>
+   </div>`;
       };
 
+      // Must be defined BEFORE you use it in chatData
       const content = `
       <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
       <h4>${initiator.name}</h4>
@@ -171,6 +144,29 @@ export default class OpposeRollService {
       ${buildDiceHTML(target, targetRoll)}
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
    `;
+
+      const chatData = {
+         speaker: ChatMessage.getSpeaker({ actor: speaker }),
+         user: initiatorUser?.id ?? game.user.id,
+         content, // now defined
+         flags: { "sr3e.opposedResolved": true },
+      };
+
+      switch (rollMode) {
+         case "gmroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            break;
+         case "blindroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            chatData.blind = true;
+            break;
+         case "selfroll":
+            chatData.whisper = [initiatorUser.id, targetUser.id];
+            break;
+         case "public":
+         default:
+            break; // do nothing
+      }
 
       await ChatMessage.create(chatData);
 
@@ -187,11 +183,11 @@ export default class OpposeRollService {
    }
 
    static getSuccessCount(rollData) {
-      const diceTerm = rollData.terms.find((t) => t.class === "Die" && t.faces === 6);
-      const targetNumber = parseInt(rollData.options.targetNumber, 10);
+      const term = rollData.terms[0];
+      const tn = rollData.options?.targetNumber;
 
-      if (!diceTerm?.results) return 0;
+      if (!tn || !term?.results) return 0;
 
-      return diceTerm.results.filter((r) => r.result >= targetNumber && !r.discarded).length;
+      return term.results.filter((r) => r.active && r.result >= tn).length;
    }
 }
