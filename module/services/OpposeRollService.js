@@ -104,19 +104,30 @@ export default class OpposeRollService {
          const tn = rollData?.options?.targetNumber ?? "?";
          const successes = results.filter((r) => r.result >= tn && !r.discarded).length;
 
-         const rolls = results
-            .map((d) => {
-               const cls = ["roll", "_sr3edie", "d6"];
-               if (d.result === 6) cls.push("max");
-               if (d.result >= tn) cls.push("success");
-               return `<li class="${cls.join(" ")}">${d.result}</li>`;
-            })
-            .join("");
+         const skill = rollData.options.skillName;
+         const specialization = rollData.options.specializationName;
+         const attribute = rollData.options.attributeName;
+         const formula = rollData.formula ?? `${term?.number ?? "?"}d6x${tn}`;
+
+         let description = "";
+         if (skill) {
+            description += skill;
+            if (specialization) {
+               description += ` (${specialization})`;
+            }
+         } else if (attribute) {
+            description += game.i18n.localize(`sr3e.attributes.${attribute}`);
+         } else {
+            description += "Unspecified roll";
+         }
 
          return `
    <div class="dice-roll expanded">
       <div class="dice-result">
-         <div class="dice-formula">${rollData.formula ?? `${term?.number ?? "?"}d6x${tn}`}</div>
+         <div class="dice-context">
+            <em>${description} vs TN ${tn} using ${formula}</em>
+         </div>
+         <div class="dice-formula">${formula}</div>
          <div class="dice-tooltip">
             <div class="wrapper">
                <section class="tooltip-part">
@@ -125,7 +136,16 @@ export default class OpposeRollService {
                         <span class="part-formula">${term?.number ?? "?"}d6x${tn}</span>
                         <span class="part-total">${successes} successes (TN: ${tn})</span>
                      </header>
-                     <ol class="dice-rolls">${rolls}</ol>
+                     <ol class="dice-rolls">
+                        ${results
+                           .map((d) => {
+                              const cls = ["roll", "_sr3edie", "d6"];
+                              if (d.result === 6) cls.push("max");
+                              if (d.result >= tn) cls.push("success");
+                              return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                           })
+                           .join("")}
+                     </ol>
                   </div>
                </section>
             </div>
