@@ -252,8 +252,12 @@
 
    function Abort() {
       const contest = OpposeRollService.getContestForTarget(actor);
-      OpposeRollService.abortOpposedRoll(contest.id);
-      onclose?.();
+      if (contest) {
+         CONFIG.queries["sr3e.abortOpposedRoll"]({ contestId: contest.id });
+         console.log("Contest Destroyed");
+         onclose?.();
+      }
+      visible = false;
    }
 
    function updateFocusables() {

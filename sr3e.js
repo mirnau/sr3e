@@ -213,6 +213,19 @@ function configureQueries() {
          rollData,
       });
    };
+
+   CONFIG.queries["sr3e.abortOpposedRoll"] = async ({ contestId }) => {
+      console.warn(`[sr3e] Received abortOpposedRoll for ${contestId}`);
+
+      const contest = OpposeRollService.getContestById(contestId);
+      if (!contest) return;
+
+      OpposeRollService.abortOpposedRoll(contestId);
+
+      // Optionally re-render the associated chat message to disable buttons
+      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
+      if (msg) msg.render(true);
+   };
 }
 
 function setFlagsOnCharacterPreCreate(document, data, options, userId) {
