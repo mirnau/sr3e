@@ -254,10 +254,10 @@
       const contest = OpposeRollService.getContestForTarget(actor);
       if (contest) {
          CONFIG.queries["sr3e.abortOpposedRoll"]({ contestId: contest.id });
-         console.log("Contest Destroyed");
-         onclose?.();
+         console.log("[sr3e] Abort query dispatched successfully.");
       }
       visible = false;
+      onclose?.();
    }
 
    function updateFocusables() {

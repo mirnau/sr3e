@@ -18,8 +18,12 @@ export default class OpposeRollService {
       pendingResponses.delete(contestId);
    }
 
-   static expireContest(contestId) {
-      activeContests.delete(contestId);
+   static abortOpposedRoll(contestId) {
+      const contest = activeContests.get(contestId);
+      if (contest) {
+         activeContests.delete(contestId);
+         console.log("[sr3e] Abort deleted successfully.");
+      }
    }
 
    static getContestForTarget(target) {

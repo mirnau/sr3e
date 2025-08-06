@@ -222,7 +222,6 @@ function configureQueries() {
 
       OpposeRollService.abortOpposedRoll(contestId);
 
-      // Optionally re-render the associated chat message to disable buttons
       const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
       if (msg) msg.render(true);
    };
