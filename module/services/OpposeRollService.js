@@ -22,7 +22,7 @@ export default class OpposeRollService {
       const contest = activeContests.get(contestId);
       if (contest) {
          activeContests.delete(contestId);
-         console.log("[sr3e] Abort deleted successfully.");
+         console.log("[sr3e] Contest expired.");
       }
    }
 
@@ -44,7 +44,6 @@ export default class OpposeRollService {
 
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
-
       this.registerContest({ contestId, initiator, target, rollData, options });
 
       const targetUser = this.resolveControllingUser(target);
@@ -88,33 +87,71 @@ export default class OpposeRollService {
    }
 
    static async resolveTargetRoll(contestId, rollData) {
-      console.log("rollData", rollData);
-
       const contest = activeContests.get(contestId);
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
       const { initiator, target, initiatorRoll, targetRoll } = contest;
-      const netSuccesses = OpposeRollService.computeNetSuccesses(initiatorRoll, targetRoll);
+      const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
-      const speaker = initiator;
-      const rollMode = game.settings.get("core", "rollMode");
 
-      const initiatorUser = this.resolveControllingUser(initiator);
-      const targetUser = this.resolveControllingUser(target);
+      // Compute and apply weapon damage if the initiator won and used a weapon
+      let damageText = "";
+      if (winner === initiator && initiatorRoll.options?.itemId) {
+         const weapon = initiator.items.get(initiatorRoll.options.itemId);
+         if (weapon?.type === "weapon") {
+            const totalDamage = await this.applyWeaponDamage({
+               weapon,
+               attacker: initiator,
+               defender: target,
+               netSuccesses,
+            });
+            damageText = `<p><strong>${initiator.name}</strong> inflicts <strong>${totalDamage}</strong> damage to <strong>${target.name}</strong> using <em>${weapon.name}</em>.</p>`;
+         }
+      }
 
-      const content = this.#buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses });
-      const chatData = this.#prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode });
+      const content = this.#buildContestMessage({
+         initiator,
+         target,
+         initiatorRoll,
+         targetRoll,
+         winner,
+         netSuccesses,
+         damageText,
+      });
+
+      const chatData = this.#prepareChatData({
+         speaker: initiator,
+         initiatorUser: this.resolveControllingUser(initiator),
+         targetUser: this.resolveControllingUser(target),
+         content,
+         rollMode: game.settings.get("core", "rollMode"),
+      });
 
       await ChatMessage.create(chatData);
 
-      const dialogId = `sr3e-opposed-roll-${contestId}`;
-      ui.windows[dialogId]?.close();
-
+      ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
       activeContests.delete(contestId);
    }
 
-   static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses }) {
+   static async applyWeaponDamage({ weapon, attacker, defender, netSuccesses }) {
+      const weaponData = weapon.system;
+      const damageBase = Number(weaponData.damage?.value) || 0;
+      const damageStaging = Number(weaponData.damage?.staging) || 1;
+      const totalDamage = damageBase + (netSuccesses * damageStaging);
+
+      await defender.update({
+         "system.health.damage.value": Math.min(
+            defender.system.health.damage.value + totalDamage,
+            defender.system.health.damage.max
+         ),
+      });
+
+      console.warn(`[sr3e] ${attacker.name} inflicted ${totalDamage} damage to ${defender.name}`);
+      return totalDamage;
+   }
+
+   static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
       return `
       <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
       <h4>${initiator.name}</h4>
@@ -122,7 +159,7 @@ export default class OpposeRollService {
       <h4>${target.name}</h4>
       ${this.#buildDiceHTML(target, targetRoll)}
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-   `;
+      ${damageText ?? ""}`;
    }
 
    static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {

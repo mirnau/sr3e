@@ -625,7 +625,6 @@
          <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Challenge}
             >Challenge!</button
          >
-         <button class="regular" type="button" onclick={Abort}>Abort Challenge</button>
       {:else}
          <button class="regular" type="button" disabled={!canSubmit} bind:this={rollBtn} onclick={HandleRoll}
             >Roll!</button

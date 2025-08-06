@@ -1,5 +1,5 @@
 <script>
-   import { mount, unmount, onDestroy, onMount } from "svelte";
+   import {onDestroy, onMount } from "svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
@@ -11,8 +11,6 @@
 
    let isFavorite = $state(false);
    let isEquipped = $state(false);
-   let isModalOpen = false;
-   let activeModal = null;
 
    const resolvingItemIdStore = inventoryCardStoreManager.GetRWStore("linkedSkilliD");
    const hasLinkedSkill = $derived($resolvingItemIdStore && $resolvingItemIdStore !== "");
