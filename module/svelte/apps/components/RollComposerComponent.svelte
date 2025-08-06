@@ -210,7 +210,6 @@
       console.log("Challenge: All contests resolved.");
       await CommitEffects();
       Hooks.callAll("actorSystemRecalculated", actor);
-      OpposeRollService.expireContest(roll.options.contestId);
       visible = false;
    }
 
@@ -236,17 +235,13 @@
 
       await roll.evaluate({ suppressMessage: true });
 
-      const contest = OpposeRollService.getContestById(caller.contestId);
-      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
-
-      await initiatorUser.query("sr3e.resolveOpposedRoll", {
+      await CONFIG.queries["sr3e.resolveOpposedRoll"]({
          contestId: caller.contestId,
          rollData: roll.toJSON(),
       });
 
       await CommitEffects();
       visible = false;
-      OpposeRollService.expireContest(caller.contestId);
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 

@@ -78,7 +78,8 @@ export default class SR3ERoll extends Roll {
 
          await new Promise((resolve) => {
             const checkInterval = setInterval(() => {
-               if (!OpposeRollService.getContestById(contestId)) {
+               const contest = OpposeRollService.getContestById(contestId);
+               if (!contest || contest.resolved || contest.aborted) {
                   clearInterval(checkInterval);
                   resolve();
                }
@@ -91,7 +92,10 @@ export default class SR3ERoll extends Roll {
       if (Array.isArray(this._waitingOn)) {
          await new Promise((resolve) => {
             const checkInterval = setInterval(() => {
-               const unresolved = this._waitingOn.filter((id) => OpposeRollService.getContestById(id));
+               const unresolved = this._waitingOn.filter((id) => {
+                  const contest = OpposeRollService.getContestById(id);
+                  return contest && !contest.resolved && !contest.aborted;
+               });
                if (unresolved.length === 0) {
                   clearInterval(checkInterval);
                   resolve();

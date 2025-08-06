@@ -47,6 +47,7 @@ import SR3EItem from "@documents/SR3EItem.js";
 import SR3ECombat from "@documents/SR3ECombat.js";
 import SR3Edie from "@documents/SR3Edie.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import SR3EChatMessage from "@documents/SR3EChatMessage.js";
 import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 
 import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
@@ -72,6 +73,7 @@ function configureProject() {
    SR3Edie.Register();
    SR3ERoll.Register();
    SR3EItem.Register();
+   SR3EChatMessage.Register();
 
    CONFIG.sr3e = sr3e;
    CONFIG.Actor.dataModels = {};
@@ -175,55 +177,14 @@ function wrapContent(root) {
 
 function configureQueries() {
    CONFIG.queries ??= {};
-   CONFIG.queries["sr3e.opposeRollPrompt"] = async ({ contestId, initiatorId, targetId, rollData, options }) => {
-      console.log("[sr3e] Received opposeRollPrompt query", { contestId, initiatorId, targetId });
-
-      const initiator = game.actors.get(initiatorId);
-      const target = game.actors.get(targetId);
-
-      if (!initiator || !target) {
-         console.warn("[sr3e] Could not resolve actors for opposeRollPrompt");
-         return;
-      }
-
-      OpposeRollService.registerContest({
-         contestId,
-         initiator,
-         target,
-         rollData,
-         options,
-      });
-
-      // Re-render any associated chat message
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
-      if (msg) msg.render(true);
-
-      return { acknowledged: true }; // Future use
-   };
 
    CONFIG.queries["sr3e.resolveOpposedRoll"] = async ({ contestId, rollData }) => {
       return OpposeRollService.resolveTargetRoll(contestId, rollData);
    };
 
-   CONFIG.queries["sr3e.resolveOpposedRollRemote"] = async ({ contestId, rollData, initiatorId }) => {
-      console.log(`[sr3e] Received resolveOpposedRollRemote on ${game.user.name}`, { contestId });
-
-      return CONFIG.queries["sr3e.resolveOpposedRoll"]({
-         contestId,
-         rollData,
-      });
-   };
-
    CONFIG.queries["sr3e.abortOpposedRoll"] = async ({ contestId }) => {
       console.warn(`[sr3e] Received abortOpposedRoll for ${contestId}`);
-
-      const contest = OpposeRollService.getContestById(contestId);
-      if (!contest) return;
-
-      OpposeRollService.abortOpposedRoll(contestId);
-
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
-      if (msg) msg.render(true);
+      await OpposeRollService.abortOpposedRoll(contestId);
    };
 }
 
@@ -429,20 +390,21 @@ function registerHooks() {
    });
 
    Hooks.on("renderChatMessageHTML", async (message, html, data) => {
-      const contestId = message.flags?.sr3e?.opposed;
+      const opposed = message.flags?.sr3e?.opposed;
+      const contestId = opposed?.contestId;
       if (!contestId) return;
 
       const container = html.querySelector(".sr3e-response-button-container");
       if (!container) return;
+
+      const contest = OpposeRollService.getContestById(contestId);
 
       const btn = document.createElement("button");
       btn.classList.add("sr3e-response-button");
       btn.dataset.contestId = contestId;
       btn.innerText = game.i18n.localize("sr3e.chat.respond");
 
-      const contest = OpposeRollService.getContestById(contestId);
-
-      if (!contest) {
+      if (!contest || contest.resolved || contest.aborted) {
          btn.disabled = true;
          btn.title = game.i18n.localize("sr3e.chat.contestExpired");
          btn.classList.add("expired");
@@ -453,16 +415,15 @@ function registerHooks() {
       const actor = contest.target;
       const controllingUser = OpposeRollService.resolveControllingUser(actor);
       const isControllingUser = game.user.id === controllingUser?.id;
-      const alreadyResponded = contest.targetRoll !== null || message.flags?.sr3e?.opposedResponded;
 
-      if (!isControllingUser || alreadyResponded) return;
+      if (!isControllingUser) return;
 
       btn.onclick = async () => {
          console.log(`[sr3e] Respond button clicked by ${game.user.name} for contest ${contestId}`);
 
-         const contest = OpposeRollService.getContestById(contestId);
+         const current = OpposeRollService.getContestById(contestId);
 
-         if (!contest) {
+         if (!current || current.resolved || current.aborted) {
             btn.disabled = true;
             btn.classList.add("expired");
             btn.innerText = game.i18n.localize("sr3e.chat.contestExpired");
@@ -474,12 +435,12 @@ function registerHooks() {
          btn.classList.add("responded");
          btn.innerText = game.i18n.localize("sr3e.chat.responded");
 
-         const actorSheet = contest.target.sheet;
+         const actorSheet = current.target.sheet;
          if (!actorSheet.rendered) await actorSheet.render(true);
 
          const caller = {
-            key: contest.options.attributeName,
-            type: contest.options.callerType,
+            key: current.options.attributeName,
+            type: current.options.callerType,
             dice: 0,
             value: 0,
             responseMode: true,
@@ -487,14 +448,6 @@ function registerHooks() {
          };
 
          actorSheet.setRollComposerData(caller);
-
-         const rollData = await OpposeRollService.waitForResponse(contestId);
-
-         await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
-            contestId,
-            rollData,
-            initiatorId: contest.initiator.id,
-         });
       };
 
       container.appendChild(btn);

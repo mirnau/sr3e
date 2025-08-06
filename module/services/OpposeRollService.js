@@ -1,63 +1,39 @@
-const activeContests = new Map();
-const pendingResponses = new Map();
-
 export default class OpposeRollService {
-   static getContestById(id) {
-      return activeContests.get(id);
+   static #getMessage(contestId) {
+      return game.messages.find((m) => m.flags?.sr3e?.opposed?.contestId === contestId);
    }
 
-   static waitForResponse(contestId) {
-      return new Promise((resolve) => {
-         pendingResponses.set(contestId, resolve);
-      });
-   }
-
-   static deliverResponse(contestId, rollData) {
-      const resolver = pendingResponses.get(contestId);
-      resolver(rollData);
-      pendingResponses.delete(contestId);
-   }
-
-   static abortOpposedRoll(contestId) {
-      const contest = activeContests.get(contestId);
-      if (contest) {
-         activeContests.delete(contestId);
-         console.log("[sr3e] Abort deleted successfully.");
-      }
+   static getContestById(contestId) {
+      const msg = this.#getMessage(contestId);
+      if (!msg) return null;
+      const data = msg.flags.sr3e.opposed;
+      return {
+         id: data.contestId,
+         initiator: game.actors.get(data.initiatorId),
+         target: game.actors.get(data.targetId),
+         initiatorRoll: data.initiatorRoll,
+         targetRoll: data.targetRoll ?? null,
+         options: data.options ?? {},
+         resolved: data.resolved ?? false,
+         pending: data.pending ?? false,
+         aborted: data.aborted ?? false,
+         message: msg,
+      };
    }
 
    static getContestForTarget(target) {
-      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
-   }
-
-   static registerContest({ contestId, initiator, target, rollData, options }) {
-      activeContests.set(contestId, {
-         id: contestId,
-         initiator,
-         target,
-         initiatorRoll: rollData,
-         targetRoll: null,
-         options,
-         isResolved: false,
+      const msg = game.messages.find((m) => {
+         const data = m.flags?.sr3e?.opposed;
+         return data && data.targetId === target.id && !data.resolved && data.pending;
       });
+      if (!msg) return null;
+      return this.getContestById(msg.flags.sr3e.opposed.contestId);
    }
 
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
-
-      this.registerContest({ contestId, initiator, target, rollData, options });
-
-      const targetUser = this.resolveControllingUser(target);
-
-      await targetUser.query("sr3e.opposeRollPrompt", {
-         contestId,
-         initiatorId: initiator.id,
-         targetId: target.id,
-         rollData,
-         options: options,
-      });
-
       const initiatorUser = this.resolveControllingUser(initiator);
+      const targetUser = this.resolveControllingUser(target);
       const whisperIds = [initiatorUser.id, targetUser.id];
 
       await ChatMessage.create({
@@ -67,7 +43,20 @@ export default class OpposeRollService {
          <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
          <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
       `,
-         flags: { "sr3e.opposed": contestId },
+         flags: {
+            sr3e: {
+               opposed: {
+                  contestId,
+                  initiatorId: initiator.id,
+                  targetId: target.id,
+                  initiatorRoll: rollData,
+                  targetRoll: null,
+                  options,
+                  resolved: false,
+                  pending: true,
+               },
+            },
+         },
       });
 
       return contestId;
@@ -88,30 +77,52 @@ export default class OpposeRollService {
    }
 
    static async resolveTargetRoll(contestId, rollData) {
-      console.log("rollData", rollData);
+      const msg = this.#getMessage(contestId);
+      if (!msg) return;
 
-      const contest = activeContests.get(contestId);
-      contest.targetRoll = rollData;
-      contest.isResolved = true;
+      const data = foundry.utils.duplicate(msg.flags.sr3e.opposed);
+      data.targetRoll = rollData;
+      data.resolved = true;
+      data.pending = false;
 
-      const { initiator, target, initiatorRoll, targetRoll } = contest;
+      const initiator = game.actors.get(data.initiatorId);
+      const target = game.actors.get(data.targetId);
+      const initiatorRoll = data.initiatorRoll;
+      const targetRoll = rollData;
       const netSuccesses = OpposeRollService.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
-      const speaker = initiator;
-      const rollMode = game.settings.get("core", "rollMode");
 
-      const initiatorUser = this.resolveControllingUser(initiator);
-      const targetUser = this.resolveControllingUser(target);
+      const content = this.#buildContestMessage({
+         initiator,
+         target,
+         initiatorRoll,
+         targetRoll,
+         winner,
+         netSuccesses,
+      });
 
-      const content = this.#buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses });
-      const chatData = this.#prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode });
+      await msg.update({
+         content,
+         [`flags.sr3e.opposed`]: data,
+      });
+   }
 
-      await ChatMessage.create(chatData);
+   static async abortOpposedRoll(contestId) {
+      const msg = this.#getMessage(contestId);
+      if (!msg) return;
+      const data = foundry.utils.duplicate(msg.flags.sr3e.opposed);
+      data.pending = false;
+      data.resolved = false;
+      data.aborted = true;
 
-      const dialogId = `sr3e-opposed-roll-${contestId}`;
-      ui.windows[dialogId]?.close();
+      const initiator = game.actors.get(data.initiatorId);
+      const target = game.actors.get(data.targetId);
+      const content = `<p><strong>${initiator.name}</strong>'s opposed roll against <strong>${target.name}</strong> was aborted.</p>`;
 
-      activeContests.delete(contestId);
+      await msg.update({
+         content,
+         [`flags.sr3e.opposed`]: data,
+      });
    }
 
    static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses }) {
@@ -123,33 +134,6 @@ export default class OpposeRollService {
       ${this.#buildDiceHTML(target, targetRoll)}
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
    `;
-   }
-
-   static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
-      const chatData = {
-         speaker: ChatMessage.getSpeaker({ actor: speaker }),
-         user: initiatorUser?.id ?? game.user.id,
-         content,
-         flags: { "sr3e.opposedResolved": true },
-      };
-
-      switch (rollMode) {
-         case "gmroll":
-            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-            break;
-         case "blindroll":
-            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-            chatData.blind = true;
-            break;
-         case "selfroll":
-            chatData.whisper = [initiatorUser.id, targetUser.id];
-            break;
-         case "public":
-         default:
-            break;
-      }
-
-      return chatData;
    }
 
    static #buildDiceHTML(actor, rollData) {
@@ -220,3 +204,4 @@ export default class OpposeRollService {
       return term.results.filter((r) => r.active && r.result >= tn).length;
    }
 }
+
