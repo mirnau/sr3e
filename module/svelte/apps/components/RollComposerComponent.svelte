@@ -197,6 +197,7 @@
          callerType: caller.type,
          targetNumber,
          opposed: true,
+         itemId: caller.item?.id,
       };
 
       const baseRoll = SR3ERoll.create(
@@ -235,6 +236,7 @@
             callerType: caller.type,
             targetNumber,
             opposed: true,
+            itemId: caller.item?.id,
          }
       );
 

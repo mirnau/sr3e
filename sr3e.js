@@ -500,6 +500,32 @@ function registerHooks() {
       container.appendChild(btn);
    });
 
+   Hooks.on("renderChatMessageHTML", (message, html) => {
+      const flags = message.flags?.sr3e;
+      if (!flags?.damageResistance) return;
+
+      const container = html.querySelector(".sr3e-resist-damage-button");
+      if (!container) {
+         console.warn("[sr3e] Damage resistance container not found in HTML", html);
+         return;
+      }
+
+      const button = document.createElement("button");
+      button.textContent = game.i18n.localize("sr3e.resistDamage") || "Resist Damage";
+      button.addEventListener("click", () => {
+         try {
+            const context = JSON.parse(decodeURIComponent(container.dataset.context));
+            console.log("[sr3e] Resist button clicked", context);
+            OpposeRollService.resolveDamageResistance(context);
+         } catch (e) {
+            console.error("[sr3e] Failed to parse damage resistance context", e);
+         }
+      });
+
+      container.appendChild(button);
+      console.log("[sr3e] Resist damage button injected into chat message");
+   });
+
    Hooks.once(hooks.init, () => {
       configureProject();
       configureThemes();

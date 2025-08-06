@@ -95,18 +95,34 @@ export default class OpposeRollService {
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
-      // Compute and apply weapon damage if the initiator won and used a weapon
       let damageText = "";
-      if (winner === initiator && initiatorRoll.options?.itemId) {
-         const weapon = initiator.items.get(initiatorRoll.options.itemId);
+      const itemId = initiatorRoll.options?.itemId;
+      console.log("[sr3e] Checking weapon roll payload", { itemId });
+
+      let contestCopy = null;
+
+      if (winner === initiator && itemId) {
+         const weapon = initiator.items.get(itemId);
+         console.log("[sr3e] Retrieved item for damage application", weapon);
+
          if (weapon?.type === "weapon") {
-            const totalDamage = await this.applyWeaponDamage({
-               weapon,
+            const damageLevel = weapon.system.damage?.level ?? "M";
+            const power = Number(weapon.system.damage?.power) || 0;
+            const damageType = weapon.system.damage?.type ?? "Physical";
+
+            const stagedLevel = this.stageDamage(damageLevel, netSuccesses);
+
+            damageText = `<p><strong>${target.name}</strong> must resist <strong>${stagedLevel} ${damageType}</strong> damage from <em>${weapon.name}</em>.</p>`;
+
+            contestCopy = {
                attacker: initiator,
                defender: target,
-               netSuccesses,
-            });
-            damageText = `<p><strong>${initiator.name}</strong> inflicts <strong>${totalDamage}</strong> damage to <strong>${target.name}</strong> using <em>${weapon.name}</em>.</p>`;
+               weapon,
+               power,
+               stagedLevel,
+               damageType,
+               contestId,
+            };
          }
       }
 
@@ -131,24 +147,144 @@ export default class OpposeRollService {
       await ChatMessage.create(chatData);
 
       ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
-      activeContests.delete(contestId);
+      activeContests.delete(contestId); // important for cleanup
+
+      if (contestCopy) {
+         setTimeout(() => {
+            this.promptDamageResistance(contestCopy).catch(console.error);
+         }, 200);
+      }
    }
 
-   static async applyWeaponDamage({ weapon, attacker, defender, netSuccesses }) {
-      const weaponData = weapon.system;
-      const damageBase = Number(weaponData.damage?.value) || 0;
-      const damageStaging = Number(weaponData.damage?.staging) || 1;
-      const totalDamage = damageBase + (netSuccesses * damageStaging);
-
-      await defender.update({
-         "system.health.damage.value": Math.min(
-            defender.system.health.damage.value + totalDamage,
-            defender.system.health.damage.max
-         ),
+   static async promptDamageResistance({ attacker, defender, weapon, power, stagedLevel, damageType, contestId }) {
+      console.log("[sr3e] promptDamageResistance called", {
+         attacker,
+         defender,
+         weapon,
+         power,
+         stagedLevel,
+         damageType,
+         contestId,
       });
 
-      console.warn(`[sr3e] ${attacker.name} inflicted ${totalDamage} damage to ${defender.name}`);
-      return totalDamage;
+      const defenderUser = this.resolveControllingUser(defender);
+
+      try {
+         const context = {
+            stagedLevel,
+            power,
+            damageType,
+            weaponId: weapon.id,
+            defenderId: defender.id,
+         };
+
+         const message = await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ actor: defender }),
+            whisper: [defenderUser.id],
+            content: `
+               <p><strong>${defender.name}</strong>, resist <strong>${stagedLevel} ${damageType}</strong> damage from <em>${weapon.name}</em>.</p>
+               <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
+            `,
+            flags: {
+               sr3e: {
+                  damageResistance: context,
+               },
+            },
+         });
+         console.log("[sr3e] Damage resistance message created", message);
+      } catch (err) {
+         console.error("[sr3e] Failed to create damage resistance message", err);
+      }
+   }
+
+   static async resolveDamageResistance({ stagedLevel, power, damageType, weaponId, defenderId }) {
+      const actor = game.actors.get(defenderId);
+      if (!actor) return ui.notifications.warn("Defender not found");
+
+      const weapon = actor.items.get(weaponId) || game.items.get(weaponId);
+      if (!weapon) return ui.notifications.warn("Weapon not found");
+
+      const damageKey = damageType;
+      const { baseLevel, healthType } = this.parseDamageType(damageKey);
+
+      const body = actor.system.attributes.body.value || 0;
+      const combatPool = actor.system.dicePools.combat.value || 0;
+      const armorRating = 0; // TODO: integrate armor system later
+
+      const tn = Math.max(2, power - armorRating);
+      const dicePool = body + combatPool;
+
+      const roll = await new Roll(`${dicePool}d6x${tn}`).evaluate();
+      const successes = roll.terms[0].results.filter((r) => r.result >= tn && !r.discarded).length;
+
+      const finalLevel = this.stageDamage(stagedLevel, -Math.floor(successes / 2));
+
+      const damageBoxes =
+         {
+            L: 1,
+            M: 3,
+            S: 6,
+            D: 10,
+         }[finalLevel] || 0;
+
+      const current = actor.system.health[healthType].value || 0;
+      const max = actor.system.health[healthType].max || 10;
+
+      const overflow = Math.max(0, current + damageBoxes - max);
+      const finalValue = Math.min(current + damageBoxes, max);
+
+      await actor.update({
+         [`system.health.${healthType}.value`]: finalValue,
+         ...(overflow > 0 && healthType === "physical"
+            ? { "system.health.overflow.value": (actor.system.health.overflow.value || 0) + overflow }
+            : {}),
+      });
+
+      const message = `
+         <p><strong>${actor.name}</strong> resisted damage from <em>${weapon.name}</em>!</p>
+         <p>Resistance successes: <strong>${successes}</strong></p>
+         <p>Final damage level: <strong>${finalLevel}</strong> (${damageBoxes} boxes of ${healthType})</p>
+         <p>Damage applied: ${damageBoxes} → ${healthType} now at ${finalValue}${
+         overflow > 0 ? `, with ${overflow} overflow` : ""
+      }</p>
+      `;
+
+      ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor }),
+         content: message,
+         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+         whisper: [game.user.id],
+      });
+   }
+
+   static stageDamage(baseLevel, netSuccesses) {
+      const levels = ["L", "M", "S", "D"];
+      let index = levels.indexOf(baseLevel);
+      if (index === -1) index = 1;
+      index += Math.floor(netSuccesses / 2);
+      return levels[Math.min(index, levels.length - 1)];
+   }
+
+   static parseDamageType(damageTypeKey) {
+      const isStun = damageTypeKey.toLowerCase().includes("stun");
+      const base = damageTypeKey.replace(/stun/i, "").toUpperCase();
+      return {
+         baseLevel: base || "M",
+         healthType: isStun ? "stun" : "physical",
+      };
+   }
+
+   static computeNetSuccesses(initiatorRollData, targetRollData) {
+      const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
+      const targetSuccesses = this.getSuccessCount(targetRollData);
+      return initiatorSuccesses - targetSuccesses;
+   }
+
+   static getSuccessCount(rollData) {
+      const term = rollData.terms[0];
+      const tn = rollData.options?.targetNumber;
+      if (!tn || !term?.results) return 0;
+      return term.results.filter((r) => r.active && r.result >= tn).length;
    }
 
    static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
@@ -240,20 +376,5 @@ export default class OpposeRollService {
             <h4 class="dice-total">${successes} successes (TN: ${tn})</h4>
          </div>
       </div>`;
-   }
-
-   static computeNetSuccesses(initiatorRollData, targetRollData) {
-      const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
-      const targetSuccesses = this.getSuccessCount(targetRollData);
-      return initiatorSuccesses - targetSuccesses;
-   }
-
-   static getSuccessCount(rollData) {
-      const term = rollData.terms[0];
-      const tn = rollData.options?.targetNumber;
-
-      if (!tn || !term?.results) return 0;
-
-      return term.results.filter((r) => r.active && r.result >= tn).length;
    }
 }
