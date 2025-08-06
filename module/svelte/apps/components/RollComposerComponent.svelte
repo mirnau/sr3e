@@ -56,9 +56,13 @@
    });
 
    let associatedDicePoolStore;
+   // svelte-ignore non_reactive_update
    let containerEl;
+   // svelte-ignore non_reactive_update
    let selectEl;
+   // svelte-ignore non_reactive_update
    let rollBtn;
+   // svelte-ignore non_reactive_update
    let clearBtn;
    let callingSkill;
    let linkedAttributeString;
@@ -250,12 +254,8 @@
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 
-   function Abort() {
-      const contest = OpposeRollService.getContestForTarget(actor);
-      if (contest) {
-         CONFIG.queries["sr3e.abortOpposedRoll"]({ contestId: contest.id });
-         console.log("[sr3e] Abort query dispatched successfully.");
-      }
+   export function Abort() {
+      OpposeRollService.expireContest(contestId);
       visible = false;
       onclose?.();
    }
