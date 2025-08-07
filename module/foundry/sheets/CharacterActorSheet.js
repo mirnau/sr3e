@@ -118,9 +118,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
             actor: this.document,
             config: CONFIG.sr3e,
             caller: null, // empty initially
-            onclose: () => {
-               // could hide if needed
-            },
          },
       });
    }

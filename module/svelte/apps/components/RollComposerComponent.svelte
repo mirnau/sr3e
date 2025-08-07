@@ -6,8 +6,12 @@
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
    import OpposeRollService from "@services/OpposeRollService.js";
+   import Respond from "@sveltecomponent/Respond.svelte";
+   import Resistance from "@sveltecomponent/Resistance.svelte";
+   import Challenge from "@sveltecomponent/Challenge.svelte";
+   import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
 
-   let { actor, config, onclose, visible = false } = $props();
+   let { actor, config, visible = false } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
@@ -41,6 +45,7 @@
    let hasChallenged = $state(false);
    let isResponding = $state(false);
    let modifiedTargetNumber = $state(0);
+   let isResistingDamage = $state(false);
 
    // Initialize caller with default values
    let caller = $state({
@@ -84,8 +89,28 @@
       }
 
       isResponding = caller.responseMode || false;
-
       hasTarget = game.user.targets.size > 0;
+
+      if (caller.type === "resistance") {
+         // Lock to Body attribute
+         caller.key = "body";
+
+         // Set title explicitly
+         title = localize(config.attributes.body);
+
+         // Get base Body dice
+         const bodyStore = actorStoreManager.GetRWStore("attributes.body.value");
+         caller.dice = get(bodyStore);
+         caller.value = caller.dice;
+
+         targetNumber = caller.power ?? 4;
+
+         // Force default dice pool to combat pool
+         associatedDicePoolString = "combatPool";
+         currentDicePoolSelectionStore.set(associatedDicePoolString);
+
+         isResistingDamage = false;
+      }
    }
 
    function resetToDefaults() {
@@ -102,13 +127,9 @@
    }
 
    $effect(() => {
-      if (!caller.type) return;
+      $shouldDisplaySheen = !isDefaulting;
 
-      console.log("caller type", caller.type);
-
-      if (caller.type === "active" || caller.type === "attribute") {
-         $shouldDisplaySheen = true;
-      } else {
+      if (!visible) {
          $shouldDisplaySheen = false;
       }
    });
@@ -176,91 +197,18 @@
       }
    }
 
-   async function Challenge() {
-      hasChallenged = true;
-      console.warn("Challenge: Initiating opposed rolls.");
-
-      const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
-
-      if (targets.length === 0) {
-         console.warn("No targets selected for opposed roll");
-         return;
-      }
-
-      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
-
-      const options = {
-         attributeName: caller.key,
-         skillName: caller.name,
-         specializationName: caller.specialization,
-         modifiers: modifiersArray,
-         callerType: caller.type,
-         targetNumber,
-         opposed: true,
-         itemId: caller.item?.id,
-      };
-
-      const baseRoll = SR3ERoll.create(
-         SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,
-            explodes: !isDefaulting,
-         }),
-         { actor },
-         options
-      );
-
-      const roll = await baseRoll.evaluate(options);
-      await baseRoll.waitForResolution();
-
-      console.log("Challenge: All contests resolved.");
-      await CommitEffects();
-      Hooks.callAll("actorSystemRecalculated", actor);
-      OpposeRollService.expireContest(roll.options.contestId);
-      visible = false;
-   }
-
-   async function Respond() {
-      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
-
-      const roll = SR3ERoll.create(
-         SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,
-            explodes: !isDefaulting,
-         }),
-         { actor },
-         {
-            attributeName: caller.key,
-            skillName: caller.name,
-            specializationName: caller.specialization,
-            modifiers: modifiersArray,
-            callerType: caller.type,
-            targetNumber,
-            opposed: true,
-            itemId: caller.item?.id,
-         }
-      );
-
-      await roll.evaluate({ suppressMessage: true });
-
-      const contest = OpposeRollService.getContestById(caller.contestId);
-      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
-
-      await initiatorUser.query("sr3e.resolveOpposedRoll", {
-         contestId: caller.contestId,
-         rollData: roll.toJSON(),
-      });
-
-      await CommitEffects();
-      visible = false;
-      OpposeRollService.expireContest(caller.contestId);
-      Hooks.callAll("actorSystemRecalculated", actor);
-   }
-
    export function Abort() {
       OpposeRollService.expireContest(contestId);
-      visible = false;
-      onclose?.();
+      OnClose();
    }
+
+   function OnClose() {
+      visible = false;
+   }
+
+   $effect(() => {
+      if (!visible) $shouldDisplaySheen = false;
+   });
 
    function updateFocusables() {
       if (!containerEl) return;
@@ -354,122 +302,12 @@
       canSubmit = modifiedTargetNumber > 1;
    });
 
-   async function HandleRoll(e) {
-      e?.preventDefault?.();
-      console.warn("HandleRoll triggered");
-
-      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
-
-      const roll = SR3ERoll.create(
-         SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,
-            explodes: !isDefaulting,
-         }),
-         { actor },
-         {
-            attributeName: caller.key,
-            skillName: caller.name,
-            specializationName: caller.specialization,
-            modifiers: modifiersArray,
-            callerType: caller.type,
-            targetNumber,
-            opposed: false,
-         }
-      );
-
-      await roll.evaluate();
-      await CommitEffects();
-
-      onclose?.({
-         dice: totalDice,
-         attributeName: caller.key,
-         options: {
-            targetNumber,
-            modifiers: modifiersArray,
-            explodes: !isDefaulting,
-         },
-      });
-
-      Hooks.callAll("actorSystemRecalculated", actor);
-
-      visible = false;
-   }
-
    async function CommitEffects() {
-      const isInCombat = game.combat !== null && game.combat !== undefined;
-
-      if (karmaCost > 0) {
-         const karmaEffect = {
-            name: `Karma Drain (${karmaCost})`,
-            label: `Used ${karmaCost} Karma Pool`,
-            icon: "icons/magic/light/explosion-star-glow-blue.webp",
-            changes: [
-               {
-                  key: "system.karma.karmaPool.mod",
-                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                  value: `-${karmaCost}`,
-                  priority: 1,
-               },
-            ],
-            origin: actor.uuid,
-            ...(isInCombat
-               ? {
-                    duration: {
-                       unit: "rounds",
-                       value: 1,
-                       startRound: game.combat.round,
-                       startTurn: game.combat.turn,
-                    },
-                 }
-               : {}),
-            flags: {
-               sr3e: {
-                  temporaryKarmaPoolDrain: true,
-                  expiresOutsideCombat: !isInCombat,
-               },
-            },
-         };
-
-         await actor.createEmbeddedDocuments("ActiveEffect", [karmaEffect], { render: false });
-      }
-
-      if (currentDicePoolAddition > 0 && currentDicePoolName) {
-         const effect = {
-            name: `Dice Pool Drain (${currentDicePoolName})`,
-            label: `Used ${currentDicePoolAddition} from ${currentDicePoolName}`,
-            icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
-            changes: [
-               {
-                  key: `system.dicePools.${currentDicePoolName}.mod`,
-                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                  value: `-${currentDicePoolAddition}`,
-                  priority: 1,
-               },
-            ],
-            origin: actor.uuid,
-            transfer: false,
-            ...(isInCombat
-               ? {
-                    duration: {
-                       unit: "rounds",
-                       value: 1,
-                       startRound: game.combat.round,
-                       startTurn: game.combat.turn,
-                    },
-                 }
-               : {}),
-            flags: {
-               sr3e: {
-                  temporaryDicePoolDrain: true,
-                  expiresOutsideCombat: !isInCombat,
-               },
-            },
-         };
-
-         await actor.createEmbeddedDocuments("ActiveEffect", [effect], { render: false });
-
-         actor.applyActiveEffects();
-      }
+      await actor.commitRollComposerEffects({
+         karmaCost,
+         poolName: currentDicePoolName,
+         poolCost: currentDicePoolAddition,
+      });
    }
 
    function getRoot(el) {
@@ -505,6 +343,19 @@
             return;
          }
          focusNext();
+      }
+   }
+
+   function AddDiceFromPool() {
+      const max = get(displayCurrentDicePoolStore)?.sum ?? 0;
+      if (currentDicePoolAddition < max) {
+         currentDicePoolAddition += 1;
+      }
+   }
+
+   function RemoveDiceFromPool() {
+      if (currentDicePoolAddition > 0) {
+         currentDicePoolAddition -= 1;
       }
    }
 
@@ -590,7 +441,7 @@
          {/each}
       </div>
 
-      {#if !(caller?.type === "attribute" && isDefaulting) && currentDicePoolName}
+      {#if !isDefaulting && currentDicePoolName}
          <div class="roll-composer-card">
             <h1>{localize(config.dicepools[currentDicePoolName])}</h1>
             <h4>Dice Added: {currentDicePoolAddition}</h4>
@@ -620,21 +471,55 @@
          </div>
       {/if}
 
-      {#if isResponding}
-         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Respond}>Respond!</button
-         >
+      {#if isResistingDamage}
+         <Resistance
+            {actor}
+            {caller}
+            {modifiersArray}
+            {targetNumber}
+            {modifiedTargetNumber}
+            {diceBought}
+            {currentDicePoolAddition}
+            {OnClose}
+            {CommitEffects}
+         />
+      {:else if isResponding}
+         <Respond
+            {actor}
+            {caller}
+            {modifiersArray}
+            {targetNumber}
+            {modifiedTargetNumber}
+            {diceBought}
+            {currentDicePoolAddition}
+            {OnClose}
+            {CommitEffects}
+         />
       {:else if hasTarget}
-         <button class="regular" type="button" disabled={!canSubmit || hasChallenged} onclick={Challenge}
-            >Challenge!</button
-         >
+         <Challenge
+            {actor}
+            {caller}
+            {modifiersArray}
+            {targetNumber}
+            {modifiedTargetNumber}
+            {diceBought}
+            {currentDicePoolAddition}
+            {OnClose}
+            {CommitEffects}
+         />
       {:else}
-         <button class="regular" type="button" disabled={!canSubmit} bind:this={rollBtn} onclick={HandleRoll}
-            >Roll!</button
-         >
+         <ComposerRoll
+            {actor}
+            {caller}
+            {modifiersArray}
+            {targetNumber}
+            {modifiedTargetNumber}
+            {diceBought}
+            {currentDicePoolAddition}
+            {isDefaulting}
+            {OnClose}
+            {CommitEffects}
+         />
       {/if}
-
-      <button class="regular" type="reset" bind:this={clearBtn} disabled={hasChallenged} onclick={Reset}>
-         Clear
-      </button>
    </div>
 {/if}

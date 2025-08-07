@@ -63,6 +63,80 @@ export default class SR3EActor extends Actor {
       });
    }
 
+   async commitRollComposerEffects({ karmaCost = 0, poolName = null, poolCost = 0 }) {
+      const isInCombat = game.combat !== null;
+
+      const effects = [];
+
+      if (karmaCost > 0) {
+         effects.push({
+            name: `Karma Drain (${karmaCost})`,
+            label: `Used ${karmaCost} Karma Pool`,
+            icon: "icons/magic/light/explosion-star-glow-blue.webp",
+            changes: [
+               {
+                  key: "system.karma.karmaPool.mod",
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${karmaCost}`,
+                  priority: 1,
+               },
+            ],
+            origin: this.uuid,
+            ...(isInCombat && {
+               duration: {
+                  unit: "rounds",
+                  value: 1,
+                  startRound: game.combat.round,
+                  startTurn: game.combat.turn,
+               },
+            }),
+            flags: {
+               sr3e: {
+                  temporaryKarmaPoolDrain: true,
+                  expiresOutsideCombat: !isInCombat,
+               },
+            },
+         });
+      }
+
+      if (poolCost > 0 && poolName) {
+         effects.push({
+            name: `Dice Pool Drain (${poolName})`,
+            label: `Used ${poolCost} from ${poolName}`,
+            icon: "systems/sr3e/textures/ai/icons/dicepool.webp",
+            changes: [
+               {
+                  key: `system.dicePools.${poolName}.mod`,
+                  mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                  value: `-${poolCost}`,
+                  priority: 1,
+               },
+            ],
+            origin: this.uuid,
+            transfer: false,
+            ...(isInCombat && {
+               duration: {
+                  unit: "rounds",
+                  value: 1,
+                  startRound: game.combat.round,
+                  startTurn: game.combat.turn,
+               },
+            }),
+            flags: {
+               sr3e: {
+                  temporaryDicePoolDrain: true,
+                  expiresOutsideCombat: !isInCombat,
+               },
+            },
+         });
+      }
+
+      if (effects.length > 0) {
+         await this.createEmbeddedDocuments("ActiveEffect", effects, { render: false });
+         this.applyActiveEffects();
+      }
+   }
+
    static Register() {
       CONFIG.Actor.documentClass = SR3EActor;
       console.log("sr3e /// ---> SR3EActor registered");
