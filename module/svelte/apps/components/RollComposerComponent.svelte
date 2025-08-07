@@ -204,6 +204,8 @@
 
    function OnClose() {
       visible = false;
+      currentDicePoolSelectionStore.set("");
+      currentDicePoolAddition = 0;
    }
 
    $effect(() => {
@@ -303,6 +305,8 @@
    });
 
    async function CommitEffects() {
+      if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
+
       await actor.commitRollComposerEffects({
          karmaCost,
          poolName: currentDicePoolName,
@@ -325,23 +329,28 @@
          e.preventDefault();
          e.stopPropagation();
          const root = getRoot(document.activeElement);
+
          if (root === rollBtn) {
-            CommitEffects();
+            rollBtn.click();
             return;
          }
+
          if (root === clearBtn) {
             Reset();
             return;
          }
+
          focusNext();
       } else if (e.key === "Tab") {
          e.preventDefault();
          e.stopPropagation();
          const root = getRoot(document.activeElement);
+
          if (root === rollBtn) {
             Reset();
             return;
          }
+
          focusNext();
       }
    }

@@ -1,10 +1,11 @@
 <script>
    import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";
-   import StatCard from "@sveltecomponent/basic/DerivedAttributeCard.svelte";
+   import DerivedAttributeCard from "@sveltecomponent/basic/DerivedAttributeCard.svelte";
    import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
+
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
@@ -53,11 +54,11 @@
 <CardToolbar {id} />
 <h1>{localize(config.dicepools.dicepools)}</h1>
 <MasonryGrid itemSelector="stat-card" gridPrefix="attribute">
-   <StatCard document={actor} label={config.dicepools.combat} value={$combat.sum} key="combat" isButton={true} />
-   <StatCard document={actor} label={config.dicepools.control} value={$control.sum} key="control" isButton={true} />
-   <StatCard document={actor} label={config.dicepools.hacking} value={$hacking.sum} key="hacking" isButton={true} />
+   <DerivedAttributeCard document={actor} label={config.dicepools.combat} value={$combat.sum} key="combat" isButton={true} />
+   <DerivedAttributeCard document={actor} label={config.dicepools.control} value={$control.sum} key="control" isButton={true} />
+   <DerivedAttributeCard document={actor} label={config.dicepools.hacking} value={$hacking.sum} key="hacking" isButton={true} />
    {#if isAwakened}
-      <StatCard document={actor} label={config.dicepools.astral} value={$astral.sum} key="astral" isButton={true} />
-      <StatCard document={actor} label={config.dicepools.spell} value={$spell.sum} key="spell" isButton={true} />
+      <DerivedAttributeCard document={actor} label={config.dicepools.astral} value={$astral.sum} key="astral" isButton={true} />
+      <DerivedAttributeCard document={actor} label={config.dicepools.spell} value={$spell.sum} key="spell" isButton={true} />
    {/if}
 </MasonryGrid>
