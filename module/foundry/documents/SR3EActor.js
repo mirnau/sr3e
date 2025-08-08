@@ -9,21 +9,21 @@ export default class SR3EActor extends Actor {
       await roll.evaluate();
    }
 
-   async AttributeRoll(dice, attributeName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+   async AttributeRoll(dice, attributeName, options = { modifiers: 0, explodes: true }) {
       const formula = SR3ERoll.buildFormula(dice, options);
       const roll = new SR3ERoll(formula, null, { ...options, attributeName });
       await roll.evaluate();
    }
 
-   async SkillRoll(dice, skillName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+   async SkillRoll(dice, skillName, options = { modifiers: 0, explodes: true }) {
       const formula = SR3ERoll.buildFormula(dice, options);
       const roll = new SR3ERoll(formula, null, { ...options, skillName });
       await roll.evaluate();
    }
 
-   async SpecializationRoll(dice, specializationName, options = { targetNumber: -1, modifiers: 0, explodes: true }) {
+   async SpecializationRoll(dice, specializationName, skillName, options = { explodes: true }) {
       const formula = SR3ERoll.buildFormula(dice, options);
-      const roll = new SR3ERoll(formula, null, { ...options, specializationName });
+      const roll = new SR3ERoll(formula, null, { ...options, specializationName, skillName });
       await roll.evaluate();
    }
 

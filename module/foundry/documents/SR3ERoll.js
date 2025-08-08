@@ -12,11 +12,13 @@ export default class SR3ERoll extends Roll {
 
    static buildFormula(dice, { explodes = true, targetNumber } = {}) {
       if (dice <= 0) return "1d6";
-
       const base = `${dice}d6`;
-      const mod = explodes ? (targetNumber != null ? `x${targetNumber}` : `x`) : "";
+      if (!explodes) return base;
 
-      return `${base}${mod}`;
+      if (targetNumber == null) return `${base}x`;
+
+      const tn = Number(targetNumber);
+      return `${base}x${Math.max(2, tn)}`;
    }
 
    async evaluate(options = {}) {
@@ -25,7 +27,6 @@ export default class SR3ERoll extends Roll {
 
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
 
-      // If this is an opposed roll (initiator), send to targets and exit
       if (this.options.opposed && actor) {
          const targets = Array.from(game.user.targets)
             .map((t) => t.actor)
@@ -61,6 +62,16 @@ export default class SR3ERoll extends Roll {
    }
 
    async toMessage() {
+      if (!this.options.opposed) {
+         const content = SR3ERoll.#buildVanillaRoll(this.actor, this.toJSON());
+         const flavor = this.getFlavor();
+         return ChatMessage.create({
+            content,
+            speaker: ChatMessage.getSpeaker(),
+            flavor,
+         });
+      }
+
       const flavor = this.getFlavor();
       return ChatMessage.create({
          content: await this.render(),
@@ -72,7 +83,6 @@ export default class SR3ERoll extends Roll {
    async waitForResolution() {
       if (!this._contested || !this._waitingOn) return;
 
-      // Defender: waiting on a single contest
       if (typeof this._waitingOn === "string") {
          const contestId = this._waitingOn;
 
@@ -87,7 +97,6 @@ export default class SR3ERoll extends Roll {
          return;
       }
 
-      // Initiator: waiting on multiple contests
       if (Array.isArray(this._waitingOn)) {
          await new Promise((resolve) => {
             const checkInterval = setInterval(() => {
@@ -103,15 +112,137 @@ export default class SR3ERoll extends Roll {
    }
 
    getFlavor() {
+      const callerType = this.options?.callerType;
       const parts = [];
-      if (this.options.attributeName) parts.push(game.i18n.localize(`sr3e.attributes.${this.options.attributeName}`));
-      if (this.options.skillName) parts.push(this.options.skillName);
-      if (this.options.specializationName) parts.push(`(${this.options.specializationName})`);
-      return parts.join(" ") || "SR3E Roll";
+      switch (callerType) {
+         case "skill":
+         case "specialization":
+            if (this.options.skillName) parts.push(this.options.skillName);
+            if (this.options.specializationName) parts.push(`(${this.options.specializationName})`);
+            break;
+         case "attribute":
+            parts.push(SR3ERoll.#attrLabel(this.options.attributeKey ?? this.options.attributeName));
+            break;
+         case "item":
+            if (this.options.itemName) parts.push(this.options.itemName);
+            break;
+         case "resistance": {
+            const a = SR3ERoll.#attrLabel(this.options.attributeKey ?? this.options.attributeName, false);
+            const staged = this.options.stagedLevel ? `${this.options.stagedLevel} ` : "";
+            const dtype = this.options.damageType ?? "Damage";
+            parts.push(`Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}`);
+            break;
+         }
+         default:
+            if (this.options.skillName) parts.push(this.options.skillName);
+            else if (this.options.itemName) parts.push(this.options.itemName);
+            else if (this.options.attributeName) parts.push(`Attribute:${this.options.attributeName}`);
+            else parts.push("SR3E Roll");
+            break;
+      }
+      return parts.join(" ");
    }
 
    static Register() {
       CONFIG.Dice.rolls = [SR3ERoll];
       window.Roll = SR3ERoll;
+   }
+
+   static #attrLabel(key, strict = true) {
+      const dict = CONFIG?.sr3e?.attributes ?? {};
+      const ok = key && Object.prototype.hasOwnProperty.call(dict, key);
+      if (strict && !ok) throw new Error(`Unknown attribute key: ${key}`);
+      return ok ? game.i18n.localize(`sr3e.attributes.${key}`) : key ?? "";
+   }
+
+   static #buildVanillaRoll(actor, rollData) {
+      const term = rollData.terms?.[0];
+      const raw = term?.results ?? [];
+      const results = raw.filter((r) => r.active !== false);
+      const dice = results.length;
+
+      const tn = Number(rollData?.options?.targetNumber);
+      const hasTN = Number.isFinite(tn);
+      const successes = hasTN ? results.filter((r) => !r.discarded && r.result >= tn).length : null;
+
+      const ones = results.filter((r) => r.result === 1).length;
+      const critical = ones >= Math.ceil(dice / 2);
+
+      const callerType = rollData.options?.callerType;
+      const skill = rollData.options?.skillName;
+      const specialization = rollData.options?.specializationName;
+      const attributeKey = rollData.options?.attributeKey ?? rollData.options?.attributeName;
+      const itemName = rollData.options?.itemName;
+
+      const explodeMod = term?.modifiers?.find?.((m) => /^x\d*$/.test(m)) ?? "";
+      const shownFormula = `${term?.number ?? "?"}d6${explodeMod}`;
+      const formula = rollData.formula ?? shownFormula;
+
+      let description;
+      switch (callerType) {
+         case "skill":
+         case "specialization":
+            description = skill ? (specialization ? `${skill} (${specialization})` : skill) : "Unspecified roll";
+            break;
+         case "attribute":
+            description = SR3ERoll.#attrLabel(attributeKey);
+            break;
+         case "item":
+            description = itemName ?? "Unspecified roll";
+            break;
+         case "resistance": {
+            const a = SR3ERoll.#attrLabel(attributeKey, false);
+            const staged = rollData.options?.stagedLevel ? `${rollData.options.stagedLevel} ` : "";
+            const dtype = rollData.options?.damageType ?? "Damage";
+            description = `Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}`;
+            break;
+         }
+         default:
+            description = skill || itemName || (attributeKey ? `Attribute:${attributeKey}` : "Unspecified roll");
+            break;
+      }
+
+      const headerRight = hasTN
+         ? `${successes} ${successes === 1 ? "success" : "successes"} (TN: ${tn})`
+         : `Dice: ${dice}`;
+      const status = critical
+         ? `<div class="sr3e-chat__critical">Critical failure</div>`
+         : hasTN && successes === 0
+         ? `<div class="sr3e-chat__failure">Failure</div>`
+         : hasTN
+         ? `<div class="sr3e-chat__successes">${successes} ${successes === 1 ? "success" : "successes"}</div>`
+         : "";
+
+      return `
+  <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
+    <div class="dice-result">
+      <div class="dice-context"><em>${description} vs TN ${hasTN ? tn : "?"} using ${formula}</em></div>
+      <div class="dice-formula">${formula}</div>
+      <div class="dice-tooltip">
+        <div class="wrapper">
+          <section class="tooltip-part">
+            <div class="dice">
+              <header class="part-header flexrow">
+                <span class="part-formula">${shownFormula}</span>
+                <span class="part-total">${headerRight}</span>
+              </header>
+              <ol class="dice-rolls">
+                ${results
+                   .map((d) => {
+                      const cls = ["roll", "_sr3edie", "d6"];
+                      if (d.result === 6) cls.push("max");
+                      if (d.exploded) cls.push("explode", "exploded");
+                      if (hasTN && d.result >= tn) cls.push("success");
+                      return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                   })
+                   .join("")}
+              </ol>
+            </div>
+          </section>
+        </div>
+      </div>
+      ${status}
+    </div>
+  </div>`;
    }
 }

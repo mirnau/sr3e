@@ -40,7 +40,7 @@
          });
       } else {
          if (specializationName) {
-            await actor.SpecializationRoll(dice, specializationName);
+            await actor.SpecializationRoll(dice, specializationName, skill.name);
          } else {
             await actor.SkillRoll(dice, skill.name);
          }
