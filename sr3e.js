@@ -52,6 +52,8 @@ import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte
 import CharacterCreationDialogApp from "@apps/dialogs/CharacterCreationDialogApp.svelte";
 import { mount, unmount } from "svelte";
 
+import { debugActorPoolUpdates, debugAECreate } from "@root/DebugHookFuncs.js";
+
 const { DocumentSheetConfig } = foundry.applications.apps;
 
 function registerDocumentTypes({ args }) {
@@ -525,6 +527,14 @@ function registerHooks() {
       container.appendChild(button);
       console.log("[sr3e] Resist damage button injected into chat message");
    });
+
+   const DEBUG = true;
+   if (DEBUG) {
+      Hooks.once("ready", () => {
+         debugActorPoolUpdates();
+         debugAECreate();
+      });
+   }
 
    Hooks.once(hooks.init, () => {
       configureProject();

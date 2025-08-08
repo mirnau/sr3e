@@ -10,6 +10,7 @@
    import Resistance from "@sveltecomponent/Resistance.svelte";
    import Challenge from "@sveltecomponent/Challenge.svelte";
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
+   import { get } from "svelte/store";
 
    let { actor, config, visible = false } = $props();
 
@@ -355,19 +356,6 @@
       }
    }
 
-   function AddDiceFromPool() {
-      const max = get(displayCurrentDicePoolStore)?.sum ?? 0;
-      if (currentDicePoolAddition < max) {
-         currentDicePoolAddition += 1;
-      }
-   }
-
-   function RemoveDiceFromPool() {
-      if (currentDicePoolAddition > 0) {
-         currentDicePoolAddition -= 1;
-      }
-   }
-
    function swallowDirectional(e) {
       if (
          e.key === "Shift" ||
@@ -459,8 +447,6 @@
                bind:value={currentDicePoolAddition}
                min={0}
                max={$displayCurrentDicePoolStore.sum}
-               onIncrement={AddDiceFromPool}
-               onDecrement={RemoveDiceFromPool}
             />
          </div>
       {/if}

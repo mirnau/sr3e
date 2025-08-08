@@ -133,7 +133,6 @@ export default class SR3EActor extends Actor {
 
       if (effects.length > 0) {
          await this.createEmbeddedDocuments("ActiveEffect", effects, { render: false });
-         this.applyActiveEffects();
       }
    }
 
