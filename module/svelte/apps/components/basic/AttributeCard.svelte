@@ -114,7 +114,7 @@
             {
                attributeName: key,
                callerType: "attribute",
-               opposed: game.user.targets.size > 0,
+               opposed: false,
             }
          );
 
