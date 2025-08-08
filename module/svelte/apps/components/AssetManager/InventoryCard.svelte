@@ -1,5 +1,5 @@
 <script>
-   import {onDestroy, onMount } from "svelte";
+   import { onDestroy, onMount } from "svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
@@ -76,31 +76,23 @@
    }
    function performItemAction() {
       const actor = item.parent;
-      const [skillId, specIndex] = item.system.linkedSkilliD.split("::");
+      const linked = item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "";
+      const [skillId, specIndex] = linked.split("::");
       const skill = actor.items.get(skillId);
       const skillData = skill.system.activeSkill;
 
-      let specialization = null;
-      let dice = 0;
-      let key = skill.name;
-      let type = "skill";
-
-      if (specIndex !== undefined) {
-         specialization = skillData.specializations[parseInt(specIndex)];
-         dice = specialization.value;
-         key = `${skill.name} - ${specialization.name}`;
-         type = "specialization";
-      } else {
-         dice = skillData.value;
-      }
+      const spec = Number.isFinite(parseInt(specIndex)) ? skillData.specializations[parseInt(specIndex)] : null;
+      const dice = spec ? spec.value : skillData.value;
 
       const caller = {
-         key,
+         callerType: "item",
+         key: item.id,
          value: 0,
-         type,
          dice,
          skillId,
-         specialization,
+         skillName: skill.name,
+         specializationName: spec ? spec.name : undefined,
+         itemName: item.name,
          item,
       };
 

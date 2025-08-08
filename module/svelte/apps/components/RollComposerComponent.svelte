@@ -159,10 +159,11 @@
          }
 
          case "item": {
-            // If the item has a linked skill, resolve it
-            const [skillId] = item.system.linkedSkilliD?.split("::") ?? [];
+            const item = actor.items.get(caller.key) || game.items.get(caller.key);
+            title = item.name;
+            const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
             const skill = actor.items.get(skillId);
-            prepareSkillBasedRoll(skill);
+            prepareSkillBasedRoll(skill, item.name);
             break;
          }
 

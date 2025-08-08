@@ -178,33 +178,43 @@ export default class SR3ERoll extends Roll {
       const shownFormula = `${term?.number ?? "?"}d6${explodeMod}`;
       const formula = rollData.formula ?? shownFormula;
 
-      let description;
+      let descriptionHtml;
       switch (callerType) {
+         case "item": {
+            const rows = [];
+            if (itemName) rows.push(`<div>Weapon: ${itemName}</div>`);
+            if (skill) rows.push(`<div>Skill: ${skill}</div>`);
+            if (specialization) rows.push(`<div>Specialization: ${specialization}</div>`);
+            descriptionHtml = rows.join("") || `<div>Unspecified roll</div>`;
+            break;
+         }
          case "skill":
          case "specialization":
-            description = skill ? (specialization ? `${skill} (${specialization})` : skill) : "Unspecified roll";
+            descriptionHtml = `<div>${
+               skill ? (specialization ? `${skill} (${specialization})` : skill) : "Unspecified roll"
+            }</div>`;
             break;
          case "attribute":
-            description = SR3ERoll.#attrLabel(attributeKey);
-            break;
-         case "item":
-            description = itemName ?? "Unspecified roll";
+            descriptionHtml = `<div>${SR3ERoll.#attrLabel(attributeKey)}</div>`;
             break;
          case "resistance": {
             const a = SR3ERoll.#attrLabel(attributeKey, false);
             const staged = rollData.options?.stagedLevel ? `${rollData.options.stagedLevel} ` : "";
             const dtype = rollData.options?.damageType ?? "Damage";
-            description = `Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}`;
+            descriptionHtml = `<div>Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}</div>`;
             break;
          }
          default:
-            description = skill || itemName || (attributeKey ? `Attribute:${attributeKey}` : "Unspecified roll");
+            descriptionHtml = `<div>${
+               skill || itemName || (attributeKey ? `Attribute:${attributeKey}` : "Unspecified roll")
+            }</div>`;
             break;
       }
 
       const headerRight = hasTN
          ? `${successes} ${successes === 1 ? "success" : "successes"} (TN: ${tn})`
          : `Dice: ${dice}`;
+
       const status = critical
          ? `<div class="sr3e-chat__critical">Critical failure</div>`
          : hasTN && successes === 0
@@ -216,7 +226,7 @@ export default class SR3ERoll extends Roll {
       return `
   <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
     <div class="dice-result">
-      <div class="dice-context"><em>${description} vs TN ${hasTN ? tn : "?"} using ${formula}</em></div>
+      <div class="dice-context"><em>${descriptionHtml}${hasTN ? ` vs TN ${tn}` : ""} using ${formula}</em></div>
       <div class="dice-formula">${formula}</div>
       <div class="dice-tooltip">
         <div class="wrapper">
