@@ -1895,25 +1895,33 @@
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 1rem), calc(100% - 1rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   .toolbar {
-    display: flex;
-    flex-direction: row;
     position: absolute;
-    top: 0rem;
-    right: 0rem;
-    padding: 0.5rem;
+    top: 0.25rem;
+    right: 0.5rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     opacity: 0;
     transition: opacity 0.2s ease;
   }
   .toolbar:hover {
     opacity: 1;
-    transition: opacity 0.2s ease;
   }
   .toolbar .sr3e-toolbar-button {
-    margin-left: 0.25rem;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    line-height: 1;
   }
   .pulsing-green-cart {
     color: inherit;
