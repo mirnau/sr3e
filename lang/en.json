@@ -46,7 +46,8 @@
          "priority": "Priority",
          "custom": "Custom",
          "other": "Other",
-         "details": "Details"
+         "details": "Details",
+         "isdefaulting": "Defaulting"
       },
       "dicepools": {
          "associateselect": "Choose an Associated Dicepool...",

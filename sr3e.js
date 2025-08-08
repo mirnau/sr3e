@@ -481,7 +481,7 @@ function registerHooks() {
 
          const caller = {
             key: contest.options.attributeName,
-            type: contest.options.callerType,
+            type: contest.options.type,
             dice: 0,
             value: 0,
             responseMode: true,

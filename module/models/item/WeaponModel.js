@@ -36,16 +36,17 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
             initial: 0.0,
          }),
          reloadMechanism: new foundry.data.fields.StringField({
-               required: true,
-               initial: ""
-            }
-         ),
+            required: true,
+            initial: "",
+         }),
          linkedSkilliD: new foundry.data.fields.StringField({
-               required: true,
-               initial: ""
-            }
-         ),
-         
+            required: true,
+            initial: "",
+         }),
+         isDefaulting: new foundry.data.fields.BooleanField({
+            required: true,
+            initial: false,
+         }),
 
          rangeBand: new foundry.data.fields.SchemaField(RangeBandModel.defineSchema()),
          roll: new foundry.data.fields.SchemaField(RollDataModel.defineSchema()),

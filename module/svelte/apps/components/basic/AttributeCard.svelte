@@ -113,7 +113,7 @@
             { actor },
             {
                attributeName: key,
-               callerType: "attribute",
+               type: "attribute",
                opposed: false,
             }
          );

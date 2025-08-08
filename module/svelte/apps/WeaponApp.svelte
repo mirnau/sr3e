@@ -93,10 +93,19 @@
       };
    });
 
+   const isDefaulting = $derived({
+      item,
+      key: "isDefaulting",
+      label: localize(config.common.isdefaulting),
+      value: system.isDefaulting,
+      path: "system",
+      type: "checkbox",
+   });
+
    const reloadMechanism = $derived({
       item,
       key: "reloadMechanism",
-      label: localize(config.weapon.reloadMechanism),
+      label: localize(config.weapon.isDefaulting),
       value: system.reloadMechanism,
       path: "system",
       type: "select",
@@ -231,6 +240,9 @@
                nomatchplaceholder="No matching skill"
                disabled={!options.length}
             />
+            <div class="stat-grid single-column">
+               <StatCard {...isDefaulting} />
+            </div>
          </div>
       {/if}
    </ItemSheetComponent>

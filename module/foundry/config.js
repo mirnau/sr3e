@@ -115,6 +115,7 @@ sr3e.common = {
    other: "sr3e.common.other",
    custom: "sr3e.common.custom",
    details: "sr3e.common.details",
+   isdefaulting: "sr3e.common.isdefaulting"
 };
 
 sr3e.dicepools = {

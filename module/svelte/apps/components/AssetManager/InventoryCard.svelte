@@ -3,8 +3,6 @@
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
-   import SR3ERoll from "@documents/SR3ERoll.js";
-   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 
    let { item, config } = $props();
    const inventoryCardStoreManager = StoreManager.Subscribe(item);
@@ -74,18 +72,26 @@
          event.dataTransfer.setDragImage(event.currentTarget, 16, 16);
       }
    }
+
    function performItemAction() {
       const actor = item.parent;
       const linked = item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "";
-      const [skillId, specIndex] = linked.split("::");
-      const skill = actor.items.get(skillId);
-      const skillData = skill.system.activeSkill;
+      if (!linked) return; // no skill linked at all
 
-      const spec = Number.isFinite(parseInt(specIndex)) ? skillData.specializations[parseInt(specIndex)] : null;
-      const dice = spec ? spec.value : skillData.value;
+      const [skillId, specIndex] = linked.split("::");
+      const skill = actor?.items?.get(skillId);
+      if (!skill) return; // skill not found
+
+      const skillType = skill.system.skillType;
+      const skillData = skill.system[`${skillType}Skill`];
+      if (!skillData) return; // type mismatch or broken data
+
+      const spec = Number.isFinite(parseInt(specIndex)) ? skillData.specializations?.[parseInt(specIndex)] : null;
+
+      const dice = spec ? spec.value : (skillData.value ?? 0);
 
       const caller = {
-         callerType: "item",
+         type: "item",
          key: item.id,
          value: 0,
          dice,
@@ -94,6 +100,7 @@
          specializationName: spec ? spec.name : undefined,
          itemName: item.name,
          item,
+         isDefaulting: item.system.isDefaulting
       };
 
       openRollComposer(actor, caller);

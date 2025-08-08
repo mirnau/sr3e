@@ -112,9 +112,9 @@ export default class SR3ERoll extends Roll {
    }
 
    getFlavor() {
-      const callerType = this.options?.callerType;
+      const type = this.options?.type;
       const parts = [];
-      switch (callerType) {
+      switch (type) {
          case "skill":
          case "specialization":
             if (this.options.skillName) parts.push(this.options.skillName);
@@ -168,7 +168,7 @@ export default class SR3ERoll extends Roll {
       const ones = results.filter((r) => r.result === 1).length;
       const critical = ones >= Math.ceil(dice / 2);
 
-      const callerType = rollData.options?.callerType;
+      const type = rollData.options?.type;
       const skill = rollData.options?.skillName;
       const specialization = rollData.options?.specializationName;
       const attributeKey = rollData.options?.attributeKey ?? rollData.options?.attributeName;
@@ -179,12 +179,34 @@ export default class SR3ERoll extends Roll {
       const formula = rollData.formula ?? shownFormula;
 
       let descriptionHtml;
-      switch (callerType) {
+
+      const isDefaulting = !!rollData.options?.isDefaulting;
+      let defaultingNote = "";
+
+      if (isDefaulting) {
+         if (specialization && skill) {
+            defaultingNote = " (Defaulting: Specialization → Skill, +4 TN)";
+         } else if (skill && attributeKey) {
+            defaultingNote = ` (Defaulting: ${skill} → ${SR3ERoll.#attrLabel(attributeKey)}, +4 TN)`;
+         } else if (rollData.options?.fromSkill && rollData.options?.toSkill) {
+            defaultingNote = ` (Defaulting: ${rollData.options.fromSkill} → ${rollData.options.toSkill}, +4 TN)`;
+         } else {
+            const skillLabel = skill ?? rollData.options?.fromSkill ?? "Unknown skill";
+            const attrLabel = SR3ERoll.#attrLabel(
+               rollData.options?.attributeKey ?? rollData.options?.attributeName,
+               false
+            );
+            defaultingNote = ` (Defaulting: ${skillLabel} → ${attrLabel}, +4 TN)`;
+         }
+      }
+
+      switch (type) {
          case "item": {
             const rows = [];
             if (itemName) rows.push(`<div>Weapon: ${itemName}</div>`);
             if (skill) rows.push(`<div>Skill: ${skill}</div>`);
             if (specialization) rows.push(`<div>Specialization: ${specialization}</div>`);
+            if (isDefaulting) rows.push(`<div><strong>${defaultingNote}</strong></div>`);
             descriptionHtml = rows.join("") || `<div>Unspecified roll</div>`;
             break;
          }

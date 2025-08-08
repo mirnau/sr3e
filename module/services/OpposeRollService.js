@@ -336,14 +336,14 @@ export default class OpposeRollService {
       const tnStr = Number.isFinite(tn) ? tn : "?";
       const successes = results.filter((r) => Number.isFinite(tn) && r.result >= tn && !r.discarded).length;
 
-      const callerType = rollData.options?.callerType;
+      const type = rollData.options?.type;
       const skillName = rollData.options?.skillLabel ?? rollData.options?.skillName ?? null;
       const specializationName = rollData.options?.specializationLabel ?? rollData.options?.specializationName ?? null;
       const attributeKey = rollData.options?.attributeKey ?? rollData.options?.attributeName ?? null;
       const itemName = rollData.options?.itemName ?? null;
 
       let description;
-      switch (callerType) {
+      switch (type) {
          case "skill":
          case "specialization":
             description = specializationName ? `${skillName} (${specializationName})` : skillName || "Unspecified roll";

@@ -10,6 +10,7 @@
       modifiedTargetNumber,
       diceBought,
       currentDicePoolAddition,
+      isDefaulting,
       OnClose,
       CommitEffects
    } = $props();
@@ -25,7 +26,7 @@
          { actor },
          {
             attributeName: caller.key,
-            callerType: "resistance",
+            type: "resistance",
             modifiers: modifiersArray,
             targetNumber,
             power: caller.power,
@@ -33,6 +34,8 @@
             damageType: caller.damageType,
             weaponId: caller.weaponId,
             opposed: false,
+            isDefaulting: isDefaulting
+            
          }
       );
 

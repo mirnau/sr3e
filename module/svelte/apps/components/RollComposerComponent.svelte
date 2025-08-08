@@ -1,6 +1,6 @@
 <script>
    import SR3ERoll from "@documents/SR3ERoll.js";
-   import { onDestroy, onMount } from "svelte";
+   import { onDestroy } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
@@ -22,33 +22,43 @@
 
    let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
-   let penalty = actorStoreManager.GetRWStore("health.penalty");
-   let karmaPoolBacking = $karmaPoolStore;
+   let penaltyStore = actorStoreManager.GetRWStore("health.penalty");
 
    let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
-   let currentDicePoolName = $state("");
-   let currentDicePoolAddition = $state(0);
    let displayCurrentDicePoolStore = null;
 
    let targetNumber = $state(4);
    let modifiersArray = $state([]);
-   let karmaCost = $state(0);
-   let diceBought = $state(0);
    let modifiersTotal = $state(0);
+   let modifiedTargetNumber = $state(0);
    let difficulty = $state("");
-   let canSubmit = $state(true);
-   let isDefaultingAsString = $state("false");
-   let isDefaulting = $state(false);
-   let title = $state("");
-   let associatedDicePoolString = $state("");
+
+   let diceBought = $state(0);
+   let karmaCost = $state(0);
    let maxAffordableDice = $state(0);
+
+   let currentDicePoolName = $state("");
+   let currentDicePoolAddition = $state(0);
+
+   let isDefaultingAsString = $state("false");
+   let isDefaulting = $derived(isDefaultingAsString === "true");
+
    let hasTarget = $state(false);
    let hasChallenged = $state(false);
    let isResponding = $state(false);
-   let modifiedTargetNumber = $state(0);
    let isResistingDamage = $state(false);
+   let canSubmit = $state(true);
+   let title = $state("");
 
-   // Initialize caller with default values
+   let associatedDicePoolString = $state("");
+   let associatedDicePoolStore;
+   let callingSkill;
+   let linkedAttributeString;
+   let linkedAttributeStore;
+   let readwrite;
+   let selectEl;
+   let containerEl;
+
    let caller = $state({
       type: null,
       key: null,
@@ -61,56 +71,106 @@
       contestId: null,
    });
 
-   let associatedDicePoolStore;
-   // svelte-ignore non_reactive_update
-   let containerEl;
-   // svelte-ignore non_reactive_update
-   let selectEl;
-   // svelte-ignore non_reactive_update
-   let rollBtn;
-   // svelte-ignore non_reactive_update
-   let clearBtn;
-   let callingSkill;
-   let linkedAttributeString;
-   let linkedAttributeStore;
-   let readwrite;
-   let focusables = [];
-
    let difficulties = ItemDataService.getDifficultyGradings(config);
-
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
+
+   // ------------------- helpers -------------------
+
+   function getAttrDiceFromSumStore(attrKey) {
+      const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
+      return Number(get(store)?.sum ?? 0);
+   }
+
+   function buildPenaltyMod() {
+      return $penaltyStore > 0 ? { id: "penalty", name: localize(config.health.penalty), value: -$penaltyStore } : null;
+   }
+
+   function upsertMod(mod) {
+      const idx = modifiersArray.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
+      if (idx === -1) modifiersArray = [...modifiersArray, mod];
+      else {
+         const copy = [...modifiersArray];
+         copy[idx] = { ...copy[idx], ...mod };
+         modifiersArray = copy;
+      }
+   }
+
+   function ensureDefaultingModForAttribute() {
+      const has = modifiersArray.some((m) => m.id === "auto-default-attr" || m.name === "Skill to attribute");
+      if (!has) {
+         upsertMod({ id: "auto-default-attr", name: "Skill to attribute", value: 4 });
+      }
+   }
+
+   function swallowDirectional(event) {
+      // Prevent arrow keys from scrolling or moving focus
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+         event.stopPropagation();
+         event.preventDefault();
+      }
+   }
+
+   function handleSelectKeydown(event) {
+      // Optional: you may have had special behaviour for the select
+      // For now, just swallow arrow keys so they don’t navigate the whole sheet
+      swallowDirectional(event);
+   }
+
+   // ------------------- composer API -------------------
 
    export function setCallerData(callerData, options = {}) {
       resetToDefaults();
-
       Object.assign(caller, callerData);
 
-      if (options.visible !== undefined) {
-         visible = options.visible;
-      }
-
+      if (options.visible !== undefined) visible = options.visible;
       isResponding = caller.responseMode || false;
       hasTarget = game.user.targets.size > 0;
 
-      if (caller.type === "resistance") {
-         // Lock to Body attribute
-         caller.key = "body";
+      // Seed wound penalty
+      modifiersArray = [];
+      const pen = buildPenaltyMod();
+      if (pen) upsertMod(pen);
 
-         // Set title explicitly
-         title = localize(config.attributes.body);
+      if (caller.type === "item") {
+         const item = actor.items.get(caller.key) || game.items.get(caller.key);
+         title = item.name;
 
-         // Get base Body dice
-         const bodyStore = actorStoreManager.GetRWStore("attributes.body.value");
-         caller.dice = get(bodyStore);
-         caller.value = caller.dice;
+         const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
+         const skill = actor.items.get(skillId);
 
-         targetNumber = caller.power ?? 4;
+         // this sets linkedAttributeString
+         prepareSkillBasedRoll(skill, item.name);
 
-         // Force default dice pool to combat pool
-         associatedDicePoolString = "combatPool";
-         currentDicePoolSelectionStore.set(associatedDicePoolString);
+         // ⬇️ expose the linked attribute on the caller for ComposerRoll
+         if (linkedAttributeString) {
+            caller.linkedAttribute = linkedAttributeString;
+         }
 
-         isResistingDamage = false;
+         if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
+            caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
+            isDefaultingAsString = "true";
+            queueMicrotask(() => {
+               if (selectEl) selectEl.value = "true";
+            });
+            ensureDefaultingModForAttribute();
+         }
+         return;
+      }
+
+      if (caller.type === "skill") {
+         const skill = actor.items.get(caller.skillId);
+         prepareSkillBasedRoll(skill, caller.key);
+
+         if (linkedAttributeString) {
+            caller.linkedAttribute = linkedAttributeString;
+         }
+         return;
+      }
+
+      if (caller.type === "specialization") {
+         const skill = actor.items.get(caller.skillId);
+         prepareSkillBasedRoll(skill, caller.key);
+         return;
       }
    }
 
@@ -121,157 +181,66 @@
       currentDicePoolAddition = 0;
       karmaCost = 0;
       isDefaultingAsString = "false";
-      isDefaulting = false;
       hasChallenged = false;
       title = "";
       associatedDicePoolString = "";
    }
 
-   $effect(() => {
-      $shouldDisplaySheen = !isDefaulting;
-
-      if (!visible) {
-         $shouldDisplaySheen = false;
-      }
-   });
-
-   $effect(() => {
-      if (!caller.type) return;
-
-      updateFocusables();
-      selectEl?.focus();
-
-      if ($penalty > 0) {
-         modifiersArray = [{ name: localize(config.health.penalty), value: -$penalty }];
-      }
-
-      switch (caller.type) {
-         case "attribute": {
-            title = localize(config.attributes[caller.key]);
-            break;
-         }
-
-         case "skill":
-         case "specialization": {
-            const skill = actor.items.get(caller.skillId);
-            prepareSkillBasedRoll(skill, caller.key);
-            break;
-         }
-
-         case "item": {
-            const item = actor.items.get(caller.key) || game.items.get(caller.key);
-            title = item.name;
-            const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
-            const skill = actor.items.get(skillId);
-            prepareSkillBasedRoll(skill, item.name);
-            break;
-         }
-
-         default:
-            console.warn("Unhandled caller type in RollComposer:", caller.type);
-            break;
-      }
-   });
+   // ------------------- internal logic -------------------
 
    function prepareSkillBasedRoll(skill, titleOverride) {
       if (!skill) return;
-
       const skillType = skill.system.skillType;
       const skillData = skill.system[skillType + "Skill"];
-
       title = titleOverride ?? skill.name;
-
       linkedAttributeString = skillData?.linkedAttribute ?? "";
-
       if (skillType === "active") {
          associatedDicePoolString = skillData?.associatedDicePool ?? "";
          if (associatedDicePoolString) {
             associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
          }
       }
-
       if (linkedAttributeString) {
-         linkedAttributeStore = actorStoreManager.GetRWStore(`attributes.${linkedAttributeString}`);
+         linkedAttributeStore = actorStoreManager.GetSumROStore(`attributes.${linkedAttributeString}`);
       }
-
       if (skillType === "language") {
          readwrite = skillData?.readwrite;
       }
    }
 
-   export function Abort() {
-      OpposeRollService.expireContest(contestId);
-      OnClose();
+   async function CommitEffects() {
+      if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
+      await actor.commitRollComposerEffects({
+         karmaCost,
+         poolName: currentDicePoolName,
+         poolCost: currentDicePoolAddition,
+      });
    }
 
-   function OnClose() {
-      visible = false;
-      currentDicePoolSelectionStore.set("");
-      currentDicePoolAddition = 0;
-   }
+   // ------------------- effects -------------------
 
    $effect(() => {
-      if (!visible) $shouldDisplaySheen = false;
-   });
-
-   function updateFocusables() {
-      if (!containerEl) return;
-      const selector = isDefaulting
-         ? "select, .counter-component[tabindex='0']:not(.karma-counter), button[type]"
-         : "select, .counter-component[tabindex='0'], button[type]";
-      focusables = Array.from(containerEl.querySelectorAll(selector));
-   }
-
-   function KarmaCostCalculator() {
-      karmaCost = 0.5 * diceBought * (diceBought + 1);
-   }
-
-   $effect(() => {
-      isDefaulting = isDefaultingAsString === "true";
-      updateFocusables();
+      $shouldDisplaySheen = !isDefaulting && visible;
    });
 
    $effect(() => {
-      const sum = Number($karmaPoolSumStore?.sum);
-      if (sum > 0) {
-         maxAffordableDice = Math.floor((-1 + Math.sqrt(1 + 8 * sum)) * 0.5);
-      } else {
-         maxAffordableDice = 0;
+      const pen = buildPenaltyMod();
+      const withoutPenalty = modifiersArray.filter((m) => m.id !== "penalty");
+
+      // Only update if changed
+      if (withoutPenalty.length !== modifiersArray.length) {
+         modifiersArray = withoutPenalty;
+      }
+
+      if (pen && !withoutPenalty.some((m) => m.id === pen.id)) {
+         modifiersArray = [...withoutPenalty, pen];
       }
    });
 
    $effect(() => {
-      currentDicePoolName = $currentDicePoolSelectionStore;
-      if (!currentDicePoolName) return;
-
-      currentDicePoolAddition = 0;
-      displayCurrentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${currentDicePoolName}`);
-   });
-
-   $effect(() => {
-      const baseModifiers = $penalty > 0 ? [{ name: localize(config.health.penalty), value: -$penalty }] : [];
-
-      if (isDefaulting) {
-         switch (caller.type) {
-            case "attribute":
-               modifiersArray = [...baseModifiers, { name: "Skill to attribute", value: 4 }];
-               break;
-            case "activeSkill":
-            case "knowledgeSkill":
-            case "languageSkill":
-               modifiersArray = [...baseModifiers, { name: "Skill to skill", value: 2 }];
-               break;
-            case "specialization":
-               modifiersArray = [...baseModifiers, { name: "Specialization to skill", value: 3 }];
-               break;
-            default:
-               console.warn(`Unknown caller type for defaulting: ${caller.type}`);
-               canSubmit = false;
-               break;
-         }
-      } else {
-         modifiersArray = baseModifiers;
-      }
+      modifiersTotal = modifiersArray.reduce((acc, m) => acc + Number(m.value ?? 0), 0);
+      modifiedTargetNumber = targetNumber + modifiersTotal;
+      canSubmit = modifiedTargetNumber > 1;
    });
 
    $effect(() => {
@@ -287,98 +256,44 @@
       else if (tn >= 10) difficulty = difficulties.nearlyimpossible;
    });
 
-   function Reset() {
-      targetNumber = 5;
-      modifiersArray = $penalty > 0 ? [{ name: localize(config.health.penalty), value: -$penalty }] : [];
-      diceBought = 0;
+   $effect(() => {
+      const sum = Number($karmaPoolSumStore?.sum);
+      if (sum > 0) {
+         maxAffordableDice = Math.floor((-1 + Math.sqrt(1 + 8 * sum)) * 0.5);
+      } else {
+         maxAffordableDice = 0;
+      }
+   });
+
+   $effect(() => {
+      currentDicePoolName = $currentDicePoolSelectionStore;
+      if (!currentDicePoolName) return;
       currentDicePoolAddition = 0;
-      karmaCost = 0;
-      isDefaultingAsString = "false";
-      selectEl?.focus();
-   }
-
-   $effect(() => {
-      modifiersTotal = modifiersArray.reduce((acc, val) => acc + val.value, 0);
+      displayCurrentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${currentDicePoolName}`);
    });
 
-   $effect(() => {
-      modifiedTargetNumber = targetNumber + modifiersTotal;
-      canSubmit = modifiedTargetNumber > 1;
-   });
+   // ------------------- UI handlers -------------------
 
-   async function CommitEffects() {
-      if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
-
-      await actor.commitRollComposerEffects({
-         karmaCost,
-         poolName: currentDicePoolName,
-         poolCost: currentDicePoolAddition,
-      });
+   function KarmaCostCalculator() {
+      karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
 
-   function getRoot(el) {
-      while (el && !focusables.includes(el)) el = el.parentElement;
-      return el;
+   function Reset() {
+      resetToDefaults();
+      const pen = buildPenaltyMod();
+      if (pen) upsertMod(pen);
    }
 
-   function focusNext() {
-      const idx = focusables.indexOf(getRoot(document.activeElement));
-      if (idx !== -1) focusables[(idx + 1) % focusables.length]?.focus();
+   function OnClose() {
+      visible = false;
+      resetToDefaults();
    }
 
-   function handleKey(e) {
-      if (e.key === "Enter") {
-         e.preventDefault();
-         e.stopPropagation();
-         const root = getRoot(document.activeElement);
-
-         if (root === rollBtn) {
-            rollBtn.click();
-            return;
-         }
-
-         if (root === clearBtn) {
-            Reset();
-            return;
-         }
-
-         focusNext();
-      } else if (e.key === "Tab") {
-         e.preventDefault();
-         e.stopPropagation();
-         const root = getRoot(document.activeElement);
-
-         if (root === rollBtn) {
-            Reset();
-            return;
-         }
-
-         focusNext();
-      }
-   }
-
-   function swallowDirectional(e) {
-      if (
-         e.key === "Shift" ||
-         e.key === "ArrowUp" ||
-         e.key === "ArrowDown" ||
-         e.key === "ArrowLeft" ||
-         e.key === "ArrowRight"
-      ) {
-         e.stopPropagation();
-      }
-   }
-
-   function handleSelectKeydown(e) {
-      if (["ArrowUp", "w", "W"].includes(e.key)) {
-         e.preventDefault();
-         selectEl.selectedIndex = 0;
-         isDefaultingAsString = selectEl.value;
-      }
-      if (["ArrowDown", "s", "S"].includes(e.key)) {
-         e.preventDefault();
-         selectEl.selectedIndex = 1;
-         isDefaultingAsString = selectEl.value;
+   function handleKey(event) {
+      if (event.key === "Escape") {
+         OnClose();
+         event.stopPropagation();
+         event.preventDefault();
       }
    }
 </script>
@@ -475,6 +390,7 @@
             {targetNumber}
             {modifiedTargetNumber}
             {diceBought}
+            {isDefaulting}
             {currentDicePoolAddition}
             {OnClose}
             {CommitEffects}
@@ -488,6 +404,7 @@
             {modifiedTargetNumber}
             {diceBought}
             {currentDicePoolAddition}
+            {isDefaulting}
             {OnClose}
             {CommitEffects}
          />
@@ -500,6 +417,7 @@
             {modifiedTargetNumber}
             {diceBought}
             {currentDicePoolAddition}
+            {isDefaulting}
             {OnClose}
             {CommitEffects}
          />

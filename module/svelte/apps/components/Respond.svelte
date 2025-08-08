@@ -11,7 +11,8 @@
       diceBought,
       currentDicePoolAddition,
       CommitEffects,
-      OnClose
+      isDefaulting,
+      OnClose,
    } = $props();
 
    async function Respond() {
@@ -28,10 +29,12 @@
             skillName: caller.name,
             specializationName: caller.specialization,
             modifiers: modifiersArray,
-            callerType: caller.type,
+            type: caller.type,
             targetNumber,
             opposed: true,
             itemId: caller.item?.id,
+            explodes: true,
+            isDefaulting: isDefaulting,
          }
       );
 
@@ -54,6 +57,4 @@
    }
 </script>
 
-<button class="regular" type="button" onclick={Respond}>
-   Respond!
-</button>
+<button class="regular" type="button" onclick={Respond}> Respond! </button>

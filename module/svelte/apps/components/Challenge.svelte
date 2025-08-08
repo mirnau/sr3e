@@ -11,6 +11,7 @@
       diceBought,
       currentDicePoolAddition,
       OnClose,
+      isDefaulting,
       CommitEffects
       
    } = $props();
@@ -35,10 +36,11 @@
          skillName: caller.name,
          specializationName: caller.specialization,
          modifiers: modifiersArray,
-         callerType: caller.type,
+         type: caller.type,
          targetNumber,
          opposed: true,
          itemId: caller.item?.id,
+         isDefaulting: isDefaulting
       };
 
       const baseRoll = SR3ERoll.create(
