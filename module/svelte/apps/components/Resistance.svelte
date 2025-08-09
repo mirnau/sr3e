@@ -16,26 +16,35 @@
    } = $props();
 
    async function Resist() {
-      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
+      const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
+
+      const type = "resistance";
+      const isAttr = caller.type === "attribute";
+
+      let attributeKeyForChat =
+         caller.linkedAttribute ??
+         caller.attributeKey ??
+         caller.attributeName ??
+         (isAttr ? caller.key : undefined);
 
       const roll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
             targetNumber: modifiedTargetNumber,
-            explodes: true,
+            explodes: true
          }),
          { actor },
          {
-            attributeName: caller.key,
-            type: "resistance",
+            type,
             modifiers: modifiersArray,
-            targetNumber,
+            targetNumber: modifiedTargetNumber,
+            attributeKey: attributeKeyForChat,
+            attributeName: attributeKeyForChat,
             power: caller.power,
             stagedLevel: caller.stagedLevel,
             damageType: caller.damageType,
             weaponId: caller.weaponId,
             opposed: false,
-            isDefaulting: isDefaulting
-            
+            isDefaulting
          }
       );
 
@@ -43,14 +52,7 @@
 
       await CommitEffects?.();
 
-      OnClose?.({
-         type: "resistance",
-         successes: roll.successes,
-         stagedLevel: caller.stagedLevel,
-         damageType: caller.damageType,
-         defenderId: actor.id,
-         weaponId: caller.weaponId,
-      });
+      OnClose?.();
 
       Hooks.callAll("actorSystemRecalculated", actor);
    }

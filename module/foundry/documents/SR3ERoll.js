@@ -155,6 +155,10 @@ export default class SR3ERoll extends Roll {
       return ok ? game.i18n.localize(`sr3e.attributes.${key}`) : key ?? "";
    }
 
+   static renderVanilla(actor, rollData) {
+      return SR3ERoll.#buildVanillaRoll(actor, rollData);
+   }
+
    static #buildVanillaRoll(actor, rollData) {
       const term = rollData.terms?.[0];
       const raw = term?.results ?? [];

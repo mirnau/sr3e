@@ -126,22 +126,25 @@
       isResponding = caller.responseMode || false;
       hasTarget = game.user.targets.size > 0;
 
-      // Seed wound penalty
       modifiersArray = [];
       const pen = buildPenaltyMod();
       if (pen) upsertMod(pen);
 
       if (caller.type === "item") {
-         const item = actor.items.get(caller.key) || game.items.get(caller.key);
+         const itemId = caller.item?.id ?? caller.key;
+         const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
+
+         if (!item) {
+            throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
+         }
+
          title = item.name;
 
          const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
          const skill = actor.items.get(skillId);
 
-         // this sets linkedAttributeString
          prepareSkillBasedRoll(skill, item.name);
 
-         // ⬇️ expose the linked attribute on the caller for ComposerRoll
          if (linkedAttributeString) {
             caller.linkedAttribute = linkedAttributeString;
          }
@@ -159,16 +162,15 @@
 
       if (caller.type === "skill") {
          const skill = actor.items.get(caller.skillId);
+         if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
          prepareSkillBasedRoll(skill, caller.key);
-
-         if (linkedAttributeString) {
-            caller.linkedAttribute = linkedAttributeString;
-         }
+         if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
          return;
       }
 
       if (caller.type === "specialization") {
          const skill = actor.items.get(caller.skillId);
+         if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
          prepareSkillBasedRoll(skill, caller.key);
          return;
       }

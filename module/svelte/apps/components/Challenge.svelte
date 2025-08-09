@@ -13,40 +13,51 @@
       OnClose,
       isDefaulting,
       CommitEffects
-      
    } = $props();
 
    let hasChallenged = false;
 
    async function Challenge() {
       hasChallenged = true;
-      console.warn("Challenge: Initiating opposed rolls.");
 
       const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
+      if (targets.length === 0) return;
 
-      if (targets.length === 0) {
-         console.warn("No targets selected for opposed roll");
-         return;
-      }
+      const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
 
-      const totalDice = caller.dice + diceBought + currentDicePoolAddition;
+      const type = caller.type ?? caller.type;
+      const isItem = type === "item";
+      const isSkill = type === "skill" || type === "specialization";
+      const isAttr  = type === "attribute";
+
+      let attributeKeyForChat =
+         caller.linkedAttribute ??
+         caller.attributeKey ??
+         caller.attributeName ??
+         (isAttr ? caller.key : undefined);
 
       const options = {
-         attributeName: caller.key,
-         skillName: caller.name,
-         specializationName: caller.specialization,
+         type,
          modifiers: modifiersArray,
-         type: caller.type,
-         targetNumber,
-         opposed: true,
-         itemId: caller.item?.id,
-         isDefaulting: isDefaulting
+         targetNumber: modifiedTargetNumber,
+         itemId:   isItem ? (caller.item?.id ?? caller.key) : undefined,
+         itemName: isItem ? (caller.itemName ?? caller.name) : undefined,
+         skillName: isItem ? caller.skillName
+                  : isSkill ? caller.name
+                  : undefined,
+         specializationName: isItem
+            ? (caller.specializationName ?? caller.specialization)
+            : (type === "specialization" ? caller.specialization : undefined),
+         attributeKey: attributeKeyForChat,
+         attributeName: attributeKeyForChat,
+         isDefaulting,
+         opposed: true
       };
 
       const baseRoll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
             targetNumber: modifiedTargetNumber,
-            explodes: true,
+            explodes: true
          }),
          { actor },
          options
@@ -56,7 +67,6 @@
       await baseRoll.waitForResolution();
 
       await CommitEffects?.();
-
       Hooks.callAll("actorSystemRecalculated", actor);
       OpposeRollService.expireContest(roll.options.contestId);
 

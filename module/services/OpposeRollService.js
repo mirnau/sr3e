@@ -1,3 +1,4 @@
+import SR3ERoll from "@documents/SR3ERoll.js";
 const activeContests = new Map();
 const pendingResponses = new Map();
 
@@ -292,14 +293,17 @@ export default class OpposeRollService {
    }
 
    static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
+      const initiatorHtml = this.#buildDiceHTML(initiator, initiatorRoll);
+      const targetHtml = this.#buildDiceHTML(target, targetRoll);
+
       return `
-      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
-      <h4>${initiator.name}</h4>
-      ${this.#buildDiceHTML(initiator, initiatorRoll)}
-      <h4>${target.name}</h4>
-      ${this.#buildDiceHTML(target, targetRoll)}
-      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-      ${damageText ?? ""}`;
+    <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+    <h4>${initiator.name}</h4>
+    ${initiatorHtml}
+    <h4>${target.name}</h4>
+    ${targetHtml}
+    <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+    ${damageText ?? ""}`;
    }
 
    static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
@@ -330,88 +334,6 @@ export default class OpposeRollService {
    }
 
    static #buildDiceHTML(actor, rollData) {
-      const term = rollData.terms?.[0];
-      const results = term?.results ?? [];
-      const tn = rollData?.options?.targetNumber;
-      const tnStr = Number.isFinite(tn) ? tn : "?";
-      const successes = results.filter((r) => Number.isFinite(tn) && r.result >= tn && !r.discarded).length;
-
-      const type = rollData.options?.type;
-      const skillName = rollData.options?.skillLabel ?? rollData.options?.skillName ?? null;
-      const specializationName = rollData.options?.specializationLabel ?? rollData.options?.specializationName ?? null;
-      const attributeKey = rollData.options?.attributeKey ?? rollData.options?.attributeName ?? null;
-      const itemName = rollData.options?.itemName ?? null;
-
-      let description;
-      switch (type) {
-         case "skill":
-         case "specialization":
-            description = specializationName ? `${skillName} (${specializationName})` : skillName || "Unspecified roll";
-            break;
-
-         case "attribute": {
-            const dict = CONFIG?.sr3e?.attributes ?? {};
-            if (!attributeKey || !Object.prototype.hasOwnProperty.call(dict, attributeKey))
-               throw new Error(`Unknown attribute key: ${attributeKey}`);
-            description = game.i18n.localize(`sr3e.attributes.${attributeKey}`);
-            break;
-         }
-
-         case "item":
-            description = itemName || "Unspecified roll";
-            break;
-
-         case "resistance": {
-            const dict = CONFIG?.sr3e?.attributes ?? {};
-            const attrOk = attributeKey && Object.prototype.hasOwnProperty.call(dict, attributeKey);
-            const attrLabel = attrOk ? game.i18n.localize(`sr3e.attributes.${attributeKey}`) : attributeKey ?? "";
-            const staged = rollData.options?.stagedLevel ?? null;
-            const dtype = rollData.options?.damageType ?? null;
-            const parts = ["Damage Resistance"];
-            if (staged && dtype) parts.push(`${staged} ${dtype}`);
-            if (attrLabel) parts.push(`(${attrLabel})`);
-            description = parts.join(" ");
-            break;
-         }
-
-         default:
-            description = skillName || itemName || (attributeKey ? `Attribute:${attributeKey}` : "Unspecified roll");
-            break;
-      }
-
-      const formula = rollData.formula ?? `${term?.number ?? "?"}d6${Number.isFinite(tn) ? `x${tn}` : ""}`;
-
-      return `
-  <div class="dice-roll expanded">
-    <div class="dice-result">
-      <div class="dice-context">
-        <em>${description} vs TN ${tnStr} using ${formula}</em>
-      </div>
-      <div class="dice-formula">${formula}</div>
-      <div class="dice-tooltip">
-        <div class="wrapper">
-          <section class="tooltip-part">
-            <div class="dice">
-              <header class="part-header flexrow">
-                <span class="part-formula">${term?.number ?? "?"}d6${Number.isFinite(tn) ? `x${tn}` : ""}</span>
-                <span class="part-total">${successes} successes (TN: ${tnStr})</span>
-              </header>
-              <ol class="dice-rolls">
-                ${results
-                   .map((d) => {
-                      const cls = ["roll", "_sr3edie", "d6"];
-                      if (d.result === 6) cls.push("max");
-                      if (Number.isFinite(tn) && d.result >= tn) cls.push("success");
-                      return `<li class="${cls.join(" ")}">${d.result}</li>`;
-                   })
-                   .join("")}
-              </ol>
-            </div>
-          </section>
-        </div>
-      </div>
-      <h4 class="dice-total">${successes} successes (TN: ${tnStr})</h4>
-    </div>
-  </div>`;
+      return SR3ERoll.renderVanilla(actor, rollData);
    }
 }
