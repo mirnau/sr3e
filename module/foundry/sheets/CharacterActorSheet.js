@@ -119,7 +119,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          props: {
             actor: this.document,
             config: CONFIG.sr3e,
-            caller: null, // empty initially
          },
       });
    }

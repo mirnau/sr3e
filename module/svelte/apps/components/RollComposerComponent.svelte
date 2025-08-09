@@ -1,6 +1,6 @@
 <script>
    import SR3ERoll from "@documents/SR3ERoll.js";
-   import { onDestroy } from "svelte";
+   import { onDestroy, onMount } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
@@ -11,8 +11,9 @@
    import Challenge from "@sveltecomponent/Challenge.svelte";
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get } from "svelte/store";
+   import FirearmService from "@services/FirearmService.js";
 
-   let { actor, config, visible = false } = $props();
+   let { actor, config } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
@@ -44,6 +45,7 @@
    let isDefaulting = $derived(isDefaultingAsString === "true");
 
    let hasTarget = $state(false);
+   let visible = $state(false);
    let hasChallenged = $state(false);
    let isResponding = $state(false);
    let isResistingDamage = $state(false);
@@ -75,6 +77,23 @@
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
    // ------------------- helpers -------------------
+
+   function upsertOrRemoveRecoil() {
+      // strip any old recoil row
+      const without = modifiersArray.filter((m) => m.id !== "recoil");
+
+      // only compute recoil in combat and for item rolls
+      const inCombat = FirearmService.inCombat?.() === true;
+      const isItem = caller?.type === "item";
+      if (!inCombat || !isItem) {
+         if (without.length !== modifiersArray.length) modifiersArray = without;
+         return;
+      }
+
+      const recoil = FirearmService.recoilModifierForComposer({ actor, caller });
+      if (recoil) modifiersArray = [...without, recoil];
+      else if (without.length !== modifiersArray.length) modifiersArray = without;
+   }
 
    function getAttrDiceFromSumStore(attrKey) {
       const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
@@ -236,6 +255,11 @@
    }
 
    // ------------------- effects -------------------
+
+   $effect(() => {
+      if (!visible) return;
+      upsertOrRemoveRecoil();
+   });
 
    $effect(() => {
       $shouldDisplaySheen = !isDefaulting && visible;

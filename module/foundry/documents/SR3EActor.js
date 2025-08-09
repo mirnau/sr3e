@@ -1,12 +1,40 @@
 // src/actors/SR3EActor.js
 import { get } from "svelte/store";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
 
 export default class SR3EActor extends Actor {
    async InitiativeRoll() {
-      const formula = SR3ERoll.buildFormula(this.system.attributes.quickness.value, { targetNumber: 4 });
-      const roll = new SR3ERoll(formula, null, { attributeName: "quickness" });
-      await roll.evaluate();
+      const mgr = StoreManager.Subscribe(this);
+      let dice = 1,
+         react = 0;
+
+      try {
+         const initStore = mgr.GetSumROStore("attributes.initiative");
+         const reactStore = mgr.GetSumROStore("attributes.reaction");
+         dice = Math.max(1, Number(get(initStore)?.sum ?? 1));
+         react = Number(get(reactStore)?.sum ?? 0);
+      } finally {
+         StoreManager.Unsubscribe(this);
+      }
+
+      // 👇 force the core Foundry roll class, not SR3ERoll
+      const CoreRoll = foundry.dice.Roll;
+      const roll = await new CoreRoll(`${dice}d6 + ${react}`).evaluate();
+
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: this }),
+         flavor: `${game.i18n?.localize?.("sr3e.initiative") ?? "Initiative"} (${dice}d6 + ${react})`,
+         content: `
+      <div class="dice-roll">
+        <div class="dice-result">
+          <div class="dice-formula">${dice}d6 + ${react}</div>
+          <h4 class="dice-total">${roll.total}</h4>
+        </div>
+      </div>`,
+      });
+
+      return roll.total;
    }
 
    async AttributeRoll(dice, attributeName, options = { modifiers: 0, explodes: true }) {

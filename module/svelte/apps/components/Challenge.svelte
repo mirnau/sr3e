@@ -31,36 +31,16 @@
     const isSkill = type === "skill" || type === "specialization";
     const isAttr  = type === "attribute";
 
-    let attributeKeyForChat =
-      caller.linkedAttribute ??
-      caller.attributeKey ??
-      caller.attributeName ??
-      (isAttr ? caller.key : undefined);
+    const attributeKeyForChat =
+      caller.linkedAttribute ?? caller.attributeKey ?? caller.attributeName ?? (isAttr ? caller.key : undefined);
 
-    const itemId = isItem ? (caller.item?.id ?? caller.key) : undefined;
-    const weapon = isItem ? (actor?.items?.get(itemId) || game.items.get(itemId) || null) : null;
-
-    const inCombat = FirearmService.inCombat?.() === true;
-    const already = isItem && inCombat ? FirearmService.getPhaseShots(actor.id) : 0;
-    const declaredRounds = weapon?.system?.declaredRounds ?? null;
-    const ammoAvailable  = weapon?.system?.ammo ?? null;
-
-    const plan = isItem && inCombat
-      ? FirearmService.planFire({ weapon, phaseShotsFired: already, declaredRounds, ammoAvailable })
-      : null;
-
-    const recoilRow = plan?.attackerTNMod
-      ? { id: "recoil", name: "Recoil", value: plan.attackerTNMod }
-      : null;
-
-    const mods = recoilRow ? [...modifiersArray, recoilRow] : modifiersArray;
-    const tn   = modifiedTargetNumber + (plan?.attackerTNMod ?? 0);
+    const tn = modifiedTargetNumber;
 
     const options = {
       type,
-      modifiers: mods,
+      modifiers: modifiersArray,
       targetNumber: tn,
-      itemId,
+      itemId: isItem ? (caller.item?.id ?? caller.key) : undefined,
       itemName: isItem ? (caller.itemName ?? caller.name) : undefined,
       skillName: isItem ? caller.skillName : isSkill ? caller.name : undefined,
       specializationName: isItem
@@ -70,9 +50,6 @@
       attributeName: attributeKeyForChat,
       isDefaulting,
       opposed: true,
-      roundsFired: plan?.roundsFired,
-      powerDelta: plan?.powerDelta,
-      levelDelta: plan?.levelDelta,
     };
 
     const baseRoll = SR3ERoll.create(
@@ -84,11 +61,29 @@
     const roll = await baseRoll.evaluate(options);
     await baseRoll.waitForResolution();
 
-    if (plan?.roundsFired && inCombat) FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
+    // Recoil stack bump: only when in combat & firing an item
+    if (FirearmService.inCombat?.() && isItem) {
+      const itemId = caller.item?.id ?? caller.key;
+      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
+
+      if (weapon) {
+        const plan = FirearmService.planFire({
+          weapon,
+          phaseShotsFired: FirearmService.getPhaseShots(actor.id),
+        });
+
+        if (plan?.roundsFired) {
+          FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
+          // Optional: notify composer to recalc if it might still be open
+          Hooks.callAll("sr3e.recoilRefresh");
+        }
+      }
+    }
 
     await CommitEffects?.();
     Hooks.callAll("actorSystemRecalculated", actor);
     OpposeRollService.expireContest(roll.options.contestId);
+
     OnClose?.();
   }
 </script>
