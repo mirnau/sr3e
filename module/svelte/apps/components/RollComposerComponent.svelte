@@ -122,6 +122,18 @@
       resetToDefaults();
       Object.assign(caller, callerData);
 
+      const dict = CONFIG?.sr3e?.attributes ?? {};
+      if (caller.responseMode && caller.type !== "attribute") {
+         caller.type = "attribute";
+         if (!caller.key) caller.key = "reaction";
+         if (!caller.name) caller.name = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
+         caller.item = undefined;
+      }
+      if (caller.type === "item" && caller.key && Object.prototype.hasOwnProperty.call(dict, caller.key)) {
+         caller.type = "attribute";
+         caller.item = undefined;
+      }
+
       if (options.visible !== undefined) visible = options.visible;
       isResponding = caller.responseMode || false;
       hasTarget = game.user.targets.size > 0;
@@ -130,25 +142,23 @@
       const pen = buildPenaltyMod();
       if (pen) upsertMod(pen);
 
+      if (Number.isFinite(Number(caller.defenseTNMod)) && Number(caller.defenseTNMod) !== 0) {
+         upsertMod({
+            id: "weapon-defense",
+            name: caller.defenseTNLabel || "Weapon difficulty",
+            value: Number(caller.defenseTNMod),
+         });
+      }
+
       if (caller.type === "item") {
          const itemId = caller.item?.id ?? caller.key;
          const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
-
-         if (!item) {
-            throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
-         }
-
+         if (!item) throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
          title = item.name;
-
          const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
          const skill = actor.items.get(skillId);
-
          prepareSkillBasedRoll(skill, item.name);
-
-         if (linkedAttributeString) {
-            caller.linkedAttribute = linkedAttributeString;
-         }
-
+         if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
          if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
             caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
             isDefaultingAsString = "true";
@@ -172,6 +182,12 @@
          const skill = actor.items.get(caller.skillId);
          if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
          prepareSkillBasedRoll(skill, caller.key);
+         return;
+      }
+
+      if (caller.type === "attribute") {
+         title = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
+         if ((caller.dice ?? 0) === 0) caller.dice = getAttrDiceFromSumStore(caller.key);
          return;
       }
    }

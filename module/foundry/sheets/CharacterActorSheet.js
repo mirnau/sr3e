@@ -8,7 +8,9 @@ import { mount, unmount } from "svelte";
 import ActorDataService from "@services/ActorDataService.js";
 import { flags } from "@services/commonConsts.js";
 import { StoreManager, stores } from "../../svelte/svelteHelpers/StoreManager.svelte";
-import RollComposerComponent from "../../svelte/apps/components/RollComposerComponent.svelte";
+import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
+import OpposeRollService from "@services/OpposeRollService.js";
+
 
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
@@ -217,8 +219,30 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       return super._tearDown();
    }
 
-   setRollComposerData(callerData) {
-      this.#composer.setCallerData(callerData, { visible: true });
+   setRollComposerData(callerData, options) {
+      if (!this.#composer) return;
+
+      const dict = CONFIG?.sr3e?.attributes ?? {};
+      let payload = { ...callerData };
+
+      if (payload?.responseMode) {
+         const contest = payload.contestId ? OpposeRollService.getContestById(payload.contestId) : null;
+         const hint = contest?.defenseHint ?? OpposeRollService.getDefaultDefenseHint(contest?.initiatorRoll);
+         if (hint?.type === "attribute") {
+            payload.type = "attribute";
+            payload.key = hint.key;
+            payload.name = game.i18n.localize(`sr3e.attributes.${hint.key}`) || hint.key;
+            payload.item = undefined;
+            payload.defenseTNMod = Number(hint.tnMod || 0);
+            payload.defenseTNLabel = hint.tnLabel || "Weapon difficulty";
+         }
+      }
+
+      if (payload?.type === "item" && payload?.key && Object.prototype.hasOwnProperty.call(dict, payload.key)) {
+         payload = { ...payload, type: "attribute", item: undefined };
+      }
+
+      this.#composer.setCallerData(payload, { visible: true });
    }
 
    _onSubmit() {

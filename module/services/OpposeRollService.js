@@ -1,4 +1,6 @@
 import SR3ERoll from "@documents/SR3ERoll.js";
+import FirearmService from "@services/FirearmService.js";
+
 const activeContests = new Map();
 const pendingResponses = new Map();
 
@@ -27,8 +29,27 @@ export default class OpposeRollService {
       }
    }
 
+   static getDefaultDefenseHint(initiatorRoll) {
+      return FirearmService.getDefenseHintFromAttack(initiatorRoll);
+   }
+
    static getContestForTarget(target) {
       return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
+   }
+
+   static getDefaultDefenseHint(initiatorRoll) {
+      const o = initiatorRoll?.options ?? {};
+      if (o.type === "item" && o.itemId) {
+         const weapon =
+            game.items.get(o.itemId) || ChatMessage.getSpeakerActor(o.speaker)?.items?.get?.(o.itemId) || null;
+
+         const tnMod = Number(weapon?.system?.defense?.tnMod ?? weapon?.system?.dodgeTNMod ?? 0);
+
+         const tnLabel = weapon?.system?.defense?.tnLabel ?? "Weapon difficulty";
+
+         return { type: "attribute", key: "reaction", tnMod, tnLabel };
+      }
+      return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
    }
 
    static registerContest({ contestId, initiator, target, rollData, options }) {
@@ -39,6 +60,7 @@ export default class OpposeRollService {
          initiatorRoll: rollData,
          targetRoll: null,
          options,
+         defenseHint: OpposeRollService.getDefaultDefenseHint(rollData),
          isResolved: false,
       });
    }
