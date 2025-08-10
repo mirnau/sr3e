@@ -1,11 +1,25 @@
 const _phaseShots = new Map();
 let _lastPhaseKey = null;
 
+const _oocShots = new Map();
+let _oocWindowMs = 3000;
+
 export default class FirearmService {
-   static #MODE_TN = { manual: 0, semiauto: 0, burst: 0, fullauto: 2 };
+   static #weaponModes() {
+      const m = CONFIG?.sr3e?.weaponMode;
+      if (!m || typeof m !== "object") throw new Error("sr3e: CONFIG.sr3e.weaponMode missing");
+      return Object.keys(m);
+   }
 
    static #modeKey(w) {
-      return w?.system?.mode ?? "manual";
+      const mode = String(w?.system?.mode ?? "");
+      const allowed = this.#weaponModes();
+      if (!allowed.includes(mode)) throw new Error(`sr3e: Unknown weapon mode "${mode}"`);
+      return mode;
+   }
+
+   static #isFirearmMode(m) {
+      return m === "manual" || m === "semiauto" || m === "burst" || m === "fullauto";
    }
 
    static #isHeavy(w) {
@@ -16,7 +30,25 @@ export default class FirearmService {
       return Number(w?.system?.recoilComp ?? 0) || 0;
    }
 
-   // --- Combat phase helpers ---
+   static getDefenseTNAdd(weapon) {
+      const mode = this.#modeKey(weapon);
+      const perWeapon = weapon?.system?.defense?.tnMods ?? {};
+      if (perWeapon[mode] != null) {
+         const v = Number(perWeapon[mode]);
+         if (Number.isFinite(v)) return v;
+         throw new Error(`sr3e: tnMods[${mode}] NaN`);
+      }
+      const baseByMode = CONFIG?.sr3e?.defense?.baseTNByMode;
+      if (!baseByMode || baseByMode[mode] == null) throw new Error(`sr3e: defense.baseTNByMode missing for mode "${mode}"`);
+      const base = Number(baseByMode[mode]);
+      if (!Number.isFinite(base)) throw new Error(`sr3e: defense.baseTNByMode[${mode}] NaN`);
+      return base;
+   }
+
+   static getDefenseTNLabel(weapon) {
+      return weapon?.system?.defense?.tnLabel ?? "Weapon difficulty";
+   }
+
    static getPhase() {
       const c = game.combat;
       if (!c) return { round: 0, pass: 0, key: "no-combat" };
@@ -50,25 +82,38 @@ export default class FirearmService {
       return !!(game.combat && game.combat.started);
    }
 
-   // --- Defense TN helpers ---
-   static getDefenseTNAdd(weapon) {
-      const mode = this.#modeKey(weapon);
-      const perWeapon = weapon?.system?.defense?.tnMods ?? {};
-      const v = Number(perWeapon?.[mode]);
-      if (!Number.isNaN(v)) return v;
-      const base = Number(this.#MODE_TN[mode]);
-      return Number.isNaN(base) ? 0 : base;
+   static setOOCWindowMs(ms) {
+      _oocWindowMs = Math.max(250, Number(ms) || 3000);
    }
 
-   static getDefenseTNLabel(weapon) {
-      return weapon?.system?.defense?.tnLabel ?? "Weapon difficulty";
+   static #oocTouch(attackerId) {
+      const s = _oocShots.get(attackerId) ?? { c: 0, t: 0 };
+      _oocShots.set(attackerId, s);
+      return s;
+   }
+
+   static #oocResetIfStale(s, now) {
+      if (now - s.t > _oocWindowMs) s.c = 0;
+   }
+
+   static getOOCShots(attackerId) {
+      const now = Date.now();
+      const s = this.#oocTouch(attackerId);
+      this.#oocResetIfStale(s, now);
+      return s.c;
+   }
+
+   static bumpOOCShots(attackerId, count) {
+      const now = Date.now();
+      const s = this.#oocTouch(attackerId);
+      this.#oocResetIfStale(s, now);
+      s.c += Number(count || 1);
+      s.t = now;
    }
 
    static getDefenseHintFromAttack(initiatorRoll) {
       const o = initiatorRoll?.options ?? {};
-      if (o.type !== "item" || !o.itemId) {
-         return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
-      }
+      if (o.type !== "item" || !o.itemId) return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
       const actor = ChatMessage.getSpeakerActor(o.speaker);
       const weapon = game.items.get(o.itemId) || actor?.items?.get?.(o.itemId) || null;
       if (!weapon) return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
@@ -77,12 +122,10 @@ export default class FirearmService {
       return { type: "attribute", key: "reaction", tnMod, tnLabel };
    }
 
-   // --- Core recoil logic ---
-   static #recoilDelta({ before, add, rc, heavy }) {
-      const mult = heavy ? 2 : 1;
-      const uncompBefore = Math.max(0, before - rc);
-      const uncompAfter = Math.max(0, before + add - rc);
-      return (uncompAfter - uncompBefore) * mult;
+   static #recoilTotal({ before, add, rc, heavy }) {
+      let total = Math.max(0, before + add - rc);
+      if (heavy && total > 0) total *= 2;
+      return total;
    }
 
    static planFire({ weapon, mode, phaseShotsFired = 0, declaredRounds = null, ammoAvailable = null }) {
@@ -97,122 +140,62 @@ export default class FirearmService {
       let notes = [];
 
       if (m === "semiauto") {
-         // First shot no recoil, second shot in same pass = +1 recoil
-         const add = phaseShotsFired === 0 ? 0 : 1;
          rounds = 1;
-         attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add, rc, heavy });
+         attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add: 1, rc, heavy });
          notes.push("SA");
       } else if (m === "manual") {
          rounds = 1;
-         notes.push("Manual");
-      } else if (m === "burst") {
-         // Default 3-round burst unless ammo short
-         const want = 3;
-         rounds = ammoAvailable != null ? Math.min(want, Number(ammoAvailable) || 0) : want;
-
-         if (rounds >= 3) {
-            attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: 3, rc, heavy });
-            powerDelta = 3;
-            levelDelta = 1;
-            notes.push("BF");
-         } else if (rounds === 2) {
-            attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: 2, rc, heavy });
-            powerDelta = 2;
-            levelDelta = 0;
-            notes.push("Short BF");
-         } else {
-            // Single fallback shot
-            attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: 1, rc, heavy });
-            notes.push("SA");
-         }
       } else if (m === "fullauto") {
          const maxRounds = 10;
          rounds = Math.min(Math.max(1, Number(declaredRounds ?? maxRounds)), maxRounds);
          if (ammoAvailable != null) rounds = Math.min(rounds, Number(ammoAvailable) || 0);
-
-         // +1 recoil per round fired this phase (cumulative)
-         attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: rounds, rc, heavy });
+         attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add: rounds, rc, heavy });
          powerDelta = rounds;
          levelDelta = Math.floor(rounds / 3);
          notes.push(`FA ${rounds}`);
+      } else if (m === "burst") {
+         const want = 3;
+         rounds = ammoAvailable != null ? Math.min(want, Number(ammoAvailable) || 0) : want;
+         if (rounds >= 2) {
+            attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add: rounds, rc, heavy });
+            powerDelta = rounds;
+            levelDelta = Math.floor(rounds / 3);
+            notes.push(rounds >= 3 ? "BF" : "Short BF");
+         } else {
+            rounds = 1;
+            attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add: 1, rc, heavy });
+            notes.push("SA");
+         }
       } else {
          rounds = 1;
-         notes.push("Other");
       }
 
-      return { roundsFired: rounds, attackerTNMod, powerDelta, levelDelta, notes };
+      return { roundsFired: rounds, attackerTNMod, powerDelta, levelDelta, notes, mode: m };
    }
 
-   static getRecoilModifier({ actor, caller, declaredRounds = 1, ammoAvailable = null, preview = true }) {
-      if (!caller || caller.type !== "item") return null;
-      if (this.inCombat()) {
-         return this.recoilModifierInCombat({ actor, caller, declaredRounds, ammoAvailable, bump: !preview });
-      } else {
-         // Outside of combat we track nothing, so roundsFiredSoFar is always 0 for preview
-         return this.recoilModifierOutOfCombat({ actor, caller, declaredRounds, ammoAvailable, roundsFiredSoFar: 0 });
-      }
-   }
+   static recoilModifierForComposer({ actor, caller, declaredRounds = 1, ammoAvailable = null }) {
+      const itemId = caller?.item?.id ?? caller?.key;
+      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
+      if (!weapon) return null;
 
-   static clearRecoilTracking() {
-      _phaseShots.clear();
-      _lastPhaseKey = null;
-   }
+      const m = this.#modeKey(weapon);
+      const already = this.inCombat() ? this.getPhaseShots(actor?.id) : this.getOOCShots(actor?.id);
 
-   // --- Pure recoil calculation (no state mutation) ---
-   static calculateRecoil({ weapon, roundsFiredSoFar = 0, declaredRounds = 1, ammoAvailable = null }) {
       const plan = this.planFire({
          weapon,
-         phaseShotsFired: roundsFiredSoFar,
+         mode: m,
+         phaseShotsFired: already,
          declaredRounds,
          ammoAvailable,
       });
 
-      const rc = this.#rc(weapon);
-      const heavy = this.#isHeavy(weapon);
-      const uncompensated = Math.max(0, roundsFiredSoFar + plan.roundsFired - rc);
-      const tnMod = uncompensated * (heavy ? 2 : 1);
-
-      return { tnMod, plan };
+      return plan.attackerTNMod ? { id: "recoil", name: "Recoil", value: plan.attackerTNMod } : null;
    }
 
-   // --- In-combat recoil (tracks shots) ---
-   static recoilModifierInCombat({ actor, caller, declaredRounds = 1, ammoAvailable = null, bump = false }) {
-      const itemId = caller?.item?.id ?? caller?.key;
-      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
-      if (!weapon) return null;
-
-      const { key: phaseKey } = this.getPhase();
-      if (phaseKey !== _lastPhaseKey) {
-         _phaseShots.clear();
-         _lastPhaseKey = phaseKey;
-      }
-
-      const alreadyFired = this.getPhaseShots(actor?.id) || 0;
-      const { tnMod, plan } = this.calculateRecoil({
-         weapon,
-         roundsFiredSoFar: alreadyFired,
-         declaredRounds,
-         ammoAvailable,
-      });
-
-      if (bump) this.bumpPhaseShots(actor?.id, plan.roundsFired);
-
-      return tnMod ? { id: "recoil", name: "Recoil", value: tnMod } : null;
-   }
-
-   // --- Out-of-combat recoil (manual round count) ---
-   static recoilModifierOutOfCombat({ actor, caller, declaredRounds = 1, ammoAvailable = null, roundsFiredSoFar = 0 }) {
-      const itemId = caller?.item?.id ?? caller?.key;
-      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
-      if (!weapon) return null;
-
-      const { tnMod } = this.calculateRecoil({
-         weapon,
-         roundsFiredSoFar,
-         declaredRounds,
-         ammoAvailable,
-      });
-
-      return tnMod ? { id: "recoil", name: "Recoil", value: tnMod } : null;
+   static bumpOnShot({ actor, weapon, declaredRounds = 1 }) {
+      const m = this.#modeKey(weapon);
+      if (!this.#isFirearmMode(m)) return;
+      if (this.inCombat()) this.bumpPhaseShots(actor?.id, declaredRounds);
+      else this.bumpOOCShots(actor?.id, declaredRounds);
    }
 }

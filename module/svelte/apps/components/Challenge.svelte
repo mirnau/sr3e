@@ -61,22 +61,13 @@
     const roll = await baseRoll.evaluate(options);
     await baseRoll.waitForResolution();
 
-    // Recoil stack bump: only when in combat & firing an item
-    if (FirearmService.inCombat?.() && isItem) {
+    if (isItem) {
       const itemId = caller.item?.id ?? caller.key;
       const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
-
       if (weapon) {
-        const plan = FirearmService.planFire({
-          weapon,
-          phaseShotsFired: FirearmService.getPhaseShots(actor.id),
-        });
-
-        if (plan?.roundsFired) {
-          FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
-          // Optional: notify composer to recalc if it might still be open
-          Hooks.callAll("sr3e.recoilRefresh");
-        }
+        const rounds = Number(caller.rounds ?? caller.value ?? 1);
+        FirearmService.bumpOnShot({ actor, weapon, declaredRounds: rounds });
+        Hooks.callAll("sr3e.recoilRefresh");
       }
     }
 

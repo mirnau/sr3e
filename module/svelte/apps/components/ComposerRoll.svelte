@@ -1,6 +1,7 @@
 <script>
   import SR3ERoll from "@documents/SR3ERoll.js";
   import { localize } from "@services/utilities.js";
+  import FirearmService from "@services/FirearmService.js";
 
   let {
     actor,
@@ -19,13 +20,11 @@
     e?.preventDefault?.();
     const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
 
-    const type = caller.type ?? caller.type; // tolerate old callers
+    const type = caller.type ?? caller.type;
     const isItem = type === "item";
     const isSkill = type === "skill" || type === "specialization";
     const isAttr  = type === "attribute";
 
-    // Always try to surface a meaningful attribute key for the chat message.
-    // Priority: linkedAttribute (from RollComposer) → explicit attribute fields → attribute caller key.
     let attributeKeyForChat =
       caller.linkedAttribute ??
       caller.attributeKey ??
@@ -42,29 +41,31 @@
         type,
         modifiers: modifiersArray,
         targetNumber: modifiedTargetNumber,
-
-        // Item / skill labeling
-        itemId:   isItem ? caller.key : undefined,
+        itemId:   isItem ? (caller.item?.id ?? caller.key) : undefined,
         itemName: isItem ? (caller.itemName ?? caller.name) : undefined,
-        skillName: isItem ? caller.skillName
-                 : isSkill ? caller.name
-                 : undefined,
+        skillName: isItem ? caller.skillName : isSkill ? caller.name : undefined,
         specializationName: isItem
-          ? caller.specializationName
+          ? (caller.specializationName ?? caller.specialization)
           : (type === "specialization" ? caller.specialization : undefined),
-
-        // Always pass attribute info if we have it; renderer will decide whether to use it.
         attributeKey: attributeKeyForChat,
         attributeName: attributeKeyForChat,
-
-        // Whether this roll was marked as defaulting in the UI
         isDefaulting,
-
         opposed: false,
       }
     );
 
     await roll.evaluate();
+
+    if (isItem) {
+      const itemId = caller.item?.id ?? caller.key;
+      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
+      if (weapon) {
+        const rounds = Number(caller.rounds ?? caller.value ?? 1);
+        FirearmService.bumpOnShot({ actor, weapon, declaredRounds: rounds });
+        Hooks.callAll("sr3e.recoilRefresh");
+      }
+    }
+
     await CommitEffects?.();
     OnClose?.();
     Hooks.callAll("actorSystemRecalculated", actor);

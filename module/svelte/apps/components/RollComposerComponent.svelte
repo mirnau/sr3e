@@ -1,11 +1,9 @@
 <script>
-   import SR3ERoll from "@documents/SR3ERoll.js";
-   import { onDestroy, onMount } from "svelte";
+   import { onMount, onDestroy } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
-   import OpposeRollService from "@services/OpposeRollService.js";
    import Respond from "@sveltecomponent/Respond.svelte";
    import Resistance from "@sveltecomponent/Resistance.svelte";
    import Challenge from "@sveltecomponent/Challenge.svelte";
@@ -19,9 +17,9 @@
    onDestroy(() => {
       $shouldDisplaySheen = false;
       StoreManager.Unsubscribe(actor);
+      if (unhook) Hooks.off("updateCombat", unhook);
    });
 
-   let karmaPoolStore = actorStoreManager.GetRWStore("karma.karmaPool.value");
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
    let penaltyStore = actorStoreManager.GetRWStore("health.penalty");
 
@@ -54,13 +52,20 @@
 
    let associatedDicePoolString = $state("");
    let associatedDicePoolStore;
-   let callingSkill;
    let linkedAttributeString;
    let linkedAttributeStore;
    let readwrite;
    let selectEl;
    let containerEl;
 
+   // ---- firearm context (for recoil) ----
+   let isFirearm = $state(false);
+   let weaponMode = $state(""); // "manual" | "semiauto" | "burst" | "fullauto" | ...
+   let declaredRounds = $state(1); // user-controlled for BF/FA
+   let ammoAvailable = $state(null); // null = unknown/unlimited; else number
+   let phaseKey = $state(""); // "round:pass" from FirearmService.getPhase()
+
+   // We keep caller shape intact
    let caller = $state({
       type: null,
       key: null,
@@ -76,24 +81,7 @@
    let difficulties = ItemDataService.getDifficultyGradings(config);
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
-   // ------------------- helpers -------------------
-
-   function upsertOrRemoveRecoil() {
-      // strip any old recoil row
-      const without = modifiersArray.filter((m) => m.id !== "recoil");
-
-      // only compute recoil in combat and for item rolls
-      const inCombat = FirearmService.inCombat?.() === true;
-      const isItem = caller?.type === "item";
-      if (!inCombat || !isItem) {
-         if (without.length !== modifiersArray.length) modifiersArray = without;
-         return;
-      }
-
-      const recoil = FirearmService.recoilModifierForComposer({ actor, caller });
-      if (recoil) modifiersArray = [...without, recoil];
-      else if (without.length !== modifiersArray.length) modifiersArray = without;
-   }
+   // --------------- helpers ----------------
 
    function getAttrDiceFromSumStore(attrKey) {
       const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
@@ -101,7 +89,8 @@
    }
 
    function buildPenaltyMod() {
-      return $penaltyStore > 0 ? { id: "penalty", name: localize(config.health.penalty), value: -$penaltyStore } : null;
+      const p = Number($penaltyStore ?? 0);
+      return p > 0 ? { id: "penalty", name: localize(config.health.penalty), value: -p } : null;
    }
 
    function upsertMod(mod) {
@@ -116,13 +105,10 @@
 
    function ensureDefaultingModForAttribute() {
       const has = modifiersArray.some((m) => m.id === "auto-default-attr" || m.name === "Skill to attribute");
-      if (!has) {
-         upsertMod({ id: "auto-default-attr", name: "Skill to attribute", value: 4 });
-      }
+      if (!has) upsertMod({ id: "auto-default-attr", name: "Skill to attribute", value: 4 });
    }
 
    function swallowDirectional(event) {
-      // Prevent arrow keys from scrolling or moving focus
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
          event.stopPropagation();
          event.preventDefault();
@@ -130,9 +116,73 @@
    }
 
    function handleSelectKeydown(event) {
-      // Optional: you may have had special behaviour for the select
-      // For now, just swallow arrow keys so they don’t navigate the whole sheet
       swallowDirectional(event);
+   }
+
+   function getWeaponFromCaller() {
+      if (caller?.type !== "item") return null;
+      const itemId = caller.item?.id ?? caller.key;
+      return actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
+   }
+
+   function initFirearmContextFromWeapon(weapon) {
+      if (!weapon) {
+         isFirearm = false;
+         weaponMode = "";
+         declaredRounds = 1;
+         ammoAvailable = null;
+         return;
+      }
+      const mode = String(weapon?.system?.mode ?? "");
+      weaponMode = mode;
+      // determine firearmness against your CONFIG modes
+      const firearmModes = CONFIG?.sr3e?.weaponMode ?? {};
+      isFirearm = Object.prototype.hasOwnProperty.call(firearmModes, mode);
+
+      // Ammo read (optional – tolerate missing data)
+      const inMag = Number(weapon?.system?.ammo?.inMag ?? weapon?.system?.ammo ?? NaN);
+      ammoAvailable = Number.isFinite(inMag) ? Math.max(0, inMag) : null;
+
+      // Default rounds by mode (SR3E)
+      if (mode === "burst") {
+         // short BF = 3 if possible, else clamp to ammo
+         declaredRounds = ammoAvailable == null ? 3 : Math.min(3, ammoAvailable);
+      } else if (mode === "fullauto") {
+         // FA must be 3..10; start at 6 as a middle ground, then clamp to ammo
+         let base = 6;
+         if (ammoAvailable != null) base = Math.min(base, ammoAvailable);
+         declaredRounds = Math.max(3, Math.min(10, base));
+      } else {
+         declaredRounds = 1;
+      }
+   }
+
+   function upsertOrRemoveRecoil() {
+      const existing = modifiersArray.find((m) => m.id === "recoil");
+      const isItem = caller?.type === "item";
+      if (!isItem) {
+         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         return;
+      }
+
+      const recoil = FirearmService.recoilModifierForComposer({
+         actor,
+         caller,
+         declaredRounds,
+         ammoAvailable,
+      });
+
+      if (!recoil) {
+         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         return;
+      }
+      if (!existing) {
+         modifiersArray = [...modifiersArray, recoil];
+         return;
+      }
+      if (existing.value !== recoil.value || existing.name !== recoil.name) {
+         modifiersArray = modifiersArray.map((m) => (m.id === "recoil" ? recoil : m));
+      }
    }
 
    // ------------------- composer API -------------------
@@ -174,9 +224,14 @@
          const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
          if (!item) throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
          title = item.name;
+
+         // init firearm context BEFORE we decide defaulting
+         initFirearmContextFromWeapon(item);
+
          const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
          const skill = actor.items.get(skillId);
          prepareSkillBasedRoll(skill, item.name);
+
          if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
          if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
             caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
@@ -192,6 +247,7 @@
       if (caller.type === "skill") {
          const skill = actor.items.get(caller.skillId);
          if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
+         initFirearmContextFromWeapon(null);
          prepareSkillBasedRoll(skill, caller.key);
          if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
          return;
@@ -200,11 +256,13 @@
       if (caller.type === "specialization") {
          const skill = actor.items.get(caller.skillId);
          if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
+         initFirearmContextFromWeapon(null);
          prepareSkillBasedRoll(skill, caller.key);
          return;
       }
 
       if (caller.type === "attribute") {
+         initFirearmContextFromWeapon(null);
          title = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
          if ((caller.dice ?? 0) === 0) caller.dice = getAttrDiceFromSumStore(caller.key);
          return;
@@ -221,6 +279,11 @@
       hasChallenged = false;
       title = "";
       associatedDicePoolString = "";
+      // firearm context
+      isFirearm = false;
+      weaponMode = "";
+      declaredRounds = 1;
+      ammoAvailable = null;
    }
 
    // ------------------- internal logic -------------------
@@ -254,28 +317,34 @@
       });
    }
 
-   // ------------------- effects -------------------
+   // ------------------- lifecycle / hooks -------------------
+   let unhook = null;
+   onMount(() => {
+      const refreshPhase = () => {
+         const { key } = FirearmService.getPhase();
+         if (key !== phaseKey) {
+            phaseKey = key;
+            // recoil may reset across passes -> recompute
+            upsertOrRemoveRecoil();
+         }
+      };
+      unhook = (..._args) => refreshPhase();
+      Hooks.on("updateCombat", unhook);
+      // initialize once
+      phaseKey = FirearmService.getPhase().key;
+   });
 
+   // ------------------- reactivity -------------------
+
+   // keep recoil in sync with visibility / caller / target / declaredRounds
    $effect(() => {
       if (!visible) return;
-      if (caller?.type !== "item") return;
-
-      const recoil = FirearmService.getRecoilModifier({ actor, caller, preview: true });
-      const idx = modifiersArray.findIndex((m) => m.id === "recoil");
-
-      if (recoil) {
-         if (idx === -1) {
-            modifiersArray = [...modifiersArray, recoil];
-         } else if (modifiersArray[idx]?.value !== recoil.value) {
-            const copy = [...modifiersArray];
-            copy[idx] = recoil;
-            modifiersArray = copy;
-         }
-      } else if (idx !== -1) {
-         const copy = [...modifiersArray];
-         copy.splice(idx, 1);
-         modifiersArray = copy;
-      }
+      caller;
+      hasTarget;
+      declaredRounds;
+      weaponMode;
+      phaseKey;
+      upsertOrRemoveRecoil();
    });
 
    $effect(() => {
@@ -285,12 +354,7 @@
    $effect(() => {
       const pen = buildPenaltyMod();
       const withoutPenalty = modifiersArray.filter((m) => m.id !== "penalty");
-
-      // Only update if changed
-      if (withoutPenalty.length !== modifiersArray.length) {
-         modifiersArray = withoutPenalty;
-      }
-
+      if (withoutPenalty.length !== modifiersArray.length) modifiersArray = withoutPenalty;
       if (pen && !withoutPenalty.some((m) => m.id === pen.id)) {
          modifiersArray = [...withoutPenalty, pen];
       }
@@ -298,7 +362,7 @@
 
    $effect(() => {
       modifiersTotal = modifiersArray.reduce((acc, m) => acc + Number(m.value ?? 0), 0);
-      modifiedTargetNumber = targetNumber + modifiersTotal;
+      modifiedTargetNumber = Math.max(2, targetNumber + modifiersTotal); // SR3 min TN = 2
       canSubmit = modifiedTargetNumber > 1;
    });
 
@@ -317,11 +381,7 @@
 
    $effect(() => {
       const sum = Number($karmaPoolSumStore?.sum);
-      if (sum > 0) {
-         maxAffordableDice = Math.floor((-1 + Math.sqrt(1 + 8 * sum)) * 0.5);
-      } else {
-         maxAffordableDice = 0;
-      }
+      maxAffordableDice = sum > 0 ? Math.floor((-1 + Math.sqrt(1 + 8 * sum)) * 0.5) : 0;
    });
 
    $effect(() => {
@@ -335,14 +395,6 @@
 
    function KarmaCostCalculator() {
       karmaCost = 0.5 * diceBought * (diceBought + 1);
-   }
-
-   function Reset() {
-      resetToDefaults();
-      FirearmService.clearRecoilTracking();
-
-      const pen = buildPenaltyMod();
-      if (pen) upsertMod(pen);
    }
 
    function OnClose() {
@@ -495,6 +547,22 @@
             {OnClose}
             {CommitEffects}
          />
+      {/if}
+      {#if caller.type === "item" && isFirearm && (weaponMode === "burst" || weaponMode === "fullauto")}
+         <div class="roll-composer-card">
+            <h1>Rounds</h1>
+            <h4>{weaponMode === "burst" ? "Burst Fire" : "Full‑Auto"}</h4>
+            <Counter
+               bind:value={declaredRounds}
+               min={weaponMode === "fullauto" ? 3 : 1}
+               max={(() => {
+                  if (weaponMode === "burst") return Math.min(3, ammoAvailable ?? 3);
+                  // fullauto
+                  const cap = 10;
+                  return Math.min(cap, ammoAvailable ?? cap);
+               })()}
+            />
+         </div>
       {/if}
    </div>
 {/if}
