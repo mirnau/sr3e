@@ -258,7 +258,19 @@
 
    $effect(() => {
       if (!visible) return;
-      upsertOrRemoveRecoil();
+      if (caller?.type !== "item") return;
+
+      const recoil = FirearmService.getRecoilModifier({ actor, caller, preview: true });
+      const withoutRecoil = modifiersArray.filter((m) => m.id !== "recoil");
+
+      if (recoil) {
+         const changed =
+            withoutRecoil.length !== modifiersArray.length ||
+            !withoutRecoil.some((m) => m.id === "recoil" && m.value === recoil.value);
+         if (changed) modifiersArray = [...withoutRecoil, recoil];
+      } else if (withoutRecoil.length !== modifiersArray.length) {
+         modifiersArray = withoutRecoil;
+      }
    });
 
    $effect(() => {
@@ -322,6 +334,8 @@
 
    function Reset() {
       resetToDefaults();
+      FirearmService.clearRecoilTracking();
+
       const pen = buildPenaltyMod();
       if (pen) upsertMod(pen);
    }
