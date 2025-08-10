@@ -1,5 +1,5 @@
 <script>
-   import { localize } from "@services/utilities.js";
+   import { localize, kvOptions } from "@services/utilities.js";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
    import Portability from "@sveltecomponent/Portability.svelte";
@@ -21,7 +21,7 @@
          value: system.class,
          path: "system",
          type: "select",
-         options: Object.values(config.ammunitionClass).map(localize),
+         options: kvOptions(config.ammunitionClass)
       },
       {
          item,
@@ -30,7 +30,7 @@
          value: system.type,
          path: "system",
          type: "select",
-         options: Object.values(config.ammunitionType).map(localize),
+         options: kvOptions(config.ammunitionType),
       },
       {
          item,
@@ -39,7 +39,7 @@
          value: system.reloadMechanism,
          path: "system",
          type: "select",
-         options: Object.values(config.reloadMechanism).map(localize),
+         options: kvOptions(config.reloadMechanism),
       },
       {
          item,
@@ -48,7 +48,6 @@
          value: system.rounds,
          path: "system",
          type: "number",
-         options: [],
       },
    ]);
 </script>

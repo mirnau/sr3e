@@ -1,175 +1,183 @@
 <script>
-  import { localize, openFilePicker } from "@services/utilities.js";
-  import StatCard from "@sveltecomponent/basic/StatCard.svelte";
-  import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
-  import Image from "@sveltecomponent/basic/Image.svelte";
-  import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
-     import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+   import { localize, kvOptions } from "@services/utilities.js";
+   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
+   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
+   import Image from "@sveltecomponent/basic/Image.svelte";
+   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
 
-  let { item = {}, config = {} } = $props();
+   let { item = {}, config = {} } = $props();
 
-  const system = $state(item.system);
-  const awakened = $state(system.awakened);
-  const magicianData = $state(system.magicianData);
-  const adeptData = $state(awakened.adeptData);
-  const labels = config.magic;
+   const system = $state(item.system);
+   const awakened = $state(system.awakened);
+   const magicianData = $state(system.magicianData);
+   const adeptData = $state(awakened.adeptData);
 
+   const archetypeOptions = kvOptions(config.archetypes);
+   const magicianTypeOptions = kvOptions(config.magicianTypes);
+   const aspectsOptions = kvOptions(config.aspects);
+   const resistanceAttributeOptions = kvOptions(config.resistanceAttributes);
+   const traditionOptions = kvOptions(config.traditions);
 
-  const archetypeOptions = [localize(labels.adept), localize(labels.magician)];
+   const awakenedState = $state({ ...system.awakened });
+   const magicianDataState = $state({ ...system.magicianData });
 
-  const magicianTypeOptions = [
-    localize(labels.fullmage),
-    localize(labels.aspectedmage),
-  ];
+   const isMagician = $derived(awakenedState.archetype === "magician");
+   const isAdept = $derived(awakenedState.archetype === "adept");
+   const isAspected = $derived(magicianDataState.magicianType === "aspectedmage");
 
-  const aspectsOptions = [
-    localize(labels.conjurer),
-    localize(labels.sorcerer),
-    localize(labels.elementalist),
-    localize(config.common.custom),
-  ];
-
-  const resistanceAttributeOptions = [
-    localize(config.attributes.willpower),
-    localize(config.attributes.charisma),
-    localize(config.attributes.intelligence),
-  ];
-
-  const traditionOptions = [
-    localize(labels.hermetic),
-    localize(labels.shamanic),
-    localize(config.common.other),
-  ];
-
-  const archetype = $derived({
-    item,
-    key: "archetype",
-    label: localize(labels.archetype),
-    value: awakened.archetype,
-    path: "system.awakened",
-    type: "select",
-    options: archetypeOptions,
-  });
-
-  const priority = $derived({
-    item,
-    key: "priority",
-    label: localize(labels.priority),
-    value: awakened.priority,
-    path: "system.awakened",
-    type: "select",
-    options: ["A", "B"],
-  });
-
-  const magicianType = $derived({
-    item,
-    key: "magicianType",
-    label: localize(labels.magicianType),
-    value: magicianData.magicianType,
-    path: "system.magicianData",
-    type: "select",
-    options: magicianTypeOptions,
-  });
-
-  const aspect = $derived({
-    item,
-    key: "aspect",
-    label: localize(labels.aspect),
-    value: magicianData.aspect,
-    path: "system.magicianData",
-    type: "select",
-    options: aspectsOptions,
-  });
-
-  const magicianFields = $derived([
-    {
+   const archetype = $derived({
       item,
-      key: "tradition",
-      label: localize(labels.tradition),
-      value: magicianData.tradition,
+      key: "archetype",
+      label: localize(config.magic.archetype),
+      value: awakenedState.archetype,
+      path: "system.awakened",
+      type: "select",
+      options: archetypeOptions,
+   });
+
+   const priority = $derived({
+      item,
+      key: "priority",
+      label: localize(config.magic.priority),
+      value: awakenedState.priority,
+      path: "system.awakened",
+      type: "select",
+      options: ["A", "B"].map((p) => ({ value: p, label: p })),
+   });
+
+   const magicianType = $derived({
+      item,
+      key: "magicianType",
+      label: localize(config.magic.magicianType),
+      value: magicianDataState.magicianType,
       path: "system.magicianData",
       type: "select",
-      options: traditionOptions,
-    },
-    {
+      options: magicianTypeOptions,
+   });
+
+   const aspect = $derived({
       item,
-      key: "drainResistanceAttribute",
-      label: localize(labels.drainResistanceAttribute),
-      value: magicianData.drainResistanceAttribute,
+      key: "aspect",
+      label: localize(config.magic.aspect),
+      value: magicianDataState.aspect,
       path: "system.magicianData",
       type: "select",
-      options: resistanceAttributeOptions,
-    },
-    {
-      item,
-      key: "canAstrallyProject",
-      label: localize(labels.canAstrallyProject),
-      value: magicianData.canAstrallyProject,
-      path: "system.magicianData",
-      type: "checkbox",
-      options: [],
-    },
-    {
-      item,
-      key: "totem",
-      label: localize(labels.totem),
-      value: magicianData.totem ?? localize(labels.shamannote),
-      path: "system.magicianData",
-      type: "text",
-      options: [],
-    },
-  ]);
+      options: aspectsOptions,
+   });
 
-  const adeptFields = $derived([]); // Extend later if needed
+   const magicianFields = $derived([
+      {
+         item,
+         key: "tradition",
+         label: localize(config.magic.tradition),
+         value: magicianDataState.tradition,
+         path: "system.magicianData",
+         type: "select",
+         options: traditionOptions,
+      },
+      {
+         item,
+         key: "drainResistanceAttribute",
+         label: localize(config.magic.drainResistanceAttribute),
+         value: magicianDataState.drainResistanceAttribute,
+         path: "system.magicianData",
+         type: "select",
+         options: resistanceAttributeOptions,
+      },
+      {
+         item,
+         key: "canAstrallyProject",
+         label: localize(config.magic.canAstrallyProject),
+         value: magicianDataState.canAstrallyProject,
+         path: "system.magicianData",
+         type: "checkbox",
+         options: [],
+      },
+      {
+         item,
+         key: "totem",
+         label: localize(config.magic.totem),
+         value: magicianDataState.totem ?? localize(config.magic.shamannote),
+         path: "system.magicianData",
+         type: "text",
+         options: [],
+      },
+   ]);
 
-  let isAspected = $state(false);
-  $effect(() => {
-    isAspected = magicianType.value === localize(labels.aspectedmage);
-  });
+   const adeptFields = $derived([]);
+
+   function setArchetype(v) {
+      awakenedState.archetype = v;
+   }
+   function setPriority(v) {
+      awakenedState.priority = v;
+   }
+   function setMagicianType(v) {
+      magicianDataState.magicianType = v;
+   }
+   function setAspect(v) {
+      magicianDataState.aspect = v;
+   }
+   function setTradition(v) {
+      magicianDataState.tradition = v;
+   }
+   function setDrainAttr(v) {
+      magicianDataState.drainResistanceAttribute = v;
+   }
+   function setAstral(v) {
+      magicianDataState.canAstrallyProject = v;
+   }
+   function setTotem(v) {
+      magicianDataState.totem = v;
+   }
 </script>
 
 <ItemSheetWrapper csslayout={"double"}>
-    <!-- Header -->
-    <ItemSheetComponent>
-      <Image entity={item}/>
+   <ItemSheetComponent>
+      <Image entity={item} />
       <div class="stat-grid single-column">
-        <StatCard>
-          <input
-            bind:value={item.name}
-            onchange={(e) => item.update({ name: e.target.value })}
-          />
-        </StatCard>
-        <StatCard {...archetype} />
-        <StatCard {...priority} />
+         <StatCard>
+            <input bind:value={item.name} onchange={(e) => item.update({ name: e.target.value })} />
+         </StatCard>
+         <StatCard {...archetype} onUpdate={setArchetype} />
+         <StatCard {...priority} onUpdate={setPriority} />
       </div>
-    </ItemSheetComponent>
+   </ItemSheetComponent>
 
-    <!-- Magician UI -->
-    {#if awakened.archetype === archetype.options[1]}
+   {#if isMagician}
       <ItemSheetComponent>
-        <StatCard {...magicianType} />
+         <StatCard {...magicianType} onUpdate={setMagicianType} />
       </ItemSheetComponent>
 
       {#if isAspected}
-        <ItemSheetComponent>
-          <StatCard {...aspect} />
-        </ItemSheetComponent>
+         <ItemSheetComponent>
+            <StatCard {...aspect} onUpdate={setAspect} />
+         </ItemSheetComponent>
       {/if}
 
       {#each magicianFields as entry}
-        <ItemSheetComponent>
-          <StatCard {...entry} />
-        </ItemSheetComponent>
+         <ItemSheetComponent>
+            {#if entry.key === "tradition"}
+               <StatCard {...entry} onUpdate={setTradition} />
+            {:else if entry.key === "drainResistanceAttribute"}
+               <StatCard {...entry} onUpdate={setDrainAttr} />
+            {:else if entry.key === "canAstrallyProject"}
+               <StatCard {...entry} onUpdate={setAstral} />
+            {:else if entry.key === "totem"}
+               <StatCard {...entry} onUpdate={setTotem} />
+            {:else}
+               <StatCard {...entry} />
+            {/if}
+         </ItemSheetComponent>
       {/each}
-
-      <!-- Adept UI -->
-    {:else if awakened.archetype === archetype.options[0]}
+   {:else if isAdept}
       {#each adeptFields as entry}
-        <ItemSheetComponent>
-          <StatCard {...entry} />
-        </ItemSheetComponent>
+         <ItemSheetComponent>
+            <StatCard {...entry} />
+         </ItemSheetComponent>
       {/each}
-    {/if}
+   {/if}
 
-    <JournalViewer document={item} {config} />
+   <JournalViewer document={item} {config} />
 </ItemSheetWrapper>

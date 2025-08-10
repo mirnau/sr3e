@@ -1,6 +1,6 @@
 <script>
    import Commodity from "@sveltecomponent/Commodity.svelte";
-   import { localize } from "@services/utilities.js";
+   import { localize, kvOptions } from "@services/utilities.js";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
@@ -18,7 +18,7 @@
          value: system.type,
          path: "system",
          type: "select",
-         options: Object.values(config.gadgettypes).map(localize),
+         options: kvOptions(config.gadgettypes),
       },
    ]);
 </script>

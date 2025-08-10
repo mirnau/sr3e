@@ -65,18 +65,40 @@ export default class OpposeRollService {
       });
    }
 
+   // OpposeRollService.js
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
       this.registerContest({ contestId, initiator, target, rollData, options });
 
-      const targetUser = this.resolveControllingUser(target);
+      // >>> recoil accounting: bump phase shots now <<<
+      try {
+         const o = rollData?.options ?? {};
+         if (o.type === "item" && o.itemId) {
+            const actor = initiator;
+            const weapon = actor?.items?.get(o.itemId) || game.items.get(o.itemId);
+            if (weapon) {
+               const already = FirearmService.getPhaseShots(actor.id);
+               const plan = FirearmService.planFire({
+                  weapon,
+                  phaseShotsFired: already,
+                  declaredRounds: options?.declaredRounds ?? o.declaredRounds ?? null,
+                  ammoAvailable: weapon.system?.ammo?.value ?? null,
+               });
+               FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
+            }
+         }
+      } catch (err) {
+         console.error("[sr3e] recoil bump failed", err);
+      }
+      // <<< end bump >>>
 
+      const targetUser = this.resolveControllingUser(target);
       await targetUser.query("sr3e.opposeRollPrompt", {
          contestId,
          initiatorId: initiator.id,
          targetId: target.id,
          rollData,
-         options: options,
+         options,
       });
 
       const initiatorUser = this.resolveControllingUser(initiator);
@@ -86,9 +108,9 @@ export default class OpposeRollService {
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
          content: `
-         <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
-         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
-      `,
+      <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
+      <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
+    `,
          flags: { "sr3e.opposed": contestId },
       });
 

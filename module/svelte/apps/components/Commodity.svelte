@@ -1,7 +1,8 @@
 <script>
-   import { localize } from "@services/utilities.js";
+   import { localize, kvOptions } from "@services/utilities.js";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
+
    let { item, config, gridCss = "" } = $props();
    const system = $state(item.system);
    const commodity = system.commodity;
@@ -47,28 +48,28 @@
          item,
          key: "status",
          label: localize(config.commodity.legalstatus),
-         value: legality.status,
+         value: legality.status, // e.g. "L" | "R" | "I"
          path: "system.commodity.legality",
          type: "select",
-         options: Object.values(config.legalstatus).map(localize),
+         options: kvOptions(config.legalstatus),
       },
       {
          item,
          key: "permit",
          label: localize(config.commodity.legalpermit),
-         value: legality.permit,
+         value: legality.permit, // e.g. "1" | "2" | "3" | "4" | "N"
          path: "system.commodity.legality",
          type: "select",
-         options: Object.values(config.legalpermit).map(localize),
+         options: kvOptions(config.legalpermit),
       },
       {
          item,
          key: "priority",
          label: localize(config.commodity.legalenforcementpriority),
-         value: legality.priority,
+         value: legality.priority, // e.g. "1" | "2" | "3" | "4" | "X"
          path: "system.commodity.legality",
          type: "select",
-         options: Object.values(config.legalpriority).map(localize),
+         options: kvOptions(config.legalpriority),
       },
    ];
 </script>

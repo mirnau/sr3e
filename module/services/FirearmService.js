@@ -80,6 +80,14 @@ export default class FirearmService {
       return { type: "attribute", key: "reaction", tnMod, tnLabel };
    }
 
+   // FirearmService.js
+   static #recoilDelta({ before, add, rc, heavy }) {
+      const mult = heavy ? 2 : 1;
+      const uncompBefore = Math.max(0, before - rc);
+      const uncompAfter = Math.max(0, before + add - rc);
+      return (uncompAfter - uncompBefore) * mult;
+   }
+
    static planFire({ weapon, mode, phaseShotsFired = 0, declaredRounds = null, ammoAvailable = null }) {
       const m = this.#normalizeMode(mode ?? this.#modeKey(weapon));
       const rc = this.#rc(weapon);
@@ -92,9 +100,8 @@ export default class FirearmService {
       let notes = [];
 
       if (m === "semiauto") {
-         const uncomp = Math.max(0, phaseShotsFired - rc);
-         attackerTNMod += uncomp;
          rounds = 1;
+         attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: 1, rc, heavy });
          notes.push("SA");
       } else if (m === "manual") {
          rounds = 1;
@@ -102,30 +109,24 @@ export default class FirearmService {
          const maxRounds = 10;
          rounds = Math.min(Math.max(1, Number(declaredRounds ?? maxRounds)), maxRounds);
          if (ammoAvailable != null) rounds = Math.min(rounds, Number(ammoAvailable) || 0);
-         const uncomp = Math.max(0, rounds - rc);
-         attackerTNMod += uncomp * (heavy ? 2 : 1);
+
+         attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: rounds, rc, heavy });
          powerDelta = rounds;
          levelDelta = Math.floor(rounds / 3);
          notes.push(`FA ${rounds}`);
       } else if (m === "burst") {
          const want = 3;
          rounds = ammoAvailable != null ? Math.min(want, Number(ammoAvailable) || 0) : want;
-         if (rounds >= 3) {
-            const uncomp = Math.max(0, 3 - rc);
-            attackerTNMod += uncomp * (heavy ? 2 : 1);
-            powerDelta = 3;
-            levelDelta = 1;
-            notes.push("BF");
-         } else if (rounds === 2) {
-            const uncomp = Math.max(0, 2 - rc);
-            attackerTNMod += uncomp * (heavy ? 2 : 1);
-            powerDelta = 2;
-            levelDelta = 0;
-            notes.push("Short BF");
+
+         if (rounds >= 2) {
+            attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: rounds, rc, heavy });
+            powerDelta = rounds;
+            levelDelta = Math.floor(rounds / 3); // 3→+1, 2→+0
+            notes.push(rounds >= 3 ? "BF" : "Short BF");
          } else {
-            const uncomp = Math.max(0, phaseShotsFired - rc);
-            attackerTNMod += uncomp;
+            // fallback single shot
             rounds = 1;
+            attackerTNMod += this.#recoilDelta({ before: phaseShotsFired, add: 1, rc, heavy });
             notes.push("SA");
          }
       } else {
@@ -135,13 +136,22 @@ export default class FirearmService {
       return { roundsFired: rounds, attackerTNMod, powerDelta, levelDelta, notes };
    }
 
-   static recoilModifierForComposer({ actor, caller, declaredRounds = null, ammoAvailable = null }) {
+   static recoilModifierForComposer({ actor, caller, declaredRounds = 1, ammoAvailable = null }) {
       if (!this.inCombat()) return null;
       const itemId = caller?.item?.id ?? caller?.key;
       const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
       if (!weapon) return null;
+
       const already = this.getPhaseShots(actor?.id);
-      const plan = this.planFire({ weapon, phaseShotsFired: already, declaredRounds, ammoAvailable });
+      console.log("Phase shots before planFire:", already);
+
+      const plan = this.planFire({
+         weapon,
+         phaseShotsFired: already, // rounds already fired this phase
+         declaredRounds, // explicitly 1 for this single trigger pull
+         ammoAvailable,
+      });
+
       return plan.attackerTNMod ? { id: "recoil", name: "Recoil", value: plan.attackerTNMod } : null;
    }
 }

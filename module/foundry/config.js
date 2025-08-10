@@ -115,7 +115,7 @@ sr3e.common = {
    other: "sr3e.common.other",
    custom: "sr3e.common.custom",
    details: "sr3e.common.details",
-   isdefaulting: "sr3e.common.isdefaulting"
+   isdefaulting: "sr3e.common.isdefaulting",
 };
 
 sr3e.dicepools = {
@@ -313,7 +313,7 @@ sr3e.weapon = {
    rangebandlong: "sr3e.weapon.rangebandlong",
    rangebandextreme: "sr3e.weapon.rangebandextreme",
    rangeband: "sr3e.weapon.rangeband",
-   reloadMechanism:"sr3e.weapon.reloadMechanism"
+   reloadMechanism: "sr3e.weapon.reloadMechanism",
 };
 
 sr3e.commodity = {
@@ -381,6 +381,7 @@ sr3e.damageType = {
 sr3e.weaponMode = {
    manual: "sr3e.weaponMode.manual",
    semiauto: "sr3e.weaponMode.semiauto",
+   burst: "sr3e.weaponMode.burst",
    fullauto: "sr3e.weaponMode.fullauto",
    blade: "sr3e.weaponMode.blade",
    explosive: "sr3e.weaponMode.explosive",
@@ -424,4 +425,33 @@ sr3e.gadgettypes = {
 
 sr3e.wearable = {
    wearables: "sr3e.wearable.wearables",
+};
+
+sr3e.magicianTypes = {
+   fullmage: "sr3e.magicianTypes.fullmage",
+   aspectedmage: "sr3e.magicianTypes.aspectedmage",
+};
+
+sr3e.aspects = {
+   conjurer: "sr3e.aspects.conjurer",
+   sorcerer: "sr3e.aspects.sorcerer",
+   elementalist: "sr3e.aspects.elementalist",
+   custom: "sr3e.aspects.custom",
+};
+
+sr3e.resistanceAttributes = {
+   willpower: "sr3e.resistanceAttributes.willpower",
+   charisma: "sr3e.resistanceAttributes.charisma",
+   intelligence: "sr3e.resistanceAttributes.intelligence",
+};
+
+sr3e.traditions = {
+   hermetic: "sr3e.traditions.hermetic",
+   shamanic: "sr3e.traditions.shamanic",
+   other: "sr3e.traditions.other",
+};
+
+sr3e.archetypes = {
+   adept: "sr3e.archetypes.adept",
+   magician: "sr3e.archetypes.magician",
 };

@@ -1,5 +1,5 @@
 <script>
-   import { localize, openFilePicker } from "@services/utilities.js";
+   import { localize, openFilePicker, kvOptions } from "@services/utilities.js";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
@@ -194,7 +194,7 @@
       value: system.priority,
       path: "system",
       type: "select",
-      options: ["C", "D", "E"],
+      options: ["C", "D", "E"].map((p) => ({ value: p, label: p })),
    });
 </script>
 

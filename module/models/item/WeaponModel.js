@@ -8,11 +8,11 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
       return {
          mode: new foundry.data.fields.StringField({
             required: true,
-            initial: "semi-automatic",
+            initial: "",
          }),
          ammunitionClass: new foundry.data.fields.StringField({
             required: true,
-            initial: "N/A",
+            initial: "",
          }),
          damage: new foundry.data.fields.NumberField({
             required: true,
@@ -20,7 +20,7 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
          }),
          damageType: new foundry.data.fields.StringField({
             required: true,
-            initial: "N/A",
+            initial: "",
          }),
          shotsPerRound: new foundry.data.fields.NumberField({
             required: true,

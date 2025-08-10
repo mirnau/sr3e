@@ -349,6 +349,7 @@
       "weaponMode": {
          "manual": "Manual",
          "semiauto": "Semi-Automatic",
+         "burst": "Burst-Fire",
          "fullauto": "Full-Automatic",
          "blade": "Blade",
          "explosive": "Explosive",
@@ -381,9 +382,32 @@
          "cy": "Cylinder",
          "belt": "Belt-Fed"
       },
-
       "gadgettypes": {
          "weaponmod": "Weapon Modification"
+      },
+      "archetypes": {
+         "adept": "Adept",
+         "magician": "Magician"
+      },
+      "magicianTypes": {
+         "fullmage": "Full Mage",
+         "aspectedmage": "Aspected Mage"
+      },
+      "aspects": {
+         "conjurer": "Conjurer",
+         "sorcerer": "Sorcerer",
+         "elementalist": "Elementalist",
+         "custom": "Custom"
+      },
+      "resistanceAttributes": {
+         "willpower": "Willpower",
+         "charisma": "Charisma",
+         "intelligence": "Intelligence"
+      },
+      "traditions": {
+         "hermetic": "Hermetic",
+         "shamanic": "Shamanic",
+         "other": "Other"
       }
    }
 }
