@@ -261,15 +261,20 @@
       if (caller?.type !== "item") return;
 
       const recoil = FirearmService.getRecoilModifier({ actor, caller, preview: true });
-      const withoutRecoil = modifiersArray.filter((m) => m.id !== "recoil");
+      const idx = modifiersArray.findIndex((m) => m.id === "recoil");
 
       if (recoil) {
-         const changed =
-            withoutRecoil.length !== modifiersArray.length ||
-            !withoutRecoil.some((m) => m.id === "recoil" && m.value === recoil.value);
-         if (changed) modifiersArray = [...withoutRecoil, recoil];
-      } else if (withoutRecoil.length !== modifiersArray.length) {
-         modifiersArray = withoutRecoil;
+         if (idx === -1) {
+            modifiersArray = [...modifiersArray, recoil];
+         } else if (modifiersArray[idx]?.value !== recoil.value) {
+            const copy = [...modifiersArray];
+            copy[idx] = recoil;
+            modifiersArray = copy;
+         }
+      } else if (idx !== -1) {
+         const copy = [...modifiersArray];
+         copy.splice(idx, 1);
+         modifiersArray = copy;
       }
    });
 
