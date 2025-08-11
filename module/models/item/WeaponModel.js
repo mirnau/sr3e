@@ -39,7 +39,7 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
             required: true,
             initial: "",
          }),
-         linkedSkilliD: new foundry.data.fields.StringField({
+         linkedSkillId: new foundry.data.fields.StringField({
             required: true,
             initial: "",
          }),

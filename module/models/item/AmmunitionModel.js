@@ -6,11 +6,11 @@ export default class AmmunitionModel extends foundry.abstract.TypeDataModel {
       return {
          class: new foundry.data.fields.StringField({
             required: true,
-            initial: "regular",
+            initial: "",
          }),
          type: new foundry.data.fields.StringField({
             required: true,
-            initial: "lightPistol",
+            initial: "",
          }),
          reloadMechanism: new foundry.data.fields.StringField({
             required: true,

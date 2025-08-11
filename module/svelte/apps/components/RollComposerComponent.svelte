@@ -233,7 +233,7 @@
          // init firearm context BEFORE we decide defaulting
          initFirearmContextFromWeapon(item);
 
-         const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkilliD ?? "").split("::");
+         const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkillId ?? "").split("::");
          const skill = actor.items.get(skillId);
          prepareSkillBasedRoll(skill, item.name);
 
