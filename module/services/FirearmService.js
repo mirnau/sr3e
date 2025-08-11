@@ -23,11 +23,41 @@ export default class FirearmService {
    }
 
    static #isHeavy(w) {
-      return !!(w?.system?.isHeavy || w?.system?.isShotgun);
+      return !!w?.system?.isHeavy;
    }
 
    static #rc(w) {
       return Number(w?.system?.recoilComp ?? 0) || 0;
+   }
+
+   static resetRecoil(attackerId) {
+      if (!attackerId) throw new Error("sr3e: resetRecoil missing attackerId");
+      if (this.inCombat()) {
+         const { key } = this.getPhase();
+         _phaseShots.delete(`${key}:${attackerId}`);
+      } else {
+         _oocShots.delete(attackerId);
+      }
+   }
+
+   static resetAllRecoilForActor(attackerId) {
+      if (!attackerId) throw new Error("sr3e: resetAllRecoilForActor missing attackerId");
+      // wipe OOC
+      _oocShots.delete(attackerId);
+      // wipe any in-phase entries for this actor (rarely needed, but handy)
+      for (const k of _phaseShots.keys()) {
+         if (k.endsWith(`:${attackerId}`)) _phaseShots.delete(k);
+      }
+   }
+
+   static hasRecoilContext(attackerId) {
+      if (!attackerId) return false;
+      if (this.inCombat()) {
+         const { key } = this.getPhase();
+         return (_phaseShots.get(`${key}:${attackerId}`) ?? 0) > 0;
+      }
+      const s = _oocShots.get(attackerId);
+      return !!s && (s.c ?? 0) > 0;
    }
 
    static getDefenseTNAdd(weapon) {
@@ -39,7 +69,8 @@ export default class FirearmService {
          throw new Error(`sr3e: tnMods[${mode}] NaN`);
       }
       const baseByMode = CONFIG?.sr3e?.defense?.baseTNByMode;
-      if (!baseByMode || baseByMode[mode] == null) throw new Error(`sr3e: defense.baseTNByMode missing for mode "${mode}"`);
+      if (!baseByMode || baseByMode[mode] == null)
+         throw new Error(`sr3e: defense.baseTNByMode missing for mode "${mode}"`);
       const base = Number(baseByMode[mode]);
       if (!Number.isFinite(base)) throw new Error(`sr3e: defense.baseTNByMode[${mode}] NaN`);
       return base;
@@ -122,9 +153,9 @@ export default class FirearmService {
       return { type: "attribute", key: "reaction", tnMod, tnLabel };
    }
 
-   static #recoilTotal({ before, add, rc, heavy }) {
+   static #recoilTotal({ before, add, rc, heavy, shotgunBF }) {
       let total = Math.max(0, before + add - rc);
-      if (heavy && total > 0) total *= 2;
+      if (total > 0 && (heavy || shotgunBF)) total *= 2;
       return total;
    }
 
@@ -140,8 +171,9 @@ export default class FirearmService {
       let notes = [];
 
       if (m === "semiauto") {
+         const add = phaseShotsFired > 0 ? 1 : 0; // <- only second SA shot adds recoil
          rounds = 1;
-         attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add: 1, rc, heavy });
+         attackerTNMod = this.#recoilTotal({ before: phaseShotsFired, add, rc, heavy });
          notes.push("SA");
       } else if (m === "manual") {
          rounds = 1;

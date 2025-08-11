@@ -83,6 +83,11 @@
 
    // --------------- helpers ----------------
 
+   function ResetRecoil() {
+      FirearmService.resetRecoil(actor?.id);
+      upsertOrRemoveRecoil(); // immediately recompute the recoil modifier row
+   }
+
    function getAttrDiceFromSumStore(attrKey) {
       const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
       return Number(get(store)?.sum ?? 0);
@@ -563,6 +568,29 @@
                })()}
             />
          </div>
+      {/if}
+      {#if FirearmService.inCombat() ? FirearmService.getPhaseShots(actor?.id) > 0 : FirearmService.getOOCShots(actor?.id) > 0}
+         {#if modifiersArray.some((m) => m.name === "Recoil")}
+            <div class="roll-composer-card">
+               <button
+                  class="regular"
+                  onclick={() => {
+                     // Remove all recoil modifiers
+                     modifiersArray = modifiersArray.filter((m) => m.name !== "Recoil");
+                     // Reset the firearm recoil counters
+                     if (actor?.id) {
+                        if (FirearmService.inCombat()) {
+                           FirearmService.bumpPhaseShots(actor.id, -FirearmService.getPhaseShots(actor.id));
+                        } else {
+                           FirearmService.bumpOOCShots(actor.id, -FirearmService.getOOCShots(actor.id));
+                        }
+                     }
+                  }}
+               >
+                  Clear Recoil
+               </button>
+            </div>
+         {/if}
       {/if}
    </div>
 {/if}
