@@ -43,6 +43,10 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
             required: true,
             initial: "",
          }),
+         ammoId: new foundry.data.fields.StringField({
+            required: true,
+            initial: "",
+         }),
          isDefaulting: new foundry.data.fields.BooleanField({
             required: true,
             initial: false,

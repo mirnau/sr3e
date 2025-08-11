@@ -2666,14 +2666,14 @@
     position: relative;
     background: var(--highlight-color-primary);
     padding: 0.25rem;
-    height: 7rem;
+    height: 8rem;
     min-width: 0;
     /* Critical */
     clip-path: polygon(0.427rem 0px, calc(100% - 0.427rem) 0px, 100% 0.427rem, 100% calc(100% - 0.854rem), calc(100% - 0.854rem) 100%, 0.427rem 100%, 0px calc(100% - 0.427rem), 0px 0.427rem);
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .image-mask {
-    width: 6.5rem;
-    height: 6.5rem;
+    width: 7.5rem;
+    height: 7.5rem;
   }
   .asset-category-container .asset-masonry-grid .asset-card-container .asset-card .asset-card-column {
     /* Your existing outer column styles */

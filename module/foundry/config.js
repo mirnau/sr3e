@@ -4,6 +4,7 @@ sr3e.ammunition = {
    ammunition: "sr3e.ammunition.ammunition",
    type: "sr3e.ammunition.type",
    rounds: "sr3e.ammunition.rounds",
+   maxcapacity: "sr3e.ammunition.maxcapacity",
    class: "sr3e.ammunition.class",
 };
 

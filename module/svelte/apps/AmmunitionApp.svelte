@@ -21,7 +21,7 @@
          value: system.class,
          path: "system",
          type: "select",
-         options: kvOptions(config.ammunitionClass)
+         options: kvOptions(config.ammunitionClass),
       },
       {
          item,
@@ -40,7 +40,9 @@
          path: "system",
          type: "select",
          options: kvOptions(config.reloadMechanism),
-      },
+      }
+   ]);
+   const capacityEntries = $derived([
       {
          item,
          key: "rounds",
@@ -49,15 +51,30 @@
          path: "system",
          type: "number",
       },
+      {
+         item,
+         key: "maxCapacity",
+         label: localize(config.ammunition.maxcapacity),
+         value: system.maxCapacity,
+         path: "system",
+         type: "number",
+      },
    ]);
 </script>
 
-<ItemSheetWrapper csslayout={"single"}>
+<ItemSheetWrapper csslayout={"double"}>
    <ItemSheetComponent>
       <Image entity={item} />
       <div class="stat-grid single-column">
          <input type="text" value={name} onchange={(e) => item.update({ name: e.target.value })} />
+      </div>
+      <div class="stat-grid single-column">
          {#each ammoEntries as entry}
+            <StatCard {...entry} />
+         {/each}
+      </div>
+      <div class="stat-grid two-column">
+         {#each capacityEntries as entry}
             <StatCard {...entry} />
          {/each}
       </div>

@@ -21,7 +21,11 @@ export default class AmmunitionModel extends foundry.abstract.TypeDataModel {
             initial: 10,
             integer: true,
          }),
-         
+         maxCapacity: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 10,
+            integer: true,
+         }),
 
          portability: new foundry.data.fields.SchemaField(PortabilityModel.defineSchema()),
          commodity: new foundry.data.fields.SchemaField(CommodityModel.defineSchema()),

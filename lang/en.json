@@ -4,6 +4,7 @@
          "ammunition": "Ammunition",
          "type": "Ammuntion Type",
          "rounds": "Rounds",
+         "maxcapacity": "Max Capacity",
          "class": "Weapon Class"
       },
       "attributes": {
