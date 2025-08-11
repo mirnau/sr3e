@@ -26,7 +26,8 @@
   
   const isWeapon = item.type === "weapon";
   const hasOwnRounds = $derived(isWeapon && foundry.utils.hasProperty(item.system, "rounds"));
-  const loadedAmmoUuidStore = isWeapon ? smItem.GetROStore("ammo.uuid") : null;
+  // Use RW stores for reactive tracking; they are safe for read-only access
+  const loadedAmmoUuidStore = isWeapon ? smItem.GetRWStore("ammo.uuid") : null;
 
   // Active stores for rounds/capacity - always point to the source document
   let activeRoundsStore = null;
@@ -48,8 +49,9 @@
 
   function useItemSelf() {
     cleanupAmmoManager();
-    activeRoundsStore = smItem.GetROStore("rounds");
-    activeMaxCapStore = smItem.GetROStore("maxCapacity");
+    // RW stores ensure reliable updates even when used read-only
+    activeRoundsStore = smItem.GetRWStore("rounds");
+    activeMaxCapStore = smItem.GetRWStore("maxCapacity");
   }
 
   function useAmmoDocument(uuid) {
@@ -59,8 +61,9 @@
     const doc = fromUuidSync(uuid);
     linkedAmmoDoc = doc;
     smAmmo = StoreManager.Subscribe(doc);
-    activeRoundsStore = smAmmo.GetROStore("rounds");
-    activeMaxCapStore = smAmmo.GetROStore("maxCapacity");
+    // Subscribing via RW stores keeps the weapon and ammo cards in sync
+    activeRoundsStore = smAmmo.GetRWStore("rounds");
+    activeMaxCapStore = smAmmo.GetRWStore("maxCapacity");
   }
 
   // Determine active ammo source - simplified without mirrors
