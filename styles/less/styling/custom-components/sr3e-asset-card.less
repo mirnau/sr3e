@@ -120,6 +120,8 @@
                      aspect-ratio: 1/1;
                      flex-shrink: 0;
                      background: var(--highlight-color-primary);
+                     transition: transform 0.1s ease;
+
                      &::before {
                         box-shadow: none;
                         background: var(--background-color);
@@ -127,6 +129,18 @@
                      &::after {
                         box-shadow: none;
                         background: var(--background-color);
+                     }
+
+                     &:hover {
+                        transform: scale(1.25);
+                        &::after {
+                           box-shadow: inset 0 0 0.5rem var(--highlight-color-primary),
+                              inset 0 0 .25rem var(--highlight-color-primary);
+                        }
+                     }
+
+                     &:active {
+                        transform: scale(0.95);
                      }
                   }
                }

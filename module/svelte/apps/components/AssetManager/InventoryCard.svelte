@@ -4,67 +4,25 @@
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
    import FirearmService from "@services/FirearmService.js";
+   import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
+   import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
 
    let { item, config } = $props();
 
-   const mainItemsStore = StoreManager.Subscribe(item);
+   const mainItemsStoreManager = StoreManager.Subscribe(item);
 
    // Flags
    let isFavorite = $state(false);
    let isEquipped = $state(false);
-   const isFavoriteStore = mainItemsStore.GetFlagStore("isFavorite");
-   const isEquippedStore = mainItemsStore.GetFlagStore("isEquipped");
+   const isFavoriteStore = mainItemsStoreManager.GetFlagStore("isFavorite");
+   const isEquippedStore = mainItemsStoreManager.GetFlagStore("isEquipped");
 
    // Linked skill
-   const linkedSkillIdStore = mainItemsStore.GetRWStore("linkedSkillId");
+   const linkedSkillIdStore = mainItemsStoreManager.GetRWStore("linkedSkillId");
    const hasLinkedSkill = $derived(!!$linkedSkillIdStore && $linkedSkillIdStore !== "");
    let linkedSkillName = $state("");
 
-   // Ammo tracking - direct document approach
-   let smAmmo = null;
-   let linkedAmmoDoc = null;
-
-   const isWeapon = item.type === "weapon";
-   const hasOwnRounds = $derived(isWeapon && foundry.utils.hasProperty(item.system, "rounds"));
-   // Use RW stores for reactive tracking; they are safe for read-only access
-   const loadedAmmoUuidStore = isWeapon ? mainItemsStore.GetRWStore("ammoId") : "";
-
-   // Active stores for rounds/capacity - always point to the source document
-   let activeRoundsStore = null;
-   let activeMaxCapStore = null;
-   let roundsVal = $state(0);
-   let maxCapVal = $state(0);
-
-   // UI state
-   let clipText = $state("-");
    let hasAmmo = $state(true);
-
-   function cleanupAmmoManager() {
-      if (smAmmo && linkedAmmoDoc) {
-         StoreManager.Unsubscribe(linkedAmmoDoc);
-         smAmmo = null;
-         linkedAmmoDoc = null;
-      }
-   }
-
-   function useItemSelf() {
-      cleanupAmmoManager();
-      // RW stores ensure reliable updates even when used read-only
-      activeRoundsStore = mainItemsStore.GetRWStore("rounds");
-      activeMaxCapStore = mainItemsStore.GetRWStore("maxCapacity");
-   }
-
-   function useAmmoDocument(uuid) {
-      cleanupAmmoManager();
-
-      // Always instantiate the ammo document - no mirroring fallback
-      const doc = fromUuidSync(uuid);
-      linkedAmmoDoc = doc;
-      smAmmo = StoreManager.Subscribe(doc);
-      // Subscribing via RW stores keeps the weapon and ammo cards in sync
-      activeRoundsStore = smAmmo.GetRWStore("rounds");
-      activeMaxCapStore = smAmmo.GetRWStore("maxCapacity");
-   }
 
    // Determine active ammo source - simplified without mirrors
    $effect(() => {
@@ -90,30 +48,6 @@
       linkedSkillName = spec ? `${skill.name} - ${spec.name}` : (skill.name ?? "");
    });
 
-   // Sync store values to state
-   $effect(() => {
-      roundsVal = activeRoundsStore ? $activeRoundsStore : 0;
-   });
-
-   $effect(() => {
-      maxCapVal = activeMaxCapStore ? $activeMaxCapStore : 0;
-   });
-
-   // Update UI state
-   $effect(() => {
-      if (maxCapVal === 0 && roundsVal === 0) {
-         clipText = "-";
-      } else if (maxCapVal === 0) {
-         clipText = `${roundsVal}`;
-      } else {
-         clipText = `${roundsVal}/${maxCapVal}`;
-      }
-   });
-
-   $effect(() => {
-      hasAmmo = !isWeapon || roundsVal > 0;
-   });
-
    // Sync flags
    onMount(() => {
       isFavorite = $isFavoriteStore;
@@ -123,31 +57,6 @@
    $effect(() => {
       $isFavoriteStore = isFavorite;
       $isEquippedStore = isEquipped;
-   });
-
-   // Resolve linked skill name
-   $effect(() => {
-      if (!hasLinkedSkill) {
-         linkedSkillName = "";
-         return;
-      }
-
-      const raw = $linkedSkillIdStore ?? "";
-      const [skillId, specIndexRaw] = raw.split("::");
-      const skill = item.parent?.items?.get(skillId);
-      if (!skill) {
-         linkedSkillName = "";
-         return;
-      }
-
-      const skillSystem = skill.system;
-      const skillType = skillSystem.skillType;
-      const skillData = skillSystem[`${skillType}Skill`];
-      const specs = skillData.specializations ?? [];
-
-      const specIndex = Number.parseInt(specIndexRaw);
-      const spec = Number.isFinite(specIndex) ? specs[specIndex] : null;
-      linkedSkillName = spec ? `${skill.name} - ${spec.name}` : skill.name;
    });
 
    onDestroy(() => {
@@ -168,7 +77,7 @@
    }
 
    function performItemAction() {
-      if (isWeapon && !hasAmmo) {
+      if (item.type === "weapon" && !hasAmmo) {
          ui.notifications.warn(localize("sr3e.notifications.outOfAmmo") || "Out of ammo. Reload first.");
          return;
       }
@@ -232,24 +141,18 @@
                </h3>
             {/if}
 
-            {#if isWeapon}
-               <h4 class="no-margin uppercase">¥ {item.system.commodity.cost} - {item.system.mode}</h4>
-               <h4 class="no-margin uppercase">
-                  {localize(config.ammunition.rounds)}: {clipText}
-               </h4>
+            {#if item.type === "weapon"}
+               <WeaponComponent {item} {config} />
             {/if}
 
             {#if item.type === "ammunition"}
-               <h4 class="no-margin uppercase">¥ {item.system.commodity.cost} - {item.system.mode}</h4>
-               <h4 class="no-margin uppercase">
-                  {localize(config.ammunition.rounds)}: {clipText}
-               </h4>
+               <AmmunitionComponent {item} {config} />
             {/if}
          </div>
       </div>
 
       <div class="asset-card-row">
-         {#if isWeapon}
+         {#if item.type === "weapon"}
             <button
                class="sr3e-toolbar-button fa-solid fa-dice"
                aria-label="Roll"
@@ -264,7 +167,7 @@
             onclick={() => item.sheet.render(true)}
          ></button>
 
-         {#if isWeapon}
+         {#if item.type === "weapon"}
             <button class="sr3e-toolbar-button fa-solid fa-repeat" aria-label="Reload" onclick={onReloadClick}></button>
          {/if}
 

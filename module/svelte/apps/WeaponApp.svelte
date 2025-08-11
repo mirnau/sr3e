@@ -11,7 +11,7 @@
   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
   import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
   import ComboSearch from "@sveltecomponent/basic/ComboSearch.svelte";
-  import { StoreManager } from "../svelteHelpers/StoreManager.svelte";
+  import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
 
   // Props (runes)
   let { item = {}, config = {} } = $props();
@@ -35,11 +35,11 @@
   // Linked skill selection (via ComboSearch)
   let allSkillsMap = new Map();
   let options = $state([]); // options for ComboSearch (already {value,label})
-  let comboSearchValue = $state(system.linkedSkilliD);
+  let comboSearchValue = $state(system.linkedSkillId);
 
   // Store wiring
   let storeManager = StoreManager.Subscribe(item);
-  let skillIdStore = storeManager.GetRWStore("linkedSkilliD");
+  let skillIdStore = storeManager.GetRWStore("linkedSkillId");
 
   onDestroy(() => {
     StoreManager.Unsubscribe(item);
@@ -52,7 +52,7 @@
 
   // Persist skill selection (no re-render)
   $effect(() => {
-    item.update({ ["system.linkedSkilliD"]: comboSearchValue }, { render: false });
+    item.update({ ["system.linkedSkillId"]: comboSearchValue }, { render: false });
   });
 
   // Build skill + specialization options from parent
