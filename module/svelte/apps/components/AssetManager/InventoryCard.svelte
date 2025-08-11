@@ -61,7 +61,6 @@
 
    onDestroy(() => {
       StoreManager.Unsubscribe(item);
-      cleanupAmmoManager();
    });
 
    async function onReloadClick() {

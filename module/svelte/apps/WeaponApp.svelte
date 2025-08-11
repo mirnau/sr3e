@@ -7,8 +7,8 @@
   import Portability from "@sveltecomponent/Portability.svelte";
   import Image from "@sveltecomponent/basic/Image.svelte";
   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
-  import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
   import ItemSheetWrapper from "@sveltecomponent/basic/ItemSheetWrapper.svelte";
+  import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";
   import GadgetViewer from "@sveltecomponent/GadgetViewer.svelte";
   import ComboSearch from "@sveltecomponent/basic/ComboSearch.svelte";
   import { StoreManager } from "@sveltehelpers/StoreManager.svelte";

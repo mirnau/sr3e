@@ -1,22 +1,24 @@
 {
-  "name": "my-svelte-project",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
-    "@sveltejs/vite-plugin-svelte": "^5.0.3",
-    "gulp": "^5.0.0",
-    "gulp-less": "^5.0.0",
-    "less": "^4.2.1",
-    "svelte": "^5.19.3",
-    "vite": "^6.3.5"
-  },
-  "dependencies": {
-    "svelte-select": "^5.8.3"
-  }
+   "name": "my-svelte-project",
+   "version": "1.0.0",
+   "type": "module",
+   "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview",
+      "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build ."
+   },
+   "devDependencies": {
+      "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
+      "@sveltejs/vite-plugin-svelte": "^5.0.3",
+      "gulp": "^5.0.0",
+      "gulp-less": "^5.0.0",
+      "less": "^4.2.1",
+      "sloc": "^0.3.2",
+      "svelte": "^5.19.3",
+      "vite": "^6.3.5"
+   },
+   "dependencies": {
+      "svelte-select": "^5.8.3"
+   }
 }

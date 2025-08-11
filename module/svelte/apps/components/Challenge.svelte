@@ -1,82 +1,89 @@
 <script>
-  import SR3ERoll from "@documents/SR3ERoll.js";
-  import OpposeRollService from "@services/OpposeRollService.js";
-  import FirearmService from "@services/FirearmService.js";
+   import SR3ERoll from "@documents/SR3ERoll.js";
+   import OpposeRollService from "@services/OpposeRollService.js";
+   import FirearmService from "@services/FirearmService.js";
 
-  let {
-    actor,
-    caller,
-    modifiersArray,
-    targetNumber,
-    modifiedTargetNumber,
-    diceBought,
-    currentDicePoolAddition,
-    OnClose,
-    isDefaulting,
-    CommitEffects,
-  } = $props();
-
-  let hasChallenged = false;
-
-  async function Challenge() {
-    hasChallenged = true;
-
-    const targets = [...game.user.targets].map(t => t.actor).filter(Boolean);
-    if (targets.length === 0) return;
-
-    const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
-
-    const type = caller.type ?? caller.type;
-    const isItem = type === "item";
-    const isSkill = type === "skill" || type === "specialization";
-    const isAttr  = type === "attribute";
-
-    const attributeKeyForChat =
-      caller.linkedAttribute ?? caller.attributeKey ?? caller.attributeName ?? (isAttr ? caller.key : undefined);
-
-    const tn = modifiedTargetNumber;
-
-    const options = {
-      type,
-      modifiers: modifiersArray,
-      targetNumber: tn,
-      itemId: isItem ? (caller.item?.id ?? caller.key) : undefined,
-      itemName: isItem ? (caller.itemName ?? caller.name) : undefined,
-      skillName: isItem ? caller.skillName : isSkill ? caller.name : undefined,
-      specializationName: isItem
-        ? (caller.specializationName ?? caller.specialization)
-        : (type === "specialization" ? caller.specialization : undefined),
-      attributeKey: attributeKeyForChat,
-      attributeName: attributeKeyForChat,
+   let {
+      actor,
+      caller,
+      modifiersArray,
+      targetNumber,
+      modifiedTargetNumber,
+      diceBought,
+      currentDicePoolAddition,
+      OnClose,
       isDefaulting,
-      opposed: true,
-    };
+      CommitEffects,
+   } = $props();
 
-    const baseRoll = SR3ERoll.create(
-      SR3ERoll.buildFormula(totalDice, { targetNumber: tn, explodes: true }),
-      { actor },
-      options
-    );
+   let hasChallenged = false;
 
-    const roll = await baseRoll.evaluate(options);
-    await baseRoll.waitForResolution();
+   async function Challenge() {
+      hasChallenged = true;
 
-    if (isItem) {
-      const itemId = caller.item?.id ?? caller.key;
-      const weapon = actor?.items?.get(itemId) || game.items.get(itemId) || null;
-      if (weapon) {
-        const rounds = Number(caller.rounds ?? caller.value ?? 1);
-        FirearmService.bumpOnShot({ actor, weapon, declaredRounds: rounds });
-        Hooks.callAll("sr3e.recoilRefresh");
+      const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
+      if (targets.length === 0) return;
+
+      const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
+
+      const type = caller.type ?? caller.type;
+      const isItem = type === "item";
+      const isSkill = type === "skill" || type === "specialization";
+      const isAttr = type === "attribute";
+
+      const attributeKeyForChat =
+         caller.linkedAttribute ?? caller.attributeKey ?? caller.attributeName ?? (isAttr ? caller.key : undefined);
+
+      const ammoTN = Number(caller?.damagePacket?.attackTNAdd || 0);
+      const finalTN = Math.max(2, Number(modifiedTargetNumber) + ammoTN);
+
+      const options = {
+         type,
+         modifiers: modifiersArray,
+         targetNumber: finalTN,
+         itemId: isItem ? (caller.item?.id ?? caller.key) : undefined,
+         itemName: isItem ? (caller.itemName ?? caller.name) : undefined,
+         skillName: isItem ? caller.skillName : isSkill ? caller.name : undefined,
+         specializationName: isItem
+            ? (caller.specializationName ?? caller.specialization)
+            : type === "specialization"
+              ? caller.specialization
+              : undefined,
+         attributeKey: attributeKeyForChat,
+         attributeName: attributeKeyForChat,
+         isDefaulting,
+         opposed: true,
+         firearm:
+            isItem && caller?.firearmPlan && caller?.damagePacket
+               ? {
+                    itemId: caller.item?.id ?? caller.key,
+                    ammoId: caller.ammoId || "",
+                    plan: caller.firearmPlan,
+                    damage: caller.damagePacket,
+                 }
+               : undefined,
+      };
+
+      const baseRoll = SR3ERoll.create(
+         SR3ERoll.buildFormula(totalDice, { targetNumber: finalTN, explodes: true }),
+         { actor },
+         options
+      );
+
+      const weapon = actor?.items?.get(caller?.item?.id ?? caller?.key) ?? null;
+      if (weapon && caller?.firearmPlan) {
+         await FirearmService.onAttackResolved(actor, weapon, caller.firearmPlan);
       }
-    }
 
-    await CommitEffects?.();
-    Hooks.callAll("actorSystemRecalculated", actor);
-    OpposeRollService.expireContest(roll.options.contestId);
+      const roll = await baseRoll.evaluate(options);
+      await baseRoll.waitForResolution();
 
-    OnClose?.();
-  }
+      await CommitEffects?.();
+      Hooks.callAll("actorSystemRecalculated", actor);
+      OpposeRollService.expireContest(roll.options.contestId);
+
+      OnClose?.();
+   }
 </script>
 
 <button class="regular" type="button" onclick={Challenge} disabled={hasChallenged}>Challenge!</button>

@@ -456,3 +456,9 @@ sr3e.archetypes = {
    adept: "sr3e.archetypes.adept",
    magician: "sr3e.archetypes.magician",
 };
+sr3e.wearable = {
+   wearable: "sr3e.wearable.wearable",
+   ballistic: "sr3e.wearable.ballistic",
+   impact: "sr3e.wearable.impact",
+   canlayer: "sr3e.wearable.canlayer",
+}

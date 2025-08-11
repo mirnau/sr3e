@@ -37,21 +37,6 @@ export default class OpposeRollService {
       return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
    }
 
-   static getDefaultDefenseHint(initiatorRoll) {
-      const o = initiatorRoll?.options ?? {};
-      if (o.type === "item" && o.itemId) {
-         const weapon =
-            game.items.get(o.itemId) || ChatMessage.getSpeakerActor(o.speaker)?.items?.get?.(o.itemId) || null;
-
-         const tnMod = Number(weapon?.system?.defense?.tnMod ?? weapon?.system?.dodgeTNMod ?? 0);
-
-         const tnLabel = weapon?.system?.defense?.tnLabel ?? "Weapon difficulty";
-
-         return { type: "attribute", key: "reaction", tnMod, tnLabel };
-      }
-      return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
-   }
-
    static registerContest({ contestId, initiator, target, rollData, options }) {
       activeContests.set(contestId, {
          id: contestId,
@@ -66,31 +51,55 @@ export default class OpposeRollService {
    }
 
    // OpposeRollService.js
+   // OpposeRollService.js
    static async start({ initiator, target, rollData, options }) {
       const contestId = foundry.utils.randomID(16);
       this.registerContest({ contestId, initiator, target, rollData, options });
 
-      // >>> recoil accounting: bump phase shots now <<<
-      try {
-         const o = rollData?.options ?? {};
-         if (o.type === "item" && o.itemId) {
-            const actor = initiator;
-            const weapon = actor?.items?.get(o.itemId) || game.items.get(o.itemId);
-            if (weapon) {
-               const already = FirearmService.getPhaseShots(actor.id);
-               const plan = FirearmService.planFire({
-                  weapon,
-                  phaseShotsFired: already,
-                  declaredRounds: options?.declaredRounds ?? o.declaredRounds ?? null,
-                  ammoAvailable: weapon.system?.ammo?.value ?? null,
-               });
-               FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
-            }
-         }
-      } catch (err) {
-         console.error("[sr3e] recoil bump failed", err);
+      const o = rollData?.options ?? {};
+      if (o.type === "item" && o.itemId) {
+         const actor = initiator;
+         const weapon = actor?.items?.get(o.itemId) || game.items.get(o.itemId);
+         if (!weapon) throw new Error("sr3e: OpposeRollService.start missing weapon");
+
+         // Current recoil context + attached ammo state
+         const already = FirearmService.inCombat()
+            ? FirearmService.getPhaseShots(actor.id)
+            : FirearmService.getOOCShots(actor.id);
+
+         const attachedAmmo = FirearmService.getAttachedAmmo(actor, weapon);
+         const ammoAvailable = attachedAmmo
+            ? Number(attachedAmmo.system?.ammunition?.rounds ?? attachedAmmo.system?.rounds ?? 0)
+            : null;
+
+         const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
+
+         // Plan the shot and bump recoil once
+         const plan = FirearmService.planFire({
+            weapon,
+            phaseShotsFired: already,
+            declaredRounds,
+            ammoAvailable,
+         });
+
+         if (FirearmService.inCombat()) FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
+         else FirearmService.bumpOOCShots(actor.id, plan.roundsFired);
+
+         // Build damage packet (rangeBand distances exist on the weapon but don't change damage directly)
+         const rangeData = weapon.system?.rangeBand ?? null; // { short, medium, long, extreme }
+         const damage = FirearmService.computeDamagePacket(weapon, plan, attachedAmmo, /* rangeBand */ null);
+
+         const attackContext = {
+            weaponId: weapon.id,
+            ammoId: attachedAmmo?.id || "",
+            plan,
+            damage,
+            rangeData,
+         };
+
+         const prev = activeContests.get(contestId);
+         activeContests.set(contestId, { ...prev, attackContext });
       }
-      // <<< end bump >>>
 
       const targetUser = this.resolveControllingUser(target);
       await targetUser.query("sr3e.opposeRollPrompt", {
@@ -131,43 +140,85 @@ export default class OpposeRollService {
       return connectedUsers.find((u) => u.isGM);
    }
 
+   static #ensureAttackContext(contest) {
+      const { initiator, initiatorRoll, options } = contest;
+      const o = initiatorRoll?.options ?? {};
+
+      const itemId = o.itemId ?? o.key ?? null;
+      if (!itemId) return null;
+
+      const weapon = initiator?.items?.get(itemId) || game.items.get(itemId);
+      if (!weapon || weapon.type !== "weapon") return null;
+
+      // Current recoil context + attached ammo state
+      const already = FirearmService.inCombat()
+         ? FirearmService.getPhaseShots(initiator.id)
+         : FirearmService.getOOCShots(initiator.id);
+
+      const attachedAmmo = FirearmService.getAttachedAmmo(initiator, weapon);
+      const ammoAvailable = attachedAmmo
+         ? Number(attachedAmmo.system?.ammunition?.rounds ?? attachedAmmo.system?.rounds ?? 0)
+         : null;
+
+      const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
+
+      // Plan the shot and bump recoil (only here because start didn’t do it)
+      const plan = FirearmService.planFire({
+         weapon,
+         phaseShotsFired: already,
+         declaredRounds,
+         ammoAvailable,
+      });
+
+      if (FirearmService.inCombat()) FirearmService.bumpPhaseShots(initiator.id, plan.roundsFired);
+      else FirearmService.bumpOOCShots(initiator.id, plan.roundsFired);
+
+      const rangeData = weapon.system?.rangeBand ?? null;
+      const damage = FirearmService.computeDamagePacket(weapon, plan, attachedAmmo, /* rangeBand */ null);
+
+      const attackContext = {
+         weaponId: weapon.id,
+         ammoId: attachedAmmo?.id || "",
+         plan,
+         damage,
+         rangeData,
+      };
+
+      contest.attackContext = attackContext;
+      activeContests.set(contest.id, contest);
+      return attackContext;
+   }
+
    static async resolveTargetRoll(contestId, rollData) {
       const contest = activeContests.get(contestId);
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
-      const { initiator, target, initiatorRoll, targetRoll } = contest;
+      let { initiator, target, initiatorRoll, targetRoll, attackContext } = contest;
+      if (!attackContext) attackContext = this.#ensureAttackContext(contest);
+
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
       let damageText = "";
-      const itemId = initiatorRoll.options?.itemId;
-      console.log("[sr3e] Checking weapon roll payload", { itemId });
+      let resistancePayload = null;
 
-      let contestCopy = null;
-
-      if (winner === initiator && itemId) {
-         const weapon = initiator.items.get(itemId);
-         console.log("[sr3e] Retrieved item for damage application", weapon);
-
+      if (winner === initiator && attackContext?.weaponId) {
+         const weapon = initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId);
          if (weapon?.type === "weapon") {
-            const damageLevel = weapon.system.damage?.level ?? "M";
-            const power = Number(weapon.system.damage?.power) || 0;
-            const damageType = weapon.system.damage?.type ?? "Physical";
+            const prep = FirearmService.prepareDamageResolution(target, {
+               plan: attackContext.plan,
+               damage: attackContext.damage,
+               netAttackSuccesses: netSuccesses,
+            });
 
-            const stagedLevel = this.stageDamage(damageLevel, netSuccesses);
+            damageText = `
+        <p><strong>${target.name}</strong> must resist
+        <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
+        (${prep.trackKey}) from <em>${weapon.name}</em>.
+        Resistance TN: <b>${prep.tn}</b>.</p>`;
 
-            damageText = `<p><strong>${target.name}</strong> must resist <strong>${stagedLevel} ${damageType}</strong> damage from <em>${weapon.name}</em>.</p>`;
-
-            contestCopy = {
-               attacker: initiator,
-               defender: target,
-               weapon,
-               power,
-               stagedLevel,
-               damageType,
-               contestId,
-            };
+            resistancePayload = { contestId, defenderId: target.id, weaponId: weapon.id, prep };
          }
       }
 
@@ -192,135 +243,91 @@ export default class OpposeRollService {
       await ChatMessage.create(chatData);
 
       ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
-      activeContests.delete(contestId); // important for cleanup
+      activeContests.delete(contestId);
 
-      if (contestCopy) {
+      if (resistancePayload) {
          setTimeout(() => {
-            this.promptDamageResistance(contestCopy).catch(console.error);
+            this.promptDamageResistance(resistancePayload).catch(console.error);
          }, 200);
       }
    }
 
-   static async promptDamageResistance({ attacker, defender, weapon, power, stagedLevel, damageType, contestId }) {
-      console.log("[sr3e] promptDamageResistance called", {
-         attacker,
-         defender,
-         weapon,
-         power,
-         stagedLevel,
-         damageType,
-         contestId,
-      });
+   static async promptDamageResistance(resistancePayload) {
+      const { contestId, defenderId, weaponId, prep } = resistancePayload;
+
+      const defender = game.actors.get(defenderId);
+      if (!defender) return ui.notifications.warn("Defender not found");
+
+      const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
+      if (!weapon) return ui.notifications.warn("Weapon not found");
 
       const defenderUser = this.resolveControllingUser(defender);
 
-      try {
-         const context = {
-            stagedLevel,
-            power,
-            damageType,
-            weaponId: weapon.id,
-            defenderId: defender.id,
-         };
+      const context = { contestId, defenderId, weaponId, prep };
 
-         const message = await ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor: defender }),
-            whisper: [defenderUser.id],
-            content: `
-               <p><strong>${
-                  defender.name
-               }</strong>, resist <strong>${stagedLevel} ${damageType}</strong> damage from <em>${weapon.name}</em>.</p>
-               <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(
-                  JSON.stringify(context)
-               )}'></div>
-            `,
-            flags: {
-               sr3e: {
-                  damageResistance: context,
-               },
-            },
-         });
-         console.log("[sr3e] Damage resistance message created", message);
-      } catch (err) {
-         console.error("[sr3e] Failed to create damage resistance message", err);
-      }
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: defender }),
+         whisper: [defenderUser.id],
+         content: `
+      <p><strong>${defender.name}</strong>, resist
+      <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> ${prep.trackKey}
+      damage from <em>${weapon.name}</em> (TN <b>${prep.tn}</b>).</p>
+      <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
+    `,
+         flags: { sr3e: { damageResistance: context } },
+      });
    }
 
-   static async resolveDamageResistance({ stagedLevel, power, damageType, weaponId, defenderId }) {
-      const actor = game.actors.get(defenderId);
-      if (!actor) return ui.notifications.warn("Defender not found");
+   // OpposeRollService.js
+   static async resolveDamageResistance({ defenderId, weaponId, prep }) {
+      const defender = game.actors.get(defenderId);
+      if (!defender) return ui.notifications.warn("Defender not found");
 
-      const weapon = actor.items.get(weaponId) || game.items.get(weaponId);
+      const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
       if (!weapon) return ui.notifications.warn("Weapon not found");
 
-      const damageKey = damageType;
-      const { baseLevel, healthType } = this.parseDamageType(damageKey);
+      const body = Number(defender.system?.attributes?.body?.value || 0);
+      const combatPool = Number(defender.system?.dicePools?.combat?.value || 0);
+      const dicePool = Math.max(0, body + combatPool);
 
-      const body = actor.system.attributes.body.value || 0;
-      const combatPool = actor.system.dicePools.combat.value || 0;
-      const armorRating = 0; // TODO: integrate armor system later
-
-      const tn = Math.max(2, power - armorRating);
-      const dicePool = body + combatPool;
-
+      const tn = Number(prep.tn);
       const roll = await new Roll(`${dicePool}d6x${tn}`).evaluate();
-      const successes = roll.terms[0].results.filter((r) => r.result >= tn && !r.discarded).length;
+      const term = roll.terms?.[0];
+      const successes = Array.isArray(term?.results)
+         ? term.results.filter((r) => r.result >= tn && !r.discarded).length
+         : 0;
 
-      const finalLevel = this.stageDamage(stagedLevel, -Math.floor(successes / 2));
+      const outcome = FirearmService.resolveDamageOutcome(prep, successes);
+      const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
 
-      const damageBoxes =
-         {
-            L: 1,
-            M: 3,
-            S: 6,
-            D: 10,
-         }[finalLevel] || 0;
+      const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
+      const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
 
-      const current = actor.system.health[healthType].value || 0;
-      const max = actor.system.health[healthType].max || 10;
+      const current = Number(foundry.utils.getProperty(defender, trackPath) || 0);
+      const max = Number(foundry.utils.getProperty(defender, maxPath) || 10);
+      const next = Math.min(current + outcome.boxes, max);
+      const overflow = Math.max(0, current + outcome.boxes - max);
 
-      const overflow = Math.max(0, current + damageBoxes - max);
-      const finalValue = Math.min(current + damageBoxes, max);
+      const update = { [trackPath]: next };
+      if (overflow > 0 && trackKey === "physical") {
+         update["system.health.overflow.value"] = Number(defender.system?.health?.overflow?.value || 0) + overflow;
+      }
 
-      await actor.update({
-         [`system.health.${healthType}.value`]: finalValue,
-         ...(overflow > 0 && healthType === "physical"
-            ? { "system.health.overflow.value": (actor.system.health.overflow.value || 0) + overflow }
-            : {}),
-      });
+      if (outcome.applied) await defender.update(update);
 
-      const message = `
-         <p><strong>${actor.name}</strong> resisted damage from <em>${weapon.name}</em>!</p>
-         <p>Resistance successes: <strong>${successes}</strong></p>
-         <p>Final damage level: <strong>${finalLevel}</strong> (${damageBoxes} boxes of ${healthType})</p>
-         <p>Damage applied: ${damageBoxes} → ${healthType} now at ${finalValue}${
-         overflow > 0 ? `, with ${overflow} overflow` : ""
-      }</p>
-      `;
-
-      ChatMessage.create({
-         speaker: ChatMessage.getSpeaker({ actor }),
-         content: message,
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: defender }),
+         content: `
+      <p><strong>${defender.name}</strong> resists damage from <em>${weapon.name}</em>.</p>
+      <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
+      <p>Pre-resist level: <b>${prep.stagedStepBeforeResist.toUpperCase()}</b> (${prep.trackKey})</p>
+      <p>Final level: <b>${outcome.finalStep?.toUpperCase?.() ?? "NONE"}</b>
+         → Boxes applied: <b>${outcome.boxes}</b>${trackKey ? ` (${trackKey})` : ""}</p>
+      ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
+    `,
          style: CONST.CHAT_MESSAGE_STYLES.OTHER,
          whisper: [game.user.id],
       });
-   }
-
-   static stageDamage(baseLevel, netSuccesses) {
-      const levels = ["L", "M", "S", "D"];
-      let index = levels.indexOf(baseLevel);
-      if (index === -1) index = 1;
-      index += Math.floor(netSuccesses / 2);
-      return levels[Math.min(index, levels.length - 1)];
-   }
-
-   static parseDamageType(damageTypeKey) {
-      const isStun = damageTypeKey.toLowerCase().includes("stun");
-      const base = damageTypeKey.replace(/stun/i, "").toUpperCase();
-      return {
-         baseLevel: base || "M",
-         healthType: isStun ? "stun" : "physical",
-      };
    }
 
    static computeNetSuccesses(initiatorRollData, targetRollData) {

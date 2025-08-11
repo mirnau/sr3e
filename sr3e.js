@@ -114,6 +114,7 @@ function configureProject() {
       skill: localize(CONFIG.sr3e.skill.skill),
       transaction: localize(CONFIG.sr3e.transaction.transaction),
       weapon: localize(CONFIG.sr3e.weapon.weapon),
+      wearable: localize(CONFIG.sr3e.wearable.wearable),
       gadget: localize(CONFIG.sr3e.gadget.gadget),
    };
 

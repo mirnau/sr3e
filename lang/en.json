@@ -305,7 +305,10 @@
          "reloadMechanism": "Reload Mechanism"
       },
       "wearable": {
-         "wearables": "Wearables"
+         "wearable": "Wearable",
+         "ballistic": "Ballistic",
+         "impact": "Impact",
+         "canlayer": "Can Layer"
       },
       "ammunitionType": {
          "regular": "Regular",

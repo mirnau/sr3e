@@ -61,19 +61,14 @@ export default class FirearmService {
    }
 
    static getDefenseTNAdd(weapon) {
-      const mode = this.#modeKey(weapon);
-      const perWeapon = weapon?.system?.defense?.tnMods ?? {};
-      if (perWeapon[mode] != null) {
-         const v = Number(perWeapon[mode]);
+      const mode = this.#modeKey(weapon); // validates against CONFIG.sr3e.weaponMode (enum only)
+      const mods = weapon?.system?.defense?.tnMods;
+      if (mods && typeof mods === "object" && Object.prototype.hasOwnProperty.call(mods, mode)) {
+         const v = Number(mods[mode]);
          if (Number.isFinite(v)) return v;
-         throw new Error(`sr3e: tnMods[${mode}] NaN`);
+         throw new Error(`sr3e: weapon.system.defense.tnMods[${mode}] must be a finite number`);
       }
-      const baseByMode = CONFIG?.sr3e?.defense?.baseTNByMode;
-      if (!baseByMode || baseByMode[mode] == null)
-         throw new Error(`sr3e: defense.baseTNByMode missing for mode "${mode}"`);
-      const base = Number(baseByMode[mode]);
-      if (!Number.isFinite(base)) throw new Error(`sr3e: defense.baseTNByMode[${mode}] NaN`);
-      return base;
+      return 0;
    }
 
    static getDefenseTNLabel(weapon) {
@@ -223,6 +218,215 @@ export default class FirearmService {
 
       return plan.attackerTNMod ? { id: "recoil", name: "Recoil", value: plan.attackerTNMod } : null;
    }
+
+   // AMMUNITION RELATED BEGIN
+   static getAttachedAmmo(actor, weapon) {
+      const id = weapon?.system?.ammoId || "";
+      if (!id) return null;
+      return actor?.items?.get(id) || null;
+   }
+
+   static extractAmmoDirectives(ammo) {
+      const t = String(ammo?.system?.type || ammo?.system?.ammoType || "").toLowerCase();
+      const d = Array.isArray(ammo?.system?.effectDirectives) ? [...ammo.system.effectDirectives] : [];
+      if (t === "apds") d.push({ k: "armor.mult.ballistic", v: 0.5 });
+      if (t === "flechette") d.push({ k: "damage.levelDelta", v: 1 }, { k: "armor.use", v: "impact" });
+      if (t === "gel") d.push({ k: "damage.type", v: "stun" }, { k: "resist.tnAdd", v: 2 });
+      if (t === "explosive") d.push({ k: "damage.powerAdd", v: 1 });
+      if (t === "incendiary") d.push({ k: "damage.type", v: "fire" }, { k: "special.incendiary", v: true });
+      if (t === "capsule") d.push({ k: "special.capsule", v: true });
+      if (t === "tracer") d.push({ k: "attack.tnAdd", v: -1 });
+      if (t === "tracker") d.push({ k: "special.tracker", v: true });
+      return d;
+   }
+
+   static computeDamagePacket(weapon, plan, ammo, rangeBand = null) {
+      const basePower = Number(weapon?.system?.damage ?? 0);
+      const baseType = String(weapon?.system?.damageType ?? "");
+      let power = Math.max(0, basePower + Number(plan?.powerDelta ?? 0));
+      let type = baseType;
+      let levelDelta = Number(plan?.levelDelta ?? 0);
+      let attackTNAdd = 0;
+      let resistTNAdd = 0;
+      let armorUse = "ballistic";
+      let armorMult = { ballistic: 1, impact: 1 };
+      const notes = [...(plan?.notes ?? [])];
+
+      if (rangeBand && Number.isFinite(rangeBand?.powerAdd)) power += Number(rangeBand.powerAdd);
+      if (rangeBand && Number.isFinite(rangeBand?.levelDelta)) levelDelta += Number(rangeBand.levelDelta);
+
+      const directives = ammo ? this.extractAmmoDirectives(ammo) : [];
+      for (const x of directives) {
+         if (x.k === "damage.powerAdd") power += Number(x.v || 0);
+         else if (x.k === "damage.levelDelta") levelDelta += Number(x.v || 0);
+         else if (x.k === "damage.type") type = String(x.v || type);
+         else if (x.k === "attack.tnAdd") attackTNAdd += Number(x.v || 0);
+         else if (x.k === "resist.tnAdd") resistTNAdd += Number(x.v || 0);
+         else if (x.k === "armor.use") armorUse = String(x.v || armorUse);
+         else if (x.k === "armor.mult.ballistic") armorMult.ballistic *= Number(x.v || 1);
+         else if (x.k === "armor.mult.impact") armorMult.impact *= Number(x.v || 1);
+         else if (x.k?.startsWith("special.")) notes.push(x.k.replace("special.", ""));
+      }
+
+      return { power, damageType: type, levelDelta, attackTNAdd, resistTNAdd, armorUse, armorMult, notes };
+   }
+
+   static beginAttack(actor, weapon, { declaredRounds = 1, ammoAvailable = null, rangeBand = null } = {}) {
+      const already = this.inCombat() ? this.getPhaseShots(actor?.id) : this.getOOCShots(actor?.id);
+      const plan = this.planFire({ weapon, phaseShotsFired: already, declaredRounds, ammoAvailable });
+      const ammo = this.getAttachedAmmo(actor, weapon);
+      const damage = this.computeDamagePacket(weapon, plan, ammo, rangeBand);
+      return { plan, damage, ammoId: ammo?.id || "" };
+   }
+
+   static async onAttackResolved(actor, weapon, plan) {
+      await this.consumeAmmo(actor, weapon, Number(plan?.roundsFired ?? 1));
+      this.bumpOnShot({ actor, weapon, declaredRounds: Number(plan?.roundsFired ?? 1) });
+      return true;
+   }
+
+   // AMMUNITION RELATED END
+
+   //DAMAGE CALC BEGIN
+
+   /** Map a damage “step” to boxes on the track (SR3 convention). */
+   static #boxesForLevel(step) {
+      // l=Light, m=Moderate, s=Serious, d=Deadly
+      if (step === "l") return 1;
+      if (step === "m") return 3;
+      if (step === "s") return 6;
+      if (step === "d") return 10; // applying 10 will usually KO/kill; your Health layer can clamp/overflow
+      return 0;
+   }
+
+   /** Normalize damage type strings from config or raw, return {step, trackKey}. */
+   static #splitDamageType(t) {
+      const key = String(t || "").trim();
+      // Accept both config keys (e.g. "mStun") and raw steps ("m", "mStun")
+      const lower = key.toLowerCase();
+      const isStun = lower.includes("stun");
+      if (lower.startsWith("l")) return { step: "l", trackKey: isStun ? "stun" : "physical" };
+      if (lower.startsWith("m")) return { step: "m", trackKey: isStun ? "stun" : "physical" };
+      if (lower.startsWith("s")) return { step: "s", trackKey: isStun ? "stun" : "physical" };
+      if (lower.startsWith("d")) return { step: "d", trackKey: isStun ? "stun" : "physical" };
+      // Fallback: treat unknown as Light Physical
+      return { step: "l", trackKey: "physical" };
+   }
+
+   /** Stage a damage step by +/-N (2 successes per stage handled outside). */
+   static #stageStep(step, delta) {
+      const order = ["l", "m", "s", "d"];
+      const i = order.indexOf(step);
+      if (i < 0) return step;
+      let n = i + Number(delta || 0);
+      if (n < 0) return null; // fully staged off → no damage
+      if (n >= order.length) n = order.length - 1;
+      return order[n];
+   }
+
+   /** Choose defender’s effective armor vs the packet (ballistic or impact, with multipliers). */
+   static #computeEffectiveArmor(defender, packet) {
+      const useImpact = String(packet?.armorUse || "ballistic") === "impact";
+      const mult = packet?.armorMult || { ballistic: 1, impact: 1 };
+
+      // Gather equipped wearables
+      const wearables = defender?.items?.filter?.((i) => i.type === "wearable") ?? [];
+      const equipped = wearables.filter((i) => !!i.getFlag("sr3e", "isEquipped"));
+
+      // Simple SR3 layering: take the highest of the chosen type
+      // (If you later want full layering—highest + half(others)—you can extend here.)
+      const getRating = (w) => {
+         const b = Number(w?.system?.armor?.ballistic ?? 0) || 0;
+         const imp = Number(w?.system?.armor?.impact ?? 0) || 0;
+         return useImpact ? imp : b;
+      };
+      let base = 0;
+      for (const w of equipped) base = Math.max(base, getRating(w));
+
+      let eff = base;
+      if (!useImpact) eff = eff * Number(mult.ballistic ?? 1);
+      else eff = eff * Number(mult.impact ?? 1);
+
+      // Floor at 0, integer
+      eff = Math.max(0, Math.floor(eff));
+      return { armorType: useImpact ? "impact" : "ballistic", base, effective: eff };
+   }
+
+   /** Compute Resistance TN: Power − effectiveArmor, min TN 2, then + packet.resistTNAdd. */
+   static #computeResistanceTN(packet, effArmor) {
+      const p = Math.max(0, Number(packet?.power ?? 0));
+      const resistAdd = Number(packet?.resistTNAdd ?? 0) || 0;
+      let tn = p - Number(effArmor?.effective ?? 0);
+      tn = Math.max(2, tn + resistAdd);
+      return tn;
+   }
+
+   /** Apply attack-side staging from net successes: 2 successes = +1 level. */
+   static #applyAttackStaging(baseStep, netAttackSuccesses = 0, extraLevelDelta = 0) {
+      const up = Math.floor(Math.max(0, Number(netAttackSuccesses || 0)) / 2);
+      const totalUp = up + Number(extraLevelDelta || 0);
+      return this.#stageStep(baseStep, totalUp);
+   }
+
+   /** Apply resistance staging: Body successes 2:1 stage down. */
+   static #applyResistanceStaging(stepAfterAttack, bodySuccesses = 0) {
+      const down = Math.floor(Math.max(0, Number(bodySuccesses || 0)) / 2);
+      return this.#stageStep(stepAfterAttack, -down);
+   }
+
+   /**
+    * Prepare the defender’s Resistance Test against a previously built damage packet.
+    * @param {Actor} defender
+    * @param {object} packet  - from computeDamagePacket()
+    * @param {number} netAttackSuccesses - net (attacker − defender) successes on the attack test
+    * @returns {{trackKey:string, tn:number, armor:{armorType:string,base:number,effective:number},
+    *            stagedStepBeforeResist:("l"|"m"|"s"|"d"|null), boxesIfUnresisted:number}}
+    */
+   static buildResistanceCheck(defender, packet, netAttackSuccesses = 0) {
+      const { step: baseStep, trackKey } = this.#splitDamageType(packet?.damageType);
+
+      // Attack-side staging (plan/range effects already folded into packet.levelDelta)
+      const stagedUp = this.#applyAttackStaging(baseStep, netAttackSuccesses, Number(packet?.levelDelta || 0));
+
+      const armor = this.#computeEffectiveArmor(defender, packet);
+      const tn = this.#computeResistanceTN(packet, armor);
+
+      return {
+         trackKey,
+         tn,
+         armor,
+         stagedStepBeforeResist: stagedUp,
+         boxesIfUnresisted: this.#boxesForLevel(stagedUp),
+      };
+   }
+
+   /**
+    * Finalize damage after the defender rolled Body vs TN.
+    * @param {ReturnType<FirearmService.buildResistanceCheck>} build
+    * @param {number} bodySuccesses
+    * @returns {{applied:boolean, finalStep:("l"|"m"|"s"|"d"|null), trackKey:string, boxes:number, overflow:number, notes:string[]}}
+    */
+   static resolveDamageOutcome(build, bodySuccesses = 0) {
+      const { stagedStepBeforeResist, trackKey } = build;
+      const finalStep = this.#applyResistanceStaging(stagedStepBeforeResist, bodySuccesses);
+
+      if (!finalStep) {
+         return { applied: false, finalStep: null, trackKey, boxes: 0, overflow: 0, notes: ["Staged off"] };
+      }
+
+      const boxes = this.#boxesForLevel(finalStep);
+      return { applied: boxes > 0, finalStep, trackKey, boxes, overflow: 0, notes: [] };
+   }
+
+   /**
+    * Convenience wrapper used by OpposeRollService: from beginAttack’s damage + net successes
+    * to a prepared resistance check object (includes TN, staged level, armor used).
+    */
+   static prepareDamageResolution(defender, { plan, damage, netAttackSuccesses = 0 } = {}) {
+      return this.buildResistanceCheck(defender, damage, netAttackSuccesses);
+   }
+
+   //DAMAGE CALC END
 
    static bumpOnShot({ actor, weapon, declaredRounds = 1 }) {
       const m = this.#modeKey(weapon);

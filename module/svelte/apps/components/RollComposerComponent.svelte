@@ -233,7 +233,7 @@
          // init firearm context BEFORE we decide defaulting
          initFirearmContextFromWeapon(item);
 
-         const [skillId] = (item.system.linkedSkillId?? item.system.linkedSkillId?? "").split("::");
+         const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkillId ?? "").split("::");
          const skill = actor.items.get(skillId);
          prepareSkillBasedRoll(skill, item.name);
 
@@ -350,6 +350,16 @@
       weaponMode;
       phaseKey;
       upsertOrRemoveRecoil();
+   });
+
+   $effect(() => {
+      if (!visible) return;
+      if (caller?.type !== "item") return;
+      const weapon = getWeaponFromCaller();
+      if (!weapon) return;
+      const pre = FirearmService.beginAttack(actor, weapon, { declaredRounds, ammoAvailable });
+      caller.firearmPlan = pre.plan;
+      caller.damagePacket = pre.damage;
    });
 
    $effect(() => {
