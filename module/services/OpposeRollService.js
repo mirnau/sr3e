@@ -277,29 +277,37 @@ export default class OpposeRollService {
          flags: { sr3e: { damageResistance: context } },
       });
    }
-
    // OpposeRollService.js
    static async resolveDamageResistance({ defenderId, weaponId, prep }) {
       const defender = game.actors.get(defenderId);
-      if (!defender) return ui.notifications.warn("Defender not found");
+      if (!defender) throw new Error("sr3e: Defender not found");
 
       const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
-      if (!weapon) return ui.notifications.warn("Weapon not found");
+      if (!weapon) throw new Error("sr3e: Weapon not found");
 
+      // Dice pool for Body Resistance
       const body = Number(defender.system?.attributes?.body?.value || 0);
       const combatPool = Number(defender.system?.dicePools?.combat?.value || 0);
       const dicePool = Math.max(0, body + combatPool);
 
-      const tn = Number(prep.tn);
-      const roll = await new Roll(`${dicePool}d6x${tn}`).evaluate();
-      const term = roll.terms?.[0];
-      const successes = Array.isArray(term?.results)
-         ? term.results.filter((r) => r.result >= tn && !r.discarded).length
-         : 0;
+      const tn = Math.max(2, Number(prep.tn) || 2);
 
+      // Roll (skip evaluation work if 0 dice)
+      let roll = null;
+      let successes = 0;
+      if (dicePool > 0) {
+         roll = await new Roll(`${dicePool}d6x${tn}`).evaluate();
+         const term = roll.terms?.[0];
+         if (Array.isArray(term?.results)) {
+            successes = term.results.filter((r) => !r.discarded && r.result >= tn).length;
+         }
+      }
+
+      // Finalize via FirearmService
       const outcome = FirearmService.resolveDamageOutcome(prep, successes);
       const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
 
+      // Apply to track
       const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
       const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
 
@@ -312,21 +320,28 @@ export default class OpposeRollService {
       if (overflow > 0 && trackKey === "physical") {
          update["system.health.overflow.value"] = Number(defender.system?.health?.overflow?.value || 0) + overflow;
       }
-
       if (outcome.applied) await defender.update(update);
+
+      // Recipients: defender + GMs
+      const defenderUser = OpposeRollService.resolveControllingUser(defender);
+      const gmIds = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+      const whisper = Array.from(new Set([defenderUser?.id, ...gmIds].filter(Boolean)));
+
+      const rollHTML = roll ? await roll.render() : "<em>No dice rolled</em>";
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: defender }),
+         whisper,
+         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
          content: `
       <p><strong>${defender.name}</strong> resists damage from <em>${weapon.name}</em>.</p>
       <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
-      <p>Pre-resist level: <b>${prep.stagedStepBeforeResist.toUpperCase()}</b> (${prep.trackKey})</p>
-      <p>Final level: <b>${outcome.finalStep?.toUpperCase?.() ?? "NONE"}</b>
-         → Boxes applied: <b>${outcome.boxes}</b>${trackKey ? ` (${trackKey})` : ""}</p>
+      ${rollHTML}
+      <p>Pre-resist level: <b>${(prep.stagedStepBeforeResist ?? "").toString().toUpperCase()}</b> (${prep.trackKey})</p>
+      <p>Final level: <b>${outcome.finalStep ? outcome.finalStep.toUpperCase() : "NONE"}</b>
+         → Boxes applied: <b>${outcome.boxes}</b> (${trackKey})</p>
       ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
     `,
-         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-         whisper: [game.user.id],
       });
    }
 

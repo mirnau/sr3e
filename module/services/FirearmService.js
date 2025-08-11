@@ -229,14 +229,16 @@ export default class FirearmService {
    static extractAmmoDirectives(ammo) {
       const t = String(ammo?.system?.type || ammo?.system?.ammoType || "").toLowerCase();
       const d = Array.isArray(ammo?.system?.effectDirectives) ? [...ammo.system.effectDirectives] : [];
-      if (t === "apds") d.push({ k: "armor.mult.ballistic", v: 0.5 });
-      if (t === "flechette") d.push({ k: "damage.levelDelta", v: 1 }, { k: "armor.use", v: "impact" });
-      if (t === "gel") d.push({ k: "damage.type", v: "stun" }, { k: "resist.tnAdd", v: 2 });
+
+      if (t === "apds") d.push({ k: "armor.mult.ballistic", v: 0.5 }); // halves ballistic, round down
+      if (t === "flechette") d.push({ k: "special.flechette", v: true }); // handled in buildResistanceCheck
+      if (t === "gel") d.push({ k: "damage.type", v: "stun" }, { k: "damage.powerAdd", v: -2 }); // -2 Power, stun
       if (t === "explosive") d.push({ k: "damage.powerAdd", v: 1 });
       if (t === "incendiary") d.push({ k: "damage.type", v: "fire" }, { k: "special.incendiary", v: true });
       if (t === "capsule") d.push({ k: "special.capsule", v: true });
-      if (t === "tracer") d.push({ k: "attack.tnAdd", v: -1 });
+      if (t === "tracer") d.push({ k: "attack.tnAdd", v: -1 }); // (you can later constrain this to > Short and cumulative)
       if (t === "tracker") d.push({ k: "special.tracker", v: true });
+
       return d;
    }
 
@@ -329,27 +331,26 @@ export default class FirearmService {
       const useImpact = String(packet?.armorUse || "ballistic") === "impact";
       const mult = packet?.armorMult || { ballistic: 1, impact: 1 };
 
-      // Gather equipped wearables
       const wearables = defender?.items?.filter?.((i) => i.type === "wearable") ?? [];
       const equipped = wearables.filter((i) => !!i.getFlag("sr3e", "isEquipped"));
 
-      // Simple SR3 layering: take the highest of the chosen type
-      // (If you later want full layering—highest + half(others)—you can extend here.)
-      const getRating = (w) => {
-         const b = Number(w?.system?.armor?.ballistic ?? 0) || 0;
-         const imp = Number(w?.system?.armor?.impact ?? 0) || 0;
-         return useImpact ? imp : b;
-      };
-      let base = 0;
-      for (const w of equipped) base = Math.max(base, getRating(w));
+      let ballisticBase = 0,
+         impactBase = 0;
+      for (const w of equipped) {
+         ballisticBase = Math.max(ballisticBase, Number(w?.system?.armor?.ballistic ?? 0) || 0);
+         impactBase = Math.max(impactBase, Number(w?.system?.armor?.impact ?? 0) || 0);
+      }
 
-      let eff = base;
-      if (!useImpact) eff = eff * Number(mult.ballistic ?? 1);
-      else eff = eff * Number(mult.impact ?? 1);
+      let eff = useImpact ? impactBase * Number(mult.impact ?? 1) : ballisticBase * Number(mult.ballistic ?? 1);
 
-      // Floor at 0, integer
       eff = Math.max(0, Math.floor(eff));
-      return { armorType: useImpact ? "impact" : "ballistic", base, effective: eff };
+      return {
+         armorType: useImpact ? "impact" : "ballistic",
+         base: useImpact ? impactBase : ballisticBase,
+         effective: eff,
+         ballisticBase,
+         impactBase,
+      };
    }
 
    /** Compute Resistance TN: Power − effectiveArmor, min TN 2, then + packet.resistTNAdd. */
@@ -385,18 +386,45 @@ export default class FirearmService {
    static buildResistanceCheck(defender, packet, netAttackSuccesses = 0) {
       const { step: baseStep, trackKey } = this.#splitDamageType(packet?.damageType);
 
-      // Attack-side staging (plan/range effects already folded into packet.levelDelta)
-      const stagedUp = this.#applyAttackStaging(baseStep, netAttackSuccesses, Number(packet?.levelDelta || 0));
+      // base staging (attacker side)
+      const upFromAttack = Math.floor(Math.max(0, Number(netAttackSuccesses || 0)) / 2);
+      const stagedUpBase = this.#stageStep(baseStep, upFromAttack + Number(packet?.levelDelta || 0));
 
-      const armor = this.#computeEffectiveArmor(defender, packet);
-      const tn = this.#computeResistanceTN(packet, armor);
+      // armor and TN as usual
+      let armor = this.#computeEffectiveArmor(defender, packet);
+      let tn = this.#computeResistanceTN(packet, armor);
+
+      const notes = packet?.notes || [];
+      const isFlechette = notes.includes("flechette");
+
+      if (isFlechette) {
+         const b = armor.ballisticBase || 0;
+         const i = armor.impactBase || 0;
+
+         if (b === 0 && i === 0) {
+            // Unarmored: +1 damage level (SR3)
+            const stagedUp = this.#stageStep(stagedUpBase, 1);
+            return {
+               trackKey,
+               tn, // TN unchanged
+               armor: { ...armor, armorType: "flechette-unarmored" },
+               stagedStepBeforeResist: stagedUp,
+               boxesIfUnresisted: this.#boxesForLevel(stagedUp),
+            };
+         } else {
+            // Armored: use max(Ballistic, 2*Impact) for the TN (SR3)
+            const flechEff = Math.max(b, Math.floor(2 * i));
+            tn = Math.max(2, Math.max(0, Number(packet?.power || 0)) - flechEff + Number(packet?.resistTNAdd || 0));
+            armor = { ...armor, effective: flechEff, armorType: "flechette" };
+         }
+      }
 
       return {
          trackKey,
          tn,
          armor,
-         stagedStepBeforeResist: stagedUp,
-         boxesIfUnresisted: this.#boxesForLevel(stagedUp),
+         stagedStepBeforeResist: stagedUpBase,
+         boxesIfUnresisted: this.#boxesForLevel(stagedUpBase),
       };
    }
 
