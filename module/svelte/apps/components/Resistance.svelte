@@ -12,48 +12,57 @@
       currentDicePoolAddition,
       isDefaulting,
       OnClose,
-      CommitEffects
+      CommitEffects,
    } = $props();
 
    async function Resist() {
+      // Let the player decide pools in the composer UI:
+      // totalDice = base + any optional pool dice they added in the panel.
       const totalDice = (caller.dice ?? 0) + (diceBought ?? 0) + (currentDicePoolAddition ?? 0);
+
+      // We expect promptDamageResistance to have put `prep` and `weaponId` on caller.
+      const prep = caller.prep;
+      const weaponId = caller.weaponId || caller?.context?.weaponId;
+
+      if (!prep || !weaponId) {
+         throw new Error("sr3e: Resistance composer missing prep or weaponId");
+      }
 
       const type = "resistance";
       const isAttr = caller.type === "attribute";
-
-      let attributeKeyForChat =
-         caller.linkedAttribute ??
-         caller.attributeKey ??
-         caller.attributeName ??
-         (isAttr ? caller.key : undefined);
+      const attributeKeyForChat =
+         caller.linkedAttribute ?? caller.attributeKey ?? caller.attributeName ?? (isAttr ? caller.key : undefined);
 
       const roll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, {
-            targetNumber: modifiedTargetNumber,
-            explodes: true
+            // Show the correct TN in the composer UI; the resolver will still enforce prep.tn.
+            targetNumber: modifiedTargetNumber ?? prep.tn,
+            explodes: true,
          }),
          { actor },
          {
             type,
             modifiers: modifiersArray,
-            targetNumber: modifiedTargetNumber,
+            targetNumber: modifiedTargetNumber ?? prep.tn,
             attributeKey: attributeKeyForChat,
             attributeName: attributeKeyForChat,
-            power: caller.power,
-            stagedLevel: caller.stagedLevel,
-            damageType: caller.damageType,
-            weaponId: caller.weaponId,
             opposed: false,
-            isDefaulting
+            isDefaulting,
          }
       );
 
-      await roll.evaluate();
+      await roll.evaluate({ async: true });
+
+      // Send the composed roll to the resolver (runs on this client via your CONFIG.queries handler)
+      await game.user.query("sr3e.resolveResistanceRoll", {
+         defenderId: actor.id,
+         weaponId,
+         prep,
+         rollData: roll.toJSON(),
+      });
 
       await CommitEffects?.();
-
       OnClose?.();
-
       Hooks.callAll("actorSystemRecalculated", actor);
    }
 </script>

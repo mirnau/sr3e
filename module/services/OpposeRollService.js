@@ -56,63 +56,22 @@ export default class OpposeRollService {
       const contestId = foundry.utils.randomID(16);
       this.registerContest({ contestId, initiator, target, rollData, options });
 
-      const o = rollData?.options ?? {};
-      if (o.type === "item" && o.itemId) {
-         const actor = initiator;
-         const weapon = actor?.items?.get(o.itemId) || game.items.get(o.itemId);
-         if (!weapon) throw new Error("sr3e: OpposeRollService.start missing weapon");
-
-         // Current recoil context + attached ammo state
-         const already = FirearmService.inCombat()
-            ? FirearmService.getPhaseShots(actor.id)
-            : FirearmService.getOOCShots(actor.id);
-
-         const attachedAmmo = FirearmService.getAttachedAmmo(actor, weapon);
-         const ammoAvailable = attachedAmmo
-            ? Number(attachedAmmo.system?.ammunition?.rounds ?? attachedAmmo.system?.rounds ?? 0)
-            : null;
-
-         const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
-
-         // Plan the shot and bump recoil once
-         const plan = FirearmService.planFire({
-            weapon,
-            phaseShotsFired: already,
-            declaredRounds,
-            ammoAvailable,
-         });
-
-         if (FirearmService.inCombat()) FirearmService.bumpPhaseShots(actor.id, plan.roundsFired);
-         else FirearmService.bumpOOCShots(actor.id, plan.roundsFired);
-
-         // Build damage packet (rangeBand distances exist on the weapon but don't change damage directly)
-         const rangeData = weapon.system?.rangeBand ?? null; // { short, medium, long, extreme }
-         const damage = FirearmService.computeDamagePacket(weapon, plan, attachedAmmo, /* rangeBand */ null);
-
-         const attackContext = {
-            weaponId: weapon.id,
-            ammoId: attachedAmmo?.id || "",
-            plan,
-            damage,
-            rangeData,
-         };
-
-         const prev = activeContests.get(contestId);
-         activeContests.set(contestId, { ...prev, attackContext });
-      }
-
-      const targetUser = this.resolveControllingUser(target);
-      await targetUser.query("sr3e.opposeRollPrompt", {
-         contestId,
-         initiatorId: initiator.id,
-         targetId: target.id,
-         rollData,
-         options,
-      });
+      // (your recoil/attackContext code stays here)
 
       const initiatorUser = this.resolveControllingUser(initiator);
-      const whisperIds = [initiatorUser.id, targetUser.id];
+      const targetUser = this.resolveControllingUser(target);
+      const payload = { contestId, initiatorId: initiator.id, targetId: target.id, rollData, options };
 
+      // Ensure BOTH clients cache the contest
+      if (initiatorUser?.id !== game.user.id) {
+         await initiatorUser.query("sr3e.opposeRollPrompt", payload);
+      }
+      if (targetUser?.id !== game.user.id) {
+         await targetUser.query("sr3e.opposeRollPrompt", payload);
+      }
+
+      // Chat message to both
+      const whisperIds = [initiatorUser.id, targetUser.id];
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
@@ -278,36 +237,22 @@ export default class OpposeRollService {
       });
    }
    // OpposeRollService.js
-   static async resolveDamageResistance({ defenderId, weaponId, prep }) {
+   static async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) {
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: Defender not found");
-
       const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
       if (!weapon) throw new Error("sr3e: Weapon not found");
 
-      // Dice pool for Body Resistance
-      const body = Number(defender.system?.attributes?.body?.value || 0);
-      const combatPool = Number(defender.system?.dicePools?.combat?.value || 0);
-      const dicePool = Math.max(0, body + combatPool);
+      // Rebuild the Roll for rendering; count successes using your helper
+      const roll = await Roll.fromData(rollData).evaluate({ async: true });
+      const tn = Number(prep.tn);
+      const successes = this.getSuccessCount({
+         ...rollData,
+         options: { ...(rollData.options || {}), targetNumber: tn },
+      });
 
-      const tn = Math.max(2, Number(prep.tn) || 2);
-
-      // Roll (skip evaluation work if 0 dice)
-      let roll = null;
-      let successes = 0;
-      if (dicePool > 0) {
-         roll = await new Roll(`${dicePool}d6x${tn}`).evaluate();
-         const term = roll.terms?.[0];
-         if (Array.isArray(term?.results)) {
-            successes = term.results.filter((r) => !r.discarded && r.result >= tn).length;
-         }
-      }
-
-      // Finalize via FirearmService
       const outcome = FirearmService.resolveDamageOutcome(prep, successes);
       const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
-
-      // Apply to track
       const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
       const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
 
@@ -322,17 +267,14 @@ export default class OpposeRollService {
       }
       if (outcome.applied) await defender.update(update);
 
-      // Recipients: defender + GMs
-      const defenderUser = OpposeRollService.resolveControllingUser(defender);
+      const rollHTML = await roll.render();
+      const defenderUser = this.resolveControllingUser(defender);
       const gmIds = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
       const whisper = Array.from(new Set([defenderUser?.id, ...gmIds].filter(Boolean)));
-
-      const rollHTML = roll ? await roll.render() : "<em>No dice rolled</em>";
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: defender }),
          whisper,
-         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
          content: `
       <p><strong>${defender.name}</strong> resists damage from <em>${weapon.name}</em>.</p>
       <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>

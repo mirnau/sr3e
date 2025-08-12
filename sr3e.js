@@ -219,6 +219,11 @@ function configureQueries() {
       const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
       if (msg) msg.render(true);
    };
+
+   CONFIG.queries["sr3e.resolveResistanceRoll"] = async ({ defenderId, weaponId, prep, rollData }) => {
+      await OpposeRollService.resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData });
+      return { ok: true };
+   };
 }
 
 function setFlagsOnCharacterPreCreate(document, data, options, userId) {
@@ -493,31 +498,38 @@ function registerHooks() {
 
       container.appendChild(btn);
    });
-
    Hooks.on("renderChatMessageHTML", (message, html) => {
-      const flags = message.flags?.sr3e;
-      if (!flags?.damageResistance) return;
+      const resp = html.querySelector(".sr3e-response-button-container");
+      if (!resp || resp.dataset.sr3eRespondWired) return;
 
-      const container = html.querySelector(".sr3e-resist-damage-button");
-      if (!container) {
-         console.warn("[sr3e] Damage resistance container not found in HTML", html);
-         return;
-      }
+      const contestId = resp.dataset.contestId;
+      const contest = OpposeRollService.getContestById(contestId);
+
+      // Only add button if this user is the target in this contest
+      if (!contest || contest.target?.id !== game.user.character?.id) return;
+
+      resp.dataset.sr3eRespondWired = "1";
 
       const button = document.createElement("button");
-      button.textContent = game.i18n.localize("sr3e.resistDamage") || "Resist Damage";
+      button.type = "button";
+      button.className = "sr3e-respond";
+      button.textContent = game.i18n.localize("sr3e.respond") || "Respond";
       button.addEventListener("click", () => {
-         try {
-            const context = JSON.parse(decodeURIComponent(container.dataset.context));
-            console.log("[sr3e] Resist button clicked", context);
-            OpposeRollService.resolveDamageResistance(context);
-         } catch (e) {
-            console.error("[sr3e] Failed to parse damage resistance context", e);
-         }
+         const hint = contest.defenseHint || { key: "reaction", tnMod: 0, tnLabel: "Weapon difficulty" };
+         contest.target.sheet.setRollComposerData(
+            {
+               responseMode: true,
+               contestId,
+               type: "attribute",
+               key: hint.key || "reaction",
+               defenseTNMod: Number(hint.tnMod || 0),
+               defenseTNLabel: hint.tnLabel || "Weapon difficulty",
+               dice: 0,
+            },
+            { visible: true }
+         );
       });
-
-      container.appendChild(button);
-      console.log("[sr3e] Resist damage button injected into chat message");
+      resp.appendChild(button);
    });
 
    const DEBUG = true;
