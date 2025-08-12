@@ -11,9 +11,9 @@ export default class OpposeRollService {
     if (!weapon || weapon.type !== "weapon") throw new Error("sr3e: weapon required");
     const fam = String(weapon.system?.family || "").toLowerCase();
     if (fam === "firearm") return { key: "firearm", svc: FirearmService };
-    if (fam === "melee" || fam === "bladed") return { key: "melee", svc: MeleeService };
+    if (fam) return { key: "melee", svc: MeleeService };
 
-    // heuristic
+    // heuristic fallback when no family is declared
     const hasAmmo = !!weapon.system?.ammunitionClass || !!weapon.system?.ammoId;
     if (hasAmmo) return { key: "firearm", svc: FirearmService };
     if (Number.isFinite(weapon.system?.reach) || Number.isFinite(weapon.system?.powerAdd)) {
