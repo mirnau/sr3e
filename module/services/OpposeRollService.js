@@ -244,7 +244,10 @@ export default class OpposeRollService {
       if (!weapon) throw new Error("sr3e: Weapon not found");
 
       // Rebuild the Roll for rendering; count successes using your helper
-      const roll = await Roll.fromData(rollData).evaluate({ async: true });
+      const roll = await Roll.fromData(rollData);
+      if (!roll._evaluated) {
+         await roll.evaluate({ async: true });
+      }
       const tn = Number(prep.tn);
       const successes = this.getSuccessCount({
          ...rollData,
