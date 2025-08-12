@@ -5,293 +5,301 @@ const activeContests = new Map();
 const pendingResponses = new Map();
 
 export default class OpposeRollService {
-  static getContestById(id) {
-    return activeContests.get(id);
-  }
+   static getContestById(id) {
+      return activeContests.get(id);
+   }
 
-  static waitForResponse(contestId) {
-    return new Promise((resolve) => {
-      pendingResponses.set(contestId, resolve);
-    });
-  }
+   static waitForResponse(contestId) {
+      return new Promise((resolve) => {
+         pendingResponses.set(contestId, resolve);
+      });
+   }
 
-  static deliverResponse(contestId, rollData) {
-    const resolver = pendingResponses.get(contestId);
-    resolver(rollData);
-    pendingResponses.delete(contestId);
-  }
+   static deliverResponse(contestId, rollData) {
+      const resolver = pendingResponses.get(contestId);
+      resolver(rollData);
+      pendingResponses.delete(contestId);
+   }
 
-  static expireContest(contestId) {
-    const contest = activeContests.get(contestId);
-    if (contest) {
-      activeContests.delete(contestId);
-      console.log("[sr3e] Contest expired.");
-    }
-  }
+   static expireContest(contestId) {
+      const contest = activeContests.get(contestId);
+      if (contest) {
+         activeContests.delete(contestId);
+         console.log("[sr3e] Contest expired.");
+      }
+   }
 
-  static getDefaultDefenseHint(initiatorRoll) {
-    return FirearmService.getDefenseHintFromAttack(initiatorRoll);
-  }
+   static getDefaultDefenseHint(initiatorRoll) {
+      return FirearmService.getDefenseHintFromAttack(initiatorRoll);
+   }
 
-  static getContestForTarget(target) {
-    return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
-  }
+   static getContestForTarget(target) {
+      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
+   }
 
-  static registerContest({ contestId, initiator, target, rollData, options }) {
-    activeContests.set(contestId, {
-      id: contestId,
-      initiator,
-      target,
-      initiatorRoll: rollData,
-      targetRoll: null,
-      options,
-      defenseHint: OpposeRollService.getDefaultDefenseHint(rollData),
-      isResolved: false,
-    });
-  }
+   static registerContest({ contestId, initiator, target, rollData, options }) {
+      activeContests.set(contestId, {
+         id: contestId,
+         initiator,
+         target,
+         initiatorRoll: rollData,
+         targetRoll: null,
+         options,
+         defenseHint: OpposeRollService.getDefaultDefenseHint(rollData),
+         isResolved: false,
+      });
+   }
 
-  static async start({ initiator, target, rollData, options }) {
-    const contestId = foundry.utils.randomID(16);
-    this.registerContest({ contestId, initiator, target, rollData, options });
+   static async start({ initiator, target, rollData, options }) {
+      const contestId = foundry.utils.randomID(16);
+      this.registerContest({ contestId, initiator, target, rollData, options });
 
-    const initiatorUser = this.resolveControllingUser(initiator);
-    const targetUser = this.resolveControllingUser(target);
-    const payload = { contestId, initiatorId: initiator.id, targetId: target.id, rollData, options };
+      const initiatorUser = this.resolveControllingUser(initiator);
+      const targetUser = this.resolveControllingUser(target);
+      const payload = { contestId, initiatorId: initiator.id, targetId: target.id, rollData, options };
 
-    if (initiatorUser?.id !== game.user.id) await initiatorUser.query("sr3e.opposeRollPrompt", payload);
-    if (targetUser?.id !== game.user.id) await targetUser.query("sr3e.opposeRollPrompt", payload);
+      if (initiatorUser?.id !== game.user.id) await initiatorUser.query("sr3e.opposeRollPrompt", payload);
+      if (targetUser?.id !== game.user.id) await targetUser.query("sr3e.opposeRollPrompt", payload);
 
-    const whisperIds = [initiatorUser.id, targetUser.id];
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: initiator }),
-      whisper: whisperIds,
-      content: `
+      const whisperIds = [initiatorUser.id, targetUser.id];
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: initiator }),
+         whisper: whisperIds,
+         content: `
         <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
       `,
-      flags: { "sr3e.opposed": contestId },
-    });
+         flags: { "sr3e.opposed": contestId },
+      });
 
-    return contestId;
-  }
+      return contestId;
+   }
 
-  static resolveControllingUser(actor) {
-    const connectedUsers = game.users.filter((u) => u.active);
+   static resolveControllingUser(actor) {
+      const connectedUsers = game.users.filter((u) => u.active);
 
-    const assignedUser = connectedUsers.find((u) => u.character?.id === actor?.id);
-    if (assignedUser) return assignedUser;
+      const assignedUser = connectedUsers.find((u) => u.character?.id === actor?.id);
+      if (assignedUser) return assignedUser;
 
-    const playerOwner = connectedUsers.find(
-      (u) => !u.isGM && actor?.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
-    );
-    if (playerOwner) return playerOwner;
+      const playerOwner = connectedUsers.find(
+         (u) => !u.isGM && actor?.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
+      );
+      if (playerOwner) return playerOwner;
 
-    return connectedUsers.find((u) => u.isGM);
-  }
+      return connectedUsers.find((u) => u.isGM);
+   }
 
-  static #ensureAttackContext(contest) {
-    const { initiator, initiatorRoll, options } = contest;
-    const o = initiatorRoll?.options ?? {};
+   static #ensureAttackContext(contest) {
+      const { initiator, initiatorRoll, options } = contest;
+      const o = initiatorRoll?.options ?? {};
 
-    const itemId = o.itemId ?? o.key ?? null;
-    if (!itemId) return null;
+      const itemId = o.itemId ?? o.key ?? null;
+      if (!itemId) return null;
 
-    const weapon = initiator?.items?.get(itemId) || game.items.get(itemId);
-    if (!weapon || weapon.type !== "weapon") return null;
+      const weapon = initiator?.items?.get(itemId) || game.items.get(itemId);
+      if (!weapon || weapon.type !== "weapon") return null;
 
-    // derive declared & available rounds (optional)
-    const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
+      // derive declared & available rounds (optional)
+      const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
 
-    // Build plan + packet via orchestrator (includes ammo/directives)
-    const { plan, damage, ammoId } = FirearmService.beginAttack(initiator, weapon, {
-      declaredRounds,
-      // if you track available ammo elsewhere, pass it; otherwise let beginAttack use attached mag
-      ammoAvailable: null,
-      rangeBand: null,
-    });
+      // Build plan + packet via orchestrator (includes ammo/directives)
+      const { plan, damage, ammoId } = FirearmService.beginAttack(initiator, weapon, {
+         declaredRounds,
+         // if you track available ammo elsewhere, pass it; otherwise let beginAttack use attached mag
+         ammoAvailable: null,
+         rangeBand: null,
+      });
 
-    // Keep prior behavior: bump recoil when the contest is set up
-    FirearmService.bumpOnShot({ actor: initiator, weapon, declaredRounds: plan.roundsFired });
+      // Keep prior behavior: bump recoil when the contest is set up
+      FirearmService.bumpOnShot({ actor: initiator, weapon, declaredRounds: plan.roundsFired });
 
-    const rangeData = weapon.system?.rangeBand ?? null;
+      const rangeData = weapon.system?.rangeBand ?? null;
 
-    const attackContext = {
-      weaponId: weapon.id,
-      ammoId: ammoId || "",
-      plan,
-      damage,      // ← packet
-      rangeData,
-    };
+      const attackContext = {
+         weaponId: weapon.id,
+         ammoId: ammoId || "",
+         plan,
+         damage, // ← packet
+         rangeData,
+      };
 
-    contest.attackContext = attackContext;
-    activeContests.set(contest.id, contest);
-    return attackContext;
-  }
+      contest.attackContext = attackContext;
+      activeContests.set(contest.id, contest);
+      return attackContext;
+   }
 
-  static async resolveTargetRoll(contestId, rollData) {
-    const contest = activeContests.get(contestId);
-    contest.targetRoll = rollData;
-    contest.isResolved = true;
+   static async resolveTargetRoll(contestId, rollData) {
+      const contest = activeContests.get(contestId);
+      contest.targetRoll = rollData;
+      contest.isResolved = true;
 
-    let { initiator, target, initiatorRoll, targetRoll, attackContext } = contest;
-    if (!attackContext) attackContext = this.#ensureAttackContext(contest);
+      let { initiator, target, initiatorRoll, targetRoll, attackContext } = contest;
+      if (!attackContext) attackContext = this.#ensureAttackContext(contest);
 
-    const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
-    const winner = netSuccesses > 0 ? initiator : target;
+      const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
+      const winner = netSuccesses > 0 ? initiator : target;
 
-    let damageText = "";
-    let resistancePayload = null;
+      let damageText = "";
+      let resistancePayload = null;
 
-    if (winner === initiator && attackContext?.weaponId) {
-      const weapon = initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId);
-      if (weapon?.type === "weapon") {
-        const prep = FirearmService.prepareDamageResolution(target, {
-          plan: attackContext.plan,
-          damage: attackContext.damage,
-          netAttackSuccesses: netSuccesses,
-        });
-        // attach contestId for later cleanup
-        prep.contestId = contest.id;
+      if (winner === initiator && attackContext?.weaponId) {
+         const weapon = initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId);
+         if (weapon?.type === "weapon") {
+            const prep = FirearmService.prepareDamageResolution(target, {
+               plan: attackContext.plan,
+               damage: attackContext.damage,
+               netAttackSuccesses: netSuccesses,
+            });
+            // attach contestId for later cleanup
+            prep.contestId = contest.id;
 
-        damageText = `
+            damageText = `
           <p><strong>${target.name}</strong> must resist
           <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
           (${prep.trackKey}) from <em>${weapon.name}</em>.
           Resistance TN: <b>${prep.tn}</b>.</p>`;
 
-        resistancePayload = { contestId, defenderId: target.id, weaponId: weapon.id, prep };
+            resistancePayload = {
+               contestId,
+               initiatorId: initiator.id,
+               defenderId: target.id,
+               weaponId: weapon.id,
+               prep,
+            };
+         }
       }
-    }
 
-    const content = this.#buildContestMessage({
-      initiator,
-      target,
-      initiatorRoll,
-      targetRoll,
-      winner,
-      netSuccesses,
-      damageText,
-    });
+      const content = this.#buildContestMessage({
+         initiator,
+         target,
+         initiatorRoll,
+         targetRoll,
+         winner,
+         netSuccesses,
+         damageText,
+      });
 
-    const chatData = this.#prepareChatData({
-      speaker: initiator,
-      initiatorUser: this.resolveControllingUser(initiator),
-      targetUser: this.resolveControllingUser(target),
-      content,
-      rollMode: game.settings.get("core", "rollMode"),
-    });
+      const chatData = this.#prepareChatData({
+         speaker: initiator,
+         initiatorUser: this.resolveControllingUser(initiator),
+         targetUser: this.resolveControllingUser(target),
+         content,
+         rollMode: game.settings.get("core", "rollMode"),
+      });
 
-    await ChatMessage.create(chatData);
+      await ChatMessage.create(chatData);
 
-    ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
-    contest.phase = "awaiting-resistance";
-    activeContests.set(contestId, contest);
+      ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
+      contest.phase = "awaiting-resistance";
+      activeContests.set(contestId, contest);
 
-    if (resistancePayload) {
-      setTimeout(() => {
-        this.promptDamageResistance(resistancePayload).catch(console.error);
-      }, 200);
-    }
-  }
+      if (resistancePayload) {
+         setTimeout(() => {
+            this.promptDamageResistance(resistancePayload).catch(console.error);
+         }, 200);
+      }
+   }
 
-  static async promptDamageResistance(resistancePayload) {
-    const { contestId, defenderId, weaponId, prep } = resistancePayload;
+   static async promptDamageResistance(resistancePayload) {
+      const { contestId, initiatorId, defenderId, weaponId, prep } = resistancePayload;
 
-    const defender = game.actors.get(defenderId);
-    if (!defender) return ui.notifications.warn("Defender not found");
+      const defender = game.actors.get(defenderId);
+      if (!defender) return ui.notifications.warn("Defender not found");
 
-    const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
-    if (!weapon) return ui.notifications.warn("Weapon not found");
+      const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
+      if (!weapon) return ui.notifications.warn("Weapon not found");
 
-    const defenderUser = this.resolveControllingUser(defender);
+      const defenderUser = this.resolveControllingUser(defender);
 
-    const context = { contestId, defenderId, weaponId, prep };
+      const context = { contestId, initiatorId, defenderId, weaponId, prep };
 
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: defender }),
-      whisper: [defenderUser.id],
-      content: `
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: defender }),
+         whisper: [defenderUser.id],
+         content: `
         <p><strong>${defender.name}</strong>, resist
         <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> ${prep.trackKey}
         damage from <em>${weapon.name}</em> (TN <b>${prep.tn}</b>).</p>
         <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
       `,
-      flags: { sr3e: { damageResistance: context } },
-    });
-  }
+         flags: { sr3e: { damageResistance: context } },
+      });
+   }
 
-  static async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) {
-    const defender = game.actors.get(defenderId);
-    if (!defender) throw new Error("sr3e: Defender not found");
-    const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
-    if (!weapon) throw new Error("sr3e: Weapon not found");
+   static async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) {
+      const defender = game.actors.get(defenderId);
+      if (!defender) throw new Error("sr3e: Defender not found");
+      const weapon = defender.items.get(weaponId) || game.items.get(weaponId);
+      if (!weapon) throw new Error("sr3e: Weapon not found");
 
-    const roll = await Roll.fromData(rollData);
-    if (!roll._evaluated) await roll.evaluate({ async: true });
+      const roll = await Roll.fromData(rollData);
+      if (!roll._evaluated) await roll.evaluate({ async: true });
 
-    const tn = Number(prep.tn);
-    const successes = this.getSuccessCount({
-      ...rollData,
-      options: { ...(rollData.options || {}), targetNumber: tn },
-    });
+      const tn = Number(prep.tn);
+      const successes = this.getSuccessCount({
+         ...rollData,
+         options: { ...(rollData.options || {}), targetNumber: tn },
+      });
 
-    const outcome = FirearmService.resolveDamageOutcome(prep, successes);
-    const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
-    const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
-    const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
+      const outcome = FirearmService.resolveDamageOutcome(prep, successes);
+      const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
+      const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
+      const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
 
-    const current = Number(foundry.utils.getProperty(defender, trackPath) || 0);
-    const max = Number(foundry.utils.getProperty(defender, maxPath) || 10);
-    const next = Math.min(current + outcome.boxes, max);
-    const overflow = Math.max(0, current + outcome.boxes - max);
+      const current = Number(foundry.utils.getProperty(defender, trackPath) || 0);
+      const max = Number(foundry.utils.getProperty(defender, maxPath) || 10);
+      const next = Math.min(current + outcome.boxes, max);
+      const overflow = Math.max(0, current + outcome.boxes - max);
 
-    const update = { [trackPath]: next };
-    if (overflow > 0 && trackKey === "physical") {
-      update["system.health.overflow.value"] = Number(defender.system?.health?.overflow?.value || 0) + overflow;
-    }
-    if (outcome.applied) await defender.update(update);
+      const update = { [trackPath]: next };
+      if (overflow > 0 && trackKey === "physical") {
+         update["system.health.overflow.value"] = Number(defender.system?.health?.overflow?.value || 0) + overflow;
+      }
+      if (outcome.applied) await defender.update(update);
 
-    const rollHTML = await roll.render();
-    const defenderUser = this.resolveControllingUser(defender);
-    const gmIds = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-    const whisper = Array.from(new Set([defenderUser?.id, ...gmIds].filter(Boolean)));
+      const rollHTML = await roll.render();
+      const defenderUser = this.resolveControllingUser(defender);
+      const gmIds = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+      const whisper = Array.from(new Set([defenderUser?.id, ...gmIds].filter(Boolean)));
 
-    await ChatMessage.create({
-      speaker: ChatMessage.getSpeaker({ actor: defender }),
-      whisper,
-      content: `
+      await ChatMessage.create({
+         speaker: ChatMessage.getSpeaker({ actor: defender }),
+         whisper,
+         content: `
         <p><strong>${defender.name}</strong> resists damage from <em>${weapon.name}</em>.</p>
         <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
         ${rollHTML}
-        <p>Pre-resist level: <b>${(prep.stagedStepBeforeResist ?? "").toString().toUpperCase()}</b> (${prep.trackKey})</p>
+        <p>Pre-resist level: <b>${(prep.stagedStepBeforeResist ?? "").toString().toUpperCase()}</b> (${
+            prep.trackKey
+         })</p>
         <p>Final level: <b>${outcome.finalStep ? outcome.finalStep.toUpperCase() : "NONE"}</b>
            → Boxes applied: <b>${outcome.boxes}</b> (${trackKey})</p>
         ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
       `,
-    });
+      });
 
-    const cid = prep?.contestId;
-    if (cid) activeContests.delete(cid);
-  }
+      const cid = prep?.contestId;
+      if (cid) activeContests.delete(cid);
+   }
 
-  static computeNetSuccesses(initiatorRollData, targetRollData) {
-    const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
-    const targetSuccesses = this.getSuccessCount(targetRollData);
-    return initiatorSuccesses - targetSuccesses;
-  }
+   static computeNetSuccesses(initiatorRollData, targetRollData) {
+      const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
+      const targetSuccesses = this.getSuccessCount(targetRollData);
+      return initiatorSuccesses - targetSuccesses;
+   }
 
-  static getSuccessCount(rollData) {
-    const term = rollData.terms[0];
-    const tn = rollData.options?.targetNumber;
-    if (!tn || !term?.results) return 0;
-    return term.results.filter((r) => r.active && r.result >= tn).length;
-  }
+   static getSuccessCount(rollData) {
+      const term = rollData.terms[0];
+      const tn = rollData.options?.targetNumber;
+      if (!tn || !term?.results) return 0;
+      return term.results.filter((r) => r.active && r.result >= tn).length;
+   }
 
-  static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
-    const initiatorHtml = this.#buildDiceHTML(initiator, initiatorRoll);
-    const targetHtml = this.#buildDiceHTML(target, targetRoll);
+   static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
+      const initiatorHtml = this.#buildDiceHTML(initiator, initiatorRoll);
+      const targetHtml = this.#buildDiceHTML(target, targetRoll);
 
-    return `
+      return `
       <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
       <h4>${initiator.name}</h4>
       ${initiatorHtml}
@@ -299,36 +307,36 @@ export default class OpposeRollService {
       ${targetHtml}
       <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
       ${damageText ?? ""}`;
-  }
+   }
 
-  static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
-    const chatData = {
-      speaker: ChatMessage.getSpeaker({ actor: speaker }),
-      user: initiatorUser?.id ?? game.user.id,
-      content,
-      flags: { "sr3e.opposedResolved": true },
-    };
+   static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
+      const chatData = {
+         speaker: ChatMessage.getSpeaker({ actor: speaker }),
+         user: initiatorUser?.id ?? game.user.id,
+         content,
+         flags: { "sr3e.opposedResolved": true },
+      };
 
-    switch (rollMode) {
-      case "gmroll":
-        chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-        break;
-      case "blindroll":
-        chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
-        chatData.blind = true;
-        break;
-      case "selfroll":
-        chatData.whisper = [initiatorUser.id, targetUser.id];
-        break;
-      case "public":
-      default:
-        break;
-    }
+      switch (rollMode) {
+         case "gmroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            break;
+         case "blindroll":
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
+            chatData.blind = true;
+            break;
+         case "selfroll":
+            chatData.whisper = [initiatorUser.id, targetUser.id];
+            break;
+         case "public":
+         default:
+            break;
+      }
 
-    return chatData;
-  }
+      return chatData;
+   }
 
-  static #buildDiceHTML(actor, rollData) {
-    return SR3ERoll.renderVanilla(actor, rollData);
-  }
+   static #buildDiceHTML(actor, rollData) {
+      return SR3ERoll.renderVanilla(actor, rollData);
+   }
 }

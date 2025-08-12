@@ -430,52 +430,46 @@ function registerHooks() {
       }
    });
 
-    Hooks.on("renderChatMessageHTML", (message, html) => {
+   Hooks.on("renderChatMessageHTML", (message, html) => {
       const node = html.querySelector(".sr3e-resist-damage-button");
       if (!node || node.dataset.sr3eResistWired) return;
       node.dataset.sr3eResistWired = "1";
 
-      const raw = node.dataset.context || "";
-      const context = JSON.parse(decodeURIComponent(raw));
-
+      const context = JSON.parse(decodeURIComponent(node.dataset.context || "%7B%7D"));
       const button = document.createElement("button");
       button.type = "button";
       button.className = "sr3e-resist";
       button.textContent = game.i18n.localize("sr3e.resist") || "Resist";
 
+      // sr3e.js — inside Hooks.on("renderChatMessageHTML", ...) for the resist button
       button.addEventListener("click", async () => {
-         const defender = game.actors.get(context.defenderId);
+         const { contestId, initiatorId, defenderId, weaponId, prep } = context;
+
+         const defender = game.actors.get(defenderId);
          if (!defender) throw new Error("sr3e: defender not found");
-         const prep = context.prep;
+
          const tn = Number(prep?.tn || 0) || 2;
 
          defender.sheet.setRollComposerData(
             {
-               responseMode: true,
-               contestId: context.contestId,
-               type: "attribute",
-               key: "body",
-               name: game.i18n.localize("sr3e.attributes.body") || "Body",
+               // 👇 use a distinct mode so the composer can branch away from Respond
+               mode: "resistance",
+               contestId,
+               initiatorId,
+               defenderId,
+               weaponId,
                tn,
+               prep,
+               // keep UX hints if you want to show them in the panel
                tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
-               opposed: false,
                explodes: true,
             },
             { visible: true }
          );
-
-         const rollData = await OpposeRollService.waitForResponse(context.contestId);
-
-         await OpposeRollService.resolveDamageResistanceFromRoll({
-            defenderId: context.defenderId,
-            weaponId: context.weaponId,
-            prep,
-            rollData,
-         });
       });
 
       node.appendChild(button);
-    });
+   });
 
    Hooks.on("renderChatMessageHTML", async (message, html, data) => {
       const contestId = message.flags?.sr3e?.opposed;
