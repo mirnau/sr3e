@@ -392,7 +392,7 @@ function registerHooks() {
       });
    });
 
-   Hooks.on("dropCanvasData", async (_canvas, data) => {
+  Hooks.on("dropCanvasData", async (_canvas, data) => {
       if (data.type !== "Item") return;
 
       const { x, y } = data;
@@ -425,6 +425,41 @@ function registerHooks() {
       } catch (err) {
          console.error("[SR3E] Transfer error:", err);
       }
+   });
+
+   Hooks.on(hooks.renderChatMessageHTML, (message, html) => {
+      const container = html.querySelector(".sr3e-resist-damage-button");
+      if (!container) return;
+
+      let context;
+      try {
+         context = JSON.parse(decodeURIComponent(container.dataset.context || "{}"));
+      } catch (err) {
+         console.error("[sr3e] Failed to parse resistance context", err);
+         return;
+      }
+
+      const { defenderId, weaponId, prep } = context || {};
+      if (!defenderId) return;
+
+      const actor = game.actors.get(defenderId);
+      if (!actor) return;
+
+      const controllingUser = OpposeRollService.resolveControllingUser(actor);
+      if (game.user.id !== controllingUser?.id) return;
+
+      const btn = document.createElement("button");
+      btn.classList.add("sr3e-response-button");
+      btn.innerText = localize("Resist");
+      btn.addEventListener("click", async () => {
+         if (!actor.sheet.rendered) await actor.sheet.render(true);
+         actor.sheet.setRollComposerData(
+            { type: "attribute", key: "body", dice: 0, isResistingDamage: true, prep, weaponId },
+            { visible: true }
+         );
+      });
+
+      container.appendChild(btn);
    });
 
    Hooks.on("renderChatMessageHTML", async (message, html, data) => {

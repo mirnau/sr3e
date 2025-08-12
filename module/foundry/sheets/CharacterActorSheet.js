@@ -241,7 +241,14 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          payload = { ...payload, type: "attribute", item: undefined };
       }
 
-      this.#composer.setCallerData(payload, { visible: true });
+      payload = {
+         ...payload,
+         isResistingDamage: callerData?.isResistingDamage,
+         prep: callerData?.prep,
+         weaponId: callerData?.weaponId,
+      };
+
+      this.#composer.setCallerData(payload, options ?? { visible: true });
    }
 
    _onSubmit() {

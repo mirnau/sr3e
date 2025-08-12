@@ -195,6 +195,8 @@
    export function setCallerData(callerData, options = {}) {
       resetToDefaults();
       Object.assign(caller, callerData);
+      caller.prep = callerData?.prep;
+      caller.weaponId = callerData?.weaponId;
 
       const dict = CONFIG?.sr3e?.attributes ?? {};
       if (caller.responseMode && caller.type !== "attribute") {
@@ -210,6 +212,7 @@
 
       if (options.visible !== undefined) visible = options.visible;
       isResponding = caller.responseMode || false;
+      isResistingDamage = callerData?.isResistingDamage || false;
       hasTarget = game.user.targets.size > 0;
 
       modifiersArray = [];
