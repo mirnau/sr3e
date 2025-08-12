@@ -498,39 +498,7 @@ function registerHooks() {
 
       container.appendChild(btn);
    });
-   Hooks.on("renderChatMessageHTML", (message, html) => {
-      const resp = html.querySelector(".sr3e-response-button-container");
-      if (!resp || resp.dataset.sr3eRespondWired) return;
 
-      const contestId = resp.dataset.contestId;
-      const contest = OpposeRollService.getContestById(contestId);
-
-      // Only add button if this user is the target in this contest
-      if (!contest || contest.target?.id !== game.user.character?.id) return;
-
-      resp.dataset.sr3eRespondWired = "1";
-
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "sr3e-respond";
-      button.textContent = game.i18n.localize("sr3e.respond") || "Respond";
-      button.addEventListener("click", () => {
-         const hint = contest.defenseHint || { key: "reaction", tnMod: 0, tnLabel: "Weapon difficulty" };
-         contest.target.sheet.setRollComposerData(
-            {
-               responseMode: true,
-               contestId,
-               type: "attribute",
-               key: hint.key || "reaction",
-               defenseTNMod: Number(hint.tnMod || 0),
-               defenseTNLabel: hint.tnLabel || "Weapon difficulty",
-               dice: 0,
-            },
-            { visible: true }
-         );
-      });
-      resp.appendChild(button);
-   });
 
    const DEBUG = true;
    if (DEBUG) {
