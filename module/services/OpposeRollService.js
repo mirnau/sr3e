@@ -150,6 +150,8 @@ export default class OpposeRollService {
           damage: attackContext.damage,
           netAttackSuccesses: netSuccesses,
         });
+        // attach contestId for later cleanup
+        prep.contestId = contest.id;
 
         damageText = `
           <p><strong>${target.name}</strong> must resist
@@ -182,7 +184,8 @@ export default class OpposeRollService {
     await ChatMessage.create(chatData);
 
     ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
-    activeContests.delete(contestId);
+    contest.phase = "awaiting-resistance";
+    activeContests.set(contestId, contest);
 
     if (resistancePayload) {
       setTimeout(() => {
@@ -266,6 +269,9 @@ export default class OpposeRollService {
         ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
       `,
     });
+
+    const cid = prep?.contestId;
+    if (cid) activeContests.delete(cid);
   }
 
   static computeNetSuccesses(initiatorRollData, targetRollData) {
