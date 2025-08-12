@@ -26,6 +26,11 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel {
             required: true,
             initial: 1,
          }),
+         reach: new foundry.data.fields.NumberField({
+            required: true,
+            initial: 0,
+            min: 0,
+         }),
          range: new foundry.data.fields.NumberField({
             required: true,
             initial: 0,

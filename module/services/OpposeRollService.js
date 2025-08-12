@@ -6,22 +6,52 @@ const activeContests = new Map();
 const pendingResponses = new Map();
 
 export default class OpposeRollService {
-  // ——— family routing ———
-  static #serviceForWeapon(weapon) {
-    if (!weapon || weapon.type !== "weapon") throw new Error("sr3e: weapon required");
-    const fam = String(weapon.system?.family || "").toLowerCase();
-    if (fam === "firearm") return { key: "firearm", svc: FirearmService };
-    if (fam) return { key: "melee", svc: MeleeService };
-
-    // heuristic fallback when no family is declared
-    const hasAmmo = !!weapon.system?.ammunitionClass || !!weapon.system?.ammoId;
-    if (hasAmmo) return { key: "firearm", svc: FirearmService };
-    if (Number.isFinite(weapon.system?.reach) || Number.isFinite(weapon.system?.powerAdd)) {
-      return { key: "melee", svc: MeleeService };
-    }
-    throw new Error(`sr3e: unknown weapon family for "${weapon.name}"`);
+  // -----------------------------
+  // Inference (no system.family)
+  // -----------------------------
+  static #num(v) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
   }
 
+  static #hasAmmoSignals(sys) {
+    if (!sys) return false;
+    if (sys.ammunitionClass || sys.ammoId) return true;
+    const inMag = this.#num(sys?.ammo?.inMag ?? sys?.ammo);
+    return inMag !== null;
+  }
+
+  static #hasFirearmMode(sys) {
+    const m = String(sys?.mode ?? "").toLowerCase();
+    if (!m) return false;
+    // align with your firearm modes
+    return ["manual", "semiauto", "burst", "fullauto", "ss", "sa", "bf", "fa"].includes(m);
+  }
+
+  static #isFirearmByHeuristic(weapon) {
+    const sys = weapon.system ?? {};
+    // IMPORTANT: ignore range bands; many melee items have defaults
+    return this.#hasAmmoSignals(sys) || this.#hasFirearmMode(sys);
+  }
+
+  static #isMeleeByHeuristic(weapon) {
+    // numeric reach is an explicit melee signal in your schema
+    return this.#num(weapon?.system?.reach) !== null;
+  }
+
+  static #serviceForWeapon(weapon) {
+    if (!weapon || weapon.type !== "weapon") throw new Error("sr3e: weapon required");
+
+    if (this.#isFirearmByHeuristic(weapon)) return { key: "firearm", svc: FirearmService };
+    if (this.#isMeleeByHeuristic(weapon))   return { key: "melee",   svc: MeleeService };
+
+    // Default to melee when there are no firearm signals
+    return { key: "melee", svc: MeleeService };
+  }
+
+  // -----------------------
+  // Contest bookkeeping API
+  // -----------------------
   static getContestById(id) {
     return activeContests.get(id);
   }
@@ -34,7 +64,7 @@ export default class OpposeRollService {
 
   static deliverResponse(contestId, rollData) {
     const resolver = pendingResponses.get(contestId);
-    resolver(rollData);
+    resolver?.(rollData);
     pendingResponses.delete(contestId);
   }
 
@@ -46,18 +76,23 @@ export default class OpposeRollService {
     }
   }
 
-  // convenience alias if something external calls this
   static abortOpposedRoll(contestId) {
     return this.expireContest(contestId);
   }
 
+  // -----------------------
+  // Contest lifecycle
+  // -----------------------
   static getDefaultDefenseHint(initiatorRoll) {
     const o = initiatorRoll?.options ?? {};
-    if (o.type !== "item" || !o.itemId) return FirearmService.getDefenseHintFromAttack(initiatorRoll);
+    if (o.type !== "item" || !o.itemId) {
+      // Neutral default (don’t call firearm code when we don’t have an item)
+      return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
+    }
 
     const actor = ChatMessage.getSpeakerActor?.(o.speaker);
     const weapon = game.items.get(o.itemId) || actor?.items?.get?.(o.itemId) || null;
-    if (!weapon) return FirearmService.getDefenseHintFromAttack(initiatorRoll);
+    if (!weapon) return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
 
     const { svc } = this.#serviceForWeapon(weapon);
     return svc.getDefenseHintFromAttack?.(initiatorRoll) ?? { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
@@ -119,6 +154,9 @@ export default class OpposeRollService {
     return connectedUsers.find((u) => u.isGM);
   }
 
+  // -----------------------
+  // Attack setup
+  // -----------------------
   static #ensureAttackContext(contest) {
     const { initiator, initiatorRoll, options } = contest;
     const o = initiatorRoll?.options ?? {};
@@ -139,6 +177,7 @@ export default class OpposeRollService {
         ammoAvailable: null,
         rangeBand: null,
       });
+      // firearm recoil bump on contest setup
       svc.bumpOnShot({ actor: initiator, weapon, declaredRounds: plan.roundsFired });
 
       attackContext = {
@@ -150,6 +189,7 @@ export default class OpposeRollService {
         rangeData: weapon.system?.rangeBand ?? null,
       };
     } else {
+      // melee
       const defender = contest.target;
       const situational = {
         calledShot: !!o.calledShot,
@@ -159,6 +199,7 @@ export default class OpposeRollService {
       };
       const meleePlan = svc.planStrike({ attacker: initiator, defender, weapon, situational });
 
+      // optional UI hint
       contest.defenseHint = {
         type: "skill",
         key: "melee",
@@ -185,6 +226,9 @@ export default class OpposeRollService {
     return attackContext;
   }
 
+  // -----------------------
+  // Resolve opposed result
+  // -----------------------
   static async resolveTargetRoll(contestId, rollData) {
     const contest = activeContests.get(contestId);
     contest.targetRoll = rollData;
@@ -266,6 +310,9 @@ export default class OpposeRollService {
     }
   }
 
+  // -----------------------
+  // Prompt & resolve resistance
+  // -----------------------
   static async promptDamageResistance(resistancePayload) {
     const { contestId, initiatorId, defenderId, weaponId, prep } = resistancePayload;
 
@@ -273,8 +320,7 @@ export default class OpposeRollService {
     if (!defender) return ui.notifications.warn("Defender not found");
 
     const initiator = game.actors.get(initiatorId);
-    const weapon =
-      initiator?.items.get(weaponId) || game.items.get(weaponId); // initiator’s weapon or world item
+    const weapon = initiator?.items.get(weaponId) || game.items.get(weaponId);
     if (!weapon) return ui.notifications.warn("Weapon not found");
 
     const defenderUser = this.resolveControllingUser(defender);
@@ -307,7 +353,7 @@ export default class OpposeRollService {
       options: { ...(rollData.options || {}), targetNumber: tn },
     });
 
-    // fetch weapon from attacker (preferred) or world, using attackerId annotated on prep
+    // get weapon from attacker if possible (preferred)
     const attacker = prep?.attackerId ? game.actors.get(prep.attackerId) : null;
     const weapon = attacker?.items.get(weaponId) || game.items.get(weaponId);
     if (!weapon) throw new Error("sr3e: Weapon not found");
@@ -353,6 +399,9 @@ export default class OpposeRollService {
     if (cid) activeContests.delete(cid);
   }
 
+  // -----------------------
+  // Utilities
+  // -----------------------
   static computeNetSuccesses(initiatorRollData, targetRollData) {
     const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
     const targetSuccesses = this.getSuccessCount(targetRollData);
@@ -360,7 +409,7 @@ export default class OpposeRollService {
   }
 
   static getSuccessCount(rollData) {
-    const term = rollData.terms[0];
+    const term = rollData.terms?.[0];
     const tn = rollData.options?.targetNumber;
     if (!tn || !term?.results) return 0;
     return term.results.filter((r) => r.active && r.result >= tn).length;
