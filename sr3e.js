@@ -54,6 +54,9 @@ import { mount, unmount } from "svelte";
 
 import { debugActorPoolUpdates, debugAECreate } from "@root/DebugHookFuncs.js";
 
+import "@registry/firearms.modes.js";
+import "@registry/firearms.directives.js";
+
 const { DocumentSheetConfig } = foundry.applications.apps;
 
 function registerDocumentTypes({ args }) {
@@ -392,7 +395,7 @@ function registerHooks() {
       });
    });
 
-  Hooks.on("dropCanvasData", async (_canvas, data) => {
+   Hooks.on("dropCanvasData", async (_canvas, data) => {
       if (data.type !== "Item") return;
 
       const { x, y } = data;
@@ -533,7 +536,6 @@ function registerHooks() {
 
       container.appendChild(btn);
    });
-
 
    const DEBUG = true;
    if (DEBUG) {

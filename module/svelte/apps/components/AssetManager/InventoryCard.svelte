@@ -3,7 +3,7 @@
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
-   import FirearmService from "@services/FirearmService.js";
+   import FirearmService from "@families/FirearmService.js";
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
 

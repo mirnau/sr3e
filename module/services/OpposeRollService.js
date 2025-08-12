@@ -1,5 +1,5 @@
 import SR3ERoll from "@documents/SR3ERoll.js";
-import FirearmService from "@services/FirearmService.js";
+import FirearmService from "@families/FirearmService.js";
 
 const activeContests = new Map();
 const pendingResponses = new Map();

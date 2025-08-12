@@ -9,7 +9,7 @@
    import Challenge from "@sveltecomponent/Challenge.svelte";
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get } from "svelte/store";
-   import FirearmService from "@services/FirearmService.js";
+   import FirearmService from "@families/FirearmService.js";
 
    let { actor, config } = $props();
 

@@ -1,7 +1,7 @@
 <script>
   import SR3ERoll from "@documents/SR3ERoll.js";
   import { localize } from "@services/utilities.js";
-  import FirearmService from "@services/FirearmService.js";
+  import FirearmService from "@families/FirearmService.js";
 
   let {
     actor,
