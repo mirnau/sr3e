@@ -2,7 +2,7 @@
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
    import { onDestroy } from "svelte";
-   let { item, config, hasAmmo = $bindable() } = $props();
+   let { item, config, hasAmmo = $bindable(), isFirearm = $bindable() } = $props();
    let clipText = $state("Empty");
 
    let weaponStore = StoreManager.Subscribe(item);
@@ -44,6 +44,9 @@
 </script>
 
 <h4 class="no-margin uppercase">¥ {item.system.commodity.cost} - {item.system.mode}</h4>
-<h4 class="no-margin uppercase">
-   {localize(config.ammunition.rounds)}: {clipText}
-</h4>
+
+{#if isFirearm}
+   <h4 class="no-margin uppercase">
+      {localize(config.ammunition.rounds)}: {clipText}
+   </h4>
+{/if}

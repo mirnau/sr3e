@@ -6,6 +6,7 @@
    import FirearmService from "@families/FirearmService.js";
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
+   import WearableComponent from "@sveltecomponent/AssetManager/components/WearableComponent.svelte";
 
    let { item, config } = $props();
 
@@ -23,6 +24,14 @@
    let linkedSkillName = $state("");
 
    let hasAmmo = $state(true);
+
+   let isFirearm = $derived(
+      item?.type === "weapon" &&
+         (String(item?.system?.mode ?? "") === "manual" ||
+            String(item?.system?.mode ?? "") === "semiauto" ||
+            String(item?.system?.mode ?? "") === "burst" ||
+            String(item?.system?.mode ?? "") === "fullauto")
+   );
 
    // Determine active ammo source - simplified without mirrors
    $effect(() => {
@@ -141,11 +150,15 @@
             {/if}
 
             {#if item.type === "weapon"}
-               <WeaponComponent {item} {config} />
+               <WeaponComponent {item} {config} {hasAmmo} {isFirearm} />
             {/if}
 
             {#if item.type === "ammunition"}
                <AmmunitionComponent {item} {config} />
+            {/if}
+
+            {#if item.type === "wearable"}
+               <WearableComponent {item} {config} />
             {/if}
          </div>
       </div>
@@ -166,7 +179,7 @@
             onclick={() => item.sheet.render(true)}
          ></button>
 
-         {#if item.type === "weapon"}
+         {#if isFirearm}
             <button class="sr3e-toolbar-button fa-solid fa-repeat" aria-label="Reload" onclick={onReloadClick}></button>
          {/if}
 
