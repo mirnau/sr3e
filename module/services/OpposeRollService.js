@@ -49,6 +49,10 @@ export default class OpposeRollService {
     return { key: "melee", svc: MeleeService };
   }
 
+  static #serviceByKey(key) {
+    return key === "firearm" ? FirearmService : MeleeService;
+  }
+
   // -----------------------
   // Contest bookkeeping API
   // -----------------------
@@ -86,7 +90,7 @@ export default class OpposeRollService {
   static getDefaultDefenseHint(initiatorRoll) {
     const o = initiatorRoll?.options ?? {};
     if (o.type !== "item" || !o.itemId) {
-      // Neutral default (don’t call firearm code when we don’t have an item)
+      // Neutral default when we don’t have an item
       return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
     }
 
@@ -183,6 +187,7 @@ export default class OpposeRollService {
       attackContext = {
         serviceKey,
         weaponId: weapon.id,
+        weaponName: weapon.name,
         ammoId: ammoId || "",
         plan,
         damage,
@@ -209,7 +214,8 @@ export default class OpposeRollService {
 
       attackContext = {
         serviceKey,
-        weaponId: weapon.id,
+        weaponId: weapon.id,          // keep if available for display
+        weaponName: weapon.name,      // <-- used even if weapon doc isn't fetched later
         plan: {
           attackerTNAdd: meleePlan.attackerTNAdd,
           defenderTNAdd: meleePlan.defenderTNAdd,
@@ -244,39 +250,44 @@ export default class OpposeRollService {
     let resistancePayload = null;
 
     if (winner === initiator && attackContext?.weaponId) {
-      const weapon = initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId);
-      if (weapon?.type === "weapon") {
-        const { svc } = this.#serviceForWeapon(weapon);
-        const prep =
-          attackContext.serviceKey === "firearm"
-            ? svc.prepareDamageResolution(target, {
-                plan: attackContext.plan,
-                damage: attackContext.damage,
-                netAttackSuccesses: netSuccesses,
-              })
-            : svc.prepareDamageResolution(target, {
-                packet: attackContext.damage,
-                netAttackSuccesses: netSuccesses,
-              });
+      const weapon =
+        initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId) || null;
 
-        // annotate for later
-        prep.contestId = contest.id;
-        prep.attackerId = initiator.id;
+      // Choose service without needing to re-infer from a doc later
+      const svc = this.#serviceByKey(attackContext.serviceKey);
 
-        damageText = `
-          <p><strong>${target.name}</strong> must resist
-          <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
-          (${prep.trackKey}) from <em>${weapon.name}</em>.
-          Resistance TN: <b>${prep.tn}</b>.</p>`;
+      const prep =
+        attackContext.serviceKey === "firearm"
+          ? svc.prepareDamageResolution(target, {
+              plan: attackContext.plan,
+              damage: attackContext.damage,
+              netAttackSuccesses: netSuccesses,
+            })
+          : svc.prepareDamageResolution(target, {
+              packet: attackContext.damage,
+              netAttackSuccesses: netSuccesses,
+            });
 
-        resistancePayload = {
-          contestId,
-          initiatorId: initiator.id,
-          defenderId: target.id,
-          weaponId: weapon.id,
-          prep,
-        };
-      }
+      // annotate for later (so we don't need to refetch/guess)
+      prep.contestId = contest.id;
+      prep.attackerId = initiator.id;
+      prep.familyKey = attackContext.serviceKey;            // <—
+      prep.weaponId = attackContext.weaponId || null;       // <—
+      prep.weaponName = attackContext.weaponName || weapon?.name || "Attack"; // <—
+
+      damageText = `
+        <p><strong>${target.name}</strong> must resist
+        <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
+        (${prep.trackKey}) from <em>${prep.weaponName}</em>.
+        Resistance TN: <b>${prep.tn}</b>.</p>`;
+
+      resistancePayload = {
+        contestId,
+        initiatorId: initiator.id,
+        defenderId: target.id,
+        weaponId: attackContext.weaponId || null,
+        prep,
+      };
     }
 
     const content = this.#buildContestMessage({
@@ -319,12 +330,15 @@ export default class OpposeRollService {
     const defender = game.actors.get(defenderId);
     if (!defender) return ui.notifications.warn("Defender not found");
 
-    const initiator = game.actors.get(initiatorId);
-    const weapon = initiator?.items.get(weaponId) || game.items.get(weaponId);
-    if (!weapon) return ui.notifications.warn("Weapon not found");
+    // Try to read the weapon for display, but DO NOT require it
+    let weaponName = prep?.weaponName || "Attack";
+    if (weaponId) {
+      const initiator = game.actors.get(initiatorId);
+      const w = initiator?.items.get(weaponId) || game.items.get(weaponId);
+      if (w?.name) weaponName = w.name;
+    }
 
     const defenderUser = this.resolveControllingUser(defender);
-
     const context = { contestId, initiatorId, defenderId, weaponId, prep };
 
     await ChatMessage.create({
@@ -333,7 +347,7 @@ export default class OpposeRollService {
       content: `
         <p><strong>${defender.name}</strong>, resist
         <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> ${prep.trackKey}
-        damage from <em>${weapon.name}</em> (TN <b>${prep.tn}</b>).</p>
+        damage from <em>${weaponName}</em> (TN <b>${prep.tn}</b>).</p>
         <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
       `,
       flags: { sr3e: { damageResistance: context } },
@@ -353,12 +367,8 @@ export default class OpposeRollService {
       options: { ...(rollData.options || {}), targetNumber: tn },
     });
 
-    // get weapon from attacker if possible (preferred)
-    const attacker = prep?.attackerId ? game.actors.get(prep.attackerId) : null;
-    const weapon = attacker?.items.get(weaponId) || game.items.get(weaponId);
-    if (!weapon) throw new Error("sr3e: Weapon not found");
-
-    const { svc } = this.#serviceForWeapon(weapon);
+    // PICK SERVICE BY prep.familyKey first (no need to find the weapon)
+    const svc = this.#serviceByKey(prep?.familyKey || "melee"); // melee default is safe
     const outcome = svc.resolveDamageOutcome(prep, successes);
 
     const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
@@ -385,7 +395,7 @@ export default class OpposeRollService {
       speaker: ChatMessage.getSpeaker({ actor: defender }),
       whisper,
       content: `
-        <p><strong>${defender.name}</strong> resists damage from <em>${weapon.name}</em>.</p>
+        <p><strong>${defender.name}</strong> resists damage from <em>${prep?.weaponName || "Attack"}</em>.</p>
         <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
         ${rollHTML}
         <p>Pre-resist level: <b>${(prep.stagedStepBeforeResist ?? "").toString().toUpperCase()}</b> (${prep.trackKey})</p>
