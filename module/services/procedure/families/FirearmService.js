@@ -112,9 +112,11 @@ export default class FirearmService {
     else this.bumpOOCShots(actor?.id, declaredRounds);
   }
 
-  // ——— ammo UX passthrough ———
-  static findCompatibleAmmo(actor, weapon) { return AmmoService.findCompatibleAmmo(actor, weapon); }
-  static async reloadWeapon(actor, weapon) { return AmmoService.reload(actor, weapon); }
-  static async ejectMagazine(actor, weapon, opts = {}) { return AmmoService.eject(actor, weapon, opts); }
-  static async consumeAmmo(actor, weapon, n = 1) { return AmmoService.consume(actor, weapon, n); }
+// ——— ammo UX passthrough ———
+static getAttachedAmmo(actor, weapon) { return AmmoService.getAttachedAmmo(actor, weapon); }
+static findCompatibleAmmo(actor, weapon) { return AmmoService.findCompatibleAmmo(actor, weapon); }
+static async reloadWeapon(actor, weapon) { return AmmoService.reload(actor, weapon); }
+static async ejectMagazine(actor, weapon, opts = {}) { return AmmoService.eject(actor, weapon, opts); }
+static async consumeAmmo(actor, weapon, n = 1) { return AmmoService.consume(actor, weapon, n); }
+
 }
