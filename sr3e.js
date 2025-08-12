@@ -452,8 +452,7 @@ function registerHooks() {
 
          defender.sheet.setRollComposerData(
             {
-               // 👇 use a distinct mode so the composer can branch away from Respond
-               mode: "resistance",
+               isResistingDamage: true,
                contestId,
                initiatorId,
                defenderId,
