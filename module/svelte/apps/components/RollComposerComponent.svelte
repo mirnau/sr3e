@@ -10,6 +10,13 @@
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get } from "svelte/store";
    import FirearmService from "@families/FirearmService.js";
+   import {
+      classifyWeapon,
+      computeRecoilRow,
+      precomputeFirearm,
+      recoilState,
+      clearAllRecoilForActor,
+   } from "@services/ComposerAttackController.js";
 
    let { actor, config } = $props();
 
@@ -84,8 +91,8 @@
    // --------------- helpers ----------------
 
    function ResetRecoil() {
-      FirearmService.resetRecoil(actor?.id);
-      upsertOrRemoveRecoil(); // immediately recompute the recoil modifier row
+      clearAllRecoilForActor(actor?.id);
+      upsertOrRemoveRecoil();
    }
 
    function getAttrDiceFromSumStore(attrKey) {
@@ -138,28 +145,11 @@
          ammoAvailable = null;
          return;
       }
-      const mode = String(weapon?.system?.mode ?? "");
+      const { isFirearm: f, mode, declaredRounds: d, ammoAvailable: a } = classifyWeapon(weapon);
+      isFirearm = f;
       weaponMode = mode;
-      // determine firearmness against your CONFIG modes
-      const firearmModes = CONFIG?.sr3e?.weaponMode ?? {};
-      isFirearm = Object.prototype.hasOwnProperty.call(firearmModes, mode);
-
-      // Ammo read (optional – tolerate missing data)
-      const inMag = Number(weapon?.system?.ammo?.inMag ?? weapon?.system?.ammo ?? NaN);
-      ammoAvailable = Number.isFinite(inMag) ? Math.max(0, inMag) : null;
-
-      // Default rounds by mode (SR3E)
-      if (mode === "burst") {
-         // short BF = 3 if possible, else clamp to ammo
-         declaredRounds = ammoAvailable == null ? 3 : Math.min(3, ammoAvailable);
-      } else if (mode === "fullauto") {
-         // FA must be 3..10; start at 6 as a middle ground, then clamp to ammo
-         let base = 6;
-         if (ammoAvailable != null) base = Math.min(base, ammoAvailable);
-         declaredRounds = Math.max(3, Math.min(10, base));
-      } else {
-         declaredRounds = 1;
-      }
+      declaredRounds = d;
+      ammoAvailable = a;
    }
 
    function upsertOrRemoveRecoil() {
@@ -170,23 +160,29 @@
          return;
       }
 
-      const recoil = FirearmService.recoilModifierForComposer({
-         actor,
-         caller,
-         declaredRounds,
-         ammoAvailable,
-      });
+      const weapon = getWeaponFromCaller();
+      if (!weapon) {
+         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         return;
+      }
 
-      if (!recoil) {
+      const { isFirearm: f } = classifyWeapon(weapon);
+      if (!f) {
+         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         return;
+      }
+
+      const row = computeRecoilRow({ actor, weapon, declaredRounds, ammoAvailable });
+      if (!row) {
          if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
          return;
       }
       if (!existing) {
-         modifiersArray = [...modifiersArray, recoil];
+         modifiersArray = [...modifiersArray, row];
          return;
       }
-      if (existing.value !== recoil.value || existing.name !== recoil.name) {
-         modifiersArray = modifiersArray.map((m) => (m.id === "recoil" ? recoil : m));
+      if (existing.value !== row.value || existing.name !== row.name) {
+         modifiersArray = modifiersArray.map((m) => (m.id === "recoil" ? row : m));
       }
    }
 
@@ -360,7 +356,15 @@
       if (caller?.type !== "item") return;
       const weapon = getWeaponFromCaller();
       if (!weapon) return;
-      const pre = FirearmService.beginAttack(actor, weapon, { declaredRounds, ammoAvailable });
+
+      const { isFirearm: f } = classifyWeapon(weapon);
+      if (!f) {
+         caller.firearmPlan = null;
+         caller.damagePacket = null;
+         return;
+      }
+
+      const pre = precomputeFirearm({ actor, weapon, declaredRounds, ammoAvailable });
       caller.firearmPlan = pre.plan;
       caller.damagePacket = pre.damage;
    });
@@ -582,22 +586,17 @@
             />
          </div>
       {/if}
-      {#if FirearmService.inCombat() ? FirearmService.getPhaseShots(actor?.id) > 0 : FirearmService.getOOCShots(actor?.id) > 0}
-         {#if modifiersArray.some((m) => m.name === "Recoil")}
+      {#if (() => {
+         const { shots } = recoilState(actor?.id);
+         return shots > 0;
+      })()}
+         {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
             <div class="roll-composer-card">
                <button
                   class="regular"
                   onclick={() => {
-                     // Remove all recoil modifiers
-                     modifiersArray = modifiersArray.filter((m) => m.name !== "Recoil");
-                     // Reset the firearm recoil counters
-                     if (actor?.id) {
-                        if (FirearmService.inCombat()) {
-                           FirearmService.bumpPhaseShots(actor.id, -FirearmService.getPhaseShots(actor.id));
-                        } else {
-                           FirearmService.bumpOOCShots(actor.id, -FirearmService.getOOCShots(actor.id));
-                        }
-                     }
+                     modifiersArray = modifiersArray.filter((m) => m.id !== "recoil" && m.name !== "Recoil");
+                     clearAllRecoilForActor(actor?.id);
                   }}
                >
                   Clear Recoil

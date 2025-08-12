@@ -56,6 +56,7 @@ import { debugActorPoolUpdates, debugAECreate } from "@root/DebugHookFuncs.js";
 
 import "@registry/firearms.modes.js";
 import "@registry/firearms.directives.js";
+import "@registry/melee.directives.js";
 
 const { DocumentSheetConfig } = foundry.applications.apps;
 
