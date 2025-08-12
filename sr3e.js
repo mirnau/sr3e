@@ -430,40 +430,52 @@ function registerHooks() {
       }
    });
 
-   Hooks.on(hooks.renderChatMessageHTML, (message, html) => {
-      const container = html.querySelector(".sr3e-resist-damage-button");
-      if (!container) return;
+    Hooks.on("renderChatMessageHTML", (message, html) => {
+      const node = html.querySelector(".sr3e-resist-damage-button");
+      if (!node || node.dataset.sr3eResistWired) return;
+      node.dataset.sr3eResistWired = "1";
 
-      let context;
-      try {
-         context = JSON.parse(decodeURIComponent(container.dataset.context || "{}"));
-      } catch (err) {
-         console.error("[sr3e] Failed to parse resistance context", err);
-         return;
-      }
+      const raw = node.dataset.context || "";
+      const context = JSON.parse(decodeURIComponent(raw));
 
-      const { defenderId, weaponId, prep } = context || {};
-      if (!defenderId) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "sr3e-resist";
+      button.textContent = game.i18n.localize("sr3e.resist") || "Resist";
 
-      const actor = game.actors.get(defenderId);
-      if (!actor) return;
+      button.addEventListener("click", async () => {
+         const defender = game.actors.get(context.defenderId);
+         if (!defender) throw new Error("sr3e: defender not found");
+         const prep = context.prep;
+         const tn = Number(prep?.tn || 0) || 2;
 
-      const controllingUser = OpposeRollService.resolveControllingUser(actor);
-      if (game.user.id !== controllingUser?.id) return;
-
-      const btn = document.createElement("button");
-      btn.classList.add("sr3e-response-button");
-      btn.innerText = localize("Resist");
-      btn.addEventListener("click", async () => {
-         if (!actor.sheet.rendered) await actor.sheet.render(true);
-         actor.sheet.setRollComposerData(
-            { type: "attribute", key: "body", dice: 0, isResistingDamage: true, prep, weaponId },
+         defender.sheet.setRollComposerData(
+            {
+               responseMode: true,
+               contestId: context.contestId,
+               type: "attribute",
+               key: "body",
+               name: game.i18n.localize("sr3e.attributes.body") || "Body",
+               tn,
+               tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
+               opposed: false,
+               explodes: true,
+            },
             { visible: true }
          );
+
+         const rollData = await OpposeRollService.waitForResponse(context.contestId);
+
+         await OpposeRollService.resolveDamageResistanceFromRoll({
+            defenderId: context.defenderId,
+            weaponId: context.weaponId,
+            prep,
+            rollData,
+         });
       });
 
-      container.appendChild(btn);
-   });
+      node.appendChild(button);
+    });
 
    Hooks.on("renderChatMessageHTML", async (message, html, data) => {
       const contestId = message.flags?.sr3e?.opposed;
