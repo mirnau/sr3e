@@ -1,6 +1,8 @@
 import OpposeRollService from "@services/OpposeRollService.js";
 
 export async function addOpposedResponseButton(message, html, data) {
+   DEBUG && LOG.inspect("Hook", [__FILE__, __LINE__, addOpposedResponseButton.name], {message, html, data});
+
    const contestId = message.flags?.sr3e?.opposed;
    if (!contestId) return;
 

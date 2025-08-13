@@ -25,6 +25,8 @@ export default class SR3ERoll extends Roll {
       this.options = foundry.utils.mergeObject(this.options ?? {}, options ?? {});
       await super.evaluate(this.options);
 
+      DEBUG && LOG.inspect("Roll options passed in", [__FILE__, __LINE__, this.evaluate.name], options);
+
       const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
 
       if (this.options.opposed && actor) {

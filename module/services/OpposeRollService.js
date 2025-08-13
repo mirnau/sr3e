@@ -61,18 +61,21 @@ export default class OpposeRollService {
    }
 
    static waitForResponse(contestId) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.waitForResponse.name]);
       return new Promise((resolve) => {
          pendingResponses.set(contestId, resolve);
       });
    }
 
    static deliverResponse(contestId, rollData) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.deliverResponse.name]);
       const resolver = pendingResponses.get(contestId);
       resolver?.(rollData);
       pendingResponses.delete(contestId);
    }
 
    static expireContest(contestId) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.expireContest.name]);
       const contest = activeContests.get(contestId);
       if (contest) {
          activeContests.delete(contestId);
@@ -81,6 +84,7 @@ export default class OpposeRollService {
    }
 
    static abortOpposedRoll(contestId) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.abortOpposedRoll.name]);
       return this.expireContest(contestId);
    }
 
@@ -122,6 +126,14 @@ export default class OpposeRollService {
    }
 
    static async start({ initiator, target, rollData, options }) {
+      DEBUG &&
+         LOG.inspect("Contest initiation:"[(__FILE__, __LINE__, this.start.name)], {
+            initiator,
+            target,
+            rolldata,
+            options,
+         });
+
       const contestId = foundry.utils.randomID(16);
       this.registerContest({ contestId, initiator, target, rollData, options });
 
@@ -238,6 +250,7 @@ export default class OpposeRollService {
    // Resolve opposed result
    // -----------------------
    static async resolveTargetRoll(contestId, rollData) {
+      DEBUG && LOG.info("Resolve opposed result", [__FILE__, __LINE__, this.resolveTargetRoll.name]);
       const contest = activeContests.get(contestId);
       contest.targetRoll = rollData;
       contest.isResolved = true;
@@ -332,6 +345,7 @@ export default class OpposeRollService {
    }
 
    static async promptDamageResistance(resistancePayload) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.promptDamageResistance.name]);
       const { contestId, initiatorId, defenderId, weaponId, prep } = resistancePayload;
 
       const defender = game.actors.get(defenderId);
@@ -387,6 +401,7 @@ export default class OpposeRollService {
    }
 
    static async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.resolveDamageResistanceFromRoll.name]);
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: Defender not found");
 
@@ -447,6 +462,7 @@ export default class OpposeRollService {
    // Utilities
    // -----------------------
    static computeNetSuccesses(initiatorRollData, targetRollData) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.computeNetSuccesses.name]);
       const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
       const targetSuccesses = this.getSuccessCount(targetRollData);
       return initiatorSuccesses - targetSuccesses;
@@ -455,6 +471,7 @@ export default class OpposeRollService {
    // after calling svc.prepareDamageResolution(...) you get `prep`
    // now build a small TN mods HTML fragment for transparency
    static renderTN(prep) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, this.renderTN.name]);
       const base = Number(prep?.tnBase ?? 4);
       const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
       const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);

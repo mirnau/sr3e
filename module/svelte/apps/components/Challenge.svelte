@@ -19,6 +19,8 @@
    let hasChallenged = false;
 
    async function Challenge() {
+      DEBUG && LOG.info("Challange combat flow initiated", [__FILE__, __LINE__, "Challenge"]);
+
       hasChallenged = true;
 
       const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
