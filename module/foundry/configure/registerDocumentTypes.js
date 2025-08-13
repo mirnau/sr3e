@@ -5,7 +5,7 @@ export function registerDocumentTypes({ args }) {
       const docName = docClass.documentName;
       CONFIG[docName].dataModels ||= {};
       CONFIG[docName].dataModels[type] = model;
-      DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
+         foundry.applications.apps.DocumentSheetConfig.registerSheet(docClass, flags.sr3e, sheet, {
          types: [type],
          makeDefault: true,
       });

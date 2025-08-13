@@ -146,6 +146,7 @@ export default class SR3ERoll extends Roll {
    static Register() {
       CONFIG.Dice.rolls = [SR3ERoll];
       window.Roll = SR3ERoll;
+      DEBUG && LOG.success("Registered:", SR3ERoll.name);
    }
 
    static #attrLabel(key, strict = true) {

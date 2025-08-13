@@ -166,6 +166,6 @@ export default class SR3EActor extends Actor {
 
    static Register() {
       CONFIG.Actor.documentClass = SR3EActor;
-      console.log("sr3e /// ---> SR3EActor registered");
+      DEBUG && LOG.success("Regisation Completed", { file: "SR3EActor.js", method: this.Register.name});
    }
 }

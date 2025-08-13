@@ -57,6 +57,6 @@ export function configureProject() {
       gadget: localize(CONFIG.sr3e.gadget.gadget),
    };
 
-   DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
-   DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
+   foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
+   foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Item, flags.core, "ItemSheetV2");
 }

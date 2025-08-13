@@ -61,7 +61,8 @@ import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
 
-const { DocumentSheetConfig } = foundry.applications.apps;
+window.DEBUG = true;
+window.LOG = Log;
 
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
@@ -172,7 +173,7 @@ function initializeSystem() {
       ],
    });
 
-   Log.success("Initialization Completed", "sr3e.js");
+   DEBUG && LOG.success("Initialization Completed", this);
 }
 
 function chain(...fns) {
@@ -193,12 +194,13 @@ function registerHooks() {
    Hooks.on(hooks.ready, initializeNewsService);
    Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
 
-   const DEBUG = false;
    if (DEBUG) {
-      Hooks.once(hooks.ready, enableDebugHooks);
+      //Hooks.once(hooks.ready, enableDebugHooks);
    }
 
    Hooks.once(hooks.init, initializeSystem);
+
+   DEBUG && LOG.success("Regisation Completed", { file: "sr3e.js", method: registerHooks.name, line: 203 });
 }
 
 registerHooks();

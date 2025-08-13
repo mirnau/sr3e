@@ -75,5 +75,6 @@ export default class SR3Edie extends foundry.dice.terms.Die {
    static Register() {
       CONFIG.Dice.terms.d = SR3Edie;
       CONFIG.Dice.terms.SR3Edie = SR3Edie;
+      DEBUG && LOG.success("Registered:", SR3Edie.name);
    }
 }
