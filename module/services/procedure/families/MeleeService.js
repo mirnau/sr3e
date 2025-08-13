@@ -5,7 +5,7 @@ import ResistanceEngine from "@rules/ResistanceEngine.js";
 
 export default class MeleeService {
    /**
-    * Compute attacker/defender TN adds (reach, situational) and assemble a DamagePacket.
+    * Assemble a DamagePacket for a melee strike.
     * Expects: weapon.system.family === "melee"
     *           weapon.system.reach (int, default 0)
     *           weapon.system.damageType (e.g., "m-physical")
@@ -14,8 +14,6 @@ export default class MeleeService {
    static planStrike({ attacker, defender, weapon, situational = {} }) {
       if (!attacker || !defender || !weapon) throw new Error("sr3e: planStrike missing actor/defender/weapon");
 
-      const tnModsAttacker = [];
-      const tnModsDefender = [];
       let levelDelta = 0;
       const notes = ["melee"];
 
@@ -23,31 +21,17 @@ export default class MeleeService {
       const dReach = this.#defenderReach(defender);
       const reachDiff = aReach - dReach;
 
-      // Reach modifier
+      // Reach note
       if (reachDiff !== 0) {
          const mag = Math.abs(reachDiff);
-         if (reachDiff > 0) {
-            tnModsAttacker.push({ id: "reach", name: "Reach Advantage", value: -mag });
-            tnModsDefender.push({ id: "reach", name: "Reach Disadvantage", value: mag });
-         } else {
-            tnModsAttacker.push({ id: "reach", name: "Reach Disadvantage", value: mag });
-            tnModsDefender.push({ id: "reach", name: "Reach Advantage", value: -mag });
-         }
          notes.push(`reach:${reachDiff > 0 ? `A+${mag}` : `D+${mag}`}`);
       }
 
       // Called shot
       if (situational?.calledShot) {
-         tnModsAttacker.push({ id: "calledShot", name: "Called Shot", value: 4 });
          notes.push("called-shot");
          if (situational?.calledShotStages) levelDelta += Number(situational.calledShotStages) || 0;
       }
-
-      // Other situational TN adds
-      if (this.#num(situational?.tnAdd) !== null)
-         tnModsAttacker.push({ id: "generic", name: "Generic Mod", value: this.#num(situational.tnAdd) });
-      if (this.#num(situational?.positionTNAdd) !== null)
-         tnModsAttacker.push({ id: "position", name: "Position", value: this.#num(situational.positionTNAdd) });
 
       // Collect melee directives
       const directives = DirectiveRegistry.collect({
@@ -60,14 +44,7 @@ export default class MeleeService {
       // Build DamagePacket
       const packet = this.#buildMeleePacket({ attacker, weapon, levelDelta, directives });
 
-      // attack.tnAdd from directives
-      if (Number(packet.attackTNAdd || 0) !== 0) {
-         tnModsAttacker.push({ id: "directive", name: "Directive", value: Number(packet.attackTNAdd) });
-      }
-
       return {
-         attackerTNMods: tnModsAttacker,
-         defenderTNMods: tnModsDefender,
          levelDelta: packet.levelDelta,
          notes: [...(packet.notes ?? []), ...notes],
          packet,
