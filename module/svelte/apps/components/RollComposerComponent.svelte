@@ -293,7 +293,7 @@
 
          // init firearm context BEFORE we decide defaulting
          initFirearmContextFromWeapon(item);
-         
+
          if (item.id !== rangePrimedForWeaponId) {
             rangeSuppressedForWeaponId = null; // new weapon, clear suppression
             primeRangeForWeapon(item);
@@ -420,6 +420,18 @@
       weaponMode;
       phaseKey;
       upsertOrRemoveRecoil();
+   });
+
+   $effect(() => {
+      if (!visible) return;
+      caller; // re-run when the roll source changes
+      hasTarget; // re-run when a target is acquired/cleared
+      if (caller?.type !== "item") return;
+      const weapon = getWeaponFromCaller();
+      if (!weapon) return;
+      if (rangeSuppressedForWeaponId === weapon.id) return; // user removed it
+      if (rangePrimedForWeaponId === weapon.id) return; // already did it this roll
+      primeRangeForWeapon(weapon); // this will set rangePrimedForWeaponId on success
    });
 
    $effect(() => {
