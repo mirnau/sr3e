@@ -25,6 +25,7 @@
       $shouldDisplaySheen = false;
       StoreManager.Unsubscribe(actor);
       if (unhook) Hooks.off("updateCombat", unhook);
+      if (targetHook) Hooks.off("targetToken", targetHook);
    });
 
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
@@ -394,6 +395,7 @@
 
    // ------------------- lifecycle / hooks -------------------
    let unhook = null;
+   let targetHook = null;
    onMount(() => {
       const refreshPhase = () => {
          const { key } = FirearmService.getPhase();
@@ -407,6 +409,12 @@
       Hooks.on("updateCombat", unhook);
       // initialize once
       phaseKey = FirearmService.getPhase().key;
+
+      // react to target acquisition/clear
+      targetHook = () => {
+         hasTarget = game.user.targets.size > 0;
+      };
+      Hooks.on("targetToken", targetHook);
    });
 
    // ------------------- reactivity -------------------
