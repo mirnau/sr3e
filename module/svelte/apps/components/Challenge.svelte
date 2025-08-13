@@ -16,12 +16,8 @@
       CommitEffects,
    } = $props();
 
-   let hasChallenged = false;
-
    async function Challenge() {
       DEBUG && LOG.info("Challange combat flow initiated", [__FILE__, __LINE__, "Challenge"]);
-
-      hasChallenged = true;
 
       const targets = [...game.user.targets].map((t) => t.actor).filter(Boolean);
       if (targets.length === 0) return;
@@ -88,4 +84,4 @@
    }
 </script>
 
-<button class="regular" type="button" onclick={Challenge} disabled={hasChallenged}>Challenge!</button>
+<button class="regular" type="button" onclick={Challenge}>Challenge!</button>

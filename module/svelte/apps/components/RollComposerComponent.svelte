@@ -116,19 +116,35 @@
       if (!weapon) return;
       if (rangeSuppressedForWeaponId === weapon.id) return;
 
+      const { isFirearm: isFw } = classifyWeapon(weapon);
+      if (!isFw) return;
+
       const attackerToken = canvas.tokens?.controlled?.[0] || actor.getActiveTokens()?.[0] || null;
-      const targetToken = [...game.user.targets][0]?.object || null;
-      if (!attackerToken || !targetToken) return; // do NOT set primed here
+      const targetToken = [...game.user.targets][0] || null;
+      if (!attackerToken || !targetToken) return;
 
       const rangeShiftLeft = 0;
-      const rangeMod = FirearmService.rangeModifierForComposer({
+      const raw = FirearmService.rangeModifierForComposer({
          actor,
          caller,
          attackerToken,
          targetToken,
          rangeShiftLeft,
       });
-      if (!rangeMod) return; // still no “primed”
+      if (raw == null) return; // nothing to add
+
+      // Enforce the expected shape, fail-fast if not provided correctly
+      const name = raw.name ?? raw.label ?? null;
+      const hasValue =
+         Object.prototype.hasOwnProperty.call(raw, "value") ||
+         Object.prototype.hasOwnProperty.call(raw, "tnDelta") ||
+         Object.prototype.hasOwnProperty.call(raw, "delta") ||
+         Object.prototype.hasOwnProperty.call(raw, "mod");
+      const value = Number(raw.value ?? raw.tnDelta ?? raw.delta ?? raw.mod);
+      if (!name || Number.isNaN(value)) {
+         throw new Error(`sr3e: rangeModifierForComposer returned invalid shape: ${JSON.stringify(raw)}`);
+      }
+      const rangeMod = { name, value, meta: raw.meta };
 
       const idx = modifiersArray.findIndex((m) => m.id === "range");
       if (idx >= 0 && modifiersArray[idx]?.meta?.userTouched) return;
@@ -141,7 +157,6 @@
          copy[idx] = { ...copy[idx], ...mod };
          modifiersArray = copy;
       }
-      // Mark primed only after a successful insert/update
       rangePrimedForWeaponId = weapon.id;
    }
 
@@ -295,9 +310,9 @@
          // init firearm context BEFORE we decide defaulting
          initFirearmContextFromWeapon(item);
 
-         if (item.id !== rangePrimedForWeaponId) {
+         if (hasTarget && item.id !== rangePrimedForWeaponId) {
             rangeSuppressedForWeaponId = null; // new weapon, clear suppression
-            primeRangeForWeapon(item);
+            primeRangeForWeapon(item); // will set primed only on success
          }
          const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkillId ?? "").split("::");
          const skill = actor.items.get(skillId);
@@ -432,14 +447,28 @@
 
    $effect(() => {
       if (!visible) return;
-      caller; // re-run when the roll source changes
-      hasTarget; // re-run when a target is acquired/cleared
+      hasTarget;
+      if (!hasTarget) return;
       if (caller?.type !== "item") return;
+
       const weapon = getWeaponFromCaller();
       if (!weapon) return;
-      if (rangeSuppressedForWeaponId === weapon.id) return; // user removed it
-      if (rangePrimedForWeaponId === weapon.id) return; // already did it this roll
-      primeRangeForWeapon(weapon); // this will set rangePrimedForWeaponId on success
+      if (rangePrimedForWeaponId || rangeSuppressedForWeaponId === weapon.id) return;
+
+      primeRangeForWeapon(weapon);
+   });
+
+   $effect(() => {
+      if (!visible) return;
+      hasTarget;
+      if (hasTarget) return;
+
+      // remove range row when no target
+      const idx = modifiersArray.findIndex((m) => m.id === "range");
+      if (idx >= 0) {
+         modifiersArray = modifiersArray.filter((m, i) => i !== idx);
+         // do NOT set suppression here; user didn’t remove it manually
+      }
    });
 
    $effect(() => {

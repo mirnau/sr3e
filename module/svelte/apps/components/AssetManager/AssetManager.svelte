@@ -15,6 +15,7 @@
 <CardToolbar {id} />
 
 <h1>{localize(config.inventory.inventory)}</h1>
+<h1>20 KG</h1>
 
 <div class="sr3e-tabs">
    <button class="fa-solid fa-suitcase-rolling" class:active={activeTab === inventory.inventory} onclick={() => (activeTab = inventory.inventory)}
@@ -27,7 +28,6 @@
       >Active Effects</button
    >
 </div>
-
 <div class="sr3e-inner-background">
    {#if activeTab === inventory.inventory}
       <Inventory {actor} {config} />
