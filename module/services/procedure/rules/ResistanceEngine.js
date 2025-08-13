@@ -36,6 +36,7 @@ export default class ResistanceEngine {
   }
 
   static build(defender, packet, netAttackSuccesses = 0) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, ResistanceEngine.build.name]);
     const { step: baseStep, trackKey } = DamageMath.splitDamageType(packet?.damageType);
     const stagedUpBase = DamageMath.applyAttackStaging(baseStep, netAttackSuccesses, packet?.levelDelta || 0);
 
@@ -78,6 +79,7 @@ export default class ResistanceEngine {
   }
 
   static resolve(build, bodySuccesses = 0) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, ResistanceEngine.resolve.name]);
     const { stagedStepBeforeResist, trackKey } = build;
     const finalStep = DamageMath.applyResistanceStaging(stagedStepBeforeResist, bodySuccesses);
     if (!finalStep) return { applied: false, finalStep: null, trackKey, boxes: 0, overflow: 0, notes: ["Staged off"] };

@@ -6,10 +6,12 @@ let _oocWindowMs = 3000;
 
 export default class RecoilTracker {
   static inCombat() {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.inCombat.name]);
     return !!(game.combat && game.combat.started);
   }
 
   static getPhase() {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.getPhase.name]);
     const c = game.combat;
     if (!c) return { round: 0, pass: 0, key: "no-combat" };
     const round = Number(c.getFlag("sr3e", "combatTurn") ?? c.round ?? 0);
@@ -18,6 +20,7 @@ export default class RecoilTracker {
   }
 
   static resetRecoil(attackerId) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.resetRecoil.name]);
     if (!attackerId) throw new Error("sr3e: resetRecoil missing attackerId");
     if (this.inCombat()) {
       const { key } = this.getPhase();
@@ -28,6 +31,7 @@ export default class RecoilTracker {
   }
 
   static resetAllRecoilForActor(attackerId) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.resetAllRecoilForActor.name]);
     if (!attackerId) throw new Error("sr3e: resetAllRecoilForActor missing attackerId");
     _oocShots.delete(attackerId);
     for (const k of _phaseShots.keys()) {
@@ -36,6 +40,7 @@ export default class RecoilTracker {
   }
 
   static hasRecoilContext(attackerId) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.hasRecoilContext.name]);
     if (!attackerId) return false;
     if (this.inCombat()) {
       const { key } = this.getPhase();
@@ -46,6 +51,7 @@ export default class RecoilTracker {
   }
 
   static getPhaseShots(attackerId) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.getPhaseShots.name]);
     const { key } = this.getPhase();
     if (key !== _lastPhaseKey) {
       _phaseShots.clear();
@@ -56,6 +62,7 @@ export default class RecoilTracker {
   }
 
   static bumpPhaseShots(attackerId, count) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.bumpPhaseShots.name]);
     const { key } = this.getPhase();
     if (key !== _lastPhaseKey) {
       _phaseShots.clear();
@@ -67,6 +74,7 @@ export default class RecoilTracker {
   }
 
   static setOOCWindowMs(ms) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.setOOCWindowMs.name]);
     _oocWindowMs = Math.max(250, Number(ms) || 3000);
   }
 
@@ -81,6 +89,7 @@ export default class RecoilTracker {
   }
 
   static getOOCShots(attackerId) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.getOOCShots.name]);
     const now = Date.now();
     const s = this.#oocTouch(attackerId);
     this.#oocResetIfStale(s, now);
@@ -88,6 +97,7 @@ export default class RecoilTracker {
   }
 
   static bumpOOCShots(attackerId, count) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, RecoilTracker.bumpOOCShots.name]);
     const now = Date.now();
     const s = this.#oocTouch(attackerId);
     this.#oocResetIfStale(s, now);

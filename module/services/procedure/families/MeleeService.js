@@ -10,8 +10,9 @@ export default class MeleeService {
     *           weapon.system.reach (int, default 0)
     *           weapon.system.damageType (e.g., "m-physical")
     *           weapon.system.damage (the "+X" in STR+X)
-    */
+   */
    static planStrike({ attacker, defender, weapon, situational = {} }) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, MeleeService.planStrike.name]);
       let levelDelta = 0;
       const notes = ["melee"];
 
@@ -40,10 +41,12 @@ export default class MeleeService {
    }
 
    static prepareDamageResolution(defender, { packet, netAttackSuccesses = 0 } = {}) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, MeleeService.prepareDamageResolution.name]);
       return ResistanceEngine.build(defender, packet, netAttackSuccesses);
    }
 
    static resolveDamageOutcome(build, bodySuccesses = 0) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, MeleeService.resolveDamageOutcome.name]);
       return ResistanceEngine.resolve(build, bodySuccesses);
    }
 
@@ -80,6 +83,7 @@ export default class MeleeService {
    }
 
    static getDefenseHintFromAttack(_initiatorRoll) {
+      DEBUG && LOG.info("", [__FILE__, __LINE__, MeleeService.getDefenseHintFromAttack.name]);
       return { type: "skill", key: "melee", tnMod: 0, tnLabel: "Melee defense" };
    }
 }
