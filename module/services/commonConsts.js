@@ -11,7 +11,7 @@ export const hooks = {
   init: "init",
   ready: "ready",
   renderApplicationV2: "renderApplicationV2",
-  renderChatMessageHTML: "renderChatMessageHTML"
+  dropCanvasData: "dropCanvasData"
 };
 
 export const flags = {
