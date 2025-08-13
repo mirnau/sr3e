@@ -1,4 +1,5 @@
-import Log from "@services/Log.js";
+// sr3e.js (entry point)
+import "@root/Bootstrap.js";
 
 import CharacterModel from "@models/actor/CharacterModel.js";
 import StorytellerScreenModel from "@models/actor/StorytellerScreenModel.js";
@@ -60,9 +61,6 @@ import { initializeNewsService } from "@hooks/ready/initializeNewsService.js";
 import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js";
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
-
-window.DEBUG = true;
-window.LOG = Log;
 
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];

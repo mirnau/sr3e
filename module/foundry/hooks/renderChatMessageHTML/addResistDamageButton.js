@@ -1,5 +1,4 @@
-export function addResistDamageButton(message, html) {
-   DEBUG && LOG.inspect("Hook", [__FILE__, __LINE__, addResistDamageButton.name], { message, html, data });
+export function addResistDamageButton(message, html, data) {
    const node = html.querySelector(".sr3e-resist-damage-button");
    if (!node || node.dataset.sr3eResistWired) return;
 

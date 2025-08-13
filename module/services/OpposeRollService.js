@@ -130,7 +130,7 @@ export default class OpposeRollService {
          LOG.inspect("Contest initiation:"[(__FILE__, __LINE__, this.start.name)], {
             initiator,
             target,
-            rolldata,
+            rollData,
             options,
          });
 
