@@ -56,6 +56,11 @@
    let isResistingDamage = $state(false);
    let canSubmit = $state(true);
    let title = $state("");
+   let rangePrimedForWeaponId = $state(null);
+   let rangeSuppressedForWeaponId = $state(null);
+
+   // same pattern for recoil if you want to stop it from overriding user edits
+   let recoilPrimedForWeaponId = $state(null);
 
    let associatedDicePoolString = $state("");
    let associatedDicePoolStore;
@@ -95,6 +100,50 @@
       upsertOrRemoveRecoil();
    }
 
+   function onRemoveModifier(index) {
+      const mod = modifiersArray[index];
+      if (mod?.id === "range" && mod.weaponId) {
+         rangeSuppressedForWeaponId = mod.weaponId;
+      }
+      if (mod?.id === "recoil" && mod.weaponId) {
+         // optional: add a recoilSuppressedForWeaponId if you want the same behavior
+      }
+      modifiersArray = modifiersArray.filter((_, j) => j !== index);
+   }
+
+   function primeRangeForWeapon(weapon) {
+      if (!weapon) return;
+      if (rangeSuppressedForWeaponId === weapon.id) return;
+
+      const attackerToken = canvas.tokens?.controlled?.[0] || actor.getActiveTokens()?.[0] || null;
+      const targetToken = [...game.user.targets][0]?.object || null;
+      if (!attackerToken || !targetToken) return; // do NOT set primed here
+
+      const rangeShiftLeft = 0;
+      const rangeMod = FirearmService.rangeModifierForComposer({
+         actor,
+         caller,
+         attackerToken,
+         targetToken,
+         rangeShiftLeft,
+      });
+      if (!rangeMod) return; // still no “primed”
+
+      const idx = modifiersArray.findIndex((m) => m.id === "range");
+      if (idx >= 0 && modifiersArray[idx]?.meta?.userTouched) return;
+
+      const mod = { ...rangeMod, id: "range", weaponId: weapon.id, source: "auto" };
+      if (idx === -1) {
+         modifiersArray = [...modifiersArray, mod];
+      } else {
+         const copy = [...modifiersArray];
+         copy[idx] = { ...copy[idx], ...mod };
+         modifiersArray = copy;
+      }
+      // Mark primed only after a successful insert/update
+      rangePrimedForWeaponId = weapon.id;
+   }
+
    function getAttrDiceFromSumStore(attrKey) {
       const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
       return Number(get(store)?.sum ?? 0);
@@ -103,6 +152,13 @@
    function buildPenaltyMod() {
       const p = Number($penaltyStore ?? 0);
       return p > 0 ? { id: "penalty", name: localize(config.health.penalty), value: -p } : null;
+   }
+
+   function markModTouched(index) {
+      const copy = [...modifiersArray];
+      const mod = copy[index];
+      copy[index] = { ...mod, meta: { ...(mod.meta || {}), userTouched: true } };
+      modifiersArray = copy;
    }
 
    function upsertMod(mod) {
@@ -153,37 +209,43 @@
    }
 
    function upsertOrRemoveRecoil() {
-      const existing = modifiersArray.find((m) => m.id === "recoil");
+      const existingIndex = modifiersArray.findIndex((m) => m.id === "recoil");
       const isItem = caller?.type === "item";
       if (!isItem) {
-         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
          return;
       }
 
       const weapon = getWeaponFromCaller();
       if (!weapon) {
-         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
          return;
       }
 
       const { isFirearm: f } = classifyWeapon(weapon);
       if (!f) {
-         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
          return;
       }
 
       const row = computeRecoilRow({ actor, weapon, declaredRounds, ammoAvailable });
       if (!row) {
-         if (existing) modifiersArray = modifiersArray.filter((m) => m.id !== "recoil");
+         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
          return;
       }
-      if (!existing) {
-         modifiersArray = [...modifiersArray, row];
+
+      // If user touched recoil, keep their value; otherwise keep it updated
+      if (existingIndex === -1) {
+         modifiersArray = [...modifiersArray, { ...row, id: "recoil", weaponId: weapon.id, source: "auto" }];
          return;
       }
-      if (existing.value !== row.value || existing.name !== row.name) {
-         modifiersArray = modifiersArray.map((m) => (m.id === "recoil" ? row : m));
-      }
+
+      const existing = modifiersArray[existingIndex];
+      if (existing?.meta?.userTouched) return;
+
+      const copy = [...modifiersArray];
+      copy[existingIndex] = { ...existing, ...row, id: "recoil", weaponId: weapon.id, source: "auto" };
+      modifiersArray = copy;
    }
 
    // ------------------- composer API -------------------
@@ -231,7 +293,11 @@
 
          // init firearm context BEFORE we decide defaulting
          initFirearmContextFromWeapon(item);
-
+         
+         if (item.id !== rangePrimedForWeaponId) {
+            rangeSuppressedForWeaponId = null; // new weapon, clear suppression
+            primeRangeForWeapon(item);
+         }
          const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkillId ?? "").split("::");
          const skill = actor.items.get(skillId);
          prepareSkillBasedRoll(skill, item.name);
@@ -288,6 +354,11 @@
       weaponMode = "";
       declaredRounds = 1;
       ammoAvailable = null;
+      // range priming should be once per roll, so reset here
+      rangePrimedForWeaponId = null;
+      rangeSuppressedForWeaponId = null;
+      // optional parity with recoil if you later implement similar suppression
+      recoilPrimedForWeaponId = null;
    }
 
    // ------------------- internal logic -------------------
@@ -475,14 +546,12 @@
          {#each modifiersArray as modifier, i (i)}
             <div class="roll-composer-card array">
                <h4 contenteditable="true">{modifier.name}</h4>
-               <Counter bind:value={modifier.value} />
-               <button
-                  class="regular"
-                  aria-label="Remove a modifier"
-                  onclick={() => {
-                     modifiersArray = modifiersArray.filter((_, j) => j !== i);
-                  }}
-               >
+               <Counter
+                  bind:value={modifier.value}
+                  onIncrement={() => markModTouched(i)}
+                  onDecrement={() => markModTouched(i)}
+               />
+               <button class="regular" aria-label="Remove a modifier" onclick={() => onRemoveModifier(i)}>
                   <i class="fa-solid fa-minus"></i>
                </button>
             </div>

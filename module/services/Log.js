@@ -70,6 +70,10 @@ export default class Log {
       } else {
          loc = this._inferLocation();
       }
+
+      if (!loc) loc = {};
+      loc.file = this._base(loc.file);
+
       // ---------------------------------------------
 
       let format = `%c${icon} | %csr3e | %c${message} %c@ ${timestamp} in `;
@@ -155,9 +159,16 @@ export default class Log {
          // Hide internal method names like "HTMLButtonElement.onclick"
          if (method && /HTML.*\.(on|addEventListener)/i.test(method)) method = undefined;
 
+         file = this._base(file);
          return { file, method, line };
       } catch {
          return null;
       }
+   }
+
+   static _base(p) {
+      if (typeof p !== "string") return p;
+      const noQuery = p.split(/[?#]/)[0];
+      return noQuery.split(/[\\/]/).pop();
    }
 }

@@ -118,10 +118,14 @@ export default class FirearmService {
 
       try {
          const r = RangeService.resolve({ weapon, attackerToken, targetToken, shiftLeft: rangeShiftLeft });
-         if (!r.band) return { id: "range", name: "Range (Out of range)", value: 999 };
+         if (!r.band) {
+            return { id: "range", name: "Range (Out of range)", value: 999, meta: { distance: r.distance } };
+         }
 
          const delta = tnDeltaFromShort(r.band);
-         return delta ? { id: "range", name: `Range (${r.band})`, value: delta } : null;
+         if (!delta) return null; // short range → base 4 already shown
+         const label = r.band[0].toUpperCase() + r.band.slice(1);
+         return { id: "range", name: `Range (${label})`, value: delta, meta: { distance: r.distance } };
       } catch {
          return null; // no canvas / no tokens -> skip adding any range modifier
       }
