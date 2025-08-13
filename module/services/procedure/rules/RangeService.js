@@ -14,16 +14,17 @@ const BASE_TN_BY_BAND = Object.freeze({
 });
 
 function measureDistanceBetweenTokens(attackerToken, targetToken) {
-   DEBUG && LOG.info("", [_FILE__, __LINE__, measureDistanceBetweenTokens.name]);
-   if (!attackerToken || !targetToken) throw new Error("sr3e: tokens required for distance");
+   DEBUG && LOG.info("", [__FILE__, __LINE__, measureDistanceBetweenTokens.name]);
+
    const p1 = { x: attackerToken.center.x, y: attackerToken.center.y };
    const p2 = { x: targetToken.center.x, y: targetToken.center.y };
-   const d = canvas.grid.measureDistance(p1, p2);
-   return Math.max(0, Number(d) || 0); // assume scene distance unit = meters
+
+   const result = canvas.grid.measurePath([p1, p2], { gridSpaces: false });
+   return result.distance; // Euclidean distance in scene units (meters)
 }
 
 function getWeaponRangeTable(weapon) {
-   DEBUG && LOG.info("", [_FILE__, __LINE__, getWeaponRangeTable.name]);
+   DEBUG && LOG.info("", [__FILE__, __LINE__, getWeaponRangeTable.name]);
    const rb = weapon?.system?.rangeBand ?? {};
    const shortMax = Number(rb.short) || 0;
    const mediumMax = Number(rb.medium) || 0;
@@ -37,7 +38,7 @@ function getWeaponRangeTable(weapon) {
 }
 
 function rawBandForDistance(distance, table) {
-   DEBUG && LOG.info("", [_FILE__, __LINE__, getWearawBandForDistanceponRangeTable.name]);
+   DEBUG && LOG.info("", [__FILE__, __LINE__, rawBandForDistance.name]);
    if (distance <= table.shortMax) return "short";
    if (distance <= table.mediumMax) return "medium";
    if (distance <= table.longMax) return "long";
@@ -46,7 +47,7 @@ function rawBandForDistance(distance, table) {
 }
 
 function applyLeftShift(band, shiftLeft = 0) {
-   DEBUG && LOG.info("", [_FILE__, __LINE__, applyLeftShift.name]);
+   DEBUG && LOG.info("", [__FILE__, __LINE__, applyLeftShift.name]);
    if (!band) return null;
    const order = ["short", "medium", "long", "extreme"];
    const i = order.indexOf(band);
@@ -56,7 +57,7 @@ function applyLeftShift(band, shiftLeft = 0) {
 }
 
 export function tnDeltaFromShort(band) {
-   DEBUG && LOG.info("", [_FILE__, __LINE__, tnDeltaFromShort.name]);
+   DEBUG && LOG.info("", [__FILE__, __LINE__, tnDeltaFromShort.name]);
    // Short is base 4; return delta to add as a visible modifier
    if (band === "short") return 0; // 4 - 4
    if (band === "medium") return 1; // 5 - 4
@@ -67,7 +68,7 @@ export function tnDeltaFromShort(band) {
 
 export default class RangeService {
    static resolve({ weapon, attackerToken, targetToken, shiftLeft = 0 }) {
-      DEBUG && LOG.info("", [_FILE__, __LINE__, RangeService.resolve.name]);
+      DEBUG && LOG.info("", [__FILE__, __LINE__, RangeService.resolve.name]);
       const distance = measureDistanceBetweenTokens(attackerToken, targetToken);
       const table = getWeaponRangeTable(weapon);
       const raw = rawBandForDistance(distance, table);
@@ -77,7 +78,7 @@ export default class RangeService {
    }
 
    static modifierForComposer({ weapon, attackerToken, targetToken, shiftLeft = 0 }) {
-      DEBUG && LOG.info("", [_FILE__, __LINE__, RangeService.modifierForComposer.name]);
+      DEBUG && LOG.info("", [__FILE__, __LINE__, RangeService.modifierForComposer.name]);
       const r = this.resolve({ weapon, attackerToken, targetToken, shiftLeft });
       if (!r.band) {
          return { id: "range", name: "Range (Out of range)", value: 999, meta: { distance: r.distance } };
