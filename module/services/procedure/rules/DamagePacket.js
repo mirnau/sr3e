@@ -1,5 +1,6 @@
 export default class DamagePacket {
   static build({ weapon, plan, directives = [], rangeBand = null } = {}) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamagePacket.build.name]);
     const basePower = Number(weapon?.system?.damage ?? 0);
     const baseType = String(weapon?.system?.damageType ?? "");
     let power = Math.max(0, basePower + Number(plan?.powerDelta ?? 0));

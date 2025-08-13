@@ -1,5 +1,6 @@
 export default class DamageMath {
   static boxesForLevel(step) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.boxesForLevel.name]);
     if (step === "l") return 1;
     if (step === "m") return 3;
     if (step === "s") return 6;
@@ -8,6 +9,7 @@ export default class DamageMath {
   }
 
   static splitDamageType(t) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.splitDamageType.name]);
     const key = String(t || "").trim();
     const lower = key.toLowerCase();
     const isStun = lower.includes("stun");
@@ -19,6 +21,7 @@ export default class DamageMath {
   }
 
   static stageStep(step, delta) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.stageStep.name]);
     const order = ["l", "m", "s", "d"];
     const i = order.indexOf(step);
     if (i < 0) return step;
@@ -29,16 +32,19 @@ export default class DamageMath {
   }
 
   static applyAttackStaging(baseStep, netAttackSuccesses = 0, extraLevelDelta = 0) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.applyAttackStaging.name]);
     const up = Math.floor(Math.max(0, Number(netAttackSuccesses || 0)) / 2);
     return this.stageStep(baseStep, up + Number(extraLevelDelta || 0));
   }
 
   static applyResistanceStaging(stepAfterAttack, bodySuccesses = 0) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.applyResistanceStaging.name]);
     const down = Math.floor(Math.max(0, Number(bodySuccesses || 0)) / 2);
     return this.stageStep(stepAfterAttack, -down);
   }
 
   static computeResistanceTN(packet, effArmor) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DamageMath.computeResistanceTN.name]);
     const p = Math.max(0, Number(packet?.power ?? 0));
     const resistAdd = Number(packet?.resistTNAdd ?? 0) || 0;
     let tn = p - Number(effArmor?.effective ?? 0);

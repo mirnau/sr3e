@@ -1,5 +1,6 @@
 export default class ArmorResolver {
   static computeEffectiveArmor(defender, packet) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, ArmorResolver.computeEffectiveArmor.name]);
     const useImpact = String(packet?.armorUse || "ballistic") === "impact";
     const mult = packet?.armorMult || { ballistic: 1, impact: 1 };
 

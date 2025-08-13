@@ -1,5 +1,6 @@
 export default class DefenseHint {
   static getDefenseTNAdd(weapon) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DefenseHint.getDefenseTNAdd.name]);
     const mode = String(weapon?.system?.mode ?? "");
     const mods = weapon?.system?.defense?.tnMods;
     if (mods && typeof mods === "object" && Object.prototype.hasOwnProperty.call(mods, mode)) {
@@ -11,10 +12,12 @@ export default class DefenseHint {
   }
 
   static getDefenseTNLabel(weapon) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DefenseHint.getDefenseTNLabel.name]);
     return weapon?.system?.defense?.tnLabel ?? "Weapon difficulty";
   }
 
   static fromInitiatorRoll(initiatorRoll) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, DefenseHint.fromInitiatorRoll.name]);
     const o = initiatorRoll?.options ?? {};
     if (o.type !== "item" || !o.itemId) return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
     const actor = ChatMessage.getSpeakerActor(o.speaker);

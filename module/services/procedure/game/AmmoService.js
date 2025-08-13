@@ -1,11 +1,13 @@
 export default class AmmoService {
   static getAttachedAmmo(actor, weapon) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.getAttachedAmmo.name]);
     const id = weapon?.system?.ammoId || "";
     if (!id) return null;
     return actor?.items?.get(id) || null;
   }
 
   static findCompatibleAmmo(actor, weapon) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.findCompatibleAmmo.name]);
     const needClass = weapon.system.ammunitionClass?.trim().toLowerCase();
     const items = actor.items.filter((i) => i.type === "ammunition");
     return items.filter((i) => {
@@ -17,6 +19,7 @@ export default class AmmoService {
   }
 
   static async reload(actor, weapon) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.reload.name]);
     const needClass = String(weapon.system?.ammunitionClass ?? "").trim();
     const compat = this.findCompatibleAmmo(actor, weapon);
     const chosen = await this.pickAmmoDialog(compat, weapon, { needClass, allowEmpty: true });
@@ -39,6 +42,7 @@ export default class AmmoService {
   }
 
   static async eject(actor, weapon, { silent = false } = {}) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.eject.name]);
     const currentId = weapon.system?.ammoId;
     if (!currentId) return;
     await weapon.update({ "system.ammoId": "" });
@@ -51,6 +55,7 @@ export default class AmmoService {
   }
 
   static async consume(actor, weapon, roundsToSpend = 1) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.consume.name]);
     const magId = weapon.system?.ammoId;
     if (!magId) return { ok: false, reason: "no-mag" };
 
@@ -76,6 +81,7 @@ export default class AmmoService {
 
   // inlined here to keep @game self-contained
   static async pickAmmoDialog(ammoItems, weapon, { needClass = "", allowEmpty = false } = {}) {
+    DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.pickAmmoDialog.name]);
     const emptyLabel = game.i18n.localize("sr3e.ammunition.empty") || "— Unloaded / Empty —";
     const roundsKey = game.i18n.localize("sr3e.ammunition.rounds") || "rounds";
     const ammoKey = game.i18n.localize("sr3e.ammunition.ammunition") || "Ammunition";
