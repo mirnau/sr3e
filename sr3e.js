@@ -172,8 +172,6 @@ function initializeSystem() {
          },
       ],
    });
-
-   DEBUG && LOG.success("Initialization Completed", this);
 }
 
 function chain(...fns) {
@@ -200,7 +198,7 @@ function registerHooks() {
 
    Hooks.once(hooks.init, initializeSystem);
 
-   DEBUG && LOG.success("Regisation Completed", { file: "sr3e.js", method: registerHooks.name, line: 203 });
+   DEBUG && LOG.success("Initialization Complete", { file: "sr3e.js", method: registerHooks.name, line: 203 });
 }
 
 registerHooks();
