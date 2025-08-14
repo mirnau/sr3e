@@ -26,7 +26,8 @@
          "broadcaster": "Broadcaster"
       },
       "chat": {
-         "contestexpried ": "Contest Expired!"
+         "contestexpried ": "Contest Expired!",
+         "resist": "Resist damage"
       },
       "combosearch": {
          "noresult": "No results...",

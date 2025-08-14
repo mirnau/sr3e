@@ -61,7 +61,9 @@
                  }
                : undefined,
       };
-
+      
+      OnClose?.();
+      
       const baseRoll = SR3ERoll.create(
          SR3ERoll.buildFormula(totalDice, { targetNumber: finalTN, explodes: true }),
          { actor },
@@ -80,7 +82,6 @@
       Hooks.callAll("actorSystemRecalculated", actor);
       OpposeRollService.expireContest(roll.options.contestId);
 
-      OnClose?.();
    }
 </script>
 

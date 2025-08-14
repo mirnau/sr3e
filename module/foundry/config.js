@@ -130,7 +130,8 @@ sr3e.dicepools = {
 };
 
 sr3e.chat = {
-   contestexpried : "sr3e.chat.contestexpried"
+   contestexpried : "sr3e.chat.contestexpried",
+   resist: "sr3e.chat.resist"
 }
 
 sr3e.dodge = {

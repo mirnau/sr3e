@@ -608,14 +608,13 @@
       karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
 
-   function OnClose() {
+   function HideSidePanel() {
       visible = false;
-      resetToDefaults();
    }
 
    function handleKey(event) {
       if (event.key === "Escape") {
-         OnClose();
+         HideSidePanel();
          event.stopPropagation();
          event.preventDefault();
       }
@@ -714,7 +713,7 @@
             {diceBought}
             {isDefaulting}
             {currentDicePoolAddition}
-            {OnClose}
+            OnClose={HideSidePanel}
             {CommitEffects}
          />
       {:else if isResponding}
@@ -727,7 +726,7 @@
             {diceBought}
             {currentDicePoolAddition}
             {isDefaulting}
-            {OnClose}
+            OnClose={HideSidePanel}
             {CommitEffects}
          />
       {:else if hasTarget}
@@ -740,7 +739,7 @@
             {diceBought}
             {currentDicePoolAddition}
             {isDefaulting}
-            {OnClose}
+            OnClose={HideSidePanel}
             {CommitEffects}
          />
       {:else}
@@ -753,7 +752,7 @@
             {diceBought}
             {currentDicePoolAddition}
             {isDefaulting}
-            {OnClose}
+            OnClose={HideSidePanel}
             {CommitEffects}
          />
       {/if}
