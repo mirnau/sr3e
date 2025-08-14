@@ -268,6 +268,19 @@
 
    export function setCallerData(callerData, options = {}) {
       resetToDefaults();
+      Object.assign(caller, {
+         type: null,
+         key: null,
+         dice: 0,
+         value: 0,
+         skillId: "",
+         specialization: "",
+         name: "",
+         responseMode: false,
+         contestId: null,
+         linkedAttribute: undefined,
+         item: undefined,
+      });
       Object.assign(caller, callerData);
       caller.prep = callerData?.prep;
       caller.weaponId = callerData?.weaponId;
@@ -278,8 +291,25 @@
       isResistingDamage = callerData?.isResistingDamage || false;
       hasTarget = game.user.targets.size > 0;
 
-      // ---- modifiers: start fresh, add wound penalty; optional defense TN mod ----
+      // ---- base TN & mods ----
+      targetNumber = 4;
       modifiersArray = [];
+      if (isResistingDamage && caller.prep) {
+         targetNumber = Number(caller.prep.tnBase ?? 4);
+         modifiersArray = Array.isArray(caller.prep.tnMods) ? [...caller.prep.tnMods] : [];
+
+         caller.type = "attribute";
+         caller.key = "body";
+         caller.name = game.i18n.localize?.("sr3e.attributes.body") || "Body";
+         caller.item = undefined;
+         caller.skillId = undefined;
+         caller.linkedAttribute = undefined;
+         if ((caller.dice ?? 0) === 0) {
+            caller.dice = getAttrDiceFromSumStore("body");
+         }
+      }
+
+      // ---- modifiers: add wound penalty; optional defense TN mod ----
       const penalty = buildPenaltyMod();
       if (penalty) upsertMod(penalty);
 
