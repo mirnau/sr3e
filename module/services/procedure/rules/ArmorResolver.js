@@ -15,11 +15,17 @@ export default class ArmorResolver {
     const mult = packet?.armorMult || { ballistic: 1, impact: 1 };
 
     const wearables = defender?.items?.filter?.((i) => i.type === "wearable") ?? [];
-    const equipped = wearables.filter((i) => !!i.getFlag?.("sr3e", "isEquipped"));  
+    const equipped = wearables.filter((i) => !!i.getFlag?.("sr3e", "isEquipped"));
 
     // collect raw ratings
-    const b = equipped.map((w) => Number(w?.system?.armor?.ballistic ?? 0) || 0).sort((a, z) => z - a);
-    const i = equipped.map((w) => Number(w?.system?.armor?.impact   ?? 0) || 0).sort((a, z) => z - a);
+    // Some legacy data stores armor ratings under system.armor.*, while newer
+    // items keep them at the top level (system.ballistic/system.impact).
+    const b = equipped
+      .map((w) => Number(w?.system?.ballistic ?? w?.system?.armor?.ballistic ?? 0) || 0)
+      .sort((a, z) => z - a);
+    const i = equipped
+      .map((w) => Number(w?.system?.impact ?? w?.system?.armor?.impact ?? 0) || 0)
+      .sort((a, z) => z - a);
 
     const ballisticBase = this.#layeredSum(b);
     const impactBase    = this.#layeredSum(i);
