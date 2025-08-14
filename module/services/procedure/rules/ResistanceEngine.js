@@ -4,18 +4,21 @@ import ArmorResolver from "./ArmorResolver.js";
 
 export default class ResistanceEngine {
    // ResistanceEngine.js
-   static #buildTNBreakdown({ packet, armor, isFlechette = false }) {
+   static #buildTNBreakdown({ packet, armor, isFlechette = false, dodgeSuccesses = 0 }) {
       const mods = [];
       const base = 0; // SR3E damage resistance is Power − Armor ± effects (min 2)
 
       const p = Math.max(0, Number(packet?.power ?? 0));
       const resistAdd = Number(packet?.resistTNAdd ?? 0) || 0;
+      const dodge = Math.max(0, Number(dodgeSuccesses) || 0);
 
       mods.push({ id: "power", name: "Attack Power", value: p });
 
       if (!(isFlechette && armor.armorType === "flechette-unarmored")) {
          mods.push({ id: "armor", name: `Armor (${armor.armorType})`, value: -Number(armor?.effective ?? 0) });
       }
+
+      if (dodge > 0) mods.push({ id: "dodge", name: "Dodge successes", value: -dodge });
 
       if (resistAdd !== 0) mods.push({ id: "resist-extra", name: "Effects & situational", value: resistAdd });
 
@@ -27,7 +30,7 @@ export default class ResistanceEngine {
       return { tnBase: base, tnMods: mods, tn };
    }
 
-   static build(defender, packet, netAttackSuccesses = 0) {
+   static build(defender, packet, netAttackSuccesses = 0, dodgeSuccesses = 0) {
       DEBUG && LOG.info("", [__FILE__, __LINE__, ResistanceEngine.build.name]);
       const { step: baseStep, trackKey } = DamageMath.splitDamageType(packet?.damageType);
       const stagedUpBase = DamageMath.applyAttackStaging(baseStep, netAttackSuccesses, packet?.levelDelta || 0);
@@ -47,6 +50,7 @@ export default class ResistanceEngine {
                packet,
                armor: { ...armor, armorType: "flechette-unarmored", effective: 0 },
                isFlechette: true,
+               dodgeSuccesses,
             });
 
             return {
@@ -64,7 +68,7 @@ export default class ResistanceEngine {
       }
 
       // Normal / armored path TN parts
-      const tnParts = this.#buildTNBreakdown({ packet, armor, isFlechette });
+      const tnParts = this.#buildTNBreakdown({ packet, armor, isFlechette, dodgeSuccesses });
       return {
          trackKey,
          ...tnParts, // { tnBase, tnMods, tn }

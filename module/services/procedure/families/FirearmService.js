@@ -169,9 +169,9 @@ export default class FirearmService {
       return { plan, damage, ammoId: ammo?.id || "" };
    }
 
-   static prepareDamageResolution(defender, { plan, damage, netAttackSuccesses = 0 } = {}) {
+   static prepareDamageResolution(defender, { plan, damage, netAttackSuccesses = 0, dodgeSuccesses = 0 } = {}) {
       DEBUG && LOG.info("", [__FILE__, __LINE__, FirearmService.prepareDamageResolution.name]);
-      return ResistanceEngine.build(defender, damage, netAttackSuccesses);
+      return ResistanceEngine.build(defender, damage, netAttackSuccesses, dodgeSuccesses);
    }
 
    static resolveDamageOutcome(build, bodySuccesses = 0) {

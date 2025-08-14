@@ -259,6 +259,7 @@ export default class OpposeRollService {
       if (!attackContext) attackContext = this.#ensureAttackContext(contest);
 
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
+      const dodgeSuccesses = this.getSuccessCount(targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
       let damageText = "";
@@ -276,10 +277,12 @@ export default class OpposeRollService {
                     plan: attackContext.plan,
                     damage: attackContext.damage,
                     netAttackSuccesses: netSuccesses,
+                    dodgeSuccesses,
                  })
                : svc.prepareDamageResolution(target, {
                     packet: attackContext.damage,
                     netAttackSuccesses: netSuccesses,
+                    dodgeSuccesses,
                  });
 
          // annotate for later (so we don't need to refetch/guess)
