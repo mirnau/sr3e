@@ -292,11 +292,22 @@ export default class OpposeRollService {
          prep.weaponId = attackContext.weaponId || null; // <—
          prep.weaponName = attackContext.weaponName || weapon?.name || "Attack"; // <—
 
-         damageText = `
+        const dodgeMod = dodgeSuccesses > 0 ? -Math.floor(dodgeSuccesses / 2) : 0;
+        const power = attackContext.damage?.power ?? 0;
+        const armorType = prep.armor?.armorType;
+        const armorEff = prep.armor?.effective ?? 0;
+
+        damageText = `
         <p><strong>${target.name}</strong> must resist
         <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
-        (${prep.trackKey}) from <em>${prep.weaponName}</em>.
-        Resistance TN: <b>${prep.tn}</b>.</p>`;
+        (${prep.trackKey}) from <em>${prep.weaponName}</em>.</p>
+        <ul>
+          <li>Dodge successes: <b>${dodgeSuccesses}</b> (${dodgeMod})</li>
+          <li>Attack Power: <b>${power}</b></li>
+          <li>Armor (${armorType}): <b>-${armorEff}</b></li>
+        </ul>
+        ${OpposeRollService.renderTN(prep)}
+        `;
 
          resistancePayload = {
             contestId,
