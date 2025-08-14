@@ -278,6 +278,30 @@
       isResistingDamage = callerData?.isResistingDamage || false;
       hasTarget = game.user.targets.size > 0;
 
+      // If we're entering the Damage Resistance flow, set a correct panel title
+      if (isResistingDamage) {
+         title = game.i18n.localize("sr3e.damageResistance") || "Damage Resistance";
+
+         // If prep carries TN parts, seed the composer so the numbers match the chat preview
+         const p = callerData?.prep;
+         if (p) {
+            // base comes from prep.tnBase (expect 0 for firearms); clamp to SR3 min 2 on the dial
+            if (Number.isFinite(p.tnBase)) targetNumber = Math.max(2, Number(p.tnBase));
+
+            // mirror the breakdown rows (Attack Power, Armor, etc.) as modifier rows
+            if (Array.isArray(p.tnMods)) {
+               const tnMods = p.tnMods.map((m) => ({
+                  id: m.id,
+                  name: m.name,
+                  value: Number(m.value) || 0,
+               }));
+               // keep any penalty row you just added above, then append TN mods
+               const penalty = modifiersArray.find((m) => m.id === "penalty") || null;
+               modifiersArray = penalty ? [penalty, ...tnMods] : tnMods;
+            }
+         }
+      }
+
       // ---- modifiers: start fresh, add wound penalty; optional defense TN mod ----
       modifiersArray = [];
       const penalty = buildPenaltyMod();

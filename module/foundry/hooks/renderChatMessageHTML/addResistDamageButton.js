@@ -28,6 +28,7 @@ export function addResistDamageButton(message, html, data) {
             tn,
             prep,
             tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
+            panelTitle: game.i18n.localize("sr3e.damageResistance") || "Damage Resistance",
             explodes: true,
          },
          { visible: true }
