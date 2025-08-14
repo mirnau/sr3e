@@ -16,6 +16,10 @@ export function addResistDamageButton(message, html, data) {
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: defender not found");
 
+      // Ensure the sheet is rendered so the composer is available.
+      const sheet = defender.sheet;
+      if (!sheet.rendered) await sheet.render(true);
+
       // Recompute the resistance TN from its parts to ensure any runtime
       // modifiers (like dodge successes) are reflected. This mirrors
       // OpposeRollService.#computeTNFromPrep.
@@ -27,7 +31,7 @@ export function addResistDamageButton(message, html, data) {
                : Number(prep?.tn ?? 0))
       );
 
-      defender.sheet.setRollComposerData(
+      sheet.setRollComposerData(
          {
             isResistingDamage: true,
             contestId,
