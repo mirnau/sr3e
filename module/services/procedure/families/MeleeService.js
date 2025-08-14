@@ -40,9 +40,9 @@ export default class MeleeService {
       };
    }
 
-   static prepareDamageResolution(defender, { packet, netAttackSuccesses = 0 } = {}) {
+   static prepareDamageResolution(defender, { packet, netAttackSuccesses = 0, dodgeSuccesses = 0 } = {}) {
       DEBUG && LOG.info("", [__FILE__, __LINE__, MeleeService.prepareDamageResolution.name]);
-      return ResistanceEngine.build(defender, packet, netAttackSuccesses);
+      return ResistanceEngine.build(defender, packet, netAttackSuccesses, dodgeSuccesses);
    }
 
    static resolveDamageOutcome(build, bodySuccesses = 0) {
