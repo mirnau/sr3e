@@ -53,13 +53,11 @@ export async function addOpposedResponseButton(message, html, data) {
    yesBtn.classList.add("sr3e-response-button", "yes");
    yesBtn.dataset.contestId = contestId;
    yesBtn.innerText = "Yes";
-   yesBtn.style.width = "10rem";
 
    const noBtn = document.createElement("button");
    noBtn.classList.add("sr3e-response-button", "no");
    noBtn.dataset.contestId = contestId;
    noBtn.innerText = "No";
-   noBtn.style.width = "10rem";
 
    // Append buttons into wrapper and then wrapper after prompt
    wrapper.append(yesBtn, noBtn);

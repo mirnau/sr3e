@@ -1156,6 +1156,9 @@
     max-width: max-content;
     align-self: flex-start;
   }
+  .buttons-horizontal-distribution .sr3e-response-button {
+    width: 4rem;
+  }
   .buttons-horizontal-distribution > button {
     flex: 0 0 auto;
     white-space: nowrap;
