@@ -268,6 +268,19 @@
 
    export function setCallerData(callerData, options = {}) {
       resetToDefaults();
+      Object.assign(caller, {
+         type: null,
+         key: null,
+         dice: 0,
+         value: 0,
+         skillId: "",
+         specialization: "",
+         name: "",
+         responseMode: false,
+         contestId: null,
+         linkedAttribute: undefined,
+         item: undefined,
+      });
       Object.assign(caller, callerData);
       caller.prep = callerData?.prep;
       caller.weaponId = callerData?.weaponId;
@@ -278,32 +291,25 @@
       isResistingDamage = callerData?.isResistingDamage || false;
       hasTarget = game.user.targets.size > 0;
 
-      // If we're entering the Damage Resistance flow, set a correct panel title
-      if (isResistingDamage) {
-         title = game.i18n.localize("sr3e.damageResistance") || "Damage Resistance";
+      // ---- base TN & mods ----
+      targetNumber = 4;
+      modifiersArray = [];
+      if (isResistingDamage && caller.prep) {
+         targetNumber = Number(caller.prep.tnBase ?? 4);
+         modifiersArray = Array.isArray(caller.prep.tnMods) ? [...caller.prep.tnMods] : [];
 
-         // If prep carries TN parts, seed the composer so the numbers match the chat preview
-         const p = callerData?.prep;
-         if (p) {
-            // base comes from prep.tnBase (expect 0 for firearms); clamp to SR3 min 2 on the dial
-            if (Number.isFinite(p.tnBase)) targetNumber = Math.max(2, Number(p.tnBase));
-
-            // mirror the breakdown rows (Attack Power, Armor, etc.) as modifier rows
-            if (Array.isArray(p.tnMods)) {
-               const tnMods = p.tnMods.map((m) => ({
-                  id: m.id,
-                  name: m.name,
-                  value: Number(m.value) || 0,
-               }));
-               // keep any penalty row you just added above, then append TN mods
-               const penalty = modifiersArray.find((m) => m.id === "penalty") || null;
-               modifiersArray = penalty ? [penalty, ...tnMods] : tnMods;
-            }
+         caller.type = "attribute";
+         caller.key = "body";
+         caller.name = game.i18n.localize?.("sr3e.attributes.body") || "Body";
+         caller.item = undefined;
+         caller.skillId = undefined;
+         caller.linkedAttribute = undefined;
+         if ((caller.dice ?? 0) === 0) {
+            caller.dice = getAttrDiceFromSumStore("body");
          }
       }
 
-      // ---- modifiers: start fresh, add wound penalty; optional defense TN mod ----
-      modifiersArray = [];
+      // ---- modifiers: add wound penalty; optional defense TN mod ----
       const penalty = buildPenaltyMod();
       if (penalty) upsertMod(penalty);
 
