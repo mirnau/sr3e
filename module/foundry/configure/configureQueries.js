@@ -34,9 +34,47 @@ export function configureQueries() {
       return CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData });
    };
 
-   // Resolve opposed roll with NO Dodge (treat as 0 successes)
+   // Resolve opposed roll with NO Dodge (treat as 0 successes) routed through the initiator
    CONFIG.queries["sr3e.resolveOpposedNoDodge"] = async ({ contestId }) => {
-      await OpposeRollService.resolveTargetRoll(contestId, {}); // empty roll => 0 successes
+      const contest = OpposeRollService.getContestById(contestId);
+      if (!contest) throw new Error(`sr3e: contest ${contestId} not found`);
+
+      // A 0-success "roll"
+      const noDodgeRollData = {
+         terms: [{ results: [] }],
+         options: { targetNumber: 4 },
+      };
+
+      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
+
+      // Run the resolution on the initiator's side (author/owner of the original chat msg)
+      if (initiatorUser?.id === game.user.id) {
+         await CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData: noDodgeRollData });
+      } else {
+         await initiatorUser.query("sr3e.resolveOpposedRollRemote", {
+            contestId,
+            rollData: noDodgeRollData,
+            initiatorId: initiatorUser?.id,
+         });
+      }
+
+      return { ok: true };
+   };
+
+   CONFIG.queries["sr3e.markOpposedResponded"] = async ({ messageId }) => {
+      const msg = game.messages.get(messageId);
+      if (!msg) throw new Error(`sr3e: chat message ${messageId} not found`);
+
+      // Only allow GM or the message author to update
+      if (!(game.user.isGM || msg.isAuthor))
+         throw new Error("sr3e: insufficient permission to update ChatMessage");
+
+      await msg.update({
+         flags: {
+            ...msg.flags,
+            sr3e: { ...(msg.flags?.sr3e || {}), opposedResponded: true },
+         },
+      });
       return { ok: true };
    };
 

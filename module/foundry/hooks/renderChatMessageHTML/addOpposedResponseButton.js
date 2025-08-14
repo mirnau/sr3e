@@ -109,11 +109,10 @@ export async function addOpposedResponseButton(message, html, data) {
       });
 
       // Mark message so we do not offer buttons again on re-render
-      try {
-         await message.update({ flags: { sr3e: { opposedResponded: true } } });
-      } catch (e) {
-         console.warn("[sr3e] Unable to set opposedResponded flag:", e);
-      }
+      const messageId = message.id;
+      const authorUser = game.users.get(game.messages.get(messageId)?.user?.id);
+      if (authorUser)
+         authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
 
    // --- NO: skip Dodge (0 successes) and continue immediately ---
@@ -135,17 +134,13 @@ export async function addOpposedResponseButton(message, html, data) {
       noBtn.classList.add("responded");
 
       // Empty rollData → getSuccessCount = 0 for defender
-      await CONFIG.queries["sr3e.resolveOpposedNoDodgeRemote"]({
-         contestId,
-         initiatorId: current.initiator.id,
-      });
+      await CONFIG.queries["sr3e.resolveOpposedNoDodge"]({ contestId });
 
       // Mark message so we do not offer buttons again on re-render
-      try {
-         await message.update({ flags: { sr3e: { opposedResponded: true } } });
-      } catch (e) {
-         console.warn("[sr3e] Unable to set opposedResponded flag:", e);
-      }
+      const messageId = message.id;
+      const authorUser = game.users.get(game.messages.get(messageId)?.user?.id);
+      if (authorUser)
+         authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
 
 }
