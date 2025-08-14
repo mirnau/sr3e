@@ -86,6 +86,8 @@ export async function addOpposedResponseButton(message, html, data) {
       const actorSheet = current.target.sheet;
       if (!actorSheet.rendered) await actorSheet.render(true);
 
+      const { tnMod = 0, tnLabel = "Weapon difficulty" } = current?.defenseHint ?? {};
+
       const caller = {
          type: "dodge",
          key: "dodge",
@@ -94,6 +96,8 @@ export async function addOpposedResponseButton(message, html, data) {
          value: 0,
          responseMode: true, // Composer: response flow
          contestId,
+         defenseTNMod: tnMod,
+         defenseTNLabel: tnLabel,
       };
 
       actorSheet.setRollComposerData(caller);

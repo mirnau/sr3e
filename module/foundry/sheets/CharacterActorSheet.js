@@ -227,7 +227,12 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       if (payload?.responseMode) {
          const contest = payload.contestId ? OpposeRollService.getContestById(payload.contestId) : null;
          const hint = contest?.defenseHint ?? OpposeRollService.getDefaultDefenseHint(contest?.initiatorRoll);
-         if (hint?.type === "attribute") {
+
+         if (payload.type === "dodge") {
+            if (payload.defenseTNMod === undefined) payload.defenseTNMod = Number(hint?.tnMod || 0);
+            if (payload.defenseTNLabel === undefined)
+               payload.defenseTNLabel = hint?.tnLabel || "Weapon difficulty";
+         } else if (hint?.type === "attribute") {
             payload.type = "attribute";
             payload.key = hint.key;
             payload.name = game.i18n.localize(`sr3e.attributes.${hint.key}`) || hint.key;
