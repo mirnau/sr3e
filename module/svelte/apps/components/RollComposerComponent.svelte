@@ -258,6 +258,7 @@
 
       const existing = modifiersArray[existingIndex];
       if (existing?.meta?.userTouched) return;
+      if (existing.value === row.value) return;
 
       const copy = [...modifiersArray];
       copy[existingIndex] = { ...existing, ...row, id: "recoil", weaponId: weapon.id, source: "auto" };
@@ -777,15 +778,9 @@
          const { shots } = recoilState(actor?.id);
          return shots > 0;
       })()}
-         {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
+        {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
             <div class="roll-composer-card">
-               <button
-                  class="regular"
-                  onclick={() => {
-                     modifiersArray = modifiersArray.filter((m) => m.id !== "recoil" && m.name !== "Recoil");
-                     clearAllRecoilForActor(actor?.id);
-                  }}
-               >
+               <button class="regular" onclick={ResetRecoil}>
                   Clear Recoil
                </button>
             </div>
