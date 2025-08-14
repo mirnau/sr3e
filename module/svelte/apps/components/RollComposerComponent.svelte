@@ -319,6 +319,8 @@
             caller.skillId = undefined;
             caller.linkedAttribute = undefined;
             caller.dice = Number(caller.dice) || 0;
+            associatedDicePoolString = "combat";
+            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
 
             // IMPORTANT: do not fall through; keep Dodge pure (no Reaction coercion).
             return;
