@@ -37,29 +37,31 @@ export async function addOpposedResponseButton(message, html, data) {
 
    if (!isControllingUser || alreadyResponded) return;
 
-   // Layout: "Dodge?" + [YES | NO] inside a common wrapper
-   const prompt = document.createElement("span");
+   // Layout: "Dodge" on its own line, followed by buttons on the next line
+   const prompt = document.createElement("div");
    prompt.classList.add("sr3e-dodge-prompt");
-   prompt.innerText = "Dodge?";
+   prompt.innerText = "Dodge";
 
-   // Build wrapper
+   // Build wrapper for buttons
    const wrapper = document.createElement("div");
    wrapper.classList.add("buttons-horizontal-distribution");
    wrapper.setAttribute("role", "group");
    wrapper.setAttribute("aria-label", "Dodge choice");
 
-   // Build buttons (unchanged)
+   // Build buttons
    const yesBtn = document.createElement("button");
    yesBtn.classList.add("sr3e-response-button", "yes");
    yesBtn.dataset.contestId = contestId;
    yesBtn.innerText = "Yes";
+   yesBtn.style.width = "10rem";
 
    const noBtn = document.createElement("button");
    noBtn.classList.add("sr3e-response-button", "no");
    noBtn.dataset.contestId = contestId;
    noBtn.innerText = "No";
+   noBtn.style.width = "10rem";
 
-   // ⬇️ Append buttons INTO the wrapper, then wrapper INTO ui
+   // Append buttons into wrapper and then wrapper after prompt
    wrapper.append(yesBtn, noBtn);
    ui.append(prompt, wrapper);
 
@@ -144,6 +146,4 @@ export async function addOpposedResponseButton(message, html, data) {
       }
    };
 
-   ui.appendChild(yesBtn);
-   ui.appendChild(noBtn);
 }
