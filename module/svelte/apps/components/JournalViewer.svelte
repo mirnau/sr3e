@@ -30,7 +30,6 @@
         previewContent = await foundry.applications.ux.TextEditor.enrichHTML(
             content,
             {
-                async: true,
                 secrets: false,
                 documents: false,
             },

@@ -404,7 +404,7 @@ export default class OpposeRollService {
       if (!defender) throw new Error("sr3e: Defender not found");
 
       const roll = await Roll.fromData(rollData);
-      if (!roll._evaluated) await roll.evaluate({ async: true });
+      if (!roll._evaluated) await roll.evaluate();
 
       const tn = this.#computeTNFromPrep(prep); // ← use base+mods, not a baked number
       const successes = this.getSuccessCount({

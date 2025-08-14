@@ -44,9 +44,7 @@
             editor()?.setContent(item.system.description);
         } else {
             editorContainer.innerHTML =
-                foundry.applications.ux.TextEditor.enrichHTML(textValue, {
-                    async: false,
-                });
+                foundry.applications.ux.TextEditor.enrichHTMLSync(textValue);
         }
 
         Log.success(
