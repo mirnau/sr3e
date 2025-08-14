@@ -110,7 +110,7 @@ export async function addOpposedResponseButton(message, html, data) {
 
       // Mark message so we do not offer buttons again on re-render
       const messageId = message.id;
-      const authorUser = game.users.get(game.messages.get(messageId)?.user?.id);
+      const authorUser = game.messages.get(messageId)?.author;
       if (authorUser)
          authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
@@ -138,7 +138,7 @@ export async function addOpposedResponseButton(message, html, data) {
 
       // Mark message so we do not offer buttons again on re-render
       const messageId = message.id;
-      const authorUser = game.users.get(game.messages.get(messageId)?.user?.id);
+      const authorUser = game.messages.get(messageId)?.author;
       if (authorUser)
          authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
