@@ -39,19 +39,19 @@
             targetNumber: modifiedTargetNumber ?? prep.tn,
             explodes: true,
          }),
-         { actor },
-         {
-            type,
-            modifiers: modifiersArray,
-            targetNumber: modifiedTargetNumber ?? prep.tn,
-            attributeKey: attributeKeyForChat,
-            attributeName: attributeKeyForChat,
-            opposed: false,
-            isDefaulting,
-         }
+        { actor },
+        {
+           type,
+           modifiers: modifiersArray,
+           targetNumber: modifiedTargetNumber ?? prep.tn,
+           attributeKey: attributeKeyForChat,
+           attributeName: attributeKeyForChat,
+           opposed: false,
+           isDefaulting,
+        }
       );
 
-      await roll.evaluate({ async: true });
+      await roll.evaluate();
 
       // Send the composed roll to the resolver (runs on this client via your CONFIG.queries handler)
       await game.user.query("sr3e.resolveResistanceRoll", {
