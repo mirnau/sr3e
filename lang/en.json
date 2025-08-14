@@ -25,6 +25,9 @@
       "broadcaster": {
          "broadcaster": "Broadcaster"
       },
+      "chat": {
+         "contestexpried ": "Contest Expired!"
+      },
       "combosearch": {
          "noresult": "No results...",
          "search": "Search"
@@ -39,6 +42,7 @@
          "legalenforcementpriority": "Enforcement Priority",
          "isBroken": "Broken"
       },
+
       "common": {
          "max": "Maximum",
          "min": "Minimum",
@@ -68,6 +72,12 @@
          "strenuous": "Strenuous",
          "extreme": "Extreme",
          "nearlyimpossible": "Nearly Impossible"
+      },
+
+      "dodge": {
+         "dodge": "Dodge",
+         "yes": "Yes",
+         "no": "No"
       },
       "effects": {
          "effectscomposer": "Effects Composer",

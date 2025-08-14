@@ -131,7 +131,7 @@
          bind:value={headlineInput} 
          placeholder={isEditing ? "Edit headline" : "Write a headline"}
       />
-      <div class="buttons-vertical-distribution">
+      <div class="buttons-horizontal-distribution">
          <button 
             type="button" 
             class="link-button" 
@@ -164,7 +164,7 @@
       </select>
    </div>
 
-   <div class="buttons-vertical-distribution">
+   <div class="buttons-horizontal-distribution">
       <button
          type="button"
          class="link-button"

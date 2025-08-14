@@ -34,6 +34,12 @@ export function configureQueries() {
       return CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData });
    };
 
+   // Resolve opposed roll with NO Dodge (treat as 0 successes)
+   CONFIG.queries["sr3e.resolveOpposedNoDodge"] = async ({ contestId }) => {
+      await OpposeRollService.resolveTargetRoll(contestId, {}); // empty roll => 0 successes
+      return { ok: true };
+   };
+
    // Abort flow.
    CONFIG.queries["sr3e.abortOpposedRoll"] = async ({ contestId }) => {
       console.warn(`[sr3e] Received abortOpposedRoll for ${contestId}`);

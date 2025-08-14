@@ -91,7 +91,7 @@
    </td>
    <td>
       <div class="cell-content">
-         <div class="buttons-vertical-distribution square">
+         <div class="buttons-horizontal-distribution square">
             <button type="button" aria-label={localize(config.sheet.edit)} class="fas fa-edit" onclick={openEditor}
             ></button>
 

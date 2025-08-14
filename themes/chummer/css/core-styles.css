@@ -1143,7 +1143,7 @@
   footer.form-footer button:last-of-type::after {
     clip-path: polygon(0.25rem 0px, calc(100% - 0.25rem) 0px, 100% 0.25rem, 100% calc(100% - 0.75rem), calc(100% - 0.75rem) 100%, 0.25rem 100%, 0px calc(100% - 0.25rem), 0px 0.25rem);
   }
-  .buttons-vertical-distribution {
+  .buttons-horizontal-distribution {
     display: inline-flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -1156,12 +1156,12 @@
     max-width: max-content;
     align-self: flex-start;
   }
-  .buttons-vertical-distribution > button {
+  .buttons-horizontal-distribution > button {
     flex: 0 0 auto;
     white-space: nowrap;
     width: auto;
   }
-  .buttons-vertical-distribution.square > button {
+  .buttons-horizontal-distribution.square > button {
     aspect-ratio: 1 / 1;
     width: 1.5rem;
     height: 1.5rem;

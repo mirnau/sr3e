@@ -129,6 +129,16 @@ sr3e.dicepools = {
    associateselect: "sr3e.dicepools.associateselect",
 };
 
+sr3e.chat = {
+   contestexpried : "sr3e.chat.contestexpried"
+}
+
+sr3e.dodge = {
+   dodge: "sr3e.dodge.dodge",
+   yes: "sr3e.dodge.yes",
+   no: "sr3e.dodge.no"
+}
+
 sr3e.gadget = {
    gadget: "sr3e.gadget.gadget",
    type: "sr3e.gadget.type",

@@ -231,7 +231,7 @@
 
                   <div class="stat-card">
                      <div class="stat-card-background"></div>
-                     <div class="buttons-vertical-distribution">
+                     <div class="buttons-horizontal-distribution">
                         <button
                            class="header-control icon sr3e-toolbar-button"
                            aria-label="Increase"

@@ -20,7 +20,7 @@ function measureDistanceBetweenTokens(attackerToken, targetToken) {
    const p2 = { x: targetToken.center.x, y: targetToken.center.y };
 
    const result = canvas.grid.measurePath([p1, p2], { gridSpaces: false });
-   return result.distance; // Euclidean distance in scene units (meters)
+   return result.distance;
 }
 
 function getWeaponRangeTable(weapon) {
@@ -30,10 +30,6 @@ function getWeaponRangeTable(weapon) {
    const mediumMax = Number(rb.medium) || 0;
    const longMax = Number(rb.long) || 0;
    const extremeMax = Number(rb.extreme) || 0;
-
-   if (!shortMax || !mediumMax || !longMax || !extremeMax) {
-      throw new Error(`sr3e: weapon "${weapon?.name}" missing rangeBand.* values`);
-   }
    return { shortMax, mediumMax, longMax, extremeMax };
 }
 

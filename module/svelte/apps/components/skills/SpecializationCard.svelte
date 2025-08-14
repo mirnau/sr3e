@@ -62,7 +62,7 @@
    <h1 class="embedded-value no-margin">{specialization.value}</h1>
 </TextInput>
 
-<div class="buttons-vertical-distribution">
+<div class="buttons-horizontal-distribution">
    <button
       class="header-control icon sr3e-toolbar-button"
       aria-label="Increment"

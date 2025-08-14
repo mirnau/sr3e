@@ -272,26 +272,16 @@
       caller.prep = callerData?.prep;
       caller.weaponId = callerData?.weaponId;
 
-      const dict = CONFIG?.sr3e?.attributes ?? {};
-      if (caller.responseMode && caller.type !== "attribute") {
-         caller.type = "attribute";
-         if (!caller.key) caller.key = "reaction";
-         if (!caller.name) caller.name = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
-         caller.item = undefined;
-      }
-      if (caller.type === "item" && caller.key && Object.prototype.hasOwnProperty.call(dict, caller.key)) {
-         caller.type = "attribute";
-         caller.item = undefined;
-      }
-
+      // ---- visibility / mode flags ----
       if (options.visible !== undefined) visible = options.visible;
       isResponding = caller.responseMode || false;
       isResistingDamage = callerData?.isResistingDamage || false;
       hasTarget = game.user.targets.size > 0;
 
+      // ---- modifiers: start fresh, add wound penalty; optional defense TN mod ----
       modifiersArray = [];
-      const pen = buildPenaltyMod();
-      if (pen) upsertMod(pen);
+      const penalty = buildPenaltyMod();
+      if (penalty) upsertMod(penalty);
 
       if (Number.isFinite(Number(caller.defenseTNMod)) && Number(caller.defenseTNMod) !== 0) {
          upsertMod({
@@ -301,57 +291,104 @@
          });
       }
 
-      if (caller.type === "item") {
-         const itemId = caller.item?.id ?? caller.key;
-         const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
-         if (!item) throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
-         title = item.name;
+      // ---- pre-normalize type ----
+      const attributesDict = CONFIG?.sr3e?.attributes ?? {};
 
-         // init firearm context BEFORE we decide defaulting
-         initFirearmContextFromWeapon(item);
+      // If an item caller uses an attribute key, treat it as an attribute roll.
+      if (caller.type === "item" && caller.key && Object.prototype.hasOwnProperty.call(attributesDict, caller.key)) {
+         caller.type = "attribute";
+         caller.item = undefined;
+      }
 
-         if (hasTarget && item.id !== rangePrimedForWeaponId) {
-            rangeSuppressedForWeaponId = null; // new weapon, clear suppression
-            primeRangeForWeapon(item); // will set primed only on success
+      // In response mode, coerce unknown types to attribute(Reaction), but NEVER dodge.
+      if (caller.responseMode && caller.type !== "attribute" && caller.type !== "dodge") {
+         caller.type = "attribute";
+         if (!caller.key) caller.key = "reaction";
+         if (!caller.name) caller.name = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
+         caller.item = undefined;
+      }
+
+      // ---- main switch ----
+      switch (caller.type) {
+         case "dodge": {
+            // No skill, no attribute, no item; user adds only pool dice if desired.
+            initFirearmContextFromWeapon(null);
+            title = caller.name || game.i18n.localize?.("sr3e.dodge") || "Dodge";
+
+            caller.item = undefined;
+            caller.skillId = undefined;
+            caller.linkedAttribute = undefined;
+            caller.dice = Number(caller.dice) || 0;
+
+            // IMPORTANT: do not fall through; keep Dodge pure (no Reaction coercion).
+            return;
          }
-         const [skillId] = (item.system.linkedSkillId ?? item.system.linkedSkillId ?? "").split("::");
-         const skill = actor.items.get(skillId);
-         prepareSkillBasedRoll(skill, item.name);
 
-         if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
-         if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
-            caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
-            isDefaultingAsString = "true";
-            queueMicrotask(() => {
-               if (selectEl) selectEl.value = "true";
-            });
-            ensureDefaultingModForAttribute();
+         case "item": {
+            const itemId = caller.item?.id ?? caller.key;
+            const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
+            if (!item) throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
+
+            title = item.name;
+
+            // Initialize firearm context BEFORE defaulting logic.
+            initFirearmContextFromWeapon(item);
+
+            // Prime range once per roll (if not suppressed by user).
+            if (hasTarget && item.id !== rangePrimedForWeaponId && rangeSuppressedForWeaponId !== item.id) {
+               // new weapon → clear suppression marker
+               rangeSuppressedForWeaponId = null;
+               primeRangeForWeapon(item);
+            }
+
+            // Prepare skill linkage from the weapon’s linked skill.
+            const [skillId] = String(item.system?.linkedSkillId ?? "").split("::");
+            const skill = skillId ? actor.items.get(skillId) : null;
+            prepareSkillBasedRoll(skill, item.name);
+
+            if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
+
+            // If no dice explicitly set, default to linked attribute dice and mark defaulting.
+            if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
+               caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
+               isDefaultingAsString = "true";
+               queueMicrotask(() => {
+                  if (selectEl) selectEl.value = "true";
+               });
+               ensureDefaultingModForAttribute();
+            }
+            return;
          }
-         return;
-      }
 
-      if (caller.type === "skill") {
-         const skill = actor.items.get(caller.skillId);
-         if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
-         initFirearmContextFromWeapon(null);
-         prepareSkillBasedRoll(skill, caller.key);
-         if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
-         return;
-      }
+         case "skill": {
+            initFirearmContextFromWeapon(null);
+            const skill = actor.items.get(caller.skillId);
+            if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
+            prepareSkillBasedRoll(skill, caller.key);
+            if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
+            return;
+         }
 
-      if (caller.type === "specialization") {
-         const skill = actor.items.get(caller.skillId);
-         if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
-         initFirearmContextFromWeapon(null);
-         prepareSkillBasedRoll(skill, caller.key);
-         return;
-      }
+         case "specialization": {
+            initFirearmContextFromWeapon(null);
+            const skill = actor.items.get(caller.skillId);
+            if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
+            prepareSkillBasedRoll(skill, caller.key);
+            return;
+         }
 
-      if (caller.type === "attribute") {
-         initFirearmContextFromWeapon(null);
-         title = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
-         if ((caller.dice ?? 0) === 0) caller.dice = getAttrDiceFromSumStore(caller.key);
-         return;
+         case "attribute": {
+            initFirearmContextFromWeapon(null);
+            title = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
+            if ((caller.dice ?? 0) === 0) {
+               caller.dice = getAttrDiceFromSumStore(caller.key);
+            }
+            return;
+         }
+
+         default: {
+            throw new Error(`sr3e: Unsupported caller.type "${caller.type}"`);
+         }
       }
    }
 
