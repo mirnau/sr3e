@@ -259,7 +259,6 @@ export default class OpposeRollService {
       if (!attackContext) attackContext = this.#ensureAttackContext(contest);
 
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
-      const dodgeSuccesses = this.getSuccessCount(targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
       let damageText = "";
@@ -276,51 +275,23 @@ export default class OpposeRollService {
                ? svc.prepareDamageResolution(target, {
                     plan: attackContext.plan,
                     damage: attackContext.damage,
-                    netAttackSuccesses: netSuccesses,
-                    dodgeSuccesses,
                  })
                : svc.prepareDamageResolution(target, {
                     packet: attackContext.damage,
-                    netAttackSuccesses: netSuccesses,
-                    dodgeSuccesses,
                  });
 
-        // annotate for later (so we don't need to refetch/guess)
-        prep.contestId = contest.id;
-        prep.attackerId = initiator.id;
-        prep.familyKey = attackContext.serviceKey; // <—
-        prep.weaponId = attackContext.weaponId || null; // <—
-        prep.weaponName = attackContext.weaponName || weapon?.name || "Attack"; // <—
+         // annotate for later (so we don't need to refetch/guess)
+         prep.contestId = contest.id;
+         prep.attackerId = initiator.id;
+         prep.familyKey = attackContext.serviceKey; // <—
+         prep.weaponId = attackContext.weaponId || null; // <—
+         prep.weaponName = attackContext.weaponName || weapon?.name || "Attack"; // <—
 
-        // --- Normalize TN fields for the resistance step and add Dodge as a TN mod ---
-        if (!prep) throw new Error("sr3e: Missing prep from prepareDamageResolution");
-        prep.tnBase = Number(prep.tnBase ?? 4);
-        if (!Array.isArray(prep.tnMods)) prep.tnMods = [];
-
-        const dodgeMod = dodgeSuccesses > 0 ? -Math.floor(dodgeSuccesses / 2) : 0;
-        {
-           const idx = prep.tnMods.findIndex((m) => (m?.key || m?.name)?.toString().toLowerCase() === "dodge");
-           const dodgeEntry = { key: "dodge", name: "Dodge", value: dodgeMod };
-           if (idx >= 0) prep.tnMods[idx] = dodgeEntry;
-           else prep.tnMods.push(dodgeEntry);
-        }
-        // -------------------------------------------------------------------------------
-
-        const power = attackContext.damage?.power ?? 0;
-        const armorType = prep.armor?.armorType;
-        const armorEff = prep.armor?.effective ?? 0;
-
-        damageText = `
+         damageText = `
         <p><strong>${target.name}</strong> must resist
         <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
-        (${prep.trackKey}) from <em>${prep.weaponName}</em>.</p>
-        <ul>
-          <li>Dodge successes: <b>${dodgeSuccesses}</b> (${dodgeMod})</li>
-          <li>Attack Power: <b>${power}</b></li>
-          <li>Armor (${armorType}): <b>-${armorEff}</b></li>
-        </ul>
-        ${OpposeRollService.renderTN(prep)}
-        `;
+        (${prep.trackKey}) from <em>${prep.weaponName}</em>.
+        Resistance TN: <b>${prep.tn}</b>.</p>`;
 
          resistancePayload = {
             contestId,
