@@ -1,56 +1,58 @@
-import { AbstractProcedure } from "./AbstractProcedure";
+import AbstractProcedure from "./AbstractProcedure.js";
+import FirearmService from "../families/FirearmService.js";
 
-export class FirearmProcedure extends AbstractProcedure {
-   constructor(caller, item) {
-      super(caller, item);
-   }
+export default class FirearmProcedure extends AbstractProcedure {
+  constructor(caller, item) {
+    super(caller, item);
+  }
 
-   get inCombat() {
-      const c = game.combat;
-      return !!c && (c.started === true || (c.combatants?.size ?? 0) > 0);
-   }
+  /** Reset recoil tracking for this actor */
+  resetRecoil() {
+    FirearmService.resetAllRecoilForActor(this.caller?.id);
+  }
 
+  /**
+   * Ensure recoil modifier is present/updated based on current state.
+   * Passing null removes any existing recoil row.
+   */
+  syncRecoil({ declaredRounds = 1, ammoAvailable = null } = {}) {
+    const mod = FirearmService.recoilModifierForComposer({
+      actor: this.caller,
+      caller: { item: this.item },
+      declaredRounds,
+      ammoAvailable,
+    });
+    const id = "recoil";
+    this.tnModifiers.update((arr = []) => {
+      const base = arr.filter((m) => m.id !== id);
+      return mod
+        ? [...base, { ...mod, id, weaponId: this.item?.id, source: "auto" }]
+        : base;
+    });
+  }
 
+  /** Prime range modifier based on active tokens */
+  primeRangeForWeapon(attackerToken, targetToken, rangeShiftLeft = 0) {
+    const mod = FirearmService.rangeModifierForComposer({
+      actor: this.caller,
+      caller: { item: this.item },
+      attackerToken,
+      targetToken,
+      rangeShiftLeft,
+    });
+    if (!mod) return;
+    this.upsertMod({ ...mod, weaponId: this.item?.id, source: "auto" });
+  }
 
-   get targetNumber() {
-      return this.#item.system.damage + this.#caller.system.attributes.strength;
-   }
-
-   primeRangeForWeapon(attackerToken, targetToken) {
-      DEBUG &&
-         (!attackerToken || !targetToken) &&
-         LOG.error("Malformed call:", [(__FILE__, __LINE__, this.primeRangeForWeapon.name)]);
-      DEBUG &&
-         !this.modifiersArray &&
-         LOG.error("Mo modifiers array has been set to the base class:", [
-            (__FILE__, __LINE__, primeRangeForWeapon.name),
-         ]);
-
-      const rangeShiftLeft = 0;
-      const raw = FirearmService.rangeModifierForComposer({
-         actor,
-         caller,
-         attackerToken,
-         targetToken,
-         rangeShiftLeft,
-      });
-
-      DEBUG && !raw && LOG.error("Redudant call?:", [(__FILE__, __LINE__, this.primeRangeForWeapon.name)]);
-
-      const name = raw.name;
-      const rangeMod = { name, value, meta: raw.meta };
-
-      const idx = modifiersArray.findIndex((m) => m.id === "range");
-      if (idx >= 0 && modifiersArray[idx]?.meta?.userTouched) return;
-
-      const mod = { ...rangeMod, id: "range", weaponId: weapon.id, source: "auto" };
-      if (idx === -1) {
-         modifiersArray = [...modifiersArray, mod];
-      } else {
-         const copy = [...modifiersArray];
-         copy[idx] = { ...copy[idx], ...mod };
-         modifiersArray = copy;
-      }
-      rangePrimedForWeaponId = weapon.id;
-   }
+  /** Precompute plan & damage for the current firearm attack */
+  precompute({ declaredRounds = 1, ammoAvailable = null } = {}) {
+    const { plan, damage } = FirearmService.beginAttack(this.caller, this.item, {
+      declaredRounds,
+      ammoAvailable,
+    });
+    if (this.caller) {
+      this.caller.firearmPlan = plan;
+      this.caller.damagePacket = damage;
+    }
+  }
 }

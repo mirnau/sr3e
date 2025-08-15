@@ -10,14 +10,8 @@
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get, writable } from "svelte/store";
    import FirearmService from "@families/FirearmService.js";
-   import {
-      classifyWeapon,
-      computeRecoilRow,
-      precomputeFirearm,
-      recoilState,
-      clearAllRecoilForActor,
-   } from "@services/ComposerAttackController.js";
    import AbstractProcedure from "@services/procedure/AbstractProcedure.js";
+   import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
 
    let { actor, config } = $props();
 
@@ -27,6 +21,8 @@
       StoreManager.Unsubscribe(actor);
       if (unhook) Hooks.off("updateCombat", unhook);
       if (targetHook) Hooks.off("targetToken", targetHook);
+      if (unsubTN) unsubTN();
+      if (unsubMods) unsubMods();
    });
 
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
@@ -63,8 +59,6 @@
    let rangeSuppressedForWeaponId = $state(null);
 
    // same pattern for recoil if you want to stop it from overriding user edits
-   let recoilPrimedForWeaponId = $state(null);
-
    let associatedDicePoolString = $state("");
    let associatedDicePoolStore;
    let linkedAttributeString;
@@ -72,6 +66,8 @@
    let readwrite;
    let selectEl;
    let containerEl;
+   let unsubTN;
+   let unsubMods;
 
    // ---- firearm context (for recoil) ----
    let isFirearm = $state(false);
@@ -99,8 +95,8 @@
    // --------------- helpers ----------------
 
    function ResetRecoil() {
-      clearAllRecoilForActor(actor?.id);
-      upsertOrRemoveRecoil();
+      procedureStore?.resetRecoil?.();
+      procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
    }
 
    function onRemoveModifier(index) {
@@ -142,67 +138,6 @@
       swallowDirectional(event);
    }
 
-   function getWeaponFromCaller() {
-      if (caller?.type !== "item") return null;
-      const itemId = caller.item?.id ?? caller.key;
-      return actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
-   }
-
-   function initFirearmContextFromWeapon(weapon) {
-      if (!weapon) {
-         isFirearm = false;
-         weaponMode = "";
-         declaredRounds = 1;
-         ammoAvailable = null;
-         return;
-      }
-      const { isFirearm: f, mode, declaredRounds: d, ammoAvailable: a } = classifyWeapon(weapon);
-      isFirearm = f;
-      weaponMode = mode;
-      declaredRounds = d;
-      ammoAvailable = a;
-   }
-
-   function upsertOrRemoveRecoil() {
-      const existingIndex = modifiersArray.findIndex((m) => m.id === "recoil");
-      const isItem = caller?.type === "item";
-      if (!isItem) {
-         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
-         return;
-      }
-
-      const weapon = getWeaponFromCaller();
-      if (!weapon) {
-         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
-         return;
-      }
-
-      const { isFirearm: f } = classifyWeapon(weapon);
-      if (!f) {
-         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
-         return;
-      }
-
-      const row = computeRecoilRow({ actor, weapon, declaredRounds, ammoAvailable });
-      if (!row) {
-         if (existingIndex >= 0) modifiersArray = modifiersArray.filter((m, i) => i !== existingIndex);
-         return;
-      }
-
-      // If user touched recoil, keep their value; otherwise keep it updated
-      if (existingIndex === -1) {
-         modifiersArray = [...modifiersArray, { ...row, id: "recoil", weaponId: weapon.id, source: "auto" }];
-         return;
-      }
-
-      const existing = modifiersArray[existingIndex];
-      if (existing?.meta?.userTouched) return;
-
-      const copy = [...modifiersArray];
-      copy[existingIndex] = { ...existing, ...row, id: "recoil", weaponId: weapon.id, source: "auto" };
-      modifiersArray = copy;
-   }
-
    // ------------------- composer API -------------------
 
    // Ensure OpposeRollService is imported where this lives:
@@ -212,15 +147,20 @@
       DEBUG &&
          !(currentProcedure instanceof AbstractProcedure) &&
          LOG.error("Unfit data type passed in", [__FILE__, __LINE__, setCallerData.name]);
+      if (unsubTN) unsubTN();
+      if (unsubMods) unsubMods();
 
-      procedureStore = writable(currentProcedure);
-      visible = true;
+      procedureStore = currentProcedure;
+      isFirearm = currentProcedure instanceof FirearmProcedure;
+
+      unsubTN = procedureStore.targetNumber.subscribe((v) => (targetNumber = v));
+      unsubMods = procedureStore.tnModifiers.subscribe((v) => (modifiersArray = v));
 
       const penalty = buildPenaltyMod();
-
       if (penalty) procedureStore.upsertMod(penalty);
 
-      titleStore = procedureStore.titleStore; //Replacing the store, not its content.
+      titleStore = procedureStore.title; //Replacing the store, not its content.
+      visible = true;
    }
 
    // ------------------- internal logic -------------------
@@ -242,8 +182,7 @@
          const { key } = FirearmService.getPhase();
          if (key !== phaseKey) {
             phaseKey = key;
-            // recoil may reset across passes -> recompute
-            upsertOrRemoveRecoil();
+            procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
          }
       };
       unhook = (..._args) => refreshPhase();
@@ -268,20 +207,23 @@
       declaredRounds;
       weaponMode;
       phaseKey;
-      upsertOrRemoveRecoil();
+      procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
    });
 
    $effect(() => {
       if (!visible) return;
       hasTarget;
       if (!hasTarget) return;
-      if (caller?.type !== "item") return;
+      if (!isFirearm) return;
 
-      const weapon = getWeaponFromCaller();
+      const weapon = procedureStore?.item;
       if (!weapon) return;
       if (rangePrimedForWeaponId || rangeSuppressedForWeaponId === weapon.id) return;
 
-      primeRangeForWeapon(weapon);
+      const attackerToken = actor?.getActiveTokens?.()[0] ?? null;
+      const targetToken = Array.from(game.user.targets)[0] ?? null;
+      procedureStore?.primeRangeForWeapon?.(attackerToken, targetToken);
+      rangePrimedForWeaponId = weapon.id;
    });
 
    $effect(() => {
@@ -299,20 +241,8 @@
 
    $effect(() => {
       if (!visible) return;
-      if (caller?.type !== "item") return;
-      const weapon = getWeaponFromCaller();
-      if (!weapon) return;
-
-      const { isFirearm: f } = classifyWeapon(weapon);
-      if (!f) {
-         caller.firearmPlan = null;
-         caller.damagePacket = null;
-         return;
-      }
-
-      const pre = precomputeFirearm({ actor, weapon, declaredRounds, ammoAvailable });
-      caller.firearmPlan = pre.plan;
-      caller.damagePacket = pre.damage;
+      if (!isFirearm) return;
+      procedureStore?.precompute?.({ declaredRounds, ammoAvailable });
    });
 
    $effect(() => {
