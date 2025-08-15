@@ -11,7 +11,6 @@ import { StoreManager, stores } from "../../svelte/svelteHelpers/StoreManager.sv
 import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 import OpposeRollService from "@services/OpposeRollService.js";
 
-
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
    #neon;
@@ -218,42 +217,10 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       return super._tearDown();
    }
 
-   setRollComposerData(callerData, options) {
+   // INFO: Sole responsibility to pass it on to Svelte
+   displayRollComposer(procedure) {
       if (!this.#composer) return;
-
-      const dict = CONFIG?.sr3e?.attributes ?? {};
-      let payload = { ...callerData };
-
-      if (payload?.responseMode) {
-         const contest = payload.contestId ? OpposeRollService.getContestById(payload.contestId) : null;
-         const hint = contest?.defenseHint ?? OpposeRollService.getDefaultDefenseHint(contest?.initiatorRoll);
-
-         if (payload.type === "dodge") {
-            if (payload.defenseTNMod === undefined) payload.defenseTNMod = Number(hint?.tnMod || 0);
-            if (payload.defenseTNLabel === undefined)
-               payload.defenseTNLabel = hint?.tnLabel || "Weapon difficulty";
-         } else if (hint?.type === "attribute") {
-            payload.type = "attribute";
-            payload.key = hint.key;
-            payload.name = game.i18n.localize(`sr3e.attributes.${hint.key}`) || hint.key;
-            payload.item = undefined;
-            payload.defenseTNMod = Number(hint.tnMod || 0);
-            payload.defenseTNLabel = hint.tnLabel || "Weapon difficulty";
-         }
-      }
-
-      if (payload?.type === "item" && payload?.key && Object.prototype.hasOwnProperty.call(dict, payload.key)) {
-         payload = { ...payload, type: "attribute", item: undefined };
-      }
-
-      payload = {
-         ...payload,
-         isResistingDamage: callerData?.isResistingDamage,
-         prep: callerData?.prep,
-         weaponId: callerData?.weaponId,
-      };
-
-      this.#composer.setCallerData(payload, options ?? { visible: true });
+      this.#composer.setCallerData(procedure);
    }
 
    _onSubmit() {

@@ -101,7 +101,7 @@
       const dice = $valueROStore?.sum ?? 0;
 
       if (e.shiftKey) {
-         actor.sheet.setRollComposerData({
+         actor.sheet.displayRollComposer({
             key,
             value: $valueROStore.value,
             type: "attribute",

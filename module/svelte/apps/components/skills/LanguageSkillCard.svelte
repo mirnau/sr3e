@@ -31,7 +31,7 @@
          : $valueStore;
 
       if (e.shiftKey) {
-         actor.sheet.setRollComposerData({
+         actor.sheet.displayRollComposer({
             type: "skill",
             key: skill.name,
             dice,

@@ -10,7 +10,6 @@ export function configureQueries() {
       const initiator = game.actors.get(initiatorId);
       const target = game.actors.get(targetId);
       if (!initiator || !target) {
-         console.warn("[sr3e] Could not resolve actors for opposeRollPrompt");
          return { acknowledged: false };
       }
 

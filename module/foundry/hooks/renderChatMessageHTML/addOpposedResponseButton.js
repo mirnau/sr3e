@@ -98,7 +98,7 @@ export async function addOpposedResponseButton(message, html, data) {
          defenseTNLabel: tnLabel,
       };
 
-      actorSheet.setRollComposerData(caller);
+      actorSheet.displayRollComposer(caller);
 
       const rollData = await OpposeRollService.waitForResponse(contestId);
 

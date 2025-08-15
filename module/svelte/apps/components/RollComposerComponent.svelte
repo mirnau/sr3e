@@ -8,7 +8,7 @@
    import Resistance from "@sveltecomponent/Resistance.svelte";
    import Challenge from "@sveltecomponent/Challenge.svelte";
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
-   import { get } from "svelte/store";
+   import { get, writable } from "svelte/store";
    import FirearmService from "@families/FirearmService.js";
    import {
       classifyWeapon,
@@ -17,6 +17,7 @@
       recoilState,
       clearAllRecoilForActor,
    } from "@services/ComposerAttackController.js";
+   import AbstractProcedure from "@services/procedure/AbstractProcedure.js";
 
    let { actor, config } = $props();
 
@@ -39,6 +40,7 @@
    let modifiersTotal = $state(0);
    let modifiedTargetNumber = $state(0);
    let difficulty = $state("");
+   let procedureStore;
 
    let diceBought = $state(0);
    let karmaCost = $state(0);
@@ -56,7 +58,7 @@
    let isResponding = $state(false);
    let isResistingDamage = $state(false);
    let canSubmit = $state(true);
-   let title = $state("");
+   let titleStore = writable("Title Not Set");
    let rangePrimedForWeaponId = $state(null);
    let rangeSuppressedForWeaponId = $state(null);
 
@@ -112,54 +114,6 @@
       modifiersArray = modifiersArray.filter((_, j) => j !== index);
    }
 
-   function primeRangeForWeapon(weapon) {
-      if (!weapon) return;
-      if (rangeSuppressedForWeaponId === weapon.id) return;
-
-      const { isFirearm: isFw } = classifyWeapon(weapon);
-      if (!isFw) return;
-
-      const attackerToken = canvas.tokens?.controlled?.[0] || actor.getActiveTokens()?.[0] || null;
-      const targetToken = [...game.user.targets][0] || null;
-      if (!attackerToken || !targetToken) return;
-
-      const rangeShiftLeft = 0;
-      const raw = FirearmService.rangeModifierForComposer({
-         actor,
-         caller,
-         attackerToken,
-         targetToken,
-         rangeShiftLeft,
-      });
-      if (raw == null) return; // nothing to add
-
-      // Enforce the expected shape, fail-fast if not provided correctly
-      const name = raw.name ?? raw.label ?? null;
-      const hasValue =
-         Object.prototype.hasOwnProperty.call(raw, "value") ||
-         Object.prototype.hasOwnProperty.call(raw, "tnDelta") ||
-         Object.prototype.hasOwnProperty.call(raw, "delta") ||
-         Object.prototype.hasOwnProperty.call(raw, "mod");
-      const value = Number(raw.value ?? raw.tnDelta ?? raw.delta ?? raw.mod);
-      if (!name || Number.isNaN(value)) {
-         throw new Error(`sr3e: rangeModifierForComposer returned invalid shape: ${JSON.stringify(raw)}`);
-      }
-      const rangeMod = { name, value, meta: raw.meta };
-
-      const idx = modifiersArray.findIndex((m) => m.id === "range");
-      if (idx >= 0 && modifiersArray[idx]?.meta?.userTouched) return;
-
-      const mod = { ...rangeMod, id: "range", weaponId: weapon.id, source: "auto" };
-      if (idx === -1) {
-         modifiersArray = [...modifiersArray, mod];
-      } else {
-         const copy = [...modifiersArray];
-         copy[idx] = { ...copy[idx], ...mod };
-         modifiersArray = copy;
-      }
-      rangePrimedForWeaponId = weapon.id;
-   }
-
    function getAttrDiceFromSumStore(attrKey) {
       const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
       return Number(get(store)?.sum ?? 0);
@@ -175,21 +129,6 @@
       const mod = copy[index];
       copy[index] = { ...mod, meta: { ...(mod.meta || {}), userTouched: true } };
       modifiersArray = copy;
-   }
-
-   function upsertMod(mod) {
-      const idx = modifiersArray.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
-      if (idx === -1) modifiersArray = [...modifiersArray, mod];
-      else {
-         const copy = [...modifiersArray];
-         copy[idx] = { ...copy[idx], ...mod };
-         modifiersArray = copy;
-      }
-   }
-
-   function ensureDefaultingModForAttribute() {
-      const has = modifiersArray.some((m) => m.id === "auto-default-attr" || m.name === "Skill to attribute");
-      if (!has) upsertMod({ id: "auto-default-attr", name: "Skill to attribute", value: 4 });
    }
 
    function swallowDirectional(event) {
@@ -258,7 +197,6 @@
 
       const existing = modifiersArray[existingIndex];
       if (existing?.meta?.userTouched) return;
-      if (existing.value === row.value) return;
 
       const copy = [...modifiersArray];
       copy[existingIndex] = { ...existing, ...row, id: "recoil", weaponId: weapon.id, source: "auto" };
@@ -267,207 +205,25 @@
 
    // ------------------- composer API -------------------
 
-   export function setCallerData(callerData, options = {}) {
-      resetToDefaults();
-      Object.assign(caller, {
-         type: null,
-         key: null,
-         dice: 0,
-         value: 0,
-         skillId: "",
-         specialization: "",
-         name: "",
-         responseMode: false,
-         contestId: null,
-         linkedAttribute: undefined,
-         item: undefined,
-      });
-      Object.assign(caller, callerData);
-      caller.prep = callerData?.prep;
-      caller.weaponId = callerData?.weaponId;
+   // Ensure OpposeRollService is imported where this lives:
+   // import OpposeRollService from "@services/OpposeRollService.js";
 
-      // ---- visibility / mode flags ----
-      if (options.visible !== undefined) visible = options.visible;
-      isResponding = caller.responseMode || false;
-      isResistingDamage = callerData?.isResistingDamage || false;
-      hasTarget = game.user.targets.size > 0;
+   export function setCallerData(currentProcedure) {
+      DEBUG &&
+         !(currentProcedure instanceof AbstractProcedure) &&
+         LOG.error("Unfit data type passed in", [__FILE__, __LINE__, setCallerData.name]);
 
-      // ---- base TN & mods ----
-      targetNumber = 4;
-      modifiersArray = [];
-      if (isResistingDamage && caller.prep) {
-         targetNumber = Number(caller.prep.tnBase ?? 4);
-         modifiersArray = Array.isArray(caller.prep.tnMods) ? [...caller.prep.tnMods] : [];
+      procedureStore = writable(currentProcedure);
+      visible = true;
 
-         caller.type = "attribute";
-         caller.key = "body";
-         caller.name = game.i18n.localize?.("sr3e.attributes.body") || "Body";
-         caller.item = undefined;
-         caller.skillId = undefined;
-         caller.linkedAttribute = undefined;
-         if ((caller.dice ?? 0) === 0) {
-            caller.dice = getAttrDiceFromSumStore("body");
-         }
-      }
-
-      // ---- modifiers: add wound penalty; optional defense TN mod ----
       const penalty = buildPenaltyMod();
-      if (penalty) upsertMod(penalty);
 
-      if (Number.isFinite(Number(caller.defenseTNMod)) && Number(caller.defenseTNMod) !== 0) {
-         upsertMod({
-            id: "weapon-defense",
-            name: caller.defenseTNLabel || "Weapon difficulty",
-            value: Number(caller.defenseTNMod),
-         });
-      }
+      if (penalty) procedureStore.upsertMod(penalty);
 
-      // ---- pre-normalize type ----
-      const attributesDict = CONFIG?.sr3e?.attributes ?? {};
-
-      // If an item caller uses an attribute key, treat it as an attribute roll.
-      if (caller.type === "item" && caller.key && Object.prototype.hasOwnProperty.call(attributesDict, caller.key)) {
-         caller.type = "attribute";
-         caller.item = undefined;
-      }
-
-      // In response mode, coerce unknown types to attribute(Reaction), but NEVER dodge.
-      if (caller.responseMode && caller.type !== "attribute" && caller.type !== "dodge") {
-         caller.type = "attribute";
-         if (!caller.key) caller.key = "reaction";
-         if (!caller.name) caller.name = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
-         caller.item = undefined;
-      }
-
-      // ---- main switch ----
-      switch (caller.type) {
-         case "dodge": {
-            // No skill, no attribute, no item; user adds only pool dice if desired.
-            initFirearmContextFromWeapon(null);
-            title = caller.name || game.i18n.localize?.("sr3e.dodge") || "Dodge";
-
-            caller.item = undefined;
-            caller.skillId = undefined;
-            caller.linkedAttribute = undefined;
-            caller.dice = Number(caller.dice) || 0;
-            associatedDicePoolString = "combat";
-            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
-
-            // IMPORTANT: do not fall through; keep Dodge pure (no Reaction coercion).
-            return;
-         }
-
-         case "item": {
-            const itemId = caller.item?.id ?? caller.key;
-            const item = actor?.items?.get(itemId) ?? game.items?.get(itemId) ?? null;
-            if (!item) throw new Error(`sr3e: Item not found for id/key "${itemId}"`);
-
-            title = item.name;
-
-            // Initialize firearm context BEFORE defaulting logic.
-            initFirearmContextFromWeapon(item);
-
-            // Prime range once per roll (if not suppressed by user).
-            if (hasTarget && item.id !== rangePrimedForWeaponId && rangeSuppressedForWeaponId !== item.id) {
-               // new weapon → clear suppression marker
-               rangeSuppressedForWeaponId = null;
-               primeRangeForWeapon(item);
-            }
-
-            // Prepare skill linkage from the weapon’s linked skill.
-            const [skillId] = String(item.system?.linkedSkillId ?? "").split("::");
-            const skill = skillId ? actor.items.get(skillId) : null;
-            prepareSkillBasedRoll(skill, item.name);
-
-            if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
-
-            // If no dice explicitly set, default to linked attribute dice and mark defaulting.
-            if ((caller.dice ?? 0) === 0 && linkedAttributeString) {
-               caller.dice = getAttrDiceFromSumStore(linkedAttributeString);
-               isDefaultingAsString = "true";
-               queueMicrotask(() => {
-                  if (selectEl) selectEl.value = "true";
-               });
-               ensureDefaultingModForAttribute();
-            }
-            return;
-         }
-
-         case "skill": {
-            initFirearmContextFromWeapon(null);
-            const skill = actor.items.get(caller.skillId);
-            if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
-            prepareSkillBasedRoll(skill, caller.key);
-            if (linkedAttributeString) caller.linkedAttribute = linkedAttributeString;
-            return;
-         }
-
-         case "specialization": {
-            initFirearmContextFromWeapon(null);
-            const skill = actor.items.get(caller.skillId);
-            if (!skill) throw new Error(`sr3e: Skill not found for id "${caller.skillId}"`);
-            prepareSkillBasedRoll(skill, caller.key);
-            return;
-         }
-
-         case "attribute": {
-            initFirearmContextFromWeapon(null);
-            title = game.i18n.localize(`sr3e.attributes.${caller.key}`) || caller.key;
-            if ((caller.dice ?? 0) === 0) {
-               caller.dice = getAttrDiceFromSumStore(caller.key);
-            }
-            return;
-         }
-
-         default: {
-            throw new Error(`sr3e: Unsupported caller.type "${caller.type}"`);
-         }
-      }
-   }
-
-   function resetToDefaults() {
-      targetNumber = 4;
-      modifiersArray = [];
-      diceBought = 0;
-      currentDicePoolAddition = 0;
-      karmaCost = 0;
-      isDefaultingAsString = "false";
-      hasChallenged = false;
-      title = "";
-      associatedDicePoolString = "";
-      // firearm context
-      isFirearm = false;
-      weaponMode = "";
-      declaredRounds = 1;
-      ammoAvailable = null;
-      // range priming should be once per roll, so reset here
-      rangePrimedForWeaponId = null;
-      rangeSuppressedForWeaponId = null;
-      // optional parity with recoil if you later implement similar suppression
-      recoilPrimedForWeaponId = null;
+      titleStore = procedureStore.titleStore; //Replacing the store, not its content.
    }
 
    // ------------------- internal logic -------------------
-
-   function prepareSkillBasedRoll(skill, titleOverride) {
-      if (!skill) return;
-      const skillType = skill.system.skillType;
-      const skillData = skill.system[skillType + "Skill"];
-      title = titleOverride ?? skill.name;
-      linkedAttributeString = skillData?.linkedAttribute ?? "";
-      if (skillType === "active") {
-         associatedDicePoolString = skillData?.associatedDicePool ?? "";
-         if (associatedDicePoolString) {
-            associatedDicePoolStore = actorStoreManager.GetRWStore(`dicePools.${associatedDicePoolString}`);
-         }
-      }
-      if (linkedAttributeString) {
-         linkedAttributeStore = actorStoreManager.GetSumROStore(`attributes.${linkedAttributeString}`);
-      }
-      if (skillType === "language") {
-         readwrite = skillData?.readwrite;
-      }
-   }
 
    async function CommitEffects() {
       if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
@@ -609,13 +365,13 @@
       karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
 
-   function HideSidePanel() {
+   function OnClose() {
       visible = false;
    }
 
    function handleKey(event) {
       if (event.key === "Escape") {
-         HideSidePanel();
+         OnClose();
          event.stopPropagation();
          event.preventDefault();
       }
@@ -633,7 +389,7 @@
       onkeydown={swallowDirectional}
    >
       <div class="roll-composer-card">
-         <h1>{title}</h1>
+         <h1>{$titleStore}</h1>
          <h1>Roll Type</h1>
          <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
             <option value="false">Regular roll</option>
@@ -704,59 +460,16 @@
          </div>
       {/if}
 
-      {#if isResistingDamage}
-         <Resistance
-            {actor}
-            {caller}
-            {modifiersArray}
-            {targetNumber}
-            {modifiedTargetNumber}
-            {diceBought}
-            {isDefaulting}
-            {currentDicePoolAddition}
-            OnClose={HideSidePanel}
-            {CommitEffects}
-         />
-      {:else if isResponding}
-         <Respond
-            {actor}
-            {caller}
-            {modifiersArray}
-            {targetNumber}
-            {modifiedTargetNumber}
-            {diceBought}
-            {currentDicePoolAddition}
-            {isDefaulting}
-            OnClose={HideSidePanel}
-            {CommitEffects}
-         />
-      {:else if hasTarget}
-         <Challenge
-            {actor}
-            {caller}
-            {modifiersArray}
-            {targetNumber}
-            {modifiedTargetNumber}
-            {diceBought}
-            {currentDicePoolAddition}
-            {isDefaulting}
-            OnClose={HideSidePanel}
-            {CommitEffects}
-         />
+      {#if false}
+         <!--Resistance {procedureStore} {OnClose} {CommitEffects} /-->
+      {:else if false}
+         <!--Respond {procedureStore} {OnClose} {CommitEffects} /-->
+      {:else if $procedureStore.hasTargets}
+         <Challenge {procedureStore} {OnClose} {CommitEffects}>
       {:else}
-         <ComposerRoll
-            {actor}
-            {caller}
-            {modifiersArray}
-            {targetNumber}
-            {modifiedTargetNumber}
-            {diceBought}
-            {currentDicePoolAddition}
-            {isDefaulting}
-            OnClose={HideSidePanel}
-            {CommitEffects}
-         />
+         <!--ComposerRoll {procedureStore} {OnClose} {CommitEffects} /-->
       {/if}
+
       {#if caller.type === "item" && isFirearm && (weaponMode === "burst" || weaponMode === "fullauto")}
          <div class="roll-composer-card">
             <h1>Rounds</h1>
@@ -777,9 +490,15 @@
          const { shots } = recoilState(actor?.id);
          return shots > 0;
       })()}
-        {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
+         {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
             <div class="roll-composer-card">
-               <button class="regular" onclick={ResetRecoil}>
+               <button
+                  class="regular"
+                  onclick={() => {
+                     modifiersArray = modifiersArray.filter((m) => m.id !== "recoil" && m.name !== "Recoil");
+                     clearAllRecoilForActor(actor?.id);
+                  }}
+               >
                   Clear Recoil
                </button>
             </div>

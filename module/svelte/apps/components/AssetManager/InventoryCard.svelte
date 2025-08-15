@@ -7,6 +7,7 @@
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
    import WearableComponent from "@sveltecomponent/AssetManager/components/WearableComponent.svelte";
+   import { ProcedureFactory } from "@services/procedure/AbstractProcedure.js";
 
    let { item, config } = $props();
 
@@ -85,37 +86,7 @@
    }
 
    function performItemAction() {
-      if (item.type === "weapon" && !hasAmmo) {
-         ui.notifications.warn(localize("sr3e.notifications.outOfAmmo") || "Out of ammo. Reload first.");
-         return;
-      }
-
-      const actor = item.parent;
-      const [skillId, specIndexRaw] = ($linkedSkillIdStore ?? "").split("::");
-      const skill = actor.items.get(skillId);
-
-      const skillType = skill?.system?.skillType;
-      const skillData = skillType ? skill.system[`${skillType}Skill`] : {};
-      const specs = skillData?.specializations ?? [];
-
-      const specIndex = Number.parseInt(specIndexRaw);
-      const spec = Number.isFinite(specIndex) ? specs[specIndex] : null;
-      const dice = spec?.value ?? skillData?.value ?? 0;
-
-      const caller = {
-         type: "item",
-         key: item.id,
-         value: 0,
-         dice,
-         skillId: skillId ?? "",
-         skillName: skill?.name ?? "",
-         specializationName: spec?.name ?? "",
-         itemName: item.name,
-         item,
-         isDefaulting: item.system.isDefaulting,
-      };
-
-      actor.sheet.setRollComposerData(caller);
+      actor.sheet.displayRollComposer(ProcedureFactory(actor, item));
    }
 
    async function onTrashClick() {

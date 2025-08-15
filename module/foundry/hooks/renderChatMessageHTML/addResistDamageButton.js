@@ -31,7 +31,7 @@ export function addResistDamageButton(message, html, data) {
                : Number(prep?.tn ?? 0))
       );
 
-      sheet.setRollComposerData(
+      sheet.displayRollComposer(
          {
             isResistingDamage: true,
             contestId,
