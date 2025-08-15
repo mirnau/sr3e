@@ -1,7 +1,7 @@
-import { AbstractProcedure } from "./AbstractProcedure";
-import { FirearmProcedure } from "./FirearmProcedure";
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
+import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
 
-export function ProcedureFactory(actor, item = null, { procedure = null, responsetype = null }) {
+export function ProcedureFactory(actor, item = null, procedure = null, responsetype = null) {
     if(!(item instanceof Item)) {
         DEBUG && LOG.error("argument is not an instance of Item" [__FILE__, __LINE__]);
         return;
@@ -13,7 +13,7 @@ export function ProcedureFactory(actor, item = null, { procedure = null, respons
                 mode === "manual" ||
                 mode === "burst" ||
                 mode === "fullauto") {
-                return new FirearmProcedure(actor, item)
+                return new FirearmProcedure(actor, item);
             }
         } else if(
             mode === "blade" ||

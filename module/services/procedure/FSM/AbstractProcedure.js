@@ -1,260 +1,352 @@
 import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
-import { writable, get } from "svelte/store";
+import { writable, derived, get } from "svelte/store";
 import { localize } from "@services/utilities.js";
 
 const config = CONFIG.sr3e;
 
 export default class AbstractProcedure {
-  #caller;
-  #item;
-  #isDefaulting = false;
+   #caller;
+   #item;
+   #isDefaulting = false;
 
-  #subSkill = null;
-  #specialization = null;
-  #readwrite = null;
+   #subSkill = null;
+   #specialization = null;
+   #readwrite = null;
 
-  // Stores
-  #targetNumberStore;
-  #modifiersArrayStore;
-  #titleStore;
-  #linkedAttributeStore;
-  #currentDicePoolStore;
-  #diceStore; // <-- ADDED: base dice for the roll (skill/spec/attr)
+   // Stores
+   #targetNumberStore;
+   #modifiersArrayStore;
+   #titleStore;
+   #linkedAttributeStore;
+   #currentDicePoolStore;
+   #diceStore; // <-- ADDED: base dice for the roll (skill/spec/attr)
+   #modifiersTotalStore;
+   #finalTNStore;
+   #difficultyStore;
+   #disposers = [];
 
-  constructor(caller = null, item = null) {
-    if (this.constructor === AbstractProcedure) {
-      DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
-      ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
-    } else {
-      this.#targetNumberStore = writable(4);
-      this.#modifiersArrayStore = writable([]); // ensure always defined
-      this.#titleStore = writable("Roll");
-      this.#diceStore = writable(0);           // default 0 dice
-      this.#linkedAttributeStore = writable(null);
-      this.#currentDicePoolStore = writable(0);
-    }
-
-    if (caller && item) {
-      this.#caller = caller;
-      this.#item = item;
-
-      this.#titleStore.set(item.name);
-
-      const itemStoreManager = StoreManager.Subscribe(this.#item);
-      const actorStoreManager = StoreManager.Subscribe(this.#caller);
-
-      const linkedSkillIdStore = GetRWStore("linkedSkillId");
-      const [skillId, specIndexRaw] = String(linkedSkillIdStore.get() ?? "").split("::");
-      const skill = this.#caller.items.get(skillId);
-
-      const subType = skill?.system?.skillType;
-      const subTypeData = subType ? (skill.system?.[`${subType}Skill`] ?? {}) : {};
-      const specializationArray = subTypeData?.specializations ?? [];
-      this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
-
-      const specIndex = Number.parseInt(specIndexRaw);
-      this.#specialization = Number.isFinite(specIndex) ? specializationArray[specIndex] : null;
-
-      const baseDice = Number(this.#specialization?.value ?? subTypeData?.value ?? 0) || 0;
-      this.#diceStore.set(baseDice);
-
-      if (subType === "active") {
-        this.#currentDicePoolStore =
-          actorStoreManager.GetSumROStore(`dicePools.${subTypeData.associatedDicePool}`);
-      } else if (subType === "language") {
-        this.#readwrite = subTypeData.readwrite;
+   constructor(caller = null, item = null) {
+      if (this.constructor === AbstractProcedure) {
+         DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
+         ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
+      } else {
+         this.#targetNumberStore = writable(4);
+         this.#modifiersArrayStore = writable([]); // ensure always defined
+         this.#titleStore = writable("Roll");
+         this.#diceStore = writable(0); // default 0 dice
+         this.#linkedAttributeStore = writable(null);
+         this.#currentDicePoolStore = writable(0);
+         this.#modifiersTotalStore = derived(this.#modifiersArrayStore, (arr = []) =>
+            arr.reduce((a, m) => a + (Number(m?.value) || 0), 0)
+         );
+         this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
+            Math.max(2, Number(base ?? 4) + Number(add ?? 0))
+         );
+         this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
+            if (tn == null) return "";
+            const n = Number(tn);
+            if (n === 2) return config.difficulty.simple;
+            if (n === 3) return config.difficulty.routine;
+            if (n === 4) return config.difficulty.average;
+            if (n === 5) return config.difficulty.challenging;
+            if (n === 6 || n === 7) return config.difficulty.hard;
+            if (n === 8) return config.difficulty.strenuous;
+            if (n === 9) return config.difficulty.extreme;
+            if (n >= 10) return config.difficulty.nearlyimpossible;
+            return "";
+         });
       }
 
-      this.#subSkill = subTypeData;
+      if (caller && item) {
+         this.#caller = caller;
+         this.#item = item;
 
-      DEBUG &&
-        !item.system.isDefaulting &&
-        LOG.error(`Item ${item.type}, ${item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
+         this.#titleStore.set(item.name);
 
-      this.#isDefaulting = !!this.#item.system.isDefaulting;
+         const itemStoreManager = StoreManager.Subscribe(this.#item);
+         const actorStoreManager = StoreManager.Subscribe(this.#caller);
 
-      if (this.#isDefaulting) {
-        if (this.#specialization) {
-          this.defaultFromSkillToSpecialization();
-        } else if (this.#subSkill?.value > 0) {
-          this.defaultFromSkillToSkill();
-        } else {
-          this.defaultFromSkillToAttribute();
-        }
+         const linkedSkillIdStore = itemStoreManager.GetRWStore("linkedSkillId");
+         const [skillId, specIndexRaw] = String(get(linkedSkillIdStore) ?? "").split("::");
+         const skill = this.#caller.items.get(skillId);
+
+         const subType = skill?.system?.skillType;
+         const subTypeData = subType ? skill.system?.[`${subType}Skill`] ?? {} : {};
+         const specializationArray = subTypeData?.specializations ?? [];
+         this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
+
+         const specIndex = Number.parseInt(specIndexRaw);
+         this.#specialization = Number.isFinite(specIndex) ? specializationArray[specIndex] : null;
+
+         const baseDice = Number(this.#specialization?.value ?? subTypeData?.value ?? 0) || 0;
+         this.#diceStore.set(baseDice);
+
+         if (subType === "active") {
+            this.#currentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${subTypeData.associatedDicePool}`);
+         } else if (subType === "language") {
+            this.#readwrite = subTypeData.readwrite;
+         }
+
+         this.#subSkill = subTypeData;
+
+         DEBUG &&
+            !item.system.isDefaulting &&
+            LOG.error(`Item ${item.type}, ${item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
+
+         this.#isDefaulting = !!this.#item.system.isDefaulting;
+
+         if (this.#isDefaulting) {
+            if (this.#specialization) {
+               this.defaultFromSkillToSpecialization();
+            } else if (this.#subSkill?.value > 0) {
+               this.defaultFromSkillToSkill();
+            } else {
+               this.defaultFromSkillToAttribute();
+            }
+         }
+
+         StoreManager.Unsubscribe(this.#caller);
+         StoreManager.Unsubscribe(this.#item);
+
+         const penaltyStore = StoreManager.Subscribe(this.#caller).GetRWStore("health.penalty");
+         const unsubPenalty = penaltyStore.subscribe((p) => {
+            const v = Number(p ?? 0);
+            this._removeModById("penalty");
+            if (v > 0) this.upsertMod({ id: "penalty", name: localize(config.health.penalty), value: -v });
+         });
+         this.#disposers.push(unsubPenalty);
       }
+   }
 
-      StoreManager.Unsubscribe(this.#caller);
-      StoreManager.Unsubscribe(this.#item);
-    }
-  }
+   /* ---------------------- Basic getters/setters ---------------------- */
+   get hasTargets() {
+      return (game.user?.targets?.size ?? 0) > 0;
+   }
 
-  /* ---------------------- Basic getters/setters ---------------------- */
-  get hasTargets() { return (game.user?.targets?.size ?? 0) > 0; }
+   get linkedAttribute() {
+      return get(this.#linkedAttributeStore);
+   }
 
-  get linkedAttribute() { return get(this.#linkedAttributeStore); }
+   get caller() {
+      return this.#caller;
+   }
+   get item() {
+      return this.#item;
+   }
 
-  get caller() { return this.#caller; }
-  get item() { return this.#item; }
+   set title(v) {
+      this.#titleStore?.set?.(v);
+   }
+   get title() {
+      return this.#titleStore;
+   } // store (Composer subscribes with {$title})
 
-  set title(v) { this.#titleStore?.set?.(v); }
-  get title()  { return this.#titleStore; } // store (Composer subscribes with {$title})
+   get tnModifiers() {
+      DEBUG && !this.#modifiersArrayStore && LOG.error("Modifiers has not been set", [__FILE__, __LINE__]);
+      return this.#modifiersArrayStore; // store (array)
+   }
 
-  get tnModifiers() {
-    DEBUG && !this.#modifiersArrayStore && LOG.error("Modifiers has not been set", [__FILE__, __LINE__]);
-    return this.#modifiersArrayStore; // store (array)
-  }
+   get targetNumber() {
+      return this.#targetNumberStore;
+   } // store (number)
 
-  get targetNumber() { return this.#targetNumberStore; } // store (number)
+   get modifiersTotal() {
+      return this.#modifiersTotalStore;
+   } // store (number)
 
-  // Dice: expose both value and store
-  get dice() { return Number(get(this.#diceStore) ?? 0) || 0; }
-  set dice(v) { this.#diceStore.set(Math.max(0, Number(v) || 0)); }
-  get diceStore() { return this.#diceStore; }
+   get finalTNStore() {
+      return this.#finalTNStore;
+   } // store (number)
 
-  get isDefaulting() { return this.#isDefaulting; }
+   get difficultyStore() {
+      return this.#difficultyStore;
+   } // store (string)
 
-  isCaller(actor) { return actor?.id === this.#caller?.id; }
+   // Dice: expose both value and store
+   get dice() {
+      return Number(get(this.#diceStore) ?? 0) || 0;
+   }
+   set dice(v) {
+      this.#diceStore.set(Math.max(0, Number(v) || 0));
+   }
+   get diceStore() {
+      return this.#diceStore;
+   }
 
-  /* --------------------------- Mod helpers --------------------------- */
-  upsertMod(mod) {
-    const arr = get(this.#modifiersArrayStore) ?? [];
-    const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
-    if (idx === -1) this.#modifiersArrayStore.set([...arr, mod]);
-    else {
+   get isDefaulting() {
+      return this.#isDefaulting;
+   }
+
+   isCaller(actor) {
+      return actor?.id === this.#caller?.id;
+   }
+
+   /* --------------------------- Mod helpers --------------------------- */
+   upsertMod(mod) {
+      const arr = get(this.#modifiersArrayStore) ?? [];
+      const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
+      if (idx === -1) this.#modifiersArrayStore.set([...arr, mod]);
+      else {
+         const copy = arr.slice();
+         copy[idx] = { ...copy[idx], ...mod };
+         this.#modifiersArrayStore.set(copy);
+      }
+   }
+
+   removeModByIndex(i) {
+      const arr = get(this.#modifiersArrayStore) ?? [];
+      if (i < 0 || i >= arr.length) return;
+      this.#modifiersArrayStore.set(arr.filter((_, j) => j !== i));
+   }
+
+   _removeModById(id) {
+      this.#modifiersArrayStore.update((arr = []) => arr.filter((m) => m.id !== id));
+   }
+
+   markModTouchedAt(index) {
+      const arr = get(this.#modifiersArrayStore) ?? [];
+      if (index < 0 || index >= arr.length) return;
       const copy = arr.slice();
-      copy[idx] = { ...copy[idx], ...mod };
+      const m = copy[index] || {};
+      copy[index] = { ...m, meta: { ...(m.meta || {}), userTouched: true } };
       this.#modifiersArrayStore.set(copy);
-    }
-  }
+   }
 
-  finalTN({ floor = null } = {}) {
-    const mods = get(this.#modifiersArrayStore) ?? [];
-    const base = Number(get(this.#targetNumberStore) ?? 4);
-    const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
-    return floor == null ? sum : Math.max(floor, sum);
-  }
+   finalTN({ floor = null } = {}) {
+      const mods = get(this.#modifiersArrayStore) ?? [];
+      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
+      return floor == null ? sum : Math.max(floor, sum);
+   }
 
-  /* -------------------- Roll formula (NEW: base) --------------------- */
-  /**
-   * Build SR3E dice formula string for SR3ERoll.
-   * - explodes=false  → "Xd6"
-   * - open test       → "Xd6x"
-   * - TN present      → "Xd6xTN" (TN floored at 2)
-   */
-  buildFormula(explodes = true) {
-    const dice = this.dice;
-    if (dice <= 0) return "1d6";
+   /* -------------------- Roll formula (NEW: base) --------------------- */
+   /**
+    * Build SR3E dice formula string for SR3ERoll.
+    * - explodes=false  → "Xd6"
+    * - open test       → "Xd6x"
+    * - TN present      → "Xd6xTN" (TN floored at 2)
+    */
+   buildFormula(explodes = true) {
+      const dice = this.dice;
+      if (dice <= 0) return "1d6";
 
-    const base = `${dice}d6`;
-    if (!explodes) return base;
+      const base = `${dice}d6`;
+      if (!explodes) return base;
 
-    // Treat explicit open-test as "no TN". Also allow targetNumber being null/undefined.
-    const tnBase = get(this.#targetNumberStore);
-    const isOpen = this.#isOpenTest() || tnBase == null;
-    if (isOpen) return `${base}x`;
+      // Treat explicit open-test as "no TN". Also allow targetNumber being null/undefined.
+      const tnBase = get(this.#targetNumberStore);
+      const isOpen = this.#isOpenTest() || tnBase == null;
+      if (isOpen) return `${base}x`;
 
-    const tn = this.finalTN();
-    return `${base}x${Math.max(2, Number(tn) || 2)}`;
-  }
+      const tn = this.finalTN();
+      return `${base}x${Math.max(2, Number(tn) || 2)}`;
+   }
 
-  onDestroy() {}
+   onDestroy() {
+      for (const d of this.#disposers)
+         try {
+            d?.();
+         } catch {}
+      this.#disposers = [];
+   }
 
-  /* --------------------------- Defaulting ---------------------------- */
-  #clearDefaultingMods() {
-    this.#modifiersArrayStore.update((arr = []) =>
-      arr.filter((m) => !String(m?.id || "").startsWith("auto-default-"))
-    );
-  }
+   /* --------------------------- Defaulting ---------------------------- */
 
-  #upsertMod(mod) {
-    this.#modifiersArrayStore.update((arr = []) => {
-      const i = arr.findIndex((m) => m.id === mod.id);
-      if (i >= 0) {
-        const next = arr.slice();
-        next[i] = { ...next[i], ...mod };
-        return next;
+   #clearDefaultingMods() {
+      this.#modifiersArrayStore.update((arr = []) =>
+         arr.filter((m) => !String(m?.id || "").startsWith("auto-default-"))
+      );
+   }
+
+   #upsertMod(mod) {
+      this.#modifiersArrayStore.update((arr = []) => {
+         const i = arr.findIndex((m) => m.id === mod.id);
+         if (i >= 0) {
+            const next = arr.slice();
+            next[i] = { ...next[i], ...mod };
+            return next;
+         }
+         return [...arr, mod];
+      });
+   }
+
+   #preDefaultTN() {
+      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const mods = get(this.#modifiersArrayStore) ?? [];
+      const add = mods
+         .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
+         .reduce((a, m) => a + (Number(m?.value) || 0), 0);
+      return base + add;
+   }
+
+   #assertDefaultAllowed() {
+      if (this.#item?.system?.noDefault) {
+         DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
+         ui.notifications.warn(localize("sr3e.warn.defaultNotAllowed"));
+         return false;
       }
-      return [...arr, mod];
-    });
-  }
+      if (this.#preDefaultTN() >= 8) {
+         DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
+         ui.notifications.warn(localize("sr3e.warn.defaultTN8"));
+         return false;
+      }
+      return true;
+   }
 
-  #preDefaultTN() {
-    const base = Number(get(this.#targetNumberStore) ?? 4);
-    const mods = get(this.#modifiersArrayStore) ?? [];
-    const add = mods
-      .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
-      .reduce((a, m) => a + (Number(m?.value) || 0), 0);
-    return base + add;
-  }
+   #isOpenTest() {
+      return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
+   }
 
-  #assertDefaultAllowed() {
-    if (this.#item?.system?.noDefault) {
-      DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
-      ui.notifications.warn(localize("sr3e.warn.defaultNotAllowed"));
-      return false;
-    }
-    if (this.#preDefaultTN() >= 8) {
-      DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
-      ui.notifications.warn(localize("sr3e.warn.defaultTN8"));
-      return false;
-    }
-    return true;
-  }
+   defaultFromSkillToAttribute() {
+      if (!this.#assertDefaultAllowed()) return;
+      this.#clearDefaultingMods();
+      const isOpen = this.#isOpenTest();
+      const mod = {
+         id: "auto-default-attr",
+         name: "Skill to attribute",
+         value: isOpen ? 0 : 4,
+         openSubtract: isOpen ? 4 : undefined,
+         poolCap: 0,
+         forbidPool: true,
+      };
+      this.#upsertMod(mod);
+   }
 
-  #isOpenTest() {
-    return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
-  }
+   defaultFromSkillToSkill() {
+      if (!this.#assertDefaultAllowed()) return;
+      const rating = Number(this.#subSkill?.value ?? 0);
+      DEBUG &&
+         (!Number.isFinite(rating) || rating <= 0) &&
+         LOG.error("No base skill to default to", [__FILE__, __LINE__]);
+      this.#clearDefaultingMods();
+      const isOpen = this.#isOpenTest();
+      const cap = Math.floor(rating / 2);
+      const mod = {
+         id: "auto-default-skill",
+         name: "Skill to skill",
+         value: isOpen ? 0 : 2,
+         openSubtract: isOpen ? 2 : undefined,
+         poolCap: cap,
+      };
+      this.#upsertMod(mod);
+   }
 
-  defaultFromSkillToAttribute() {
-    if (!this.#assertDefaultAllowed()) return;
-    this.#clearDefaultingMods();
-    const isOpen = this.#isOpenTest();
-    const mod = {
-      id: "auto-default-attr",
-      name: "Skill to attribute",
-      value: isOpen ? 0 : 4,
-      openSubtract: isOpen ? 4 : undefined,
-      poolCap: 0,
-      forbidPool: true,
-    };
-    this.#upsertMod(mod);
-  }
-
-  defaultFromSkillToSkill() {
-    if (!this.#assertDefaultAllowed()) return;
-    const rating = Number(this.#subSkill?.value ?? 0);
-    DEBUG &&
-      (!Number.isFinite(rating) || rating <= 0) &&
-      LOG.error("No base skill to default to", [__FILE__, __LINE__]);
-    this.#clearDefaultingMods();
-    const isOpen = this.#isOpenTest();
-    const cap = Math.floor(rating / 2);
-    const mod = {
-      id: "auto-default-skill",
-      name: "Skill to skill",
-      value: isOpen ? 0 : 2,
-      openSubtract: isOpen ? 2 : undefined,
-      poolCap: cap,
-    };
-    this.#upsertMod(mod);
-  }
-
-  defaultFromSkillToSpecialization() {
-    if (!this.#assertDefaultAllowed()) return;
-    const baseRating = Number(this.#subSkill?.value ?? 0);
-    DEBUG &&
-      (!Number.isFinite(baseRating) || baseRating <= 0) &&
-      LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
-    this.#clearDefaultingMods();
-    const isOpen = this.#isOpenTest();
-    const cap = Math.floor(baseRating / 2);
-    const mod = {
-      id: "auto-default-spec",
-      name: "Skill to specialization",
-      value: isOpen ? 0 : 3,
-      openSubtract: isOpen ? 3 : undefined,
-      poolCap: cap,
-    };
-    this.#upsertMod(mod);
-  }
+   defaultFromSkillToSpecialization() {
+      if (!this.#assertDefaultAllowed()) return;
+      const baseRating = Number(this.#subSkill?.value ?? 0);
+      DEBUG &&
+         (!Number.isFinite(baseRating) || baseRating <= 0) &&
+         LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
+      this.#clearDefaultingMods();
+      const isOpen = this.#isOpenTest();
+      const cap = Math.floor(baseRating / 2);
+      const mod = {
+         id: "auto-default-spec",
+         name: "Skill to specialization",
+         value: isOpen ? 0 : 3,
+         openSubtract: isOpen ? 3 : undefined,
+         poolCap: cap,
+      };
+      this.#upsertMod(mod);
+   }
 }

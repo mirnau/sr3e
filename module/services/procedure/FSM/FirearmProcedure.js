@@ -1,5 +1,5 @@
-import AbstractProcedure from "./AbstractProcedure.js";
-import FirearmService from "../families/FirearmService.js";
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
+import FirearmService from "@services/procedure/families/FirearmService.js";
 
 export default class FirearmProcedure extends AbstractProcedure {
   constructor(caller, item) {

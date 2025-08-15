@@ -23,10 +23,12 @@
       if (targetHook) Hooks.off("targetToken", targetHook);
       if (unsubTN) unsubTN();
       if (unsubMods) unsubMods();
+      if (unsubFinalTN) unsubFinalTN();
+      if (unsubModsTotal) unsubModsTotal();
+      if (unsubDifficulty) unsubDifficulty();
    });
 
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
-   let penaltyStore = actorStoreManager.GetRWStore("health.penalty");
 
    let currentDicePoolSelectionStore = actorStoreManager.GetShallowStore(actor.id, stores.dicepoolSelection);
    let displayCurrentDicePoolStore = null;
@@ -58,7 +60,6 @@
    let rangePrimedForWeaponId = $state(null);
    let rangeSuppressedForWeaponId = $state(null);
 
-   // same pattern for recoil if you want to stop it from overriding user edits
    let associatedDicePoolString = $state("");
    let associatedDicePoolStore;
    let linkedAttributeString;
@@ -68,15 +69,16 @@
    let containerEl;
    let unsubTN;
    let unsubMods;
+   let unsubFinalTN;
+   let unsubModsTotal;
+   let unsubDifficulty;
 
-   // ---- firearm context (for recoil) ----
    let isFirearm = $state(false);
-   let weaponMode = $state(""); // "manual" | "semiauto" | "burst" | "fullauto" | ...
-   let declaredRounds = $state(1); // user-controlled for BF/FA
-   let ammoAvailable = $state(null); // null = unknown/unlimited; else number
-   let phaseKey = $state(""); // "round:pass" from FirearmService.getPhase()
+   let weaponMode = $state("");
+   let declaredRounds = $state(1);
+   let ammoAvailable = $state(null);
+   let phaseKey = $state("");
 
-   // We keep caller shape intact
    let caller = $state({
       type: null,
       key: null,
@@ -92,8 +94,6 @@
    let difficulties = ItemDataService.getDifficultyGradings(config);
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
-   // --------------- helpers ----------------
-
    function ResetRecoil() {
       procedureStore?.resetRecoil?.();
       procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
@@ -105,9 +105,8 @@
          rangeSuppressedForWeaponId = mod.weaponId;
       }
       if (mod?.id === "recoil" && mod.weaponId) {
-         // optional: add a recoilSuppressedForWeaponId if you want the same behavior
       }
-      modifiersArray = modifiersArray.filter((_, j) => j !== index);
+      procedureStore?.removeModByIndex?.(index);
    }
 
    function getAttrDiceFromSumStore(attrKey) {
@@ -115,16 +114,8 @@
       return Number(get(store)?.sum ?? 0);
    }
 
-   function buildPenaltyMod() {
-      const p = Number($penaltyStore ?? 0);
-      return p > 0 ? { id: "penalty", name: localize(config.health.penalty), value: -p } : null;
-   }
-
    function markModTouched(index) {
-      const copy = [...modifiersArray];
-      const mod = copy[index];
-      copy[index] = { ...mod, meta: { ...(mod.meta || {}), userTouched: true } };
-      modifiersArray = copy;
+      procedureStore?.markModTouchedAt?.(index);
    }
 
    function swallowDirectional(event) {
@@ -138,32 +129,28 @@
       swallowDirectional(event);
    }
 
-   // ------------------- composer API -------------------
-
-   // Ensure OpposeRollService is imported where this lives:
-   // import OpposeRollService from "@services/OpposeRollService.js";
-
    export function setCallerData(currentProcedure) {
       DEBUG &&
          !(currentProcedure instanceof AbstractProcedure) &&
          LOG.error("Unfit data type passed in", [__FILE__, __LINE__, setCallerData.name]);
       if (unsubTN) unsubTN();
       if (unsubMods) unsubMods();
+      if (unsubFinalTN) unsubFinalTN();
+      if (unsubModsTotal) unsubModsTotal();
+      if (unsubDifficulty) unsubDifficulty();
 
       procedureStore = currentProcedure;
       isFirearm = currentProcedure instanceof FirearmProcedure;
 
       unsubTN = procedureStore.targetNumber.subscribe((v) => (targetNumber = v));
       unsubMods = procedureStore.tnModifiers.subscribe((v) => (modifiersArray = v));
+      unsubFinalTN = procedureStore.finalTNStore?.subscribe?.((v) => (modifiedTargetNumber = v));
+      unsubModsTotal = procedureStore.modifiersTotal?.subscribe?.((v) => (modifiersTotal = v));
+      unsubDifficulty = procedureStore.difficultyStore?.subscribe?.((v) => (difficulty = v));
 
-      const penalty = buildPenaltyMod();
-      if (penalty) procedureStore.upsertMod(penalty);
-
-      titleStore = procedureStore.title; //Replacing the store, not its content.
+      titleStore = procedureStore.title;
       visible = true;
    }
-
-   // ------------------- internal logic -------------------
 
    async function CommitEffects() {
       if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
@@ -174,7 +161,6 @@
       });
    }
 
-   // ------------------- lifecycle / hooks -------------------
    let unhook = null;
    let targetHook = null;
    onMount(() => {
@@ -187,19 +173,14 @@
       };
       unhook = (..._args) => refreshPhase();
       Hooks.on("updateCombat", unhook);
-      // initialize once
       phaseKey = FirearmService.getPhase().key;
 
-      // react to target acquisition/clear
       targetHook = () => {
          hasTarget = game.user.targets.size > 0;
       };
       Hooks.on("targetToken", targetHook);
    });
 
-   // ------------------- reactivity -------------------
-
-   // keep recoil in sync with visibility / caller / target / declaredRounds
    $effect(() => {
       if (!visible) return;
       caller;
@@ -231,11 +212,9 @@
       hasTarget;
       if (hasTarget) return;
 
-      // remove range row when no target
       const idx = modifiersArray.findIndex((m) => m.id === "range");
       if (idx >= 0) {
          modifiersArray = modifiersArray.filter((m, i) => i !== idx);
-         // do NOT set suppression here; user didn’t remove it manually
       }
    });
 
@@ -250,31 +229,7 @@
    });
 
    $effect(() => {
-      const pen = buildPenaltyMod();
-      const withoutPenalty = modifiersArray.filter((m) => m.id !== "penalty");
-      if (withoutPenalty.length !== modifiersArray.length) modifiersArray = withoutPenalty;
-      if (pen && !withoutPenalty.some((m) => m.id === pen.id)) {
-         modifiersArray = [...withoutPenalty, pen];
-      }
-   });
-
-   $effect(() => {
-      modifiersTotal = modifiersArray.reduce((acc, m) => acc + Number(m.value ?? 0), 0);
-      modifiedTargetNumber = Math.max(2, targetNumber + modifiersTotal); // SR3 min TN = 2
-      canSubmit = modifiedTargetNumber > 1;
-   });
-
-   $effect(() => {
-      const tn = Number(targetNumber);
-      if (!difficulties) return;
-      if (tn === 2) difficulty = difficulties.simple;
-      else if (tn === 3) difficulty = difficulties.routine;
-      else if (tn === 4) difficulty = difficulties.average;
-      else if (tn === 5) difficulty = difficulties.challenging;
-      else if (tn === 6 || tn === 7) difficulty = difficulties.hard;
-      else if (tn === 8) difficulty = difficulties.strenuous;
-      else if (tn === 9) difficulty = difficulties.extreme;
-      else if (tn >= 10) difficulty = difficulties.nearlyimpossible;
+      canSubmit = Number(modifiedTargetNumber) > 1;
    });
 
    $effect(() => {
@@ -288,8 +243,6 @@
       currentDicePoolAddition = 0;
       displayCurrentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${currentDicePoolName}`);
    });
-
-   // ------------------- UI handlers -------------------
 
    function KarmaCostCalculator() {
       karmaCost = 0.5 * diceBought * (diceBought + 1);
@@ -308,11 +261,12 @@
    }
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 {#if visible}
+   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
    <div
       class="roll-composer-container"
       bind:this={containerEl}
+      aria-role="presentation"
       role="group"
       tabindex="-1"
       onkeydowncapture={handleKey}
@@ -331,6 +285,7 @@
          <h1>Target Number</h1>
          <h4>{difficulty}</h4>
          <Counter bind:value={targetNumber} min="2" />
+         <h4>Final: {modifiedTargetNumber}</h4>
       </div>
 
       <div class="roll-composer-card">
@@ -390,15 +345,9 @@
          </div>
       {/if}
 
-      {#if false}
-         <!--Resistance {procedureStore} {OnClose} {CommitEffects} /-->
-      {:else if false}
-         <!--Respond {procedureStore} {OnClose} {CommitEffects} /-->
-      {:else if $procedureStore.hasTargets}
+      {#if false}{:else if false}{:else if $procedureStore.hasTargets}
          <Challenge {procedureStore} {OnClose} {CommitEffects} />
-      {:else}
-         <!--ComposerRoll {procedureStore} {OnClose} {CommitEffects} /-->
-      {/if}
+      {:else}{/if}
 
       {#if caller.type === "item" && isFirearm && (weaponMode === "burst" || weaponMode === "fullauto")}
          <div class="roll-composer-card">
@@ -409,7 +358,6 @@
                min={weaponMode === "fullauto" ? 3 : 1}
                max={(() => {
                   if (weaponMode === "burst") return Math.min(3, ammoAvailable ?? 3);
-                  // fullauto
                   const cap = 10;
                   return Math.min(cap, ammoAvailable ?? cap);
                })()}
