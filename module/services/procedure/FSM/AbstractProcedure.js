@@ -93,6 +93,9 @@ export default class AbstractProcedure {
 
   get linkedAttribute() { return get(this.#linkedAttributeStore); }
 
+  get caller() { return this.#caller; }
+  get item() { return this.#item; }
+
   set title(v) { this.#titleStore?.set?.(v); }
   get title()  { return this.#titleStore; } // store (Composer subscribes with {$title})
 
