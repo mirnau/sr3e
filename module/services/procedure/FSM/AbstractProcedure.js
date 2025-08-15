@@ -1,4 +1,4 @@
-import { StoreManager } from "module/svelte/svelteHelpers/StoreManager.svelte";
+import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
 import { writable, get } from "svelte/store";
 import { localize } from "@services/utilities.js";
 

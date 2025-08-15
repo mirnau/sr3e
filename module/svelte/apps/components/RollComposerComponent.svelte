@@ -10,7 +10,7 @@
    import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get, writable } from "svelte/store";
    import FirearmService from "@families/FirearmService.js";
-   import AbstractProcedure from "@services/procedure/AbstractProcedure.js";
+   import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
    import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
 
    let { actor, config } = $props();
@@ -395,7 +395,7 @@
       {:else if false}
          <!--Respond {procedureStore} {OnClose} {CommitEffects} /-->
       {:else if $procedureStore.hasTargets}
-         <Challenge {procedureStore} {OnClose} {CommitEffects}>
+         <Challenge {procedureStore} {OnClose} {CommitEffects} />
       {:else}
          <!--ComposerRoll {procedureStore} {OnClose} {CommitEffects} /-->
       {/if}
