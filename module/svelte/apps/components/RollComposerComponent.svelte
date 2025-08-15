@@ -53,7 +53,7 @@
    let modifiersTotal = $state(0);
    let modifiedTargetNumber = $state(0);
    let difficulty = $state("");
-   let procedureStore = null;
+   let procedureStore = writable(null);
 
    let diceBought = $state(0);
    let karmaCost = $state(0);
@@ -65,7 +65,7 @@
    let isDefaultingAsString = $state("false");
    let isDefaulting = $derived(isDefaultingAsString === "true");
 
-   let hasTarget = $state(false);
+   let hasTargets = $state(false);
    let visible = $state(false);
    let canSubmit = $state(true);
    let titleStore = writable("Title Not Set");
@@ -138,11 +138,12 @@
       // wipe old subs first
       clearStoreSubscriptions();
 
+      // swap in the new procedure instance
+      $procedureStore = currentProcedure;
+      
       //Needs to be reacitive for both parts
       modifiersArrayStore = $procedureStore.modifiersArrayStore;
-
-      // swap in the new procedure instance
-      procedureStore = currentProcedure;
+      
       isFirearm = currentProcedure instanceof FirearmProcedure;
 
       // hook stores via the helper
@@ -151,7 +152,7 @@
       addSub(procedureStore.finalTNStore, (v) => (modifiedTargetNumber = v));
       addSub(procedureStore.modifiersTotal, (v) => (modifiersTotal = v));
       addSub(procedureStore.difficultyStore, (v) => (difficulty = v));
-      addSub(procedureStore.hasTargetsStore, (v) => (hasTarget = v));
+      addSub(procedureStore.hasTargetsStore, (v) => (hasTargets = v));
 
       titleStore = procedureStore.title;
 
@@ -182,7 +183,7 @@
       phaseKey = FirearmService.getPhase().key;
 
       targetHook = () => {
-         hasTarget = game.user.targets.size > 0;
+         hasTargets = game.user.targets.size > 0;
       };
       Hooks.on("targetToken", targetHook);
    });
@@ -190,7 +191,7 @@
    $effect(() => {
       if (!visible) return;
       caller;
-      hasTarget;
+      hasTargets;
       declaredRounds;
       weaponMode;
       phaseKey;
@@ -199,8 +200,8 @@
 
    $effect(() => {
       if (!visible) return;
-      hasTarget;
-      if (!hasTarget) return;
+      hasTargets;
+      if (!hasTargets) return;
       if (!isFirearm) return;
 
       const weapon = procedureStore?.item;
@@ -215,7 +216,7 @@
 
    $effect(() => {
       if (!visible) return;
-      if (hasTarget) return;
+      if (hasTargets) return;
       const idx = modifiersArrayStore?.findIndex?.((m) => m.id === "range");
       if (idx >= 0) procedureStore?.removeModByIndex?.(idx);
    });
