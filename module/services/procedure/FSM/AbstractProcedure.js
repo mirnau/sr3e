@@ -1,8 +1,10 @@
 import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
-import { writable, derived, get } from "svelte/store";
+import { writable, derived, get, readable } from "svelte/store";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function C() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class AbstractProcedure {
    #caller;
@@ -13,17 +15,22 @@ export default class AbstractProcedure {
    #specialization = null;
    #readwrite = null;
 
-   // Stores
    #targetNumberStore;
    #modifiersArrayStore;
    #titleStore;
    #linkedAttributeStore;
    #currentDicePoolStore;
-   #diceStore; // <-- ADDED: base dice for the roll (skill/spec/attr)
+   #diceStore;
    #modifiersTotalStore;
    #finalTNStore;
    #difficultyStore;
    #disposers = [];
+   #hasTargetsStore = readable(false, (set) => {
+      const update = () => set((game.user?.targets?.size ?? 0) > 0);
+      Hooks.on("targetToken", update);
+      update(); // initial
+      return () => Hooks.off("targetToken", update);
+   });
 
    constructor(caller = null, item = null) {
       if (this.constructor === AbstractProcedure) {
@@ -31,9 +38,9 @@ export default class AbstractProcedure {
          ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
       } else {
          this.#targetNumberStore = writable(4);
-         this.#modifiersArrayStore = writable([]); // ensure always defined
+         this.#modifiersArrayStore = writable([]);
          this.#titleStore = writable("Roll");
-         this.#diceStore = writable(0); // default 0 dice
+         this.#diceStore = writable(0);
          this.#linkedAttributeStore = writable(null);
          this.#currentDicePoolStore = writable(0);
          this.#modifiersTotalStore = derived(this.#modifiersArrayStore, (arr = []) =>
@@ -45,14 +52,15 @@ export default class AbstractProcedure {
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
-            if (n === 2) return config.difficulty.simple;
-            if (n === 3) return config.difficulty.routine;
-            if (n === 4) return config.difficulty.average;
-            if (n === 5) return config.difficulty.challenging;
-            if (n === 6 || n === 7) return config.difficulty.hard;
-            if (n === 8) return config.difficulty.strenuous;
-            if (n === 9) return config.difficulty.extreme;
-            if (n >= 10) return config.difficulty.nearlyimpossible;
+            const d = C().difficulty || {};
+            if (n === 2) return d.simple || "";
+            if (n === 3) return d.routine || "";
+            if (n === 4) return d.average || "";
+            if (n === 5) return d.challenging || "";
+            if (n === 6 || n === 7) return d.hard || "";
+            if (n === 8) return d.strenuous || "";
+            if (n === 9) return d.extreme || "";
+            if (n >= 10) return d.nearlyimpossible || "";
             return "";
          });
       }
@@ -112,15 +120,14 @@ export default class AbstractProcedure {
          const unsubPenalty = penaltyStore.subscribe((p) => {
             const v = Number(p ?? 0);
             this._removeModById("penalty");
-            if (v > 0) this.upsertMod({ id: "penalty", name: localize(config.health.penalty), value: -v });
+            if (v > 0) this.upsertMod({ id: "penalty", name: localize(C().health?.penalty), value: -v });
          });
          this.#disposers.push(unsubPenalty);
       }
    }
 
-   /* ---------------------- Basic getters/setters ---------------------- */
-   get hasTargets() {
-      return (game.user?.targets?.size ?? 0) > 0;
+   get hasTargetsStore() {
+      return this.#hasTargetsStore;
    }
 
    get linkedAttribute() {
@@ -139,30 +146,29 @@ export default class AbstractProcedure {
    }
    get title() {
       return this.#titleStore;
-   } // store (Composer subscribes with {$title})
+   }
 
-   get tnModifiers() {
+   get modifiersArrayStore() {
       DEBUG && !this.#modifiersArrayStore && LOG.error("Modifiers has not been set", [__FILE__, __LINE__]);
-      return this.#modifiersArrayStore; // store (array)
+      return this.#modifiersArrayStore;
    }
 
    get targetNumber() {
       return this.#targetNumberStore;
-   } // store (number)
+   }
 
    get modifiersTotal() {
       return this.#modifiersTotalStore;
-   } // store (number)
+   }
 
    get finalTNStore() {
       return this.#finalTNStore;
-   } // store (number)
+   }
 
    get difficultyStore() {
       return this.#difficultyStore;
-   } // store (string)
+   }
 
-   // Dice: expose both value and store
    get dice() {
       return Number(get(this.#diceStore) ?? 0) || 0;
    }
@@ -181,7 +187,6 @@ export default class AbstractProcedure {
       return actor?.id === this.#caller?.id;
    }
 
-   /* --------------------------- Mod helpers --------------------------- */
    upsertMod(mod) {
       const arr = get(this.#modifiersArrayStore) ?? [];
       const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
@@ -219,13 +224,6 @@ export default class AbstractProcedure {
       return floor == null ? sum : Math.max(floor, sum);
    }
 
-   /* -------------------- Roll formula (NEW: base) --------------------- */
-   /**
-    * Build SR3E dice formula string for SR3ERoll.
-    * - explodes=false  → "Xd6"
-    * - open test       → "Xd6x"
-    * - TN present      → "Xd6xTN" (TN floored at 2)
-    */
    buildFormula(explodes = true) {
       const dice = this.dice;
       if (dice <= 0) return "1d6";
@@ -233,7 +231,6 @@ export default class AbstractProcedure {
       const base = `${dice}d6`;
       if (!explodes) return base;
 
-      // Treat explicit open-test as "no TN". Also allow targetNumber being null/undefined.
       const tnBase = get(this.#targetNumberStore);
       const isOpen = this.#isOpenTest() || tnBase == null;
       if (isOpen) return `${base}x`;
@@ -243,14 +240,13 @@ export default class AbstractProcedure {
    }
 
    onDestroy() {
-      for (const d of this.#disposers)
+      for (const d of this.#disposers) {
          try {
             d?.();
          } catch {}
+      }
       this.#disposers = [];
    }
-
-   /* --------------------------- Defaulting ---------------------------- */
 
    #clearDefaultingMods() {
       this.#modifiersArrayStore.update((arr = []) =>

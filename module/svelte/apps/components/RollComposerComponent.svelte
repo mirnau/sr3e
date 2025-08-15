@@ -12,6 +12,7 @@
    import FirearmService from "@families/FirearmService.js";
    import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
    import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
+   import { recoilState, clearAllRecoilForActor } from "@services/ComposerAttackController.js";
 
    let { actor, config } = $props();
 
@@ -21,12 +22,26 @@
       StoreManager.Unsubscribe(actor);
       if (unhook) Hooks.off("updateCombat", unhook);
       if (targetHook) Hooks.off("targetToken", targetHook);
-      if (unsubTN) unsubTN();
-      if (unsubMods) unsubMods();
-      if (unsubFinalTN) unsubFinalTN();
-      if (unsubModsTotal) unsubModsTotal();
-      if (unsubDifficulty) unsubDifficulty();
+      clearStoreSubscriptions();
    });
+
+   const storeSubscriptions = [];
+
+   function addSub(store, fn) {
+      if (!store?.subscribe) return;
+      const unsub = store.subscribe(fn);
+      storeSubscriptions.push(unsub);
+   }
+
+   function clearStoreSubscriptions() {
+      while (storeSubscriptions.length) {
+         try {
+            storeSubscriptions.pop()();
+         } catch {
+            /* noop */
+         }
+      }
+   }
 
    let karmaPoolSumStore = actorStoreManager.GetSumROStore("karma.karmaPool");
 
@@ -34,11 +49,11 @@
    let displayCurrentDicePoolStore = null;
 
    let targetNumber = $state(4);
-   let modifiersArray = $state([]);
+   let modifiersArrayStore = null;
    let modifiersTotal = $state(0);
    let modifiedTargetNumber = $state(0);
    let difficulty = $state("");
-   let procedureStore;
+   let procedureStore = null;
 
    let diceBought = $state(0);
    let karmaCost = $state(0);
@@ -52,26 +67,13 @@
 
    let hasTarget = $state(false);
    let visible = $state(false);
-   let hasChallenged = $state(false);
-   let isResponding = $state(false);
-   let isResistingDamage = $state(false);
    let canSubmit = $state(true);
    let titleStore = writable("Title Not Set");
    let rangePrimedForWeaponId = $state(null);
    let rangeSuppressedForWeaponId = $state(null);
 
-   let associatedDicePoolString = $state("");
-   let associatedDicePoolStore;
-   let linkedAttributeString;
-   let linkedAttributeStore;
-   let readwrite;
    let selectEl;
    let containerEl;
-   let unsubTN;
-   let unsubMods;
-   let unsubFinalTN;
-   let unsubModsTotal;
-   let unsubDifficulty;
 
    let isFirearm = $state(false);
    let weaponMode = $state("");
@@ -91,7 +93,6 @@
       contestId: null,
    });
 
-   let difficulties = ItemDataService.getDifficultyGradings(config);
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
    function ResetRecoil() {
@@ -100,7 +101,7 @@
    }
 
    function onRemoveModifier(index) {
-      const mod = modifiersArray[index];
+      const mod = modifiersArrayStore[index];
       if (mod?.id === "range" && mod.weaponId) {
          rangeSuppressedForWeaponId = mod.weaponId;
       }
@@ -133,22 +134,27 @@
       DEBUG &&
          !(currentProcedure instanceof AbstractProcedure) &&
          LOG.error("Unfit data type passed in", [__FILE__, __LINE__, setCallerData.name]);
-      if (unsubTN) unsubTN();
-      if (unsubMods) unsubMods();
-      if (unsubFinalTN) unsubFinalTN();
-      if (unsubModsTotal) unsubModsTotal();
-      if (unsubDifficulty) unsubDifficulty();
 
+      // wipe old subs first
+      clearStoreSubscriptions();
+
+      //Needs to be reacitive for both parts
+      modifiersArrayStore = $procedureStore.modifiersArrayStore;
+
+      // swap in the new procedure instance
       procedureStore = currentProcedure;
       isFirearm = currentProcedure instanceof FirearmProcedure;
 
-      unsubTN = procedureStore.targetNumber.subscribe((v) => (targetNumber = v));
-      unsubMods = procedureStore.tnModifiers.subscribe((v) => (modifiersArray = v));
-      unsubFinalTN = procedureStore.finalTNStore?.subscribe?.((v) => (modifiedTargetNumber = v));
-      unsubModsTotal = procedureStore.modifiersTotal?.subscribe?.((v) => (modifiersTotal = v));
-      unsubDifficulty = procedureStore.difficultyStore?.subscribe?.((v) => (difficulty = v));
+      // hook stores via the helper
+      addSub(procedureStore.targetNumber, (v) => (targetNumber = v));
+      addSub(procedureStore.tnModifiers, (v) => (modifiersArrayStore = v));
+      addSub(procedureStore.finalTNStore, (v) => (modifiedTargetNumber = v));
+      addSub(procedureStore.modifiersTotal, (v) => (modifiersTotal = v));
+      addSub(procedureStore.difficultyStore, (v) => (difficulty = v));
+      addSub(procedureStore.hasTargetsStore, (v) => (hasTarget = v));
 
       titleStore = procedureStore.title;
+
       visible = true;
    }
 
@@ -209,13 +215,9 @@
 
    $effect(() => {
       if (!visible) return;
-      hasTarget;
       if (hasTarget) return;
-
-      const idx = modifiersArray.findIndex((m) => m.id === "range");
-      if (idx >= 0) {
-         modifiersArray = modifiersArray.filter((m, i) => i !== idx);
-      }
+      const idx = modifiersArrayStore?.findIndex?.((m) => m.id === "range");
+      if (idx >= 0) procedureStore?.removeModByIndex?.(idx);
    });
 
    $effect(() => {
@@ -293,16 +295,14 @@
          <button
             aria-label="Add a modifier"
             class="regular"
-            onclick={() => {
-               modifiersArray = [...modifiersArray, { name: "Modifier", value: 0 }];
-            }}
+            onclick={() => procedureStore?.upsertMod?.({ name: "Modifier", value: 0 })}
          >
             <i class="fa-solid fa-plus"></i>
          </button>
 
          <h4>Modifiers Total: {modifiersTotal}</h4>
 
-         {#each modifiersArray as modifier, i (i)}
+         {#each modifiersArrayStore as modifier, i (i)}
             <div class="roll-composer-card array">
                <h4 contenteditable="true">{modifier.name}</h4>
                <Counter
@@ -345,9 +345,9 @@
          </div>
       {/if}
 
-      {#if false}{:else if false}{:else if $procedureStore.hasTargets}
+      {#if hasTargets}
          <Challenge {procedureStore} {OnClose} {CommitEffects} />
-      {:else}{/if}
+      {/if}
 
       {#if caller.type === "item" && isFirearm && (weaponMode === "burst" || weaponMode === "fullauto")}
          <div class="roll-composer-card">
@@ -368,12 +368,13 @@
          const { shots } = recoilState(actor?.id);
          return shots > 0;
       })()}
-         {#if modifiersArray.some((m) => m.id === "recoil" || m.name === "Recoil")}
+         {#if modifiersArrayStore?.some?.((m) => m.id === "recoil" || m.name === "Recoil")}
             <div class="roll-composer-card">
                <button
                   class="regular"
                   onclick={() => {
-                     modifiersArray = modifiersArray.filter((m) => m.id !== "recoil" && m.name !== "Recoil");
+                     const idx = modifiersArrayStore.findIndex((m) => m.id === "recoil" || m.name === "Recoil");
+                     if (idx >= 0) procedureStore?.removeModByIndex?.(idx);
                      clearAllRecoilForActor(actor?.id);
                   }}
                >
