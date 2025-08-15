@@ -22,10 +22,7 @@ export default class SR3ERoll extends Roll {
    }
 
    //const finalTN = Math.max(2, Number(modifiedTargetNumber) + ammoTN);
-   async evaluate(options = {}) {
-      this.options = foundry.utils.mergeObject(this.options ?? {}, options ?? {});
-      const evalOptions = { ...this.options };
-      delete evalOptions.async;
+   async evaluate(procedureStore) {
       await super.evaluate(evalOptions);
 
       DEBUG && LOG.inspect("Roll options passed in", [__FILE__, __LINE__, this.evaluate.name], evalOptions);
