@@ -34,14 +34,14 @@ export function configureQueries() {
   };
 
   /**
-   * Relay to the *initiator user* strictly, using the stored initiatorUserId on the contest.
+   * Relay to the *initiator user* strictly, using the stored initiator.userId on the contest.
    * No initiatorId param needed; we read from the local contest.
    */
   CONFIG.queries["sr3e.resolveOpposedRollRemote"] = async ({ contestId, rollData }) => {
     const contest = OpposeRollService.getContestById(contestId);
     if (!contest) return { ok: false, reason: "no contest" };
 
-    const initiatorUser = game.users.get(contest.initiatorUserId);
+    const initiatorUser = game.users.get(contest.initiator?.userId);
     if (!initiatorUser) return { ok: false, reason: "no initiator user" };
 
     if (initiatorUser.id === game.user.id) {
