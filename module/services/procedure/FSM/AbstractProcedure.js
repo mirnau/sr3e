@@ -5,406 +5,568 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 
 function C() {
-   return CONFIG?.sr3e || {};
+  return CONFIG?.sr3e || {};
 }
 
 export default class AbstractProcedure {
-   #caller;
-   #item;
-   #isDefaulting = false;
+  // ---------- static: serialization registry & helpers ----------
+  static #SCHEMA_VERSION = 1;
+  static #registry = new Map(); // kind -> ctor
 
-   #subSkill = null;
-   #specialization = null;
-   #readwrite = null;
-   #contestIds = [];
+  /**
+   * Subclasses should call once at module load:
+   *   AbstractProcedure.registerSubclass("firearm", FirearmProcedure)
+   */
+  static registerSubclass(kind, ctor) {
+    if (!kind || typeof kind !== "string") throw new Error("registerSubclass: kind must be a string");
+    if (typeof ctor !== "function") throw new Error("registerSubclass: ctor must be a constructor");
+    this.#registry.set(kind, ctor);
+    // Optional: expose a static `kind` on the ctor for convenience
+    try { ctor.kind = kind; } catch {}
+  }
 
-   #targetNumberStore;
-   #modifiersArrayStore;
-   #titleStore;
-   #linkedAttributeStore;
-   #currentDicePoolStore;
-   #diceStore;
-   #modifiersTotalStore;
-   #finalTNStore;
-   #difficultyStore;
-   #disposers = [];
-   #hasTargetsStore = readable(false, (set) => {
-      const update = () => set((game.user?.targets?.size ?? 0) > 0);
-      Hooks.on("targetToken", update);
-      update(); // initial
-      return () => Hooks.off("targetToken", update);
-   });
+  static getCtor(kind) {
+    return this.#registry.get(kind) || null;
+  }
 
-   constructor(caller = null, item = null) {
-      if (this.constructor === AbstractProcedure) {
-         DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
-         ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
-      } else {
-         this.#targetNumberStore = writable(4);
-         this.#modifiersArrayStore = writable([]);
-         this.#titleStore = writable("Roll");
-         this.#diceStore = writable(0);
-         this.#linkedAttributeStore = writable(null);
-         this.#currentDicePoolStore = writable(0);
-         this.#modifiersTotalStore = derived(this.#modifiersArrayStore, (arr = []) =>
-            arr.reduce((a, m) => a + (Number(m?.value) || 0), 0)
-         );
-         this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
-            Math.max(2, Number(base ?? 4) + Number(add ?? 0))
-         );
-         this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
-            if (tn == null) return "";
-            const n = Number(tn);
-            const d = C().difficulty || {};
-            if (n === 2) return d.simple || "";
-            if (n === 3) return d.routine || "";
-            if (n === 4) return d.average || "";
-            if (n === 5) return d.challenging || "";
-            if (n === 6 || n === 7) return d.hard || "";
-            if (n === 8) return d.strenuous || "";
-            if (n === 9) return d.extreme || "";
-            if (n >= 10) return d.nearlyimpossible || "";
-            return "";
-         });
-      }
+  /**
+   * Convenience: JSON.stringify wrapper around toJSON().
+   */
+  serialize() {
+    return JSON.stringify(this.toJSON());
+  }
 
-      if (caller && item) {
-         this.#caller = caller;
-         this.#item = item;
+  /**
+   * Convenience: JSON.parse + fromJSON().
+   */
+  static async deserialize(json, opts = {}) {
+    const obj = typeof json === "string" ? JSON.parse(json) : json;
+    return this.fromJSON(obj, opts);
+  }
 
-         this.#titleStore.set(item.name);
+  /**
+   * Hydrate a (sub)class instance from JSON.
+   * opts.resolveActor?: async ({uuid,id}) => Actor
+   * opts.resolveItem?: async ({uuid,id}, actor) => Item
+   */
+  static async fromJSON(obj, opts = {}) {
+    if (!obj || typeof obj !== "object") throw new Error("fromJSON: invalid payload");
+    const { schema = 1, kind, actor, item, state = {}, extra = null } = obj;
 
-         const itemStoreManager = StoreManager.Subscribe(this.#item);
-         const actorStoreManager = StoreManager.Subscribe(this.#caller);
+    if (schema !== this.#SCHEMA_VERSION) {
+      // schema bump handling goes here if needed
+      DEBUG && LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${this.#SCHEMA_VERSION}`, [
+        __FILE__,
+        __LINE__,
+      ]);
+    }
 
-         const linkedSkillIdStore = itemStoreManager.GetRWStore("linkedSkillId");
-         const [skillId, specIndexRaw] = String(get(linkedSkillIdStore) ?? "").split("::");
-         const skill = this.#caller.items.get(skillId);
-
-         const subType = skill?.system?.skillType;
-         const subTypeData = subType ? skill.system?.[`${subType}Skill`] ?? {} : {};
-         const specializationArray = subTypeData?.specializations ?? [];
-         this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
-
-         const specIndex = Number.parseInt(specIndexRaw);
-         this.#specialization = Number.isFinite(specIndex) ? specializationArray[specIndex] : null;
-
-         const baseDice = Number(this.#specialization?.value ?? subTypeData?.value ?? 0) || 0;
-         this.#diceStore.set(baseDice);
-
-         if (subType === "active") {
-            this.#currentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${subTypeData.associatedDicePool}`);
-         } else if (subType === "language") {
-            this.#readwrite = subTypeData.readwrite;
-         }
-
-         this.#subSkill = subTypeData;
-
-         DEBUG &&
-            !item.system.isDefaulting &&
-            LOG.error(`Item ${item.type}, ${item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
-
-         this.#isDefaulting = !!this.#item.system.isDefaulting;
-
-         if (this.#isDefaulting) {
-            if (this.#specialization) {
-               this.defaultFromSkillToSpecialization();
-            } else if (this.#subSkill?.value > 0) {
-               this.defaultFromSkillToSkill();
-            } else {
-               this.defaultFromSkillToAttribute();
-            }
-         }
-
-         StoreManager.Unsubscribe(this.#caller);
-         StoreManager.Unsubscribe(this.#item);
-
-         const penaltyStore = StoreManager.Subscribe(this.#caller).GetRWStore("health.penalty");
-         const unsubPenalty = penaltyStore.subscribe((p) => {
-            const v = Number(p ?? 0);
-            this._removeModById("penalty");
-            if (v > 0) this.upsertMod({ id: "penalty", name: localize(C().health?.penalty), value: -v });
-         });
-         this.#disposers.push(unsubPenalty);
-      }
-   }
-
-   get hasTargetsStore() {
-      return this.#hasTargetsStore;
-   }
-
-   get linkedAttribute() {
-      return get(this.#linkedAttributeStore);
-   }
-
-   get caller() {
-      return this.#caller;
-   }
-   get item() {
-      return this.#item;
-   }
-
-   set title(v) {
-      this.#titleStore?.set?.(v);
-   }
-   get title() {
-      return this.#titleStore;
-   }
-
-   get modifiersArrayStore() {
-      DEBUG && !this.#modifiersArrayStore && LOG.error("Modifiers has not been set", [__FILE__, __LINE__]);
-      return this.#modifiersArrayStore;
-   }
-
-   get targetNumber() {
-      return this.#targetNumberStore;
-   }
-
-   get modifiersTotal() {
-      return this.#modifiersTotalStore;
-   }
-
-   get finalTNStore() {
-      return this.#finalTNStore;
-   }
-
-   get difficultyStore() {
-      return this.#difficultyStore;
-   }
-
-   get dice() {
-      return Number(get(this.#diceStore) ?? 0) || 0;
-   }
-   set dice(v) {
-      this.#diceStore.set(Math.max(0, Number(v) || 0));
-   }
-   get diceStore() {
-      return this.#diceStore;
-   }
-
-   get isDefaulting() {
-      return this.#isDefaulting;
-   }
-
-   get contestIds() {
-      return this.#contestIds.slice();
-   }
-
-   get isOpposed() {
-      return (game.user?.targets?.size ?? 0) > 0;
-   }
-
-   setContestIds(ids = []) {
-      this.#contestIds = Array.from(ids).filter(Boolean);
-   }
-   appendContestId(id) {
-      if (id) this.#contestIds.push(id);
-   }
-   clearContests() {
-      this.#contestIds = [];
-   }
-
-   isCaller(actor) {
-      return actor?.id === this.#caller?.id;
-   }
-
-   upsertMod(mod) {
-      const arr = get(this.#modifiersArrayStore) ?? [];
-      const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
-      if (idx === -1) this.#modifiersArrayStore.set([...arr, mod]);
-      else {
-         const copy = arr.slice();
-         copy[idx] = { ...copy[idx], ...mod };
-         this.#modifiersArrayStore.set(copy);
-      }
-   }
-
-   removeModByIndex(i) {
-      const arr = get(this.#modifiersArrayStore) ?? [];
-      if (i < 0 || i >= arr.length) return;
-      this.#modifiersArrayStore.set(arr.filter((_, j) => j !== i));
-   }
-
-   _removeModById(id) {
-      this.#modifiersArrayStore.update((arr = []) => arr.filter((m) => m.id !== id));
-   }
-
-   markModTouchedAt(index) {
-      const arr = get(this.#modifiersArrayStore) ?? [];
-      if (index < 0 || index >= arr.length) return;
-      const copy = arr.slice();
-      const m = copy[index] || {};
-      copy[index] = { ...m, meta: { ...(m.meta || {}), userTouched: true } };
-      this.#modifiersArrayStore.set(copy);
-   }
-
-   finalTN({ floor = null } = {}) {
-      const mods = get(this.#modifiersArrayStore) ?? [];
-      const base = Number(get(this.#targetNumberStore) ?? 4);
-      const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
-      return floor == null ? sum : Math.max(floor, sum);
-   }
-
-   buildFormula(explodes = true) {
-      const dice = this.dice;
-      if (dice <= 0) return "1d6";
-
-      const base = `${dice}d6`;
-      if (!explodes) return base;
-
-      const tnBase = get(this.#targetNumberStore);
-      const isOpen = this.#isOpenTest() || tnBase == null;
-      if (isOpen) return `${base}x`;
-
-      const tn = this.finalTN();
-      return `${base}x${Math.max(2, Number(tn) || 2)}`;
-   }
-
-   onDestroy() {
-      for (const d of this.#disposers) {
-         try {
-            d?.();
-         } catch {}
-      }
-      this.#disposers = [];
-   }
-
-   /**
-    * Generic contested roll entry point used by Challenge.svelte
-    */
-   async challenge({ OnClose, CommitEffects } = {}) {
-      try {
-         OnClose?.();
-
-         const actor = this.caller;
-         const formula = this.buildFormula(true);
-         const baseRoll = SR3ERoll.create(formula, { actor });
-
-         await this.onChallengeWillRoll?.({ baseRoll, actor });
-
-         // <<< pass the procedure instance instead of options >>>
-         const roll = await baseRoll.evaluate(this);
-         await baseRoll.waitForResolution();
-
-         await CommitEffects?.();
-
-         // Expire all contests recorded on the procedure, then clear
-         if (this.#contestIds?.length) {
-            for (const id of this.#contestIds) OpposeRollService.expireContest(id);
-            this.clearContests();
-         }
-
-         Hooks.callAll("actorSystemRecalculated", actor);
-         await this.onChallengeResolved?.({ roll, actor });
-         return roll;
-      } catch (err) {
-         DEBUG && LOG.error("Challenge flow failed", [__FILE__, __LINE__, err]);
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
-         throw err;
-      }
-   }
-
-   /** Optional hook: run just before the roll is evaluated. Subclasses may override. */
-   async onChallengeWillRoll(/* { baseRoll, actor } */) {}
-
-   /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
-   async onChallengeResolved(/* { roll, actor } */) {}
-
-   #clearDefaultingMods() {
-      this.#modifiersArrayStore.update((arr = []) =>
-         arr.filter((m) => !String(m?.id || "").startsWith("auto-default-"))
-      );
-   }
-
-   #upsertMod(mod) {
-      this.#modifiersArrayStore.update((arr = []) => {
-         const i = arr.findIndex((m) => m.id === mod.id);
-         if (i >= 0) {
-            const next = arr.slice();
-            next[i] = { ...next[i], ...mod };
-            return next;
-         }
-         return [...arr, mod];
+    // Resolve actor & item
+    const resolveActor =
+      opts.resolveActor ||
+      (async (ref) => {
+        if (!ref) return null;
+        if (ref.uuid && typeof fromUuid === "function") {
+          try { return await fromUuid(ref.uuid); } catch {}
+        }
+        return game.actors?.get(ref.id) ?? null;
       });
-   }
 
-   #preDefaultTN() {
-      const base = Number(get(this.#targetNumberStore) ?? 4);
-      const mods = get(this.#modifiersArrayStore) ?? [];
-      const add = mods
-         .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
-         .reduce((a, m) => a + (Number(m?.value) || 0), 0);
-      return base + add;
-   }
+    const resolveItem =
+      opts.resolveItem ||
+      (async (ref, resolvedActor) => {
+        if (!ref) return null;
+        if (ref.uuid && typeof fromUuid === "function") {
+          try { return await fromUuid(ref.uuid); } catch {}
+        }
+        return resolvedActor?.items?.get(ref.id) || game.items?.get(ref.id) || null;
+      });
 
-   #assertDefaultAllowed() {
-      if (this.#item?.system?.noDefault) {
-         DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize("sr3e.warn.defaultNotAllowed"));
-         return false;
+    const callerDoc = await resolveActor(actor);
+    const itemDoc = await resolveItem(item, callerDoc);
+
+    if (!callerDoc || !itemDoc) {
+      throw new Error("fromJSON: could not resolve caller and/or item");
+    }
+
+    // Pick the right concrete class
+    const Ctor = (kind && this.getCtor(kind)) || this;
+    if (Ctor === AbstractProcedure) {
+      throw new Error(`fromJSON: no registered subclass for kind="${kind}"`);
+    }
+
+    const proc = new Ctor(callerDoc, itemDoc);
+
+    // Apply base state
+    if (typeof state.title === "string") proc.#titleStore.set(state.title);
+    if (Number.isFinite(Number(state.targetNumber))) proc.#targetNumberStore.set(Number(state.targetNumber));
+
+    // Defensive copy of modifiers
+    const mods = Array.isArray(state.modifiers) ? state.modifiers.map((m) => ({ ...m })) : [];
+    proc.#modifiersArrayStore.set(mods);
+
+    if (Number.isFinite(Number(state.dice))) proc.#diceStore.set(Math.max(0, Number(state.dice)));
+    proc.#isDefaulting = !!state.isDefaulting;
+
+    if (typeof state.linkedAttribute === "string" || state.linkedAttribute === null) {
+      proc.#linkedAttributeStore.set(state.linkedAttribute ?? null);
+    }
+
+    proc.#contestIds = Array.isArray(state.contestIds) ? state.contestIds.filter(Boolean) : [];
+
+    // Let subclass hydrate its extras
+    if (typeof proc.fromJSONExtra === "function") {
+      await proc.fromJSONExtra(extra ?? null, { opts, payload: obj });
+    }
+
+    return proc;
+  }
+
+  // ---------- instance ----------
+  #caller;
+  #item;
+  #isDefaulting = false;
+
+  #subSkill = null;
+  #specialization = null;
+  #readwrite = null;
+  #contestIds = [];
+
+  #targetNumberStore;
+  #modifiersArrayStore;
+  #titleStore;
+  #linkedAttributeStore;
+  #currentDicePoolStore;
+  #diceStore;
+  #modifiersTotalStore;
+  #finalTNStore;
+  #difficultyStore;
+  #disposers = [];
+  #hasTargetsStore = readable(false, (set) => {
+    const update = () => set((game.user?.targets?.size ?? 0) > 0);
+    Hooks.on("targetToken", update);
+    update(); // initial
+    return () => Hooks.off("targetToken", update);
+  });
+
+  constructor(caller = null, item = null) {
+    if (this.constructor === AbstractProcedure) {
+      DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
+      ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
+    } else {
+      this.#targetNumberStore = writable(4);
+      this.#modifiersArrayStore = writable([]);
+      this.#titleStore = writable("Roll");
+      this.#diceStore = writable(0);
+      this.#linkedAttributeStore = writable(null);
+      this.#currentDicePoolStore = writable(0);
+      this.#modifiersTotalStore = derived(this.#modifiersArrayStore, (arr = []) =>
+        arr.reduce((a, m) => a + (Number(m?.value) || 0), 0)
+      );
+      this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
+        Math.max(2, Number(base ?? 4) + Number(add ?? 0))
+      );
+      this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
+        if (tn == null) return "";
+        const n = Number(tn);
+        const d = C().difficulty || {};
+        if (n === 2) return d.simple || "";
+        if (n === 3) return d.routine || "";
+        if (n === 4) return d.average || "";
+        if (n === 5) return d.challenging || "";
+        if (n === 6 || n === 7) return d.hard || "";
+        if (n === 8) return d.strenuous || "";
+        if (n === 9) return d.extreme || "";
+        if (n >= 10) return d.nearlyimpossible || "";
+        return "";
+      });
+    }
+
+    if (caller && item) {
+      this.#caller = caller;
+      this.#item = item;
+
+      this.#titleStore.set(item.name);
+
+      const itemStoreManager = StoreManager.Subscribe(this.#item);
+      const actorStoreManager = StoreManager.Subscribe(this.#caller);
+
+      const linkedSkillIdStore = itemStoreManager.GetRWStore("linkedSkillId");
+      const [skillId, specIndexRaw] = String(get(linkedSkillIdStore) ?? "").split("::");
+      const skill = this.#caller.items.get(skillId);
+
+      const subType = skill?.system?.skillType;
+      const subTypeData = subType ? skill.system?.[`${subType}Skill`] ?? {} : {};
+      const specializationArray = subTypeData?.specializations ?? [];
+      this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
+
+      const specIndex = Number.parseInt(specIndexRaw);
+      this.#specialization = Number.isFinite(specIndex) ? specializationArray[specIndex] : null;
+
+      const baseDice = Number(this.#specialization?.value ?? subTypeData?.value ?? 0) || 0;
+      this.#diceStore.set(baseDice);
+
+      if (subType === "active") {
+        this.#currentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${subTypeData.associatedDicePool}`);
+      } else if (subType === "language") {
+        this.#readwrite = subTypeData.readwrite;
       }
-      if (this.#preDefaultTN() >= 8) {
-         DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize("sr3e.warn.defaultTN8"));
-         return false;
+
+      this.#subSkill = subTypeData;
+
+      DEBUG &&
+        !item.system.isDefaulting &&
+        LOG.error(`Item ${item.type}, ${item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
+
+      this.#isDefaulting = !!this.#item.system.isDefaulting;
+
+      if (this.#isDefaulting) {
+        if (this.#specialization) {
+          this.defaultFromSkillToSpecialization();
+        } else if (this.#subSkill?.value > 0) {
+          this.defaultFromSkillToSkill();
+        } else {
+          this.defaultFromSkillToAttribute();
+        }
       }
-      return true;
-   }
 
-   #isOpenTest() {
-      return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
-   }
+      StoreManager.Unsubscribe(this.#caller);
+      StoreManager.Unsubscribe(this.#item);
 
-   defaultFromSkillToAttribute() {
-      if (!this.#assertDefaultAllowed()) return;
-      this.#clearDefaultingMods();
-      const isOpen = this.#isOpenTest();
-      const mod = {
-         id: "auto-default-attr",
-         name: "Skill to attribute",
-         value: isOpen ? 0 : 4,
-         openSubtract: isOpen ? 4 : undefined,
-         poolCap: 0,
-         forbidPool: true,
-      };
-      this.#upsertMod(mod);
-   }
+      const penaltyStore = StoreManager.Subscribe(this.#caller).GetRWStore("health.penalty");
+      const unsubPenalty = penaltyStore.subscribe((p) => {
+        const v = Number(p ?? 0);
+        this._removeModById("penalty");
+        if (v > 0) this.upsertMod({ id: "penalty", name: localize(C().health?.penalty), value: -v });
+      });
+      this.#disposers.push(unsubPenalty);
+    }
+  }
 
-   defaultFromSkillToSkill() {
-      if (!this.#assertDefaultAllowed()) return;
-      const rating = Number(this.#subSkill?.value ?? 0);
-      DEBUG &&
-         (!Number.isFinite(rating) || rating <= 0) &&
-         LOG.error("No base skill to default to", [__FILE__, __LINE__]);
-      this.#clearDefaultingMods();
-      const isOpen = this.#isOpenTest();
-      const cap = Math.floor(rating / 2);
-      const mod = {
-         id: "auto-default-skill",
-         name: "Skill to skill",
-         value: isOpen ? 0 : 2,
-         openSubtract: isOpen ? 2 : undefined,
-         poolCap: cap,
-      };
-      this.#upsertMod(mod);
-   }
+  // ---------- serialization (instance) ----------
+  /**
+   * Subclasses can override to add more payload.
+   * Return a plain object.
+   */
+  toJSONExtra() {
+    return null;
+  }
 
-   defaultFromSkillToSpecialization() {
-      if (!this.#assertDefaultAllowed()) return;
-      const baseRating = Number(this.#subSkill?.value ?? 0);
-      DEBUG &&
-         (!Number.isFinite(baseRating) || baseRating <= 0) &&
-         LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
-      this.#clearDefaultingMods();
-      const isOpen = this.#isOpenTest();
-      const cap = Math.floor(baseRating / 2);
-      const mod = {
-         id: "auto-default-spec",
-         name: "Skill to specialization",
-         value: isOpen ? 0 : 3,
-         openSubtract: isOpen ? 3 : undefined,
-         poolCap: cap,
-      };
-      this.#upsertMod(mod);
-   }
+  /**
+   * Subclasses can override to restore extra payload.
+   * May be async.
+   */
+  // async fromJSONExtra(extra, { opts, payload }) {}
+
+  /**
+   * Emit a versioned, minimal JSON shape for transport.
+   */
+  toJSON() {
+    return {
+      schema: this.constructor.#SCHEMA_VERSION,
+      kind: this.constructor.kind || this.constructor.name, // subclass should register a stable `kind`
+      actor: {
+        id: this.#caller?.id ?? null,
+        uuid: this.#caller?.uuid ?? null,
+      },
+      item: {
+        id: this.#item?.id ?? null,
+        uuid: this.#item?.uuid ?? null,
+      },
+      state: {
+        title: get(this.#titleStore),
+        targetNumber: Number(get(this.#targetNumberStore) ?? 4),
+        modifiers: (get(this.#modifiersArrayStore) ?? []).map((m) => ({ ...m })),
+        dice: Number(get(this.#diceStore) ?? 0),
+        isDefaulting: !!this.#isDefaulting,
+        linkedAttribute: get(this.#linkedAttributeStore),
+        contestIds: this.#contestIds.slice(),
+      },
+      extra: this.toJSONExtra(),
+    };
+  }
+
+  // ---------- basic getters/setters ----------
+  get hasTargetsStore() {
+    return this.#hasTargetsStore;
+  }
+
+  get linkedAttribute() {
+    return get(this.#linkedAttributeStore);
+  }
+
+  get caller() {
+    return this.#caller;
+  }
+  get item() {
+    return this.#item;
+  }
+
+  set title(v) {
+    this.#titleStore?.set?.(v);
+  }
+  get title() {
+    return this.#titleStore;
+  }
+  // explicit alias for convenience in UI code
+  get titleStore() {
+    return this.#titleStore;
+  }
+
+  get modifiersArrayStore() {
+    DEBUG && !this.#modifiersArrayStore && LOG.error("Modifiers has not been set", [__FILE__, __LINE__]);
+    return this.#modifiersArrayStore;
+  }
+
+  get targetNumber() {
+    return this.#targetNumberStore;
+  }
+
+  get modifiersTotal() {
+    return this.#modifiersTotalStore;
+  }
+
+  get finalTNStore() {
+    return this.#finalTNStore;
+  }
+
+  get difficultyStore() {
+    return this.#difficultyStore;
+  }
+
+  get dice() {
+    return Number(get(this.#diceStore) ?? 0) || 0;
+  }
+  set dice(v) {
+    this.#diceStore.set(Math.max(0, Number(v) || 0));
+  }
+  get diceStore() {
+    return this.#diceStore;
+  }
+
+  get isDefaulting() {
+    return this.#isDefaulting;
+  }
+
+  get contestIds() {
+    return this.#contestIds.slice();
+  }
+
+  get isOpposed() {
+    return (game.user?.targets?.size ?? 0) > 0;
+  }
+
+  setContestIds(ids = []) {
+    this.#contestIds = Array.from(ids).filter(Boolean);
+  }
+  appendContestId(id) {
+    if (id) this.#contestIds.push(id);
+  }
+  clearContests() {
+    this.#contestIds = [];
+  }
+
+  isCaller(actor) {
+    return actor?.id === this.#caller?.id;
+  }
+
+  // ---------- mods ----------
+  upsertMod(mod) {
+    const arr = get(this.#modifiersArrayStore) ?? [];
+    const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
+    if (idx === -1) this.#modifiersArrayStore.set([...arr, mod]);
+    else {
+      const copy = arr.slice();
+      copy[idx] = { ...copy[idx], ...mod };
+      this.#modifiersArrayStore.set(copy);
+    }
+  }
+
+  removeModByIndex(i) {
+    const arr = get(this.#modifiersArrayStore) ?? [];
+    if (i < 0 || i >= arr.length) return;
+    this.#modifiersArrayStore.set(arr.filter((_, j) => j !== i));
+  }
+
+  _removeModById(id) {
+    this.#modifiersArrayStore.update((arr = []) => arr.filter((m) => m.id !== id));
+  }
+
+  markModTouchedAt(index) {
+    const arr = get(this.#modifiersArrayStore) ?? [];
+    if (index < 0 || index >= arr.length) return;
+    const copy = arr.slice();
+    const m = copy[index] || {};
+    copy[index] = { ...m, meta: { ...(m.meta || {}), userTouched: true } };
+    this.#modifiersArrayStore.set(copy);
+  }
+
+  // ---------- math ----------
+  finalTN({ floor = null } = {}) {
+    const mods = get(this.#modifiersArrayStore) ?? [];
+    const base = Number(get(this.#targetNumberStore) ?? 4);
+    const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
+    return floor == null ? sum : Math.max(floor, sum);
+  }
+
+  buildFormula(explodes = true) {
+    const dice = this.dice;
+    if (dice <= 0) return "1d6";
+
+    const base = `${dice}d6`;
+    if (!explodes) return base;
+
+    const tnBase = get(this.#targetNumberStore);
+    const isOpen = this.#isOpenTest() || tnBase == null;
+    if (isOpen) return `${base}x`;
+
+    const tn = this.finalTN();
+    return `${base}x${Math.max(2, Number(tn) || 2)}`;
+  }
+
+  onDestroy() {
+    for (const d of this.#disposers) {
+      try {
+        d?.();
+      } catch {}
+    }
+    this.#disposers = [];
+  }
+
+  /**
+   * Generic contested roll entry point used by Challenge.svelte
+   */
+  async challenge({ OnClose, CommitEffects } = {}) {
+    try {
+      OnClose?.();
+
+      const actor = this.caller;
+      const formula = this.buildFormula(true);
+      const baseRoll = SR3ERoll.create(formula, { actor });
+
+      await this.onChallengeWillRoll?.({ baseRoll, actor });
+
+      // Procedure-driven evaluation
+      const roll = await baseRoll.evaluate(this);
+      await baseRoll.waitForResolution();
+
+      await CommitEffects?.();
+
+      if (this.#contestIds?.length) {
+        for (const id of this.#contestIds) OpposeRollService.expireContest(id);
+        this.clearContests();
+      }
+
+      Hooks.callAll("actorSystemRecalculated", actor);
+      await this.onChallengeResolved?.({ roll, actor });
+      return roll;
+    } catch (err) {
+      DEBUG && LOG.error("Challenge flow failed", [__FILE__, __LINE__, err]);
+      ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
+      throw err;
+    }
+  }
+
+  /** Optional hook: run just before the roll is evaluated. Subclasses may override. */
+  async onChallengeWillRoll(/* { baseRoll, actor } */) {}
+
+  /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
+  async onChallengeResolved(/* { roll, actor } */) {}
+
+  // ---------- defaulting helpers ----------
+  #clearDefaultingMods() {
+    this.#modifiersArrayStore.update((arr = []) =>
+      arr.filter((m) => !String(m?.id || "").startsWith("auto-default-"))
+    );
+  }
+
+  #upsertMod(mod) {
+    this.#modifiersArrayStore.update((arr = []) => {
+      const i = arr.findIndex((m) => m.id === mod.id);
+      if (i >= 0) {
+        const next = arr.slice();
+        next[i] = { ...next[i], ...mod };
+        return next;
+      }
+      return [...arr, mod];
+    });
+  }
+
+  #preDefaultTN() {
+    const base = Number(get(this.#targetNumberStore) ?? 4);
+    const mods = get(this.#modifiersArrayStore) ?? [];
+    const add = mods
+      .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
+      .reduce((a, m) => a + (Number(m?.value) || 0), 0);
+    return base + add;
+  }
+
+  #assertDefaultAllowed() {
+    if (this.#item?.system?.noDefault) {
+      DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
+      ui.notifications.warn(localize("sr3e.warn.defaultNotAllowed"));
+      return false;
+    }
+    if (this.#preDefaultTN() >= 8) {
+      DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
+      ui.notifications.warn(localize("sr3e.warn.defaultTN8"));
+      return false;
+    }
+    return true;
+  }
+
+  #isOpenTest() {
+    return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
+  }
+
+  defaultFromSkillToAttribute() {
+    if (!this.#assertDefaultAllowed()) return;
+    this.#clearDefaultingMods();
+    const isOpen = this.#isOpenTest();
+    const mod = {
+      id: "auto-default-attr",
+      name: "Skill to attribute",
+      value: isOpen ? 0 : 4,
+      openSubtract: isOpen ? 4 : undefined,
+      poolCap: 0,
+      forbidPool: true,
+    };
+    this.#upsertMod(mod);
+  }
+
+  defaultFromSkillToSkill() {
+    if (!this.#assertDefaultAllowed()) return;
+    const rating = Number(this.#subSkill?.value ?? 0);
+    DEBUG && (!Number.isFinite(rating) || rating <= 0) && LOG.error("No base skill to default to", [__FILE__, __LINE__]);
+    this.#clearDefaultingMods();
+    const isOpen = this.#isOpenTest();
+    const cap = Math.floor(rating / 2);
+    const mod = {
+      id: "auto-default-skill",
+      name: "Skill to skill",
+      value: isOpen ? 0 : 2,
+      openSubtract: isOpen ? 2 : undefined,
+      poolCap: cap,
+    };
+    this.#upsertMod(mod);
+  }
+
+  defaultFromSkillToSpecialization() {
+    if (!this.#assertDefaultAllowed()) return;
+    const baseRating = Number(this.#subSkill?.value ?? 0);
+    DEBUG &&
+      (!Number.isFinite(baseRating) || baseRating <= 0) &&
+      LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
+    this.#clearDefaultingMods();
+    const isOpen = this.#isOpenTest();
+    const cap = Math.floor(baseRating / 2);
+    const mod = {
+      id: "auto-default-spec",
+      name: "Skill to specialization",
+      value: isOpen ? 0 : 3,
+      openSubtract: isOpen ? 3 : undefined,
+      poolCap: cap,
+    };
+    this.#upsertMod(mod);
+  }
 }

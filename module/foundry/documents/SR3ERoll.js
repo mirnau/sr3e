@@ -1,258 +1,169 @@
 import OpposeRollService from "@services/OpposeRollService.js";
 
+/**
+ * Procedure-driven roll:
+ * - `evaluate(procedure)` takes an AbstractProcedure (or subclass) instance.
+ * - Never reads `this.options` for context; the procedure drives everything.
+ * - For opposed rolls, we start contests via OpposeRollService using the procedure.
+ */
 export default class SR3ERoll extends Roll {
-   constructor(formula, data = {}, options = {}) {
-      super(formula, data, options);
-      this.actor = data?.actor || null;
-   }
+  constructor(formula, data = {}, options = {}) {
+    super(formula, data, options);
+    this.actor = data?.actor || null;
+    this._procedure = null;
+    this._contested = false;
+    this._waitingOn = null; // contest ids (string or string[])
+  }
 
-   static create(formula, data = {}, options = {}) {
-      return new this(formula, data, options);
-   }
+  static create(formula, data = {}, options = {}) {
+    return new this(formula, data, options);
+  }
 
-   static buildFormula(dice, { explodes = true, targetNumber } = {}) {
-      if (dice <= 0) return "1d6";
-      const base = `${dice}d6`;
-      if (!explodes) return base;
+  static buildFormula(dice, { explodes = true, targetNumber } = {}) {
+    if (dice <= 0) return "1d6";
+    const base = `${dice}d6`;
+    if (!explodes) return base;
+    if (targetNumber == null) return `${base}x`;
+    const tn = Number(targetNumber);
+    return `${base}x${Math.max(2, tn)}`;
+  }
 
-      if (targetNumber == null) return `${base}x`;
+  /**
+   * Evaluate the roll using the provided procedure.
+   * Contract (minimal) expected from `procedure`:
+   *   - procedure.caller  : Actor
+   *   - procedure.getTargets() : Actor[] (may be empty)
+   *   - procedure.getFlavor() : string
+   *   - procedure.finalTN({ floor?: number }) : number
+   *   - (optional) procedure.onAfterEvaluate(roll)
+   *   - (optional, opposed only) procedure.exportForContest() → { familyKey, weaponId?, weaponName?, plan?, damage?, tnBase?, tnMods? }
+   */
+  async evaluate(procedure) {
+    DEBUG && !(procedure instanceof AbstractProcedure) && LOG.error("SR3ERoll.evaluate requires a procedure", [__FILE__, __LINE__]);
+    this._procedure = procedure;
+    this.actor = procedure.caller || this.actor;
 
-      const tn = Number(targetNumber);
-      return `${base}x${Math.max(2, tn)}`;
-   }
+    // Roll the dice; NO options/fallbacks.
+    await super.evaluate({});
 
-   //const finalTN = Math.max(2, Number(modifiedTargetNumber) + ammoTN);
-   async evaluate(procedureStore) {
-      await super.evaluate(evalOptions);
+    // Allow the procedure to react (ammo, recoil bookkeeping, etc.)
+    if (typeof procedure.onAfterEvaluate === "function") {
+      await procedure.onAfterEvaluate(this);
+    }
 
-      DEBUG && LOG.inspect("Roll options passed in", [__FILE__, __LINE__, this.evaluate.name], evalOptions);
+    // Opposed?
+    const targets = (typeof procedure.getTargets === "function" ? procedure.getTargets() : []) || [];
+    if (targets.length > 0) {
+      this._contested = true;
+      this._waitingOn = [];
 
-      const actor = this.actor || ChatMessage.getSpeakerActor(this.options.speaker);
+      // Make sure the roll JSON has a TN so success counting works in chat
+      const rollJSON = this.toJSON();
+      const tn = Number(procedure.finalTN?.({ floor: 2 }) ?? null);
+      if (!rollJSON.options) rollJSON.options = {};
+      rollJSON.options.targetNumber = Number.isFinite(tn) ? tn : undefined;
 
-      if (this.options.opposed && actor) {
-         const targets = Array.from(game.user.targets)
-            .map((t) => t.actor)
-            .filter(Boolean);
-
-         const uniqueTargets = [...new Map(targets.map((a) => [a.id, a])).values()];
-
-         if (uniqueTargets.length > 0) {
-            this._contested = true;
-            this._waitingOn = [];
-
-            for (const target of uniqueTargets) {
-               console.log(`[SR3ERoll] Initiator ${actor.name} starting contest vs ${target.name}`);
-               const contestId = await OpposeRollService.start({
-                  initiator: actor,
-                  target,
-                  rollData: this.toJSON(),
-                  options: this.options,
-               });
-               this.options.contestId = contestId;
-               if (contestId) this._waitingOn.push(contestId);
-            }
-
-            return this;
-         }
-      }
-
-      if (!this.options.suppressMessage) {
-         await this.toMessage();
+      for (const target of targets) {
+        const contestId = await OpposeRollService.startProcedure({
+          procedure,
+          target,
+          initiatorRoll: rollJSON, // snapshot of THIS roll
+        });
+        if (contestId) this._waitingOn.push(contestId);
       }
 
       return this;
-   }
+    }
 
-   async toMessage() {
-      if (!this.options.opposed) {
-         const content = SR3ERoll.#buildVanillaRoll(this.actor, this.toJSON());
-         const flavor = this.getFlavor();
-         return ChatMessage.create({
-            content,
-            speaker: ChatMessage.getSpeaker(),
-            flavor,
-         });
-      }
+    // Non-opposed → immediate chat
+    await this.toMessageFromProcedure();
+    return this;
+  }
 
-      const flavor = this.getFlavor();
-      return ChatMessage.create({
-         content: await this.render(),
-         speaker: ChatMessage.getSpeaker(),
-         flavor,
+  /**
+   * Create a vanilla chat message driven by the procedure.
+   */
+  async toMessageFromProcedure() {
+    const content = SR3ERoll.renderVanillaFromProcedure(this._procedure, this.toJSON());
+    const flavor = String(this._procedure?.getFlavor?.() ?? "");
+    return ChatMessage.create({
+      content,
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor,
+    });
+  }
+
+  async waitForResolution() {
+    if (!this._contested || !this._waitingOn) return;
+
+    if (typeof this._waitingOn === "string") {
+      const contestId = this._waitingOn;
+      await new Promise((resolve) => {
+        const t = setInterval(() => {
+          if (!OpposeRollService.getContestById(contestId)) {
+            clearInterval(t);
+            resolve();
+          }
+        }, 250);
       });
-   }
+      return;
+    }
 
-   async waitForResolution() {
-      if (!this._contested || !this._waitingOn) return;
+    if (Array.isArray(this._waitingOn)) {
+      await new Promise((resolve) => {
+        const t = setInterval(() => {
+          const unresolved = this._waitingOn.filter((id) => OpposeRollService.getContestById(id));
+          if (unresolved.length === 0) {
+            clearInterval(t);
+            resolve();
+          }
+        }, 250);
+      });
+    }
+  }
 
-      if (typeof this._waitingOn === "string") {
-         const contestId = this._waitingOn;
+  // ---------------------------
+  // Rendering helpers
+  // ---------------------------
 
-         await new Promise((resolve) => {
-            const checkInterval = setInterval(() => {
-               if (!OpposeRollService.getContestById(contestId)) {
-                  clearInterval(checkInterval);
-                  resolve();
-               }
-            }, 250);
-         });
-         return;
-      }
+  /**
+   * Procedure-driven vanilla renderer (TN from procedure, description from procedure).
+   * This intentionally does NOT use rollData.options for context.
+   */
+  static renderVanillaFromProcedure(procedure, rollData) {
+    const term = rollData.terms?.[0];
+    const raw = term?.results ?? [];
+    const results = raw.filter((r) => r.active !== false)
+    const dice = results.length;
 
-      if (Array.isArray(this._waitingOn)) {
-         await new Promise((resolve) => {
-            const checkInterval = setInterval(() => {
-               const unresolved = this._waitingOn.filter((id) => OpposeRollService.getContestById(id));
-               if (unresolved.length === 0) {
-                  clearInterval(checkInterval);
-                  resolve();
-               }
-            }, 250);
-         });
-         return;
-      }
-   }
+    // TN from procedure (if present)
+    const tn = Number(procedure?.finalTN?.({ floor: 2 }) ?? null);
+    const hasTN = Number.isFinite(tn);
+    const successes = hasTN ? results.filter((r) => !r.discarded && r.result >= tn).length : null;
 
-   getFlavor() {
-      const type = this.options?.type;
-      const parts = [];
-      switch (type) {
-         case "skill":
-         case "specialization":
-            if (this.options.skillName) parts.push(this.options.skillName);
-            if (this.options.specializationName) parts.push(`(${this.options.specializationName})`);
-            break;
-         case "attribute":
-            parts.push(SR3ERoll.#attrLabel(this.options.attributeKey ?? this.options.attributeName));
-            break;
-         case "item":
-            if (this.options.itemName) parts.push(this.options.itemName);
-            break;
-         case "resistance": {
-            const a = SR3ERoll.#attrLabel(this.options.attributeKey ?? this.options.attributeName, false);
-            const staged = this.options.stagedLevel ? `${this.options.stagedLevel} ` : "";
-            const dtype = this.options.damageType ?? "Damage";
-            parts.push(`Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}`);
-            break;
-         }
-         default:
-            if (this.options.skillName) parts.push(this.options.skillName);
-            else if (this.options.itemName) parts.push(this.options.itemName);
-            else if (this.options.attributeName) parts.push(`Attribute:${this.options.attributeName}`);
-            else parts.push("SR3E Roll");
-            break;
-      }
-      return parts.join(" ");
-   }
+    const ones = results.filter((r) => r.result === 1).length;
+    const critical = ones >= Math.ceil(dice / 2);
 
-   static Register() {
-      CONFIG.Dice.rolls = [SR3ERoll];
-      window.Roll = SR3ERoll;
-      DEBUG && LOG.success("Registered:", SR3ERoll.name);
-   }
+    const explodeMod = term?.modifiers?.find?.((m) => /^x\d*$/.test(m)) ?? "";
+    const shownFormula = `${term?.number ?? "?"}d6${explodeMod}`;
+    const formula = rollData.formula ?? shownFormula;
 
-   static #attrLabel(key, strict = true) {
-      const dict = CONFIG?.sr3e?.attributes ?? {};
-      const ok = key && Object.prototype.hasOwnProperty.call(dict, key);
-      if (strict && !ok) throw new Error(`Unknown attribute key: ${key}`);
-      return ok ? game.i18n.localize(`sr3e.attributes.${key}`) : key ?? "";
-   }
+    // Ask the procedure to describe the roll
+    const descriptionHtml = String(procedure?.getChatDescription?.() ?? "");
 
-   static renderVanilla(actor, rollData) {
-      return SR3ERoll.#buildVanillaRoll(actor, rollData);
-   }
+    const headerRight = hasTN
+      ? `${successes} ${successes === 1 ? "success" : "successes"} (TN: ${tn})`
+      : `Dice: ${dice}`;
 
-   static #buildVanillaRoll(actor, rollData) {
-      const term = rollData.terms?.[0];
-      const raw = term?.results ?? [];
-      const results = raw.filter((r) => r.active !== false);
-      const dice = results.length;
+    const status = critical
+      ? `<div class="sr3e-chat__critical">Critical failure</div>`
+      : hasTN && successes === 0
+      ? `<div class="sr3e-chat__failure">Failure</div>`
+      : hasTN
+      ? `<div class="sr3e-chat__successes">${successes} ${successes === 1 ? "success" : "successes"}</div>`
+      : "";
 
-      const tn = Number(rollData?.options?.targetNumber);
-      const hasTN = Number.isFinite(tn);
-      const successes = hasTN ? results.filter((r) => !r.discarded && r.result >= tn).length : null;
-
-      const ones = results.filter((r) => r.result === 1).length;
-      const critical = ones >= Math.ceil(dice / 2);
-
-      const type = rollData.options?.type;
-      const skill = rollData.options?.skillName;
-      const specialization = rollData.options?.specializationName;
-      const attributeKey = rollData.options?.attributeKey ?? rollData.options?.attributeName;
-      const itemName = rollData.options?.itemName;
-
-      const explodeMod = term?.modifiers?.find?.((m) => /^x\d*$/.test(m)) ?? "";
-      const shownFormula = `${term?.number ?? "?"}d6${explodeMod}`;
-      const formula = rollData.formula ?? shownFormula;
-
-      let descriptionHtml;
-
-      const isDefaulting = !!rollData.options?.isDefaulting;
-      let defaultingNote = "";
-
-      if (isDefaulting) {
-         if (specialization && skill) {
-            defaultingNote = " (Defaulting: Specialization → Skill, +4 TN)";
-         } else if (skill && attributeKey) {
-            defaultingNote = ` (Defaulting: ${skill} → ${SR3ERoll.#attrLabel(attributeKey)}, +4 TN)`;
-         } else if (rollData.options?.fromSkill && rollData.options?.toSkill) {
-            defaultingNote = ` (Defaulting: ${rollData.options.fromSkill} → ${rollData.options.toSkill}, +4 TN)`;
-         } else {
-            const skillLabel = skill ?? rollData.options?.fromSkill ?? "Unknown skill";
-            const attrLabel = SR3ERoll.#attrLabel(
-               rollData.options?.attributeKey ?? rollData.options?.attributeName,
-               false
-            );
-            defaultingNote = ` (Defaulting: ${skillLabel} → ${attrLabel}, +4 TN)`;
-         }
-      }
-
-      switch (type) {
-         case "item": {
-            const rows = [];
-            if (itemName) rows.push(`<div>Weapon: ${itemName}</div>`);
-            if (skill) rows.push(`<div>Skill: ${skill}</div>`);
-            if (specialization) rows.push(`<div>Specialization: ${specialization}</div>`);
-            if (isDefaulting) rows.push(`<div><strong>${defaultingNote}</strong></div>`);
-            descriptionHtml = rows.join("") || `<div>Unspecified roll</div>`;
-            break;
-         }
-         case "skill":
-         case "specialization":
-            descriptionHtml = `<div>${
-               skill ? (specialization ? `${skill} (${specialization})` : skill) : "Unspecified roll"
-            }</div>`;
-            break;
-         case "attribute":
-            descriptionHtml = `<div>${SR3ERoll.#attrLabel(attributeKey)}</div>`;
-            break;
-         case "resistance": {
-            const a = SR3ERoll.#attrLabel(attributeKey, false);
-            const staged = rollData.options?.stagedLevel ? `${rollData.options.stagedLevel} ` : "";
-            const dtype = rollData.options?.damageType ?? "Damage";
-            descriptionHtml = `<div>Damage Resistance: ${staged}${dtype}${a ? ` (${a})` : ""}</div>`;
-            break;
-         }
-         default:
-            descriptionHtml = `<div>${
-               skill || itemName || (attributeKey ? `Attribute:${attributeKey}` : "Unspecified roll")
-            }</div>`;
-            break;
-      }
-
-      const headerRight = hasTN
-         ? `${successes} ${successes === 1 ? "success" : "successes"} (TN: ${tn})`
-         : `Dice: ${dice}`;
-
-      const status = critical
-         ? `<div class="sr3e-chat__critical">Critical failure</div>`
-         : hasTN && successes === 0
-         ? `<div class="sr3e-chat__failure">Failure</div>`
-         : hasTN
-         ? `<div class="sr3e-chat__successes">${successes} ${successes === 1 ? "success" : "successes"}</div>`
-         : "";
-
-      return `
+    return `
   <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
     <div class="dice-result">
       <div class="dice-context"><em>${descriptionHtml}${hasTN ? ` vs TN ${tn}` : ""} using ${formula}</em></div>
@@ -267,14 +178,14 @@ export default class SR3ERoll extends Roll {
               </header>
               <ol class="dice-rolls">
                 ${results
-                   .map((d) => {
-                      const cls = ["roll", "_sr3edie", "d6"];
-                      if (d.result === 6) cls.push("max");
-                      if (d.exploded) cls.push("explode", "exploded");
-                      if (hasTN && d.result >= tn) cls.push("success");
-                      return `<li class="${cls.join(" ")}">${d.result}</li>`;
-                   })
-                   .join("")}
+                  .map((d) => {
+                    const cls = ["roll", "_sr3edie", "d6"];
+                    if (d.result === 6) cls.push("max");
+                    if (d.exploded) cls.push("explode", "exploded");
+                    if (hasTN && d.result >= tn) cls.push("success");
+                    return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                  })
+                  .join("")}
               </ol>
             </div>
           </section>
@@ -283,5 +194,69 @@ export default class SR3ERoll extends Roll {
       ${status}
     </div>
   </div>`;
-   }
+  }
+
+  // Legacy helpers kept for other callers; not used by the new path.
+  static renderVanilla(actor, rollData) {
+    return SR3ERoll.#buildVanillaRoll(actor, rollData);
+  }
+
+  static #buildVanillaRoll(actor, rollData) {
+    // (unchanged; legacy path for non-procedure callers)
+    const term = rollData.terms?.[0];
+    const raw = term?.results ?? [];
+    const results = raw.filter((r) => r.active !== false);
+    const dice = results.length;
+
+    const tn = Number(rollData?.options?.targetNumber);
+    const hasTN = Number.isFinite(tn);
+    const successes = hasTN ? results.filter((r) => !r.discarded && r.result >= tn).length : null;
+
+    const ones = results.filter((r) => r.result === 1).length;
+    const critical = ones >= Math.ceil(dice / 2);
+
+    const explodeMod = term?.modifiers?.find?.((m) => /^x\d*$/.test(m)) ?? "";
+    const shownFormula = `${term?.number ?? "?"}d6${explodeMod}`;
+    const formula = rollData.formula ?? shownFormula;
+
+    const headerRight = hasTN
+      ? `${successes} ${successes === 1 ? "success" : "successes"} (TN: ${tn})`
+      : `Dice: ${dice}`;
+
+    return `
+  <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
+    <div class="dice-result">
+      <div class="dice-formula">${formula}</div>
+      <div class="dice-tooltip">
+        <div class="wrapper">
+          <section class="tooltip-part">
+            <div class="dice">
+              <header class="part-header flexrow">
+                <span class="part-formula">${shownFormula}</span>
+                <span class="part-total">${headerRight}</span>
+              </header>
+              <ol class="dice-rolls">
+                ${results
+                  .map((d) => {
+                    const cls = ["roll", "_sr3edie", "d6"];
+                    if (d.result === 6) cls.push("max");
+                    if (d.exploded) cls.push("explode", "exploded");
+                    if (hasTN && d.result >= tn) cls.push("success");
+                    return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                  })
+                  .join("")}
+              </ol>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  }
+
+  static Register() {
+    CONFIG.Dice.rolls = [SR3ERoll];
+    window.Roll = SR3ERoll;
+    DEBUG && LOG.success("Registered:", SR3ERoll.name);
+  }
 }
