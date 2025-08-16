@@ -55,10 +55,10 @@ export default class AbstractProcedure {
       if (!obj || typeof obj !== "object") throw new Error("fromJSON: invalid payload");
       const { schema = 1, kind, actor, item, state = {}, extra = null } = obj;
 
-      if (schema !== this.#SCHEMA_VERSION) {
+      if (schema !== AbstractProcedure.#SCHEMA_VERSION) {
          // schema bump handling goes here if needed
          DEBUG &&
-            LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${this.#SCHEMA_VERSION}`, [
+            LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${AbstractProcedure.#SCHEMA_VERSION}`, [
                __FILE__,
                __LINE__,
             ]);
@@ -279,7 +279,7 @@ export default class AbstractProcedure {
     */
    toJSON() {
       return {
-         schema: this.constructor.#SCHEMA_VERSION,
+         schema: AbstractProcedure.#SCHEMA_VERSION,
          kind: this.constructor.kind || this.constructor.name, // subclass should register a stable `kind`
          actor: {
             id: this.#caller?.id ?? null,
