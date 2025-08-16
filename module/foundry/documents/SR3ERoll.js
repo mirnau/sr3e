@@ -1,5 +1,5 @@
 import OpposeRollService from "@services/OpposeRollService.js";
-import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js"
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 
 /**
  * Procedure-driven roll:
@@ -84,6 +84,12 @@ export default class SR3ERoll extends Roll {
             }
             return this;
          }
+      }
+
+      if (procedure.shouldSelfPublish?.() === false) {
+         // Defender (or other responder) procedures return their roll to the flow,
+         // but do not post their own chat message.
+         return this;
       }
 
       // Non-opposed → immediate chat

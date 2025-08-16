@@ -3,178 +3,239 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import FirearmService from "@families/FirearmService.js";
 
 export default class FirearmProcedure extends AbstractProcedure {
-   #attackCtx = null; // { plan, damage, ammoId }
+  #attackCtx = null; // { plan, damage, ammoId }
 
-   constructor(caller, item) {
-      super(caller, item);
-   }
+  constructor(caller, item) {
+    super(caller, item);
+  }
 
-   // ----- small alias (since you used tnModifiers.update(...) above)
-   get tnModifiers() {
-      return this.modifiersArrayStore;
-   }
+  // Alias: you were doing tnModifiers.update(...) earlier
+  get tnModifiers() {
+    return this.modifiersArrayStore;
+  }
 
-   /** Optional: nicer chat bits for SR3ERoll.renderVanillaFromProcedure */
-   getFlavor() {
-      const w = this.item?.name ?? "Firearm";
-      return `${w} Attack`;
-   }
-   getChatDescription() {
-      const w = this.item?.name ?? "Firearm";
-      return `<div>${w}</div>`;
-   }
+  // ----- nice bits for SR3ERoll.renderVanillaFromProcedure
+  getFlavor() {
+    const w = this.item?.name ?? "Firearm";
+    return `${w} Attack`;
+  }
+  getChatDescription() {
+    const w = this.item?.name ?? "Firearm";
+    return `<div>${w}</div>`;
+  }
 
-   /** Reset recoil tracking for this actor */
-   resetRecoil() {
-      FirearmService.resetAllRecoilForActor(this.caller?.id);
-   }
+  /** Reset recoil tracking for this actor */
+  resetRecoil() {
+    FirearmService.resetAllRecoilForActor(this.caller?.id);
+  }
 
-   /** Ensure recoil mod row is kept in sync for the composer */
-   syncRecoil({ declaredRounds = 1, ammoAvailable = null } = {}) {
-      const mod = FirearmService.recoilModifierForComposer({
-         actor: this.caller,
-         caller: { item: this.item },
-         declaredRounds,
-         ammoAvailable,
-      });
-      const id = "recoil";
-      this.tnModifiers.update((arr = []) => {
-         const base = arr.filter((m) => m.id !== id);
-         return mod ? [...base, { ...mod, id, weaponId: this.item?.id, source: "auto" }] : base;
-      });
-   }
+  /** Keep recoil row in sync in the composer */
+  syncRecoil({ declaredRounds = 1, ammoAvailable = null } = {}) {
+    const mod = FirearmService.recoilModifierForComposer({
+      actor: this.caller,
+      caller: { item: this.item },
+      declaredRounds,
+      ammoAvailable,
+    });
+    const id = "recoil";
+    this.tnModifiers.update((arr = []) => {
+      const base = arr.filter((m) => m.id !== id);
+      return mod ? [...base, { ...mod, id, weaponId: this.item?.id, source: "auto" }] : base;
+    });
+  }
 
-   /** Add/refresh range mod row in the composer */
-   primeRangeForWeapon(attackerToken, targetToken, rangeShiftLeft = 0) {
-      const mod = FirearmService.rangeModifierForComposer({
-         actor: this.caller,
-         caller: { item: this.item },
-         attackerToken,
-         targetToken,
-         rangeShiftLeft,
-      });
-      if (!mod) return;
-      this.upsertMod({ ...mod, weaponId: this.item?.id, source: "auto" });
-   }
+  /** Add/refresh range mod row in the composer */
+  primeRangeForWeapon(attackerToken, targetToken, rangeShiftLeft = 0) {
+    const mod = FirearmService.rangeModifierForComposer({
+      actor: this.caller,
+      caller: { item: this.item },
+      attackerToken,
+      targetToken,
+      rangeShiftLeft,
+    });
+    if (!mod) return;
+    this.upsertMod({ ...mod, weaponId: this.item?.id, source: "auto" });
+  }
 
-   /**
-    * Precompute the attack plan + damage for this firearm before rolling.
-    * Composer can call this when declaredRounds/ammo changes.
-    */
-   precompute({
-      declaredRounds = 1,
-      ammoAvailable = null,
-      attackerToken = null,
-      targetToken = null,
-      rangeShiftLeft = 0,
-   } = {}) {
-      const { plan, damage, ammoId } = FirearmService.beginAttack(this.caller, this.item, {
-         declaredRounds,
-         ammoAvailable,
-         attackerToken,
-         targetToken,
-         rangeShiftLeft,
-      });
+  /**
+   * Precompute plan + damage so exportForContest has a clean snapshot.
+   */
+  precompute({
+    declaredRounds = 1,
+    ammoAvailable = null,
+    attackerToken = null,
+    targetToken = null,
+    rangeShiftLeft = 0,
+  } = {}) {
+    const { plan, damage, ammoId } = FirearmService.beginAttack(this.caller, this.item, {
+      declaredRounds,
+      ammoAvailable,
+      attackerToken,
+      targetToken,
+      rangeShiftLeft,
+    });
+    this.#attackCtx = { plan, damage, ammoId };
+  }
+
+  // ----- Composer primary button label
+  getPrimaryActionLabel() {
+    const t = game?.i18n?.localize?.bind(game.i18n);
+    if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
+    const fire = t?.("sr3e.button.fire") ?? "Fire";
+    const weapon = this.item?.name ?? "";
+    return weapon ? `${fire} ${weapon}` : fire;
+  }
+
+  /** Finalize firearm attack bookkeeping after the challenge resolves. */
+  async onChallengeResolved({ roll, actor }) {
+    if (!this.#attackCtx) {
+      const { plan, damage, ammoId } = FirearmService.beginAttack(this.caller, this.item, {});
       this.#attackCtx = { plan, damage, ammoId };
-   }
+    }
+    const weapon = this.item;
+    const plan = this.#attackCtx?.plan;
+    if (weapon && plan) await FirearmService.onAttackResolved(actor, weapon, plan);
+    this.#attackCtx = null;
+  }
 
-   // FirearmProcedure.js
-   getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
-      const fire = t?.("sr3e.button.fire") ?? "Fire";
-      const weapon = this.item?.name ?? "";
-      return weapon ? `${fire} ${weapon}` : fire;
-   }
+  // ---------- defense guidance & opposed export ----------
 
-   /** After the contested roll completes, finalize firearm attack resolution */
-   async onChallengeResolved({ roll, actor }) {
-      // If precompute hasn't run, compute on-demand with conservative defaults
-      if (!this.#attackCtx) {
-         const { plan, damage, ammoId } = FirearmService.beginAttack(this.caller, this.item, {});
-         this.#attackCtx = { plan, damage, ammoId };
-      }
+  /** What the defender rolls against (UI labels & default TN hint). */
+  getDefenseHint() {
+    return {
+      type: "attribute",
+      key: "reaction",
+      tnMod: 0,
+      tnLabel: "Weapon difficulty",
+    };
+  }
 
-      const weapon = this.item;
-      const plan = this.#attackCtx?.plan;
+  /**
+   * Provide the responder UI HTML (used by addOpposedResponseButton).
+   * Uses exportCtx.next.ui.{prompt,yes,no} and returns a Yes/No block.
+   */
+  async getResponderPromptHTML(exportCtx /*, { contest } */) {
+    const ui = exportCtx?.next?.ui || {};
+    const prompt = String(ui.prompt || "");
+    const yes = String(ui.yes || "");
+    const no = String(ui.no || "");
+    if (!prompt || !yes || !no) {
+      throw new Error("export.next.ui.{prompt,yes,no} are required for responder UI");
+    }
+    return `
+      <div class="sr3e-responder-prompt">${prompt}</div>
+      <div class="buttons-horizontal-distribution" role="group" aria-label="Defense choice">
+        <button class="sr3e-response-button yes" data-responder="yes">${yes}</button>
+        <button class="sr3e-response-button no"  data-responder="no">${no}</button>
+      </div>
+    `;
+  }
 
-      if (weapon && plan) {
-         await FirearmService.onAttackResolved(actor, weapon, plan);
-      }
+  /**
+   * Build the *defense* procedure for the responder (e.g., Dodge).
+   * Uses the subclass registry so this stays data-driven.
+   */
+  buildDefenseProcedure(exportCtx, { defender, contestId }) {
+    const kind = String(exportCtx?.next?.kind || "");
+    const Ctor = AbstractProcedure.getCtor(kind);
+    if (!Ctor) throw new Error(`No registered defense procedure for kind="${kind}"`);
+    const baseArgs = exportCtx?.next?.args || {};
+    return new Ctor(defender, null, { ...baseArgs, contestId });
+  }
 
-      // Clear transient state after resolution
-      this.#attackCtx = null;
-   }
+  /**
+   * Firearm-flavored contested outcome. We can wrap the base HTML
+   * and also decide whether to attach a resistance prep here.
+   */
+  async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+    const base = await super.renderContestOutcome(exportCtx, {
+      initiator, target, initiatorRoll, targetRoll, netSuccesses,
+    });
 
-   // ---------- defense guidance & export for opposed flow ----------
+    const weaponName = exportCtx?.weaponName || this.item?.name || "Attack";
+    const header = `
+      <p><strong>${initiator?.name}</strong> attacks <strong>${target?.name}</strong> with <em>${weaponName}</em>.</p>
+    `;
 
-   /**
-    * What the defender rolls against (used for UI labels and default TN mod).
-    * Keep it strict; no fallbacks.
-    */
-   getDefenseHint() {
-      // Adjust this to your firearm rules (range/mode might add difficulty etc.)
-      return {
-         type: "attribute",
-         key: "reaction",
-         tnMod: 0,
-         tnLabel: "Weapon difficulty", // localize if you wish
-      };
-   }
+    // If attacker wins, we can return the resistance prep directly here.
+    const resistancePrep = netSuccesses > 0
+      ? this.buildResistancePrep(exportCtx, { initiator, target })
+      : null;
 
-   /**
-    * Single source of truth shipped to OpposeRollService.startProcedure().
-    * Includes the full attack snapshot + the "next" step spec (Dodge).
-    */
-   exportForContest() {
-      const weapon = this.item;
-      const attacker = this.caller;
+    return {
+      html: `${header}${base.html}`,
+      resistancePrep,
+    };
+  }
 
-      // Base TN shown on the attacker's roll; defender will have its own mods
-      const tnBase = Number(get(this.targetNumberStore) ?? 4);
+  /**
+   * Construct the resistance-prep object using the export snapshot.
+   * Called only when the attacker wins.
+   */
+  buildResistancePrep(exportCtx, { initiator, target }) {
+    if (exportCtx?.familyKey !== "firearm") return null;
 
-      // Snapshot attack TN modifiers (useful for later displays/resistance)
-      const tnMods = (get(this.modifiersArrayStore) ?? []).map((m) => ({
-         id: m.id ?? null,
-         name: m.name ?? "",
-         value: Number(m.value) || 0,
-      }));
+    const prep = FirearmService.prepareDamageResolution(target, {
+      plan: exportCtx.plan,
+      damage: exportCtx.damage,
+    });
 
-      // Ensure we have a current attack plan/damage
-      if (!this.#attackCtx) {
-         const { plan, damage, ammoId } = FirearmService.beginAttack(attacker, weapon, {});
-         this.#attackCtx = { plan, damage, ammoId };
-      }
+    // annotate for the resistance step
+    prep.familyKey  = "firearm";
+    prep.weaponId   = exportCtx.weaponId || null;
+    prep.weaponName = exportCtx.weaponName || "Attack";
+    if (exportCtx.tnBase != null) prep.tnBase = exportCtx.tnBase;
+    if (Array.isArray(exportCtx.tnMods)) prep.tnMods = exportCtx.tnMods.slice();
 
-      const { tnMod, tnLabel } = this.getDefenseHint();
+    return prep;
+  }
 
-      return {
-         familyKey: "firearm",
-         weaponId: weapon?.id ?? null,
-         weaponName: weapon?.name ?? "Attack",
-         plan: this.#attackCtx?.plan ?? null,
-         damage: this.#attackCtx?.damage ?? null,
-         tnBase,
-         tnMods,
+  /**
+   * Single source of truth shipped to OpposeRollService.startProcedure().
+   * Includes the attack snapshot + the “next” step (Dodge) spec.
+   */
+  exportForContest() {
+    const weapon   = this.item;
+    const attacker = this.caller;
 
-         // Tell the responder exactly what procedure to run next and how to label it
-         next: {
-            kind: "dodge", // must be registered via AbstractProcedure.registerSubclass("dodge", DodgeProcedure)
-            ui: {
-               prompt: `${attacker?.name ?? "Attacker"} attacks with ${weapon?.name ?? "weapon"}. Dodge?`,
-               yes: "Dodge",
-               no: "Don’t Dodge",
-            },
-            // Minimal args for DodgeProcedure; keep this tight & explicit
-            args: {
-               initiatorId: attacker?.id,
-               weaponId: weapon?.id,
-               weaponName: weapon?.name ?? "Attack",
-               defenseTNMod: tnMod,
-               defenseTNLabel: tnLabel,
-               // If your dodge needs more (e.g., scene/token ids), add them here explicitly
-            },
-         },
-      };
-   }
+    const tnBase = Number(get(this.targetNumberStore) ?? 4);
+    const tnMods = (get(this.modifiersArrayStore) ?? []).map((m) => ({
+      id: m.id ?? null,
+      name: m.name ?? "",
+      value: Number(m.value) || 0,
+    }));
+
+    if (!this.#attackCtx) {
+      const { plan, damage, ammoId } = FirearmService.beginAttack(attacker, weapon, {});
+      this.#attackCtx = { plan, damage, ammoId };
+    }
+
+    const { tnMod, tnLabel } = this.getDefenseHint();
+
+    return {
+      familyKey: "firearm",
+      weaponId: weapon?.id ?? null,
+      weaponName: weapon?.name ?? "Attack",
+      plan: this.#attackCtx?.plan ?? null,
+      damage: this.#attackCtx?.damage ?? null,
+      tnBase,
+      tnMods,
+
+      next: {
+        kind: "dodge", // must be registered in init: AbstractProcedure.registerSubclass("dodge", DodgeProcedure)
+        ui: {
+          prompt: `${attacker?.name ?? "Attacker"} attacks with ${weapon?.name ?? "weapon"}. Dodge?`,
+          yes: "Dodge",
+          no:  "Don’t Dodge",
+        },
+        args: {
+          initiatorId: attacker?.id,
+          weaponId: weapon?.id,
+          weaponName: weapon?.name ?? "Attack",
+          defenseTNMod: tnMod,
+          defenseTNLabel: tnLabel,
+        },
+      },
+    };
+  }
 }

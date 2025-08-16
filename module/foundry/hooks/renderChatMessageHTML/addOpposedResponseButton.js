@@ -114,7 +114,6 @@ export async function addOpposedResponseButton(message, html /*, data */) {
       await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
         contestId,
         rollData,
-        initiatorId: current.initiatorId,
       });
 
       const messageId = message.id;

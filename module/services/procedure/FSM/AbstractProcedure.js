@@ -373,7 +373,9 @@ export default class AbstractProcedure {
       return (game.user?.targets?.size ?? 0) > 0;
    }
 
-   // AbstractProcedure.js
+   shouldSelfPublish() {
+      return true;
+   }
 
    // The default label; subclasses override as they like.
    getKindOfRollLabel() {
@@ -521,6 +523,33 @@ export default class AbstractProcedure {
    async onChallengeResolved(/* { roll, actor } */) {}
 
    // ---------- resoponder helpers ----------
+
+   // AbstractProcedure.js (inside the class)
+
+   // Family-agnostic contested outcome renderer; returns HTML + optional resistance prep
+   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+      const initName = initiator?.name ?? "Attacker";
+      const tgtName = target?.name ?? "Defender";
+
+      const initHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
+      const tgtHtml = SR3ERoll.renderVanilla(target, targetRoll);
+      const winner = netSuccesses > 0 ? initName : tgtName;
+
+      return {
+         html: `
+      <p><strong>Contested roll between ${initName} and ${tgtName}</strong></p>
+      <h4>${initName}</h4>${initHtml}
+      <h4>${tgtName}</h4>${tgtHtml}
+      <p><strong>${winner}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+    `,
+         resistancePrep: null, // subclasses can return a full prep for damage resistance
+      };
+   }
+
+   // Default: nothing to prep. Subclasses (e.g., Firearm) can build a resist-prep blob.
+   buildResistancePrep(exportCtx, { initiator, target }) {
+      return null;
+   }
 
    /**
     * Build the defense procedure instance that should run on the defender side.
