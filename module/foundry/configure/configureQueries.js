@@ -3,22 +3,12 @@ import OpposeRollService from "@services/OpposeRollService.js";
 export function configureQueries() {
    CONFIG.queries ??= {};
 
-   // Defender-side: register the contest on that client.
-   CONFIG.queries["sr3e.opposeRollPrompt"] = async ({ contestId, initiatorId, targetId, rollData, options }) => {
-      console.log("[sr3e] Received opposeRollPrompt query", { contestId, initiatorId, targetId });
-
-      const initiator = game.actors.get(initiatorId);
-      const target = game.actors.get(targetId);
-      if (!initiator || !target) {
-         return { acknowledged: false };
-      }
-
-      OpposeRollService.registerContest({ contestId, initiator, target, rollData, options });
-
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
+   CONFIG.queries["sr3e.opposeRollPrompt"] = async (stub) => {
+      console.log("[sr3e] Received opposeRollPrompt (strict stub)", stub);
+      const contest = OpposeRollService.registerContestStub(stub);
+      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === stub.contestId);
       if (msg) msg.render(true);
-
-      return { acknowledged: true };
+      return { acknowledged: !!contest };
    };
 
    // Back to initiator: resolve target roll and continue the chain.
@@ -44,7 +34,8 @@ export function configureQueries() {
          options: { targetNumber: 4 },
       };
 
-      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
+      const initiatorActor = contest.initiator || game.actors.get(contest.initiatorId);
+      const initiatorUser = OpposeRollService.resolveControllingUser(initiatorActor);
 
       // Run the resolution on the initiator's side (author/owner of the original chat msg)
       if (initiatorUser?.id === game.user.id) {
@@ -65,8 +56,7 @@ export function configureQueries() {
       if (!msg) throw new Error(`sr3e: chat message ${messageId} not found`);
 
       // Only allow GM or the message author to update
-      if (!(game.user.isGM || msg.isAuthor))
-         throw new Error("sr3e: insufficient permission to update ChatMessage");
+      if (!(game.user.isGM || msg.isAuthor)) throw new Error("sr3e: insufficient permission to update ChatMessage");
 
       await msg.update({
          flags: {

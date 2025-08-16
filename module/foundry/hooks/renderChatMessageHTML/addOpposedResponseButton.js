@@ -30,8 +30,9 @@ export async function addOpposedResponseButton(message, html, data) {
       return;
    }
 
-   const actor = contest.target;
-   const controllingUser = OpposeRollService.resolveControllingUser(actor);
+   const actor = game.actors.get(contest.target?.actorId);
+   if (!actor) return; // not hydrated yet; render again when query registers it
+   const controllingUser = OpposeRollService.resolveControllingUser(actor.id);
    const isControllingUser = game.user.id === controllingUser?.id;
    const alreadyResponded = contest.targetRoll !== null || message.flags?.sr3e?.opposedResponded;
 
@@ -81,7 +82,11 @@ export async function addOpposedResponseButton(message, html, data) {
       noBtn.disabled = true;
       yesBtn.classList.add("responded");
 
-      const actorSheet = current.target.sheet;
+      const actorDoc =
+         current.target instanceof Actor
+            ? current.target
+            : game.actors.get(current.target?.id ?? current.target?.actorId);
+      const actorSheet = actorDoc.sheet;
       if (!actorSheet.rendered) await actorSheet.render(true);
 
       const { tnMod = 0, tnLabel = "Weapon difficulty" } = current?.defenseHint ?? {};
@@ -105,14 +110,13 @@ export async function addOpposedResponseButton(message, html, data) {
       await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
          contestId,
          rollData,
-         initiatorId: current.initiator.id,
+         initiatorId: current.initiatorId,
       });
 
       // Mark message so we do not offer buttons again on re-render
       const messageId = message.id;
       const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser)
-         authorUser.query("sr3e.markOpposedResponded", { messageId });
+      if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
 
    // --- NO: skip Dodge (0 successes) and continue immediately ---
@@ -139,8 +143,6 @@ export async function addOpposedResponseButton(message, html, data) {
       // Mark message so we do not offer buttons again on re-render
       const messageId = message.id;
       const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser)
-         authorUser.query("sr3e.markOpposedResponded", { messageId });
+      if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
    };
-
 }
