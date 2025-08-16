@@ -10,25 +10,33 @@ function C() {
 
 export default class AbstractProcedure {
    // ---------- static: serialization registry & helpers ----------
+   // ---- Registration (factory) ----
    static #SCHEMA_VERSION = 1;
-   static #registry = new Map(); // kind -> ctor
 
-   /**
-    * Subclasses should call once at module load:
-    *   AbstractProcedure.registerSubclass("firearm", FirearmProcedure)
-    */
-   static registerSubclass(kind, ctor) {
+   // Map: kind -> constructor
+   static #registry = new Map();
+
+   /** Register a subclass so fromJSON() can find it later. */
+   static registerSubclass(kind, Ctor) {
       if (!kind || typeof kind !== "string") throw new Error("registerSubclass: kind must be a string");
-      if (typeof ctor !== "function") throw new Error("registerSubclass: ctor must be a constructor");
-      this.#registry.set(kind, ctor);
-      // Optional: expose a static `kind` on the ctor for convenience
+      if (typeof Ctor !== "function") throw new Error("registerSubclass: ctor must be a constructor");
+      // Overwrite is fine in dev reloads; warn if you want:
+      // if (this.#registry.has(kind)) console.warn(`[sr3e] Re-registering procedure kind "${kind}"`);
+      this.#registry.set(kind, Ctor);
+      // Convenience: give the constructor a stable kind
       try {
-         ctor.kind = kind;
+         Object.defineProperty(Ctor, "kind", { value: kind, configurable: true });
       } catch {}
    }
 
+   /** Lookup a registered constructor by kind. */
    static getCtor(kind) {
-      return this.#registry.get(kind) || null;
+      return this.#registry.get(kind) ?? null;
+   }
+
+   /** Optional tooling: list all registered kinds (nice for debugging). */
+   static listKinds() {
+      return Array.from(this.#registry.keys());
    }
 
    /**
@@ -56,7 +64,7 @@ export default class AbstractProcedure {
       const { schema = 1, kind, actor, item, state = {}, extra = null } = obj;
 
       if (schema !== AbstractProcedure.#SCHEMA_VERSION) {
-         // schema bump handling goes here if needed
+         // optional: migrate or just warn
          DEBUG &&
             LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${AbstractProcedure.#SCHEMA_VERSION}`, [
                __FILE__,
@@ -64,7 +72,7 @@ export default class AbstractProcedure {
             ]);
       }
 
-      // Resolve actor & item
+      // Default resolvers (allow override via opts)
       const resolveActor =
          opts.resolveActor ||
          (async (ref) => {
@@ -76,7 +84,6 @@ export default class AbstractProcedure {
             }
             return game.actors?.get(ref.id) ?? null;
          });
-
       const resolveItem =
          opts.resolveItem ||
          (async (ref, resolvedActor) => {
@@ -91,37 +98,26 @@ export default class AbstractProcedure {
 
       const callerDoc = await resolveActor(actor);
       const itemDoc = await resolveItem(item, callerDoc);
+      if (!callerDoc || !itemDoc) throw new Error("fromJSON: could not resolve caller and/or item");
 
-      if (!callerDoc || !itemDoc) {
-         throw new Error("fromJSON: could not resolve caller and/or item");
-      }
-
-      // Pick the right concrete class
-      const Ctor = (kind && this.getCtor(kind)) || this;
-      if (Ctor === AbstractProcedure) {
-         throw new Error(`fromJSON: no registered subclass for kind="${kind}"`);
-      }
+      // Find the concrete class
+      const Ctor = AbstractProcedure.getCtor(kind);
+      if (!Ctor) throw new Error(`fromJSON: no registered subclass for kind="${kind}"`);
 
       const proc = new Ctor(callerDoc, itemDoc);
 
-      // Apply base state
+      // Base state
       if (typeof state.title === "string") proc.#titleStore.set(state.title);
       if (Number.isFinite(Number(state.targetNumber))) proc.#targetNumberStore.set(Number(state.targetNumber));
-
-      // Defensive copy of modifiers
       const mods = Array.isArray(state.modifiers) ? state.modifiers.map((m) => ({ ...m })) : [];
       proc.#modifiersArrayStore.set(mods);
-
       if (Number.isFinite(Number(state.dice))) proc.#diceStore.set(Math.max(0, Number(state.dice)));
       proc.#isDefaulting = !!state.isDefaulting;
-
-      if (typeof state.linkedAttribute === "string" || state.linkedAttribute === null) {
+      if (typeof state.linkedAttribute === "string" || state.linkedAttribute === null)
          proc.#linkedAttributeStore.set(state.linkedAttribute ?? null);
-      }
-
       proc.#contestIds = Array.isArray(state.contestIds) ? state.contestIds.filter(Boolean) : [];
 
-      // Let subclass hydrate its extras
+      // Subclass extras
       if (typeof proc.fromJSONExtra === "function") {
          await proc.fromJSONExtra(extra ?? null, { opts, payload: obj });
       }
@@ -277,18 +273,14 @@ export default class AbstractProcedure {
    /**
     * Emit a versioned, minimal JSON shape for transport.
     */
+   // AbstractProcedure.js (only the toJSON body changes)
+
    toJSON() {
       return {
          schema: AbstractProcedure.#SCHEMA_VERSION,
-         kind: this.constructor.kind || this.constructor.name, // subclass should register a stable `kind`
-         actor: {
-            id: this.#caller?.id ?? null,
-            uuid: this.#caller?.uuid ?? null,
-         },
-         item: {
-            id: this.#item?.id ?? null,
-            uuid: this.#item?.uuid ?? null,
-         },
+         kind: this.constructor.kind || this.constructor.name, // <- important
+         actor: { id: this.#caller?.id ?? null, uuid: this.#caller?.uuid ?? null },
+         item: { id: this.#item?.id ?? null, uuid: this.#item?.uuid ?? null },
          state: {
             title: get(this.#titleStore),
             targetNumber: Number(get(this.#targetNumberStore) ?? 4),
@@ -298,7 +290,7 @@ export default class AbstractProcedure {
             linkedAttribute: get(this.#linkedAttributeStore),
             contestIds: this.#contestIds.slice(),
          },
-         extra: this.toJSONExtra(),
+         extra: this.toJSONExtra(), // subclass-specific payload
       };
    }
 
@@ -379,6 +371,36 @@ export default class AbstractProcedure {
 
    get isOpposed() {
       return (game.user?.targets?.size ?? 0) > 0;
+   }
+
+   // AbstractProcedure.js
+
+   // The default label; subclasses override as they like.
+   getKindOfRollLabel() {
+      const t = game?.i18n?.localize?.bind(game.i18n);
+      return this.hasTargets ? t?.("sr3e.label.challenge") ?? "Challenge" : t?.("sr3e.label.roll") ?? "Roll";
+   }
+
+   getItemLabel() {
+      // Prefer the item’s name; fall back to the procedure’s title
+      return this.item?.name ?? (typeof this.title === "string" ? this.title : "");
+   }
+
+   // (keep these from earlier)
+   getPrimaryActionLabel() {
+      const t = game?.i18n?.localize?.bind(game.i18n);
+      return this.hasTargets ? t?.("sr3e.button.challenge") ?? "Challenge!" : t?.("sr3e.button.roll") ?? "Roll!";
+   }
+
+   isPrimaryActionEnabled() {
+      const tn = Number(this.finalTN({ floor: 2 }));
+      return Number.isFinite(tn) && tn > 1;
+   }
+
+   // Whether the main action is enabled (TN must be >= 2)
+   isPrimaryActionEnabled() {
+      const tn = Number(this.finalTN({ floor: 2 }));
+      return Number.isFinite(tn) && tn > 1;
    }
 
    setContestIds(ids = []) {
@@ -497,6 +519,57 @@ export default class AbstractProcedure {
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
    async onChallengeResolved(/* { roll, actor } */) {}
+
+   // ---------- resoponder helpers ----------
+
+   /**
+    * Build the defense procedure instance that should run on the defender side.
+    * Default: use exportCtx.next.kind to choose a registered procedure and hydrate it.
+    * Subclasses may override for custom behavior.
+    */
+   async buildDefenseProcedure(exportCtx, { defender, contestId }) {
+      if (!exportCtx?.next?.kind) {
+         throw new Error("export.next.kind is required to build the defense procedure");
+      }
+      const kind = exportCtx.next.kind;
+      const DefenseCtor = AbstractProcedure.getCtor(kind);
+      if (!DefenseCtor) {
+         throw new Error(`No registered procedure for kind="${kind}"`);
+      }
+      const proc = new DefenseCtor(defender, /* item */ null);
+      if (typeof proc.fromContestExport === "function") {
+         await proc.fromContestExport(exportCtx, { contestId, initiatorExport: exportCtx });
+      }
+      return proc;
+   }
+
+   /**
+    * Default responder prompt as HTML string.
+    * Subclasses can override `getResponderPromptHTML` to fully customize the block,
+    * but MUST include buttons with [data-responder="yes"] and [data-responder="no"].
+    */
+   buildDefaultResponderPromptHTML(exportCtx /*, { contest } */) {
+      const ui = exportCtx?.next?.ui;
+      if (!ui?.prompt || !ui?.yes || !ui?.no) {
+         throw new Error("export.next.ui.{prompt,yes,no} are required for responder UI");
+      }
+      return `
+      <div class="sr3e-responder-prompt">
+        <div class="sr3e-responder-text">${ui.prompt}</div>
+        <div class="buttons-horizontal-distribution" role="group" aria-label="Defense choice">
+          <button class="sr3e-response-button yes" data-responder="yes">${ui.yes}</button>
+          <button class="sr3e-response-button no" data-responder="no">${ui.no}</button>
+        </div>
+      </div>`;
+   }
+
+   /**
+    * Optional override for subclasses. If not provided, `buildDefaultResponderPromptHTML` is used.
+    * Must return an HTML string that includes [data-responder="yes"] and [data-responder="no"] buttons.
+    */
+   async getResponderPromptHTML(exportCtx, { contest }) {
+      return this.buildDefaultResponderPromptHTML(exportCtx, { contest });
+   }
 
    // ---------- defaulting helpers ----------
    #clearDefaultingMods() {

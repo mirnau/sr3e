@@ -62,6 +62,11 @@ import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
 
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
+import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
+import DodgeProcedure from "@services/procedure/FSM/DodgeProcedure.js";
+//import MeleeProcedure     from "@services/procedure/FSM/MeleeProcedure.js";
+
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
    if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
@@ -193,6 +198,10 @@ function registerHooks() {
    if (DEBUG) {
       //Hooks.once(hooks.ready, enableDebugHooks);
    }
+
+   AbstractProcedure.registerSubclass("firearm", FirearmProcedure);
+   AbstractProcedure.registerSubclass("dodge", DodgeProcedure);
+   //AbstractProcedure.registerSubclass("melee", MeleeProcedure);
 
    Hooks.once(hooks.init, initializeSystem);
 

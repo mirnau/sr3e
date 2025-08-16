@@ -4,10 +4,6 @@
    import ItemDataService from "@services/ItemDataService.js";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
    import { localize } from "@services/utilities.js";
-   import Respond from "@sveltecomponent/Respond.svelte";
-   import Resistance from "@sveltecomponent/Resistance.svelte";
-   import Challenge from "@sveltecomponent/Challenge.svelte";
-   import ComposerRoll from "@sveltecomponent/ComposerRoll.svelte";
    import { get, writable } from "svelte/store";
    import FirearmService from "@families/FirearmService.js";
    import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
@@ -54,6 +50,11 @@
    let modifiedTargetNumber = $state(0);
    let difficulty = $state("");
    let procedureStore = writable(null);
+
+   let primaryLabel = $state("Roll!");
+   let primaryEnabled = $state(true);
+   let kindOfRoll = $state("Roll");
+   let itemName = $state("");
 
    let diceBought = $state(0);
    let karmaCost = $state(0);
@@ -108,11 +109,6 @@
       if (mod?.id === "recoil" && mod.weaponId) {
       }
       procedureStore?.removeModByIndex?.(index);
-   }
-
-   function getAttrDiceFromSumStore(attrKey) {
-      const store = actorStoreManager.GetSumROStore(`attributes.${attrKey}`);
-      return Number(get(store)?.sum ?? 0);
    }
 
    function markModTouched(index) {
@@ -206,6 +202,23 @@
       const targetToken = Array.from(game.user.targets)[0] ?? null;
       procedureStore?.primeRangeForWeapon?.(attackerToken, targetToken);
       rangePrimedForWeaponId = weapon.id;
+   });
+
+   $effect(() => {
+      const proc = $procedureStore;
+      if (!proc) return;
+
+      try {
+         kindOfRoll = proc.getKindOfRollLabel?.() ?? (proc.hasTargets ? "Challenge" : "Roll");
+         itemName = proc.getItemLabel?.() ?? (proc.item?.name || "");
+         primaryLabel = proc.getPrimaryActionLabel?.() ?? "Roll!";
+         primaryEnabled = proc.isPrimaryActionEnabled?.() ?? true;
+      } catch {
+         kindOfRoll = "Roll";
+         itemName = "";
+         primaryLabel = "Roll!";
+         primaryEnabled = true;
+      }
    });
 
    $effect(() => {
@@ -340,9 +353,18 @@
          </div>
       {/if}
 
-      {#if hasTargets}
-         <Challenge {procedureStore} {OnClose} {CommitEffects} />
-      {/if}
+      <div class="roll-composer-card">
+         <h4>{kindOfRoll}</h4>
+         {#if itemName}<h4>{itemName}</h4>{/if}
+         <button
+            class="regular"
+            type="button"
+            disabled={!primaryEnabled}
+            onclick={async () => await $procedureStore.challenge({ OnClose, CommitEffects })}
+         >
+            {primaryLabel}
+         </button>
+      </div>
 
       {#if caller.type === "item" && isFirearm && (weaponMode === "burst" || weaponMode === "fullauto")}
          <div class="roll-composer-card">

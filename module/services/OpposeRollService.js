@@ -2,23 +2,9 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import FirearmService from "@families/FirearmService.js";
 import MeleeService from "@families/MeleeService.js";
 
-const activeContests = new Map();       // contestId -> Contest (ID-only shape)
-const pendingResponses = new Map();     // contestId -> resolver
+const activeContests = new Map();
+const pendingResponses = new Map();
 
-/**
- * Canonical contest shape (no embedded Actor docs):
- * {
- *   id: string,
- *   initiatorId: string,
- *   target: { actorId: string, name?: string, tokenId?: string, sceneId?: string },
- *   initiatorRoll: any,
- *   targetRoll: any | null,
- *   isResolved: boolean,
- *   procedure: { class: string, json: object|null, export: object },
- *   defenseHint: { type: "attribute"|"skill", key: string, tnMod: number, tnLabel: string },
- *   phase?: string
- * }
- */
 export default class OpposeRollService {
   // -----------------------
   // Bookkeeping
@@ -51,26 +37,27 @@ export default class OpposeRollService {
     return this.expireContest(contestId);
   }
 
-  // Defender/initiator clients register contests from a stub (strict, ID-only).
+  /**
+   * Local registration on any client that receives the stub via query.
+   * The stub ONLY contains ids (no heavy docs). We resolve to Actor docs here.
+   */
   static registerContestStub(stub) {
-    const {
-      contestId,
-      initiatorId,
-      target,            // { actorId, name?, tokenId?, sceneId? }
-      initiatorRoll,
-      procedure,
-      defenseHint,
-    } = stub;
+    const { contestId, initiatorId, target, initiatorRoll, procedure, defenseHint } = stub;
+
+    const initiator = game.actors.get(initiatorId) || null;
+    const targetActorId = target?.actorId ?? null;
+    const targetActor = targetActorId ? game.actors.get(targetActorId) : null;
 
     const contest = {
       id: contestId,
-      initiatorId,
-      target,
+      initiator,
+      target: targetActor,
       initiatorRoll,
       targetRoll: null,
       isResolved: false,
-      procedure,
-      defenseHint,
+      procedure,     // { class, json, export }
+      defenseHint,   // hint object for defender UI
+      phase: "awaiting-response",
     };
 
     activeContests.set(contestId, contest);
@@ -80,6 +67,11 @@ export default class OpposeRollService {
   // -----------------------
   // Procedure-driven start
   // -----------------------
+  /**
+   * Start opposed flow from the initiator’s client.
+   * - Store full docs locally.
+   * - Send a *stub* (ids + exports) to remote clients.
+   */
   static async startProcedure({ procedure, targetActor, targetToken = null, roll }) {
     const initiator = procedure?.caller;
     const contestId = foundry.utils.randomID(16);
@@ -87,15 +79,11 @@ export default class OpposeRollService {
     const initiatorRoll = this.#buildRollSnapshot(roll, procedure);
     const exportCtx = (typeof procedure.exportForContest === "function" ? procedure.exportForContest() : {}) || {};
 
+    // Local full contest (docs ok locally)
     const contest = {
       id: contestId,
-      initiatorId: initiator?.id,
-      target: {
-        actorId: targetActor?.id,
-        name: targetActor?.name,
-        tokenId: targetToken?.id ?? targetToken?.document?.id ?? null,
-        sceneId: targetToken?.scene?.id ?? targetToken?.document?.parent?.id ?? null,
-      },
+      initiator,
+      target: targetActor,
       initiatorRoll,
       targetRoll: null,
       isResolved: false,
@@ -105,28 +93,43 @@ export default class OpposeRollService {
         export: exportCtx,
       },
       defenseHint:
-        typeof procedure.getDefenseHint === "function"
-          ? procedure.getDefenseHint()
-          : { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" },
+        (typeof procedure.getDefenseHint === "function" && procedure.getDefenseHint()) || {
+          type: "attribute",
+          key: "reaction",
+          tnMod: 0,
+          tnLabel: "",
+        },
+      phase: "awaiting-response",
+      tokenRef: {
+        tokenId: targetToken?.id ?? targetToken?.document?.id ?? null,
+        sceneId: targetToken?.scene?.id ?? targetToken?.document?.parent?.id ?? null,
+      },
     };
 
     activeContests.set(contestId, contest);
 
-    const initiatorUser = this.resolveControllingUser(initiator?.id);
-    const targetUser = this.resolveControllingUser(targetActor?.id);
+    // Prepare and send *stub* to other clients
+    const initiatorUser = this.resolveControllingUser(initiator);
+    const targetUser = this.resolveControllingUser(targetActor);
 
-    // Strict stub to remote clients
     const stub = {
       contestId,
       initiatorId: initiator?.id,
-      target: contest.target,
+      target: {
+        actorId: targetActor?.id,
+        name: targetActor?.name,
+        tokenId: contest.tokenRef.tokenId,
+        sceneId: contest.tokenRef.sceneId,
+      },
       initiatorRoll,
-      procedure: contest.procedure,
+      procedure: contest.procedure, // includes exportCtx
       defenseHint: contest.defenseHint,
     };
+
     if (initiatorUser?.id !== game.user.id) await initiatorUser.query("sr3e.opposeRollPrompt", stub);
     if (targetUser?.id !== game.user.id) await targetUser.query("sr3e.opposeRollPrompt", stub);
 
+    // Chat prompt (whisper to the two involved)
     const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: initiator }),
@@ -141,11 +144,8 @@ export default class OpposeRollService {
     return contestId;
   }
 
-  // Accepts Actor doc OR actorId
-  static resolveControllingUser(actorOrId) {
-    const actor = typeof actorOrId === "string" ? this.#actorById(actorOrId) : actorOrId;
+  static resolveControllingUser(actor) {
     const connected = game.users.filter((u) => u.active);
-
     const assigned = connected.find((u) => u.character?.id === actor?.id);
     if (assigned) return assigned;
 
@@ -157,21 +157,16 @@ export default class OpposeRollService {
     return connected.find((u) => u.isGM);
   }
 
-  static #actorById(id) {
-    if (!id) return null;
-    return game.actors.get(id) || null;
-  }
-
   static #buildRollSnapshot(roll, procedure) {
     const json = roll.toJSON();
 
-    // Ensure TN is present for success counting in UI
+    // Ensure TN present for success counting in UI
     const tn = Number(procedure?.finalTN?.({ floor: 2 }) ?? null);
     json.options = json.options || {};
     if (Number.isFinite(tn)) json.options.targetNumber = tn;
     else delete json.options.targetNumber;
 
-    // Optional meta for rendering
+    // Carry procedure-provided flavor/description (optional)
     json.meta = {
       flavor: procedure?.getFlavor?.() ?? "",
       descriptionHtml: procedure?.getChatDescription?.() ?? "",
@@ -191,54 +186,53 @@ export default class OpposeRollService {
     contest.targetRoll = rollData;
     contest.isResolved = true;
 
-    const { initiatorId, target, initiatorRoll, targetRoll, procedure: proc } = contest;
+    const initiator = contest.initiator;
+    const target = contest.target;
+    const initiatorRoll = contest.initiatorRoll;
+    const targetRoll = contest.targetRoll;
 
-    // Resolve docs locally (ID-only contests)
-    const initiator = this.#actorById(initiatorId);
-    const targetActor = this.#actorById(target?.actorId);
-    if (!initiator || !targetActor) throw new Error("sr3e: missing actors to resolve contest");
+    // Attack context exported by the initiator procedure
+    const procExport = contest.procedure?.export || null;
 
     const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
-    const winner = netSuccesses > 0 ? initiator : targetActor;
+    const winner = netSuccesses > 0 ? initiator : target;
 
     let damageText = "";
     let resistancePayload = null;
 
-    // If initiator wins and we have an attack context snapshot, prepare resistance
-    if (winner === initiator && proc?.export?.familyKey) {
-      const family = proc.export.familyKey;
-      const svc = family === "firearm" ? FirearmService : MeleeService;
+    if (winner === initiator && procExport?.familyKey) {
+      const svc = procExport.familyKey === "firearm" ? FirearmService : MeleeService;
 
       const prep =
-        family === "firearm"
-          ? svc.prepareDamageResolution(targetActor, { plan: proc.export.plan, damage: proc.export.damage })
-          : svc.prepareDamageResolution(targetActor, { packet: proc.export.damage });
+        procExport.familyKey === "firearm"
+          ? svc.prepareDamageResolution(target, { plan: procExport.plan, damage: procExport.damage })
+          : svc.prepareDamageResolution(target, { packet: procExport.damage });
 
-      // annotate for later; keep everything we need for the resist step
+      // annotate for later; keep everything needed for resist step
       prep.contestId = contest.id;
       prep.attackerId = initiator.id;
-      prep.familyKey = family;
-      prep.weaponId = proc.export.weaponId || null;
-      prep.weaponName = proc.export.weaponName || "Attack";
+      prep.familyKey = procExport.familyKey;
+      prep.weaponId = procExport.weaponId || null;
+      prep.weaponName = procExport.weaponName || "Attack";
 
       damageText = `
-        <p><strong>${targetActor.name}</strong> must resist
+        <p><strong>${target.name}</strong> must resist
         <strong>${String(prep.stagedStepBeforeResist || "").toUpperCase()}</strong> damage
-        (${prep.trackKey}) from <em>${prep.weaponName}</em>.</p>`;
+        (${prep.trackKey}) from <em>${prep.weaponName}</em>.</p>
+      `;
 
       resistancePayload = {
         contestId: contest.id,
         initiatorId: initiator.id,
-        defenderId: targetActor.id,
-        weaponId: proc.export.weaponId || null,
+        defenderId: target.id,
+        weaponId: procExport.weaponId || null,
         prep,
       };
     }
 
-    // Compose chat output with both dice pools
     const content = this.#buildContestMessage({
       initiator,
-      target: targetActor,
+      target,
       initiatorRoll,
       targetRoll,
       winner,
@@ -249,7 +243,7 @@ export default class OpposeRollService {
     const chatData = this.#prepareChatData({
       speaker: initiator,
       initiatorUser: this.resolveControllingUser(initiator),
-      targetUser: this.resolveControllingUser(targetActor),
+      targetUser: this.resolveControllingUser(target),
       content,
       rollMode: game.settings.get("core", "rollMode"),
     });
@@ -281,7 +275,7 @@ export default class OpposeRollService {
     const defender = game.actors.get(defenderId);
     if (!defender) return ui.notifications.warn("Defender not found");
 
-    // Show weapon name if possible; otherwise rely on prep annotation
+    // Prefer annotated weaponName; fall back to doc if we can resolve it.
     let weaponName = prep?.weaponName || "Attack";
     if (weaponId) {
       const initiator = game.actors.get(initiatorId);
@@ -292,18 +286,28 @@ export default class OpposeRollService {
     const defenderUser = this.resolveControllingUser(defender);
     const context = { contestId, initiatorId, defenderId, weaponId, prep };
 
-    const base = Number(prep?.tnBase ?? 4);
-    const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
-    const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
-    const finalTN = Math.max(2, base + sum);
+    const tnHtml = (() => {
+      const base = Number(prep?.tnBase ?? 4);
+      const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
+      const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const finalTN = Math.max(2, base + sum);
 
-    const items = mods
-      .map((m) => {
-        const sign = (Number(m.value) || 0) >= 0 ? "+" : "−";
-        const abs = Math.abs(Number(m.value) || 0);
-        return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
-      })
-      .join("");
+      const items = mods
+        .map((m) => {
+          const sign = (Number(m.value) || 0) >= 0 ? "+" : "−";
+          const abs = Math.abs(Number(m.value) || 0);
+          return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
+        })
+        .join("");
+
+      return `
+         <div class="sr3e-tn-breakdown">
+           <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
+             sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
+           })</small></p>
+           ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+         </div>`;
+    })();
 
     await ChatMessage.create({
       speaker: ChatMessage.getSpeaker({ actor: defender }),
@@ -312,10 +316,7 @@ export default class OpposeRollService {
         <p><strong>${defender.name}</strong>, resist
         <strong>${String(prep.stagedStepBeforeResist || "").toUpperCase()}</strong> ${prep.trackKey}
         damage from <em>${weaponName}</em>.</p>
-        <div class="sr3e-tn-breakdown">
-          <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""})</small></p>
-          ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
-        </div>
+        ${tnHtml}
         <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
       `,
       flags: { sr3e: { damageResistance: context } },
