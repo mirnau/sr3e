@@ -43,18 +43,14 @@ export default class OpposeRollService {
     * The stub ONLY contains ids (no heavy docs). We resolve to Actor docs here.
     */
    static registerContestStub(stub) {
-      const { contestId, initiatorId, target, initiatorRoll, procedure, defenseHint } = stub;
+      const { contestId, initiator, target, initiatorRoll, procedure, defenseHint } = stub;
 
-      const initiator = game.actors.get(initiatorId) || null;
       const targetActorId = target?.actorId ?? null;
       const targetActor = targetActorId ? game.actors.get(targetActorId) : null;
 
       const contest = {
          id: contestId,
-         initiator: {
-            actorId: initiator.id,
-            userId: game.user.id, // <- initiatorUserId
-         },
+         initiator,
          target: targetActor,
          initiatorRoll,
          targetRoll: null,
@@ -88,7 +84,7 @@ export default class OpposeRollService {
          id: contestId,
          initiator: {
             actorId: initiator.id,
-            userId: game.user.id, // <- initiatorUserId
+            userId: game.user.id,
          },
          target: targetActor,
          initiatorRoll,
@@ -122,7 +118,7 @@ export default class OpposeRollService {
          contestId,
          initiator: {
             actorId: initiator.id,
-            userId: game.user.id, // <- initiatorUserId
+            userId: game.user.id,
          },
          target: {
             actorId: targetActor?.id,
@@ -195,7 +191,7 @@ export default class OpposeRollService {
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
-      const initiator = contest.initiator;
+      const initiator = game.actors.get(contest.initiator?.actorId) || null;
       const target = contest.target;
       const initiatorRoll = contest.initiatorRoll;
       const targetRoll = contest.targetRoll;
@@ -291,10 +287,11 @@ export default class OpposeRollService {
             damageText,
          });
 
+      const targetUser = this.resolveControllingUser(target);
       const chatData = this.#prepareChatData({
          speaker: initiator,
-         initiatorUserId,
-         targetUser: this.resolveControllingUser(target),
+         initiator: contest.initiator,
+         targetUserId: targetUser?.id,
          content,
          rollMode: game.settings.get("core", "rollMode"),
       });
@@ -475,10 +472,11 @@ export default class OpposeRollService {
       ${damageText ?? ""}`;
    }
 
-   static #prepareChatData({ speaker, initiatorUserId, targetUserId, content, rollMode }) {
+   static #prepareChatData({ speaker, initiator, targetUserId, content, rollMode }) {
+      const userId = initiator?.userId;
       const chatData = {
          speaker: ChatMessage.getSpeaker({ actor: speaker }),
-         user: initiatorUserId, // author is the initiator’s user id
+         user: userId,
          content,
          flags: { "sr3e.opposedResolved": true },
       };
@@ -492,7 +490,7 @@ export default class OpposeRollService {
             chatData.blind = true;
             break;
          case "selfroll":
-            chatData.whisper = [initiatorUserId, targetUserId].filter(Boolean);
+            chatData.whisper = [userId, targetUserId].filter(Boolean);
             break;
          case "public":
          default:
