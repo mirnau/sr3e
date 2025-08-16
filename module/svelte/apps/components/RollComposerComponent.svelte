@@ -68,7 +68,7 @@
    let hasTargets = $state(false);
    let visible = $state(false);
    let canSubmit = $state(true);
-   let titleStore = writable("Title Not Set");
+   let title = writable("Title Not Set");
    let rangePrimedForWeaponId = $state(null);
    let rangeSuppressedForWeaponId = $state(null);
 
@@ -140,21 +140,20 @@
 
       // swap in the new procedure instance
       $procedureStore = currentProcedure;
-      
-      //Needs to be reacitive for both parts
+
+      //Needs to be reacitive for both parts, getting the store itself, not its value!
+      //can't be left readonly, has to be writable, thus getting the store, and not sub
       modifiersArrayStore = $procedureStore.modifiersArrayStore;
-      
+
       isFirearm = currentProcedure instanceof FirearmProcedure;
 
       // hook stores via the helper
-      addSub(procedureStore.targetNumber, (v) => (targetNumber = v));
-      addSub(procedureStore.tnModifiers, (v) => (modifiersArrayStore = v));
-      addSub(procedureStore.finalTNStore, (v) => (modifiedTargetNumber = v));
-      addSub(procedureStore.modifiersTotal, (v) => (modifiersTotal = v));
-      addSub(procedureStore.difficultyStore, (v) => (difficulty = v));
-      addSub(procedureStore.hasTargetsStore, (v) => (hasTargets = v));
-
-      titleStore = procedureStore.title;
+      addSub($procedureStore.targetNumberStore, (v) => (targetNumber = v));
+      addSub($procedureStore.modifiersTotalStore, (v) => (modifiersTotal = v));
+      addSub($procedureStore.finalTNStore, (v) => (modifiedTargetNumber = v));
+      addSub($procedureStore.difficultyStore, (v) => (difficulty = v));
+      addSub($procedureStore.hasTargetsStore, (v) => (hasTargets = v));
+      addSub($procedureStore.titleStore, (v) => (title = v));
 
       visible = true;
    }
@@ -181,11 +180,6 @@
       unhook = (..._args) => refreshPhase();
       Hooks.on("updateCombat", unhook);
       phaseKey = FirearmService.getPhase().key;
-
-      targetHook = () => {
-         hasTargets = game.user.targets.size > 0;
-      };
-      Hooks.on("targetToken", targetHook);
    });
 
    $effect(() => {
@@ -276,7 +270,7 @@
       onkeydown={swallowDirectional}
    >
       <div class="roll-composer-card">
-         <h1>{$titleStore}</h1>
+         <h1>{title}</h1>
          <h1>Roll Type</h1>
          <select bind:this={selectEl} bind:value={isDefaultingAsString} onkeydown={handleSelectKeydown}>
             <option value="false">Regular roll</option>
