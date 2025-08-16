@@ -124,11 +124,11 @@ export class StoreManager {
             store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
          };
 
-         const recalcHook = (actor) => {
-            if (actor.id !== this.#document.id) return;
-            const v = foundry.utils.getProperty(actor.system, dataPath);
-            store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
-         };
+        const recalcHook = (actor) => {
+           if (!actor || actor.id !== this.#document.id) return;
+           const v = foundry.utils.getProperty(actor.system, dataPath);
+           store.set(v && typeof v === "object" ? (Array.isArray(v) ? [...v] : { ...v }) : v);
+        };
 
          Hooks.on(`update${docType}`, updateHook);
          Hooks.on("actorSystemRecalculated", recalcHook);
