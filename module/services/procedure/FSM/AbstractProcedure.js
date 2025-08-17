@@ -459,7 +459,7 @@ export default class AbstractProcedure {
 
    buildFormula(explodes = true) {
       const dice = this.dice;
-      if (dice <= 0) return "1d6";
+      if (dice <= 0) return "0d6";
 
       const base = `${dice}d6`;
       if (!explodes) return base;

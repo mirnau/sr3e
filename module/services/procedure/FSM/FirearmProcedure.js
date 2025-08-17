@@ -179,41 +179,38 @@ export default class FirearmProcedure extends AbstractProcedure {
    async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
       const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
 
-      // Top lines — exact order requested
       const top = `
-      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
-      <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
-    `;
+    <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+    <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
+  `;
 
-      // Firearm context (Mode + Attack TN base + plain list of modifiers)
       const attackBits = this.#attackContext(exportCtx);
 
-      // Per-side summaries (no actor name repetition, no "Dice:" line)
+      // Attacker: from weapon item (as you already had)
       const iSummary = this.#attackerSummaryFromItem(initiator, initiatorRoll);
-      const dSummary = this.#defenderSummaryFromPools(target, targetRoll);
+      // Defender: from the actual roll options (skill/spec/defaulting OR attribute) + pools/karma
+      const dSummary = this.#defenderSummaryFromRoll(target, targetRoll);
 
-      // Standard roll cards
       const iHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
       const tHtml = SR3ERoll.renderVanilla(target, targetRoll);
 
       const winner = netSuccesses > 0 ? initiator : target;
 
       const html = `
-      ${top}
-      ${attackBits}
+    ${top}
+    ${attackBits}
 
-      <h4>${initiator.name}</h4>
-      ${iSummary}
-      ${iHtml}
+    <h4>${initiator.name}</h4>
+    ${iSummary}
+    ${iHtml}
 
-      <h4>${target.name}</h4>
-      ${dSummary}
-      ${tHtml}
+    <h4>${target.name}</h4>
+    ${dSummary}
+    ${tHtml}
 
-      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-    `;
+    <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+  `;
 
-      // Attach resistance prep only if attacker won
       const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
 
       return { html, resistancePrep };
@@ -288,7 +285,8 @@ export default class FirearmProcedure extends AbstractProcedure {
 
    // ---------- helpers (strict, no fallbacks) ----------
 
-   static #cap(s) {
+   // Replace your static #cap with an instance private helper:
+   #cap(s) {
       if (!s) return "";
       const t = String(s)
          .replace(/[_\-]+/g, " ")
@@ -304,11 +302,11 @@ export default class FirearmProcedure extends AbstractProcedure {
       const tnBase = Number(exportCtx?.tnBase);
 
       const modeBits = [];
-      if (mode) modeBits.push(`Mode: <b>${this.constructor.#cap(mode)}</b>`);
+      if (mode) modeBits.push(`Mode: <b>${this.#cap(mode)}</b>`);
       if (Number.isFinite(rounds) && rounds > 1) modeBits.push(`Rounds: <b>${rounds}</b>`);
 
       const mods = Array.isArray(exportCtx?.tnMods) ? exportCtx.tnMods : [];
-      const items = (exportCtx.tnMods ?? [])
+      const items = mods
          .map((m) => {
             const v = Number(m.value) || 0;
             const sign = v >= 0 ? "+" : "−";
@@ -319,12 +317,12 @@ export default class FirearmProcedure extends AbstractProcedure {
          .join("");
 
       return `
-      <div class="sr3e-attack-context">
-        ${modeBits.length ? `<p>${modeBits.join(" • ")}</p>` : ""}
-        <p>Attack TN: <b>${tnBase}</b></p>
-        ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
-      </div>
-    `;
+    <div class="sr3e-attack-context">
+      ${modeBits.length ? `<p>${modeBits.join(" • ")}</p>` : ""}
+      <p>Attack TN: <b>${tnBase}</b></p>
+      ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+    </div>
+  `;
    }
 
    /** Resolve skill + specialization strictly from the weapon’s linkedSkillId. */
@@ -370,41 +368,74 @@ export default class FirearmProcedure extends AbstractProcedure {
    }
 
    /** Defender summary lists ONLY explicit pool dice present on the roll (+ karma dice/rerolls if set). */
-   #defenderSummaryFromPools(_actor, rollJson) {
+   /** Defender summary reads ONLY what the defender actually rolled:
+    *  - If a skill was chosen: "Skill: X, Specialization: Y[, Defaulting]"
+    *  - Else if an attribute was chosen: "Attribute: Z"
+    *  Then adds lines for Pools and Karma actually used.
+    *  No lookups, no assumptions, no fallbacks.
+    */
+   #defenderSummaryFromRoll(_actor, rollJson) {
       const o = rollJson?.options ?? {};
 
-      const entries = [];
-      const push = (label, n) => {
-         const v = Number(n || 0);
-         if (v > 0) entries.push(`${label} ${v}`);
+      // --- main basis: skill/spec/defaulting OR attribute (whatever the user selected)
+      // Accept common shapes coming from the composer (strings or small objects).
+      const readName = (v) => {
+         if (v == null) return null;
+         if (typeof v === "string") return v;
+         if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
+         return null;
       };
 
-      // Named pools you care about
-      push("Combat Pool", o.combatPoolDice);
-      push("Control Pool", o.controlPoolDice);
-      push("Hacking Pool", o.hackingPoolDice);
-      push("Astral Pool", o.astralPoolDice);
-      push("Spell Pool", o.spellPoolDice);
+      const skillName = readName(o.skillKey ?? o.skill);
+      const specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      const attrName = readName(o.attributeKey ?? o.attribute);
+      const isDefault = !!(o.isDefaulting ?? o.defaulting);
 
-      // Also support array form provided by the composer (still strict: only what the roll says)
+      const mainBits = [];
+      if (skillName) {
+         mainBits.push(`Skill: ${this.#cap(skillName)}`);
+         if (specName) mainBits.push(`Specialization: ${this.#cap(specName)}`);
+         if (isDefault) mainBits.push("Defaulting");
+      } else if (attrName) {
+         mainBits.push(`Attribute: ${this.#cap(attrName)}`);
+      }
+
+      // --- pools actually used on the roll (named fields and/or array form)
+      const poolEntries = [];
+      const pushPool = (label, n) => {
+         const v = Number(n || 0);
+         if (v > 0) poolEntries.push(`${label} ${v}`);
+      };
+      pushPool("Combat Pool", o.combatPoolDice);
+      pushPool("Control Pool", o.controlPoolDice);
+      pushPool("Hacking Pool", o.hackingPoolDice);
+      pushPool("Astral Pool", o.astralPoolDice);
+      pushPool("Spell Pool", o.spellPoolDice);
+
       if (Array.isArray(o.pools)) {
          for (const p of o.pools) {
-            const name = (p?.name || p?.key || "").trim();
+            const name = typeof p?.name === "string" ? p.name : typeof p?.key === "string" ? p.key : null;
             const dice = Number(p?.dice ?? p?.value ?? 0);
-            if (name && dice > 0) entries.push(`${this.constructor.#cap(name)} ${dice}`);
+            if (name && dice > 0) poolEntries.push(`${this.#cap(name)} ${dice}`);
          }
       }
 
+      // --- karma actually used
       const karmaBits = [];
       const kd = Number(o.karmaDice || 0);
       if (kd > 0) karmaBits.push(`${kd} die`);
       const kr = Number(o.karmaRerolls || 0);
       if (kr > 0) karmaBits.push(`${kr} reroll${kr === 1 ? "" : "s"}`);
 
-      const parts = [];
-      if (entries.length) parts.push(`Pools: ${entries.join(", ")}`);
-      if (karmaBits.length) parts.push(`Karma: ${karmaBits.join(", ")}`);
+      // Build HTML (one line for basis; one line for pools/karma if present)
+      const out = [];
+      if (mainBits.length) out.push(`<p class="sr3e-roll-summary"><small>${mainBits.join(", ")}</small></p>`);
 
-      return parts.length ? `<p class="sr3e-roll-summary"><small>${parts.join(" • ")}</small></p>` : "";
+      const tailBits = [];
+      if (poolEntries.length) tailBits.push(`Pools: ${poolEntries.join(", ")}`);
+      if (karmaBits.length) tailBits.push(`Karma: ${karmaBits.join(", ")}`);
+      if (tailBits.length) out.push(`<p class="sr3e-roll-summary"><small>${tailBits.join(" • ")}</small></p>`);
+
+      return out.join("\n");
    }
 }
