@@ -1,3 +1,5 @@
+import ResistanceProcedure from "@services/procedure/FSM/ResistanceProcedure.js";
+
 export function addResistDamageButton(message, html, data) {
    const node = html.querySelector(".sr3e-resist-damage-button");
    if (!node || node.dataset.sr3eResistWired) return;
@@ -11,41 +13,21 @@ export function addResistDamageButton(message, html, data) {
    button.textContent = game.i18n.localize("sr3e.resist") || "Resist";
 
    button.addEventListener("click", async () => {
-      const { contestId, initiatorId, defenderId, weaponId, prep } = context;
+      const { defenderId, prep } = context;
 
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: defender not found");
 
-      // Ensure the sheet is rendered so the composer is available.
       const sheet = defender.sheet;
       if (!sheet.rendered) await sheet.render(true);
 
-      // Recompute the resistance TN from its parts to ensure any runtime
-      // modifiers (like dodge successes) are reflected. This mirrors
-      // OpposeRollService.#computeTNFromPrep.
-      const tn = Math.max(
-         2,
-         Number(prep?.tnBase ?? 0) +
-            (Array.isArray(prep?.tnMods)
-               ? prep.tnMods.reduce((a, m) => a + (Number(m.value) || 0), 0)
-               : Number(prep?.tn ?? 0))
-      );
+      const procedure = new ResistanceProcedure(defender, null, { prep });
 
-      sheet.displayRollComposer(
-         {
-            isResistingDamage: true,
-            contestId,
-            initiatorId,
-            defenderId,
-            weaponId,
-            tn,
-            prep,
-            tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
-            panelTitle: game.i18n.localize("sr3e.damageResistance") || "Damage Resistance",
-            explodes: true,
-         },
-         { visible: true }
-      );
+      if (typeof sheet.displayRollComposer === "function") {
+         await sheet.displayRollComposer({ procedure }, { visible: true });
+      } else {
+         throw new Error("sr3e: sheet.displayRollComposer not available");
+      }
    });
 
    node.appendChild(button);

@@ -65,6 +65,7 @@ import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDam
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
 import DodgeProcedure from "@services/procedure/FSM/DodgeProcedure.js";
+import ResistanceProcedure from "@services/procedure/FSM/ResistanceProcedure.js";
 //import MeleeProcedure     from "@services/procedure/FSM/MeleeProcedure.js";
 
 function debugFlagsOnActor(actor, options, userId) {
@@ -201,6 +202,7 @@ function registerHooks() {
 
    AbstractProcedure.registerSubclass("firearm", FirearmProcedure);
    AbstractProcedure.registerSubclass("dodge", DodgeProcedure);
+   AbstractProcedure.registerSubclass("resistance", DodgeProcedure);
    //AbstractProcedure.registerSubclass("melee", MeleeProcedure);
 
    Hooks.once(hooks.init, initializeSystem);
