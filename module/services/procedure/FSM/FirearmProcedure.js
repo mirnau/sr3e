@@ -250,9 +250,6 @@ export default class FirearmProcedure extends AbstractProcedure {
       // --- Resistance base TN = Attack Power (AP) -------------------------------
       // Pull AP from the computed plan/damage (NOT as a modifier).
       const ap = Number(plan?.attackPower ?? damage?.power);
-      if (!Number.isFinite(ap) || ap <= 0) {
-         throw new Error("FirearmProcedure: missing attack power for resistance TN");
-      }
       prep.tnBase = ap;
 
       // --- Resistance-phase TN modifiers (e.g., armor) --------------------------
@@ -262,7 +259,7 @@ export default class FirearmProcedure extends AbstractProcedure {
             plan,
             damage,
             weapon: this.item,
-         }) ?? [];
+         });
 
       // Use ONLY the resistance-phase mods here
       prep.tnMods = Array.isArray(resistMods) ? resistMods : [];

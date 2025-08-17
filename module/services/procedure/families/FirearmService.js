@@ -196,6 +196,16 @@ export default class FirearmService {
       else this.bumpOOCShots(actor?.id, declaredRounds);
    }
 
+   static resistanceTNModsForTarget(target, { plan, damage, weapon } = {}) {
+      const packet = damage || DamagePacket.build({ weapon, plan, directives: [], rangeBand: null });
+      const build = ResistanceEngine.build(target, packet, 0);
+
+      const eff = Number(build.armor.effective);
+      const label = build.armor.armorType ? `Armor (${build.armor.armorType})` : "Armor";
+
+      return eff === 0 ? [] : [{ id: "armor", name: label, value: -eff }];
+   }
+
    // ——— ammo UX passthrough ———
    static getAttachedAmmo(actor, weapon) {
       DEBUG && LOG.info("", [__FILE__, __LINE__, FirearmService.getAttachedAmmo.name]);

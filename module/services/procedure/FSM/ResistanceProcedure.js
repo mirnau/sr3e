@@ -8,21 +8,16 @@ export default class ResistanceProcedure extends AbstractProcedure {
 
    constructor(defender, _item = null, { prep } = {}) {
       super(defender, _item);
-      if (!prep) throw new Error("sr3e: ResistanceProcedure requires prep");
       this.#prep = prep;
 
-      // 1) Title (purely cosmetic)
+      // Title
       this.title = this.getFlavor();
 
-      // 2) Base TN for the resistance step
-      //    -> Must already be computed by the originating family and stored in prep.tnBase
-      //       (e.g., for firearms: AP).
-      const baseTN = Number(prep.tnBase ?? 4);
-      this.targetNumberStore.set(Number.isFinite(baseTN) ? baseTN : 4);
+      // Base TN and mods — assume provided by prep (no fallbacks)
+      const baseTN = Number(prep.tnBase);
+      this.targetNumberStore.set(baseTN);
 
-      // 3) Resistance-phase TN modifiers only (e.g., armor), provided by prep.tnMods.
-      //    No attack-step modifiers should be present here.
-      const rawMods = Array.isArray(prep.tnMods) ? prep.tnMods : [];
+      const rawMods = prep.tnMods; // must be an array upstream
       this.modifiersArrayStore.set(
          rawMods.map((m) => ({
             id: m.id ?? null,
@@ -32,8 +27,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
          }))
       );
 
-      // 4) Base dice for resistance: use defender's Body rating.
-      //    (Keep it defensive about data shapes.)
+      // Base dice (Body)
       const body =
          Number(defender?.system?.attributes?.body?.value) ??
          Number(defender?.system?.body?.value) ??

@@ -310,9 +310,10 @@ export default class OpposeRollService {
    // -----------------------
    // Prompt & resolve resistance
    // -----------------------
+   // Helper remains strict but without manual throws
    static #computeTNFromPrep(prep) {
-      const base = Number(prep?.tnBase ?? 4);
-      const sum = (Array.isArray(prep?.tnMods) ? prep.tnMods : []).reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const base = Number(prep.tnBase);
+      const sum = prep.tnMods.reduce((a, m) => a + (Number(m.value) || 0), 0);
       return Math.max(2, base + sum);
    }
 
@@ -332,8 +333,9 @@ export default class OpposeRollService {
       const defenderUser = this.resolveControllingUser(defender);
       const context = { contestId, initiatorId, defenderId, weaponId, prep };
 
-      const base = Number(prep?.tnBase ?? 4);
-      const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
+      // Inside promptDamageResistance: compute tnHtml without throws/fallbacks
+      const base = Number(prep.tnBase);
+      const mods = prep.tnMods; // expect array
       const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
       const finalTN = Math.max(2, base + sum);
 
@@ -341,18 +343,18 @@ export default class OpposeRollService {
          .map((m) => {
             const v = Number(m.value) || 0;
             const sign = v >= 0 ? "+" : "−";
-            return `<li><span>${m.name}</span><b>${sign}${Math.abs(v)}</b></li>`;
+            const abs = Math.abs(v);
+            return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
          })
          .join("");
 
       const tnHtml = `
-    <div class="sr3e-tn-breakdown">
-      <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
+  <div class="sr3e-tn-breakdown">
+    <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
          sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
       })</small></p>
-      ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
-    </div>
-  `;
+    ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+  </div>`;
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: defender }),
