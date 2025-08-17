@@ -254,6 +254,18 @@
       displayCurrentDicePoolStore = actorStoreManager.GetSumROStore(`dicePools.${currentDicePoolName}`);
    });
 
+   $effect(() => {
+      const proc = $procedureStore;
+      if (!proc) return;
+      proc.poolDice = currentDicePoolAddition;
+   });
+
+   $effect(() => {
+      const proc = $procedureStore;
+      if (!proc) return;
+      proc.karmaDice = diceBought;
+   });
+
    function KarmaCostCalculator() {
       karmaCost = 0.5 * diceBought * (diceBought + 1);
    }
