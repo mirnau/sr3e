@@ -506,12 +506,12 @@ export default class AbstractProcedure {
    }
 
    buildFormula(explodes = true) {
-      const baseDice = Math.max(0, this.dice);
+      const baseDice = Math.max(0, Number(this.dice) || 0);
       const poolDice = this.#computeClampedPoolDice(this.poolDice);
-      const karmaDice = Math.max(0, this.karmaDice);
+      const karmaDice = Math.max(0, Number(this.karmaDice) || 0);
 
-      const totalDice = Math.max(0, baseDice + poolDice + karmaDice);
-      if (totalDice <= 0) return "0d6";
+      let totalDice = baseDice + poolDice + karmaDice;
+      totalDice = Number.isFinite(totalDice) ? Math.max(1, Math.floor(totalDice)) : 1;
 
       const base = `${totalDice}d6`;
       if (!explodes) return base;
