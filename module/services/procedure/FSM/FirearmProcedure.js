@@ -233,16 +233,39 @@ export default class FirearmProcedure extends AbstractProcedure {
     * Build the resist-prep for damage (called only when attacker wins).
     * Pure snapshot; OpposeRollService will prompt the defender.
     */
+   // FirearmProcedure.js (inside class)
    buildResistancePrep(exportCtx, { initiator, target }) {
-      const prep = FirearmService.prepareDamageResolution(target, {
-         plan: exportCtx.plan,
-         damage: exportCtx.damage,
-      });
+      // Use the snapshot for this attack
+      const plan = exportCtx?.plan ?? this.#attackCtx?.plan ?? {};
+      const damage = exportCtx?.damage ?? this.#attackCtx?.damage ?? {};
 
-      // annotate for the resistance step
+      // Base resistance payload from the family service
+      const prep = FirearmService.prepareDamageResolution(target, { plan, damage });
+
+      // Annotate for the resistance step
       prep.familyKey = "firearm";
-      prep.weaponId = exportCtx.weaponId || this.item?.id || null;
-      prep.weaponName = exportCtx.weaponName || this.item?.name || "Attack";
+      prep.weaponId = exportCtx?.weaponId || this.item?.id || null;
+      prep.weaponName = exportCtx?.weaponName || this.item?.name || "Attack";
+
+      // --- Resistance base TN = Attack Power (AP) -------------------------------
+      // Pull AP from the computed plan/damage (NOT as a modifier).
+      const ap = Number(plan?.attackPower ?? damage?.power);
+      if (!Number.isFinite(ap) || ap <= 0) {
+         throw new Error("FirearmProcedure: missing attack power for resistance TN");
+      }
+      prep.tnBase = ap;
+
+      // --- Resistance-phase TN modifiers (e.g., armor) --------------------------
+      // Keep this: it should return only resistance-time mods. No range/recoil/etc., and no AP.
+      const resistMods =
+         FirearmService.resistanceTNModsForTarget?.(target, {
+            plan,
+            damage,
+            weapon: this.item,
+         }) ?? [];
+
+      // Use ONLY the resistance-phase mods here
+      prep.tnMods = Array.isArray(resistMods) ? resistMods : [];
 
       return prep;
    }
