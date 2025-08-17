@@ -11,12 +11,12 @@ export default class FirearmProcedure extends AbstractProcedure {
     super(caller, item);
   }
 
-  // Alias: you were doing tnModifiers.update(...) earlier
+  // Convenience alias for composer code
   get tnModifiers() {
     return this.modifiersArrayStore;
   }
 
-  // ----- nice bits for SR3ERoll.renderVanillaFromProcedure
+  // ----- Minimal flavor used by SR3ERoll when needed
   getFlavor() {
     const w = this.item?.name ?? "Firearm";
     return `${w} Attack`;
@@ -79,6 +79,7 @@ export default class FirearmProcedure extends AbstractProcedure {
     this.#attackCtx = { plan, damage, ammoId };
   }
 
+  // ---------- main action ----------
   async execute({ OnClose, CommitEffects } = {}) {
     try {
       OnClose?.();
@@ -94,6 +95,7 @@ export default class FirearmProcedure extends AbstractProcedure {
 
       await CommitEffects?.();
 
+      // Clean up any local contests this procedure opened
       const ids = this.contestIds;
       if (ids?.length) {
         for (const id of ids) OpposeRollService.expireContest(id);
@@ -110,7 +112,7 @@ export default class FirearmProcedure extends AbstractProcedure {
     }
   }
 
-  // ----- Composer primary button label
+  // Primary button label
   getPrimaryActionLabel() {
     const t = game?.i18n?.localize?.bind(game.i18n);
     if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
@@ -131,7 +133,7 @@ export default class FirearmProcedure extends AbstractProcedure {
     this.#attackCtx = null;
   }
 
-  // ---------- defense guidance & opposed export ----------
+  // ---------- defense guidance & responder UI ----------
 
   /** What the defender rolls against (UI labels & default TN hint). */
   getDefenseHint() {
@@ -143,10 +145,7 @@ export default class FirearmProcedure extends AbstractProcedure {
     };
   }
 
-  /**
-   * Provide the responder UI HTML (used by addOpposedResponseButton).
-   * Uses exportCtx.next.ui.{prompt,yes,no} and returns a Yes/No block.
-   */
+  /** Custom responder prompt (must include yes/no buttons with the data-responder attribute). */
   async getResponderPromptHTML(exportCtx /*, { contest } */) {
     const ui = exportCtx?.next?.ui || {};
     const prompt = String(ui.prompt || "");
@@ -165,8 +164,7 @@ export default class FirearmProcedure extends AbstractProcedure {
   }
 
   /**
-   * Build the *defense* procedure for the responder (e.g., Dodge).
-   * Uses the subclass registry so this stays data-driven.
+   * Build the *defense* procedure for the responder (e.g., Dodge), fully data-driven via registry.
    */
   buildDefenseProcedure(exportCtx, { defender, contestId }) {
     const kind = String(exportCtx?.next?.kind || "");
@@ -176,38 +174,58 @@ export default class FirearmProcedure extends AbstractProcedure {
     return new Ctor(defender, null, { ...baseArgs, contestId });
   }
 
-  /**
-   * Firearm-flavored contested outcome. We can wrap the base HTML
-   * and also decide whether to attach a resistance prep here.
-   */
-  async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
-    const base = await super.renderContestOutcome(exportCtx, {
-      initiator, target, initiatorRoll, targetRoll, netSuccesses,
-    });
+  // ---------- contested result rendering (STRICT, NO FALLBACKS) ----------
 
-    const weaponName = exportCtx?.weaponName || this.item?.name || "Attack";
-    const header = `
-      <p><strong>${initiator?.name}</strong> attacks <strong>${target?.name}</strong> with <em>${weaponName}</em>.</p>
+  async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+    const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
+
+    // Top lines — exact order requested
+    const top = `
+      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+      <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
     `;
 
-    // If attacker wins, we can return the resistance prep directly here.
+    // Firearm context (Mode + Attack TN base + plain list of modifiers)
+    const attackBits = this.#attackContext(exportCtx);
+
+    // Per-side summaries (no actor name repetition, no "Dice:" line)
+    const iSummary = this.#attackerSummaryFromItem(initiator, initiatorRoll);
+    const dSummary = this.#defenderSummaryFromPools(target,   targetRoll);
+
+    // Standard roll cards
+    const iHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
+    const tHtml = SR3ERoll.renderVanilla(target,   targetRoll);
+
+    const winner = netSuccesses > 0 ? initiator : target;
+
+    const html = `
+      ${top}
+      ${attackBits}
+
+      <h4>${initiator.name}</h4>
+      ${iSummary}
+      ${iHtml}
+
+      <h4>${target.name}</h4>
+      ${dSummary}
+      ${tHtml}
+
+      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+    `;
+
+    // Attach resistance prep only if attacker won
     const resistancePrep = netSuccesses > 0
       ? this.buildResistancePrep(exportCtx, { initiator, target })
       : null;
 
-    return {
-      html: `${header}${base.html}`,
-      resistancePrep,
-    };
+    return { html, resistancePrep };
   }
 
   /**
-   * Construct the resistance-prep object using the export snapshot.
-   * Called only when the attacker wins.
+   * Build the resist-prep for damage (called only when attacker wins).
+   * Pure snapshot; OpposeRollService will prompt the defender.
    */
   buildResistancePrep(exportCtx, { initiator, target }) {
-    if (exportCtx?.familyKey !== "firearm") return null;
-
     const prep = FirearmService.prepareDamageResolution(target, {
       plan: exportCtx.plan,
       damage: exportCtx.damage,
@@ -215,18 +233,16 @@ export default class FirearmProcedure extends AbstractProcedure {
 
     // annotate for the resistance step
     prep.familyKey  = "firearm";
-    prep.weaponId   = exportCtx.weaponId || null;
-    prep.weaponName = exportCtx.weaponName || "Attack";
+    prep.weaponId   = exportCtx.weaponId || this.item?.id || null;
+    prep.weaponName = exportCtx.weaponName || this.item?.name || "Attack";
     if (exportCtx.tnBase != null) prep.tnBase = exportCtx.tnBase;
     if (Array.isArray(exportCtx.tnMods)) prep.tnMods = exportCtx.tnMods.slice();
 
     return prep;
   }
 
-  /**
-   * Single source of truth shipped to OpposeRollService.startProcedure().
-   * Includes the attack snapshot + the “next” step (Dodge) spec.
-   */
+  // ---------- contest export (drives responder and resistance) ----------
+
   exportForContest() {
     const weapon   = this.item;
     const attacker = this.caller;
@@ -255,7 +271,7 @@ export default class FirearmProcedure extends AbstractProcedure {
       tnMods,
 
       next: {
-        kind: "dodge", // must be registered in init: AbstractProcedure.registerSubclass("dodge", DodgeProcedure)
+        kind: "dodge",
         ui: {
           prompt: `${attacker?.name ?? "Attacker"} attacks with ${weapon?.name ?? "weapon"}. Dodge?`,
           yes: "Dodge",
@@ -270,5 +286,95 @@ export default class FirearmProcedure extends AbstractProcedure {
         },
       },
     };
+  }
+
+  // ---------- helpers (strict, no fallbacks) ----------
+
+  static #cap(s) {
+    if (!s) return "";
+    const t = String(s).replace(/[_\-]+/g, " ").trim();
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  /** Firearm context strictly from exportCtx: Mode + Attack TN base, and a plain list of modifiers. */
+  #attackContext(exportCtx) {
+    const plan   = exportCtx?.plan || {};
+    const mode   = plan.modeName || null;
+    const rounds = Number(plan.declaredRounds ?? 1);
+    const tnBase = Number(exportCtx?.tnBase);
+
+    const modeBits = [];
+    if (mode) modeBits.push(`Mode: <b>${this.constructor.#cap(mode)}</b>`);
+    if (Number.isFinite(rounds) && rounds > 1) modeBits.push(`Rounds: <b>${rounds}</b>`);
+
+    const mods = Array.isArray(exportCtx?.tnMods) ? exportCtx.tnMods : [];
+    const items = mods.map((m) => {
+      const v = Number(m.value) || 0;
+      const sign = v >= 0 ? "+" : "−";
+      const abs = Math.abs(v);
+      const name = m.name || this.constructor.#cap(m.id || "");
+      return `<li><span>${name}</span><b>${sign}${abs}</b></li>`;
+    }).join("");
+
+    return `
+      <div class="sr3e-attack-context">
+        ${modeBits.length ? `<p>${modeBits.join(" • ")}</p>` : ""}
+        <p>Attack TN: <b>${tnBase}</b></p>
+        ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+      </div>
+    `;
+  }
+
+  /** Attacker summary reads *only* from the weapon item for skill/spec/defaulting; no actor name, no dice line. */
+  #attackerSummaryFromItem(_actor, _rollJson) {
+    const sys = this.item?.system ?? {};
+    const skillKey = sys?.skill?.key ?? sys?.skillKey ?? null;
+    const spec     = sys?.specialization?.name ?? sys?.specialization?.key ?? null;
+    const isDefault= Boolean(sys?.isDefaulting ?? sys?.defaulting ?? false);
+
+    const bits = [];
+    if (skillKey) bits.push(`Skill: ${this.constructor.#cap(skillKey)}`);
+    if (spec)     bits.push(`Specialization: ${this.constructor.#cap(spec)}`);
+    if (isDefault) bits.push("Defaulting");
+
+    return bits.length
+      ? `<p class="sr3e-roll-summary"><small>${bits.join(", ")}</small></p>`
+      : "";
+  }
+
+  /** Defender summary lists ONLY explicit pool dice present on the roll (+ karma dice/rerolls if set). */
+  #defenderSummaryFromPools(_actor, rollJson) {
+    const o = rollJson?.options ?? {};
+
+    const entries = [];
+    const push = (label, n) => { const v = Number(n || 0); if (v > 0) entries.push(`${label} ${v}`); };
+
+    // Named pools you care about
+    push("Combat Pool",  o.combatPoolDice);
+    push("Control Pool", o.controlPoolDice);
+    push("Hacking Pool", o.hackingPoolDice);
+    push("Astral Pool",  o.astralPoolDice);
+    push("Spell Pool",   o.spellPoolDice);
+
+    // Also support array form provided by the composer (still strict: only what the roll says)
+    if (Array.isArray(o.pools)) {
+      for (const p of o.pools) {
+        const name = (p?.name || p?.key || "").trim();
+        const dice = Number(p?.dice ?? p?.value ?? 0);
+        if (name && dice > 0) entries.push(`${this.constructor.#cap(name)} ${dice}`);
+      }
+    }
+
+    const karmaBits = [];
+    const kd = Number(o.karmaDice || 0);    if (kd > 0) karmaBits.push(`${kd} die`);
+    const kr = Number(o.karmaRerolls || 0); if (kr > 0) karmaBits.push(`${kr} reroll${kr === 1 ? "" : "s"}`);
+
+    const parts = [];
+    if (entries.length) parts.push(`Pools: ${entries.join(", ")}`);
+    if (karmaBits.length) parts.push(`Karma: ${karmaBits.join(", ")}`);
+
+    return parts.length
+      ? `<p class="sr3e-roll-summary"><small>${parts.join(" • ")}</small></p>`
+      : "";
   }
 }

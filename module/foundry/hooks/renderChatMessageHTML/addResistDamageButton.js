@@ -24,7 +24,7 @@ export function addResistDamageButton(message, html, data) {
       const procedure = new ResistanceProcedure(defender, null, { prep });
 
       if (typeof sheet.displayRollComposer === "function") {
-         sheet.displayRollComposer({ procedure }, { visible: true });
+         sheet.displayRollComposer(procedure);
       } else {
          throw new Error("sr3e: sheet.displayRollComposer not available");
       }
