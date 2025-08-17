@@ -1,23 +1,28 @@
-// ResistanceProcedure.js
+// module/services/procedure/FSM/ResistanceProcedure.js
 import { get } from "svelte/store";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import OpposeRollService from "@services/OpposeRollService.js";
+import ResistanceEngine from "@rules/ResistanceEngine.js";
 
 export default class ResistanceProcedure extends AbstractProcedure {
    #prep;
+   #defender;
 
    constructor(defender, _item = null, { prep } = {}) {
-      super(defender, _item);
+      super(defender, _item); // base class won’t set #caller because item is null
+      this.#defender = defender; // keep our own pointer to the actor
       this.#prep = prep;
 
-      // Title
+      // Title (cosmetic)
       this.title = this.getFlavor();
 
-      // Base TN and mods — assume provided by prep (no fallbacks)
+      // Base TN for this resistance step (must be prepared by the family)
       const baseTN = Number(prep.tnBase);
       this.targetNumberStore.set(baseTN);
 
-      const rawMods = prep.tnMods; // must be an array upstream
+      // Resistance-step TN modifiers (e.g., armor), provided by the family
+      const rawMods = prep.tnMods;
       this.modifiersArrayStore.set(
          rawMods.map((m) => ({
             id: m.id ?? null,
@@ -27,13 +32,17 @@ export default class ResistanceProcedure extends AbstractProcedure {
          }))
       );
 
-      // Base dice (Body)
+      // Base dice = Body
       const body =
-         Number(defender?.system?.attributes?.body?.value) ??
-         Number(defender?.system?.body?.value) ??
-         Number(defender?.system?.body) ??
-         0;
+         Number(defender.system?.attributes?.body?.value) ??
+         Number(defender.system?.body?.value) ??
+         Number(defender.system?.body);
       this.dice = Math.max(0, Number(body) || 0);
+   }
+
+   // OVERRIDE: always return our defender actor (base class didn’t set #caller)
+   get caller() {
+      return this.#defender;
    }
 
    get kind() {
@@ -47,20 +56,19 @@ export default class ResistanceProcedure extends AbstractProcedure {
    }
 
    getFlavor() {
-      const t = String(this.#prep?.stagedStepBeforeResist || "").toUpperCase();
-      const track = String(this.#prep?.trackKey || "");
-      const w = this.#prep?.weaponName || "Attack";
+      const t = String(this.#prep.stagedStepBeforeResist || "").toUpperCase();
+      const track = String(this.#prep.trackKey || "");
+      const w = this.#prep.weaponName || "Attack";
       return `Damage Resistance — ${w} (${track}${t ? `, ${t}` : ""})`;
    }
 
-   // Ensure the generic renderer gets the TN snapshot for THIS step
    async onChallengeWillRoll({ baseRoll, actor }) {
       await super.onChallengeWillRoll?.({ baseRoll, actor });
       baseRoll.options = baseRoll.options || {};
       baseRoll.options.attribute = { key: "body", name: "Body" };
 
-      const tnBase = Number(get(this.targetNumberStore) ?? 4);
-      const tnMods = (get(this.modifiersArrayStore) ?? []).map((m) => ({
+      const tnBase = Number(get(this.targetNumberStore));
+      const tnMods = (get(this.modifiersArrayStore) || []).map((m) => ({
          id: m.id ?? null,
          name: m.name ?? "",
          value: Number(m.value) || 0,
@@ -75,18 +83,16 @@ export default class ResistanceProcedure extends AbstractProcedure {
       return t?.("sr3e.button.resist") ?? "Resist";
    }
 
-   // Use the stores (not prep) so it reflects the AP base you set above + mods
    finalTN({ floor = 2 } = {}) {
-      const base = Number(get(this.targetNumberStore) ?? 4);
-      const mods = get(this.modifiersArrayStore) ?? [];
+      const base = Number(get(this.targetNumberStore));
+      const mods = get(this.modifiersArrayStore) || [];
       const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
       return Math.max(floor, base + sum);
    }
 
-   // Optional: also switch the description to read from the stores
    getChatDescription() {
-      const base = Number(get(this.targetNumberStore) ?? 4);
-      const mods = get(this.modifiersArrayStore) ?? [];
+      const base = Number(get(this.targetNumberStore));
+      const mods = get(this.modifiersArrayStore) || [];
       const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
       const finalTN = Math.max(2, base + sum);
       const items = mods
@@ -107,38 +113,46 @@ export default class ResistanceProcedure extends AbstractProcedure {
    }
 
    async execute({ OnClose, CommitEffects } = {}) {
-      try {
-         OnClose?.();
-         const actor = this.caller;
-         const formula = this.buildFormula(true);
-         const baseRoll = SR3ERoll.create(formula, { actor });
-         await this.onChallengeWillRoll?.({ baseRoll, actor });
-         const roll = await baseRoll.evaluate(this);
-         await baseRoll.waitForResolution();
-         await CommitEffects?.();
-         Hooks.callAll("actorSystemRecalculated", actor);
-         await this.onChallengeResolved?.({ roll, actor });
-         return roll;
-      } catch (err) {
-         DEBUG && LOG.error("Resistance flow failed", [__FILE__, __LINE__, err]);
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
-         throw err;
-      }
+      OnClose?.();
+
+      const actor = this.caller;
+      const formula = this.buildFormula(true);
+      const baseRoll = SR3ERoll.create(formula, { actor });
+
+      await this.onChallengeWillRoll?.({ baseRoll, actor });
+
+      const roll = await baseRoll.evaluate(this);
+      await baseRoll.waitForResolution();
+
+      await CommitEffects?.();
+      Hooks.callAll("actorSystemRecalculated", actor);
+
+      await this.onChallengeResolved?.({ roll, actor });
+      return roll;
+   }
+
+   async onChallengeResolved({ roll, actor }) {
+      await OpposeRollService.resolveDamageResistanceFromRoll({
+         defenderId: actor.id,
+         weaponId: this.#prep.weaponId,
+         prep: this.#prep,
+         rollData: roll.toJSON(),
+      });
    }
 
    exportForContest() {
       return {
-         familyKey: this.#prep?.familyKey || null,
-         weaponId: this.#prep?.weaponId || null,
-         weaponName: this.#prep?.weaponName || "Attack",
+         familyKey: this.#prep.familyKey || null,
+         weaponId: this.#prep.weaponId || null,
+         weaponName: this.#prep.weaponName || "Attack",
       };
    }
 
    toJSON() {
       return { kind: this.kind, prep: this.#prep };
    }
+
    static async fromJSON(json) {
-      if (!json?.prep) throw new Error("sr3e: ResistanceProcedure.fromJSON missing prep");
       return new ResistanceProcedure(null, null, { prep: json.prep });
    }
 }
