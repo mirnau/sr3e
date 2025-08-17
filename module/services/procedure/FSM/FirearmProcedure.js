@@ -177,6 +177,20 @@ export default class FirearmProcedure extends AbstractProcedure {
    // ---------- contested result rendering (STRICT, NO FALLBACKS) ----------
 
    // In FirearmProcedure
+   // In FirearmProcedure
+
+   #attackHeader(exportCtx) {
+      const plan = exportCtx?.plan || {};
+      const mode = plan.modeName || null;
+      const rounds = Number(plan.declaredRounds ?? 1);
+
+      const modeBits = [];
+      if (mode) modeBits.push(`Mode: <b>${this.#cap(mode)}</b>`);
+      if (Number.isFinite(rounds) && rounds > 1) modeBits.push(`Rounds: <b>${rounds}</b>`);
+
+      return modeBits.length ? `<p>${modeBits.join(" • ")}</p>` : "";
+   }
+
    async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
       const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
 
@@ -185,7 +199,8 @@ export default class FirearmProcedure extends AbstractProcedure {
     <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
   `;
 
-      const attackBits = this.#attackContext(exportCtx); // <-- add this
+      // NEW: only show mode/rounds header (no TN or mod list here)
+      const headerBits = this.#attackHeader(exportCtx);
 
       const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
       const tSummary = this.#summarizeRollGeneric(target, targetRoll);
@@ -197,10 +212,10 @@ export default class FirearmProcedure extends AbstractProcedure {
 
       const html = `
     ${top}
-    ${attackBits}                                          <!-- shows Attack TN (base) + each TN modifier -->
+    ${headerBits}
 
     <h4>${initiator.name}</h4>
-    ${iSummary}                                            <!-- per-roll: skill/spec/defaulting + TN breakdown + pools + karma -->
+    ${iSummary}
     ${iHtml}
 
     <h4>${target.name}</h4>
@@ -228,8 +243,6 @@ export default class FirearmProcedure extends AbstractProcedure {
       prep.familyKey = "firearm";
       prep.weaponId = exportCtx.weaponId || this.item?.id || null;
       prep.weaponName = exportCtx.weaponName || this.item?.name || "Attack";
-      if (exportCtx.tnBase != null) prep.tnBase = exportCtx.tnBase;
-      if (Array.isArray(exportCtx.tnMods)) prep.tnMods = exportCtx.tnMods.slice();
 
       return prep;
    }
