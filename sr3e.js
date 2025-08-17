@@ -202,7 +202,7 @@ function registerHooks() {
 
    AbstractProcedure.registerSubclass("firearm", FirearmProcedure);
    AbstractProcedure.registerSubclass("dodge", DodgeProcedure);
-   AbstractProcedure.registerSubclass("resistance", DodgeProcedure);
+   AbstractProcedure.registerSubclass("resistance", ResistanceProcedure);
    //AbstractProcedure.registerSubclass("melee", MeleeProcedure);
 
    Hooks.once(hooks.init, initializeSystem);
