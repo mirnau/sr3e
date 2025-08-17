@@ -360,7 +360,7 @@
             class="regular"
             type="button"
             disabled={!primaryEnabled}
-            onclick={async () => await $procedureStore.challenge({ OnClose, CommitEffects })}
+            onclick={async () => await $procedureStore.execute({ OnClose, CommitEffects })}
          >
             {primaryLabel}
          </button>

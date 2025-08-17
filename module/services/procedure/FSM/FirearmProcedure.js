@@ -1,5 +1,7 @@
 import { get } from "svelte/store";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
+import SR3ERoll from "@documents/SR3ERoll.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 import FirearmService from "@families/FirearmService.js";
 
 export default class FirearmProcedure extends AbstractProcedure {
@@ -75,6 +77,37 @@ export default class FirearmProcedure extends AbstractProcedure {
       rangeShiftLeft,
     });
     this.#attackCtx = { plan, damage, ammoId };
+  }
+
+  async execute({ OnClose, CommitEffects } = {}) {
+    try {
+      OnClose?.();
+
+      const actor = this.caller;
+      const formula = this.buildFormula(true);
+      const baseRoll = SR3ERoll.create(formula, { actor });
+
+      await this.onChallengeWillRoll?.({ baseRoll, actor });
+
+      const roll = await baseRoll.evaluate(this);
+      await baseRoll.waitForResolution();
+
+      await CommitEffects?.();
+
+      const ids = this.contestIds;
+      if (ids?.length) {
+        for (const id of ids) OpposeRollService.expireContest(id);
+        this.clearContests();
+      }
+
+      Hooks.callAll("actorSystemRecalculated", actor);
+      await this.onChallengeResolved?.({ roll, actor });
+      return roll;
+    } catch (err) {
+      DEBUG && LOG.error("Challenge flow failed", [__FILE__, __LINE__, err]);
+      ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
+      throw err;
+    }
   }
 
   // ----- Composer primary button label
