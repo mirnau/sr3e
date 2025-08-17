@@ -176,6 +176,7 @@ export default class FirearmProcedure extends AbstractProcedure {
 
    // ---------- contested result rendering (STRICT, NO FALLBACKS) ----------
 
+   // In FirearmProcedure
    async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
       const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
 
@@ -184,12 +185,10 @@ export default class FirearmProcedure extends AbstractProcedure {
     <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
   `;
 
-      const attackBits = this.#attackContext(exportCtx);
+      const attackBits = this.#attackContext(exportCtx); // <-- add this
 
-      // Attacker: from weapon item (as you already had)
-      const iSummary = this.#attackerSummaryFromItem(initiator, initiatorRoll);
-      // Defender: from the actual roll options (skill/spec/defaulting OR attribute) + pools/karma
-      const dSummary = this.#defenderSummaryFromRoll(target, targetRoll);
+      const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
+      const tSummary = this.#summarizeRollGeneric(target, targetRoll);
 
       const iHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
       const tHtml = SR3ERoll.renderVanilla(target, targetRoll);
@@ -198,21 +197,20 @@ export default class FirearmProcedure extends AbstractProcedure {
 
       const html = `
     ${top}
-    ${attackBits}
+    ${attackBits}                                          <!-- shows Attack TN (base) + each TN modifier -->
 
     <h4>${initiator.name}</h4>
-    ${iSummary}
+    ${iSummary}                                            <!-- per-roll: skill/spec/defaulting + TN breakdown + pools + karma -->
     ${iHtml}
 
     <h4>${target.name}</h4>
-    ${dSummary}
+    ${tSummary}
     ${tHtml}
 
     <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
   `;
 
       const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
-
       return { html, resistancePrep };
    }
 
@@ -323,6 +321,107 @@ export default class FirearmProcedure extends AbstractProcedure {
       ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
     </div>
   `;
+   }
+
+   #tnBreakdownFromRoll(rollJson) {
+      const o = rollJson?.options || {};
+      const base = Number(o.tnBase ?? 4);
+      const mods = Array.isArray(o.tnMods) ? o.tnMods : [];
+      const finalTN = Number.isFinite(Number(o.targetNumber))
+         ? Number(o.targetNumber)
+         : Math.max(2, base + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
+
+      const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const items = mods
+         .map((m) => {
+            const v = Number(m.value) || 0;
+            const sign = v >= 0 ? "+" : "−";
+            const abs = Math.abs(v);
+            const name = m.name || (m.id ? String(m.id) : "");
+            return `<li><span>${name}</span><b>${sign}${abs}</b></li>`;
+         })
+         .join("");
+
+      return `
+    <div class="sr3e-tn-breakdown">
+      <p>TN: <b>${finalTN}</b> <small>(base ${base}${
+         sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
+      })</small></p>
+      ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+    </div>
+  `;
+   }
+
+   #contribLineFromRoll(rollJson) {
+      const o = rollJson?.options || {};
+
+      // Normalize pools
+      const pools = [];
+      if (Array.isArray(o.pools)) {
+         for (const p of o.pools) {
+            const name = typeof p?.name === "string" ? p.name : typeof p?.key === "string" ? this.#cap(p.key) : "Pool";
+            const dice = Number(p?.dice ?? p?.value ?? 0);
+            if (dice > 0) pools.push(`${name} ${dice}`);
+         }
+      }
+      // Also swallow legacy keys if present (won’t duplicate thanks to unique names)
+      const legacy = [
+         ["combatPoolDice", "Combat Pool"],
+         ["controlPoolDice", "Control Pool"],
+         ["hackingPoolDice", "Hacking Pool"],
+         ["astralPoolDice", "Astral Pool"],
+         ["spellPoolDice", "Spell Pool"],
+      ];
+      for (const [key, label] of legacy) {
+         const n = Number(o[key] ?? 0);
+         if (n > 0 && !pools.some((s) => s.startsWith(label + " "))) pools.push(`${label} ${n}`);
+      }
+
+      const kd = Math.max(0, Number(o.karmaDice || 0));
+      const kr = Math.max(0, Number(o.karmaRerolls || 0));
+      const karmaBits = [];
+      if (kd > 0) karmaBits.push(`${kd} die`);
+      if (kr > 0) karmaBits.push(`${kr} reroll${kr === 1 ? "" : "s"}`);
+
+      const tail = [];
+      if (pools.length) tail.push(`Pools: ${pools.join(", ")}`);
+      if (karmaBits.length) tail.push(`Karma: ${karmaBits.join(", ")}`);
+
+      return tail.length ? `<p class="sr3e-roll-summary"><small>${tail.join(" • ")}</small></p>` : "";
+   }
+
+   /** Main generic summary for a roll: Skill/Spec/Defaulting or Attribute, TN breakdown, Pools/Karma */
+   #summarizeRollGeneric(_actor, rollJson) {
+      const o = rollJson?.options || {};
+      const readName = (v) => {
+         if (v == null) return null;
+         if (typeof v === "string") return v;
+         if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
+         return null;
+      };
+
+      // Skill/Spec/Defaulting or Attribute line
+      const skillName = readName(o.skillKey ?? o.skill);
+      const specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      const attrName = readName(o.attributeKey ?? o.attribute);
+      const isDefault = !!(o.isDefaulting ?? o.defaulting);
+
+      const mainBits = [];
+      if (skillName) {
+         mainBits.push(`Skill: ${this.#cap(skillName)}`);
+         if (specName) mainBits.push(`Specialization: ${this.#cap(specName)}`);
+         if (isDefault) mainBits.push("Defaulting");
+      } else if (attrName) {
+         mainBits.push(`Attribute: ${this.#cap(attrName)}`);
+      }
+
+      const mainLine = mainBits.length ? `<p class="sr3e-roll-summary"><small>${mainBits.join(", ")}</small></p>` : "";
+
+      // TN breakdown + pools/karma
+      const tnBlock = this.#tnBreakdownFromRoll(rollJson);
+      const contrib = this.#contribLineFromRoll(rollJson);
+
+      return `${mainLine}\n${tnBlock}\n${contrib}`;
    }
 
    /** Resolve skill + specialization strictly from the weapon’s linkedSkillId. */

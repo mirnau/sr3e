@@ -449,6 +449,13 @@ export default class AbstractProcedure {
    }
 
    // ---------- mods ----------
+
+   setSelectedPoolKey(name) {
+      if (typeof name === "string" && name.trim()) {
+         this.#associatedPoolKey = name.trim(); // used in onChallengeWillRoll to name the pool contribution
+      }
+   }
+
    upsertMod(mod) {
       const arr = get(this.#modifiersArrayStore) ?? [];
       const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
@@ -488,30 +495,36 @@ export default class AbstractProcedure {
    }
 
    #computeClampedPoolDice(selected) {
-      let sel = Math.max(0, Number(selected) || 0);
+      // user-selected dice
+      let sel = Math.max(0, Math.floor(Number(selected) || 0));
 
+      // pool forbidden?
       const mods = get(this.#modifiersArrayStore) ?? [];
-      const forbid = mods.some((m) => m?.forbidPool === true);
-      if (forbid) return 0;
+      if (mods.some((m) => m?.forbidPool === true)) return 0;
 
-      const caps = mods
-         .map((m) => Number(m?.poolCap))
-         .filter((n) => Number.isFinite(n) && n >= 0);
-      if (caps.length) sel = Math.min(sel, Math.min(...caps));
+      // cap by poolCap mods
+      const caps = mods.map((m) => Number(m?.poolCap)).filter((n) => Number.isFinite(n) && n >= 0);
+      const cap = caps.length ? Math.min(...caps) : Infinity;
 
-      const available = Math.max(0, Number(get(this.#currentDicePoolStore) ?? 0));
-      sel = Math.min(sel, available);
+      // available from the sum store (can be a number OR { sum })
+      let availRaw = this.#currentDicePoolStore ? get(this.#currentDicePoolStore) : 0;
+      const available = Math.max(
+         0,
+         Math.floor(Number(availRaw && typeof availRaw === "object" ? availRaw.sum : availRaw) || 0)
+      );
 
-      return Math.max(0, Math.floor(sel));
+      // clamp
+      sel = Math.min(sel, cap, available);
+      return Math.max(0, sel);
    }
 
    buildFormula(explodes = true) {
-      const baseDice = Math.max(0, Number(this.dice) || 0);
-      const poolDice = this.#computeClampedPoolDice(this.poolDice);
-      const karmaDice = Math.max(0, Number(this.karmaDice) || 0);
+      const baseDice = Math.max(0, Math.floor(Number(this.dice) || 0));
+      const poolDice = Math.max(0, Math.floor(this.#computeClampedPoolDice(this.poolDice)));
+      const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
 
-      let totalDice = baseDice + poolDice + karmaDice;
-      totalDice = Number.isFinite(totalDice) ? Math.max(1, Math.floor(totalDice)) : 1;
+      const totalDice = baseDice + poolDice + karmaDice;
+      if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
 
       const base = `${totalDice}d6`;
       if (!explodes) return base;
@@ -520,8 +533,20 @@ export default class AbstractProcedure {
       const isOpen = this.#isOpenTest() || tnBase == null;
       if (isOpen) return `${base}x`;
 
-      const tn = this.finalTN();
-      return `${base}x${Math.max(2, Number(tn) || 2)}`;
+      const tn = Math.max(2, Number(this.finalTN()) || 2);
+      return `${base}x${tn}`;
+   }
+
+   getTotalDiceBreakdown() {
+      const baseDice = Math.max(0, this.dice);
+      const poolDice = this.#computeClampedPoolDice(this.poolDice);
+      const karmaDice = Math.max(0, this.karmaDice);
+      return {
+         baseDice,
+         poolDice,
+         karmaDice,
+         totalDice: baseDice + poolDice + karmaDice,
+      };
    }
 
    onDestroy() {
@@ -538,24 +563,64 @@ export default class AbstractProcedure {
    }
 
    /** Optional hook: run just before the roll is evaluated. Subclasses may override. */
-   async onChallengeWillRoll({ baseRoll /*, actor*/ }) {
-      baseRoll.options = baseRoll.options || {};
+   /** Optional hook: run just before the roll is evaluated. Subclasses may override. */
+   async onChallengeWillRoll({ baseRoll /*, actor */ }) {
+      // --- prepare safe numbers --------------------------------------------------
+      const clampInt = (v) => Math.max(0, Math.floor(Number(v) || 0));
 
-      const selPool = this.#computeClampedPoolDice(this.poolDice);
-      if (selPool > 0) {
+      const baseDice = clampInt(this.dice);
+      const poolDice = clampInt(this.#computeClampedPoolDice(this.poolDice));
+      const karmaDice = clampInt(this.karmaDice);
+
+      // --- attach options (used later by contested message rendering) ------------
+      const o = (baseRoll.options = baseRoll.options || {});
+
+      // Total & base dice (useful for debugging and UI summaries)
+      if (o.baseDice == null) o.baseDice = baseDice;
+      if (o.dice == null) o.dice = baseDice + poolDice + karmaDice;
+
+      // Karma
+      if (karmaDice > 0 && o.karmaDice == null) o.karmaDice = karmaDice;
+
+      // Pools (normalize into a single array so renderers don't guess)
+      if (!Array.isArray(o.pools)) o.pools = [];
+
+      const prettyPool = (k) => {
+         if (!k) return "Pool";
+         // Try config label first, then prettify the key
+         const label = CONFIG?.sr3e?.dicepools?.[k];
+         if (label) return typeof game?.i18n?.localize === "function" ? game.i18n.localize(label) : String(label);
+         return String(k)
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^\w/, (c) => c.toUpperCase()); // e.g., combatPool → Combat Pool
+      };
+
+      if (poolDice > 0) {
+         // If this roll has an associated pool key (from the linked skill), record both a
+         // key-specific field (for legacy consumers) AND a normalized pools[] entry.
          if (this.#associatedPoolKey) {
-            const key = `${this.#associatedPoolKey}Dice`;
-            if (baseRoll.options[key] == null) baseRoll.options[key] = selPool;
+            const key = `${this.#associatedPoolKey}Dice`; // e.g. "combatPoolDice"
+            if (o[key] == null) o[key] = poolDice;
+            o.pools.push({ name: prettyPool(this.#associatedPoolKey), key: this.#associatedPoolKey, dice: poolDice });
          } else {
-            if (!Array.isArray(baseRoll.options.pools)) baseRoll.options.pools = [];
-            if (!baseRoll.options.pools.some((p) => (p?.name ?? p?.key) === "Pool")) {
-               baseRoll.options.pools.push({ name: "Pool", key: "pool", dice: selPool });
-            }
+            // Generic/unknown pool selection
+            o.pools.push({ name: "Pool", key: "pool", dice: poolDice });
          }
       }
 
-      const kd = Math.max(0, this.karmaDice);
-      if (kd > 0 && baseRoll.options.karmaDice == null) baseRoll.options.karmaDice = kd;
+      // TN snapshot for full transparency (base + individual modifiers + final)
+      // These reflect what the composer currently shows.
+      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const mods = (get(this.#modifiersArrayStore) ?? []).map((m) => ({
+         id: m.id ?? null,
+         name: m.name ?? "",
+         value: Number(m.value) || 0,
+      }));
+
+      if (o.tnBase == null) o.tnBase = base;
+      if (!Array.isArray(o.tnMods)) o.tnMods = mods.slice();
+      if (o.targetNumber == null)
+         o.targetNumber = Math.max(2, base + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
    }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
