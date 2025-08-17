@@ -111,6 +111,8 @@ export default class AbstractProcedure {
       const mods = Array.isArray(state.modifiers) ? state.modifiers.map((m) => ({ ...m })) : [];
       proc.#modifiersArrayStore.set(mods);
       if (Number.isFinite(Number(state.dice))) proc.#diceStore.set(Math.max(0, Number(state.dice)));
+      if (Number.isFinite(Number(state.poolDice))) proc.#poolDiceStore.set(Math.max(0, Number(state.poolDice)));
+      if (Number.isFinite(Number(state.karmaDice))) proc.#karmaDiceStore.set(Math.max(0, Number(state.karmaDice)));
       proc.#isDefaulting = !!state.isDefaulting;
       if (typeof state.linkedAttribute === "string" || state.linkedAttribute === null)
          proc.#linkedAttributeStore.set(state.linkedAttribute ?? null);
@@ -140,6 +142,9 @@ export default class AbstractProcedure {
    #linkedAttributeStore;
    #currentDicePoolStore;
    #diceStore;
+   #poolDiceStore;
+   #karmaDiceStore;
+   #associatedPoolKey = null;
    #modifiersTotalStore;
    #finalTNStore;
    #difficultyStore;
@@ -169,6 +174,8 @@ export default class AbstractProcedure {
          this.#modifiersArrayStore = writable([]);
          this.#titleStore = writable("Roll");
          this.#diceStore = writable(0);
+         this.#poolDiceStore = writable(0);
+         this.#karmaDiceStore = writable(0);
          this.#linkedAttributeStore = writable(null);
          this.#currentDicePoolStore = writable(0);
          this.#modifiersTotalStore = derived(this.#modifiersArrayStore, (arr = []) =>
@@ -208,6 +215,7 @@ export default class AbstractProcedure {
 
          const subType = skill?.system?.skillType;
          const subTypeData = subType ? skill.system?.[`${subType}Skill`] ?? {} : {};
+         this.#associatedPoolKey = subTypeData?.associatedDicePool ?? null;
          const specializationArray = subTypeData?.specializations ?? [];
          this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
 
@@ -285,6 +293,8 @@ export default class AbstractProcedure {
             targetNumber: Number(get(this.#targetNumberStore) ?? 4),
             modifiers: (get(this.#modifiersArrayStore) ?? []).map((m) => ({ ...m })),
             dice: Number(get(this.#diceStore) ?? 0),
+            poolDice: Number(get(this.#poolDiceStore) ?? 0),
+            karmaDice: Number(get(this.#karmaDiceStore) ?? 0),
             isDefaulting: !!this.#isDefaulting,
             linkedAttribute: get(this.#linkedAttributeStore),
             contestIds: this.#contestIds.slice(),
@@ -358,6 +368,26 @@ export default class AbstractProcedure {
    }
    get diceStore() {
       return this.#diceStore;
+   }
+
+   get poolDice() {
+      return Math.max(0, Number(get(this.#poolDiceStore) ?? 0));
+   }
+   set poolDice(v) {
+      this.#poolDiceStore.set(Math.max(0, Number(v) || 0));
+   }
+   get poolDiceStore() {
+      return this.#poolDiceStore;
+   }
+
+   get karmaDice() {
+      return Math.max(0, Number(get(this.#karmaDiceStore) ?? 0));
+   }
+   set karmaDice(v) {
+      this.#karmaDiceStore.set(Math.max(0, Number(v) || 0));
+   }
+   get karmaDiceStore() {
+      return this.#karmaDiceStore;
    }
 
    get isDefaulting() {
@@ -457,11 +487,33 @@ export default class AbstractProcedure {
       return floor == null ? sum : Math.max(floor, sum);
    }
 
-   buildFormula(explodes = true) {
-      const dice = this.dice;
-      if (dice <= 0) return "0d6";
+   #computeClampedPoolDice(selected) {
+      let sel = Math.max(0, Number(selected) || 0);
 
-      const base = `${dice}d6`;
+      const mods = get(this.#modifiersArrayStore) ?? [];
+      const forbid = mods.some((m) => m?.forbidPool === true);
+      if (forbid) return 0;
+
+      const caps = mods
+         .map((m) => Number(m?.poolCap))
+         .filter((n) => Number.isFinite(n) && n >= 0);
+      if (caps.length) sel = Math.min(sel, Math.min(...caps));
+
+      const available = Math.max(0, Number(get(this.#currentDicePoolStore) ?? 0));
+      sel = Math.min(sel, available);
+
+      return Math.max(0, Math.floor(sel));
+   }
+
+   buildFormula(explodes = true) {
+      const baseDice = Math.max(0, this.dice);
+      const poolDice = this.#computeClampedPoolDice(this.poolDice);
+      const karmaDice = Math.max(0, this.karmaDice);
+
+      const totalDice = Math.max(0, baseDice + poolDice + karmaDice);
+      if (totalDice <= 0) return "0d6";
+
+      const base = `${totalDice}d6`;
       if (!explodes) return base;
 
       const tnBase = get(this.#targetNumberStore);
@@ -486,7 +538,25 @@ export default class AbstractProcedure {
    }
 
    /** Optional hook: run just before the roll is evaluated. Subclasses may override. */
-   async onChallengeWillRoll(/* { baseRoll, actor } */) {}
+   async onChallengeWillRoll({ baseRoll /*, actor*/ }) {
+      baseRoll.options = baseRoll.options || {};
+
+      const selPool = this.#computeClampedPoolDice(this.poolDice);
+      if (selPool > 0) {
+         if (this.#associatedPoolKey) {
+            const key = `${this.#associatedPoolKey}Dice`;
+            if (baseRoll.options[key] == null) baseRoll.options[key] = selPool;
+         } else {
+            if (!Array.isArray(baseRoll.options.pools)) baseRoll.options.pools = [];
+            if (!baseRoll.options.pools.some((p) => (p?.name ?? p?.key) === "Pool")) {
+               baseRoll.options.pools.push({ name: "Pool", key: "pool", dice: selPool });
+            }
+         }
+      }
+
+      const kd = Math.max(0, this.karmaDice);
+      if (kd > 0 && baseRoll.options.karmaDice == null) baseRoll.options.karmaDice = kd;
+   }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
    async onChallengeResolved(/* { roll, actor } */) {}
