@@ -1,146 +1,151 @@
 import OpposeRollService from "@services/OpposeRollService.js";
-import { localize } from "@services/utilities";
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 
-export async function addOpposedResponseButton(message, html, data) {
-   DEBUG && LOG.inspect("Hook", [__FILE__, __LINE__, addOpposedResponseButton.name], { message, html, data });
+export async function addOpposedResponseButton(message, html /*, data */) {
+  const contestId = message.flags?.sr3e?.opposed;
+  if (!contestId) return;
 
-   const contestId = message.flags?.sr3e?.opposed;
-   const config = CONFIG.sr3e;
-   if (!contestId) return;
+  const container = html.querySelector(".sr3e-response-button-container");
+  if (!container) return;
 
-   const container = html.querySelector(".sr3e-response-button-container");
-   if (!container) return;
+  const contest = OpposeRollService.getContestById(contestId);
 
-   const contest = OpposeRollService.getContestById(contestId);
+  // Stable UI holder (avoid shadowing Foundry's global `ui`)
+  let uiHost = container.querySelector(".sr3e-responder-ui");
+  if (uiHost) uiHost.remove();
+  uiHost = document.createElement("div");
+  uiHost.classList.add("sr3e-responder-ui");
+  container.appendChild(uiHost);
 
-   // Build a stable UI container to avoid duplicate inserts on re-render.
-   let ui = container.querySelector(".sr3e-dodge-ui");
-   if (ui) ui.remove(); // re-render → rebuild
-   ui = document.createElement("div");
-   ui.classList.add("sr3e-dodge-ui");
-   container.appendChild(ui);
+  if (!contest) {
+    const b = document.createElement("button");
+    b.classList.add("sr3e-response-button", "expired");
+    b.disabled = true;
+    b.title = "Contest expired";
+    b.innerText = "Contest expired";
+    uiHost.appendChild(b);
+    return;
+  }
 
-   if (!contest) {
-      const expired = document.createElement("button");
-      expired.classList.add("sr3e-response-button", "expired");
-      expired.disabled = true;
-      expired.title = localize(config.chat.contestexpried);
-      expired.innerText = localize(config.chat.contestexpried);
-      ui.appendChild(expired);
-      return;
-   }
+  // Defender doc & permissions
+  const defender = contest.target instanceof Actor
+    ? contest.target
+    : game.actors.get(contest.target?.id ?? contest.target?.actorId);
+  if (!defender) return; // not hydrated locally yet
 
-   const actor = contest.target;
-   const controllingUser = OpposeRollService.resolveControllingUser(actor);
-   const isControllingUser = game.user.id === controllingUser?.id;
-   const alreadyResponded = contest.targetRoll !== null || message.flags?.sr3e?.opposedResponded;
+  const controllingUser = OpposeRollService.resolveControllingUser(defender);
+  const isControllingUser = game.user.id === controllingUser?.id;
+  const alreadyResponded = Boolean(contest.targetRoll) || Boolean(message.flags?.sr3e?.opposedResponded);
+  if (!isControllingUser || alreadyResponded) return;
 
-   if (!isControllingUser || alreadyResponded) return;
+  // Rehydrate the initiator’s procedure (not the defense one!)
+  const procJSON = contest?.procedure?.json;
+  const exportCtx = contest?.procedure?.export;
+  if (!procJSON || !exportCtx) {
+    const err = document.createElement("div");
+    err.classList.add("sr3e-dodge-error");
+    err.innerText = "Opposed flow is missing procedure payload.";
+    uiHost.appendChild(err);
+    return;
+  }
 
-   // Layout: "Dodge" on its own line, followed by buttons on the next line
-   const prompt = document.createElement("div");
-   prompt.classList.add("sr3e-dodge-prompt");
-   prompt.innerText = "Dodge";
+  let initiatorProc;
+  try {
+    initiatorProc = await AbstractProcedure.fromJSON(procJSON);
+  } catch (e) {
+    const err = document.createElement("div");
+    err.classList.add("sr3e-dodge-error");
+    err.innerText = `Failed to rehydrate initiator procedure: ${e?.message || e}`;
+    uiHost.appendChild(err);
+    return;
+  }
 
-   // Build wrapper for buttons
-   const wrapper = document.createElement("div");
-   wrapper.classList.add("buttons-horizontal-distribution");
-   wrapper.setAttribute("role", "group");
-   wrapper.setAttribute("aria-label", "Dodge choice");
+  // Ask the procedure for responder UI (HTML string)
+  let responderHTML;
+  try {
+    responderHTML = await initiatorProc.getResponderPromptHTML(exportCtx, { contest });
+  } catch (e) {
+    const err = document.createElement("div");
+    err.classList.add("sr3e-dodge-error");
+    err.innerText = `Responder UI error: ${e?.message || e}`;
+    uiHost.appendChild(err);
+    return;
+  }
 
-   // Build buttons
-   const yesBtn = document.createElement("button");
-   yesBtn.classList.add("sr3e-response-button", "yes");
-   yesBtn.dataset.contestId = contestId;
-   yesBtn.innerText = "Yes";
+  uiHost.innerHTML = responderHTML;
 
-   const noBtn = document.createElement("button");
-   noBtn.classList.add("sr3e-response-button", "no");
-   noBtn.dataset.contestId = contestId;
-   noBtn.innerText = "No";
+  // NEW: accept ANY [data-responder] button (yes/no/standard/full/etc.)
+  const buttons = Array.from(uiHost.querySelectorAll("[data-responder]"));
+  if (!buttons.length) {
+    const err = document.createElement("div");
+    err.classList.add("sr3e-dodge-error");
+    err.innerText = "Responder UI is missing [data-responder] controls.";
+    uiHost.appendChild(err);
+    return;
+  }
 
-   // Append buttons into wrapper and then wrapper after prompt
-   wrapper.append(yesBtn, noBtn);
-   ui.append(prompt, wrapper);
+  // Helper to disable all buttons and mark one as responded
+  const disableAll = (clicked) => {
+    for (const b of buttons) {
+      b.disabled = true;
+      b.classList.toggle("responded", b === clicked);
+    }
+  };
 
-   // --- YES: open Respond flow (your existing behavior) ---
-   yesBtn.onclick = async () => {
-      console.log(`[sr3e] Dodge=YES clicked by ${game.user.name} for contest ${contestId}`);
+  // Wire each responder button
+  for (const btn of buttons) {
+    btn.onclick = async () => {
+      try {
+        disableAll(btn);
 
-      const current = OpposeRollService.getContestById(contestId);
-      if (!current) {
-         yesBtn.disabled = true;
-         noBtn.disabled = true;
-         yesBtn.classList.add("expired");
-         yesBtn.innerText = localize(config.chat.contestexpried);
-         yesBtn.title = localize(config.chat.contestexpried);
-         return;
+        const current = OpposeRollService.getContestById(contestId);
+        if (!current) {
+          btn.classList.add("expired");
+          btn.innerText = "Contest expired";
+          return;
+        }
+
+        const responderKey = String(btn.dataset.responder || "").toLowerCase();
+
+        // NO → treat as 0 successes (works for dodge-style flows)
+        if (responderKey === "no") {
+          await CONFIG.queries["sr3e.resolveOpposedNoDodge"]({ contestId });
+
+          const messageId = message.id;
+          const authorUser = game.messages.get(messageId)?.author;
+          if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
+          return;
+        }
+
+        // YES or any named defense kind (e.g., "standard", "full")
+        const defenseProc = await initiatorProc.buildDefenseProcedure(exportCtx, {
+          defender,
+          contestId,
+          responderKey, // <-- this is the key for melee to choose standard/full
+        });
+
+        const sheet = defender.sheet;
+        if (!sheet.rendered) await sheet.render(true);
+        sheet.displayRollComposer(defenseProc);
+
+        // Wait until the defense procedure calls deliverResponse
+        const rollData = await OpposeRollService.waitForResponse(contestId);
+
+        // Resolve on the initiator's client (relayed if necessary)
+        await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
+          contestId,
+          rollData,
+        });
+
+        // Mark the chat message as responded so it won't re-offer buttons
+        const messageId = message.id;
+        const authorUser = game.messages.get(messageId)?.author;
+        if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
+      } catch (e) {
+        // Use Foundry's global UI, not the local DOM element
+        ui.notifications?.error?.(e?.message || "Defense flow failed");
+        console.error(e);
       }
-
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
-      yesBtn.classList.add("responded");
-
-      const actorSheet = current.target.sheet;
-      if (!actorSheet.rendered) await actorSheet.render(true);
-
-      const { tnMod = 0, tnLabel = "Weapon difficulty" } = current?.defenseHint ?? {};
-
-      const caller = {
-         type: "dodge",
-         key: "dodge",
-         name: localize(config.dodge.dodge),
-         dice: 0, // start with zero dice
-         value: 0,
-         responseMode: true, // Composer: response flow
-         contestId,
-         defenseTNMod: tnMod,
-         defenseTNLabel: tnLabel,
-      };
-
-      actorSheet.setRollComposerData(caller);
-
-      const rollData = await OpposeRollService.waitForResponse(contestId);
-
-      await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
-         contestId,
-         rollData,
-         initiatorId: current.initiator.id,
-      });
-
-      // Mark message so we do not offer buttons again on re-render
-      const messageId = message.id;
-      const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser)
-         authorUser.query("sr3e.markOpposedResponded", { messageId });
-   };
-
-   // --- NO: skip Dodge (0 successes) and continue immediately ---
-   noBtn.onclick = async () => {
-      console.log(`[sr3e] Dodge=NO clicked by ${game.user.name} for contest ${contestId}`);
-
-      const current = OpposeRollService.getContestById(contestId);
-      if (!current) {
-         yesBtn.disabled = true;
-         noBtn.disabled = true;
-         noBtn.classList.add("expired");
-         noBtn.innerText = localize(config.chat.contestexpried);
-         noBtn.title = localize(config.chat.contestexpried);
-         return;
-      }
-
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
-      noBtn.classList.add("responded");
-
-      // Empty rollData → getSuccessCount = 0 for defender
-      await CONFIG.queries["sr3e.resolveOpposedNoDodge"]({ contestId });
-
-      // Mark message so we do not offer buttons again on re-render
-      const messageId = message.id;
-      const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser)
-         authorUser.query("sr3e.markOpposedResponded", { messageId });
-   };
-
+    };
+  }
 }

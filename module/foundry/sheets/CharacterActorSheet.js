@@ -11,7 +11,6 @@ import { StoreManager, stores } from "../../svelte/svelteHelpers/StoreManager.sv
 import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
 import OpposeRollService from "@services/OpposeRollService.js";
 
-
 export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
    #app;
    #neon;
@@ -100,6 +99,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
          this._injectCharacterCreationPointsApp(header);
       }
 
+      this._enableGmRightClickOwnership(windowContent);
       SR3DLog.success("Svelte mounted", this.constructor.name);
       return windowContent;
    }
@@ -218,46 +218,52 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       return super._tearDown();
    }
 
-   setRollComposerData(callerData, options) {
+   // INFO: Sole responsibility to pass it on to Svelte
+   displayRollComposer(procedure) {
       if (!this.#composer) return;
-
-      const dict = CONFIG?.sr3e?.attributes ?? {};
-      let payload = { ...callerData };
-
-      if (payload?.responseMode) {
-         const contest = payload.contestId ? OpposeRollService.getContestById(payload.contestId) : null;
-         const hint = contest?.defenseHint ?? OpposeRollService.getDefaultDefenseHint(contest?.initiatorRoll);
-
-         if (payload.type === "dodge") {
-            if (payload.defenseTNMod === undefined) payload.defenseTNMod = Number(hint?.tnMod || 0);
-            if (payload.defenseTNLabel === undefined)
-               payload.defenseTNLabel = hint?.tnLabel || "Weapon difficulty";
-         } else if (hint?.type === "attribute") {
-            payload.type = "attribute";
-            payload.key = hint.key;
-            payload.name = game.i18n.localize(`sr3e.attributes.${hint.key}`) || hint.key;
-            payload.item = undefined;
-            payload.defenseTNMod = Number(hint.tnMod || 0);
-            payload.defenseTNLabel = hint.tnLabel || "Weapon difficulty";
-         }
-      }
-
-      if (payload?.type === "item" && payload?.key && Object.prototype.hasOwnProperty.call(dict, payload.key)) {
-         payload = { ...payload, type: "attribute", item: undefined };
-      }
-
-      payload = {
-         ...payload,
-         isResistingDamage: callerData?.isResistingDamage,
-         prep: callerData?.prep,
-         weaponId: callerData?.weaponId,
-      };
-
-      this.#composer.setCallerData(payload, options ?? { visible: true });
+      this.#composer.setCallerData(procedure);
    }
 
    _onSubmit() {
       return false;
+   }
+
+   // Inside CharacterActorSheet class
+
+   /** Hook GM-only right-click to open Configure Ownership for embedded docs. */
+   _enableGmRightClickOwnership(rootEl) {
+      if (!game.user?.isGM) return;
+
+      // Delegate on the sheet root; adjust selectors to match your DOM if needed
+      const SELECTOR = "[data-item-id], [data-effect-id], [data-skill-id], [data-document-id]";
+
+      // One listener for the whole sheet
+      rootEl.addEventListener("contextmenu", (ev) => {
+         const target = ev.target.closest(SELECTOR);
+         if (!target) return;
+
+         // Try to resolve an embedded document by id
+         const id =
+            target.dataset.itemId ?? target.dataset.effectId ?? target.dataset.skillId ?? target.dataset.documentId;
+
+         if (!id) return;
+
+         // Look up the embedded document on this actor
+         const doc = this.document.items.get(id) ?? this.document.effects.get(id) ?? null;
+
+         if (!doc) return;
+
+         // Prevent the native context menu and open Foundry's ownership dialog
+         ev.preventDefault();
+         try {
+            const Cfg = foundry?.applications?.apps?.DocumentOwnershipConfig;
+            if (!Cfg) return ui.notifications?.warn?.("Ownership config UI unavailable.");
+            new Cfg(doc).render(true); // open "Configure Ownership" for that embedded doc
+         } catch (e) {
+            console.error("[sr3e] Ownership config open failed:", e);
+            ui.notifications?.error?.("Could not open Configure Ownership.");
+         }
+      });
    }
 
    async _onDrop(event) {

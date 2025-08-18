@@ -1,95 +1,109 @@
 import OpposeRollService from "@services/OpposeRollService.js";
 
 export function configureQueries() {
-   CONFIG.queries ??= {};
+  CONFIG.queries ??= {};
 
-   // Defender-side: register the contest on that client.
-   CONFIG.queries["sr3e.opposeRollPrompt"] = async ({ contestId, initiatorId, targetId, rollData, options }) => {
-      console.log("[sr3e] Received opposeRollPrompt query", { contestId, initiatorId, targetId });
+  /**
+   * Arrives on remote clients (initiator + target).
+   * Register the contest stub locally, then re-render the chat message so buttons appear.
+   */
+  CONFIG.queries["sr3e.opposeRollPrompt"] = async (stub) => {
+    // stub shape:
+    // {
+    //   contestId,
+    //   initiator: { actorId, userId },
+    //   target: { actorId, name, tokenId, sceneId },
+    //   initiatorRoll,
+    //   procedure,   // { class, json, export }
+    //   defenseHint,
+    // }
+    OpposeRollService.registerContestStub(stub);
 
-      const initiator = game.actors.get(initiatorId);
-      const target = game.actors.get(targetId);
-      if (!initiator || !target) {
-         console.warn("[sr3e] Could not resolve actors for opposeRollPrompt");
-         return { acknowledged: false };
-      }
+    const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === stub.contestId);
+    if (msg) msg.render(true);
 
-      OpposeRollService.registerContest({ contestId, initiator, target, rollData, options });
+    return { acknowledged: true };
+  };
 
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
-      if (msg) msg.render(true);
+  /**
+   * The actual resolution call (should run on the initiator's client).
+   */
+  CONFIG.queries["sr3e.resolveOpposedRoll"] = async ({ contestId, rollData }) => {
+    await OpposeRollService.resolveTargetRoll(contestId, rollData);
+    return { ok: true };
+  };
 
-      return { acknowledged: true };
-   };
+  /**
+   * Relay to the *initiator user* strictly, using the stored initiator.userId on the contest.
+   * No initiatorId param needed; we read from the local contest.
+   */
+  CONFIG.queries["sr3e.resolveOpposedRollRemote"] = async ({ contestId, rollData }) => {
+    const contest = OpposeRollService.getContestById(contestId);
+    if (!contest) return { ok: false, reason: "no contest" };
 
-   // Back to initiator: resolve target roll and continue the chain.
-   CONFIG.queries["sr3e.resolveOpposedRoll"] = async ({ contestId, rollData }) => {
-      await OpposeRollService.resolveTargetRoll(contestId, rollData);
-      return { ok: true };
-   };
+    const initiatorUser = game.users.get(contest.initiator?.userId);
+    if (!initiatorUser) return { ok: false, reason: "no initiator user" };
 
-   // Optional relay.
-   CONFIG.queries["sr3e.resolveOpposedRollRemote"] = async ({ contestId, rollData, initiatorId }) => {
-      console.log(`[sr3e] Received resolveOpposedRollRemote on ${game.user.name}`, { contestId });
+    if (initiatorUser.id === game.user.id) {
+      // We are the initiator → resolve locally.
       return CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData });
-   };
+    }
 
-   // Resolve opposed roll with NO Dodge (treat as 0 successes) routed through the initiator
-   CONFIG.queries["sr3e.resolveOpposedNoDodge"] = async ({ contestId }) => {
-      const contest = OpposeRollService.getContestById(contestId);
-      if (!contest) throw new Error(`sr3e: contest ${contestId} not found`);
+    // Not the initiator → forward to that user.
+    await initiatorUser.query("sr3e.resolveOpposedRollRemote", { contestId, rollData });
+    return { ok: true, relayed: true };
+  };
 
-      // A 0-success "roll"
-      const noDodgeRollData = {
-         terms: [{ results: [] }],
-         options: { targetNumber: 4 },
-      };
+  /**
+   * Defender chose "No" → treat as 0-success defense, but still resolve on the initiator.
+   */
+  CONFIG.queries["sr3e.resolveOpposedNoDodge"] = async ({ contestId }) => {
+    const noDodgeRollData = {
+      terms: [{ results: [] }],
+      options: { targetNumber: 4 },
+    };
+    // Reuse the same strict relay path
+    return CONFIG.queries["sr3e.resolveOpposedRollRemote"]({ contestId, rollData: noDodgeRollData });
+  };
 
-      const initiatorUser = OpposeRollService.resolveControllingUser(contest.initiator);
+  /**
+   * Mark the opposed prompt message as responded so it won't re-offer buttons.
+   */
+  CONFIG.queries["sr3e.markOpposedResponded"] = async ({ messageId }) => {
+    const msg = game.messages.get(messageId);
+    if (!msg) throw new Error(`sr3e: chat message ${messageId} not found`);
 
-      // Run the resolution on the initiator's side (author/owner of the original chat msg)
-      if (initiatorUser?.id === game.user.id) {
-         await CONFIG.queries["sr3e.resolveOpposedRoll"]({ contestId, rollData: noDodgeRollData });
-      } else {
-         await initiatorUser.query("sr3e.resolveOpposedRollRemote", {
-            contestId,
-            rollData: noDodgeRollData,
-            initiatorId: initiatorUser?.id,
-         });
-      }
+    if (!(game.user.isGM || msg.isAuthor)) {
+      throw new Error("sr3e: insufficient permission to update ChatMessage");
+    }
 
-      return { ok: true };
-   };
+    await msg.update({
+      flags: {
+        ...msg.flags,
+        sr3e: { ...(msg.flags?.sr3e || {}), opposedResponded: true },
+      },
+    });
+    return { ok: true };
+  };
 
-   CONFIG.queries["sr3e.markOpposedResponded"] = async ({ messageId }) => {
-      const msg = game.messages.get(messageId);
-      if (!msg) throw new Error(`sr3e: chat message ${messageId} not found`);
+  /**
+   * Abort flow and refresh the prompt message.
+   */
+  CONFIG.queries["sr3e.abortOpposedRoll"] = async ({ contestId }) => {
+    const contest = OpposeRollService.getContestById(contestId);
+    if (!contest) return { ok: true };
 
-      // Only allow GM or the message author to update
-      if (!(game.user.isGM || msg.isAuthor))
-         throw new Error("sr3e: insufficient permission to update ChatMessage");
+    OpposeRollService.abortOpposedRoll(contestId);
+    const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
+    if (msg) msg.render(true);
+    return { ok: true };
+  };
 
-      await msg.update({
-         flags: {
-            ...msg.flags,
-            sr3e: { ...(msg.flags?.sr3e || {}), opposedResponded: true },
-         },
-      });
-      return { ok: true };
-   };
-
-   // Abort flow.
-   CONFIG.queries["sr3e.abortOpposedRoll"] = async ({ contestId }) => {
-      console.warn(`[sr3e] Received abortOpposedRoll for ${contestId}`);
-      const contest = OpposeRollService.getContestById(contestId);
-      if (!contest) return;
-      OpposeRollService.abortOpposedRoll(contestId);
-      const msg = game.messages.find((m) => m.flags?.sr3e?.opposed === contestId);
-      if (msg) msg.render(true);
-   };
-
-   CONFIG.queries["sr3e.resolveResistanceRoll"] = async ({ defenderId, weaponId, prep, rollData }) => {
-      await OpposeRollService.resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData });
-      return { ok: true };
-   };
+  /**
+   * Damage resistance resolution (already runs where invoked).
+   */
+  CONFIG.queries["sr3e.resolveResistanceRoll"] = async ({ defenderId, weaponId, prep, rollData }) => {
+    await OpposeRollService.resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData });
+    return { ok: true };
+  };
 }

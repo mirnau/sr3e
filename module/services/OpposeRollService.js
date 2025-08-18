@@ -1,81 +1,31 @@
-import SR3ERoll from "@documents/SR3ERoll.js";
 import FirearmService from "@families/FirearmService.js";
 import MeleeService from "@families/MeleeService.js";
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 
 const activeContests = new Map();
 const pendingResponses = new Map();
 
 export default class OpposeRollService {
-   // -----------------------------
-   // Inference (no system.family)
-   // -----------------------------
-   static #num(v) {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : null;
-   }
-
-   static #hasAmmoSignals(sys) {
-      if (!sys) return false;
-      if (sys.ammunitionClass || sys.ammoId) return true;
-      const inMag = this.#num(sys?.ammo?.inMag ?? sys?.ammo);
-      return inMag !== null;
-   }
-
-   static #hasFirearmMode(sys) {
-      const m = String(sys?.mode ?? "").toLowerCase();
-      if (!m) return false;
-      // align with your firearm modes
-      return ["manual", "semiauto", "burst", "fullauto", "ss", "sa", "bf", "fa"].includes(m);
-   }
-
-   static #isFirearmByHeuristic(weapon) {
-      const sys = weapon.system ?? {};
-      // IMPORTANT: ignore range bands; many melee items have defaults
-      return this.#hasAmmoSignals(sys) || this.#hasFirearmMode(sys);
-   }
-
-   static #isMeleeByHeuristic(weapon) {
-      // numeric reach is an explicit melee signal in your schema
-      return this.#num(weapon?.system?.reach) !== null;
-   }
-
-   static #serviceForWeapon(weapon) {
-      if (!weapon || weapon.type !== "weapon") throw new Error("sr3e: weapon required");
-
-      if (this.#isFirearmByHeuristic(weapon)) return { key: "firearm", svc: FirearmService };
-      if (this.#isMeleeByHeuristic(weapon)) return { key: "melee", svc: MeleeService };
-
-      // Default to melee when there are no firearm signals
-      return { key: "melee", svc: MeleeService };
-   }
-
-   static #serviceByKey(key) {
-      return key === "firearm" ? FirearmService : MeleeService;
-   }
-
    // -----------------------
-   // Contest bookkeeping API
+   // Bookkeeping
    // -----------------------
    static getContestById(id) {
       return activeContests.get(id);
    }
 
    static waitForResponse(contestId) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.waitForResponse.name]);
       return new Promise((resolve) => {
          pendingResponses.set(contestId, resolve);
       });
    }
 
    static deliverResponse(contestId, rollData) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.deliverResponse.name]);
       const resolver = pendingResponses.get(contestId);
       resolver?.(rollData);
       pendingResponses.delete(contestId);
    }
 
    static expireContest(contestId) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.expireContest.name]);
       const contest = activeContests.get(contestId);
       if (contest) {
          activeContests.delete(contestId);
@@ -84,72 +34,112 @@ export default class OpposeRollService {
    }
 
    static abortOpposedRoll(contestId) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.abortOpposedRoll.name]);
       return this.expireContest(contestId);
    }
 
-   // -----------------------
-   // Contest lifecycle
-   // -----------------------
-   static getDefaultDefenseHint(initiatorRoll) {
-      const o = initiatorRoll?.options ?? {};
-      if (o.type !== "item" || !o.itemId) {
-         // Neutral default when we don’t have an item
-         return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
-      }
+   /**
+    * Local registration on any client that receives the stub via query.
+    * The stub ONLY contains ids (no heavy docs). We resolve to Actor docs here.
+    */
+   static registerContestStub(stub) {
+      const { contestId, initiator, target, initiatorRoll, procedure, defenseHint } = stub;
 
-      const actor = ChatMessage.getSpeakerActor?.(o.speaker);
-      const weapon = game.items.get(o.itemId) || actor?.items?.get?.(o.itemId) || null;
-      if (!weapon) return { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" };
+      const targetActorId = target?.actorId ?? null;
+      const targetActor = targetActorId ? game.actors.get(targetActorId) : null;
 
-      const { svc } = this.#serviceForWeapon(weapon);
-      return (
-         svc.getDefenseHintFromAttack?.(initiatorRoll) ?? { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "" }
-      );
-   }
-
-   static getContestForTarget(target) {
-      return [...activeContests.values()].find((c) => c.target.id === target.id && !c.isResolved);
-   }
-
-   static registerContest({ contestId, initiator, target, rollData, options }) {
-      activeContests.set(contestId, {
+      const contest = {
          id: contestId,
          initiator,
-         target,
-         initiatorRoll: rollData,
+         target: targetActor,
+         initiatorRoll,
          targetRoll: null,
-         options,
-         defenseHint: OpposeRollService.getDefaultDefenseHint(rollData),
          isResolved: false,
-      });
+         procedure, // { class, json, export }
+         defenseHint, // hint object for defender UI
+         phase: "awaiting-response",
+      };
+
+      activeContests.set(contestId, contest);
+      return contest;
    }
 
-   static async start({ initiator, target, rollData, options }) {
-      DEBUG &&
-         LOG.inspect("Contest initiation:"[(__FILE__, __LINE__, this.start.name)], {
-            initiator,
-            target,
-            rollData,
-            options,
-         });
-
+   // -----------------------
+   // Procedure-driven start
+   // -----------------------
+   /**
+    * Start opposed flow from the initiator’s client.
+    * - Store full docs locally.
+    * - Send a *stub* (ids + exports) to remote clients.
+    */
+   static async startProcedure({ procedure, targetActor, targetToken = null, roll }) {
+      const initiator = procedure?.caller;
       const contestId = foundry.utils.randomID(16);
-      this.registerContest({ contestId, initiator, target, rollData, options });
 
+      const initiatorRoll = this.#buildRollSnapshot(roll, procedure);
+      const exportCtx = (typeof procedure.exportForContest === "function" ? procedure.exportForContest() : {}) || {};
+
+      // Local full contest (docs ok locally)
+      const contest = {
+         id: contestId,
+         initiator: {
+            actorId: initiator.id,
+            userId: game.user.id,
+         },
+         target: targetActor,
+         initiatorRoll,
+         targetRoll: null,
+         isResolved: false,
+         procedure: {
+            class: procedure?.constructor?.name ?? "AbstractProcedure",
+            json: typeof procedure.toJSON === "function" ? procedure.toJSON() : null,
+            export: exportCtx,
+         },
+         defenseHint: (typeof procedure.getDefenseHint === "function" && procedure.getDefenseHint()) || {
+            type: "attribute",
+            key: "reaction",
+            tnMod: 0,
+            tnLabel: "",
+         },
+         phase: "awaiting-response",
+         tokenRef: {
+            tokenId: targetToken?.id ?? targetToken?.document?.id ?? null,
+            sceneId: targetToken?.scene?.id ?? targetToken?.document?.parent?.id ?? null,
+         },
+      };
+
+      activeContests.set(contestId, contest);
+
+      // Prepare and send *stub* to other clients
       const initiatorUser = this.resolveControllingUser(initiator);
-      const targetUser = this.resolveControllingUser(target);
-      const payload = { contestId, initiatorId: initiator.id, targetId: target.id, rollData, options };
+      const targetUser = this.resolveControllingUser(targetActor);
 
-      if (initiatorUser?.id !== game.user.id) await initiatorUser.query("sr3e.opposeRollPrompt", payload);
-      if (targetUser?.id !== game.user.id) await targetUser.query("sr3e.opposeRollPrompt", payload);
+      const stub = {
+         contestId,
+         initiator: {
+            actorId: initiator.id,
+            userId: game.user.id,
+         },
+         target: {
+            actorId: targetActor?.id,
+            name: targetActor?.name,
+            tokenId: contest.tokenRef.tokenId,
+            sceneId: contest.tokenRef.sceneId,
+         },
+         initiatorRoll,
+         procedure: contest.procedure, // includes exportCtx
+         defenseHint: contest.defenseHint,
+      };
 
-      const whisperIds = [initiatorUser.id, targetUser.id];
+      if (initiatorUser?.id !== game.user.id) await initiatorUser.query("sr3e.opposeRollPrompt", stub);
+      if (targetUser?.id !== game.user.id) await targetUser.query("sr3e.opposeRollPrompt", stub);
+
+      // Chat prompt (whisper to the two involved)
+      const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
          content: `
-        <p><strong>${initiator.name}</strong> has initiated an opposed roll against <strong>${target.name}</strong>.</p>
+        <p><strong>${initiator?.name}</strong> has initiated an opposed roll against <strong>${targetActor?.name}</strong>.</p>
         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
       `,
          flags: { "sr3e.opposed": contestId },
@@ -159,197 +149,200 @@ export default class OpposeRollService {
    }
 
    static resolveControllingUser(actor) {
-      const connectedUsers = game.users.filter((u) => u.active);
+      const connected = game.users.filter((u) => u.active);
+      const assigned = connected.find((u) => u.character?.id === actor?.id);
+      if (assigned) return assigned;
 
-      const assignedUser = connectedUsers.find((u) => u.character?.id === actor?.id);
-      if (assignedUser) return assignedUser;
-
-      const playerOwner = connectedUsers.find(
+      const owner = connected.find(
          (u) => !u.isGM && actor?.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
       );
-      if (playerOwner) return playerOwner;
+      if (owner) return owner;
 
-      return connectedUsers.find((u) => u.isGM);
+      return connected.find((u) => u.isGM);
    }
 
-   // -----------------------
-   // Attack setup
-   // -----------------------
-   static #ensureAttackContext(contest) {
-      const { initiator, initiatorRoll, options } = contest;
-      const o = initiatorRoll?.options ?? {};
+   static #buildRollSnapshot(roll, procedure) {
+      const json = roll.toJSON();
 
-      const itemId = o.itemId ?? o.key ?? null;
-      if (!itemId) return null;
+      // Ensure TN present for success counting in UI
+      const tn = Number(procedure?.finalTN?.({ floor: 2 }) ?? null);
+      json.options = json.options || {};
+      if (Number.isFinite(tn)) json.options.targetNumber = tn;
+      else delete json.options.targetNumber;
 
-      const weapon = initiator?.items?.get(itemId) || game.items.get(itemId);
-      if (!weapon || weapon.type !== "weapon") return null;
+      // Carry procedure-provided flavor/description (optional)
+      json.meta = {
+         flavor: procedure?.getFlavor?.() ?? "",
+         descriptionHtml: procedure?.getChatDescription?.() ?? "",
+         procedureKind: procedure?.constructor?.name ?? "AbstractProcedure",
+      };
 
-      const { key: serviceKey, svc } = this.#serviceForWeapon(weapon);
-
-      let attackContext;
-      if (serviceKey === "firearm") {
-         const declaredRounds = options?.declaredRounds ?? o.declaredRounds ?? null;
-         const { plan, damage, ammoId } = svc.beginAttack(initiator, weapon, {
-            declaredRounds,
-            ammoAvailable: null,
-            rangeBand: null,
-         });
-         // firearm recoil bump on contest setup
-         svc.bumpOnShot({ actor: initiator, weapon, declaredRounds: plan.roundsFired });
-
-         attackContext = {
-            serviceKey,
-            weaponId: weapon.id,
-            weaponName: weapon.name,
-            ammoId: ammoId || "",
-            plan,
-            damage,
-            rangeData: weapon.system?.rangeBand ?? null,
-         };
-      } else {
-         // melee
-         const defender = contest.target;
-         const situational = {
-            calledShot: !!o.calledShot,
-            tnAdd: Number(o.tnAdd || 0) || 0,
-            positionTNAdd: Number(o.positionTNAdd || 0) || 0,
-            ...(options?.situational || {}),
-         };
-         const meleePlan = svc.planStrike({ attacker: initiator, defender, weapon, situational });
-
-         // optional UI hint
-         contest.defenseHint = {
-            type: "skill",
-            key: "melee",
-            tnMod: meleePlan.defenderTNAdd ?? 0,
-            tnLabel: "Melee defense",
-         };
-
-         attackContext = {
-            serviceKey,
-            weaponId: weapon.id, // keep if available for display
-            weaponName: weapon.name, // <-- used even if weapon doc isn't fetched later
-            plan: {
-               attackerTNAdd: meleePlan.attackerTNAdd,
-               defenderTNAdd: meleePlan.defenderTNAdd,
-               levelDelta: meleePlan.levelDelta,
-               notes: meleePlan.notes,
-            },
-            damage: meleePlan.packet, // DamagePacket
-            rangeData: null,
-         };
-      }
-
-      contest.attackContext = attackContext;
-      activeContests.set(contest.id, contest);
-      return attackContext;
+      return json;
    }
 
    // -----------------------
    // Resolve opposed result
    // -----------------------
    static async resolveTargetRoll(contestId, rollData) {
-      DEBUG && LOG.info("Resolve opposed result", [__FILE__, __LINE__, this.resolveTargetRoll.name]);
       const contest = activeContests.get(contestId);
+      if (!contest) return;
+
       contest.targetRoll = rollData;
       contest.isResolved = true;
 
-      let { initiator, target, initiatorRoll, targetRoll, attackContext } = contest;
-      if (!attackContext) attackContext = this.#ensureAttackContext(contest);
+      const initiator = game.actors.get(contest.initiator?.actorId) || null;
+      const target = contest.target;
+      const initiatorRoll = contest.initiatorRoll;
+      const targetRoll = contest.targetRoll;
+
+      const exportCtx = contest.procedure?.export || null;
+      const procJSON = contest.procedure?.json || null;
 
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
-      let damageText = "";
-      let resistancePayload = null;
+      // DIFF #1: detect melee full defense (parry) from defender roll options
+      const meleeDefenseMode = String(targetRoll?.options?.meleeDefenseMode || "");
+      const isMeleeFullDefense = meleeDefenseMode === "full";
 
-      if (winner === initiator && attackContext?.weaponId) {
-         const weapon = initiator.items.get(attackContext.weaponId) || game.items.get(attackContext.weaponId) || null;
-
-         // Choose service without needing to re-infer from a doc later
-         const svc = this.#serviceByKey(attackContext.serviceKey);
-
-         const prep =
-            attackContext.serviceKey === "firearm"
-               ? svc.prepareDamageResolution(target, {
-                    plan: attackContext.plan,
-                    damage: attackContext.damage,
-                 })
-               : svc.prepareDamageResolution(target, {
-                    packet: attackContext.damage,
-                 });
-
-         // annotate for later (so we don't need to refetch/guess)
-         prep.contestId = contest.id;
-         prep.attackerId = initiator.id;
-         prep.familyKey = attackContext.serviceKey; // <—
-         prep.weaponId = attackContext.weaponId || null; // <—
-         prep.weaponName = attackContext.weaponName || weapon?.name || "Attack"; // <—
-
-         damageText = `
-        <p><strong>${target.name}</strong> must resist
-        <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
-        (${prep.trackKey}) from <em>${prep.weaponName}</em>.
-        Resistance TN: <b>${prep.tn}</b>.</p>`;
-
-         resistancePayload = {
-            contestId,
-            initiatorId: initiator.id,
-            defenderId: target.id,
-            weaponId: attackContext.weaponId || null,
-            prep,
-         };
+      // Attempt to rehydrate the initiator procedure to let it render & prep
+      let initiatorProc = null;
+      try {
+         if (procJSON) initiatorProc = await AbstractProcedure.fromJSON(procJSON);
+      } catch (e) {
+         console.warn("[sr3e] Failed to rehydrate initiator procedure:", e);
       }
 
-      const content = this.#buildContestMessage({
-         initiator,
-         target,
-         initiatorRoll,
-         targetRoll,
-         winner,
-         netSuccesses,
-         damageText,
-      });
+      // Firearms bookkeeping (ammo/recoil) regardless of hit/miss
+      if (initiatorProc?.onChallengeResolved && initiator) {
+         try {
+            await initiatorProc.onChallengeResolved({ roll: initiatorRoll, actor: initiator });
+         } catch (e) {
+            console.warn("[sr3e] onChallengeResolved (challenge path) failed:", e);
+         }
+      }
 
-      const chatData = this.#prepareChatData({
-         speaker: initiator,
-         initiatorUser: this.resolveControllingUser(initiator),
-         targetUser: this.resolveControllingUser(target),
-         content,
-         rollMode: game.settings.get("core", "rollMode"),
-      });
+      // 1) Let subclass render contested chat (and optionally provide resistance prep)
+      let htmlOut = null;
+      let resistancePrep = null;
 
-      await ChatMessage.create(chatData);
+      if (initiatorProc?.renderContestOutcome) {
+         try {
+            const out = await initiatorProc.renderContestOutcome(exportCtx, {
+               initiator,
+               target,
+               initiatorRoll,
+               targetRoll,
+               netSuccesses,
+               winner,
+            });
+            if (typeof out === "string") {
+               htmlOut = out;
+            } else if (out && typeof out === "object") {
+               htmlOut = out.html ?? null;
+               resistancePrep = out.resistancePrep ?? null;
+            }
+         } catch (e) {
+            console.warn("[sr3e] renderContestOutcome failed:", e);
+         }
+      }
 
-      ui.windows[`sr3e-opposed-roll-${contestId}`]?.close();
+      // 2) If attacker wins but no prep provided yet, ask subclass to build it, else fallback
+      if (winner === initiator && !resistancePrep) {
+         try {
+            if (initiatorProc?.buildResistancePrep) {
+               resistancePrep = initiatorProc.buildResistancePrep(exportCtx, { initiator, target }) || null;
+            }
+         } catch (e) {
+            console.warn("[sr3e] buildResistancePrep failed; will fallback to service:", e);
+         }
+
+         // Final fallback using familyKey snapshot (kept)
+         if (!resistancePrep && exportCtx?.familyKey) {
+            const svc = exportCtx.familyKey === "firearm" ? FirearmService : MeleeService;
+            resistancePrep =
+               exportCtx.familyKey === "firearm"
+                  ? svc.prepareDamageResolution(target, { plan: exportCtx.plan, damage: exportCtx.damage })
+                  : svc.prepareDamageResolution(target, { packet: exportCtx.damage });
+
+            if (resistancePrep) {
+               resistancePrep.familyKey = exportCtx.familyKey;
+               resistancePrep.weaponId = exportCtx.weaponId || null;
+               resistancePrep.weaponName = exportCtx.weaponName || "Attack";
+               if (exportCtx.tnBase != null) resistancePrep.tnBase = exportCtx.tnBase;
+               if (Array.isArray(exportCtx.tnMods)) resistancePrep.tnMods = exportCtx.tnMods.slice();
+            }
+         }
+      }
+
+      // 3) Post the contested chat ONLY if the procedure provided HTML
+      if (htmlOut) {
+         const targetUser = this.resolveControllingUser(target);
+         const chatData = this.#prepareChatData({
+            speaker: initiator,
+            initiator: contest.initiator,
+            targetUserId: targetUser?.id,
+            content: htmlOut,
+            rollMode: game.settings.get("core", "rollMode"),
+         });
+         await ChatMessage.create(chatData);
+      } else {
+         console.warn("[sr3e] No contested outcome HTML returned by procedure; no combined chat message posted.");
+      }
+
       contest.phase = "awaiting-resistance";
-      activeContests.set(contestId, contest);
+      activeContests.set(contest.id, contest);
 
-      if (resistancePayload) {
-         setTimeout(() => {
-            OpposeRollService.promptDamageResistance(resistancePayload).catch(console.error);
-         }, 200);
+      // 4) If we have a resistance prep, prompt defender
+      if (winner === initiator && resistancePrep) {
+         try {
+            // DIFF #2/3: on melee full defense, surface optional Dodge step to the prompt layer
+            if (exportCtx?.familyKey === "melee" && isMeleeFullDefense) {
+               resistancePrep.meleeOptionalDodge = {
+                  enabled: true,
+                  // Helpful context if your prompt wants to display it:
+                  netAttackSuccesses: netSuccesses,
+               };
+            }
+
+            // Ensure a few fields are set for the prompt step
+            resistancePrep.contestId = contest.id;
+            resistancePrep.attackerId = initiator.id;
+            const weaponId = resistancePrep.weaponId ?? exportCtx?.weaponId ?? null;
+
+            const payload = {
+               contestId: contest.id,
+               initiatorId: initiator.id,
+               defenderId: target.id,
+               weaponId,
+               prep: resistancePrep,
+            };
+
+            setTimeout(() => {
+               OpposeRollService.promptDamageResistance(payload).catch(console.error);
+            }, 200);
+         } catch (e) {
+            console.error("[sr3e] Failed to prompt damage resistance:", e);
+         }
       }
    }
 
    // -----------------------
    // Prompt & resolve resistance
    // -----------------------
+   // Helper remains strict but without manual throws
    static #computeTNFromPrep(prep) {
-      const base = Number(prep?.tnBase ?? 4);
-      const sum = (Array.isArray(prep?.tnMods) ? prep.tnMods : []).reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const base = Number(prep.tnBase);
+      const sum = prep.tnMods.reduce((a, m) => a + (Number(m.value) || 0), 0);
       return Math.max(2, base + sum);
    }
 
    static async promptDamageResistance(resistancePayload) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.promptDamageResistance.name]);
       const { contestId, initiatorId, defenderId, weaponId, prep } = resistancePayload;
 
       const defender = game.actors.get(defenderId);
       if (!defender) return ui.notifications.warn("Defender not found");
 
-      // Try to read the weapon for display, but DO NOT require it
       let weaponName = prep?.weaponName || "Attack";
       if (weaponId) {
          const initiator = game.actors.get(initiatorId);
@@ -360,62 +353,73 @@ export default class OpposeRollService {
       const defenderUser = this.resolveControllingUser(defender);
       const context = { contestId, initiatorId, defenderId, weaponId, prep };
 
-      // keep passing prep as-is; it now includes tnBase/tnMods
-      const tnHtml = (() => {
-         const base = Number(prep?.tnBase ?? 4);
-         const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
-         const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
-         const finalTN = Math.max(2, base + sum);
+      // Inside promptDamageResistance: compute tnHtml without throws/fallbacks
+      const base = Number(prep.tnBase);
+      const mods = prep.tnMods; // expect array
+      const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const finalTN = Math.max(2, base + sum);
 
-         const items = mods
-            .map((m) => {
-               const sign = (Number(m.value) || 0) >= 0 ? "+" : "−";
-               const abs = Math.abs(Number(m.value) || 0);
-               return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
-            })
-            .join("");
+      const items = mods
+         .map((m) => {
+            const v = Number(m.value) || 0;
+            const sign = v >= 0 ? "+" : "−";
+            const abs = Math.abs(v);
+            return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
+         })
+         .join("");
 
-         return `
-         <div class="sr3e-tn-breakdown">
-            <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
-            sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
-         })</small></p>
-            ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
-         </div>`;
-      })();
+      const tnHtml = `
+  <div class="sr3e-tn-breakdown">
+    <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
+         sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
+      })</small></p>
+    ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
+  </div>`;
 
       await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: defender }),
-         whisper: [defenderUser.id],
+         whisper: [defenderUser?.id].filter(Boolean),
          content: `
-         <p><strong>${defender.name}</strong>, resist
-         <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> ${prep.trackKey}
-         damage from <em>${weaponName}</em>.</p>
-         ${tnHtml}
-         <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
-      `,
+      <p><strong>${defender.name}</strong>, resist
+      <strong>${String(prep.stagedStepBeforeResist || "").toUpperCase()}</strong> ${prep.trackKey}
+      damage from <em>${weaponName}</em>.</p>
+      ${tnHtml}
+      <div class="sr3e-resist-damage-button" data-context='${encodeURIComponent(JSON.stringify(context))}'></div>
+    `,
          flags: { sr3e: { damageResistance: context } },
       });
    }
 
    static async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.resolveDamageResistanceFromRoll.name]);
+      // --- 1) Resolve defender & roll ------------------------------------------------
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: Defender not found");
 
       const roll = await Roll.fromData(rollData);
       if (!roll._evaluated) await roll.evaluate();
 
-      const tn = this.#computeTNFromPrep(prep); // ← use base+mods, not a baked number
+      // --- 2) Compute TN strictly from prep (base + resistance-step mods) ------------
+      const base = Number(prep?.tnBase ?? 4);
+      const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
+      const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
+      const tn = Math.max(2, base + sum);
+
+      // Count successes at that TN (do not mutate stored roll; pass TN in options)
       const successes = this.getSuccessCount({
          ...rollData,
          options: { ...(rollData.options || {}), targetNumber: tn },
       });
 
-      // PICK SERVICE BY prep.familyKey first (no need to find the weapon)
-      const svc = this.#serviceByKey(prep?.familyKey || "melee"); // melee default is safe
+      // --- 3) Resolve outcome via family service (strict: no fallback) ---------------
+      const familyKey = String(prep?.familyKey || "");
+      let svc = null;
+      if (familyKey === "firearm") svc = FirearmService;
+      else if (familyKey === "melee") svc = MeleeService;
+      else throw new Error(`sr3e: Unknown resistance familyKey "${familyKey}"`);
+
       const outcome = svc.resolveDamageOutcome(prep, successes);
 
+      // --- 4) Apply result to health tracks ------------------------------------------
       const trackKey = outcome.trackKey === "stun" ? "stun" : "physical";
       const trackPath = trackKey === "stun" ? "system.health.stun.value" : "system.health.physical.value";
       const maxPath = trackKey === "stun" ? "system.health.stun.max" : "system.health.physical.max";
@@ -431,6 +435,7 @@ export default class OpposeRollService {
       }
       if (outcome.applied) await defender.update(update);
 
+      // --- 5) Post a concise result message ------------------------------------------
       const rollHTML = await roll.render();
       const defenderUser = this.resolveControllingUser(defender);
       const gmIds = ChatMessage.getWhisperRecipients("GM").map((u) => u.id);
@@ -440,64 +445,28 @@ export default class OpposeRollService {
          speaker: ChatMessage.getSpeaker({ actor: defender }),
          whisper,
          content: `
-         <p><strong>${defender.name}</strong> resists damage from <em>${prep?.weaponName || "Attack"}</em>.</p>
-         <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
-         ${rollHTML}
-         <p>Pre-resist level: <b>${(prep.stagedStepBeforeResist ?? "").toString().toUpperCase()}</b> (${
-            prep.trackKey
-         })</p>
-         <p>Final level: <b>${outcome.finalStep ? outcome.finalStep.toUpperCase() : "NONE"}</b>
-            → Boxes applied: <b>${outcome.boxes}</b> (${trackKey})</p>
-         ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
-      `,
+      <p><strong>${defender.name}</strong> resists damage from <em>${prep?.weaponName || "Attack"}</em>.</p>
+      <p>Resistance TN: <b>${tn}</b> &nbsp;|&nbsp; Successes: <b>${successes}</b></p>
+      ${rollHTML}
+      <p>Pre-resist level: <b>${String(prep.stagedStepBeforeResist || "").toUpperCase()}</b> (${prep.trackKey})</p>
+      <p>Final level: <b>${outcome.finalStep ? outcome.finalStep.toUpperCase() : "NONE"}</b>
+         → Boxes applied: <b>${outcome.boxes}</b> (${trackKey})</p>
+      ${overflow > 0 ? `<p>Overflow: <b>${overflow}</b></p>` : ""}
+    `,
       });
 
-      const cid = prep?.contestId;
-      if (cid) activeContests.delete(cid);
+      // --- 6) Cleanup contest if present ---------------------------------------------
+      if (prep?.contestId) activeContests.delete(prep.contestId);
    }
 
    // -----------------------
    // Utilities
    // -----------------------
    static computeNetSuccesses(initiatorRollData, targetRollData) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.computeNetSuccesses.name]);
       const initiatorSuccesses = this.getSuccessCount(initiatorRollData);
       const targetSuccesses = this.getSuccessCount(targetRollData);
       return initiatorSuccesses - targetSuccesses;
    }
-
-   // after calling svc.prepareDamageResolution(...) you get `prep`
-   // now build a small TN mods HTML fragment for transparency
-   static renderTN(prep) {
-      DEBUG && LOG.info("", [__FILE__, __LINE__, this.renderTN.name]);
-      const base = Number(prep?.tnBase ?? 4);
-      const mods = Array.isArray(prep?.tnMods) ? prep.tnMods : [];
-      const sum = mods.reduce((a, m) => a + (Number(m.value) || 0), 0);
-      const finalTN = Math.max(2, base + sum);
-
-      const items = mods
-         .map((m) => {
-            const sign = (Number(m.value) || 0) >= 0 ? "+" : "−";
-            const abs = Math.abs(Number(m.value) || 0);
-            return `<li><span>${m.name}</span><b>${sign}${abs}</b></li>`;
-         })
-         .join("");
-
-      return `
-    <div class="sr3e-tn-breakdown">
-      <p>Resistance TN: <b>${finalTN}</b> <small>(base ${base}${
-         sum ? (sum > 0 ? ` + ${sum}` : ` − ${Math.abs(sum)}`) : ""
-      })</small></p>
-      ${items ? `<ul class="sr3e-tn-mods">${items}</ul>` : ""}
-    </div>`;
-   }
-
-   damageText = `
-  <p><strong>${target.name}</strong> must resist
-  <strong>${prep.stagedStepBeforeResist.toUpperCase()}</strong> damage
-  (${prep.trackKey}) from <em>${prep.weaponName}</em>.</p>
-  ${renderTN(prep)}
-`;
 
    static getSuccessCount(rollData) {
       const term = rollData.terms?.[0];
@@ -506,24 +475,11 @@ export default class OpposeRollService {
       return term.results.filter((r) => r.active && r.result >= tn).length;
    }
 
-   static #buildContestMessage({ initiator, target, initiatorRoll, targetRoll, winner, netSuccesses, damageText }) {
-      const initiatorHtml = this.#buildDiceHTML(initiator, initiatorRoll);
-      const targetHtml = this.#buildDiceHTML(target, targetRoll);
-
-      return `
-      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
-      <h4>${initiator.name}</h4>
-      ${initiatorHtml}
-      <h4>${target.name}</h4>
-      ${targetHtml}
-      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-      ${damageText ?? ""}`;
-   }
-
-   static #prepareChatData({ speaker, initiatorUser, targetUser, content, rollMode }) {
+   static #prepareChatData({ speaker, initiator, targetUserId, content, rollMode }) {
+      const userId = initiator?.userId;
       const chatData = {
          speaker: ChatMessage.getSpeaker({ actor: speaker }),
-         user: initiatorUser?.id ?? game.user.id,
+         user: userId,
          content,
          flags: { "sr3e.opposedResolved": true },
       };
@@ -537,17 +493,12 @@ export default class OpposeRollService {
             chatData.blind = true;
             break;
          case "selfroll":
-            chatData.whisper = [initiatorUser.id, targetUser.id];
+            chatData.whisper = [userId, targetUserId].filter(Boolean);
             break;
          case "public":
          default:
             break;
       }
-
       return chatData;
-   }
-
-   static #buildDiceHTML(actor, rollData) {
-      return SR3ERoll.renderVanilla(actor, rollData);
    }
 }

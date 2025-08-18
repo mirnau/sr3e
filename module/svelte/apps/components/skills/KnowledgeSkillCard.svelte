@@ -30,7 +30,7 @@
          : $valueStore;
 
       if (e.shiftKey) {
-         actor.sheet.setRollComposerData({
+         actor.sheet.displayRollComposer({
             type: "skill",
             key: skill.name,
             dice,
@@ -67,7 +67,7 @@
 </script>
 
 <svelte:window on:keydown|capture={handleEscape} />
-<div class="skill-card-container">
+<div class="skill-card-container" data-item-id="{skill.id}">
    {#if $isShoppingState}
       <i
          class={`header-control icon fa-solid fa-pen-to-square pulsing-green-cart`}

@@ -62,6 +62,14 @@ import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
 
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
+import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
+import DodgeProcedure from "@services/procedure/FSM/DodgeProcedure.js";
+import ResistanceProcedure from "@services/procedure/FSM/ResistanceProcedure.js";
+import MeleeProcedure from "@services/procedure/FSM/MeleeProcedure.js";
+import MeleeFullDefenseProcedure from "@services/procedure/FSM/MeleeFullDefenseProcedure.js";
+import MeleeStandardDefenseProcedure from "@services/procedure/FSM/MeleeStandardDefenseProcedure.js";
+
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
    if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
@@ -193,6 +201,14 @@ function registerHooks() {
    if (DEBUG) {
       //Hooks.once(hooks.ready, enableDebugHooks);
    }
+
+   // registration map — do this once during init/startup
+   AbstractProcedure.registerSubclass("firearm", FirearmProcedure);
+   AbstractProcedure.registerSubclass("dodge", DodgeProcedure);
+   AbstractProcedure.registerSubclass("resistance", ResistanceProcedure);
+   AbstractProcedure.registerSubclass("melee", MeleeProcedure); // attacker
+   AbstractProcedure.registerSubclass("melee-standard", MeleeStandardDefenseProcedure); // defender (standard)
+   AbstractProcedure.registerSubclass("melee-full", MeleeFullDefenseProcedure); // defender (full)
 
    Hooks.once(hooks.init, initializeSystem);
 
