@@ -1,4 +1,3 @@
-// module/hooks/addOpposedResponseButton.js
 import OpposeRollService from "@services/OpposeRollService.js";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 
@@ -11,12 +10,12 @@ export async function addOpposedResponseButton(message, html /*, data */) {
 
   const contest = OpposeRollService.getContestById(contestId);
 
-  // Stable UI holder
-  let ui = container.querySelector(".sr3e-responder-ui");
-  if (ui) ui.remove();
-  ui = document.createElement("div");
-  ui.classList.add("sr3e-responder-ui");
-  container.appendChild(ui);
+  // Stable UI holder (avoid shadowing Foundry's global `ui`)
+  let uiHost = container.querySelector(".sr3e-responder-ui");
+  if (uiHost) uiHost.remove();
+  uiHost = document.createElement("div");
+  uiHost.classList.add("sr3e-responder-ui");
+  container.appendChild(uiHost);
 
   if (!contest) {
     const b = document.createElement("button");
@@ -24,7 +23,7 @@ export async function addOpposedResponseButton(message, html /*, data */) {
     b.disabled = true;
     b.title = "Contest expired";
     b.innerText = "Contest expired";
-    ui.appendChild(b);
+    uiHost.appendChild(b);
     return;
   }
 
@@ -46,7 +45,7 @@ export async function addOpposedResponseButton(message, html /*, data */) {
     const err = document.createElement("div");
     err.classList.add("sr3e-dodge-error");
     err.innerText = "Opposed flow is missing procedure payload.";
-    ui.appendChild(err);
+    uiHost.appendChild(err);
     return;
   }
 
@@ -57,7 +56,7 @@ export async function addOpposedResponseButton(message, html /*, data */) {
     const err = document.createElement("div");
     err.classList.add("sr3e-dodge-error");
     err.innerText = `Failed to rehydrate initiator procedure: ${e?.message || e}`;
-    ui.appendChild(err);
+    uiHost.appendChild(err);
     return;
   }
 
@@ -69,75 +68,84 @@ export async function addOpposedResponseButton(message, html /*, data */) {
     const err = document.createElement("div");
     err.classList.add("sr3e-dodge-error");
     err.innerText = `Responder UI error: ${e?.message || e}`;
-    ui.appendChild(err);
+    uiHost.appendChild(err);
     return;
   }
 
-  ui.innerHTML = responderHTML;
+  uiHost.innerHTML = responderHTML;
 
-  const yesBtn = ui.querySelector('[data-responder="yes"]');
-  const noBtn  = ui.querySelector('[data-responder="no"]');
-  if (!yesBtn || !noBtn) {
+  // NEW: accept ANY [data-responder] button (yes/no/standard/full/etc.)
+  const buttons = Array.from(uiHost.querySelectorAll("[data-responder]"));
+  if (!buttons.length) {
     const err = document.createElement("div");
     err.classList.add("sr3e-dodge-error");
-    err.innerText = "Responder UI is missing yes/no controls.";
-    ui.appendChild(err);
+    err.innerText = "Responder UI is missing [data-responder] controls.";
+    uiHost.appendChild(err);
     return;
   }
 
-  // YES → build defense procedure & open composer
-  yesBtn.onclick = async () => {
-    try {
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
-      yesBtn.classList.add("responded");
+  // Helper to disable all buttons and mark one as responded
+  const disableAll = (clicked) => {
+    for (const b of buttons) {
+      b.disabled = true;
+      b.classList.toggle("responded", b === clicked);
+    }
+  };
 
-      const current = OpposeRollService.getContestById(contestId);
-      if (!current) {
-        yesBtn.classList.add("expired");
-        yesBtn.innerText = "Contest expired";
-        return;
+  // Wire each responder button
+  for (const btn of buttons) {
+    btn.onclick = async () => {
+      try {
+        disableAll(btn);
+
+        const current = OpposeRollService.getContestById(contestId);
+        if (!current) {
+          btn.classList.add("expired");
+          btn.innerText = "Contest expired";
+          return;
+        }
+
+        const responderKey = String(btn.dataset.responder || "").toLowerCase();
+
+        // NO → treat as 0 successes (works for dodge-style flows)
+        if (responderKey === "no") {
+          await CONFIG.queries["sr3e.resolveOpposedNoDodge"]({ contestId });
+
+          const messageId = message.id;
+          const authorUser = game.messages.get(messageId)?.author;
+          if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
+          return;
+        }
+
+        // YES or any named defense kind (e.g., "standard", "full")
+        const defenseProc = await initiatorProc.buildDefenseProcedure(exportCtx, {
+          defender,
+          contestId,
+          responderKey, // <-- this is the key for melee to choose standard/full
+        });
+
+        const sheet = defender.sheet;
+        if (!sheet.rendered) await sheet.render(true);
+        sheet.displayRollComposer(defenseProc);
+
+        // Wait until the defense procedure calls deliverResponse
+        const rollData = await OpposeRollService.waitForResponse(contestId);
+
+        // Resolve on the initiator's client (relayed if necessary)
+        await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
+          contestId,
+          rollData,
+        });
+
+        // Mark the chat message as responded so it won't re-offer buttons
+        const messageId = message.id;
+        const authorUser = game.messages.get(messageId)?.author;
+        if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
+      } catch (e) {
+        // Use Foundry's global UI, not the local DOM element
+        ui.notifications?.error?.(e?.message || "Defense flow failed");
+        console.error(e);
       }
-
-      const defenseProc = await initiatorProc.buildDefenseProcedure(exportCtx, {
-        defender,
-        contestId,
-      });
-
-      const sheet = defender.sheet;
-      if (!sheet.rendered) await sheet.render(true);
-      sheet.displayRollComposer(defenseProc);
-
-      // Wait until the defense procedure calls deliverResponse
-      const rollData = await OpposeRollService.waitForResponse(contestId);
-
-      await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
-        contestId,
-        rollData,
-      });
-
-      const messageId = message.id;
-      const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
-    } catch (e) {
-      ui.notifications?.error?.(e?.message || "Defense flow failed");
-    }
-  };
-
-  // NO → treat as 0 successes
-  noBtn.onclick = async () => {
-    try {
-      yesBtn.disabled = true;
-      noBtn.disabled = true;
-      noBtn.classList.add("responded");
-
-      await CONFIG.queries["sr3e.resolveOpposedNoDodge"]({ contestId });
-
-      const messageId = message.id;
-      const authorUser = game.messages.get(messageId)?.author;
-      if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId });
-    } catch (e) {
-      ui.notifications?.error?.(e?.message || "Defense skip failed");
-    }
-  };
+    };
+  }
 }

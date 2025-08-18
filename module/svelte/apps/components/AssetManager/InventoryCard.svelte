@@ -103,7 +103,7 @@
 </script>
 
 <!-- svelte-ignore a11y_unknown_aria_attribute -->
-<div class="asset-card" role="presentation" aria-role="presentation" draggable="true" ondragstart={onDragStart}>
+<div data-item-id="{item.id}" class="asset-card" role="presentation" aria-role="presentation" draggable="true" ondragstart={onDragStart}>
    <div class="asset-background-layer"></div>
    <div class="image-mask">
       <img src={item.img} role="presentation" alt={item.name} />

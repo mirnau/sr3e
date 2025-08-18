@@ -201,6 +201,10 @@ export default class OpposeRollService {
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
 
+      // DIFF #1: detect melee full defense (parry) from defender roll options
+      const meleeDefenseMode = String(targetRoll?.options?.meleeDefenseMode || "");
+      const isMeleeFullDefense = meleeDefenseMode === "full";
+
       // Attempt to rehydrate the initiator procedure to let it render & prep
       let initiatorProc = null;
       try {
@@ -209,8 +213,7 @@ export default class OpposeRollService {
          console.warn("[sr3e] Failed to rehydrate initiator procedure:", e);
       }
 
-      // Important: apply shot/ammo/recoil bookkeeping for firearms (same as regular roll).
-      // Do this regardless of hit/miss; recoil tracks shots fired, not outcome.
+      // Firearms bookkeeping (ammo/recoil) regardless of hit/miss
       if (initiatorProc?.onChallengeResolved && initiator) {
          try {
             await initiatorProc.onChallengeResolved({ roll: initiatorRoll, actor: initiator });
@@ -254,7 +257,7 @@ export default class OpposeRollService {
             console.warn("[sr3e] buildResistancePrep failed; will fallback to service:", e);
          }
 
-         // Final fallback using familyKey snapshot (we keep this; only the MESSAGE fallback is removed)
+         // Final fallback using familyKey snapshot (kept)
          if (!resistancePrep && exportCtx?.familyKey) {
             const svc = exportCtx.familyKey === "firearm" ? FirearmService : MeleeService;
             resistancePrep =
@@ -262,7 +265,6 @@ export default class OpposeRollService {
                   ? svc.prepareDamageResolution(target, { plan: exportCtx.plan, damage: exportCtx.damage })
                   : svc.prepareDamageResolution(target, { packet: exportCtx.damage });
 
-            // annotate a few convenience fields
             if (resistancePrep) {
                resistancePrep.familyKey = exportCtx.familyKey;
                resistancePrep.weaponId = exportCtx.weaponId || null;
@@ -285,7 +287,6 @@ export default class OpposeRollService {
          });
          await ChatMessage.create(chatData);
       } else {
-         // No backup message — surface a clear dev warning
          console.warn("[sr3e] No contested outcome HTML returned by procedure; no combined chat message posted.");
       }
 
@@ -295,6 +296,15 @@ export default class OpposeRollService {
       // 4) If we have a resistance prep, prompt defender
       if (winner === initiator && resistancePrep) {
          try {
+            // DIFF #2/3: on melee full defense, surface optional Dodge step to the prompt layer
+            if (exportCtx?.familyKey === "melee" && isMeleeFullDefense) {
+               resistancePrep.meleeOptionalDodge = {
+                  enabled: true,
+                  // Helpful context if your prompt wants to display it:
+                  netAttackSuccesses: netSuccesses,
+               };
+            }
+
             // Ensure a few fields are set for the prompt step
             resistancePrep.contestId = contest.id;
             resistancePrep.attackerId = initiator.id;
