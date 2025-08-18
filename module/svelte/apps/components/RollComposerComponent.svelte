@@ -72,7 +72,6 @@
    // svelte-ignore non_reactive_update
    let containerEl;
 
-   let isFirearm = $state(false);
    let weaponMode = $state("");
    let declaredRounds = $state(1);
    let ammoAvailable = $state(null);
@@ -145,7 +144,6 @@
       $procedureStore = currentProcedure;
 
       modifiersArrayStore = $procedureStore.modifiersArrayStore;
-      isFirearm = currentProcedure instanceof FirearmProcedure;
 
       addSub($procedureStore.targetNumberStore, (v) => (targetNumber = v));
       addSub($procedureStore.modifiersTotalStore, (v) => (modifiersTotal = v));
@@ -187,9 +185,9 @@
          rangePrimedForWeaponId = null;
          const weapon = $procedureStore?.item;
          if (!weapon) return;
-         const attackerToken = actor?.getActiveTokens?.()[0] ?? null;
+         const attackerToken = actor?.getActiveTokens?.[0] ?? null;
          const targetToken = Array.from(game.user.targets)[0] ?? null;
-         if (attackerToken && targetToken && isFirearm) {
+         if (attackerToken && targetToken && $procedureStore instanceof FirearmProcedure) {
             if (rangeSuppressedForWeaponId !== weapon.id) {
                $procedureStore?.primeRangeForWeapon?.(attackerToken, targetToken);
                rangePrimedForWeaponId = weapon.id;
@@ -234,11 +232,11 @@
          if (idx >= 0) $procedureStore?.removeModByIndex?.(idx);
          return;
       }
-      if (!isFirearm) return;
+      if (!($procedureStore instanceof FirearmProcedure)) return;
       const weapon = $procedureStore?.item;
       if (!weapon) return;
       if (rangePrimedForWeaponId || rangeSuppressedForWeaponId === weapon.id) return;
-      const attackerToken = actor?.getActiveTokens?.()[0] ?? null;
+      const attackerToken = actor?.getActiveTokens?.[0] ?? null;
       const targetToken = Array.from(game.user.targets)[0] ?? null;
       $procedureStore?.primeRangeForWeapon?.(attackerToken, targetToken);
       rangePrimedForWeaponId = weapon.id;
@@ -246,7 +244,7 @@
 
    $effect(() => {
       if (!visible) return;
-      if (!isFirearm) return;
+      if (!($procedureStore instanceof FirearmProcedure)) return;
       $procedureStore?.precompute?.({ declaredRounds, ammoAvailable });
    });
 
@@ -313,7 +311,6 @@
 </script>
 
 {#if visible}
-   <!-- svelte-ignore a11y_unknown_aria_attribute -->
    <!-- svelte-ignore a11y_unknown_aria_attribute -->
    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
    <div

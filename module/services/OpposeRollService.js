@@ -209,6 +209,16 @@ export default class OpposeRollService {
          console.warn("[sr3e] Failed to rehydrate initiator procedure:", e);
       }
 
+      // Important: apply shot/ammo/recoil bookkeeping for firearms (same as regular roll).
+      // Do this regardless of hit/miss; recoil tracks shots fired, not outcome.
+      if (initiatorProc?.onChallengeResolved && initiator) {
+         try {
+            await initiatorProc.onChallengeResolved({ roll: initiatorRoll, actor: initiator });
+         } catch (e) {
+            console.warn("[sr3e] onChallengeResolved (challenge path) failed:", e);
+         }
+      }
+
       // 1) Let subclass render contested chat (and optionally provide resistance prep)
       let htmlOut = null;
       let resistancePrep = null;
