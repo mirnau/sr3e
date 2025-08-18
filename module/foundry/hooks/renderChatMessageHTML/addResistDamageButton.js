@@ -1,5 +1,3 @@
-import { hooks } from "@services/commonConsts.js";
-
 export function addResistDamageButton(message, html, data) {
    const node = html.querySelector(".sr3e-resist-damage-button");
    if (!node || node.dataset.sr3eResistWired) return;
@@ -18,45 +16,36 @@ export function addResistDamageButton(message, html, data) {
       const defender = game.actors.get(defenderId);
       if (!defender) throw new Error("sr3e: defender not found");
 
+      // Ensure the sheet is rendered so the composer is available.
       const sheet = defender.sheet;
+      if (!sheet.rendered) await sheet.render(true);
 
-      const applyCallerData = () => {
-         // Recompute the resistance TN from its parts to ensure any runtime
-         // modifiers (like dodge successes) are reflected. This mirrors
-         // OpposeRollService.#computeTNFromPrep.
-         const tn = Math.max(
-            2,
-            Number(prep?.tnBase ?? 0) +
-               (Array.isArray(prep?.tnMods)
-                  ? prep.tnMods.reduce((a, m) => a + (Number(m.value) || 0), 0)
-                  : Number(prep?.tn ?? 0))
-         );
+      // Recompute the resistance TN from its parts to ensure any runtime
+      // modifiers (like dodge successes) are reflected. This mirrors
+      // OpposeRollService.#computeTNFromPrep.
+      const tn = Math.max(
+         2,
+         Number(prep?.tnBase ?? 0) +
+            (Array.isArray(prep?.tnMods)
+               ? prep.tnMods.reduce((a, m) => a + (Number(m.value) || 0), 0)
+               : Number(prep?.tn ?? 0))
+      );
 
-         sheet.setRollComposerData(
-            {
-               isResistingDamage: true,
-               contestId,
-               initiatorId,
-               defenderId,
-               weaponId,
-               tn,
-               prep,
-               tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
-               panelTitle: game.i18n.localize("sr3e.damageResistance") || "Damage Resistance",
-               explodes: true,
-            },
-            { visible: true }
-         );
-      };
-
-      if (!sheet.rendered) {
-         Hooks.once(hooks.renderCharacterActorSheet, (app) => {
-            if (app === sheet) applyCallerData();
-         });
-         await sheet.render(true);
-      } else {
-         applyCallerData();
-      }
+      sheet.setRollComposerData(
+         {
+            isResistingDamage: true,
+            contestId,
+            initiatorId,
+            defenderId,
+            weaponId,
+            tn,
+            prep,
+            tnLabel: game.i18n.localize("sr3e.resistanceTN") || "Damage Resistance",
+            panelTitle: game.i18n.localize("sr3e.damageResistance") || "Damage Resistance",
+            explodes: true,
+         },
+         { visible: true }
+      );
    });
 
    node.appendChild(button);
