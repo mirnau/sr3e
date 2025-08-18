@@ -143,6 +143,9 @@
       clearStoreSubscriptions();
       $procedureStore = currentProcedure;
 
+      rangePrimedForWeaponId = null;
+      rangeSuppressedForWeaponId = null;
+
       modifiersArrayStore = $procedureStore.modifiersArrayStore;
 
       addSub($procedureStore.targetNumberStore, (v) => (targetNumber = v));
@@ -183,9 +186,10 @@
       targetHook = (user, token, targeted) => {
          if (user?.id !== game.user.id) return;
          rangePrimedForWeaponId = null;
+         rangeSuppressedForWeaponId = null;
          const weapon = $procedureStore?.item;
          if (!weapon) return;
-         const attackerToken = actor?.getActiveTokens?.[0] ?? null;
+         const attackerToken = actor?.getActiveTokens?.()[0] ?? null;
          const targetToken = Array.from(game.user.targets)[0] ?? null;
          if (attackerToken && targetToken && $procedureStore instanceof FirearmProcedure) {
             if (rangeSuppressedForWeaponId !== weapon.id) {
@@ -233,11 +237,15 @@
          return;
       }
       if (!($procedureStore instanceof FirearmProcedure)) return;
+
       const weapon = $procedureStore?.item;
       if (!weapon) return;
       if (rangePrimedForWeaponId || rangeSuppressedForWeaponId === weapon.id) return;
-      const attackerToken = actor?.getActiveTokens?.[0] ?? null;
+
+      const attackerToken = actor?.getActiveTokens?.()?.[0] ?? null;
       const targetToken = Array.from(game.user.targets)[0] ?? null;
+      if (!attackerToken || !targetToken) return;
+
       $procedureStore?.primeRangeForWeapon?.(attackerToken, targetToken);
       rangePrimedForWeaponId = weapon.id;
    });
