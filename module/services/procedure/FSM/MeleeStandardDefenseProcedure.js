@@ -6,21 +6,26 @@ import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
    constructor(defender, _item = null, args = {}) {
       super(defender, _item, args);
-
-      const { baseDice } = this.getEffectiveDice();
-      this.dice = baseDice;
-
       ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${this.caller?.id}`,
+         ownerKey: `${this.constructor.name}:${caller?.id}`,
          priority: "advanced",
          onDenied: () => {},
       });
    }
 
+   // in MeleeStandardDefenseProcedure
    buildFormula(explodes = true) {
-      const { totalDice } = this.getEffectiveDice({ includePool: true, includeKarma: true });
-      if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
+      const b = this.args?.basis || {};
+      const key = String(b.key || "strength");
+      const attr = this.caller?.system?.attributes?.[key];
+      const attrVal = Number(attr?.total ?? attr?.value ?? 0) || 0;
 
+      const baseDice = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? attrVal) || 0));
+      const poolDice = Math.max(0, Math.floor(Number(this.poolDice) || 0));
+      const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
+      const totalDice = baseDice + poolDice + karmaDice;
+
+      if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
       const base = `${totalDice}d6`;
       if (!explodes) return base;
 

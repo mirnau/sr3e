@@ -7,7 +7,6 @@
    import FirearmService from "@families/FirearmService.js";
    import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
    import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
-   import MeleeFullDefenseProcedure from "@services/procedure/FSM/MeleeFullDefenseProcedure.js";
    import { recoilState, clearAllRecoilForActor } from "@services/ComposerAttackController.js";
 
    let { actor, config } = $props();
@@ -143,10 +142,6 @@
       if (!(currentProcedure instanceof AbstractProcedure)) throw new Error("Unfit data type");
       clearStoreSubscriptions();
       $procedureStore = currentProcedure;
-
-      if (currentProcedure?.args?.basis) {
-         caller = { ...currentProcedure.args.basis };
-      }
 
       rangePrimedForWeaponId = null;
       rangeSuppressedForWeaponId = null;
@@ -425,24 +420,7 @@
             class="regular"
             type="button"
             disabled={!primaryEnabled}
-            onclick={async () => {
-               const proc = $procedureStore;
-               if (!proc) return;
-               proc.setBasis?.(caller);
-               if (Number.isFinite(Number(caller?.dice))) proc.dice = Math.max(0, Number(caller.dice));
-               if (proc instanceof MeleeFullDefenseProcedure) proc.poolDice = 0;
-               const { totalDice } = proc.getEffectiveDice({
-                  includePool: !(proc instanceof MeleeFullDefenseProcedure),
-                  includeKarma: true,
-               });
-               if (!Number.isFinite(totalDice) || totalDice <= 0) {
-                  ui.notifications?.warn?.(
-                     localize("sr3e.warn.noDice") ?? "Cannot roll 0 dice."
-                  );
-                  return;
-               }
-               await proc.execute({ OnClose, CommitEffects });
-            }}
+            onclick={async () => await $procedureStore.execute({ OnClose, CommitEffects })}
          >
             {primaryLabel}
          </button>

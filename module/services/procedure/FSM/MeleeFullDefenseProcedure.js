@@ -5,10 +5,15 @@ import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
 export default class MeleeFullDefenseProcedure extends AbstractProcedure {
    constructor(defender, _item = null, args = {}) {
-      super(defender, _item, args);
+      super(defender, _item);
+      this.args = args || {};
 
-      const { baseDice } = this.getEffectiveDice();
-      this.dice = baseDice;
+      // Seed base dice from chosen basis or fallback to Strength
+      const basis = this.args.basis || {};
+      const key = String(basis.key || "strength");
+      const a = defender?.system?.attributes?.[key];
+      const seed = Number(basis.dice ?? a?.total ?? a?.value ?? 0) || 0;
+      this.dice = Math.max(0, seed);
 
       // Full Defense "owns" input while active
       ProcedureLock.assertEnter({
@@ -28,13 +33,27 @@ export default class MeleeFullDefenseProcedure extends AbstractProcedure {
       return game?.i18n?.localize?.("sr3e.button.fullDefend") ?? "Full Defense";
    }
 
+   // add below the class methods
    buildFormula(explodes = true) {
-      const { totalDice } = this.getEffectiveDice({ includePool: false, includeKarma: true });
+      // 1) base dice from the active basis or fallback to Strength
+      const b = this.args?.basis || {};
+      const key = String(b.key || "strength");
+      const attr = this.caller?.system?.attributes?.[key];
+      const attrVal = Number(attr?.total ?? attr?.value ?? 0) || 0;
+
+      // prefer explicit basis.dice if composer supplied it; otherwise use attribute value
+      const baseDice = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? attrVal) || 0));
+
+      // 2) Full Defense initial test: no pool; karma is allowed as usual
+      const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
+      const totalDice = baseDice + karmaDice;
+
       if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
 
       const base = `${totalDice}d6`;
       if (!explodes) return base;
 
+      // Use the procedure’s final TN (your AbstractProcedure already clamps ≥2)
       const tn = Math.max(2, Number(this.finalTN()) || 2);
       return `${base}x${tn}`;
    }
@@ -45,19 +64,25 @@ export default class MeleeFullDefenseProcedure extends AbstractProcedure {
       // Initial Full Defense test: no Combat Pool on this roll
       this.poolDice = 0;
 
+      // If user reshaped UI and dice went to 0, re-seed from basis/attribute
+      if ((this.dice | 0) <= 0) {
+         const basis = this.args?.basis || {};
+         const key = String(basis.key || "strength");
+         const a = this.caller?.system?.attributes?.[key];
+         const seed = Number(basis.dice ?? a?.total ?? a?.value ?? 0) || 0;
+         this.dice = Math.max(0, seed);
+      }
+
       const actor = this.caller;
       const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
 
+      // Reflect "no pool on this test" and keep attribute basis for transparency
       const basis = this.args?.basis || {};
       const opt = { ...(baseRoll.options || {}), pools: [] };
-      if (basis.type === "attribute") {
+      if (!opt.skill && !opt.skillKey && !opt.attribute && !opt.attributeKey) {
          opt.attributeKey = String(basis.key || "strength");
-         opt.isDefaulting = basis.isDefaulting ?? true;
+         opt.isDefaulting = true;
          if (Number.isFinite(basis.dice)) opt.attributeDice = Number(basis.dice);
-      } else if (basis.type === "skill") {
-         opt.skill = { id: basis.id, name: basis.name };
-         if (basis.specialization) opt.specialization = basis.specialization;
-         if (Number.isFinite(basis.dice)) opt.skillDice = Number(basis.dice);
       }
       baseRoll.options = opt;
 

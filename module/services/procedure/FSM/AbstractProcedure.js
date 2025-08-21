@@ -165,8 +165,7 @@ export default class AbstractProcedure {
       return () => Hooks.off("targetToken", update);
    });
 
-   constructor(caller = null, item = null, args = {}) {
-      this.args = args || {};
+   constructor(caller = null, item = null) {
       if (this.constructor === AbstractProcedure) {
          DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
          ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
@@ -201,12 +200,8 @@ export default class AbstractProcedure {
          });
       }
 
-      this.setBasis(this.args?.basis);
-
-      if (caller) {
+      if (caller && item) {
          this.#caller = caller;
-      }
-      if (item) {
          this.#item = item;
 
          this.#titleStore.set(item.name);
@@ -497,56 +492,6 @@ export default class AbstractProcedure {
       const base = Number(get(this.#targetNumberStore) ?? 4);
       const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
       return floor == null ? sum : Math.max(floor, sum);
-   }
-
-   setBasis(b = null) {
-      this.args = this.args || {};
-      this.args.basis = b || null;
-      if (b?.type === "attribute" && typeof b.key === "string") {
-         this.#linkedAttributeStore?.set?.(b.key);
-      }
-   }
-
-   getEffectiveDice({ includePool = false, includeKarma = false } = {}) {
-      const basis = this.args?.basis || {};
-      let baseDice = 0;
-
-      if (Number.isFinite(Number(basis.dice))) {
-         baseDice = Number(basis.dice);
-      } else if (basis.type === "skill") {
-         const skillId = basis.id || basis.skillId;
-         const skill = this.caller?.items?.get?.(skillId) || null;
-         if (skill) {
-            const type = skill.system?.skillType;
-            const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
-            if (Number.isFinite(Number(basis.specIndex))) {
-               const specs = Array.isArray(sub.specializations) ? sub.specializations : [];
-               const spec = specs[Number(basis.specIndex)] || null;
-               baseDice = Number(spec?.value ?? 0) || 0;
-            } else {
-               baseDice = Number(sub.value ?? 0) || 0;
-            }
-         }
-      } else if (basis.type === "attribute") {
-         const key = String(basis.key || this.linkedAttribute || "strength");
-         const a = this.caller?.system?.attributes?.[key];
-         baseDice = Number(a?.total ?? a?.value ?? 0) || 0;
-      } else {
-         const key = String(this.linkedAttribute || "strength");
-         const a = this.caller?.system?.attributes?.[key];
-         baseDice = Number(a?.total ?? a?.value ?? 0) || 0;
-      }
-
-      baseDice = Math.max(0, Math.floor(Number(baseDice) || 0));
-
-      const poolDice = includePool
-         ? Math.max(0, Math.floor(this.#computeClampedPoolDice(this.poolDice)))
-         : 0;
-      const karmaDice = includeKarma
-         ? Math.max(0, Math.floor(Number(this.karmaDice) || 0))
-         : 0;
-
-      return { baseDice, poolDice, karmaDice, totalDice: baseDice + poolDice + karmaDice };
    }
 
    #computeClampedPoolDice(selected) {
