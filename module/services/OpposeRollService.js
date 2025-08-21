@@ -199,7 +199,7 @@ export default class OpposeRollService {
       const procJSON = contest.procedure?.json || null;
 
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
-      const winner = netSuccesses > 0 ? initiator : target;
+      const winner = netSuccesses >= 0 ? initiator : target; // SR3: attacker wins ties
 
       // DIFF #1: detect melee full defense (parry) from defender roll options
       const meleeDefenseMode = String(targetRoll?.options?.meleeDefenseMode || "");

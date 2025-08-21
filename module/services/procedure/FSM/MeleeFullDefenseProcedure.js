@@ -43,11 +43,14 @@ export default class MeleeFullDefenseProcedure extends AbstractProcedure {
       const baseRoll = SR3ERoll.create(formula, { actor });
 
       // Also sanitize any array-based pools on the roll options if present
-      baseRoll.options = {
-         ...(baseRoll.options || {}),
-         pools: [], // disallow named pools entirely
-      };
-
+      const basis = this.args?.basis;
+      const opt = { ...(baseRoll.options || {}), pools: [] };
+      if (basis && !opt.skill && !opt.skillKey && !opt.attribute && !opt.attributeKey) {
+         opt.attributeKey = basis.key || "strength";
+         opt.isDefaulting = true;
+         if (Number.isFinite(basis.dice)) opt.attributeDice = Number(basis.dice);
+      }
+      baseRoll.options = opt;
       const roll = await baseRoll.evaluate(this);
       await roll.waitForResolution();
 

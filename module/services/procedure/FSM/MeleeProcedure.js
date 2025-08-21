@@ -134,12 +134,19 @@ export default class MeleeProcedure extends AbstractProcedure {
     * The responder harness should pass a third arg { responderKey } with "standard" or "full".
     * If your harness doesn’t yet, you can also embed a tiny switch there to rewrite `next.kind`.
     */
-   buildDefenseProcedure(exportCtx, { defender, contestId, responderKey = "standard" }) {
+   buildDefenseProcedure(exportCtx, { defender, contestId, responderKey = "standard", defenseHint = null }) {
       const key = responderKey === "full" ? "melee-full" : "melee-standard";
       const Ctor = AbstractProcedure.getCtor(key);
       if (!Ctor) throw new Error(`No registered defense procedure for key="${key}"`);
       const baseArgs = exportCtx?.next?.args || {};
-      return new Ctor(defender, null, { ...baseArgs, contestId });
+      const s =
+         Number(defender?.system?.attributes?.strength?.total ?? defender?.system?.attributes?.strength?.value ?? 0) ||
+         0;
+      const basis =
+         defenseHint && defenseHint.type && defenseHint.key
+            ? { type: String(defenseHint.type), key: String(defenseHint.key) }
+            : { type: "attribute", key: "strength", name: "Strength", isDefaulting: true, dice: s };
+      return new Ctor(defender, null, { ...baseArgs, contestId, basis });
    }
 
    // ---------- contested result rendering (strict) ----------
