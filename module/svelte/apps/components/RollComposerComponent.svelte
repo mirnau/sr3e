@@ -420,7 +420,16 @@
             class="regular"
             type="button"
             disabled={!primaryEnabled}
-            onclick={async () => await $procedureStore.execute({ OnClose, CommitEffects })}
+            onclick={async () => {
+               // RollComposerComponent.svelte (inside the submit onclick)
+               const proc = $procedureStore;
+               proc.args = { ...(proc.args || {}), basis: caller };
+               if (Number.isFinite(Number(caller?.dice))) proc.dice = Math.max(0, Number(caller.dice));
+               proc.karmaDice = Math.max(0, Number(diceBought) || 0);
+               if (proc.constructor.name === "MeleeFullDefenseProcedure") proc.poolDice = 0;
+               else proc.poolDice = Math.max(0, Number(currentDicePoolAddition) || 0);
+               await proc.execute({ OnClose, CommitEffects });
+            }}
          >
             {primaryLabel}
          </button>

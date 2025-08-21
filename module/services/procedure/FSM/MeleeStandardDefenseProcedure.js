@@ -1,63 +1,52 @@
-// module/services/procedure/FSM/MeleeStandardDefenseProcedure.js
-import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
+import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
 export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
-   constructor(defender, _item = null, args = {}) {
-      super(defender, _item, args);
-      ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${caller?.id}`,
-         priority: "advanced",
-         onDenied: () => {},
-      });
-   }
+  constructor(defender, _item = null, args = {}) {
+    super(defender, _item);
+    this.args = args || {};
 
-   // in MeleeStandardDefenseProcedure
-   buildFormula(explodes = true) {
-      const b = this.args?.basis || {};
-      const key = String(b.key || "strength");
-      const attr = this.caller?.system?.attributes?.[key];
-      const attrVal = Number(attr?.total ?? attr?.value ?? 0) || 0;
+    ProcedureLock.assertEnter({
+      ownerKey: `${this.constructor.name}:${this.caller?.id}`,
+      priority: "advanced",
+      onDenied: () => {}
+    });
+  }
 
-      const baseDice = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? attrVal) || 0));
-      const poolDice = Math.max(0, Math.floor(Number(this.poolDice) || 0));
-      const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
-      const totalDice = baseDice + poolDice + karmaDice;
+  getFlavor() { return "Melee Defense (Standard)"; }
+  getChatDescription() { return `<div>Melee Defense (Standard)</div>`; }
+  getPrimaryActionLabel() { return game?.i18n?.localize?.("sr3e.button.defend") ?? "Defend"; }
 
-      if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
-      const base = `${totalDice}d6`;
-      if (!explodes) return base;
+  // SENTINEL: force a constant exploding formula
+  buildFormula(explodes = true) {
+    return "100d6x4";
+  }
 
-      const tn = Math.max(2, Number(this.finalTN()) || 2);
-      return `${base}x${tn}`;
-   }
+  async execute({ OnClose } = {}) {
+    OnClose?.();
 
-   onDestroy() {
-      super.onDestroy?.();
-      ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
-   }
+    const actor = this.caller;
+    const formula = this.buildFormula(true);
+    console.warn("[DEF SENTINEL] StandardDefense formula ->", formula, {
+      proc: this?.constructor?.name,
+      basis: this?.args?.basis,
+      dice: this.dice,
+      pool: this.poolDice,
+      karma: this.karmaDice
+    });
 
-   getFlavor() {
-      return "Melee Defense (Standard)";
-   }
-   getChatDescription() {
-      return `<div>Melee Defense (Standard)</div>`;
-   }
-   getPrimaryActionLabel() {
-      return game?.i18n?.localize?.("sr3e.button.defend") ?? "Defend";
-   }
+    const roll = await SR3ERoll.create(formula, { actor }).evaluate(this);
+    await roll.waitForResolution();
 
-   // No pool limitations; defender can add their chosen Combat Pool
-   async execute({ OnClose } = {}) {
-      OnClose?.();
-      const actor = this.caller;
-      const formula = this.buildFormula(true);
-      const roll = await SR3ERoll.create(formula, { actor }).evaluate(this);
-      await roll.waitForResolution();
+    roll.toJSON().options = { ...(roll.options || {}), meleeDefenseMode: "standard", __sentinel: "STANDARD" };
+    return roll;
+  }
 
-      // Tag the roll minimally so the resolver knows this was "standard"
-      roll.toJSON().options = { ...(roll.options || {}), meleeDefenseMode: "standard" };
-      return roll;
-   }
+  onDestroy() {
+    super.onDestroy?.();
+    ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
+  }
 }
+
+try { AbstractProcedure.register?.("melee-standard", MeleeStandardDefenseProcedure); } catch {}
