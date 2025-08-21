@@ -27,14 +27,27 @@ export default class OpposeRollService {
 
    static expireContest(contestId) {
       const contest = activeContests.get(contestId);
-      if (contest) {
-         activeContests.delete(contestId);
-         console.log("[sr3e] Contest expired.");
+      if (!contest) return;
+      if (contest.timer) {
+         clearTimeout(contest.timer);
+         contest.timer = null;
       }
+      activeContests.delete(contestId);
+      this.deliverResponse(contestId, { __aborted: true });
    }
 
-   static abortOpposedRoll(contestId) {
-      return this.expireContest(contestId);
+   static abortOpposedRoll(contestId, { reason = "user-cancel", byUserId = game.user?.id } = {}) {
+      const contest = activeContests.get(contestId);
+      this.expireContest(contestId);
+      const mId = contest?.messageId;
+      const msg = mId ? game.messages.get(mId) : null;
+      if (msg) {
+         const f = foundry.utils.duplicate(msg.flags || {});
+         f.sr3e = { ...(f.sr3e || {}), opposedResponded: true, opposedCancelled: reason, opposedCancelledBy: byUserId };
+         msg.update({ flags: f }).catch(() => {});
+      }
+      Hooks.callAll("sr3e:contest-cancelled", { contestId, reason, byUserId });
+      return true;
    }
 
    /**
@@ -135,16 +148,26 @@ export default class OpposeRollService {
 
       // Chat prompt (whisper to the two involved)
       const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
-      await ChatMessage.create({
+      const msg = await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
          content: `
-        <p><strong>${initiator?.name}</strong> has initiated an opposed roll against <strong>${targetActor?.name}</strong>.</p>
-        <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
-      `,
+         <p><strong>${initiator?.name}</strong> has initiated an opposed roll against <strong>${targetActor?.name}</strong>.</p>
+         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
+       `,
          flags: { "sr3e.opposed": contestId },
       });
 
+      return contestId;
+      contest.messageId = msg?.id ?? null;
+
+      const timeoutMs = Number(game.settings?.get?.("sr3e", "contestTimeoutMs")) || 600000;
+      contest.timer = setTimeout(() => {
+         try {
+            OpposeRollService.abortOpposedRoll(contestId, { reason: "timeout" });
+         } catch {}
+      }, timeoutMs);
+      activeContests.set(contestId, contest);
       return contestId;
    }
 
@@ -186,6 +209,10 @@ export default class OpposeRollService {
    static async resolveTargetRoll(contestId, rollData) {
       const contest = activeContests.get(contestId);
       if (!contest) return;
+      if (contest.timer) {
+         clearTimeout(contest.timer);
+         contest.timer = null;
+      }
 
       contest.targetRoll = rollData;
       contest.isResolved = true;

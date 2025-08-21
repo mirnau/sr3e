@@ -13,6 +13,26 @@ export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
       });
    }
 
+   // in MeleeStandardDefenseProcedure
+   buildFormula(explodes = true) {
+      const b = this.args?.basis || {};
+      const key = String(b.key || "strength");
+      const attr = this.caller?.system?.attributes?.[key];
+      const attrVal = Number(attr?.total ?? attr?.value ?? 0) || 0;
+
+      const baseDice = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? attrVal) || 0));
+      const poolDice = Math.max(0, Math.floor(Number(this.poolDice) || 0));
+      const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
+      const totalDice = baseDice + poolDice + karmaDice;
+
+      if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
+      const base = `${totalDice}d6`;
+      if (!explodes) return base;
+
+      const tn = Math.max(2, Number(this.finalTN()) || 2);
+      return `${base}x${tn}`;
+   }
+
    onDestroy() {
       super.onDestroy?.();
       ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
@@ -41,7 +61,3 @@ export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
       return roll;
    }
 }
-
-try {
-   AbstractProcedure.register?.("melee-standard", MeleeStandardDefenseProcedure);
-} catch {}

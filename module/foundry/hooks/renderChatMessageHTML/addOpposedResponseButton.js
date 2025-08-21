@@ -35,7 +35,10 @@ export async function addOpposedResponseButton(message, html /*, data */) {
    const controllingUser = OpposeRollService.resolveControllingUser(defender);
    const isControllingUser = game.user.id === controllingUser?.id;
    const alreadyResponded = Boolean(contest.targetRoll) || Boolean(message.flags?.sr3e?.opposedResponded);
-   if (!isControllingUser || alreadyResponded) return;
+   const isInitiatorUser = game.user.id === contest?.initiator?.userId;
+   const canCancel = isInitiatorUser || game.user.isGM;
+   const canRespond = isControllingUser && !alreadyResponded;
+   if (!canRespond && !canCancel) return;
 
    // Rehydrate the initiator’s procedure (not the defense one!)
    const procJSON = contest?.procedure?.json;
@@ -71,6 +74,25 @@ export async function addOpposedResponseButton(message, html /*, data */) {
       return;
    }
 
+   if (canCancel && !alreadyResponded) {
+      const cancel = document.createElement("button");
+      cancel.classList.add("sr3e-response-button", "cancel");
+      cancel.dataset.responder = "cancel";
+      cancel.innerText = game.i18n.localize?.("sr3e.button.cancel") || "Cancel";
+      cancel.onclick = async () => {
+         try {
+            cancel.disabled = true;
+            await CONFIG.queries["sr3e.cancelOpposedContest"]?.({ contestId, reason: "user-cancel" });
+            const authorUser = game.messages.get(message.id)?.author;
+            if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId: message.id });
+         } catch (e) {
+            ui.notifications?.error?.(e?.message || "Cancel failed");
+         }
+      };
+      uiHost.appendChild(cancel);
+   }
+
+   if (!canRespond) return;
    uiHost.innerHTML = responderHTML;
 
    // NEW: accept ANY [data-responder] button (yes/no/standard/full/etc.)
@@ -128,14 +150,13 @@ export async function addOpposedResponseButton(message, html /*, data */) {
             if (!sheet.rendered) await sheet.render(true);
             sheet.displayRollComposer(defenseProc);
 
-            // Wait until the defense procedure calls deliverResponse
             const rollData = await OpposeRollService.waitForResponse(contestId);
-
-            // Resolve on the initiator's client (relayed if necessary)
-            await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({
-               contestId,
-               rollData,
-            });
+            if (!rollData || rollData.__aborted) {
+               const authorUser = game.messages.get(message.id)?.author;
+               if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId: message.id });
+               return;
+            }
+            await CONFIG.queries["sr3e.resolveOpposedRollRemote"]({ contestId, rollData });
 
             // Mark the chat message as responded so it won't re-offer buttons
             const messageId = message.id;
