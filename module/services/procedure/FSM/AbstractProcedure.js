@@ -582,6 +582,15 @@ export default class AbstractProcedure {
       // Karma
       if (karmaDice > 0 && o.karmaDice == null) o.karmaDice = karmaDice;
 
+      // Defaulting
+      if (this.#isDefaulting) {
+         const lk = get(this.#linkedAttributeStore);
+         if (lk) {
+            o.attributeKey = lk; // helps the defender/attacker summary block label correctly
+            o.defaulting = true;
+         }
+      }
+
       // Pools (normalize into a single array so renderers don't guess)
       if (!Array.isArray(o.pools)) o.pools = [];
 
@@ -754,6 +763,16 @@ export default class AbstractProcedure {
       if (!this.#assertDefaultAllowed()) return;
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
+
+      let attrKey = get(this.#linkedAttributeStore);
+      if (!attrKey) {
+         attrKey = this.#item?.system?.governingAttribute ?? this.#item?.system?.defaultAttributeKey ?? "strength";
+         this.#linkedAttributeStore.set(attrKey);
+      }
+      const a = this.#caller?.system?.attributes?.[attrKey];
+      const attrVal = Number(a?.total ?? a?.value ?? 0) || 0;
+      this.#diceStore.set(Math.max(0, attrVal));
+
       const mod = {
          id: "auto-default-attr",
          name: "Skill to attribute",

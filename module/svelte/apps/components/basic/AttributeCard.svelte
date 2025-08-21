@@ -6,6 +6,8 @@
    import { mount, unmount } from "svelte";
    import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
    import SR3ERoll from "@documents/SR3ERoll.js";
+   import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+   import UncontestedAttributeProcedure from "@services/procedure/FSM/UncontestedAttributeProcedure.js";
 
    let { actor, localization, key } = $props();
 
@@ -99,26 +101,27 @@
 
    async function Roll(e) {
       const dice = $valueROStore?.sum ?? 0;
+      const basis = { type: "attribute", key, dice };
 
-      if (e.shiftKey) {
-         actor.sheet.displayRollComposer({
-            key,
-            value: $valueROStore.value,
-            type: "attribute",
-            dice,
+      const id = ProcedureLock.assertEnter({
+         ownerKey: `uncontested-attribute:${actor.id}`,
+         priority: "simple",
+         onDenied: () => Hooks.callAll("sr3e:procedure-basis-override", { actorId: actor.id, basis }),
+      });
+      if (!id) {
+         e.preventDefault();
+         return;
+      }
+
+      try {
+         const proc = new UncontestedAttributeProcedure(actor, null, {
+            attributeKey: key,
+            title: localize(localization[key]),
          });
-      } else {
-         const roll = SR3ERoll.create(
-            SR3ERoll.buildFormula(dice, { explodes: true }),
-            { actor },
-            {
-               attributeName: key,
-               type: "attribute",
-               opposed: false,
-            }
-         );
-
-         await roll.evaluate();
+         if (e.shiftKey) actor.sheet.displayRollComposer(proc);
+         else await proc.execute();
+      } finally {
+         ProcedureLock.release(id);
       }
 
       e.preventDefault();

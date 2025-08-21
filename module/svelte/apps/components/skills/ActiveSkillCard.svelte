@@ -6,6 +6,8 @@
    import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
    import { mount, unmount } from "svelte";
    import { onDestroy } from "svelte";
+   import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+   import UncontestedSkillProcedure from "@services/procedure/FSM/UncontestedSkillProcedure.js";
 
    let { skill = {}, actor = {}, config = {} } = $props();
 
@@ -24,26 +26,28 @@
    }
 
    async function Roll(e, skillId, specializationName = null) {
-      const dice = specializationName
-         ? $specializationsStore.find((s) => s.name === specializationName)?.value
-         : $valueStore;
+      const arr = $specializationsStore;
+      const specIndex = specializationName ? arr.findIndex((s) => s.name === specializationName) : null;
+      const dice = specializationName ? (arr?.[specIndex]?.value ?? 0) : $valueStore;
 
-      if (e.shiftKey) {
-         actor.sheet.displayRollComposer({
-            type: "skill",
-            key: skill.name,
-            dice,
-            value: dice,
-            skillId,
-            specialization: specializationName,
-            name: skill.name,
-         });
-      } else {
-         if (specializationName) {
-            await actor.SpecializationRoll(dice, specializationName, skill.name);
-         } else {
-            await actor.SkillRoll(dice, skill.name);
-         }
+      const basis = { type: "skill", id: skillId, dice, specIndex };
+
+      const id = ProcedureLock.assertEnter({
+         ownerKey: `uncontested-skill:${actor.id}`,
+         priority: "simple",
+         onDenied: () => Hooks.callAll("sr3e:procedure-basis-override", { actorId: actor.id, basis }),
+      });
+      if (!id) {
+         e.preventDefault();
+         return;
+      }
+
+      try {
+         const proc = new UncontestedSkillProcedure(actor, null, { skillId, specIndex, title: skill.name });
+         if (e.shiftKey) actor.sheet.displayRollComposer(proc);
+         else await proc.execute();
+      } finally {
+         ProcedureLock.release(id);
       }
 
       e.preventDefault();
@@ -51,6 +55,7 @@
 
    onDestroy(() => {
       StoreManager.Unsubscribe(skill);
+      StoreManager.Unsubscribe(actor);
    });
    function handleEscape(e) {
       if (e.key === "Escape" && activeModal) {
@@ -66,7 +71,7 @@
 
 <svelte:window on:keydown|capture={handleEscape} />
 
-<div class="skill-card-container" data-item-id="{skill.id}">
+<div class="skill-card-container" data-item-id={skill.id}>
    {#if $isShoppingState}
       <i
          class={`header-control icon fa-solid fa-pen-to-square pulsing-green-cart`}
