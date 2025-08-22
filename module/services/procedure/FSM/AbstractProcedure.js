@@ -2,6 +2,7 @@ import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
 import { writable, derived, get, readable } from "svelte/store";
 import { localize } from "@services/utilities.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
 function C() {
    return CONFIG?.sr3e || {};
@@ -130,6 +131,7 @@ export default class AbstractProcedure {
    #caller;
    #item;
    #isDefaulting = false;
+   #lockKey = null;
 
    #subSkill = null;
    #specialization = null;
@@ -165,7 +167,7 @@ export default class AbstractProcedure {
       return () => Hooks.off("targetToken", update);
    });
 
-   constructor(caller = null, item = null) {
+   constructor(caller = null, item = null, { lockPriority = "normal" } = {}) {
       if (this.constructor === AbstractProcedure) {
          DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
          ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
@@ -199,6 +201,10 @@ export default class AbstractProcedure {
             return "";
          });
       }
+
+      const ownerKey = `${this.constructor.name}:${caller?.id}`;
+      const id = ProcedureLock.assertEnter({ ownerKey, priority: lockPriority });
+      if (id) this.#lockKey = ownerKey;
 
       if (caller && item) {
          this.#caller = caller;
@@ -556,6 +562,10 @@ export default class AbstractProcedure {
          } catch {}
       }
       this.#disposers = [];
+      if (this.#lockKey) {
+         ProcedureLock.release(this.#lockKey);
+         this.#lockKey = null;
+      }
    }
 
    async execute(/* opts */) {

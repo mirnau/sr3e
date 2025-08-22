@@ -1,6 +1,5 @@
 // UncontestedSkillProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
 export default class UncontestedSkillProcedure extends AbstractProcedure {
@@ -13,7 +12,7 @@ export default class UncontestedSkillProcedure extends AbstractProcedure {
   #poolKey = null;
 
   constructor(caller, _item, { skillId, specIndex = null, title = null } = {}) {
-    super(caller, /* item */ null);
+    super(caller, /* item */ null, { lockPriority: "simple" });
     const skill = caller?.items?.get?.(skillId) || null;
     this.#skillId = skill?.id ?? null;
 
@@ -48,34 +47,23 @@ export default class UncontestedSkillProcedure extends AbstractProcedure {
   getChatDescription() { return `<div>${this.title}${this.#specName ? ` (${this.#specName})` : ""}</div>`; }
 
   async execute({ OnClose, CommitEffects } = {}) {
-    const ok = ProcedureLock.assertEnter({
-      ownerKey: `${UncontestedSkillProcedure.KIND}:${this.caller?.id}`,
-      priority: "simple",
-      onDenied: () => ui.notifications.warn(game.i18n.localize?.("sr3e.warn.procedureBusy") ?? "Another procedure is in progress.")
-    });
-    if (!ok) return null;
+    OnClose?.();
 
-    try {
-      OnClose?.();
+    const actor = this.caller;
+    const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
+    await this.onChallengeWillRoll?.({ baseRoll, actor });
 
-      const actor = this.caller;
-      const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
-      await this.onChallengeWillRoll?.({ baseRoll, actor });
+    baseRoll.options = baseRoll.options || {};
+    baseRoll.options.type = "skill";
+    baseRoll.options.skill = { id: this.#skillId, name: this.#skillName };
+    if (this.#specName) baseRoll.options.specialization = this.#specName;
+    if (this.#poolKey) baseRoll.options.pools = [{ key: this.#poolKey, name: this.#poolKey, dice: this.poolDice }];
 
-      baseRoll.options = baseRoll.options || {};
-      baseRoll.options.type = "skill";
-      baseRoll.options.skill = { id: this.#skillId, name: this.#skillName };
-      if (this.#specName) baseRoll.options.specialization = this.#specName;
-      if (this.#poolKey) baseRoll.options.pools = [{ key: this.#poolKey, name: this.#poolKey, dice: this.poolDice }];
-
-      const roll = await baseRoll.evaluate(this);
-      await baseRoll.waitForResolution();
-      await CommitEffects?.();
-      await this.onChallengeResolved?.({ roll, actor });
-      return roll;
-    } finally {
-      ProcedureLock.release(`${UncontestedSkillProcedure.KIND}:${this.caller?.id}`);
-    }
+    const roll = await baseRoll.evaluate(this);
+    await baseRoll.waitForResolution();
+    await CommitEffects?.();
+    await this.onChallengeResolved?.({ roll, actor });
+    return roll;
   }
 
   toJSONExtra() { return { skillId: this.#skillId, specName: this.#specName, poolKey: this.#poolKey }; }
