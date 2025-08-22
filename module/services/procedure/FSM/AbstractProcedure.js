@@ -54,17 +54,31 @@ export default class AbstractProcedure {
       const actorId = caller?.id;
       if (!actorId || typeof ProcedureCtor !== "function") return null;
 
-      const active = AbstractProcedure.#activeByActor.get(actorId);
+      const active = AbstractProcedure.getActiveForActor(actorId);
       if (active) {
-         if (intent?.skillId) {
-            active.rebaseToSkill(intent.skillId, intent.specIndex ?? null);
-         }
+         // Lock is taken -> ask the active instance to rebase instead.
+         AbstractProcedure.emitRebase({
+            actorId,
+            fromKind: ProcedureCtor.kind || ProcedureCtor.name,
+            fromItem: item,
+            intent,
+         });
          return active;
       }
 
       const args = intent?.args || {};
-      const proc = new ProcedureCtor(caller, item, args);
-      return proc;
+      return new ProcedureCtor(caller, item, args);
+   }
+
+   static emitRebase({ actorId, fromKind, fromItem, intent = {} }) {
+      Hooks.callAll("sr3e.rebase", {
+         actorId,
+         fromKind,
+         fromItem: fromItem
+            ? { id: fromItem.id ?? null, uuid: fromItem.uuid ?? null, name: fromItem.name ?? "" }
+            : null,
+         intent,
+      });
    }
 
    /**
@@ -297,6 +311,13 @@ export default class AbstractProcedure {
 
       if (this.#lockKey) {
          AbstractProcedure.#activeByActor.set(this.#caller?.id, this);
+
+         const onRebase = (msg) => {
+            if (!msg || msg.actorId !== this.#caller?.id) return;
+            this.onRebaseSignal(msg);
+         };
+         Hooks.on("sr3e.rebase", onRebase);
+         this.#disposers.push(() => Hooks.off("sr3e.rebase", onRebase));
       }
    }
 
@@ -539,6 +560,21 @@ export default class AbstractProcedure {
       if (name) this.#titleStore.set(name);
 
       return true;
+   }
+
+   onRebaseSignal({ intent = {}, fromKind = "", fromItem = null }) {
+      const skillId = intent?.skillId ?? null;
+      const specIndex = Number.isFinite(Number(intent?.specIndex))
+         ? Number(intent.specIndex)
+         : null;
+
+      if (skillId) {
+         this.rebaseToSkill(skillId, specIndex);
+         return;
+      }
+
+      // Future: handle attribute defaulting or other rebasing cues from `intent`
+      // e.g. { attributeKey: "strength" } -> set linkedAttribute + defaulting helpers
    }
 
    // ---------- mods ----------
