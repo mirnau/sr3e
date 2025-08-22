@@ -1,7 +1,6 @@
 // UncontestedAttributeProcedure.js
 import { get } from "svelte/store";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
 export default class UncontestedAttributeProcedure extends AbstractProcedure {
@@ -9,10 +8,9 @@ export default class UncontestedAttributeProcedure extends AbstractProcedure {
   static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
 
   #attrKey = "strength";
-  #lockId = null;
 
   constructor(caller, _item, { attributeKey = "strength", title = null } = {}) {
-    super(caller, /*item*/ null);
+    super(caller, /*item*/ null, { lockPriority: "simple" });
     this.#attrKey = String(attributeKey || "strength").toLowerCase();
 
     // set title + base dice from attribute
@@ -33,34 +31,22 @@ export default class UncontestedAttributeProcedure extends AbstractProcedure {
   getChatDescription() { return `<div>${this.title} test</div>`; }
 
   async execute({ OnClose, CommitEffects } = {}) {
-    // simple priority; refuse if an advanced proc is active
-    const ok = ProcedureLock.assertEnter({
-      ownerKey: `${UncontestedAttributeProcedure.KIND}:${this.caller?.id}`,
-      priority: "simple",
-      onDenied: () => ui.notifications.warn(game.i18n.localize?.("sr3e.warn.procedureBusy") ?? "Another procedure is in progress.")
-    });
-    if (!ok) return null;
+    OnClose?.();
 
-    try {
-      OnClose?.();
+    const actor = this.caller;
+    const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
+    await this.onChallengeWillRoll?.({ baseRoll, actor });
 
-      const actor = this.caller;
-      const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
-      await this.onChallengeWillRoll?.({ baseRoll, actor });
+    // annotate what we’re rolling
+    baseRoll.options = baseRoll.options || {};
+    baseRoll.options.attributeKey = this.#attrKey;
+    baseRoll.options.type = "attribute";
 
-      // annotate what we’re rolling
-      baseRoll.options = baseRoll.options || {};
-      baseRoll.options.attributeKey = this.#attrKey;
-      baseRoll.options.type = "attribute";
-
-      const roll = await baseRoll.evaluate(this);
-      await baseRoll.waitForResolution();
-      await CommitEffects?.();
-      await this.onChallengeResolved?.({ roll, actor });
-      return roll;
-    } finally {
-      ProcedureLock.release(`${UncontestedAttributeProcedure.KIND}:${this.caller?.id}`);
-    }
+    const roll = await baseRoll.evaluate(this);
+    await baseRoll.waitForResolution();
+    await CommitEffects?.();
+    await this.onChallengeResolved?.({ roll, actor });
+    return roll;
   }
 
   toJSONExtra() { return { attributeKey: this.#attrKey }; }

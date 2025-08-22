@@ -3,26 +3,15 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import FirearmService from "@families/FirearmService.js";
 import { writable, get } from "svelte/store";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
 export default class FirearmProcedure extends AbstractProcedure {
    #attackCtx = null;
    #selectedPoolKey = null;
 
    constructor(caller, item) {
-      super(caller, item);
+      super(caller, item, { lockPriority: "advanced" });
       this.weaponModeStore = writable(item?.system?.mode ?? "semiauto");
       this.ammoAvailableStore = writable(this.#ammo());
-      ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${caller?.id}`,
-         priority: "advanced",
-         onDenied: () => {},
-      });
-   }
-
-   onDestroy() {
-      super.onDestroy?.();
-      ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
    }
 
    get tnModifiers() {

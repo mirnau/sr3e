@@ -1,13 +1,12 @@
 // module/services/procedure/FSM/MeleeDefenseProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
 function cap(s) { return typeof s === "string" && s ? s[0].toUpperCase() + s.slice(1) : s; }
 
 export default class MeleeDefenseProcedure extends AbstractProcedure {
   constructor(defender, _item = null, args = {}) {
-    super(defender, _item);
+    super(defender, _item, { lockPriority: "advanced" });
     this.args = args || {};
     this.mode = (this.args.mode === "full") ? "full" : "standard";   // "standard" | "full"
 
@@ -24,11 +23,6 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
       this.title = game?.i18n?.localize?.("sr3e.label.standardDefense") ?? "Standard Defense";
     }
 
-    ProcedureLock.assertEnter({
-      ownerKey: `${this.constructor.name}:${this.caller?.id}`,
-      priority: "advanced",
-      onDenied: () => {},
-    });
   }
 
   // Composer labels
@@ -91,8 +85,4 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     return roll;
   }
 
-  onDestroy() {
-    super.onDestroy?.();
-    ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
-  }
 }

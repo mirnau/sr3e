@@ -10,7 +10,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    #defender;
 
    constructor(defender, _item = null, { prep } = {}) {
-      super(defender, _item); // base class won’t set #caller because item is null
+      super(defender, _item, { lockPriority: "advanced" }); // base class won’t set #caller because item is null
       this.#defender = defender; // keep our own pointer to the actor
       this.#prep = prep;
 

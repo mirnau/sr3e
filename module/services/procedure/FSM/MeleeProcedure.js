@@ -4,7 +4,6 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import MeleeService from "@families/MeleeService.js";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
 
 /**
@@ -17,17 +16,7 @@ export default class MeleeProcedure extends AbstractProcedure {
    #packet = null; // DamagePacket (snapshot)
 
    constructor(caller, item) {
-      super(caller, item);
-      ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${caller?.id}`,
-         priority: "advanced",
-         onDenied: () => {},
-      });
-   }
-
-   onDestroy() {
-      super.onDestroy?.();
-      ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
+      super(caller, item, { lockPriority: "advanced" });
    }
 
    // Minimal flavor used by SR3ERoll when needed
