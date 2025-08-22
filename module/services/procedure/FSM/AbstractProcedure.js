@@ -466,12 +466,6 @@ export default class AbstractProcedure {
       return Number.isFinite(tn) && tn > 1;
    }
 
-   // Whether the main action is enabled (TN must be >= 2)
-   isPrimaryActionEnabled() {
-      const tn = Number(this.finalTN({ floor: 2 }));
-      return Number.isFinite(tn) && tn > 1;
-   }
-
    setContestIds(ids = []) {
       this.#contestIds = Array.from(ids).filter(Boolean);
    }
