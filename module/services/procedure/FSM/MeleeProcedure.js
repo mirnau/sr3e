@@ -5,6 +5,7 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import MeleeService from "@families/MeleeService.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
 
 /**
  * Attacker procedure for melee.
@@ -135,44 +136,97 @@ export default class MeleeProcedure extends AbstractProcedure {
     * If your harness doesn’t yet, you can also embed a tiny switch there to rewrite `next.kind`.
     */
    buildDefenseProcedure(exportCtx, { defender, contestId, responderKey = "standard", defenseHint = null }) {
-      const key = responderKey === "full" ? "melee-full" : "melee-standard";
+      // Unified defender procedure + mode flag
+      const key = "melee-defense"; // <-- single class
+      const mode = responderKey === "full" ? "full" : "standard";
       const Ctor = AbstractProcedure.getCtor(key);
       if (!Ctor) throw new Error(`No registered defense procedure for key="${key}"`);
+
       const baseArgs = exportCtx?.next?.args || {};
-      const s =
-         Number(defender?.system?.attributes?.strength?.total ?? defender?.system?.attributes?.strength?.value ?? 0) ||
-         0;
-      const basis =
-         defenseHint && defenseHint.type && defenseHint.key
-            ? { type: String(defenseHint.type), key: String(defenseHint.key) }
-            : { type: "attribute", key: "strength", name: "Strength", isDefaulting: true, dice: s };
-      return new Ctor(defender, null, { ...baseArgs, contestId, basis });
-   }
 
-   // ---------- contested result rendering (strict) ----------
-   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
-      const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
+      // --- 1) Try to honor an explicit hint (attribute or skill), and hydrate its dice via StoreManager
+      let basis = null;
 
-      const top = `
-      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
-      <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
-    `;
+      if (defenseHint && defenseHint.type) {
+         if (defenseHint.type === "attribute") {
+            const attrKey = String(defenseHint.key || "strength");
+            const sm = StoreManager.Subscribe(defender);
+            try {
+               const st = sm.GetSumROStore(`attributes.${attrKey}`);
+               const snap = get(st) || {};
+               const dice = Math.max(0, Number(snap.sum) || 0);
+               basis = {
+                  type: "attribute",
+                  key: attrKey,
+                  name: attrKey.charAt(0).toUpperCase() + attrKey.slice(1),
+                  isDefaulting: defenseHint.isDefaulting ?? true,
+                  dice,
+               };
+            } finally {
+               StoreManager.Unsubscribe(defender);
+            }
+         } else if (defenseHint.type === "skill") {
+            const skillId = defenseHint.id || defenseHint.skillId;
+            const skill = defender?.items?.get?.(skillId);
+            if (skill) {
+               const smSkill = StoreManager.Subscribe(skill);
+               try {
+                  const valueStore = smSkill.GetRWStore("activeSkill.value");
+                  const specsStore = smSkill.GetRWStore("activeSkill.specializations");
 
-      const iSummary = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tSummary = SR3ERoll.renderVanilla(target, targetRoll);
-      const winner = netSuccesses > 0 ? initiator : target;
+                  let dice = Number(get(valueStore)) || 0;
+                  if (Number.isFinite(Number(defenseHint.specIndex))) {
+                     const specs = get(specsStore) || [];
+                     dice = Number(specs[Number(defenseHint.specIndex)]?.value) || dice;
+                  } else if (defenseHint.specialization) {
+                     const specs = get(specsStore) || [];
+                     const found = specs.find(
+                        (s) => s?.name === defenseHint.specialization || s?.label === defenseHint.specialization
+                     );
+                     dice = Number(found?.value) || dice;
+                  }
 
-      const html = `
-      ${top}
-      <h4>${initiator.name}</h4>
-      ${iSummary}
-      <h4>${target.name}</h4>
-      ${tSummary}
-      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-    `;
+                  basis = {
+                     type: "skill",
+                     id: skill.id,
+                     name: skill.name,
+                     dice: Math.max(0, Math.floor(dice)),
+                     specialization: defenseHint.specialization ?? null,
+                     specIndex: Number.isFinite(Number(defenseHint.specIndex)) ? Number(defenseHint.specIndex) : null,
+                  };
+               } finally {
+                  StoreManager.Unsubscribe(skill);
+               }
+            }
+         }
+      }
 
-      const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
-      return { html, resistancePrep };
+      // --- 2) Fallback: Strength via StoreManager (matches your UI value)
+      if (!basis || !Number.isFinite(Number(basis.dice))) {
+         const sm = StoreManager.Subscribe(defender);
+         try {
+            const st = sm.GetSumROStore("attributes.strength");
+            const snap = get(st) || {};
+            const dice = Math.max(0, Number(snap.sum) || 0);
+            basis = {
+               type: "attribute",
+               key: "strength",
+               name: "Strength",
+               isDefaulting: true,
+               dice,
+            };
+         } finally {
+            StoreManager.Unsubscribe(defender);
+         }
+      }
+
+      // --- 3) Instantiate the unified defender procedure with hydrated basis + mode
+      const proc = new Ctor(defender, null, { ...baseArgs, contestId, basis, mode });
+
+      if (typeof proc.fromContestExport === "function") {
+         proc.fromContestExport(exportCtx, { contestId, initiatorExport: exportCtx });
+      }
+      return proc;
    }
 
    /**
@@ -244,8 +298,3 @@ export default class MeleeProcedure extends AbstractProcedure {
       };
    }
 }
-
-// Register (if your AbstractProcedure exposes a register method; otherwise, do it in your registry file)
-try {
-   AbstractProcedure.register?.("melee", MeleeProcedure);
-} catch {}

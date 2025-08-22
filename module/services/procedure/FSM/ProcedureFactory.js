@@ -1,18 +1,21 @@
+// module/services/procedure/FSM/ProcedureFactory.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
 import DodgeProcedure from "./DodgeProcedure";
 import MeleeProcedure from "./MeleeProcedure";
 import ResistanceProcedure from "./ResistanceProcedure";
 import ExplosiveProcedure from "./ExplosiveProcedure";
-import MeleeStandardDefenseProcedure from "./MeleeStandardDefenseProcedure";
-import MeleeFullDefenseProcedure from "./MeleeFullDefenseProcedure";
+import MeleeDefenseProcedure from "./MeleeDefenseProcedure"; // <-- unified defender proc
+
+import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
+import { get } from "svelte/store";
 
 /**
  * ProcedureFactory
  * @param {Actor} actor              The acting actor (attacker or defender depending on context)
  * @param {Item|null} item           The weapon item for attack flows (null for response flows)
  * @param {AbstractProcedure|null} procedure  The initiator's procedure in response flows (optional)
- * @param {string|null} responseType One of: "dodge", "resist", "melee-standard", "melee-full" (case-insensitive)
+ * @param {string|null} responseType One of: "dodge", "resist", "melee-standard", "melee-full", "melee-defense" (case-insensitive)
  */
 export function ProcedureFactory(actor, item = null, procedure = null, responseType = null) {
    // ---------- ATTACKER FLOW: build from weapon item ----------
@@ -47,35 +50,71 @@ export function ProcedureFactory(actor, item = null, procedure = null, responseT
       return null;
    }
 
-   // ---------- DEFENDER/RESPONSE FLOW ----------
+   // ---------- DEFENDER / RESPONSE FLOW ----------
    if (responseType && (procedure || actor)) {
       const key = String(responseType).toLowerCase();
 
       switch (key) {
          case "dodge":
-            // Preserve your existing signature (you previously did `new DodgeProcedure(procedure)`)
+            // Preserve signature (previously: new DodgeProcedure(procedure))
             return new (AbstractProcedure.getCtor?.("dodge") ?? DodgeProcedure)(procedure);
 
          case "resist":
          case "resistance":
             return new (AbstractProcedure.getCtor?.("resistance") ?? ResistanceProcedure)(procedure);
 
+         // Unified melee defense: "standard" or "full" → single class + mode
          case "melee-standard":
          case "standard":
-            // Defender procedure: expects the defender actor
-            return new (AbstractProcedure.getCtor?.("melee-standard") ?? MeleeStandardDefenseProcedure)(actor, null, {
-               contestId: procedure?.contestId,
-            });
-
          case "melee-full":
          case "full":
-            return new (AbstractProcedure.getCtor?.("melee-full") ?? MeleeFullDefenseProcedure)(actor, null, {
+         case "melee-defense":
+         case "defense": {
+            if (!actor) {
+               DEBUG &&
+                  LOG.warn(`ProcedureFactory: defender actor missing for responseType="${responseType}"`, {
+                     file: __FILE__,
+                     line: __LINE__,
+                  });
+               return null;
+            }
+
+            const resolvedMode = key === "melee-full" || key === "full" ? "full" : "standard";
+
+            // Hydrate a safe default basis via StoreManager (Strength) so we never roll 0d6
+            let basis = null;
+            try {
+               const sm = StoreManager.Subscribe(actor);
+               const st = sm.GetSumROStore("attributes.strength");
+               const snap = get(st) || {};
+               const dice = Math.max(0, Number(snap.sum) || 0);
+               basis = { type: "attribute", key: "strength", name: "Strength", isDefaulting: true, dice };
+               StoreManager.Unsubscribe(actor);
+            } catch (e) {
+               DEBUG &&
+                  LOG.warn("ProcedureFactory: failed to hydrate Strength basis for defender; defaulting to 0", {
+                     file: __FILE__,
+                     line: __LINE__,
+                     e,
+                  });
+               basis = { type: "attribute", key: "strength", name: "Strength", isDefaulting: true, dice: 0 };
+            }
+
+            // Instantiate unified defender procedure
+            const MeleeDefCtor = AbstractProcedure.getCtor?.("melee-defense") ?? MeleeDefenseProcedure;
+            return new MeleeDefCtor(actor, null, {
                contestId: procedure?.contestId,
+               basis,
+               mode: resolvedMode,
             });
+         }
 
          default:
             DEBUG &&
-               LOG.warn(`ProcedureFactory: unknown responseType="${responseType}"`, { file: __FILE__, line: __LINE__ });
+               LOG.warn(`ProcedureFactory: unknown responseType="${responseType}"`, {
+                  file: __FILE__,
+                  line: __LINE__,
+               });
             return null;
       }
    }

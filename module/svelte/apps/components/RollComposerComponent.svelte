@@ -413,27 +413,51 @@
          </div>
       {/if}
 
-      <div class="roll-composer-card">
-         <h4>{kindOfRoll}</h4>
-         {#if itemName}<h4>{itemName}</h4>{/if}
-         <button
-            class="regular"
-            type="button"
-            disabled={!primaryEnabled}
-            onclick={async () => {
-               // RollComposerComponent.svelte (inside the submit onclick)
-               const proc = $procedureStore;
-               proc.args = { ...(proc.args || {}), basis: caller };
-               if (Number.isFinite(Number(caller?.dice))) proc.dice = Math.max(0, Number(caller.dice));
-               proc.karmaDice = Math.max(0, Number(diceBought) || 0);
-               if (proc.constructor.name === "MeleeFullDefenseProcedure") proc.poolDice = 0;
-               else proc.poolDice = Math.max(0, Number(currentDicePoolAddition) || 0);
-               await proc.execute({ OnClose, CommitEffects });
-            }}
-         >
-            {primaryLabel}
-         </button>
-      </div>
+      <button
+         class="regular"
+         type="button"
+         disabled={!primaryEnabled}
+         onclick={async () => {
+            const proc = $procedureStore;
+            if (!proc) return;
+
+            // 1) Candidate basis from the composer (may be empty!)
+            const candidate = foundry?.utils?.deepClone ? foundry.utils.deepClone(caller) : { ...caller };
+            const hasValidType = candidate && typeof candidate.type === "string" && candidate.type.trim();
+            const hasDice = Number.isFinite(Number(candidate?.dice)) && Number(candidate.dice) > 0;
+
+            // 2) Only push a basis override if it’s meaningful.
+            //    Otherwise keep the hydrated basis that MeleeProcedure set.
+            if (hasValidType && hasDice) {
+               proc.args = proc.args || {};
+               proc.args.basis = candidate;
+               // Optional UI nicety: reflect the dice in the composer/proc if provided.
+               proc.dice = Math.max(0, Number(candidate.dice));
+            }
+
+            // 3) Karma + Pool
+            proc.karmaDice = Math.max(0, Number(diceBought) || 0);
+            if (proc?.constructor?.name === "MeleeFullDefenseProcedure") {
+               // Full Defense initial test ignores pool
+               proc.poolDice = 0;
+            } else {
+               proc.poolDice = Math.max(0, Number(currentDicePoolAddition) || 0);
+            }
+
+            // 4) Debug & roll via the procedure (keeps logic in the chain, not here)
+            console.debug("DEF submit ->", {
+               kind: proc?.constructor?.name,
+               basis: proc?.args?.basis,
+               dice: proc?.dice,
+               pool: proc?.poolDice,
+               karma: proc?.karmaDice,
+            });
+
+            await proc.execute({ OnClose, CommitEffects });
+         }}
+      >
+         {primaryLabel}
+      </button>
 
       {#if $procedureStore instanceof FirearmProcedure}
          {#if weaponMode === "burst" || weaponMode === "fullauto"}
