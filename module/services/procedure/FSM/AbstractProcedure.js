@@ -16,6 +16,9 @@ export default class AbstractProcedure {
    // Map: kind -> constructor
    static #registry = new Map();
 
+   // Track the currently active procedure per actor
+   static #activeByActor = new Map();
+
    /** Register a subclass so fromJSON() can find it later. */
    static registerSubclass(kind, Ctor) {
       if (!kind || typeof kind !== "string") throw new Error("registerSubclass: kind must be a string");
@@ -37,6 +40,31 @@ export default class AbstractProcedure {
    /** Optional tooling: list all registered kinds (nice for debugging). */
    static listKinds() {
       return Array.from(this.#registry.keys());
+   }
+
+   static getActiveForActor(actorId) {
+      return actorId ? this.#activeByActor.get(actorId) ?? null : null;
+   }
+
+   static isLockedForActor(actorId) {
+      return !!this.getActiveForActor(actorId);
+   }
+
+   static beginOrRebase(ProcedureCtor, caller, item, intent = {}) {
+      const actorId = caller?.id;
+      if (!actorId || typeof ProcedureCtor !== "function") return null;
+
+      const active = AbstractProcedure.#activeByActor.get(actorId);
+      if (active) {
+         if (intent?.skillId) {
+            active.rebaseToSkill(intent.skillId, intent.specIndex ?? null);
+         }
+         return active;
+      }
+
+      const args = intent?.args || {};
+      const proc = new ProcedureCtor(caller, item, args);
+      return proc;
    }
 
    /**
@@ -206,11 +234,11 @@ export default class AbstractProcedure {
       const id = ProcedureLock.assertEnter({ ownerKey, priority: lockPriority });
       if (id) this.#lockKey = ownerKey;
 
-      if (caller && item) {
-         this.#caller = caller;
-         this.#item = item;
+      this.#caller = caller;
+      this.#item = item;
 
-         this.#titleStore.set(item.name);
+      if (this.#caller && this.#item) {
+         this.#titleStore.set(this.#item.name);
 
          const itemStoreManager = StoreManager.Subscribe(this.#item);
          const actorStoreManager = StoreManager.Subscribe(this.#caller);
@@ -240,8 +268,8 @@ export default class AbstractProcedure {
          this.#subSkill = subTypeData;
 
          DEBUG &&
-            !item.system.isDefaulting &&
-            LOG.error(`Item ${item.type}, ${item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
+            !this.#item.system.isDefaulting &&
+            LOG.error(`Item ${this.#item.type}, ${this.#item.name} has no isDefaulting property`, [__FILE__, __LINE__]);
 
          this.#isDefaulting = !!this.#item.system.isDefaulting;
 
@@ -265,6 +293,10 @@ export default class AbstractProcedure {
             if (v > 0) this.upsertMod({ id: "penalty", name: localize(C().health?.penalty), value: -v });
          });
          this.#disposers.push(unsubPenalty);
+      }
+
+      if (this.#lockKey) {
+         AbstractProcedure.#activeByActor.set(this.#caller?.id, this);
       }
    }
 
@@ -454,6 +486,67 @@ export default class AbstractProcedure {
       return actor?.id === this.#caller?.id;
    }
 
+   rebaseToSkill(skillId, specIndex = null) {
+      if (!this.#caller || !skillId) return false;
+
+      const skill = this.#caller.items?.get?.(skillId);
+      if (!skill) return false;
+
+      const smItem = StoreManager.Subscribe(this.#item);
+      try {
+         const linkedSkillIdStore = smItem.GetRWStore("linkedSkillId");
+         const idx = Number.isFinite(Number(specIndex)) ? Number(specIndex) : null;
+         linkedSkillIdStore.set(idx != null ? `${skillId}::${idx}` : String(skillId));
+      } finally {
+         StoreManager.Unsubscribe(this.#item);
+      }
+
+      const subType = skill.system?.skillType;
+      const subTypeData = subType ? skill.system?.[`${subType}Skill`] ?? {} : {};
+      const specializationArray = subTypeData?.specializations ?? [];
+
+      this.#subSkill = subTypeData;
+      this.#associatedPoolKey = subTypeData?.associatedDicePool ?? null;
+      this.#linkedAttributeStore.set(subTypeData.linkedAttribute ?? null);
+
+      const idx = Number.isFinite(Number(specIndex)) ? Number(specIndex) : NaN;
+      this.#specialization = Number.isNaN(idx) ? null : specializationArray[idx] ?? null;
+
+      const baseDice = Number(this.#specialization?.value ?? subTypeData?.value ?? 0) || 0;
+      this.#diceStore.set(baseDice);
+
+      const smActor = StoreManager.Subscribe(this.#caller);
+      try {
+         if (subType === "active") {
+            this.#currentDicePoolStore = smActor.GetSumROStore(`dicePools.${subTypeData.associatedDicePool}`);
+         } else if (subType === "language") {
+            this.#readwrite = subTypeData.readwrite;
+         } else {
+            this.#currentDicePoolStore = writable(0);
+         }
+      } finally {
+         StoreManager.Unsubscribe(this.#caller);
+      }
+
+      this.#isDefaulting = !!this.#item?.system?.isDefaulting;
+      if (this.#isDefaulting) {
+         if (this.#specialization) {
+            this.defaultFromSkillToSpecialization();
+         } else if (this.#subSkill?.value > 0) {
+            this.defaultFromSkillToSkill();
+         } else {
+            this.defaultFromSkillToAttribute();
+         }
+      } else {
+         this.#clearDefaultingMods();
+      }
+
+      const name = this.getItemLabel();
+      if (name) this.#titleStore.set(name);
+
+      return true;
+   }
+
    // ---------- mods ----------
 
    setSelectedPoolKey(name) {
@@ -562,6 +655,9 @@ export default class AbstractProcedure {
          } catch {}
       }
       this.#disposers = [];
+      if (this.#caller?.id) {
+         AbstractProcedure.#activeByActor.delete(this.#caller.id);
+      }
       if (this.#lockKey) {
          ProcedureLock.release(this.#lockKey);
          this.#lockKey = null;
