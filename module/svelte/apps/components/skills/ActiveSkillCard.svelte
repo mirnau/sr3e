@@ -7,7 +7,7 @@
    import { mount, unmount } from "svelte";
    import { onDestroy } from "svelte";
    import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
-   import UncontestedSkillProcedure from "@services/procedure/FSM/UncontestedSkillProcedure.js";
+   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
    let { skill = {}, actor = {}, config = {} } = $props();
 
@@ -28,27 +28,16 @@
    async function Roll(e, skillId, specializationName = null) {
       const arr = $specializationsStore;
       const specIndex = specializationName ? arr.findIndex((s) => s.name === specializationName) : null;
-      const dice = specializationName ? (arr?.[specIndex]?.value ?? 0) : $valueStore;
 
-      const basis = { type: "skill", id: skillId, dice, specIndex };
-
-      const id = ProcedureLock.assertEnter({
-         ownerKey: `uncontested-skill:${actor.id}`,
-         priority: "simple",
-         onDenied: () => Hooks.callAll("sr3e:procedure-basis-override", { actorId: actor.id, basis }),
+      const proc = ProcedureFactory.Create(ProcedureFactory.type.skill, {
+         actor,
+         args: { skillId, specIndex, title: skill.name },
       });
-      if (!id) {
-         e.preventDefault();
-         return;
-      }
+      
+      DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
-      try {
-         const proc = new UncontestedSkillProcedure(actor, null, { skillId, specIndex, title: skill.name });
-         if (e.shiftKey) actor.sheet.displayRollComposer(proc);
-         else await proc.execute();
-      } finally {
-         ProcedureLock.release(id);
-      }
+      if (e.shiftKey && actor?.sheet?.displayRollComposer) actor.sheet.displayRollComposer(proc);
+      else await proc.execute();
 
       e.preventDefault();
    }

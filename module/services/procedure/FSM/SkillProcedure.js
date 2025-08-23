@@ -2,7 +2,7 @@
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
-export default class UncontestedSkillProcedure extends AbstractProcedure {
+export default class SkillProcedure extends AbstractProcedure {
   static KIND = "uncontested-skill";
   static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
 

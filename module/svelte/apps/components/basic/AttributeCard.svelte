@@ -100,28 +100,20 @@
    });
 
    async function Roll(e) {
-      const dice = $valueROStore?.sum ?? 0;
-      const basis = { type: "attribute", key, dice };
-
-      const id = ProcedureLock.assertEnter({
-         ownerKey: `uncontested-attribute:${actor.id}`,
-         priority: "simple",
-         onDenied: () => Hooks.callAll("sr3e:procedure-basis-override", { actorId: actor.id, basis }),
-      });
-      if (!id) {
-         e.preventDefault();
-         return;
-      }
-
-      try {
-         const proc = new UncontestedAttributeProcedure(actor, null, {
+      const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
+         actor,
+         args: {
             attributeKey: key,
             title: localize(localization[key]),
-         });
-         if (e.shiftKey) actor.sheet.displayRollComposer(proc);
-         else await proc.execute();
-      } finally {
-         ProcedureLock.release(id);
+         },
+      });
+
+      DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
+
+      if (e.shiftKey && actor?.sheet?.displayRollComposer) {
+         actor.sheet.displayRollComposer(proc);
+      } else {
+         await proc.execute();
       }
 
       e.preventDefault();

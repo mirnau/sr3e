@@ -3,7 +3,7 @@ import { get } from "svelte/store";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
-export default class UncontestedAttributeProcedure extends AbstractProcedure {
+export default class AttributeProcedure extends AbstractProcedure {
   static KIND = "uncontested-attribute";
   static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
 
