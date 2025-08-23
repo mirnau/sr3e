@@ -24,7 +24,7 @@ export default class AttributeProcedure extends AbstractProcedure {
 
       // TN defaults to 4 (already defaulted in abstract)
       // For generic attribute tests we usually disallow pools unless caller passes one via a mod.
-      this.upsertMod({ id: "simple-attr", name: "Attribute Test", value: 0, forbidPool: true });
+      //this.upsertMod({ id: "simple-attr", name: "Attribute Test", value: 0, forbidPool: true });
    }
 
    shouldSelfPublish() {
