@@ -7,6 +7,7 @@
    import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
    import SR3ERoll from "@documents/SR3ERoll.js";
    import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
    import UncontestedAttributeProcedure from "@services/procedure/FSM/UncontestedAttributeProcedure.js";
 
    let { actor, localization, key } = $props();
@@ -110,9 +111,10 @@
 
       DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
-      if (e.shiftKey && actor?.sheet?.displayRollComposer) {
+      if (e.shiftKey) {
          actor.sheet.displayRollComposer(proc);
       } else {
+         console.log("FLUFFY CAT");
          await proc.execute();
       }
 
