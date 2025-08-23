@@ -148,8 +148,10 @@ export default class SR3ERoll extends Roll {
       const results = raw.filter((r) => r.active !== false);
       const dice = results.length;
 
-      const tn = Number(procedure?.finalTN?.({ floor: 2 }) ?? null);
-      const hasTN = Number.isFinite(tn);
+      const tnRaw = procedure?.finalTN?.({ floor: 2 });
+      const hasTN = tnRaw != null && Number.isFinite(Number(tnRaw));
+      const tn = hasTN ? Number(tnRaw) : null;
+
       const successes = hasTN ? results.filter((r) => !r.discarded && r.result >= tn).length : null;
 
       const ones = results.filter((r) => r.result === 1).length;
@@ -174,43 +176,39 @@ export default class SR3ERoll extends Roll {
          : "";
 
       return `
-  <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
-    <div class="dice-result">
-      <div class="dice-context"><em>${descriptionHtml}${hasTN ? ` vs TN ${tn}` : ""} using ${formula}</em></div>
-      <div class="dice-formula">${formula}</div>
-      <div class="dice-tooltip">
-        <div class="wrapper">
-          <section class="tooltip-part">
-            <div class="dice">
-              <header class="part-header flexrow">
-                <span class="part-formula">${shownFormula}</span>
-                <span class="part-total">${headerRight}</span>
-              </header>
-              <ol class="dice-rolls">
-                ${results
-                   .map((d) => {
-                      const cls = ["roll", "_sr3edie", "d6"];
-                      if (d.result === 6) cls.push("max");
-                      if (d.exploded) cls.push("explode", "exploded");
-                      if (hasTN && d.result >= tn) cls.push("success");
-                      return `<li class="${cls.join(" ")}">${d.result}</li>`;
-                   })
-                   .join("")}
-              </ol>
-            </div>
-          </section>
+    <div class="dice-roll expanded sr3e-vanilla ${critical ? "is-critical" : ""}">
+      <div class="dice-result">
+        <div class="dice-context"><em>${descriptionHtml}${hasTN ? ` vs TN ${tn}` : ""} using ${formula}</em></div>
+        <div class="dice-formula">${formula}</div>
+        <div class="dice-tooltip">
+          <div class="wrapper">
+            <section class="tooltip-part">
+              <div class="dice">
+                <header class="part-header flexrow">
+                  <span class="part-formula">${shownFormula}</span>
+                  <span class="part-total">${headerRight}</span>
+                </header>
+                <ol class="dice-rolls">
+                  ${results
+                     .map((d) => {
+                        const cls = ["roll", "_sr3edie", "d6"];
+                        if (d.result === 6) cls.push("max");
+                        if (d.exploded) cls.push("explode", "exploded");
+                        if (hasTN && d.result >= tn) cls.push("success");
+                        return `<li class="${cls.join(" ")}">${d.result}</li>`;
+                     })
+                     .join("")}
+                </ol>
+              </div>
+            </section>
+          </div>
         </div>
+        ${status}
       </div>
-      ${status}
-    </div>
-  </div>`;
+    </div>`;
    }
 
-   // Legacy helpers (left for any non-procedure callers).
-   static renderVanilla(actor, rollData) {
-      return SR3ERoll.#buildVanillaRoll(actor, rollData);
-   }
-
+   /* Remove ?
    static #buildVanillaRoll(actor, rollData) {
       const term = rollData.terms?.[0];
       const raw = term?.results ?? [];
@@ -262,6 +260,7 @@ export default class SR3ERoll extends Roll {
     </div>
   </div>`;
    }
+  */
 
    static Register() {
       CONFIG.Dice.rolls = [SR3ERoll];
