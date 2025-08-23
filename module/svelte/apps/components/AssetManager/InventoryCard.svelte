@@ -7,7 +7,7 @@
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
    import WearableComponent from "@sveltecomponent/AssetManager/components/WearableComponent.svelte";
-   import { ProcedureFactory } from "@services/procedure/FSM/ProcedureFactory.js";
+   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
    let { item, config } = $props();
 

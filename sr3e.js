@@ -68,8 +68,8 @@ import DodgeProcedure from "@services/procedure/FSM/DodgeProcedure.js";
 import ResistanceProcedure from "@services/procedure/FSM/ResistanceProcedure.js";
 import MeleeProcedure from "@services/procedure/FSM/MeleeProcedure.js";
 import MeleeDefenseProcedure from "@services/procedure/FSM/MeleeDefenseProcedure.js";
-import UncontestedSkillProcedure from "@services/procedure/FSM/UncontestedSkillProcedure.js";
-import UncontestedAttributeProcedure from "@services/procedure/FSM/UncontestedAttributeProcedure.js";
+import SkillProcedure from "@services/procedure/FSM/SkillProcedure.js";
+import AttributeProcedure from "@services/procedure/FSM/AttributeProcedure.js";
 
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
@@ -209,8 +209,8 @@ function registerHooks() {
    AbstractProcedure.registerSubclass("resistance", ResistanceProcedure);
    AbstractProcedure.registerSubclass("melee", MeleeProcedure); // attacker
    AbstractProcedure.registerSubclass("melee-defense", MeleeDefenseProcedure); // defender (full)
-   AbstractProcedure.registerSubclass("uncontested-skill", UncontestedSkillProcedure);
-   AbstractProcedure.registerSubclass("uncontested-attribute", UncontestedAttributeProcedure);
+   AbstractProcedure.registerSubclass("skill", SkillProcedure);
+   AbstractProcedure.registerSubclass("attribute", AttributeProcedure);
 
    Hooks.once(hooks.init, initializeSystem);
 

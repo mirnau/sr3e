@@ -108,7 +108,9 @@ export default class AbstractProcedure {
 
       // Base state
       if (typeof state.title === "string") proc.#titleStore.set(state.title);
-      if (Number.isFinite(Number(state.targetNumber))) proc.#targetNumberStore.set(Number(state.targetNumber));
+      const tn = state.targetNumber;
+      if (tn != null && Number.isFinite(Number(tn))) proc.#targetNumberStore.set(Number(tn));
+
       const mods = Array.isArray(state.modifiers) ? state.modifiers.map((m) => ({ ...m })) : [];
       proc.#modifiersArrayStore.set(mods);
       if (Number.isFinite(Number(state.dice))) proc.#diceStore.set(Math.max(0, Number(state.dice)));
@@ -172,7 +174,7 @@ export default class AbstractProcedure {
          DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
          ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
       } else {
-         this.#targetNumberStore = writable(4);
+         this.#targetNumberStore = writable(null);
          this.#modifiersArrayStore = writable([]);
          this.#titleStore = writable("Roll");
          this.#diceStore = writable(0);
@@ -184,8 +186,9 @@ export default class AbstractProcedure {
             arr.reduce((a, m) => a + (Number(m?.value) || 0), 0)
          );
          this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
-            Math.max(2, Number(base ?? 4) + Number(add ?? 0))
+            base == null ? null : Math.max(2, Number(base) + Number(add ?? 0))
          );
+
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
@@ -296,7 +299,10 @@ export default class AbstractProcedure {
          item: { id: this.#item?.id ?? null, uuid: this.#item?.uuid ?? null },
          state: {
             title: get(this.#titleStore),
-            targetNumber: Number(get(this.#targetNumberStore) ?? 4),
+            targetNumber: (() => {
+               const v = get(this.#targetNumberStore);
+               return v == null ? null : Number(v);
+            })(),
             modifiers: (get(this.#modifiersArrayStore) ?? []).map((m) => ({ ...m })),
             dice: Number(get(this.#diceStore) ?? 0),
             poolDice: Number(get(this.#poolDiceStore) ?? 0),
@@ -408,6 +414,10 @@ export default class AbstractProcedure {
       return (game.user?.targets?.size ?? 0) > 0;
    }
 
+   setDefaultTNForComposer(n = 4) {
+      if (get(this.#targetNumberStore) == null) this.#targetNumberStore.set(Number(n));
+   }
+
    shouldSelfPublish() {
       return true;
    }
@@ -430,13 +440,9 @@ export default class AbstractProcedure {
    }
 
    isPrimaryActionEnabled() {
-      const tn = Number(this.finalTN({ floor: 2 }));
-      return Number.isFinite(tn) && tn > 1;
-   }
-
-   // Whether the main action is enabled (TN must be >= 2)
-   isPrimaryActionEnabled() {
-      const tn = Number(this.finalTN({ floor: 2 }));
+      const baseRaw = get(this.#targetNumberStore);
+      if (baseRaw == null) return true;
+      const tn = this.finalTN({ floor: 2 });
       return Number.isFinite(tn) && tn > 1;
    }
 
@@ -494,8 +500,10 @@ export default class AbstractProcedure {
 
    // ---------- math ----------
    finalTN({ floor = null } = {}) {
+      const baseRaw = get(this.#targetNumberStore);
+      if (baseRaw == null) return null;
       const mods = get(this.#modifiersArrayStore) ?? [];
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const base = Number(baseRaw);
       const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
       return floor == null ? sum : Math.max(floor, sum);
    }
@@ -528,7 +536,6 @@ export default class AbstractProcedure {
       const baseDice = Math.max(0, Math.floor(Number(this.dice) || 0));
       const poolDice = Math.max(0, Math.floor(this.#computeClampedPoolDice(this.poolDice)));
       const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
-
       const totalDice = baseDice + poolDice + karmaDice;
       if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
 
@@ -536,10 +543,9 @@ export default class AbstractProcedure {
       if (!explodes) return base;
 
       const tnBase = get(this.#targetNumberStore);
-      const isOpen = this.#isOpenTest() || tnBase == null;
-      if (isOpen) return `${base}x`;
+      if (tnBase == null) return `${base}x`;
 
-      const tn = Math.max(2, Number(this.finalTN()) || 2);
+      const tn = Math.max(2, Number(this.finalTN({ floor: 2 })) || 2);
       return `${base}x${tn}`;
    }
 
@@ -629,17 +635,19 @@ export default class AbstractProcedure {
 
       // TN snapshot for full transparency (base + individual modifiers + final)
       // These reflect what the composer currently shows.
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const baseRaw = get(this.#targetNumberStore);
       const mods = (get(this.#modifiersArrayStore) ?? []).map((m) => ({
          id: m.id ?? null,
          name: m.name ?? "",
          value: Number(m.value) || 0,
       }));
-
-      if (o.tnBase == null) o.tnBase = base;
       if (!Array.isArray(o.tnMods)) o.tnMods = mods.slice();
+      if (o.tnBase == null) o.tnBase = baseRaw == null ? null : Number(baseRaw);
       if (o.targetNumber == null)
-         o.targetNumber = Math.max(2, base + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
+         o.targetNumber =
+            baseRaw == null
+               ? null
+               : Math.max(2, Number(baseRaw) + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
    }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
@@ -743,7 +751,7 @@ export default class AbstractProcedure {
    }
 
    #preDefaultTN() {
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const base = Number(get(this.#targetNumberStore));
       const mods = get(this.#modifiersArrayStore) ?? [];
       const add = mods
          .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
@@ -765,15 +773,16 @@ export default class AbstractProcedure {
       return true;
    }
 
+   /* NOT UP TO DATE TODO: Fix this later
    #isOpenTest() {
       return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
    }
-
+   
    defaultFromSkillToAttribute() {
       if (!this.#assertDefaultAllowed()) return;
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
-
+      
       let attrKey = get(this.#linkedAttributeStore);
       if (!attrKey) {
          attrKey = this.#item?.system?.governingAttribute ?? this.#item?.system?.defaultAttributeKey ?? "strength";
@@ -782,7 +791,7 @@ export default class AbstractProcedure {
       const a = this.#caller?.system?.attributes?.[attrKey];
       const attrVal = Number(a?.total ?? a?.value ?? 0) || 0;
       this.#diceStore.set(Math.max(0, attrVal));
-
+      
       const mod = {
          id: "auto-default-attr",
          name: "Skill to attribute",
@@ -798,8 +807,8 @@ export default class AbstractProcedure {
       if (!this.#assertDefaultAllowed()) return;
       const rating = Number(this.#subSkill?.value ?? 0);
       DEBUG &&
-         (!Number.isFinite(rating) || rating <= 0) &&
-         LOG.error("No base skill to default to", [__FILE__, __LINE__]);
+      (!Number.isFinite(rating) || rating <= 0) &&
+      LOG.error("No base skill to default to", [__FILE__, __LINE__]);
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
       const cap = Math.floor(rating / 2);
@@ -812,13 +821,13 @@ export default class AbstractProcedure {
       };
       this.#upsertMod(mod);
    }
-
+   
    defaultFromSkillToSpecialization() {
       if (!this.#assertDefaultAllowed()) return;
       const baseRating = Number(this.#subSkill?.value ?? 0);
       DEBUG &&
-         (!Number.isFinite(baseRating) || baseRating <= 0) &&
-         LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
+      (!Number.isFinite(baseRating) || baseRating <= 0) &&
+      LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
       const cap = Math.floor(baseRating / 2);
@@ -831,4 +840,5 @@ export default class AbstractProcedure {
       };
       this.#upsertMod(mod);
    }
+   */
 }

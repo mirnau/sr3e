@@ -157,6 +157,7 @@
       addSub($procedureStore.weaponModeStore, (v) => (weaponMode = v));
       addSub($procedureStore.ammoAvailableStore, (v) => (ammoAvailable = v));
 
+      $procedureStore.setDefaultTNForComposer();
       visible = true;
    }
 

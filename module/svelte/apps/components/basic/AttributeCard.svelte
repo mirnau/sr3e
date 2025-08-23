@@ -8,7 +8,6 @@
    import SR3ERoll from "@documents/SR3ERoll.js";
    import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
    import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
-   import UncontestedAttributeProcedure from "@services/procedure/FSM/UncontestedAttributeProcedure.js";
 
    let { actor, localization, key } = $props();
 
@@ -103,23 +102,18 @@
    async function Roll(e) {
       const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
          actor,
-         args: {
-            attributeKey: key,
-            title: localize(localization[key]),
-         },
+         args: { attributeKey: key, title: localize(localization[key]) },
       });
 
       DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
-      if (e.shiftKey) {
+      if (e.shiftKey && actor?.sheet?.displayRollComposer) {
          actor.sheet.displayRollComposer(proc);
       } else {
-         console.log("FLUFFY CAT");
          await proc.execute();
       }
-
-      e.preventDefault();
    }
+   
 </script>
 
 <svelte:window on:keydown|capture={handleEscape} />
