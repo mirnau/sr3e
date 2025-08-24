@@ -91,7 +91,7 @@ export default class AttributeProcedure extends AbstractProcedure {
       };
    }
 
-   async fromContestExport(exportCtx /*, { contestId, initiatorExport, responderKey } */) {
+   async fromContestExport(exportCtx, { contestId } = {}) {
       const k = String(exportCtx?.attributeKey || this.#attrKey || "strength").toLowerCase();
       this.#attrKey = k;
 
@@ -101,6 +101,9 @@ export default class AttributeProcedure extends AbstractProcedure {
       const a = this.caller?.system?.attributes?.[k];
       const rating = Number(a?.total ?? a?.value ?? 0) || 0;
       this.dice = Math.max(0, rating);
+
+      // If we were called with a contestId, ensure the roll is returned to the initiator
+      if (contestId) this.setContestIds([contestId]);
 
       // Defender is always a “response” roll → explicitly opt-in to opposed behavior
       this.setOpposedEnabled(true);
