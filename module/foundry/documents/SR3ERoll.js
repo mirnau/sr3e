@@ -81,7 +81,7 @@ export default class SR3ERoll extends Roll {
 
   async toMessageFromProcedure() {
     const descriptionHtml = String(this._procedure?.getChatDescription?.() ?? "");
-    const content = SR3ERoll.renderNonContested(this.toJSON(), { descriptionHtml });
+    const content = SR3ERoll.renderRollOutcome(this.toJSON(), { descriptionHtml });
     const flavor = String(this._procedure?.getFlavor?.() ?? "");
     return ChatMessage.create({
       content,

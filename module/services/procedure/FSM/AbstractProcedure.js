@@ -662,8 +662,8 @@ export default class AbstractProcedure {
       const initName = initiator?.name ?? "Attacker";
       const tgtName = target?.name ?? "Defender";
 
-      const initHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tgtHtml = SR3ERoll.renderVanilla(target, targetRoll);
+      const initHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tgtHtml = SR3ERoll.renderRollOutcome(targetRoll);
       const winner = netSuccesses > 0 ? initName : tgtName;
 
       return {
