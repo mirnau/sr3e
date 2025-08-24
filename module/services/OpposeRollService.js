@@ -84,14 +84,30 @@ export default class OpposeRollService {
     * - Store full docs locally.
     * - Send a *stub* (ids + exports) to remote clients.
     */
+   // OpposeRollService.js
    static async startProcedure({ procedure, targetActor, targetToken = null, roll }) {
-      const initiator = procedure?.caller;
+      // --- strict preconditions (fallback-free) ---
+      if (!procedure) throw new Error("startProcedure: procedure is required");
+      const initiator = procedure.caller;
+      if (!initiator) throw new Error("startProcedure: procedure.caller (initiator) is required");
+      if (!targetActor) throw new Error("startProcedure: targetActor is required");
+      if (!roll) throw new Error("startProcedure: roll is required");
+
       const contestId = foundry.utils.randomID(16);
 
+      // Snapshot the initiator’s roll and the export context from the procedure
       const initiatorRoll = this.#buildRollSnapshot(roll, procedure);
       const exportCtx = (typeof procedure.exportForContest === "function" ? procedure.exportForContest() : {}) || {};
 
-      // Local full contest (docs ok locally)
+      // Optional hint for defender UI (attribute contests may use this)
+      const defenseHint = (typeof procedure.getDefenseHint === "function" && procedure.getDefenseHint()) || {
+         type: "attribute",
+         key: "reaction",
+         tnMod: 0,
+         tnLabel: "",
+      };
+
+      // Full local contest record
       const contest = {
          id: contestId,
          initiator: {
@@ -107,12 +123,7 @@ export default class OpposeRollService {
             json: typeof procedure.toJSON === "function" ? procedure.toJSON() : null,
             export: exportCtx,
          },
-         defenseHint: (typeof procedure.getDefenseHint === "function" && procedure.getDefenseHint()) || {
-            type: "attribute",
-            key: "reaction",
-            tnMod: 0,
-            tnLabel: "",
-         },
+         defenseHint,
          phase: "awaiting-response",
          tokenRef: {
             tokenId: targetToken?.id ?? targetToken?.document?.id ?? null,
@@ -122,7 +133,7 @@ export default class OpposeRollService {
 
       activeContests.set(contestId, contest);
 
-      // Prepare and send *stub* to other clients
+      // Build the lightweight stub for remote clients (ids only)
       const initiatorUser = this.resolveControllingUser(initiator);
       const targetUser = this.resolveControllingUser(targetActor);
 
@@ -133,8 +144,8 @@ export default class OpposeRollService {
             userId: game.user.id,
          },
          target: {
-            actorId: targetActor?.id,
-            name: targetActor?.name,
+            actorId: targetActor.id,
+            name: targetActor.name,
             tokenId: contest.tokenRef.tokenId,
             sceneId: contest.tokenRef.sceneId,
          },
@@ -148,26 +159,18 @@ export default class OpposeRollService {
 
       // Chat prompt (whisper to the two involved)
       const whisperIds = [initiatorUser?.id, targetUser?.id].filter(Boolean);
-      const msg = await ChatMessage.create({
+      await ChatMessage.create({
          speaker: ChatMessage.getSpeaker({ actor: initiator }),
          whisper: whisperIds,
          content: `
-         <p><strong>${initiator?.name}</strong> has initiated an opposed roll against <strong>${targetActor?.name}</strong>.</p>
-         <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
-       `,
-         flags: { "sr3e.opposed": contestId },
+      <p><strong>${initiator.name}</strong> has initiated an opposed roll against
+         <strong>${targetActor.name}</strong>.</p>
+      <div class="sr3e-response-button-container" data-contest-id="${contestId}"></div>
+    `,
+         // IMPORTANT: flags.sr3e.opposed (this is what addOpposedResponseButton reads)
+         flags: { sr3e: { opposed: contestId } },
       });
 
-      return contestId;
-      contest.messageId = msg?.id ?? null;
-
-      const timeoutMs = Number(game.settings?.get?.("sr3e", "contestTimeoutMs")) || 600000;
-      contest.timer = setTimeout(() => {
-         try {
-            OpposeRollService.abortOpposedRoll(contestId, { reason: "timeout" });
-         } catch {}
-      }, timeoutMs);
-      activeContests.set(contestId, contest);
       return contestId;
    }
 

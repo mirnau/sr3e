@@ -43,7 +43,7 @@ export default class SR3ERoll extends Roll {
     }
 
     // Initiator: opposed?
-    if (procedure.hasTargets) {
+    if (procedure.isOpposed) {
       const tokens = procedure.targetTokens;
       const unique = [];
       const seen = new Set();

@@ -59,12 +59,12 @@ export default class AbstractProcedure {
     * opts.resolveActor?: async ({uuid,id}) => Actor
     * opts.resolveItem?: async ({uuid,id}, actor) => Item
     */
+   // AbstractProcedure.js
    static async fromJSON(obj, opts = {}) {
       if (!obj || typeof obj !== "object") throw new Error("fromJSON: invalid payload");
       const { schema = 1, kind, actor, item, state = {}, extra = null } = obj;
 
       if (schema !== AbstractProcedure.#SCHEMA_VERSION) {
-         // optional: migrate or just warn
          DEBUG &&
             LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${AbstractProcedure.#SCHEMA_VERSION}`, [
                __FILE__,
@@ -72,7 +72,6 @@ export default class AbstractProcedure {
             ]);
       }
 
-      // Default resolvers (allow override via opts)
       const resolveActor =
          opts.resolveActor ||
          (async (ref) => {
@@ -84,6 +83,7 @@ export default class AbstractProcedure {
             }
             return game.actors?.get(ref.id) ?? null;
          });
+
       const resolveItem =
          opts.resolveItem ||
          (async (ref, resolvedActor) => {
@@ -96,17 +96,21 @@ export default class AbstractProcedure {
             return resolvedActor?.items?.get(ref.id) || game.items?.get(ref.id) || null;
          });
 
-      const callerDoc = await resolveActor(actor);
-      const itemDoc = await resolveItem(item, callerDoc);
-      if (!callerDoc || !itemDoc) throw new Error("fromJSON: could not resolve caller and/or item");
-
-      // Find the concrete class
+      // Find subclass first; some may not require an item
       const Ctor = AbstractProcedure.getCtor(kind);
       if (!Ctor) throw new Error(`fromJSON: no registered subclass for kind="${kind}"`);
 
+      const callerDoc = await resolveActor(actor);
+      if (!callerDoc) throw new Error("fromJSON: could not resolve caller");
+
+      // Only require item if one was actually sent
+      const itemRequested = !!(item && (item.id || item.uuid));
+      const itemDoc = itemRequested ? await resolveItem(item, callerDoc) : null;
+      if (itemRequested && !itemDoc) throw new Error("fromJSON: could not resolve item");
+
       const proc = new Ctor(callerDoc, itemDoc);
 
-      // Base state
+      // Restore base state
       if (typeof state.title === "string") proc.#titleStore.set(state.title);
       const tn = state.targetNumber;
       if (tn != null && Number.isFinite(Number(tn))) proc.#targetNumberStore.set(Number(tn));
@@ -121,7 +125,6 @@ export default class AbstractProcedure {
          proc.#linkedAttributeStore.set(state.linkedAttribute ?? null);
       proc.#contestIds = Array.isArray(state.contestIds) ? state.contestIds.filter(Boolean) : [];
 
-      // Subclass extras
       if (typeof proc.fromJSONExtra === "function") {
          await proc.fromJSONExtra(extra ?? null, { opts, payload: obj });
       }
@@ -169,6 +172,8 @@ export default class AbstractProcedure {
       return () => Hooks.off("targetToken", update);
    });
 
+   // AbstractProcedure.js
+   // AbstractProcedure.js
    constructor(caller = null, item = null, { lockPriority = "normal" } = {}) {
       if (this.constructor === AbstractProcedure) {
          DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
@@ -188,7 +193,6 @@ export default class AbstractProcedure {
          this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
             base == null ? null : Math.max(2, Number(base) + Number(add ?? 0))
          );
-
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
@@ -209,10 +213,15 @@ export default class AbstractProcedure {
       const id = ProcedureLock.assertEnter({ ownerKey, priority: lockPriority });
       if (id) this.#lockKey = ownerKey;
 
-      if (caller && item) {
-         this.#caller = caller;
-         this.#item = item;
+      // ✅ Always set caller when provided (even if there is no item)
+      if (caller) this.#caller = caller;
 
+      // If an item is supplied, a caller is required
+      if (item && !caller) throw new Error("AbstractProcedure: item provided without caller");
+
+      // Item-specific initialization (only when we actually have an item)
+      if (item) {
+         this.#item = item;
          this.#titleStore.set(item.name);
 
          const itemStoreManager = StoreManager.Subscribe(this.#item);
@@ -260,7 +269,10 @@ export default class AbstractProcedure {
 
          StoreManager.Unsubscribe(this.#caller);
          StoreManager.Unsubscribe(this.#item);
+      }
 
+      // ✅ Penalty hook belongs to the actor, not to the item — do it whenever we have a caller
+      if (this.#caller) {
          const penaltyStore = StoreManager.Subscribe(this.#caller).GetRWStore("health.penalty");
          const unsubPenalty = penaltyStore.subscribe((p) => {
             const v = Number(p ?? 0);
