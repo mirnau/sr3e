@@ -240,6 +240,87 @@ export default class MeleeProcedure extends AbstractProcedure {
       return prep;
    }
 
+   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+      const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
+      const top = `
+    <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+    <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
+  `;
+      const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
+      const tSummary = this.#summarizeRollGeneric(target, targetRoll);
+      const iHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tHtml = SR3ERoll.renderRollOutcome(targetRoll);
+      const winner = netSuccesses > 0 ? initiator : target;
+      const html = `
+    ${top}
+    <h4>${initiator.name}</h4>${iSummary}${iHtml}
+    <h4>${target.name}</h4>${tSummary}${tHtml}
+    <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+  `;
+      const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
+      return { html, resistancePrep };
+   }
+
+   #summarizeRollGeneric(actor, rollJson) {
+      const o = rollJson?.options || {};
+      const readName = (v) => {
+         if (v == null) return null;
+         if (typeof v === "string") return v;
+         if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
+         return null;
+      };
+      let skillName = readName(o.skillKey ?? o.skill);
+      let specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      let attrName = readName(o.attributeKey ?? o.attribute);
+      let isDefault = !!(o.isDefaulting ?? o.defaulting);
+
+      if (!skillName && !attrName && actor?.id === this.caller?.id) {
+         const info = this.#resolveItemSkillAndSpec();
+         if (info) {
+            skillName = info.skillName ?? skillName;
+            specName = info.specName ?? specName;
+            isDefault = info.isDefault ?? isDefault;
+         }
+      }
+
+      const bits = [];
+      if (skillName) {
+         bits.push(`Skill: ${this.#cap(skillName)}`);
+         if (specName) bits.push(`Specialization: ${this.#cap(specName)}`);
+         if (isDefault) bits.push("Defaulting");
+      } else if (attrName) {
+         bits.push(`Attribute: ${this.#cap(attrName)}`);
+      }
+      return bits.length ? `<p class="sr3e-roll-summary"><small>${bits.join(", ")}</small></p>` : "";
+   }
+
+   #resolveItemSkillAndSpec() {
+      const sys = this.item?.system ?? {};
+      const linked = String(sys.linkedSkillId ?? "").trim();
+      if (!linked) return null;
+      const [skillId, specIndexRaw] = linked.split("::");
+      if (!skillId) return null;
+      const skill = this.caller?.items?.get?.(skillId);
+      if (!skill) return null;
+      const type = skill.system?.skillType;
+      const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
+      const specs = Array.isArray(sub.specializations) ? sub.specializations : [];
+      const specIndex = Number.parseInt(specIndexRaw, 10);
+      const specObj = Number.isFinite(specIndex) ? specs[specIndex] : null;
+      const skillName = skill.name ?? (type ? String(type) : null);
+      const specName = specObj?.name ?? (typeof specObj === "string" ? specObj : null);
+      const isDefault = !!sys.isDefaulting;
+      return { skillName, specName, isDefault };
+   }
+
+   #cap(s) {
+      if (!s) return "";
+      const t = String(s)
+         .replace(/[_\-]+/g, " ")
+         .trim();
+      return t.charAt(0).toUpperCase() + t.slice(1);
+   }
+
    // ---------- contest export ----------
    exportForContest() {
       const weapon = this.item;
