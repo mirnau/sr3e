@@ -206,13 +206,10 @@ export default class OpposeRollService {
    // -----------------------
    // Resolve opposed result
    // -----------------------
+   // OpposeRollService.js (only this method shown)
    static async resolveTargetRoll(contestId, rollData) {
       const contest = activeContests.get(contestId);
-      if (!contest) return;
-      if (contest.timer) {
-         clearTimeout(contest.timer);
-         contest.timer = null;
-      }
+      if (!contest) throw new Error("sr3e: contest not found");
 
       contest.targetRoll = rollData;
       contest.isResolved = true;
@@ -224,134 +221,43 @@ export default class OpposeRollService {
 
       const exportCtx = contest.procedure?.export || null;
       const procJSON = contest.procedure?.json || null;
+      if (!procJSON) throw new Error("sr3e: missing procedure json");
+
+      // Rehydrate the initiator procedure
+      const initiatorProc = await AbstractProcedure.fromJSON(procJSON);
+
+      // Let subclass do bookkeeping if needed
+      if (initiatorProc.onChallengeResolved && initiator) {
+         await initiatorProc.onChallengeResolved({ roll: initiatorRoll, actor: initiator });
+      }
 
       const netSuccesses = this.computeNetSuccesses(initiatorRoll, targetRoll);
-      const winner = netSuccesses >= 0 ? initiator : target; // SR3: attacker wins ties
+      const winner = netSuccesses >= 0 ? initiator : target;
 
-      // DIFF #1: detect melee full defense (parry) from defender roll options
-      const meleeDefenseMode = String(targetRoll?.options?.meleeDefenseMode || "");
-      const isMeleeFullDefense = meleeDefenseMode === "full";
+      // Ask the initiator procedure to render the *combined* opposed message
+      const out = await initiatorProc.renderContestOutcome(exportCtx, {
+         initiator,
+         target,
+         initiatorRoll,
+         targetRoll,
+         netSuccesses,
+         winner,
+      });
+      const htmlOut = typeof out === "string" ? out : out?.html;
+      if (!htmlOut) throw new Error("sr3e: renderContestOutcome returned no HTML");
 
-      // Attempt to rehydrate the initiator procedure to let it render & prep
-      let initiatorProc = null;
-      try {
-         if (procJSON) initiatorProc = await AbstractProcedure.fromJSON(procJSON);
-      } catch (e) {
-         console.warn("[sr3e] Failed to rehydrate initiator procedure:", e);
-      }
+      const targetUser = this.resolveControllingUser(target);
+      const chatData = this.#prepareChatData({
+         speaker: initiator,
+         initiator: contest.initiator,
+         targetUserId: targetUser?.id,
+         content: htmlOut,
+         rollMode: game.settings.get("core", "rollMode"),
+      });
+      await ChatMessage.create(chatData);
 
-      // Firearms bookkeeping (ammo/recoil) regardless of hit/miss
-      if (initiatorProc?.onChallengeResolved && initiator) {
-         try {
-            await initiatorProc.onChallengeResolved({ roll: initiatorRoll, actor: initiator });
-         } catch (e) {
-            console.warn("[sr3e] onChallengeResolved (challenge path) failed:", e);
-         }
-      }
-
-      // 1) Let subclass render contested chat (and optionally provide resistance prep)
-      let htmlOut = null;
-      let resistancePrep = null;
-
-      if (initiatorProc?.renderContestOutcome) {
-         try {
-            const out = await initiatorProc.renderContestOutcome(exportCtx, {
-               initiator,
-               target,
-               initiatorRoll,
-               targetRoll,
-               netSuccesses,
-               winner,
-            });
-            if (typeof out === "string") {
-               htmlOut = out;
-            } else if (out && typeof out === "object") {
-               htmlOut = out.html ?? null;
-               resistancePrep = out.resistancePrep ?? null;
-            }
-         } catch (e) {
-            console.warn("[sr3e] renderContestOutcome failed:", e);
-         }
-      }
-
-      // 2) If attacker wins but no prep provided yet, ask subclass to build it, else fallback
-      if (winner === initiator && !resistancePrep) {
-         try {
-            if (initiatorProc?.buildResistancePrep) {
-               resistancePrep = initiatorProc.buildResistancePrep(exportCtx, { initiator, target }) || null;
-            }
-         } catch (e) {
-            console.warn("[sr3e] buildResistancePrep failed; will fallback to service:", e);
-         }
-
-         // Final fallback using familyKey snapshot (kept)
-         if (!resistancePrep && exportCtx?.familyKey) {
-            const svc = exportCtx.familyKey === "firearm" ? FirearmService : MeleeService;
-            resistancePrep =
-               exportCtx.familyKey === "firearm"
-                  ? svc.prepareDamageResolution(target, { plan: exportCtx.plan, damage: exportCtx.damage })
-                  : svc.prepareDamageResolution(target, { packet: exportCtx.damage });
-
-            if (resistancePrep) {
-               resistancePrep.familyKey = exportCtx.familyKey;
-               resistancePrep.weaponId = exportCtx.weaponId || null;
-               resistancePrep.weaponName = exportCtx.weaponName || "Attack";
-               if (exportCtx.tnBase != null) resistancePrep.tnBase = exportCtx.tnBase;
-               if (Array.isArray(exportCtx.tnMods)) resistancePrep.tnMods = exportCtx.tnMods.slice();
-            }
-         }
-      }
-
-      // 3) Post the contested chat ONLY if the procedure provided HTML
-      if (htmlOut) {
-         const targetUser = this.resolveControllingUser(target);
-         const chatData = this.#prepareChatData({
-            speaker: initiator,
-            initiator: contest.initiator,
-            targetUserId: targetUser?.id,
-            content: htmlOut,
-            rollMode: game.settings.get("core", "rollMode"),
-         });
-         await ChatMessage.create(chatData);
-      } else {
-         console.warn("[sr3e] No contested outcome HTML returned by procedure; no combined chat message posted.");
-      }
-
-      contest.phase = "awaiting-resistance";
-      activeContests.set(contest.id, contest);
-
-      // 4) If we have a resistance prep, prompt defender
-      if (winner === initiator && resistancePrep) {
-         try {
-            // DIFF #2/3: on melee full defense, surface optional Dodge step to the prompt layer
-            if (exportCtx?.familyKey === "melee" && isMeleeFullDefense) {
-               resistancePrep.meleeOptionalDodge = {
-                  enabled: true,
-                  // Helpful context if your prompt wants to display it:
-                  netAttackSuccesses: netSuccesses,
-               };
-            }
-
-            // Ensure a few fields are set for the prompt step
-            resistancePrep.contestId = contest.id;
-            resistancePrep.attackerId = initiator.id;
-            const weaponId = resistancePrep.weaponId ?? exportCtx?.weaponId ?? null;
-
-            const payload = {
-               contestId: contest.id,
-               initiatorId: initiator.id,
-               defenderId: target.id,
-               weaponId,
-               prep: resistancePrep,
-            };
-
-            setTimeout(() => {
-               OpposeRollService.promptDamageResistance(payload).catch(console.error);
-            }, 200);
-         } catch (e) {
-            console.error("[sr3e] Failed to prompt damage resistance:", e);
-         }
-      }
+      // (If your item procedures use damage resistance, keep that path here;
+      // attribute contests won’t provide resistancePrep and that’s fine.)
    }
 
    // -----------------------
