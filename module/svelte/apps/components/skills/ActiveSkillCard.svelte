@@ -33,11 +33,21 @@
          actor,
          args: { skillId, specIndex, title: skill.name },
       });
-      
-      DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
-      if (e.shiftKey && actor?.sheet?.displayRollComposer) actor.sheet.displayRollComposer(proc);
-      else await proc.execute();
+      DEBUG && !proc && LOG.error("Could not create skill procedure.", [__FILE__, __LINE__]);
+
+      proc.setDefaultTNForComposer?.();
+
+      const useComposer = actor?.sheet?.displayRollComposer && (e.shiftKey || proc.isOpposed);
+
+      if (useComposer) {
+         if (proc.isOpposed && typeof proc.setOpposedEnabled === "function") {
+            proc.setOpposedEnabled(true);
+         }
+         actor.sheet.displayRollComposer(proc);
+      } else {
+         await proc.execute();
+      }
 
       e.preventDefault();
    }

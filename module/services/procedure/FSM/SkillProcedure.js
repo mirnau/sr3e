@@ -1,10 +1,8 @@
-// UncontestedSkillProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
 export default class SkillProcedure extends AbstractProcedure {
-  static KIND = "uncontested-skill";
-  static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
+  static KIND = "skill";
 
   #skillId = null;
   #skillName = "Skill";
@@ -12,11 +10,10 @@ export default class SkillProcedure extends AbstractProcedure {
   #poolKey = null;
 
   constructor(caller, _item, { skillId, specIndex = null, title = null } = {}) {
-    super(caller, /* item */ null, { lockPriority: "simple" });
+    super(caller, null, { lockPriority: "simple" });
     const skill = caller?.items?.get?.(skillId) || null;
     this.#skillId = skill?.id ?? null;
 
-    // read skill rating + metadata directly off the skill item
     let rating = 0;
     if (skill) {
       const type = skill.system?.skillType;
@@ -30,7 +27,6 @@ export default class SkillProcedure extends AbstractProcedure {
 
       rating = Number(spec?.value ?? sub.value ?? 0) || 0;
 
-      // help the abstract clamping: cap by half-base when defaulting to a spec
       if (this.#specName && !Number.isFinite(Number(spec?.value)) && Number.isFinite(sub.value)) {
         this.upsertMod({ id: "spec-cap", name: "Spec cap", poolCap: Math.floor(Number(sub.value) / 2) });
       }
@@ -38,18 +34,16 @@ export default class SkillProcedure extends AbstractProcedure {
 
     this.title = title || this.#skillName;
     this.dice  = Math.max(0, rating);
-
-    // If you want to allow pools here, add a soft cap based on the pool sum (optional).
-    // By default we leave pools enabled; AbstractProcedure will clamp to 0 if no pool store is bound.
   }
 
+  shouldSelfPublish() { return true; }
   getFlavor() { return `${this.title} Test`; }
   getChatDescription() { return `<div>${this.title}${this.#specName ? ` (${this.#specName})` : ""}</div>`; }
 
   async execute({ OnClose, CommitEffects } = {}) {
     OnClose?.();
-
     const actor = this.caller;
+
     const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
     await this.onChallengeWillRoll?.({ baseRoll, actor });
 
@@ -66,10 +60,65 @@ export default class SkillProcedure extends AbstractProcedure {
     return roll;
   }
 
-  toJSONExtra() { return { skillId: this.#skillId, specName: this.#specName, poolKey: this.#poolKey }; }
+  async getResponderPromptHTML(exportCtx) {
+    const label = String(exportCtx?.skillName || this.#skillName || "Skill").toUpperCase();
+    return `
+      <div class="sr3e-responder-prompt">
+        <div class="sr3e-responder-text">Opposed ${label} test</div>
+        <div class="buttons-horizontal-distribution" role="group" aria-label="Response">
+          <button class="sr3e-response-button yes" data-responder="yes">Accept</button>
+          <button class="sr3e-response-button no"  data-responder="decline">Decline</button>
+        </div>
+      </div>`;
+  }
+
+  exportForContest() {
+    return {
+      familyKey: "skill",
+      skillId: this.#skillId,
+      skillName: this.#skillName,
+      specName: this.#specName,
+      poolKey: this.#poolKey,
+      next: { kind: SkillProcedure.KIND }
+    };
+  }
+
+  async fromContestExport(exportCtx, { contestId } = {}) {
+    const id = exportCtx?.skillId ?? this.#skillId ?? null;
+    const skill = this.caller?.items?.get?.(id) || null;
+    this.#skillId = skill?.id ?? id ?? null;
+
+    if (skill) {
+      const type = skill.system?.skillType;
+      const sub = type ? (skill.system?.[`${type}Skill`] ?? {}) : {};
+      this.#skillName = exportCtx?.skillName ?? skill.name ?? type ?? "Skill";
+      this.#specName  = exportCtx?.specName ?? null;
+      this.#poolKey   = exportCtx?.poolKey ?? sub.associatedDicePool ?? null;
+
+      const specs = Array.isArray(sub.specializations) ? sub.specializations : [];
+      const spec = this.#specName ? specs.find(s => (s?.name ?? s?.label) === this.#specName) : null;
+      const rating = Number(spec?.value ?? sub.value ?? 0) || 0;
+      this.dice = Math.max(0, rating);
+
+      if (this.#specName && !Number.isFinite(Number(spec?.value)) && Number.isFinite(sub.value)) {
+        this.upsertMod({ id: "spec-cap", name: "Spec cap", poolCap: Math.floor(Number(sub.value) / 2) });
+      }
+    } else {
+      this.#skillName = exportCtx?.skillName ?? this.#skillName;
+      this.#specName  = exportCtx?.specName ?? this.#specName;
+      this.#poolKey   = exportCtx?.poolKey ?? this.#poolKey;
+    }
+
+    this.title = this.#skillName;
+
+    if (contestId) this.setContestIds([contestId]);
+  }
+
+  toJSONExtra() { return { skillId: this.#skillId, specName: this.#specName, poolKey: this.#poolKey, skillName: this.#skillName }; }
   async fromJSONExtra(extra) {
-    this.#skillId  = extra?.skillId  ?? this.#skillId;
-    this.#specName = extra?.specName ?? this.#specName;
-    this.#poolKey  = extra?.poolKey  ?? this.#poolKey;
+    this.#skillId   = extra?.skillId   ?? this.#skillId;
+    this.#specName  = extra?.specName  ?? this.#specName;
+    this.#poolKey   = extra?.poolKey   ?? this.#poolKey;
+    this.#skillName = extra?.skillName ?? this.#skillName;
   }
 }
