@@ -122,7 +122,7 @@ export default class SR3ERoll extends Roll {
   // Uses TN from rollData.options.targetNumber if present.
   // Optional descriptionHtml is displayed above the formula.
   // ---------------------------------------------------------------------------
-  static resultMessage(rollData, { descriptionHtml = "" } = {}) {
+  static renderRollOutcome(rollData, { descriptionHtml = "" } = {}) {
     const term = rollData.terms?.[0];
     const raw = term?.results ?? [];
     const results = raw.filter((r) => r.active !== false);
