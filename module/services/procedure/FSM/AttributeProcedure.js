@@ -111,6 +111,59 @@ export default class AttributeProcedure extends AbstractProcedure {
       // this.targetNumberStore?.set?.(null);
    }
 
+   #cap(s) {
+      if (!s) return "";
+      const t = String(s)
+         .replace(/[_\-]+/g, " ")
+         .trim();
+      return t.charAt(0).toUpperCase() + t.slice(1);
+   }
+
+   #summarizeRollGeneric(rollJson) {
+      const o = rollJson?.options || {};
+      const readName = (v) => {
+         if (v == null) return null;
+         if (typeof v === "string") return v;
+         if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
+         return null;
+      };
+      const skillName = readName(o.skillKey ?? o.skill);
+      const specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      const attrKey = readName(o.attributeKey ?? o.attribute);
+      const attrName = attrKey ? (CONFIG?.sr3e?.attributes?.[attrKey] ?? attrKey) : null;
+      const isDefault = !!(o.isDefaulting ?? o.defaulting);
+      const bits = [];
+      if (skillName) {
+         bits.push(`Skill: ${this.#cap(skillName)}`);
+         if (specName) bits.push(`Specialization: ${this.#cap(specName)}`);
+         if (isDefault) bits.push("Defaulting");
+      } else if (attrName) {
+         bits.push(`Attribute: ${this.#cap(attrName)}`);
+      }
+      return bits.length
+         ? `<p class="sr3e-roll-summary"><small>${bits.join(", ")}</small></p>`
+         : "";
+   }
+
+   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+      const initName = initiator?.name ?? "Attacker";
+      const tgtName = target?.name ?? "Defender";
+      const iHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tHtml = SR3ERoll.renderRollOutcome(targetRoll);
+      const iSummary = this.#summarizeRollGeneric(initiatorRoll);
+      const tSummary = this.#summarizeRollGeneric(targetRoll);
+      const winner = netSuccesses > 0 ? initName : tgtName;
+      return {
+         html: `
+      <p><strong>Contested roll between ${initName} and ${tgtName}</strong></p>
+      <h4>${initName}</h4>${iSummary}${iHtml}
+      <h4>${tgtName}</h4>${tSummary}${tHtml}
+      <p><strong>${winner}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+    `,
+         resistancePrep: null,
+      };
+   }
+
    toJSONExtra() {
       return { attributeKey: this.#attrKey };
    }
