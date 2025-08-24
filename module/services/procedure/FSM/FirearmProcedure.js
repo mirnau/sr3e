@@ -188,8 +188,8 @@ export default class FirearmProcedure extends AbstractProcedure {
       const headerBits = this.#attackHeader(exportCtx);
       const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
       const tSummary = this.#summarizeRollGeneric(target, targetRoll);
-      const iHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tHtml = SR3ERoll.renderVanilla(target, targetRoll);
+      const iHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tHtml = SR3ERoll.renderRollOutcome(targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
       const html = `
     ${top}
