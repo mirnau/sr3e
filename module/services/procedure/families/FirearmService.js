@@ -10,8 +10,8 @@ import RangeService, { tnDeltaFromShort } from "@rules/RangeService.js";
 export default class FirearmService {
    // ——— mode helpers ———
    static #weaponModes() {
-      const m = CONFIG?.sr3e?.weaponMode;
-      if (!m || typeof m !== "object") throw new Error("sr3e: CONFIG.sr3e.weaponMode missing");
+      const m = Config?.sr3e?.weaponMode;
+      if (!m || typeof m !== "object") throw new Error("sr3e: Config.sr3e.weaponMode missing");
       return Object.keys(m);
    }
    static #modeKey(w) {

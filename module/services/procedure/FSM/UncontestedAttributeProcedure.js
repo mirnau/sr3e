@@ -4,6 +4,8 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
+const config = Config.sr3e;
+
 export default class UncontestedAttributeProcedure extends AbstractProcedure {
   static KIND = "uncontested-attribute";
   static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
@@ -16,7 +18,7 @@ export default class UncontestedAttributeProcedure extends AbstractProcedure {
     this.#attrKey = String(attributeKey || "strength").toLowerCase();
 
     // set title + base dice from attribute
-    const label = title || (CONFIG?.sr3e?.attributes?.[this.#attrKey] ?? this.#attrKey);
+    const label = title || (config?.attributes?.[this.#attrKey] ?? this.#attrKey);
     this.title = typeof label === "string" ? label : this.#attrKey;
 
     const a = caller?.system?.attributes?.[this.#attrKey];
@@ -37,7 +39,7 @@ export default class UncontestedAttributeProcedure extends AbstractProcedure {
     const ok = ProcedureLock.assertEnter({
       ownerKey: `${UncontestedAttributeProcedure.KIND}:${this.caller?.id}`,
       priority: "simple",
-      onDenied: () => ui.notifications.warn(game.i18n.localize?.("sr3e.warn.procedureBusy") ?? "Another procedure is in progress.")
+      onDenied: () => ui.notifications.warn(game.i18n.localize?.(config.warn.procedureBusy) ?? "Another procedure is in progress.")
     });
     if (!ok) return null;
 

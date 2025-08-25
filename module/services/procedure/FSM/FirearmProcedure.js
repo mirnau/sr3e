@@ -5,6 +5,8 @@ import FirearmService from "@families/FirearmService.js";
 import { writable, get } from "svelte/store";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
+const config = Config.sr3e;
+
 export default class FirearmProcedure extends AbstractProcedure {
    #attackCtx = null;
    #selectedPoolKey = null;
@@ -108,15 +110,15 @@ export default class FirearmProcedure extends AbstractProcedure {
          await this.onChallengeResolved?.({ roll, actor });
          return roll;
       } catch (err) {
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
+         ui.notifications.error(game.i18n.localize?.(config.error.challengeFailed) ?? "Challenge failed");
          throw err;
       }
    }
 
    getPrimaryActionLabel() {
       const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
-      const fire = t?.("sr3e.button.fire") ?? "Fire";
+      if (this.hasTargets) return t?.(config.button.challenge) ?? "Challenge!";
+      const fire = t?.(config.button.fire) ?? "Fire";
       const weapon = this.item?.name ?? "";
       return weapon ? `${fire} ${weapon}` : fire;
    }

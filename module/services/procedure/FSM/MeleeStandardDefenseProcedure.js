@@ -3,6 +3,8 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
+const config = Config.sr3e;
+
 export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
    constructor(defender, _item = null, args = {}) {
       super(defender, _item, args);
@@ -25,7 +27,7 @@ export default class MeleeStandardDefenseProcedure extends AbstractProcedure {
       return `<div>Melee Defense (Standard)</div>`;
    }
    getPrimaryActionLabel() {
-      return game?.i18n?.localize?.("sr3e.button.defend") ?? "Defend";
+      return game?.i18n?.localize?.(config.button.defend) ?? "Defend";
    }
 
    // No pool limitations; defender can add their chosen Combat Pool

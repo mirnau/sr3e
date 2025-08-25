@@ -5,7 +5,32 @@
          "type": "Ammuntion Type",
          "rounds": "Rounds",
          "maxcapacity": "Max Capacity",
-         "class": "Weapon Class"
+         "class": "Weapon Class",
+         "empty": "— Unloaded / Empty —",
+         "requiredClass": "Required class"
+      },
+      "button": {
+         "attack": "Attack",
+         "challenge": "Challenge!",
+         "defend": "Defend",
+         "fullDefend": "Full Defense",
+         "roll": "Roll!",
+         "dodge": "Dodge!",
+         "fire": "Fire",
+         "resist": "Resist"
+      },
+      "label": {
+         "challenge": "Challenge",
+         "roll": "Roll",
+         "dodge": "Dodge"
+      },
+      "warn": {
+         "defaultNotAllowed": "Defaulting not allowed",
+         "defaultTN8": "Default target number is 8",
+         "procedureBusy": "Another procedure is in progress."
+      },
+      "error": {
+         "challengeFailed": "Challenge failed"
       },
       "attributes": {
          "attributes": "Attributes",

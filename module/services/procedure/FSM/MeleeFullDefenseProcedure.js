@@ -3,6 +3,8 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
+const config = Config.sr3e;
+
 /**
  * Full Defense (Parry): skill only, NO Combat Pool.
  * We hard-zero any pool contribution at roll time to enforce it.
@@ -29,7 +31,7 @@ export default class MeleeFullDefenseProcedure extends AbstractProcedure {
       return `<div>Melee Defense (Full)</div>`;
    }
    getPrimaryActionLabel() {
-      return game?.i18n?.localize?.("sr3e.button.fullDefend") ?? "Full Defense";
+      return game?.i18n?.localize?.(config.button.fullDefend) ?? "Full Defense";
    }
 
    async execute({ OnClose } = {}) {

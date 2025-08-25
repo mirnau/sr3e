@@ -3,9 +3,7 @@ import { writable, derived, get, readable } from "svelte/store";
 import { localize } from "@services/utilities.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
-function C() {
-   return CONFIG?.sr3e || {};
-}
+const config = Config.sr3e;
 
 export default class AbstractProcedure {
    // ---------- static: serialization registry & helpers ----------
@@ -187,7 +185,7 @@ export default class AbstractProcedure {
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
-            const d = C().difficulty || {};
+            const d = config.difficulty || {};
             if (n === 2) return d.simple || "";
             if (n === 3) return d.routine || "";
             if (n === 4) return d.average || "";
@@ -256,7 +254,7 @@ export default class AbstractProcedure {
          const unsubPenalty = penaltyStore.subscribe((p) => {
             const v = Number(p ?? 0);
             this._removeModById("penalty");
-            if (v > 0) this.upsertMod({ id: "penalty", name: localize(C().health?.penalty), value: -v });
+            if (v > 0) this.upsertMod({ id: "penalty", name: localize(config.health?.penalty), value: -v });
          });
          this.#disposers.push(unsubPenalty);
       }
@@ -409,7 +407,7 @@ export default class AbstractProcedure {
    // The default label; subclasses override as they like.
    getKindOfRollLabel() {
       const t = game?.i18n?.localize?.bind(game.i18n);
-      return this.hasTargets ? t?.("sr3e.label.challenge") ?? "Challenge" : t?.("sr3e.label.roll") ?? "Roll";
+      return this.hasTargets ? t?.(config.label.challenge) ?? "Challenge" : t?.(config.label.roll) ?? "Roll";
    }
 
    getItemLabel() {
@@ -420,7 +418,7 @@ export default class AbstractProcedure {
    // (keep these from earlier)
    getPrimaryActionLabel() {
       const t = game?.i18n?.localize?.bind(game.i18n);
-      return this.hasTargets ? t?.("sr3e.button.challenge") ?? "Challenge!" : t?.("sr3e.button.roll") ?? "Roll!";
+      return this.hasTargets ? t?.(config.button.challenge) ?? "Challenge!" : t?.(config.button.roll) ?? "Roll!";
    }
 
    isPrimaryActionEnabled() {
@@ -597,7 +595,7 @@ export default class AbstractProcedure {
       const prettyPool = (k) => {
          if (!k) return "Pool";
          // Try config label first, then prettify the key
-         const label = CONFIG?.sr3e?.dicepools?.[k];
+         const label = config.dicepools?.[k];
          if (label) return typeof game?.i18n?.localize === "function" ? game.i18n.localize(label) : String(label);
          return String(k)
             .replace(/([A-Z])/g, " $1")
@@ -744,12 +742,12 @@ export default class AbstractProcedure {
    #assertDefaultAllowed() {
       if (this.#item?.system?.noDefault) {
          DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize("sr3e.warn.defaultNotAllowed"));
+         ui.notifications.warn(localize(config.warn.defaultNotAllowed));
          return false;
       }
       if (this.#preDefaultTN() >= 8) {
          DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize("sr3e.warn.defaultTN8"));
+         ui.notifications.warn(localize(config.warn.defaultTN8));
          return false;
       }
       return true;

@@ -5,6 +5,8 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import ResistanceEngine from "@rules/ResistanceEngine.js";
 
+const config = Config.sr3e;
+
 export default class ResistanceProcedure extends AbstractProcedure {
    #prep;
    #defender;
@@ -52,7 +54,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
       return 1;
    }
    getCaller() {
-      return { type: "attribute", key: "body", name: "Body" };
+      return { type: "attribute", key: "body", name: game.i18n.localize(config.attributes.body) };
    }
 
    getFlavor() {
@@ -65,7 +67,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    async onChallengeWillRoll({ baseRoll, actor }) {
       await super.onChallengeWillRoll?.({ baseRoll, actor });
       baseRoll.options = baseRoll.options || {};
-      baseRoll.options.attribute = { key: "body", name: "Body" };
+      baseRoll.options.attribute = { key: "body", name: game.i18n.localize(config.attributes.body) };
 
       const tnBase = Number(get(this.targetNumberStore));
       const tnMods = (get(this.modifiersArrayStore) || []).map((m) => ({
@@ -80,7 +82,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
 
    getPrimaryActionLabel() {
       const t = game?.i18n?.localize?.bind(game.i18n);
-      return t?.("sr3e.button.resist") ?? "Resist";
+      return t?.(config.button.resist) ?? "Resist";
    }
 
    finalTN({ floor = 2 } = {}) {
