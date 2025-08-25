@@ -6,6 +6,35 @@ sr3e.ammunition = {
    rounds: "sr3e.ammunition.rounds",
    maxcapacity: "sr3e.ammunition.maxcapacity",
    class: "sr3e.ammunition.class",
+   empty: "sr3e.ammunition.empty",
+   requiredClass: "sr3e.ammunition.requiredClass",
+};
+
+sr3e.button = {
+   attack: "sr3e.button.attack",
+   challenge: "sr3e.button.challenge",
+   defend: "sr3e.button.defend",
+   fullDefend: "sr3e.button.fullDefend",
+   roll: "sr3e.button.roll",
+   dodge: "sr3e.button.dodge",
+   fire: "sr3e.button.fire",
+   resist: "sr3e.button.resist",
+};
+
+sr3e.label = {
+   challenge: "sr3e.label.challenge",
+   roll: "sr3e.label.roll",
+   dodge: "sr3e.label.dodge",
+};
+
+sr3e.warn = {
+   defaultNotAllowed: "sr3e.warn.defaultNotAllowed",
+   defaultTN8: "sr3e.warn.defaultTN8",
+   procedureBusy: "sr3e.warn.procedureBusy",
+};
+
+sr3e.error = {
+   challengeFailed: "sr3e.error.challengeFailed",
 };
 
 sr3e.attributes = {

@@ -3,6 +3,8 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 
+const config = Config.sr3e;
+
 export default class DodgeProcedure extends AbstractProcedure {
    static kind = "dodge";
 
@@ -11,7 +13,7 @@ export default class DodgeProcedure extends AbstractProcedure {
    constructor(defender, _noItem = null, { contestId } = {}) {
       super(defender, null);
 
-      this.title = game?.i18n?.localize?.("sr3e.dodge.title") ?? "Dodge";
+      this.title = game?.i18n?.localize?.(config.dodge.dodge) ?? "Dodge";
       this.#contestId = contestId ?? null;
 
       // Base TN 4
@@ -23,13 +25,13 @@ export default class DodgeProcedure extends AbstractProcedure {
 
    // Flavor in the composer
    getKindOfRollLabel() {
-      return game?.i18n?.localize?.("sr3e.label.dodge") ?? "Dodge";
+      return game?.i18n?.localize?.(config.label.dodge) ?? "Dodge";
    }
    getItemLabel() {
       return typeof this.title === "string" ? this.title : "";
    }
    getPrimaryActionLabel() {
-      return game?.i18n?.localize?.("sr3e.button.dodge") ?? "Dodge!";
+      return game?.i18n?.localize?.(config.button.dodge) ?? "Dodge!";
    }
 
    // Never start a new opposed flow from here
@@ -71,7 +73,7 @@ export default class DodgeProcedure extends AbstractProcedure {
          return roll;
       } catch (err) {
          DEBUG && LOG.error("Challenge flow failed", [__FILE__, __LINE__, err]);
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
+         ui.notifications.error(game.i18n.localize?.(config.error.challengeFailed) ?? "Challenge failed");
          throw err;
       }
    }

@@ -3,6 +3,8 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 
+const config = Config.sr3e;
+
 export default class UncontestedSkillProcedure extends AbstractProcedure {
   static KIND = "uncontested-skill";
   static register() { AbstractProcedure.registerSubclass(this.KIND, this); }
@@ -51,7 +53,7 @@ export default class UncontestedSkillProcedure extends AbstractProcedure {
     const ok = ProcedureLock.assertEnter({
       ownerKey: `${UncontestedSkillProcedure.KIND}:${this.caller?.id}`,
       priority: "simple",
-      onDenied: () => ui.notifications.warn(game.i18n.localize?.("sr3e.warn.procedureBusy") ?? "Another procedure is in progress.")
+      onDenied: () => ui.notifications.warn(game.i18n.localize?.(config.warn.procedureBusy) ?? "Another procedure is in progress.")
     });
     if (!ok) return null;
 

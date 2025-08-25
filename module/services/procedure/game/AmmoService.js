@@ -1,3 +1,5 @@
+const config = Config.sr3e;
+
 export default class AmmoService {
   static getAttachedAmmo(actor, weapon) {
     DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.getAttachedAmmo.name]);
@@ -82,9 +84,9 @@ export default class AmmoService {
   // inlined here to keep @game self-contained
   static async pickAmmoDialog(ammoItems, weapon, { needClass = "", allowEmpty = false } = {}) {
     DEBUG && LOG.info("", [__FILE__, __LINE__, AmmoService.pickAmmoDialog.name]);
-    const emptyLabel = game.i18n.localize("sr3e.ammunition.empty") || "— Unloaded / Empty —";
-    const roundsKey = game.i18n.localize("sr3e.ammunition.rounds") || "rounds";
-    const ammoKey = game.i18n.localize("sr3e.ammunition.ammunition") || "Ammunition";
+    const emptyLabel = game.i18n.localize(config.ammunition.empty) || "— Unloaded / Empty —";
+    const roundsKey = game.i18n.localize(config.ammunition.rounds) || "rounds";
+    const ammoKey = game.i18n.localize(config.ammunition.ammunition) || "Ammunition";
 
     const options = [];
     if (allowEmpty) options.push(`<option value="__EMPTY__">${emptyLabel}</option>`);
@@ -96,7 +98,7 @@ export default class AmmoService {
     }
 
     const needClassHint = needClass
-      ? `<p class="notes"><small>${game.i18n.localize("sr3e.ammunition.requiredClass") || "Required class"}: <b>${needClass}</b></small></p>`
+      ? `<p class="notes"><small>${game.i18n.localize(config.ammunition.requiredClass) || "Required class"}: <b>${needClass}</b></small></p>`
       : "";
 
     const content = `
@@ -110,14 +112,14 @@ export default class AmmoService {
       window: { title: `Reload ${weapon.name}` },
       content,
       ok: {
-        label: game.i18n.localize("sr3e.modal.confirm") || "OK",
+        label: game.i18n.localize(config.modal.confirm) || "OK",
         callback: (event, button, dialog) => {
           const id = dialog.element.querySelector('select[name="ammoId"]').value;
           if (id === "__EMPTY__") return "__EMPTY__";
           return ammoItems.find((i) => i.id === id);
         },
       },
-      cancel: { label: game.i18n.localize("sr3e.modal.decline") || "Cancel" },
+      cancel: { label: game.i18n.localize(config.modal.decline) || "Cancel" },
       rejectClose: false,
       modal: true,
     });

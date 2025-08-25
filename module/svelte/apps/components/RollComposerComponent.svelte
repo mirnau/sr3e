@@ -9,7 +9,7 @@
    import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
    import { recoilState, clearAllRecoilForActor } from "@services/ComposerAttackController.js";
 
-   let { actor, config } = $props();
+   let { actor, config = Config.sr3e } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {
