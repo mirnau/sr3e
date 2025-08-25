@@ -1,7 +1,6 @@
 // services/procedure/FSM/SkillResponseProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
-import OpposeRollService from "@services/OpposeRollService.js";
 import { localize } from "@services/utilities.js";
 
 function C() { return CONFIG?.sr3e || {}; }
@@ -13,11 +12,11 @@ export default class SkillResponseProcedure extends AbstractProcedure {
   #skillName = "Skill";
   #specName = null;
   #poolKey = null;
-  #contestId = null;
 
-  constructor(defender, _noItem = null, _args = {}) {
+  constructor(defender, _noItem = null, args = {}) {
     super(defender, null, { lockPriority: "simple" });
     this.title = `${this.#skillName} Response`;
+    if (args?.contestId) this.setContestId(args.contestId);
   }
 
   get hasTargets() { return false; }
@@ -47,9 +46,7 @@ export default class SkillResponseProcedure extends AbstractProcedure {
     await roll.waitForResolution();
     await CommitEffects?.();
 
-    if (this.#contestId) {
-      OpposeRollService.deliverResponse(this.#contestId, roll.toJSON());
-    }
+    this.deliverContestResponse(roll);
 
     Hooks.callAll("actorSystemRecalculated", actor);
     await this.onChallengeResolved?.({ roll, actor });
@@ -57,7 +54,7 @@ export default class SkillResponseProcedure extends AbstractProcedure {
   }
 
   async fromContestExport(exportCtx, { contestId } = {}) {
-    this.#contestId = contestId ?? null;
+    this.setContestId(contestId ?? null);
 
     const idFromExport = exportCtx?.skillId ?? null;
     const skill = idFromExport ? this.caller?.items?.get?.(idFromExport) : null;
@@ -85,7 +82,7 @@ export default class SkillResponseProcedure extends AbstractProcedure {
 
   toJSONExtra() {
     return {
-      contestId: this.#contestId,
+      contestId: this.contestId,
       skillId:   this.#skillId,
       specName:  this.#specName,
       poolKey:   this.#poolKey,
@@ -93,7 +90,7 @@ export default class SkillResponseProcedure extends AbstractProcedure {
     };
   }
   async fromJSONExtra(extra) {
-    this.#contestId = extra?.contestId ?? this.#contestId;
+    this.setContestId(extra?.contestId ?? null);
     this.#skillId   = extra?.skillId   ?? this.#skillId;
     this.#specName  = extra?.specName  ?? this.#specName;
     this.#poolKey   = extra?.poolKey   ?? this.#poolKey;
