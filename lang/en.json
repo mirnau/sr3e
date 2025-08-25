@@ -209,7 +209,11 @@
          "defaultNotAllowed": "Default Not Allowed",
          "defaultTN8": "Default target number can't exceed 8",
          "contestexpired": "Contest Expired",
-         "weapondifficulty": "Weapon Difficulty"
+         "weapondifficulty": "Weapon Difficulty",
+         "dodgetitle": "Select dodge action",
+         "dodge": "Dodge",
+         "dodgebutton": "Dodge",
+         "dodgedescription": "Dodge the incomming attack"
       },
       "sheet": {
          "attributepoints": "Attribute Points",
@@ -227,11 +231,7 @@
          "searchJournals": "Search Journals",
          "skillpoints": "Skill Points",
          "resources": "Resources",
-         "viewbackground": "View Background",
-         "dodgetitle": "Select dodge action",
-         "dodge": "Dodge",
-         "dodgebutton": "Dodge",
-         "dodgedescription": "Dodge the incomming attack"
+         "viewbackground": "View Background"
       },
       "skill": {
          "active": "Active Skill",

@@ -292,8 +292,8 @@ sr3e.procedure = {
    weapondifficulty: "sr3e.procedure.weapondifficulty",
    dodgeTitle: "sr3e.procedure.dodgetitle",
    dodge: "sr3e.procedure.dodge",
-   dodgeButton: "sr3e.procedure.dodgebutton",
-   dodgeDescription: "sr3e.procedure.dodgedescription",
+   dodgebutton: "sr3e.procedure.dodgebutton",
+   dodgedescription: "sr3e.procedure.dodgedescription",
 };
 
 sr3e.time = {
