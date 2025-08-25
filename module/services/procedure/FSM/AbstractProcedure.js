@@ -155,6 +155,7 @@ export default class AbstractProcedure {
    #modifiersTotalStore;
    #finalTNStore;
    #difficultyStore;
+   #responderBasis = null;
    #disposers = [];
    #hasTargetsStore = readable(false, (set) => {
       const update = (user) => {
@@ -350,6 +351,60 @@ export default class AbstractProcedure {
    }
    get item() {
       return this.#item;
+   }
+
+   // -- Responder basis ---------------------------------------------------
+
+   setResponderBasis(basis = null) {
+      this.#responderBasis = basis ? { ...basis } : null;
+   }
+
+   getResponderBasis() {
+      return this.#responderBasis ? { ...this.#responderBasis } : null;
+   }
+
+   setLinkedAttributeKey(key) {
+      if (typeof key === "string" && key) this.#linkedAttributeStore?.set?.(key);
+   }
+
+   applyResponderBasisDice() {
+      const actor = this.caller;
+      const b = this.#responderBasis;
+      if (!actor || !b || !b.type) return;
+
+      if (b.type === "attribute") {
+         const key = String(b.key || "").toLowerCase();
+         const a = actor?.system?.attributes?.[key];
+         const rating = Number(a?.total ?? a?.value ?? 0) || 0;
+         this.setLinkedAttributeKey(key);
+         this.dice = Math.max(0, rating);
+         return;
+      }
+
+      if (b.type === "skill") {
+         const skill = actor?.items?.get?.(b.id);
+         if (!skill) return;
+
+         const type = skill.system?.skillType;
+         const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
+         const specs = Array.isArray(sub?.specializations) ? sub.specializations : [];
+         let dice = Number(sub?.value ?? 0) || 0;
+
+         if (Number.isFinite(Number(b.specIndex))) {
+            const s = specs[Number(b.specIndex)];
+            const v = Number(s?.value);
+            if (Number.isFinite(v)) dice = v;
+         } else if (b.specialization) {
+            const s = specs.find((s) => (s?.name ?? s?.label) === b.specialization);
+            const v = Number(s?.value);
+            if (Number.isFinite(v)) dice = v;
+         }
+
+         this.dice = Math.max(0, Math.floor(dice));
+
+         const poolKey = sub?.associatedDicePool || null;
+         if (poolKey) this.setSelectedPoolKey(poolKey);
+      }
    }
 
    set title(v) {
@@ -662,6 +717,34 @@ export default class AbstractProcedure {
             baseRaw == null
                ? null
                : Math.max(2, Number(baseRaw) + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
+
+      // --- imprint responder basis so contested renderers can label correctly ---
+      const b = this.#responderBasis;
+      if (b && b.type === "attribute") {
+         const key = typeof b.key === "string" ? b.key : get(this.#linkedAttributeStore);
+         if (key) {
+            o.attributeKey = key;
+            if (o.defaulting == null) o.defaulting = false;
+            if (o.type == null) o.type = "attribute";
+         }
+      } else if (b && b.type === "skill") {
+         const actor = this.caller;
+         const skill = actor?.items?.get?.(b.id);
+         o.skill = { id: b.id || null, name: skill?.name || "Skill" };
+         if (b.specialization) o.specialization = b.specialization;
+         if (Number.isFinite(Number(b.specIndex))) o.specIndex = Number(b.specIndex);
+         if (o.type == null) o.type = "skill";
+         if (o.defaulting == null) o.defaulting = false;
+         if (this.#associatedPoolKey && !o.pools.some((p) => p.key === this.#associatedPoolKey)) {
+            const sel = clampInt(this.poolDice);
+            if (sel > 0)
+               o.pools.push({
+                  name: prettyPool(this.#associatedPoolKey),
+                  key: this.#associatedPoolKey,
+                  dice: sel,
+               });
+         }
+      }
    }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
