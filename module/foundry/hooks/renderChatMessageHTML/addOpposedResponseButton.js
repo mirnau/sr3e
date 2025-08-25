@@ -1,5 +1,8 @@
 import OpposeRollService from "@services/OpposeRollService.js";
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e
 
 export async function addOpposedResponseButton(message, html /*, data */) {
    const contestId = message.flags?.sr3e?.opposed;
@@ -21,8 +24,8 @@ export async function addOpposedResponseButton(message, html /*, data */) {
       const b = document.createElement("button");
       b.classList.add("sr3e-response-button", "expired");
       b.disabled = true;
-      b.title = "Contest expired";
-      b.innerText = "Contest expired";
+      b.title = localize(config.procedure.contestexpired);
+      b.innerText = localize(config.procedure.contestexpired);
       uiHost.appendChild(b);
       return;
    }
@@ -122,7 +125,7 @@ export async function addOpposedResponseButton(message, html /*, data */) {
             const current = OpposeRollService.getContestById(contestId);
             if (!current) {
                btn.classList.add("expired");
-               btn.innerText = "Contest expired";
+               btn.innerText = localize(config.procedure.contestexpired);
                return;
             }
 

@@ -36,11 +36,10 @@
 
       DEBUG && !proc && LOG.error("Could not create skill procedure.", [__FILE__, __LINE__]);
 
-      proc.setDefaultTNForComposer?.();
-
       const useComposer = actor?.sheet?.displayRollComposer && (e.shiftKey || proc.isOpposed);
 
       if (useComposer) {
+         proc.setDefaultTNForComposer?.();
          if (proc.isOpposed && typeof proc.setOpposedEnabled === "function") {
             proc.setOpposedEnabled(true);
          }

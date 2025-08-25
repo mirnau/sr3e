@@ -1,4 +1,7 @@
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 
 

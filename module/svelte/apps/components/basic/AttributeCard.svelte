@@ -108,11 +108,11 @@
       DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
       // Prime default target number so `isOpposed` reflects current targets
-      proc.setDefaultTNForComposer?.();
-
+      
       const useComposer = actor?.sheet?.displayRollComposer && (e.shiftKey || proc.isOpposed);
-
+      
       if (useComposer) {
+         proc.setDefaultTNForComposer?.();
          if (proc.isOpposed && typeof proc.setOpposedEnabled === "function") {
             proc.setOpposedEnabled(true);
          }

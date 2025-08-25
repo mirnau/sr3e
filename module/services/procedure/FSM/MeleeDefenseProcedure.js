@@ -1,6 +1,9 @@
 // module/services/procedure/FSM/MeleeDefenseProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 function cap(s) { return typeof s === "string" && s ? s[0].toUpperCase() + s.slice(1) : s; }
 
@@ -14,29 +17,31 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     const b = this.args.basis || {};
     this.dice = Math.max(0, Number(b.dice ?? 0));
 
-    // Nice panel title
+    // Panel title
     if (this.mode === "full") {
+      const parry = localize(config.procedure.parry);
       this.title = b?.type === "attribute"
-        ? `Parry (${cap(b.key || "Strength")})`
-        : `Parry (${b?.name || "Melee"})`;
+        ? `${parry} (${cap(b.key)})`
+        : `${parry} (${b?.name})`;
     } else {
-      this.title = game?.i18n?.localize?.("sr3e.label.standardDefense") ?? "Standard Defense";
+      this.title = localize(config.procedure.standardDefense);
     }
-
   }
 
   // Composer labels
   getKindOfRollLabel() {
     return this.mode === "full"
-      ? (game?.i18n?.localize?.("sr3e.label.fullDefense") ?? "Full Defense")
-      : (game?.i18n?.localize?.("sr3e.label.standardDefense") ?? "Standard Defense");
+      ? localize(config.procedure.fullDefense)
+      : localize(config.procedure.standardDefense);
   }
+
   getPrimaryActionLabel() {
     return this.mode === "full"
-      ? (game?.i18n?.localize?.("sr3e.button.fullDefend") ?? "Full Defense")
-      : (game?.i18n?.localize?.("sr3e.button.defend") ?? "Defend");
+      ? localize(config.procedure.fullDefend)
+      : localize(config.procedure.defend);
   }
-  getFlavor() { return String(this.title || (this.mode === "full" ? "Melee Defense (Full)" : "Melee Defense (Standard)")); }
+
+  getFlavor() { return String(this.title); }
   getChatDescription() { return `<div>${this.getFlavor()}</div>`; }
 
   // Build the defense test:
@@ -84,5 +89,4 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     }
     return roll;
   }
-
 }

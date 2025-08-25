@@ -130,15 +130,15 @@ sr3e.dicepools = {
 };
 
 sr3e.chat = {
-   contestexpried : "sr3e.chat.contestexpried",
-   resist: "sr3e.chat.resist"
-}
+   contestexpried: "sr3e.chat.contestexpried",
+   resist: "sr3e.chat.resist",
+};
 
 sr3e.dodge = {
    dodge: "sr3e.dodge.dodge",
    yes: "sr3e.dodge.yes",
-   no: "sr3e.dodge.no"
-}
+   no: "sr3e.dodge.no",
+};
 
 sr3e.gadget = {
    gadget: "sr3e.gadget.gadget",
@@ -274,6 +274,26 @@ sr3e.notifications = {
    skillpointsrefund: "sr3e.notifications.skillpointsrefund",
    skillpricecrossedthreshold: "sr3e.notifications.skillpricecrossedthreshold",
    warnnogadgettypeselected: "sr3e.notifications.warnnogadgettypeselected",
+};
+
+sr3e.procedure = {
+   difficulty: "sr3e.procedure.difficulty",
+   challenge: "sr3e.procedure.challenge",
+   roll: "sr3e.procedure.roll",
+   standardDefense: "sr3e.procedure.standardDefense",
+   fullDefense: "sr3e.procedure.fullDefense",
+   fire: "sr3e.procedure.fire",
+   attack: "sr3e.procedure.attack",
+   resist: "sr3e.procedure.resist",
+   challengeFailed: "sr3e.procedure.challengeFailed",
+   defaultNotAllowed: "sr3e.procedure.defaultNotAllowed",
+   defaultTN8: "sr3e.procedure.defaultTN8",
+   contestexpired: "sr3e.procedure.contestexpired",
+   weapondifficulty: "sr3e.procedure.weapondifficulty",
+   dodgeTitle: "sr3e.procedure.dodgetitle",
+   dodge: "sr3e.procedure.dodge",
+   dodgeButton: "sr3e.procedure.dodgebutton",
+   dodgeDescription: "sr3e.procedure.dodgedescription",
 };
 
 sr3e.time = {
@@ -472,4 +492,4 @@ sr3e.wearable = {
    ballistic: "sr3e.wearable.ballistic",
    impact: "sr3e.wearable.impact",
    canlayer: "sr3e.wearable.canlayer",
-}
+};

@@ -2,6 +2,9 @@
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import { get } from "svelte/store";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 export default class AttributeProcedure extends AbstractProcedure {
    static KIND = "attribute";
@@ -118,6 +121,7 @@ export default class AttributeProcedure extends AbstractProcedure {
          .trim();
       return t.charAt(0).toUpperCase() + t.slice(1);
    }
+
 
    #summarizeRollGeneric(rollJson) {
       const o = rollJson?.options || {};

@@ -4,6 +4,9 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import ResistanceEngine from "@rules/ResistanceEngine.js";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 export default class ResistanceProcedure extends AbstractProcedure {
    #prep;
@@ -79,8 +82,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    }
 
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      return t?.("sr3e.button.resist") ?? "Resist";
+      return localize(config.procedure.resist);
    }
 
    finalTN({ floor = 2 } = {}) {

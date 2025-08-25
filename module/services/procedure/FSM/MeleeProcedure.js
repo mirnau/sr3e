@@ -5,6 +5,9 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import MeleeService from "@families/MeleeService.js";
 import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 /**
  * Attacker procedure for melee.
@@ -31,9 +34,8 @@ export default class MeleeProcedure extends AbstractProcedure {
 
    // Primary button label
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
-      const atk = t?.("sr3e.button.attack") ?? "Attack";
+      if (this.hasTargets) return localize(config.procedure.challenge);
+      const atk = localize(config.procedure.attack);
       const weapon = this.item?.name ?? "";
       return weapon ? `${atk} ${weapon}` : atk;
    }
@@ -81,7 +83,6 @@ export default class MeleeProcedure extends AbstractProcedure {
          return roll;
       } catch (err) {
          DEBUG && LOG.error("Melee challenge flow failed", [__FILE__, __LINE__, err]);
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
          throw err;
       }
    }

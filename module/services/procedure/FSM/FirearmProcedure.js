@@ -3,6 +3,9 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import FirearmService from "@families/FirearmService.js";
 import { writable, get } from "svelte/store";
+import { localize } from "@services/utilities.js";
+
+const config = CONFIG.sr3e;
 
 export default class FirearmProcedure extends AbstractProcedure {
    #attackCtx = null;
@@ -97,21 +100,20 @@ export default class FirearmProcedure extends AbstractProcedure {
          await this.onChallengeResolved?.({ roll, actor });
          return roll;
       } catch (err) {
-         ui.notifications.error(game.i18n.localize?.("sr3e.error.challengeFailed") ?? "Challenge failed");
+         DEBUG && ui.notifications.error("Challenge failed");
          throw err;
       }
    }
 
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.("sr3e.button.challenge") ?? "Challenge!";
-      const fire = t?.("sr3e.button.fire") ?? "Fire";
+      if (this.hasTargets) return localize(config.procedure.challenge);
+      const fire = localize(config.procedure.fire);
       const weapon = this.item?.name ?? "";
       return weapon ? `${fire} ${weapon}` : fire;
    }
 
    getKindOfRollLabel() {
-      return this.hasTargets ? "Challenge" : "Roll";
+      return this.hasTargets ? localize(config.procedure.challenge) : localize(config.procedure.roll);
    }
 
    getItemLabel() {
@@ -142,7 +144,7 @@ export default class FirearmProcedure extends AbstractProcedure {
          type: "attribute",
          key: "reaction",
          tnMod: 0,
-         tnLabel: "Weapon difficulty",
+         tnLabel: localize(config.procedure.weapondifficulty),
       };
    }
 
