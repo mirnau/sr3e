@@ -1,6 +1,7 @@
 // module/services/procedure/FSM/AttributeResponseProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 import { localize } from "@services/utilities.js";
 
 function RuntimeConfig() { return CONFIG?.sr3e || {}; }
@@ -9,10 +10,10 @@ export default class AttributeResponseProcedure extends AbstractProcedure {
   static KIND = "attribute-response";
 
   #attrKey = "strength";
+  #contestId = null;
 
-  constructor(defender, _item = null, { attributeKey = "strength", title = null, contestId = null } = {}) {
+  constructor(defender, _item = null, { attributeKey = "strength", title = null } = {}) {
     super(defender, null, { lockPriority: "simple" });
-    this.setContestId(contestId);
     this.#attrKey = String(attributeKey || "strength").toLowerCase();
 
     const label = title || (RuntimeConfig().attributes?.[this.#attrKey] ?? this.#attrKey);
@@ -48,7 +49,9 @@ export default class AttributeResponseProcedure extends AbstractProcedure {
     await baseRoll.waitForResolution();
     await CommitEffects?.();
 
-    this.deliverContestResponse(roll);
+    if (this.#contestId) {
+      OpposeRollService.deliverResponse(this.#contestId, roll.toJSON());
+    }
 
     Hooks.callAll("actorSystemRecalculated", actor);
     await this.onChallengeResolved?.({ roll, actor });
@@ -56,7 +59,7 @@ export default class AttributeResponseProcedure extends AbstractProcedure {
   }
 
   async fromContestExport(exportCtx, { contestId } = {}) {
-    this.setContestId(contestId ?? null);
+    this.#contestId = contestId ?? null;
 
     const k = String(exportCtx?.attributeKey || this.#attrKey || "strength").toLowerCase();
     this.#attrKey = k;
@@ -69,9 +72,9 @@ export default class AttributeResponseProcedure extends AbstractProcedure {
     this.dice = Math.max(0, rating);
   }
 
-  toJSONExtra() { return { attributeKey: this.#attrKey, contestId: this.contestId }; }
+  toJSONExtra() { return { attributeKey: this.#attrKey, contestId: this.#contestId }; }
   async fromJSONExtra(extra) {
     if (extra?.attributeKey) this.#attrKey = String(extra.attributeKey).toLowerCase();
-    this.setContestId(extra?.contestId ?? null);
+    this.#contestId = extra?.contestId ?? this.#contestId;
   }
 }
