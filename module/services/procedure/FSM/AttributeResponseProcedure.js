@@ -4,9 +4,7 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import { localize } from "@services/utilities.js";
 
-function RuntimeConfig() {
-  return CONFIG?.sr3e || {};
-}
+function RuntimeConfig() { return CONFIG?.sr3e || {}; }
 
 export default class AttributeResponseProcedure extends AbstractProcedure {
   static KIND = "attribute-response";
@@ -26,17 +24,20 @@ export default class AttributeResponseProcedure extends AbstractProcedure {
     this.dice = Math.max(0, rating);
   }
 
+  get hasTargets() { return false; }
+  get isOpposed() { return false; }
+  shouldSelfPublish() { return false; }
+
   getKindOfRollLabel() { return localize(RuntimeConfig().procedure.respond); }
   getPrimaryActionLabel() { return localize(RuntimeConfig().procedure.respond); }
 
-  shouldSelfPublish() { return false; }
   getFlavor() { return `${this.title} Response`; }
   getChatDescription() { return `<div>${this.title} response</div>`; }
 
   async execute({ OnClose, CommitEffects } = {}) {
     OnClose?.();
-    const actor = this.caller;
 
+    const actor = this.caller;
     const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
     await this.onChallengeWillRoll?.({ baseRoll, actor });
 
