@@ -5,7 +5,9 @@ import FirearmService from "@families/FirearmService.js";
 import { writable, get } from "svelte/store";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class FirearmProcedure extends AbstractProcedure {
    #attackCtx = null;
@@ -106,14 +108,14 @@ export default class FirearmProcedure extends AbstractProcedure {
    }
 
    getPrimaryActionLabel() {
-      if (this.hasTargets) return localize(config.procedure.challenge);
-      const fire = localize(config.procedure.fire);
+      if (this.hasTargets) return localize(RuntimeConfig().procedure.challenge);
+      const fire = localize(RuntimeConfig().procedure.fire);
       const weapon = this.item?.name ?? "";
       return weapon ? `${fire} ${weapon}` : fire;
    }
 
    getKindOfRollLabel() {
-      return this.hasTargets ? localize(config.procedure.challenge) : localize(config.procedure.roll);
+      return this.hasTargets ? localize(RuntimeConfig().procedure.challenge) : localize(RuntimeConfig().procedure.roll);
    }
 
    getItemLabel() {
@@ -144,7 +146,7 @@ export default class FirearmProcedure extends AbstractProcedure {
          type: "attribute",
          key: "reaction",
          tnMod: 0,
-         tnLabel: localize(config.procedure.weapondifficulty),
+         tnLabel: localize(RuntimeConfig().procedure.weapondifficulty),
       };
    }
 

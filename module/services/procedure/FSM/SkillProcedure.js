@@ -2,7 +2,9 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class SkillProcedure extends AbstractProcedure {
   static KIND = "skill";

@@ -4,7 +4,9 @@ import { localize } from "@services/utilities.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class AbstractProcedure {
    // ---------- static: serialization registry & helpers ----------
@@ -194,7 +196,7 @@ export default class AbstractProcedure {
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
-            const d = localize(config.procedure.difficulty) || {};
+           const d = localize(RuntimeConfig().procedure.difficulty) || {};
             if (n === 2) return d.simple || "";
             if (n === 3) return d.routine || "";
             if (n === 4) return d.average || "";
@@ -275,7 +277,7 @@ export default class AbstractProcedure {
          const unsubPenalty = penaltyStore.subscribe((p) => {
             const v = Number(p ?? 0);
             this._removeModById("penalty");
-            if (v > 0) this.upsertMod({ id: "penalty", name: localize(config.health.penalty), value: -v });
+            if (v > 0) this.upsertMod({ id: "penalty", name: localize(RuntimeConfig().health.penalty), value: -v });
          });
          this.#disposers.push(unsubPenalty);
       }
@@ -435,8 +437,8 @@ export default class AbstractProcedure {
    // The default label; subclasses override as they like.
    getKindOfRollLabel() {
       return this.hasTargets
-         ? localize(config.procedure.challenge) ?? "Challenge"
-         : localize(config.procedure.roll) ?? "Roll";
+         ? localize(RuntimeConfig().procedure.challenge) ?? "Challenge"
+         : localize(RuntimeConfig().procedure.roll) ?? "Roll";
    }
 
    getItemLabel() {
@@ -447,8 +449,8 @@ export default class AbstractProcedure {
    // (keep these from earlier)
    getPrimaryActionLabel() {
       return this.hasTargets
-         ? localize(config.procedure.challenge) ?? "Challenge!"
-         : t?.(config.procedure.roll) ?? "Roll!";
+         ? localize(RuntimeConfig().procedure.challenge) ?? "Challenge!"
+         : t?.(RuntimeConfig().procedure.roll) ?? "Roll!";
    }
 
    isPrimaryActionEnabled() {

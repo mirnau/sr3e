@@ -7,7 +7,9 @@ import MeleeService from "@families/MeleeService.js";
 import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 /**
  * Attacker procedure for melee.
@@ -34,8 +36,8 @@ export default class MeleeProcedure extends AbstractProcedure {
 
    // Primary button label
    getPrimaryActionLabel() {
-      if (this.hasTargets) return localize(config.procedure.challenge);
-      const atk = localize(config.procedure.attack);
+      if (this.hasTargets) return localize(RuntimeConfig().procedure.challenge);
+      const atk = localize(RuntimeConfig().procedure.attack);
       const weapon = this.item?.name ?? "";
       return weapon ? `${atk} ${weapon}` : atk;
    }
