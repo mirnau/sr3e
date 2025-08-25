@@ -425,12 +425,15 @@
             // 1) Candidate basis from the composer (may be empty!)
             const candidate = foundry?.utils?.deepClone ? foundry.utils.deepClone(caller) : { ...caller };
             const hasValidType = candidate && typeof candidate.type === "string" && candidate.type.trim();
+            const hasDice = Number.isFinite(Number(candidate?.dice)) && Number(candidate.dice) > 0;
 
-            if (hasValidType) {
-               try {
-                  proc.setResponderBasis(candidate);
-                  proc.applyResponderBasisDice();
-               } catch {}
+            // 2) Only push a basis override if it’s meaningful.
+            //    Otherwise keep the hydrated basis that MeleeProcedure set.
+            if (hasValidType && hasDice) {
+               proc.args = proc.args || {};
+               proc.args.basis = candidate;
+               // Optional UI nicety: reflect the dice in the composer/proc if provided.
+               proc.dice = Math.max(0, Number(candidate.dice));
             }
 
             // 3) Karma + Pool
@@ -443,9 +446,9 @@
             }
 
             // 4) Debug & roll via the procedure (keeps logic in the chain, not here)
-              console.debug("DEF submit ->", {
+            console.debug("DEF submit ->", {
                kind: proc?.constructor?.name,
-               basis: proc.getResponderBasis?.(),
+               basis: proc?.args?.basis,
                dice: proc?.dice,
                pool: proc?.poolDice,
                karma: proc?.karmaDice,

@@ -15,13 +15,11 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     this.args = args || {};
     this.mode = (this.args.mode === "full") ? "full" : "standard";   // "standard" | "full"
 
-    if (args?.basis) {
-      this.setResponderBasis(args.basis);
-      this.applyResponderBasisDice();
-    }
+    // Seed UI from hydrated basis (built in MeleeProcedure.buildDefenseProcedure)
+    const b = this.args.basis || {};
+    this.dice = Math.max(0, Number(b.dice ?? 0));
 
-    const b = this.getResponderBasis() || {};
-
+    // Panel title
     if (this.mode === "full") {
       const parry = localize(RuntimeConfig().procedure.parry);
       this.title = b?.type === "attribute"
@@ -52,7 +50,7 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
   // - STANDARD: base/basis + pool + karma
   // - FULL:     base/basis + karma   (no pool on this initial test)
   buildFormula(explodes = true) {
-    const b = this.getResponderBasis() || {};
+    const b = this.args?.basis || {};
     const baseDice  = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? 0)));
     const poolDice  = this.mode === "full" ? 0 : Math.max(0, Math.floor(Number(this.poolDice) || 0));
     const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
@@ -72,7 +70,7 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     if (this.mode === "full") this.poolDice = 0;
 
     // Safety: restore from basis if UI zeroed it
-    const b = this.getResponderBasis() || {};
+    const b = this.args?.basis || {};
     if ((this.dice | 0) <= 0) this.dice = Math.max(0, Number(b.dice ?? 0));
 
     const actor = this.caller;
