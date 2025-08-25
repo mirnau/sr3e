@@ -3,7 +3,9 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 function cap(s) { return typeof s === "string" && s ? s[0].toUpperCase() + s.slice(1) : s; }
 
@@ -19,26 +21,26 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
 
     // Panel title
     if (this.mode === "full") {
-      const parry = localize(config.procedure.parry);
+      const parry = localize(RuntimeConfig().procedure.parry);
       this.title = b?.type === "attribute"
         ? `${parry} (${cap(b.key)})`
         : `${parry} (${b?.name})`;
     } else {
-      this.title = localize(config.procedure.standardDefense);
+      this.title = localize(RuntimeConfig().procedure.standardDefense);
     }
   }
 
   // Composer labels
   getKindOfRollLabel() {
     return this.mode === "full"
-      ? localize(config.procedure.fullDefense)
-      : localize(config.procedure.standardDefense);
+      ? localize(RuntimeConfig().procedure.fullDefense)
+      : localize(RuntimeConfig().procedure.standardDefense);
   }
 
   getPrimaryActionLabel() {
     return this.mode === "full"
-      ? localize(config.procedure.fullDefend)
-      : localize(config.procedure.defend);
+      ? localize(RuntimeConfig().procedure.fullDefend)
+      : localize(RuntimeConfig().procedure.defend);
   }
 
   getFlavor() { return String(this.title); }

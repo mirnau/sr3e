@@ -4,7 +4,9 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class DodgeProcedure extends AbstractProcedure {
    static kind = "dodge";
@@ -14,7 +16,7 @@ export default class DodgeProcedure extends AbstractProcedure {
    constructor(defender, _noItem = null, { contestId } = {}) {
       super(defender, null);
 
-      this.title = localize(config.procedure.dodgetitle);
+      this.title = localize(RuntimeConfig().procedure.dodgetitle);
       this.#contestId = contestId ?? null;
 
       // Base TN 4
@@ -23,13 +25,13 @@ export default class DodgeProcedure extends AbstractProcedure {
 
    // Flavor in the composer
    getKindOfRollLabel() {
-      return localize(config.procedure.dodge);
+      return localize(RuntimeConfig().procedure.dodge);
    }
    getItemLabel() {
       return typeof this.title === "string" ? this.title : "";
    }
    getPrimaryActionLabel() {
-      return localize(config.procedure.dodgebutton);
+      return localize(RuntimeConfig().procedure.dodgebutton);
    }
 
    // Never start a new opposed flow from here
@@ -42,7 +44,7 @@ export default class DodgeProcedure extends AbstractProcedure {
    }
 
    getChatDescription() {
-      return localize(config.procedure.dodgedescription);
+      return localize(RuntimeConfig().procedure.dodgedescription);
    }
 
    async execute({ OnClose, CommitEffects } = {}) {

@@ -6,7 +6,9 @@ import OpposeRollService from "@services/OpposeRollService.js";
 import ResistanceEngine from "@rules/ResistanceEngine.js";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class ResistanceProcedure extends AbstractProcedure {
    #prep;
@@ -82,7 +84,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    }
 
    getPrimaryActionLabel() {
-      return localize(config.procedure.resist);
+      return localize(RuntimeConfig().procedure.resist);
    }
 
    finalTN({ floor = 2 } = {}) {

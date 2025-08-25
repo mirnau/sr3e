@@ -4,7 +4,9 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import { get } from "svelte/store";
 import { localize } from "@services/utilities.js";
 
-const config = CONFIG.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class AttributeProcedure extends AbstractProcedure {
    static KIND = "attribute";
