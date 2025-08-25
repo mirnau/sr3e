@@ -205,12 +205,22 @@
 
    $effect(() => {
       if (!visible) return;
-      caller;
+      const proc = $procedureStore;
+      const basis = caller;
       hasTargets;
       declaredRounds;
       weaponMode;
       phaseKey;
-      $procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
+
+      if (proc && basis && typeof basis.type === "string" && basis.type.trim()) {
+         proc.setResponseBasis?.(basis);
+         proc.args = proc.args || {};
+         proc.args.basis = basis;
+         if (Number.isFinite(Number(basis.dice))) {
+            proc.dice = Math.max(0, Math.floor(Number(basis.dice)));
+         }
+      }
+      proc?.syncRecoil?.({ declaredRounds, ammoAvailable });
    });
 
    $effect(() => {
@@ -422,21 +432,7 @@
             const proc = $procedureStore;
             if (!proc) return;
 
-            // 1) Candidate basis from the composer (may be empty!)
-            const candidate = foundry?.utils?.deepClone ? foundry.utils.deepClone(caller) : { ...caller };
-            const hasValidType = candidate && typeof candidate.type === "string" && candidate.type.trim();
-            const hasDice = Number.isFinite(Number(candidate?.dice)) && Number(candidate.dice) > 0;
-
-            // 2) Only push a basis override if it’s meaningful.
-            //    Otherwise keep the hydrated basis that MeleeProcedure set.
-            if (hasValidType && hasDice) {
-               proc.args = proc.args || {};
-               proc.args.basis = candidate;
-               // Optional UI nicety: reflect the dice in the composer/proc if provided.
-               proc.dice = Math.max(0, Number(candidate.dice));
-            }
-
-            // 3) Karma + Pool
+            // Karma + Pool
             proc.karmaDice = Math.max(0, Number(diceBought) || 0);
             if (proc?.constructor?.name === "MeleeFullDefenseProcedure") {
                // Full Defense initial test ignores pool
@@ -445,7 +441,7 @@
                proc.poolDice = Math.max(0, Number(currentDicePoolAddition) || 0);
             }
 
-            // 4) Debug & roll via the procedure (keeps logic in the chain, not here)
+            // Debug & roll via the procedure (keeps logic in the chain, not here)
             console.debug("DEF submit ->", {
                kind: proc?.constructor?.name,
                basis: proc?.args?.basis,
