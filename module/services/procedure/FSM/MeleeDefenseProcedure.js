@@ -15,16 +15,19 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     this.args = args || {};
     this.mode = (this.args.mode === "full") ? "full" : "standard";   // "standard" | "full"
 
-    // Seed UI from hydrated basis (built in MeleeProcedure.buildDefenseProcedure)
+    // Bind contest id so we can deliver the reply
+    this.setContestId(this.args?.contestId ?? null);
+
+    // Seed UI from hydrated basis
     const b = this.args.basis || {};
-    this.dice = Math.max(0, Number(b.dice ?? 0));
+    this.setResponseBasis(b); // sets dice, linked attribute, etc.
 
     // Panel title
     if (this.mode === "full") {
       const parry = localize(RuntimeConfig().procedure.parry);
       this.title = b?.type === "attribute"
         ? `${parry} (${cap(b.key)})`
-        : `${parry} (${b?.name})`;
+        : `${parry} (${b?.name || "Defense"})`;
     } else {
       this.title = localize(RuntimeConfig().procedure.standardDefense);
     }
@@ -63,32 +66,36 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     return `${head}x${tn}`;
   }
 
+  shouldSelfPublish() { return false; }
+
   async execute({ OnClose } = {}) {
     OnClose?.();
 
-    // Enforce “no pool” on Full Defense initial test
     if (this.mode === "full") this.poolDice = 0;
 
-    // Safety: restore from basis if UI zeroed it
     const b = this.args?.basis || {};
     if ((this.dice | 0) <= 0) this.dice = Math.max(0, Number(b.dice ?? 0));
 
     const actor = this.caller;
-    const roll  = await SR3ERoll.create(this.buildFormula(true), { actor }).evaluate(this);
+    const baseRoll = SR3ERoll.create(this.buildFormula(true), { actor });
+    await this.onChallengeWillRoll?.({ baseRoll, actor });
+    const roll  = await baseRoll.evaluate(this);
     await roll.waitForResolution();
 
-    // Tag the roll so your contested resolver can branch
-    const o = (roll.toJSON().options = { ...(roll.options || {}), meleeDefenseMode: this.mode });
-    o.testName = this.getFlavor();
+    const json = roll.toJSON();
+    json.options = { ...(json.options || {}), meleeDefenseMode: this.mode, testName: this.getFlavor() };
     if (b?.type === "attribute") {
-      o.attributeKey   = String(b.key || "strength");
-      o.isDefaulting   = b.isDefaulting ?? true;
-      if (Number.isFinite(Number(b.dice))) o.attributeDice = Number(b.dice);
+      json.options.attributeKey = String(b.key || "strength");
+      json.options.isDefaulting = b.isDefaulting ?? true;
+      if (Number.isFinite(Number(b.dice))) json.options.attributeDice = Number(b.dice);
     } else if (b?.type === "skill") {
-      o.skill = { id: b.id, name: b.name };
-      if (b.specialization) o.specialization = b.specialization;
-      if (Number.isFinite(Number(b.dice))) o.skillDice = Number(b.dice);
+      json.options.skill = { id: b.id, name: b.name };
+      if (b.specialization) json.options.specialization = b.specialization;
+      if (Number.isFinite(Number(b.dice))) json.options.skillDice = Number(b.dice);
     }
+
+    this.deliverContestResponse(json);
+
     return roll;
   }
 }
