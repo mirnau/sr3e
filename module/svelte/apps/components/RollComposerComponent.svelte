@@ -160,6 +160,22 @@
       visible = true;
    }
 
+   export function setResponderBasis(basis) {
+      const proc = $procedureStore;
+      if (!proc) return;
+      proc.setResponderBasis?.(basis);
+      proc.applyResponderBasisDice?.();
+      if (basis && basis.type === "skill") {
+         const skill = actor?.items?.get?.(basis.id);
+         const type = skill?.system?.skillType;
+         const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
+         const poolKey = sub?.associatedDicePool || "";
+         currentDicePoolSelectionStore?.set?.(poolKey);
+      } else if (basis && basis.type === "attribute") {
+         currentDicePoolSelectionStore?.set?.("");
+      }
+   }
+
    async function CommitEffects() {
       if ((karmaCost ?? 0) <= 0 && (currentDicePoolAddition ?? 0) <= 0) return;
       await actor.commitRollComposerEffects({
