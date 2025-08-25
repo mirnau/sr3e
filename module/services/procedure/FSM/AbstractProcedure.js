@@ -3,7 +3,6 @@ import { writable, derived, get, readable } from "svelte/store";
 import { localize } from "@services/utilities.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
-import OpposeRollService from "@services/OpposeRollService.js";
 
 function RuntimeConfig() {
    return CONFIG?.sr3e || {};
@@ -142,8 +141,6 @@ export default class AbstractProcedure {
    #subSkill = null;
    #specialization = null;
    #readwrite = null;
-   #contestId = null;
-   #responseBasis = null;
    #contestIds = [];
 
    #targetNumberStore;
@@ -425,36 +422,6 @@ export default class AbstractProcedure {
       return this.#contestIds.slice();
    }
 
-   setContestId(id) {
-      this.#contestId = id ?? null;
-   }
-
-   get contestId() {
-      return this.#contestId;
-   }
-
-   setResponseBasis(basis = null) {
-      this.#responseBasis = basis || null;
-
-      const n = Number(basis?.dice);
-      if (Number.isFinite(n)) this.dice = Math.max(0, Math.floor(n));
-
-      if (basis?.type === "attribute" && basis?.key) {
-         this.#linkedAttributeStore?.set?.(String(basis.key));
-      }
-   }
-
-   getResponseBasis() {
-      return this.#responseBasis;
-   }
-
-   deliverContestResponse(rollOrJson) {
-      const id = this.#contestId;
-      if (!id) return;
-      const payload = typeof rollOrJson?.toJSON === "function" ? rollOrJson.toJSON() : rollOrJson;
-      if (payload) OpposeRollService.deliverResponse(id, payload);
-   }
-
    get isOpposed() {
       return (game.user?.targets?.size ?? 0) > 0;
    }
@@ -638,39 +605,50 @@ export default class AbstractProcedure {
       // --- attach options (used later by contested message rendering) ------------
       const o = (baseRoll.options = baseRoll.options || {});
 
+      // Total & base dice (useful for debugging and UI summaries)
       if (o.baseDice == null) o.baseDice = baseDice;
       if (o.dice == null) o.dice = baseDice + poolDice + karmaDice;
 
+      // Karma
       if (karmaDice > 0 && o.karmaDice == null) o.karmaDice = karmaDice;
 
+      // Defaulting
       if (this.#isDefaulting) {
          const lk = get(this.#linkedAttributeStore);
          if (lk) {
-            o.attributeKey = lk;
+            o.attributeKey = lk; // helps the defender/attacker summary block label correctly
             o.defaulting = true;
          }
       }
 
+      // Pools (normalize into a single array so renderers don't guess)
       if (!Array.isArray(o.pools)) o.pools = [];
+
       const prettyPool = (k) => {
          if (!k) return "Pool";
+         // Try config label first, then prettify the key
          const label = CONFIG?.sr3e?.dicepools?.[k];
          if (label) return typeof game?.i18n?.localize === "function" ? game.i18n.localize(label) : String(label);
          return String(k)
             .replace(/([A-Z])/g, " $1")
-            .replace(/^\w/, (c) => c.toUpperCase());
+            .replace(/^\w/, (c) => c.toUpperCase()); // e.g., combatPool → Combat Pool
       };
 
       if (poolDice > 0) {
+         // If this roll has an associated pool key (from the linked skill), record both a
+         // key-specific field (for legacy consumers) AND a normalized pools[] entry.
          if (this.#associatedPoolKey) {
-            const key = `${this.#associatedPoolKey}Dice`;
+            const key = `${this.#associatedPoolKey}Dice`; // e.g. "combatPoolDice"
             if (o[key] == null) o[key] = poolDice;
             o.pools.push({ name: prettyPool(this.#associatedPoolKey), key: this.#associatedPoolKey, dice: poolDice });
          } else {
+            // Generic/unknown pool selection
             o.pools.push({ name: "Pool", key: "pool", dice: poolDice });
          }
       }
 
+      // TN snapshot for full transparency (base + individual modifiers + final)
+      // These reflect what the composer currently shows.
       const baseRaw = get(this.#targetNumberStore);
       const mods = (get(this.#modifiersArrayStore) ?? []).map((m) => ({
          id: m.id ?? null,
@@ -679,37 +657,11 @@ export default class AbstractProcedure {
       }));
       if (!Array.isArray(o.tnMods)) o.tnMods = mods.slice();
       if (o.tnBase == null) o.tnBase = baseRaw == null ? null : Number(baseRaw);
-      if (o.targetNumber == null) {
+      if (o.targetNumber == null)
          o.targetNumber =
             baseRaw == null
                ? null
                : Math.max(2, Number(baseRaw) + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
-      }
-
-      const basis = this.#responseBasis;
-      if (basis && typeof basis === "object") {
-         if (basis.type === "attribute") {
-            o.type = "attribute";
-            if (basis.key) o.attributeKey = String(basis.key);
-            if (basis.isDefaulting != null) o.isDefaulting = !!basis.isDefaulting;
-            if (Number.isFinite(Number(basis.dice))) o.attributeDice = Math.max(0, Math.floor(Number(basis.dice)));
-         } else if (basis.type === "skill") {
-            o.type = "skill";
-            o.skill = { id: basis.id ?? null, name: basis.name ?? "Skill" };
-            if (basis.specialization) o.specialization = basis.specialization;
-            if (Number.isFinite(Number(basis.specIndex))) o.specIndex = Number(basis.specIndex);
-            if (basis.poolKey) {
-               const sel = this.#computeClampedPoolDice(this.poolDice);
-               if (sel > 0) o.pools.push({ name: prettyPool(basis.poolKey), key: basis.poolKey, dice: sel });
-            }
-            if (Number.isFinite(Number(basis.dice))) o.skillDice = Math.max(0, Math.floor(Number(basis.dice)));
-         } else if (basis.type === "item") {
-            o.type = "item";
-            o.itemKey = basis.id ?? null;
-            if (basis.name) o.itemName = basis.name;
-            if (Number.isFinite(Number(basis.dice))) o.itemDice = Math.max(0, Math.floor(Number(basis.dice)));
-         }
-      }
    }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */

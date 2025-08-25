@@ -15,19 +15,16 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     this.args = args || {};
     this.mode = (this.args.mode === "full") ? "full" : "standard";   // "standard" | "full"
 
-    // Bind contest id so we can deliver the reply
-    this.setContestId(this.args?.contestId ?? null);
-
-    // Seed UI from hydrated basis
+    // Seed UI from hydrated basis (built in MeleeProcedure.buildDefenseProcedure)
     const b = this.args.basis || {};
-    this.setResponseBasis(b); // sets dice, linked attribute, etc.
+    this.dice = Math.max(0, Number(b.dice ?? 0));
 
     // Panel title
     if (this.mode === "full") {
       const parry = localize(RuntimeConfig().procedure.parry);
       this.title = b?.type === "attribute"
         ? `${parry} (${cap(b.key)})`
-        : `${parry} (${b?.name || "Defense"})`;
+        : `${parry} (${b?.name})`;
     } else {
       this.title = localize(RuntimeConfig().procedure.standardDefense);
     }
@@ -69,8 +66,10 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
   async execute({ OnClose } = {}) {
     OnClose?.();
 
+    // Enforce “no pool” on Full Defense initial test
     if (this.mode === "full") this.poolDice = 0;
 
+    // Safety: restore from basis if UI zeroed it
     const b = this.args?.basis || {};
     if ((this.dice | 0) <= 0) this.dice = Math.max(0, Number(b.dice ?? 0));
 
@@ -78,20 +77,18 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     const roll  = await SR3ERoll.create(this.buildFormula(true), { actor }).evaluate(this);
     await roll.waitForResolution();
 
-    const json = roll.toJSON();
-    json.options = { ...(json.options || {}), meleeDefenseMode: this.mode, testName: this.getFlavor() };
+    // Tag the roll so your contested resolver can branch
+    const o = (roll.toJSON().options = { ...(roll.options || {}), meleeDefenseMode: this.mode });
+    o.testName = this.getFlavor();
     if (b?.type === "attribute") {
-      json.options.attributeKey = String(b.key || "strength");
-      json.options.isDefaulting = b.isDefaulting ?? true;
-      if (Number.isFinite(Number(b.dice))) json.options.attributeDice = Number(b.dice);
+      o.attributeKey   = String(b.key || "strength");
+      o.isDefaulting   = b.isDefaulting ?? true;
+      if (Number.isFinite(Number(b.dice))) o.attributeDice = Number(b.dice);
     } else if (b?.type === "skill") {
-      json.options.skill = { id: b.id, name: b.name };
-      if (b.specialization) json.options.specialization = b.specialization;
-      if (Number.isFinite(Number(b.dice))) json.options.skillDice = Number(b.dice);
+      o.skill = { id: b.id, name: b.name };
+      if (b.specialization) o.specialization = b.specialization;
+      if (Number.isFinite(Number(b.dice))) o.skillDice = Number(b.dice);
     }
-
-    this.deliverContestResponse(json);
-
     return roll;
   }
 }

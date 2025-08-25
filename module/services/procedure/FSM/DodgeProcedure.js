@@ -1,6 +1,7 @@
 // services/procedure/FSM/DodgeProcedure.js
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 import { localize } from "@services/utilities.js";
 
 function RuntimeConfig() {
@@ -10,12 +11,15 @@ function RuntimeConfig() {
 export default class DodgeProcedure extends AbstractProcedure {
    static kind = "dodge";
 
+   #contestId = null;
+
    constructor(defender, _noItem = null, { contestId } = {}) {
       super(defender, null);
 
       this.title = localize(RuntimeConfig().procedure.dodgetitle);
-      this.setContestId(contestId ?? null);
+      this.#contestId = contestId ?? null;
 
+      // Base TN 4
       this.targetNumberStore?.set?.(4);
    }
 
@@ -57,7 +61,11 @@ export default class DodgeProcedure extends AbstractProcedure {
 
       await CommitEffects?.();
 
-      this.deliverContestResponse(roll);
+      if (!this.#contestId) {
+         console.warn("[sr3e] DodgeProcedure missing contestId; cannot deliver response");
+      } else {
+         OpposeRollService.deliverResponse(this.#contestId, roll.toJSON());
+      }
 
       Hooks.callAll("actorSystemRecalculated", actor);
       await this.onChallengeResolved?.({ roll, actor });

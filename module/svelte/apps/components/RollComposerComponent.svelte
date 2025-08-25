@@ -430,12 +430,10 @@
             // 2) Only push a basis override if it’s meaningful.
             //    Otherwise keep the hydrated basis that MeleeProcedure set.
             if (hasValidType && hasDice) {
-               proc.setResponseBasis?.(candidate);
                proc.args = proc.args || {};
                proc.args.basis = candidate;
-               if (Number.isFinite(Number(candidate.dice))) {
-                  proc.dice = Math.max(0, Number(candidate.dice));
-               }
+               // Optional UI nicety: reflect the dice in the composer/proc if provided.
+               proc.dice = Math.max(0, Number(candidate.dice));
             }
 
             // 3) Karma + Pool
