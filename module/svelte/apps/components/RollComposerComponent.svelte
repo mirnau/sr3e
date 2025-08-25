@@ -79,17 +79,7 @@
    let ammoAvailable = $state(null);
    let phaseKey = $state("");
 
-   let caller = $state({
-      type: null,
-      key: null,
-      dice: 0,
-      value: 0,
-      skillId: "",
-      specialization: "",
-      name: "",
-      responseMode: false,
-      contestId: null,
-   });
+   let caller = $state({});
 
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
@@ -144,14 +134,16 @@
       if (!(currentProcedure instanceof AbstractProcedure)) throw new Error("Unfit data type");
 
       const existing = $procedureStore;
-      const inContest = existing?.contestId && typeof existing.setResponseBasis === "function";
+      const inContest = !!existing?.contestId;
       const isBasisProc = currentProcedure instanceof AttributeProcedure || currentProcedure instanceof SkillProcedure;
-      if (existing && inContest && isBasisProc) {
+
+      // CASE 1: We already have a responder in an active contest and user picked a basis proc => convert to basis
+      if (existing && inContest && isBasisProc && typeof existing.setResponseBasis === "function") {
          let basis = null;
          if (currentProcedure instanceof AttributeProcedure) {
             const extra = currentProcedure.toJSONExtra?.() || {};
             basis = { type: "attribute", key: extra.attributeKey, dice: currentProcedure.dice };
-         } else if (currentProcedure instanceof SkillProcedure) {
+         } else {
             const extra = currentProcedure.toJSONExtra?.() || {};
             basis = {
                type: "skill",
@@ -167,13 +159,21 @@
             existing.args = existing.args || {};
             existing.args.basis = basis;
             if (Number.isFinite(Number(basis.dice))) existing.dice = Math.max(0, Math.floor(Number(basis.dice)));
-            caller = { ...caller, ...basis };
+            // Tag caller with this contest’s basis only
+            caller = { ...basis, __contestId: existing.contestId };
          }
          return;
       }
 
+      // CASE 2: New procedure (likely a new contest): reset caller to avoid sticky basis
       clearStoreSubscriptions();
       $procedureStore = currentProcedure;
+
+      // If this is a fresh responder with a different contest id, nuke any previous caller basis.
+      const cid = $procedureStore?.contestId ?? null;
+      if (!cid || caller?.__contestId !== cid) {
+         caller = {};
+      }
 
       rangePrimedForWeaponId = null;
       rangeSuppressedForWeaponId = null;
@@ -237,21 +237,27 @@
 
    $effect(() => {
       if (!visible) return;
+
       const proc = $procedureStore;
-      const basis = caller;
+      if (!proc) return;
+
       hasTargets;
       declaredRounds;
       weaponMode;
       phaseKey;
 
-      if (proc && basis && typeof basis.type === "string" && basis.type.trim()) {
-         proc.setResponseBasis?.(basis);
-         proc.args = proc.args || {};
-         proc.args.basis = basis;
-         if (Number.isFinite(Number(basis.dice))) {
-            proc.dice = Math.max(0, Math.floor(Number(basis.dice)));
+      // Only push a basis if the caller is tagged for THIS contest and has a type.
+      if (caller && caller.__contestId === proc.contestId && typeof caller.type === "string" && caller.type.trim()) {
+         if (typeof proc.setResponseBasis === "function") {
+            proc.setResponseBasis(caller);
+            proc.args = proc.args || {};
+            proc.args.basis = caller;
+            if (Number.isFinite(Number(caller.dice))) {
+               proc.dice = Math.max(0, Math.floor(Number(caller.dice)));
+            }
          }
       }
+
       proc?.syncRecoil?.({ declaredRounds, ammoAvailable });
    });
 
