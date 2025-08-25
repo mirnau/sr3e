@@ -444,6 +444,11 @@ export default class AbstractProcedure {
       }
    }
 
+   resetResponseBasis() {
+      this.#responseBasis = null;
+      this.#linkedAttributeStore?.set?.(null);
+   }
+
    getResponseBasis() {
       return this.#responseBasis;
    }
@@ -748,7 +753,7 @@ export default class AbstractProcedure {
     * Build the defense procedure instance that should run on the defender side.
     * Default: use exportCtx.next.kind to choose a registered procedure and hydrate it.
     * Subclasses may override for custom behavior.
-    */
+   */
    async buildDefenseProcedure(exportCtx, { defender, contestId }) {
       if (!exportCtx?.next?.kind) {
          throw new Error("export.next.kind is required to build the defense procedure");
@@ -758,8 +763,16 @@ export default class AbstractProcedure {
       if (!DefenseCtor) {
          throw new Error(`No registered procedure for kind="${kind}"`);
       }
+
+      // Always pass contestId into the defense proc.
       const baseArgs = exportCtx?.next?.args || {};
       const proc = new DefenseCtor(defender, /* item */ null, { ...baseArgs, contestId });
+
+      // NEW: start from a clean basis (avoid sticky basis from a previous contest).
+      if (typeof proc.resetResponseBasis === "function") {
+         proc.resetResponseBasis();
+      }
+
       if (typeof proc.fromContestExport === "function") {
          await proc.fromContestExport(exportCtx, { contestId, initiatorExport: exportCtx });
       }
