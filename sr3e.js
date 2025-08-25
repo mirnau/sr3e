@@ -69,7 +69,9 @@ import ResistanceProcedure from "@services/procedure/FSM/ResistanceProcedure.js"
 import MeleeProcedure from "@services/procedure/FSM/MeleeProcedure.js";
 import MeleeDefenseProcedure from "@services/procedure/FSM/MeleeDefenseProcedure.js";
 import SkillProcedure from "@services/procedure/FSM/SkillProcedure.js";
+import SkillResponseProcedure from "@services/procedure/FSM/SkillResponseProcedure.js";
 import AttributeProcedure from "@services/procedure/FSM/AttributeProcedure.js";
+import AttributeResponseProcedure from "@services/procedure/FSM/AttributeResponseProcedure.js";
 
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
@@ -210,7 +212,9 @@ function registerHooks() {
    AbstractProcedure.registerSubclass("melee", MeleeProcedure); // attacker
    AbstractProcedure.registerSubclass("melee-defense", MeleeDefenseProcedure); // defender (full)
    AbstractProcedure.registerSubclass("skill", SkillProcedure);
+   AbstractProcedure.registerSubclass("skill-response", SkillResponseProcedure);
    AbstractProcedure.registerSubclass("attribute", AttributeProcedure);
+   AbstractProcedure.registerSubclass("attribute-response", AttributeResponseProcedure);
 
    Hooks.once(hooks.init, initializeSystem);
 

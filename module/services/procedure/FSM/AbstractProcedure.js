@@ -437,8 +437,8 @@ export default class AbstractProcedure {
    // The default label; subclasses override as they like.
    getKindOfRollLabel() {
       return this.hasTargets
-         ? localize(RuntimeConfig().procedure.challenge) ?? "Challenge"
-         : localize(RuntimeConfig().procedure.roll) ?? "Roll";
+         ? localize(RuntimeConfig().procedure.challenge)
+         : localize(RuntimeConfig().procedure.resist);
    }
 
    getItemLabel() {
@@ -449,8 +449,8 @@ export default class AbstractProcedure {
    // (keep these from earlier)
    getPrimaryActionLabel() {
       return this.hasTargets
-         ? localize(RuntimeConfig().procedure.challenge) ?? "Challenge!"
-         : t?.(RuntimeConfig().procedure.roll) ?? "Roll!";
+         ? localize(RuntimeConfig().procedure.challenge)
+         : t?.(RuntimeConfig().procedure.resist);
    }
 
    isPrimaryActionEnabled() {
