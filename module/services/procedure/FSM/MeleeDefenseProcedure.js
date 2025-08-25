@@ -17,7 +17,8 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
 
     // Seed UI from hydrated basis (built in MeleeProcedure.buildDefenseProcedure)
     const b = this.args.basis || {};
-    this.dice = Math.max(0, Number(b.dice ?? 0));
+    this.setResponderBasis(b);
+    this.applyResponderBasisDice();
 
     // Panel title
     if (this.mode === "full") {
@@ -50,8 +51,7 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
   // - STANDARD: base/basis + pool + karma
   // - FULL:     base/basis + karma   (no pool on this initial test)
   buildFormula(explodes = true) {
-    const b = this.args?.basis || {};
-    const baseDice  = Math.max(0, Math.floor(Number(b.dice ?? this.dice ?? 0)));
+    const baseDice  = Math.max(0, Math.floor(Number(this.dice ?? 0)));
     const poolDice  = this.mode === "full" ? 0 : Math.max(0, Math.floor(Number(this.poolDice) || 0));
     const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
     const total = baseDice + poolDice + karmaDice;
@@ -70,8 +70,7 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     if (this.mode === "full") this.poolDice = 0;
 
     // Safety: restore from basis if UI zeroed it
-    const b = this.args?.basis || {};
-    if ((this.dice | 0) <= 0) this.dice = Math.max(0, Number(b.dice ?? 0));
+    if ((this.dice | 0) <= 0) this.applyResponderBasisDice();
 
     const actor = this.caller;
     const roll  = await SR3ERoll.create(this.buildFormula(true), { actor }).evaluate(this);
@@ -80,14 +79,15 @@ export default class MeleeDefenseProcedure extends AbstractProcedure {
     // Tag the roll so your contested resolver can branch
     const o = (roll.toJSON().options = { ...(roll.options || {}), meleeDefenseMode: this.mode });
     o.testName = this.getFlavor();
+    const b = this.getResponderBasis() || {};
     if (b?.type === "attribute") {
       o.attributeKey   = String(b.key || "strength");
       o.isDefaulting   = b.isDefaulting ?? true;
-      if (Number.isFinite(Number(b.dice))) o.attributeDice = Number(b.dice);
+      if (Number.isFinite(Number(this.dice))) o.attributeDice = Number(this.dice);
     } else if (b?.type === "skill") {
       o.skill = { id: b.id, name: b.name };
       if (b.specialization) o.specialization = b.specialization;
-      if (Number.isFinite(Number(b.dice))) o.skillDice = Number(b.dice);
+      if (Number.isFinite(Number(this.dice))) o.skillDice = Number(this.dice);
     }
     return roll;
   }
