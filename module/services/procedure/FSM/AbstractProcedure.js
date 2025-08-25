@@ -142,7 +142,6 @@ export default class AbstractProcedure {
    #specialization = null;
    #readwrite = null;
    #contestIds = [];
-   #responderBasis = null;
 
    #targetNumberStore;
    #modifiersArrayStore;
@@ -483,72 +482,6 @@ export default class AbstractProcedure {
       }
    }
 
-   /** Convenience setter so the Composer can update the linked attribute key. */
-   setLinkedAttributeKey(key) {
-      if (typeof key === "string" && key) this.#linkedAttributeStore?.set?.(key);
-   }
-
-   /**
-    * Set a generic responder basis.
-    * basis:
-    *  - { type: "attribute", key: "body" }
-    *  - { type: "skill", id: "<skillId>", specIndex?: number, specialization?: string }
-    */
-   setResponderBasis(basis = null) {
-      this.#responderBasis = basis ? { ...basis } : null;
-   }
-
-   /** Get the current responder basis (shallow copy). */
-   getResponderBasis() {
-      return this.#responderBasis ? { ...this.#responderBasis } : null;
-   }
-
-   /**
-    * Recalculate this.dice (and pool key when possible) from the current responder basis.
-    * Call this after setResponderBasis(...) whenever the user changes choice in the Composer.
-    * No validation; if something is missing we quietly keep current dice.
-    */
-   applyResponderBasisDice() {
-      const actor = this.caller;
-      const b = this.#responderBasis;
-      if (!actor || !b || !b.type) return;
-
-      if (b.type === "attribute") {
-         const key = String(b.key || "").toLowerCase();
-         const a = actor?.system?.attributes?.[key];
-         const rating = Number(a?.total ?? a?.value ?? 0) || 0;
-         this.setLinkedAttributeKey(key);
-         this.dice = Math.max(0, rating);
-         return;
-      }
-
-      if (b.type === "skill") {
-         const skill = actor?.items?.get?.(b.id);
-         if (!skill) return;
-
-         const type = skill.system?.skillType;
-         const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
-         const specs = Array.isArray(sub?.specializations) ? sub.specializations : [];
-         let dice = Number(sub?.value ?? 0) || 0;
-
-         if (Number.isFinite(Number(b.specIndex))) {
-            const s = specs[Number(b.specIndex)];
-            const v = Number(s?.value);
-            if (Number.isFinite(v)) dice = v;
-         } else if (b.specialization) {
-            const s = specs.find((s) => (s?.name ?? s?.label) === b.specialization);
-            const v = Number(s?.value);
-            if (Number.isFinite(v)) dice = v;
-         }
-
-         this.dice = Math.max(0, Math.floor(dice));
-
-         const poolKey = sub?.associatedDicePool || null;
-         if (poolKey) this.setSelectedPoolKey(poolKey);
-         return;
-      }
-   }
-
    upsertMod(mod) {
       const arr = get(this.#modifiersArrayStore) ?? [];
       const idx = arr.findIndex((m) => (mod.id && m.id === mod.id) || (!mod.id && m.name === mod.name));
@@ -729,32 +662,6 @@ export default class AbstractProcedure {
             baseRaw == null
                ? null
                : Math.max(2, Number(baseRaw) + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
-
-      // --- NEW: imprint responder basis so contested renderers can label correctly ----
-      // We avoid validation. If the composer fed a basis, we serialize it into options.
-      const b = this.#responderBasis;
-      if (b && b.type === "attribute") {
-         const key = typeof b.key === "string" ? b.key : get(this.#linkedAttributeStore);
-         if (key) {
-            o.attributeKey = key;
-            if (o.defaulting == null) o.defaulting = false;
-            o.type = o.type || "attribute";
-         }
-      } else if (b && b.type === "skill") {
-         const actor = this.caller;
-         const skill = actor?.items?.get?.(b.id);
-         const skillName = skill?.name || "Skill";
-         o.skill = { id: b.id || null, name: skillName };
-         if (b.specialization) o.specialization = b.specialization;
-         if (Number.isFinite(Number(b.specIndex))) o.specIndex = Number(b.specIndex);
-         if (this.#associatedPoolKey && !o.pools.some((p) => p.key === this.#associatedPoolKey)) {
-            const sel = clampInt(this.poolDice);
-            if (sel > 0)
-               o.pools.push({ name: prettyPool(this.#associatedPoolKey), key: this.#associatedPoolKey, dice: sel });
-         }
-         if (o.type == null) o.type = "skill";
-         if (o.defaulting == null) o.defaulting = false;
-      }
    }
 
    /** Optional hook: run after the roll is fully resolved. Subclasses may override. */
