@@ -3,11 +3,11 @@
    import { flags } from "@services/commonConsts.js";
    import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
-   import { mount, unmount } from "svelte";
-   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
-   import SR3ERoll from "@documents/SR3ERoll.js";
-   import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+   import { unmount } from "svelte";
    import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
+
+   import CreationAttributeShopper from "@services/shopping/CreationAttributeShopper.js";
+   import KarmaAttributeShopper from "@services/shopping/KarmaAttributeShopper.js";
 
    let { actor, localization, key } = $props();
 
@@ -64,15 +64,20 @@
 
    let activeModal = null;
 
-   function add(change) {
-      if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
-         const newPoints = $attributePointStore - change;
-         const newValue = $valueRWStore + change;
+   // --- Shopper selection (polymorphic) ---
+   let shopper = $derived(
+      $isShoppingState
+         ? new CreationAttributeShopper({ storeManager, actor, key, metatype })
+         : new KarmaAttributeShopper({ storeManager, actor, key, metatype })
+   );
 
-         if (newPoints >= 0 && (attributeLimit === null || newValue <= attributeLimit)) {
-            $attributePointStore = newPoints;
-            $valueRWStore = newValue;
-         }
+   function add(change) {
+      if ($isShoppingState) {
+         shopper.applyDelta(change, {
+            minFloor: 1,
+            committedFloor: committedValue,
+            isLocked: $attributeAssignmentLockedStore
+         });
       }
    }
 
@@ -107,10 +112,8 @@
 
       DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
 
-      // Prime default target number so `isOpposed` reflects current targets
-      
       const useComposer = actor?.sheet?.displayRollComposer && (e.shiftKey || proc.isOpposed);
-      
+
       if (useComposer) {
          proc.setDefaultTNForComposer?.();
          if (proc.isOpposed && typeof proc.setOpposedEnabled === "function") {
@@ -121,7 +124,6 @@
          await proc.execute();
       }
    }
-
 </script>
 
 <svelte:window on:keydown|capture={handleEscape} />
@@ -134,7 +136,7 @@
       <div class="stat-label">
          {#if key !== "reaction"}
             <i
-               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
+               class="fa-solid fa-circle-chevron-down decrement-attribute {(!shopper.canDecrease?.(1, committedValue, $attributeAssignmentLockedStore) || isMinLimit) ? 'disabled' : ''}"
                role="button"
                tabindex="0"
                onclick={decrement}
@@ -145,7 +147,7 @@
          <h1 class="stat-value">{$valueROStore.sum}</h1>
          {#if key !== "reaction"}
             <i
-               class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
+               class="fa-solid fa-circle-chevron-up increment-attribute {shopper.canIncrease?.() ? '' : 'disabled'}"
                role="button"
                tabindex="0"
                onclick={increment}
