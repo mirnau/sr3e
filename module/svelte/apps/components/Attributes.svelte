@@ -13,6 +13,8 @@
    let isAwakened = $state(false);
    let localization = config.attributes;
    let storeManager = StoreManager.Subscribe(actor);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
 
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.attributeAssignmentLocked);
 
@@ -25,7 +27,9 @@
    let reactionValue = storeManager.GetRWStore("attributes.reaction.value");
 
    $effect(() => {
-      $reactionValue = Math.floor(($intelligence.sum + $quickness.sum) * 0.5);
+      const prevInt = $isShoppingState ? ($attributePreview?.values?.intelligence ?? $intelligence.sum) : $intelligence.sum;
+      const prevQui = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quickness.sum) : $quickness.sum;
+      $reactionValue = Math.floor((prevInt + prevQui) * 0.5);
    });
 
    $effect(() => {

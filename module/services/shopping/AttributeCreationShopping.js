@@ -25,6 +25,10 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
       ([$b, $m]) => ({ value: $b ?? 0, mod: $m ?? 0, sum: ($b ?? 0) + ($m ?? 0) })
     );
 
+    // Attribute preview aggregator for derived stats (reaction, dice pools)
+    this.previewStore = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
+    this._previewUnsub = null;
+
     // Chevron guards based on staged values
     this.canIncrementRO = derived([this.stagedBase, this.points], () => this.computeCanIncrement());
     this.canDecrementRO = derived([this.stagedBase], () => this.computeCanDecrement());
@@ -85,6 +89,19 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     this.baselinePoints = get(this.points) || 0;
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
+
+    // Mark preview active and seed current sum for this attribute
+    const curPrev = get(this.previewStore) || { active: false, values: {} };
+    const seedSum = (this.baselineBase ?? 0) + (get(this.modRO) ?? 0);
+    this.previewStore.set({ active: true, values: { ...(curPrev.values || {}), [this.key]: seedSum } });
+
+    // Update preview on any display change
+    this._previewUnsub && this._previewUnsub();
+    this._previewUnsub = this.displayRO.subscribe((v) => {
+      const sum = v?.sum ?? 0;
+      const cur = get(this.previewStore) || { active: true, values: {} };
+      this.previewStore.set({ active: true, values: { ...(cur.values || {}), [this.key]: sum } });
+    });
   }
 
   _commitAndEndSession() {
@@ -93,6 +110,16 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     if (finalBase !== get(this.baseRW)) this.baseRW.set(finalBase);
     if (stagedSpent !== 0) this.points.set(this.baselinePoints - stagedSpent);
     this.sessionActive = false;
+
+    // Clear this attribute from preview; if none left, mark inactive
+    if (this._previewUnsub) { this._previewUnsub(); this._previewUnsub = null; }
+    const cur = get(this.previewStore) || { active: true, values: {} };
+    if (cur?.values && this.key in cur.values) {
+      const nextValues = { ...cur.values };
+      delete nextValues[this.key];
+      const anyLeft = Object.keys(nextValues).length > 0;
+      this.previewStore.set({ active: anyLeft, values: nextValues });
+    }
   }
 
   commit() {
@@ -105,6 +132,16 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
     this.sessionActive = false;
+
+    // Clear this attribute from preview; if none left, mark inactive
+    if (this._previewUnsub) { this._previewUnsub(); this._previewUnsub = null; }
+    const cur = get(this.previewStore) || { active: true, values: {} };
+    if (cur?.values && this.key in cur.values) {
+      const nextValues = { ...cur.values };
+      delete nextValues[this.key];
+      const anyLeft = Object.keys(nextValues).length > 0;
+      this.previewStore.set({ active: anyLeft, values: nextValues });
+    }
   }
 
   _currentStagedBase() {

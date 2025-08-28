@@ -4,6 +4,7 @@
    import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
+   import { flags } from "@services/commonConsts.js";
    import { onDestroy } from "svelte";
 
 
@@ -16,6 +17,8 @@
    });
 
    const storeManager = StoreManager.Subscribe(actor);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
 
    let intelligence = storeManager.GetSumROStore("attributes.intelligence");
    let willpower = storeManager.GetSumROStore("attributes.willpower");
@@ -40,10 +43,18 @@
    let spellValueStore = storeManager.GetRWStore("dicePools.spell.value");
 
    $effect(() => {
-      $controlValueStore = $reaction.sum;
-      $combatValueStore = Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5);
-      $astralValueStore = Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5);
-      $spellValueStore = Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5);
+      const A = (k, fall) => $isShoppingState ? ($attributePreview?.values?.[k] ?? fall) : fall;
+      const i = A("intelligence", $intelligence.sum);
+      const q = A("quickness", $quickness.sum);
+      const w = A("willpower", $willpower.sum);
+      const c = A("charisma", $charisma.sum);
+      const m = A("magic", $magic.sum);
+      const reactionPreview = Math.floor((i + q) * 0.5);
+
+      $controlValueStore = reactionPreview;
+      $combatValueStore = Math.floor((i + q + w) * 0.5);
+      $astralValueStore = Math.floor((i + c + w) * 0.5);
+      $spellValueStore = Math.floor((i + m + w) * 0.5);
    });
 
    onDestroy(() => {

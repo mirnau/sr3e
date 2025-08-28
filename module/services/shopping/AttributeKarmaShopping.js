@@ -26,6 +26,9 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
       baseline: 0,
       stagedSpent: 0,
     });
+    // Attribute preview aggregator for derived stats (reaction, dice pools)
+    this.previewStore = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
+    this._previewUnsub = null;
 
     // Session wiring
     this.isShoppingStateStore = isShoppingStateStore;
@@ -116,6 +119,19 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
     this.baselineGoodKarmaRO.set(this.baselineGoodKarma);
+
+    // Mark preview active and seed current sum for this attribute
+    const curPrev = get(this.previewStore) || { active: false, values: {} };
+    const seedSum = (this.baselineBase ?? 0) + (get(this.modRO) ?? 0);
+    this.previewStore.set({ active: true, values: { ...(curPrev.values || {}), [this.key]: seedSum } });
+
+    // Update preview on any display change
+    this._previewUnsub && this._previewUnsub();
+    this._previewUnsub = this.displayRO.subscribe((v) => {
+      const sum = v?.sum ?? 0;
+      const cur = get(this.previewStore) || { active: true, values: {} };
+      this.previewStore.set({ active: true, values: { ...(cur.values || {}), [this.key]: sum } });
+    });
   }
 
   _commitAndEndSession() {
@@ -136,6 +152,16 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     }
 
     this.sessionActive = false;
+
+    // Clear this attribute from preview; if none left, mark inactive
+    if (this._previewUnsub) { this._previewUnsub(); this._previewUnsub = null; }
+    const cur = get(this.previewStore) || { active: true, values: {} };
+    if (cur?.values && this.key in cur.values) {
+      const nextValues = { ...cur.values };
+      delete nextValues[this.key];
+      const anyLeft = Object.keys(nextValues).length > 0;
+      this.previewStore.set({ active: anyLeft, values: nextValues });
+    }
   }
 
   // Canonical SR3E costs: 2×t up to RML, 3×t above RML

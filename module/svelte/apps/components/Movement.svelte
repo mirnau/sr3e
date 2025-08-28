@@ -7,11 +7,14 @@
    import { shoppingState } from "../../../svelteStore.js";
    import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
    import { StoreManager } from "../../svelteHelpers/StoreManager.svelte";
+   import { flags } from "@services/commonConsts.js";
    import { onDestroy } from "svelte";
 
    let { actor = {}, config = {}, id = {}, span = {} } = $props();
 
    let storeManager = StoreManager.Subscribe(actor);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
    onDestroy(() => StoreManager.Unsubscribe(actor));
 
    let quicknessStore = storeManager.GetSumROStore("attributes.quickness");
@@ -25,8 +28,9 @@
    $effect(() => {
       if (!metatype) return;
       const runningMod = metatype.system.movement.factor ?? 3;
-      $walkingValue = $quicknessStore.sum;
-      $runningValue = Math.floor($quicknessStore.sum * runningMod);
+      const q = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quicknessStore.sum) : $quicknessStore.sum;
+      $walkingValue = q;
+      $runningValue = Math.floor(q * runningMod);
    });
 </script>
 

@@ -10,7 +10,7 @@
   import AttributeCreationShopping from "@services/shopping/AttributeCreationShopping.js";
   import AttributeKarmaShopping from "@services/shopping/AttributeKarmaShopping.js";
 
-  let { actor, localization, key } = $props();
+  let { actor, localization, key, config } = $props();
 
   // StoreManager (local subscribe/unsubscribe)
   let storeManager = StoreManager.Subscribe(actor);
@@ -112,8 +112,9 @@
 
     if (!$isShoppingState) {
       pipeDisplay(valueROStore);       // non-shopping: live actor sum
-      canIncStore.set(false);
-      canDecStore.set(false);
+      // Reinitialize chevron stores (avoid calling .set on a derived store)
+      canIncStore = writable(false);
+      canDecStore = writable(false);
       return;
     }
 
@@ -193,7 +194,7 @@
   async function Roll(e) {
     const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
       actor,
-      args: { attributeKey: key, title: localize(localization[key]) }
+      args: { attributeKey: key, title: localize((localization && localization[key]) ?? (config?.attributes?.[key]) ?? key) }
     });
 
     DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
