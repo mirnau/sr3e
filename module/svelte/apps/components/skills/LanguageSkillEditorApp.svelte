@@ -5,6 +5,8 @@
    import { flags } from "@services/commonConsts.js";
    import { get, set } from "svelte/store";
    import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
+   import LanguageSkillKarmaShopping from "@services/shopping/LanguageSkillKarmaShopping.js";
+   import LanguageSkillCreationShopping from "@services/shopping/LanguageSkillCreationShopping.js";
 
    let { skill, actor, config, app } = $props();
 
@@ -16,6 +18,11 @@
    let languageSkillPointsStore = actorStoreManager.GetRWStore("creation.languagePoints");
 
    let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
+   let isShoppingStateStore = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+   let strategy = null;
+   let uiValue = $state(0);
+   let canInc = $state(false);
+   let canDec = $state(false);
 
    const languageSkillsIdArrayStore = actorStoreManager.GetShallowStore(
       actor.id,
@@ -39,6 +46,29 @@
    $effect(() => {
       skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
       skill.update({ "system.languageSkill.readwrite.value": readWrite }, { render: false });
+   });
+
+   // Strategy wiring for shopping sessions (preview staged value)
+   $effect(() => {
+      try {
+         if (strategy?._unsubDisplay) strategy._unsubDisplay();
+         if (strategy?._unsubCanInc) strategy._unsubCanInc();
+         if (strategy?._unsubCanDec) strategy._unsubCanDec();
+         if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+      } catch {}
+      strategy = null;
+      uiValue = $valueStore;
+
+      if ($isShoppingStateStore) {
+         if ($isCharacterCreationStore) {
+            strategy = new LanguageSkillCreationShopping({ actor, skill, actorStoreManager, itemStoreManager, isShoppingStateStore });
+         } else {
+            strategy = new LanguageSkillKarmaShopping({ actor, skill, actorStoreManager, itemStoreManager, isShoppingStateStore });
+         }
+         strategy._unsubDisplay = strategy.displayBase.subscribe((v) => (uiValue = v ?? $valueStore));
+         strategy._unsubCanInc = strategy.canIncrementRO.subscribe((v) => (canInc = !!v));
+         strategy._unsubCanDec = strategy.canDecrementRO.subscribe((v) => (canDec = !!v));
+      }
    });
 
    async function addNewSpecialization() {
@@ -85,8 +115,8 @@
                   }
                }
             }
-         } else {
-            console.log("TODO: implement karma based shopping");
+         } else if ($isShoppingStateStore && strategy) {
+            strategy.applyIncrement();
          }
       } else {
          ui.notifications.warn(localize(config.notifications.assignattributesfirst));
@@ -110,8 +140,8 @@
                $valueStore -= 1;
                $languageSkillPointsStore += refundForCurrentLevel;
             }
-         } else {
-            console.log("TODO: implement karma based shopping");
+         } else if ($isShoppingStateStore && strategy) {
+            strategy.applyDecrement();
          }
       } else {
          ui.notifications.warn(localize(config.notifications.assignattributesfirst));
@@ -213,7 +243,7 @@
 
                   <div class="stat-card">
                      <div class="stat-card-background"></div>
-                     <h1>{$valueStore}</h1>
+                     <h1>{uiValue}</h1>
                   </div>
 
                   <div class="stat-card">
@@ -236,13 +266,13 @@
                            class="header-control icon sr3e-toolbar-button"
                            aria-label="Increase"
                            onclick={increment}
-                           disabled={disableValueControls}><i class="fa-solid fa-plus"></i></button
+                           disabled={disableValueControls || ($isShoppingStateStore && strategy && !canInc)}><i class="fa-solid fa-plus"></i></button
                         >
                         <button
                            class="header-control icon sr3e-toolbar-button"
                            aria-label="Decrease"
                            onclick={decrement}
-                           disabled={disableValueControls}><i class="fa-solid fa-minus"></i></button
+                           disabled={disableValueControls || ($isShoppingStateStore && strategy && !canDec)}><i class="fa-solid fa-minus"></i></button
                         >
                         <button class="header-control icon sr3e-toolbar-button" aria-label="Delete" onclick={deleteThis}
                            ><i class="fa-solid fa-trash-can"></i></button
