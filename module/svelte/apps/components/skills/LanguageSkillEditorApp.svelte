@@ -85,10 +85,7 @@
          });
          $valueStore -= 1;
       } else {
-         $specializationsStore.push({
-            name: localize(config.skill.newspecialization),
-            value: 0,
-         });
+         if ($isShoppingStateStore && strategy) { strategy.addSpecialization(localize(config.skill.newspecialization)); }
       }
       $specializationsStore = [...$specializationsStore];
       await skill.update({ "system.languageSkill.specializations": $specializationsStore }, { render: false });
@@ -315,3 +312,5 @@
       </div>
    </div>
 </div>
+
+

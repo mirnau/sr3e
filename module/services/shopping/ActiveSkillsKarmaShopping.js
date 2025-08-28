@@ -19,6 +19,7 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     // Staged base
     this.stagedBase = writable(0);
     this.sessionActive = false;
+    this.baselineSpecs = [];
 
     // Display uses staged base directly (no mod for skills)
     this.displayBase = derived([this.stagedBase], ([$b]) => ($b ?? 0));
@@ -42,6 +43,11 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
   _startSession() {
     this.sessionActive = true;
     this.baselineBase = this.currentBase();
+    // snapshot specializations for rollback
+    try {
+      const curSpecs = get(this.specsRW) || [];
+      this.baselineSpecs = Array.isArray(curSpecs) ? curSpecs.map((s) => ({ ...s })) : [];
+    } catch { this.baselineSpecs = []; }
     const sess = get(this.sessionKarma);
     if (!sess?.active) {
       const baseline = Number(get(this.goodKarma) ?? 0);
@@ -71,6 +77,8 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
   rollback() {
     if (!this.sessionActive) return;
     this.stagedBase.set(this.baselineBase);
+    // revert specializations to snapshot
+    try { this.specsRW.set(this.baselineSpecs.map((s) => ({ ...s }))); } catch {}
     const sess = get(this.sessionKarma);
     if (sess?.active) this.sessionKarma.set({ active: false, baseline: 0, stagedSpent: 0 });
     this.sessionActive = false;
@@ -115,5 +123,65 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     this.stagedBase.set(cur - 1);
     const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
     this.sessionKarma.set({ ...sess, active: true, stagedSpent: Math.max(0, (sess.stagedSpent || 0) - refund) });
+  }
+
+  // ---- Specializations (Karma) ----
+  _specs() {
+    try { return Array.isArray(get(this.specsRW)) ? [...get(this.specsRW)] : []; } catch { return []; }
+  }
+
+  _setSpecs(next) {
+    try { this.specsRW.set(Array.isArray(next) ? next.map((s)=>({ ...s })) : []); } catch {}
+  }
+
+  addSpecialization(name = "") {
+    if (!this.sessionActive) return false;
+    const base = Number(get(this.stagedBase) ?? this.baselineBase) || 0;
+    if (base <= 0) return false; // must possess base skill
+    const currentSpecs = this._specs();
+    const maxCount = this.maxSpecializationsAllowed(base);
+    if (currentSpecs.length >= maxCount) return false;
+    const newRating = base + 1;
+    const cost = Math.ceil(this.costForSpecializationTarget(newRating));
+    if (this._availableKarma() < cost) return false;
+    const next = [...currentSpecs, { name, value: newRating }];
+    this._setSpecs(next);
+    const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
+    this.sessionKarma.set({ ...sess, active: true, stagedSpent: (sess.stagedSpent || 0) + cost });
+    return true;
+  }
+
+  incrementSpecialization(specRef) {
+    if (!this.sessionActive || !specRef) return false;
+    const specs = this._specs();
+    const idx = specs.indexOf(specRef);
+    if (idx < 0) return false;
+    const base = Number(get(this.stagedBase) ?? this.baselineBase) || 0;
+    const cur = Number(specs[idx]?.value ?? 0) || 0;
+    const nextRating = cur + 1;
+    if (nextRating > this.maxSpecRating(base)) return false;
+    const cost = Math.ceil(this.costForSpecializationTarget(nextRating));
+    if (this._availableKarma() < cost) return false;
+    specs[idx] = { ...specs[idx], value: nextRating };
+    this._setSpecs(specs);
+    const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
+    this.sessionKarma.set({ ...sess, active: true, stagedSpent: (sess.stagedSpent || 0) + cost });
+    return true;
+  }
+
+  decrementSpecialization(specRef) {
+    if (!this.sessionActive || !specRef) return false;
+    const specs = this._specs();
+    const idx = specs.indexOf(specRef);
+    if (idx < 0) return false;
+    const cur = Number(specs[idx]?.value ?? 0) || 0;
+    const baselineCur = Number((this.baselineSpecs[idx]?.value) ?? 0) || 0;
+    if (cur <= baselineCur) return false;
+    const refund = Math.ceil(this.costForSpecializationTarget(cur));
+    specs[idx] = { ...specs[idx], value: cur - 1 };
+    this._setSpecs(specs);
+    const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
+    this.sessionKarma.set({ ...sess, active: true, stagedSpent: Math.max(0, (sess.stagedSpent || 0) - refund) });
+    return true;
   }
 }

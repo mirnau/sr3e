@@ -16,6 +16,8 @@
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
 
    let intelligence = storeManager.GetSumROStore("attributes.intelligence");
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
    let attributePointsStore = storeManager.GetRWStore("creation.attributePoints");
    let activeSkillPointsStore = storeManager.GetRWStore("creation.activePoints");
    let knowledgePointsStore = storeManager.GetRWStore("creation.knowledgePoints");
@@ -31,10 +33,11 @@
       { value: $languagePointsStore, text: languagePointsText },
    ]);
 
-   // Update dependent values when intelligence changes
+   // Update dependent values when Intelligence changes (use preview during shopping)
    $effect(() => {
-      knowledgePointsStore.set($intelligence.sum * 5);
-      languagePointsStore.set(Math.floor($intelligence.sum * 1.5));
+      const intSum = $isShoppingState ? ($attributePreview?.values?.intelligence ?? $intelligence.sum) : $intelligence.sum;
+      knowledgePointsStore.set((intSum ?? 0) * 5);
+      languagePointsStore.set(Math.floor((intSum ?? 0) * 1.5));
    });
 
    $effect(() => {

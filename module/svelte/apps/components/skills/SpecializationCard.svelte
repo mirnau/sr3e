@@ -41,11 +41,11 @@
    }
 
    function increment() {
-      console.log("increment Entered");
+      dispatch("increment", { specialization });
    }
 
    function decrement() {
-      console.log("decrement Entered");
+      dispatch("decrement", { specialization });
    }
 
    function deleteThis() {

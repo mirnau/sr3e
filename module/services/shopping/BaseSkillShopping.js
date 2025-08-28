@@ -63,11 +63,32 @@ export default class BaseSkillShopping {
   }
 
   // Specializations constraints
-  maxSpecializationsAllowed(baseRating) { return Math.max(0, Number(baseRating || 0)); }
+  // Count limit per rules: cannot exceed linked Attribute rating
+  maxSpecializationsAllowed(_baseRating) { return Math.max(0, Number(this.linkedAttributeSum() || 0)); }
   maxSpecRating(baseRating) {
     const b = Number(baseRating || 0);
     if (b <= 1) return 3; // exception: base 1 allows spec 3
     return 2 * b;
   }
-}
 
+  // Specialization cost factors by type (SR3E examples)
+  specializationFactorFor(targetRating, linkedAttr) {
+    const doubleAttr = (linkedAttr || 0) * 2;
+    if (this.type === "active") {
+      if (targetRating <= (linkedAttr || 0)) return 0.5;
+      if (targetRating <= doubleAttr) return 1.0;
+      return 1.5;
+    } else {
+      // knowledge/language
+      if (targetRating <= (linkedAttr || 0)) return 0.5;
+      if (targetRating <= doubleAttr) return 0.75;
+      return 1.0;
+    }
+  }
+
+  costForSpecializationTarget(newRating) {
+    const linked = this.linkedAttributeSum();
+    const f = this.specializationFactorFor(newRating, linked);
+    return f * newRating;
+  }
+}

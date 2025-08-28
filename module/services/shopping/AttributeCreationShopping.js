@@ -17,6 +17,12 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     // Staged state
     this.stagedBase = writable(0);
     this.stagedSpent = writable(0); // attribute points spent during session
+    // Shared creation pool across all attributes
+    this.sessionPool = storeManager.GetShallowStore(actor.id, "creationAttributeSession", {
+      active: false,
+      baseline: 0,
+      stagedSpent: 0,
+    });
 
     // Live mod for display
     this.modRO = this.storeManager.GetROStore(`attributes.${this.key}.mod`);
@@ -41,7 +47,7 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
   }
 
   dispose() {
-    if (this.sessionActive) this.rollback();
+    // Do not rollback the shared pool here; lifecycle is tied to isShoppingState
     this._sessionUnsub && this._sessionUnsub();
   }
 
@@ -71,7 +77,10 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     const curSpent = get(this.stagedSpent) || 0;
     const curBase = this._currentStagedBase();
     this.stagedBase.set(curBase + 1);
-    this.stagedSpent.set(curSpent + 1);
+    const newSpent = curSpent + 1;
+    this.stagedSpent.set(newSpent);
+    // Update shared pool and live remaining points
+    this._updatePool(+1);
   }
 
   _applyDecrement() {
@@ -79,14 +88,24 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     if (cur <= this.baselineBase) return;
     const curSpent = get(this.stagedSpent) || 0;
     this.stagedBase.set(cur - 1);
-    this.stagedSpent.set(Math.max(0, curSpent - 1));
+    const newSpent = Math.max(0, curSpent - 1);
+    this.stagedSpent.set(newSpent);
+    // Update shared pool and live remaining points
+    this._updatePool(-1);
   }
 
   // --- Session helpers ---
   _startSession() {
     this.sessionActive = true;
     this.baselineBase = get(this.baseRW) || 0;
-    this.baselinePoints = get(this.points) || 0;
+    const pool = get(this.sessionPool);
+    if (!pool?.active) {
+      const baseline = get(this.points) || 0;
+      this.sessionPool.set({ active: true, baseline, stagedSpent: 0 });
+      this.baselinePoints = baseline;
+    } else {
+      this.baselinePoints = pool.baseline ?? (get(this.points) || 0);
+    }
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
 
@@ -106,9 +125,14 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
 
   _commitAndEndSession() {
     const finalBase = get(this.stagedBase) || this.baselineBase;
-    const stagedSpent = get(this.stagedSpent) || 0;
     if (finalBase !== get(this.baseRW)) this.baseRW.set(finalBase);
-    if (stagedSpent !== 0) this.points.set(this.baselinePoints - stagedSpent);
+    const pool = get(this.sessionPool);
+    if (pool?.active) {
+      const totalSpent = Number(pool.stagedSpent || 0);
+      const baseline = Number(pool.baseline || this.baselinePoints || 0);
+      this.points.set(Math.max(0, baseline - totalSpent));
+      this.sessionPool.set({ active: false, baseline: 0, stagedSpent: 0 });
+    }
     this.sessionActive = false;
 
     // Clear this attribute from preview; if none left, mark inactive
@@ -131,6 +155,14 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
     // Discard staged changes
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
+    // Restore shared pool and points
+    const pool = get(this.sessionPool);
+    if (pool?.active) {
+      this.sessionPool.set({ active: false, baseline: 0, stagedSpent: 0 });
+      this.points.set(Number(pool.baseline || this.baselinePoints || 0));
+    } else {
+      this.points.set(this.baselinePoints || 0);
+    }
     this.sessionActive = false;
 
     // Clear this attribute from preview; if none left, mark inactive
@@ -149,7 +181,17 @@ export default class AttributeCreationShopping extends BaseAttributeShopping {
   }
 
   _availablePoints() {
-    const staged = get(this.stagedSpent) || 0;
-    return (this.baselinePoints || 0) - staged;
+    const pool = get(this.sessionPool) || { baseline: this.baselinePoints || 0, stagedSpent: 0 };
+    const baselineVal = (pool.baseline ?? this.baselinePoints ?? 0);
+    const stagedVal = (pool.stagedSpent ?? 0);
+    return baselineVal - stagedVal;
+  }
+
+  _updatePool(delta) {
+    const pool = get(this.sessionPool) || { active: true, baseline: this.baselinePoints || 0, stagedSpent: 0 };
+    const stagedSpent = Math.max(0, (pool.stagedSpent || 0) + delta);
+    const baseline = Number(pool.baseline || this.baselinePoints || 0);
+    this.sessionPool.set({ active: true, baseline, stagedSpent });
+    this.points.set(Math.max(0, baseline - stagedSpent));
   }
 }
