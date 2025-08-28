@@ -9,9 +9,9 @@ function attributeMaximumFromRML(rml) {
 }
 
 export default class AttributeKarmaShopping extends BaseAttributeShopping {
-  constructor({ actor, key, storeManager, rml, disallowRaise, isShoppingStateStore }) {
-    const max = attributeMaximumFromRML(rml);
-    super({ actor, key, storeManager, rml, max, disallowRaise });
+  constructor({ actor, key, storeManager, rml, max, disallowRaise, isShoppingStateStore }) {
+    const computedMax = max ?? attributeMaximumFromRML(rml);
+    super({ actor, key, storeManager, rml, max: computedMax, disallowRaise });
 
     this.goodKarma = storeManager.GetRWStore("karma.goodKarma");
     this.spentKarma = storeManager.GetRWStore("karma.spentKarma");

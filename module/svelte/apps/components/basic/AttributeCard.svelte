@@ -33,6 +33,8 @@
   let rml = $derived(
     key === "magic" || !metatype ? null : (metatype.system.attributeLimits?.[key] ?? null)
   );
+  // Karma purchases can exceed the racial limit up to 1.5× RML
+  let karmaMax = $derived(rml == null ? null : Math.floor(rml * 1.5));
 
   // Resources
   let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
@@ -108,6 +110,7 @@
         key,
         storeManager,
         rml: rml ?? null,
+        max: karmaMax ?? null,
         disallowRaise: disallowKarmaRaise,
         isShoppingStateStore: isShoppingState
       });
