@@ -3,10 +3,7 @@
    import { flags } from "@services/commonConsts.js";
    import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
-   import { mount, unmount } from "svelte";
-   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
-   import SR3ERoll from "@documents/SR3ERoll.js";
-   import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+   import { unmount } from "svelte";
    import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
    let { actor, localization, key } = $props();
