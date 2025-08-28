@@ -1,9 +1,6 @@
-// services/shopping/AttributeKarmaShopping.js
 import { writable, derived, get } from "svelte/store";
 import BaseAttributeShopping from "./BaseAttributeShopping.js";
 
-// If you later want to allow beyond-RML up to Attribute Maximum (≈1.5×RML),
-// change max to attributeMaximumFromRML(rml) here and keep the cost rule.
 function attributeMaximumFromRML(rml) {
   if (rml == null) return null;
   return Math.floor(rml * 1.5);
@@ -11,44 +8,43 @@ function attributeMaximumFromRML(rml) {
 
 export default class AttributeKarmaShopping extends BaseAttributeShopping {
   constructor({ actor, key, storeManager, rml, disallowRaise, isShoppingStateStore }) {
-    // Hard-cap at RML for now (no over-RML buying in karma sessions)
-    const max = rml ?? null;
+    const max = attributeMaximumFromRML(rml);
     super({ actor, key, storeManager, rml, max, disallowRaise });
 
     this.goodKarma = storeManager.GetRWStore("karma.goodKarma");
     this.spentKarma = storeManager.GetRWStore("karma.spentKarma");
-
     this.isShoppingStateStore = isShoppingStateStore;
 
-    // Session state
     this.sessionActive = false;
     this.baselineBase = 0;
     this.baselineGoodKarma = 0;
     this.baselineSpentKarma = 0;
 
-    // Staged values (local to the session)
-    this.stagedBase = storeManager.GetShallowStore(actor.id, `karmaSession:${key}:stagedBase`);
-    this.stagedSpent = storeManager.GetShallowStore(actor.id, `karmaSession:${key}:stagedSpent`, 0);
+    // Use REAL Svelte stores for staging (not StoreManager shallow stores)
+    this.stagedBase = writable(0);
+    this.stagedSpent = writable(0);
 
-    // Use RO mod to compose display sum from staged base
+    // Display during session = stagedBase + live mod
     this.modRO = storeManager.GetROStore(`attributes.${key}.mod`);
     this.displayRO = derived(
       [this.stagedBase, this.modRO],
       ([$b, $m]) => ({ value: $b ?? 0, mod: $m ?? 0, sum: ($b ?? 0) + ($m ?? 0) })
     );
 
-    // React to entering / leaving shopping session
+    // Start/commit when shopping flag flips
     this._sessionUnsub = this.isShoppingStateStore.subscribe((v) => {
-      if (v && !this.sessionActive) {
-        this._startSession();
-      } else if (!v && this.sessionActive) {
-        this._commitAndEndSession();
-      }
+      if (v && !this.sessionActive) this._startSession();
+      else if (!v && this.sessionActive) this._commitAndEndSession();
     });
   }
 
   dispose() {
     this._sessionUnsub && this._sessionUnsub();
+  }
+
+  // IMPORTANT: next target must be based on staged base in Karma sessions
+  nextTarget() {
+    return this._currentStagedBase() + 1;
   }
 
   _startSession() {
@@ -64,9 +60,7 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     const finalBase = get(this.stagedBase);
     const stagedSpent = get(this.stagedSpent);
 
-    const currentBase = get(this.baseRW);
-    if (finalBase !== currentBase) this.baseRW.set(finalBase);
-
+    if (finalBase !== get(this.baseRW)) this.baseRW.set(finalBase);
     if (stagedSpent !== 0) {
       this.goodKarma.set(this.baselineGoodKarma - stagedSpent);
       this.spentKarma.set(this.baselineSpentKarma + stagedSpent);
@@ -75,8 +69,9 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this.sessionActive = false;
   }
 
+  // Canon: 2×t up to RML, 3×t above RML
   costForTarget(t) {
-    // If you later allow beyond-RML, switch to 3×t for t > rml
+    if (this.rml != null && t > this.rml) return 3 * t;
     return 2 * t;
   }
 
@@ -91,7 +86,7 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
 
   _canIncrement(t) {
     if (!this.sessionActive) return false;
-    if (this.disallowRaise) return false; // reaction / magic / essence not purchasable
+    if (this.disallowRaise) return false; // reaction / magic / essence
     if (!this.withinMax(t)) return false;
 
     const cost = this.costForTarget(t);
@@ -100,8 +95,7 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
 
   _canDecrement() {
     if (!this.sessionActive) return false;
-    const cur = this._currentStagedBase();
-    return cur > this.baselineBase;
+    return this._currentStagedBase() > this.baselineBase;
   }
 
   _applyIncrement() {
@@ -120,7 +114,7 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     const cur = this._currentStagedBase();
     if (cur <= this.baselineBase) return;
 
-    const refund = this.costForTarget(cur);
+    const refund = this.costForTarget(cur); // cost of the pip being removed
     const curSpent = get(this.stagedSpent) || 0;
 
     this.stagedBase.set(cur - 1);

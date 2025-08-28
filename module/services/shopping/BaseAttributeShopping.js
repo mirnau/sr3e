@@ -1,21 +1,22 @@
-// services/shopping/BaseAttributeShopping.js
 import { get } from "svelte/store";
 
 export default class BaseAttributeShopping {
-  constructor({ actor, key, storeManager, rml = null, max = null, disallowRaise = false }) {
+  constructor(opts) {
+    const { actor, key, storeManager, rml, max, disallowRaise } = opts || {};
+
     this.actor = actor;
     this.key = key;
     this.storeManager = storeManager;
-    this.rml = rml;
-    this.max = max;
-    this.disallowRaise = disallowRaise;
+    this.rml = rml ?? null;
+    this.max = max ?? null;
+    this.disallowRaise = !!disallowRaise;
 
     this.valueRO = storeManager.GetSumROStore(`attributes.${key}`);
     this.baseRW = storeManager.GetRWStore(`attributes.${key}.value`);
   }
 
   nextTarget() {
-    return get(this.baseRW) + 1;
+    return (get(this.baseRW) || 0) + 1;
   }
 
   withinMax(t) {
@@ -25,7 +26,7 @@ export default class BaseAttributeShopping {
 
   atMin() {
     const v = get(this.valueRO);
-    return v.value <= 1;
+    return (v?.value || 0) <= 1;
   }
 
   computeCanIncrement() {

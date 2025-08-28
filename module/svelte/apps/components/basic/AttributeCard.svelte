@@ -11,7 +11,7 @@
 
   let { actor, localization, key } = $props();
 
-  // Local StoreManager (your pattern)
+  // Local StoreManager (subscribe/unsubscribe locally)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
     StoreManager.Unsubscribe(actor);
@@ -21,8 +21,9 @@
   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-  // Actor values (default display when not in Karma session)
-  let valueROStore = storeManager.GetSumROStore(`attributes.${key}`); // { value, mod, sum }
+  // Actor attribute stores
+  // valueROStore is a SUM RO store that returns { value, mod, sum }
+  let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
 
   // RML from metatype (never for magic)
   let metatype = $derived(actor.items.find((i) => i.type === "metatype") || null);
@@ -30,48 +31,47 @@
     key === "magic" || !metatype ? null : (metatype.system.attributeLimits?.[key] ?? null)
   );
 
-  // Resources we touch to force recompute in Creation mode
+  // Resource stores we touch for reactivity in guards
   let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
   let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma");
-  let spentKarmaStore = storeManager.GetRWStore("karma.spentKarma");
 
-  // Strategy and display store
+  // Strategy instance and which store to display
   let strategy = null;
-
-  // Always a STORE reference for the big number displayed
+  // displayStore is ALWAYS a Svelte store with { value, mod, sum }
+  // - Creation or non-shopping: valueROStore
+  // - Karma session: strategy.displayRO (stagedBase + mod)
   let displayStore = valueROStore;
 
-  // In Karma mode we also keep local refs to the strategy’s SESSION stores
-  // so our $derived guards actually re-run when staged values change.
-  let stagedBaseStore = null;
-  let stagedSpentStore = null;
-
   $effect(() => {
-    // Clean up existing strategy on mode switch
+    // Dispose old strategy if present
     if (strategy && typeof strategy.dispose === "function") {
       strategy.dispose();
     }
     strategy = null;
-    stagedBaseStore = null;
-    stagedSpentStore = null;
 
     if (!$isShoppingState) {
-      displayStore = valueROStore; // non-shopping → live actor sum
+      // Not shopping: show live actor sum
+      displayStore = valueROStore;
       return;
     }
 
-    const disallowKarmaRaise = key === "magic" || key === "essence" || key === "reaction";
+    const disallowKarmaRaise = key === "reaction" || key === "magic" || key === "essence";
+    const disallowCreationRaise = key === "reaction";
 
     if ($isCharacterCreationStore) {
+      // Character creation: immediate apply, capped by RML; reaction is not buyable
       strategy = new AttributeCreationShopping({
         actor,
         key,
         storeManager,
         rml: rml ?? null,
-        max: rml ?? null
+        max: rml ?? null,
+        disallowRaise: disallowCreationRaise
       });
-      displayStore = valueROStore; // creation applies immediately to actor
+      displayStore = valueROStore;
     } else {
+      // Karma session: staged buys, canonical SR3E costs (2× up to RML, 3× above RML),
+      // cap at Attribute Maximum (computed in strategy), not buyable: reaction/magic/essence
       strategy = new AttributeKarmaShopping({
         actor,
         key,
@@ -80,27 +80,25 @@
         disallowRaise: disallowKarmaRaise,
         isShoppingStateStore: isShoppingState
       });
-      // Pull session stores so the template reacts to staging
-      stagedBaseStore = strategy.stagedBase;   // store
-      stagedSpentStore = strategy.stagedSpent; // store
-      displayStore = strategy.displayRO || valueROStore; // store
+      displayStore = strategy.displayRO || valueROStore;
     }
   });
 
-  // Guards — plain booleans (never use $ on them)
+  // Chevron guards (plain booleans; do NOT use $ on them)
+  // Each guard "touches" stores so it recomputes when relevant data changes.
   let canIncrement = $derived(() => {
     if (!$isShoppingState) return false;
     if (!strategy) return false;
 
-    // Touch relevant stores so this recomputes:
     if ($isCharacterCreationStore) {
+      // Re-run when the actor's displayed sum or creation points change
       const _sum = $valueROStore.sum;
       const _pts = $creationPointsStore;
       return strategy.computeCanIncrement();
     } else {
-      // Karma session: re-run on staged changes, not live karma (we use baseline inside strategy)
-      const _stagedBase = stagedBaseStore ? $stagedBaseStore : 0;
-      const _stagedSpent = stagedSpentStore ? $stagedSpentStore : 0;
+      // Re-run when the staged display sum changes (stagedBase + mod) or good karma changes
+      const _stagedSum = $displayStore.sum;
+      const _good = $goodKarmaStore;
       return strategy.computeCanIncrement();
     }
   });
@@ -113,7 +111,7 @@
       const _sum = $valueROStore.sum;
       return strategy.computeCanDecrement();
     } else {
-      const _stagedBase = stagedBaseStore ? $stagedBaseStore : 0;
+      const _stagedSum = $displayStore.sum;
       return strategy.computeCanDecrement();
     }
   });
@@ -128,6 +126,7 @@
     strategy.applyDecrement();
   }
 
+  // Modal / escape handling (unchanged)
   let activeModal = null;
 
   function handleEscape(e) {
@@ -147,6 +146,7 @@
     }
   });
 
+  // Non-shopping rolls (unchanged)
   async function Roll(e) {
     const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
       actor,
@@ -177,30 +177,26 @@
     <div class="stat-card-background"></div>
 
     <div class="stat-label">
-      {#if key !== "reaction"}
-        <i
-          class="fa-solid fa-circle-chevron-down decrement-attribute {canDecrement ? '' : 'disabled'}"
-          role="button"
-          tabindex="0"
-          onclick={decrement}
-          onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-          title={canDecrement ? "" : "At minimum for this session"}
-        ></i>
-      {/if}
+      <i
+        class="fa-solid fa-circle-chevron-down decrement-attribute {canDecrement ? '' : 'disabled'}"
+        role="button"
+        tabindex="0"
+        onclick={decrement}
+        onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+        title={canDecrement ? "" : "At minimum for this session"}
+      ></i>
 
-      <!-- displayStore is ALWAYS a store -->
+      <!-- displayStore is ALWAYS a store; safe to use $displayStore.sum -->
       <h1 class="stat-value">{$displayStore.sum}</h1>
 
-      {#if key !== "reaction"}
-        <i
-          class="fa-solid fa-circle-chevron-up increment-attribute {canIncrement ? '' : 'disabled'}"
-          role="button"
-          tabindex="0"
-          onclick={increment}
-          onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-          title={canIncrement ? "" : "Cap reached or not enough Karma"}
-        ></i>
-      {/if}
+      <i
+        class="fa-solid fa-circle-chevron-up increment-attribute {canIncrement ? '' : 'disabled'}"
+        role="button"
+        tabindex="0"
+        onclick={increment}
+        onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+        title={canIncrement ? "" : "Cap reached or not enough Karma"}
+      ></i>
     </div>
   </div>
 {:else}
