@@ -27,9 +27,9 @@
    let reactionValue = storeManager.GetRWStore("attributes.reaction.value");
 
    $effect(() => {
-      const prevInt = $isShoppingState ? ($attributePreview?.values?.intelligence ?? $intelligence.sum) : $intelligence.sum;
-      const prevQui = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quickness.sum) : $quickness.sum;
-      $reactionValue = Math.floor((prevInt + prevQui) * 0.5);
+      const prevIntelligence = $isShoppingState ? ($attributePreview?.values?.intelligence ?? $intelligence.sum) : $intelligence.sum;
+      const prevQuickness = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quickness.sum) : $quickness.sum;
+      $reactionValue = Math.floor((prevIntelligence + prevQuickness) * 0.5);
    });
 
    $effect(() => {

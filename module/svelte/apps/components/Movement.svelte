@@ -28,9 +28,9 @@
    $effect(() => {
       if (!metatype) return;
       const runningMod = metatype.system.movement.factor ?? 3;
-      const q = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quicknessStore.sum) : $quicknessStore.sum;
-      $walkingValue = q;
-      $runningValue = Math.floor(q * runningMod);
+      const quicknessPreview = $isShoppingState ? ($attributePreview?.values?.quickness ?? $quicknessStore.sum) : $quicknessStore.sum;
+      $walkingValue = quicknessPreview;
+      $runningValue = Math.floor(quicknessPreview * runningMod);
    });
 </script>
 

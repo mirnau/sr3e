@@ -3,7 +3,7 @@
    import { flags } from "@services/commonConsts.js";
    import CreationPointList from "@sveltecomponent/CreationPointList.svelte";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
-   import { onDestroy } from "svelte";
+   import { onDestroy, tick } from "svelte";
 
    let { actor, config } = $props();
 
@@ -14,9 +14,9 @@
    let storeManager = StoreManager.Subscribe(actor);
 
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
 
    let intelligence = storeManager.GetSumROStore("attributes.intelligence");
-   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
    let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
    let attributePointsStore = storeManager.GetRWStore("creation.attributePoints");
    let activeSkillPointsStore = storeManager.GetRWStore("creation.activePoints");
@@ -60,8 +60,16 @@
             });
 
             if (confirmed) {
-               actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, true);
+               // Flip shopping off to commit all staged attribute sessions while cards are mounted
+               $isShoppingState = false;
+               await tick();
+
+               // Lock attribute assignment (switch UI to skills)
+               await actor.setFlag(flags.sr3e, flags.actor.attributeAssignmentLocked, true);
                $attributeAssignmentLocked = true;
+
+               // Re-enable shopping for the skills phase
+               $isShoppingState = true;
             }
          })();
       }
@@ -73,3 +81,6 @@
 </script>
 
 <CreationPointList points={pointList} containerCSS={"attribute-point-assignment"} />
+
+
+

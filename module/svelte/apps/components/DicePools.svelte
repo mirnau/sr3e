@@ -43,18 +43,18 @@
    let spellValueStore = storeManager.GetRWStore("dicePools.spell.value");
 
    $effect(() => {
-      const A = (k, fall) => $isShoppingState ? ($attributePreview?.values?.[k] ?? fall) : fall;
-      const i = A("intelligence", $intelligence.sum);
-      const q = A("quickness", $quickness.sum);
-      const w = A("willpower", $willpower.sum);
-      const c = A("charisma", $charisma.sum);
-      const m = A("magic", $magic.sum);
-      const reactionPreview = Math.floor((i + q) * 0.5);
+      const previewOrFallback = (key, fallback) => $isShoppingState ? ($attributePreview?.values?.[key] ?? fallback) : fallback;
+      const intelligenceValue = previewOrFallback("intelligence", $intelligence.sum);
+      const quicknessValue = previewOrFallback("quickness", $quickness.sum);
+      const willpowerValue = previewOrFallback("willpower", $willpower.sum);
+      const charismaValue = previewOrFallback("charisma", $charisma.sum);
+      const magicValue = previewOrFallback("magic", $magic.sum);
+      const reactionPreview = Math.floor((intelligenceValue + quicknessValue) * 0.5);
 
-      $controlValueStore = reactionPreview;
-      $combatValueStore = Math.floor((i + q + w) * 0.5);
-      $astralValueStore = Math.floor((i + c + w) * 0.5);
-      $spellValueStore = Math.floor((i + m + w) * 0.5);
+      $controlValueStore = reactionPreview;                                   // preview Reaction
+      $combatValueStore = Math.floor((intelligenceValue + quicknessValue + willpowerValue) * 0.5); // (/2)
+      $astralValueStore = Math.floor((intelligenceValue + charismaValue + willpowerValue) * 0.5);  // (/2)
+      $spellValueStore = Math.floor((intelligenceValue + magicValue + willpowerValue) / 3);        // (/3)
    });
 
    onDestroy(() => {

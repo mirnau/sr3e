@@ -15,13 +15,9 @@
   // StoreManager (local subscribe/unsubscribe)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
-    // If shopping session is active and we're in Karma mode, roll back on close.
-    // For creation mode we keep the shared session pool intact.
+    // Only roll back on close for Karma mode; creation is committed via the manager flow.
     try {
-      if (
-        strategy && typeof strategy.rollback === "function" &&
-        get(isShoppingState) && !get(isCharacterCreationStore)
-      ) {
+      if (strategy && typeof strategy.rollback === "function" && get(isShoppingState) && !get(isCharacterCreationStore)) {
         strategy.rollback();
       }
     } catch {}
@@ -264,3 +260,4 @@
     </div>
   </div>
 {/if}
+
