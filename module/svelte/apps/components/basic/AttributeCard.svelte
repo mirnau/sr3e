@@ -4,14 +4,17 @@
   import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
   import { onDestroy } from "svelte";
   import { unmount } from "svelte";
+  import { writable } from "svelte/store";
   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
   import AttributeCreationShopping from "@services/shopping/AttributeCreationShopping.js";
   import AttributeKarmaShopping from "@services/shopping/AttributeKarmaShopping.js";
 
+  const TRACE = false;
+
   let { actor, localization, key } = $props();
 
-  // Local StoreManager (subscribe/unsubscribe locally)
+  // Local StoreManager (your pattern)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
     StoreManager.Unsubscribe(actor);
@@ -22,7 +25,7 @@
   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
   // Actor attribute stores
-  // valueROStore is a SUM RO store that returns { value, mod, sum }
+  // Sum RO store that yields { value, mod, sum }
   let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
 
   // RML from metatype (never for magic)
@@ -31,27 +34,57 @@
     key === "magic" || !metatype ? null : (metatype.system.attributeLimits?.[key] ?? null)
   );
 
-  // Resource stores we touch for reactivity in guards
+  // Resources
   let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
   let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma");
 
-  // Strategy instance and which store to display
+  // Strategy instance
   let strategy = null;
-  // displayStore is ALWAYS a Svelte store with { value, mod, sum }
-  // - Creation or non-shopping: valueROStore
-  // - Karma session: strategy.displayRO (stagedBase + mod)
-  let displayStore = valueROStore;
 
-  $effect(() => {
-    // Dispose old strategy if present
-    if (strategy && typeof strategy.dispose === "function") {
-      strategy.dispose();
+  // --- A STABLE UI store that the template always reads from ---
+  // We pipe the appropriate source into this store on mode changes.
+  const uiDisplay = writable({ value: 0, mod: 0, sum: 0 });
+
+  // Keep active subscription cleanup
+  let _unsubDisplay = null;
+
+  function _pipeDisplay(fromStore) {
+    // Clean old subscription
+    _unsubDisplay && _unsubDisplay();
+    _unsubDisplay = null;
+
+    if (!fromStore || typeof fromStore.subscribe !== "function") {
+      // Fallback to zeros to avoid runtime errors
+      uiDisplay.set({ value: 0, mod: 0, sum: 0 });
+      return;
     }
+    // Pipe source store into the stable uiDisplay store
+    _unsubDisplay = fromStore.subscribe((v) => {
+      // Some Get* stores in this codebase return plain numbers or objects.
+      // Normalize to { value, mod, sum } for the template.
+      if (v && typeof v === "object" && "sum" in v) {
+        uiDisplay.set({ value: v.value ?? 0, mod: v.mod ?? 0, sum: v.sum ?? 0 });
+      } else if (typeof v === "number") {
+        uiDisplay.set({ value: v, mod: 0, sum: v });
+      } else {
+        uiDisplay.set({ value: 0, mod: 0, sum: 0 });
+      }
+    });
+  }
+
+  onDestroy(() => {
+    _unsubDisplay && _unsubDisplay();
+    _unsubDisplay = null;
+  });
+
+  // Strategy wiring + display source routing
+  $effect(() => {
+    if (strategy && typeof strategy.dispose === "function") strategy.dispose();
     strategy = null;
 
     if (!$isShoppingState) {
-      // Not shopping: show live actor sum
-      displayStore = valueROStore;
+      TRACE && console.log(`[Card] not shopping — show live actor sum`);
+      _pipeDisplay(valueROStore);
       return;
     }
 
@@ -59,7 +92,6 @@
     const disallowCreationRaise = key === "reaction";
 
     if ($isCharacterCreationStore) {
-      // Character creation: immediate apply, capped by RML; reaction is not buyable
       strategy = new AttributeCreationShopping({
         actor,
         key,
@@ -68,10 +100,9 @@
         max: rml ?? null,
         disallowRaise: disallowCreationRaise
       });
-      displayStore = valueROStore;
+      TRACE && console.log(`[Card] creation strategy for ${key} (RML=${rml ?? "n/a"})`);
+      _pipeDisplay(valueROStore); // creation changes actor immediately
     } else {
-      // Karma session: staged buys, canonical SR3E costs (2× up to RML, 3× above RML),
-      // cap at Attribute Maximum (computed in strategy), not buyable: reaction/magic/essence
       strategy = new AttributeKarmaShopping({
         actor,
         key,
@@ -80,26 +111,28 @@
         disallowRaise: disallowKarmaRaise,
         isShoppingStateStore: isShoppingState
       });
-      displayStore = strategy.displayRO || valueROStore;
+      TRACE && console.log(`[Card] karma strategy for ${key} (RML=${rml ?? "n/a"})`);
+      _pipeDisplay(strategy.displayRO); // stagedBase + mod
     }
   });
 
-  // Chevron guards (plain booleans; do NOT use $ on them)
-  // Each guard "touches" stores so it recomputes when relevant data changes.
+  // Chevron guards — booleans computed from stable, always-existing stores
   let canIncrement = $derived(() => {
     if (!$isShoppingState) return false;
     if (!strategy) return false;
 
     if ($isCharacterCreationStore) {
-      // Re-run when the actor's displayed sum or creation points change
       const _sum = $valueROStore.sum;
       const _pts = $creationPointsStore;
-      return strategy.computeCanIncrement();
+      const ok = strategy.computeCanIncrement();
+      TRACE && console.log(`[Card:canUp][creation] ${ok}`);
+      return ok;
     } else {
-      // Re-run when the staged display sum changes (stagedBase + mod) or good karma changes
-      const _stagedSum = $displayStore.sum;
-      const _good = $goodKarmaStore;
-      return strategy.computeCanIncrement();
+      const _stagedSum = $uiDisplay.sum; // reacts when stagedBase changes
+      const _good = $goodKarmaStore;     // reacts when good karma changes
+      const ok = strategy.computeCanIncrement();
+      TRACE && console.log(`[Card:canUp][karma] ${ok}`);
+      return ok;
     }
   });
 
@@ -109,19 +142,25 @@
 
     if ($isCharacterCreationStore) {
       const _sum = $valueROStore.sum;
-      return strategy.computeCanDecrement();
+      const ok = strategy.computeCanDecrement();
+      TRACE && console.log(`[Card:canDown][creation] ${ok}`);
+      return ok;
     } else {
-      const _stagedSum = $displayStore.sum;
-      return strategy.computeCanDecrement();
+      const _stagedSum = $uiDisplay.sum; // reacts when stagedBase changes
+      const ok = strategy.computeCanDecrement();
+      TRACE && console.log(`[Card:canDown][karma] ${ok}`);
+      return ok;
     }
   });
 
   function increment() {
+    TRACE && console.log(`[Card:click up] ${key}`);
     if (!strategy) return;
     strategy.applyIncrement();
   }
 
   function decrement() {
+    TRACE && console.log(`[Card:click down] ${key}`);
     if (!strategy) return;
     strategy.applyDecrement();
   }
@@ -186,8 +225,8 @@
         title={canDecrement ? "" : "At minimum for this session"}
       ></i>
 
-      <!-- displayStore is ALWAYS a store; safe to use $displayStore.sum -->
-      <h1 class="stat-value">{$displayStore.sum}</h1>
+      <!-- uiDisplay is ALWAYS a store; safe to use $uiDisplay.sum -->
+      <h1 class="stat-value">{$uiDisplay.sum}</h1>
 
       <i
         class="fa-solid fa-circle-chevron-up increment-attribute {canIncrement ? '' : 'disabled'}"

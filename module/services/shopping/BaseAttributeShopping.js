@@ -11,10 +11,11 @@ export default class BaseAttributeShopping {
     this.max = max ?? null;
     this.disallowRaise = !!disallowRaise;
 
-    this.valueRO = storeManager.GetSumROStore(`attributes.${key}`);
-    this.baseRW = storeManager.GetRWStore(`attributes.${key}.value`);
+    this.valueRO = storeManager.GetSumROStore(`attributes.${key}`);       // { value, mod, sum } store
+    this.baseRW = storeManager.GetRWStore(`attributes.${key}.value`);     // number store
   }
 
+  // Creation uses actor base; Karma overrides this to staged base.
   nextTarget() {
     return (get(this.baseRW) || 0) + 1;
   }
@@ -50,6 +51,7 @@ export default class BaseAttributeShopping {
     this._applyDecrement();
   }
 
+  // Hooks for subclasses
   _canIncrement(_t) { return false; }
   _canDecrement() { return false; }
   _applyIncrement() {}

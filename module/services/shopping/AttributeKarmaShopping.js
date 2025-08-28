@@ -1,6 +1,8 @@
 import { writable, derived, get } from "svelte/store";
 import BaseAttributeShopping from "./BaseAttributeShopping.js";
 
+const TRACE = true;
+
 function attributeMaximumFromRML(rml) {
   if (rml == null) return null;
   return Math.floor(rml * 1.5);
@@ -20,18 +22,17 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this.baselineGoodKarma = 0;
     this.baselineSpentKarma = 0;
 
-    // Use REAL Svelte stores for staging (not StoreManager shallow stores)
+    // Staged values MUST be real Svelte stores to trigger reactivity
     this.stagedBase = writable(0);
     this.stagedSpent = writable(0);
 
     // Display during session = stagedBase + live mod
-    this.modRO = storeManager.GetROStore(`attributes.${key}.mod`);
+    this.modRO = this.storeManager.GetROStore(`attributes.${this.key}.mod`);
     this.displayRO = derived(
       [this.stagedBase, this.modRO],
       ([$b, $m]) => ({ value: $b ?? 0, mod: $m ?? 0, sum: ($b ?? 0) + ($m ?? 0) })
     );
 
-    // Start/commit when shopping flag flips
     this._sessionUnsub = this.isShoppingStateStore.subscribe((v) => {
       if (v && !this.sessionActive) this._startSession();
       else if (!v && this.sessionActive) this._commitAndEndSession();
@@ -42,7 +43,7 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this._sessionUnsub && this._sessionUnsub();
   }
 
-  // IMPORTANT: next target must be based on staged base in Karma sessions
+  // Use STAGED base in Karma mode
   nextTarget() {
     return this._currentStagedBase() + 1;
   }
@@ -54,6 +55,8 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this.baselineSpentKarma = get(this.spentKarma);
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
+
+    TRACE && console.log(`[KarmaSession:start] key=${this.key} base=${this.baselineBase} goodKarma=${this.baselineGoodKarma}`);
   }
 
   _commitAndEndSession() {
@@ -65,6 +68,8 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
       this.goodKarma.set(this.baselineGoodKarma - stagedSpent);
       this.spentKarma.set(this.baselineSpentKarma + stagedSpent);
     }
+
+    TRACE && console.log(`[KarmaSession:commit] key=${this.key} finalBase=${finalBase} spent=${stagedSpent}`);
 
     this.sessionActive = false;
   }
@@ -85,17 +90,34 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
   }
 
   _canIncrement(t) {
-    if (!this.sessionActive) return false;
-    if (this.disallowRaise) return false; // reaction / magic / essence
-    if (!this.withinMax(t)) return false;
+    if (!this.sessionActive) {
+      TRACE && console.log(`[Karma:canUp] false — session inactive`);
+      return false;
+    }
+    if (this.disallowRaise) {
+      TRACE && console.log(`[Karma:canUp] false — disallowRaise for ${this.key}`);
+      return false;
+    }
+    if (!this.withinMax(t)) {
+      TRACE && console.log(`[Karma:canUp] false — at cap (max=${this.max}) target=${t}`);
+      return false;
+    }
 
     const cost = this.costForTarget(t);
-    return this._availableKarma() >= cost;
+    const ok = this._availableKarma() >= cost;
+    TRACE && console.log(`[Karma:canUp] ${ok} — next=${t} cost=${cost} available=${this._availableKarma()}`);
+    return ok;
   }
 
   _canDecrement() {
-    if (!this.sessionActive) return false;
-    return this._currentStagedBase() > this.baselineBase;
+    if (!this.sessionActive) {
+      TRACE && console.log(`[Karma:canDown] false — session inactive`);
+      return false;
+    }
+    const cur = this._currentStagedBase();
+    const ok = cur > this.baselineBase;
+    TRACE && console.log(`[Karma:canDown] ${ok} — staged=${cur} baseline=${this.baselineBase}`);
+    return ok;
   }
 
   _applyIncrement() {
@@ -108,16 +130,20 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
 
     this.stagedBase.set(curBase + 1);
     this.stagedSpent.set(curSpent + cost);
+
+    TRACE && console.log(`[Karma:up] to ${curBase + 1} (spent +${cost} → ${curSpent + cost})`);
   }
 
   _applyDecrement() {
     const cur = this._currentStagedBase();
     if (cur <= this.baselineBase) return;
 
-    const refund = this.costForTarget(cur); // cost of the pip being removed
+    const refund = this.costForTarget(cur);
     const curSpent = get(this.stagedSpent) || 0;
 
     this.stagedBase.set(cur - 1);
     this.stagedSpent.set(curSpent - refund);
+
+    TRACE && console.log(`[Karma:down] to ${cur - 1} (refund ${refund} → spent ${curSpent - refund})`);
   }
 }
