@@ -15,9 +15,10 @@
   // StoreManager (local subscribe/unsubscribe)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
-    // Only roll back on close for Karma mode; creation is committed via the manager flow.
+    // Roll back uncommitted sessions on close for both creation and karma
+    // (manager commit path flips isShoppingState=false beforehand, so this will not fire on commit).
     try {
-      if (strategy && typeof strategy.rollback === "function" && get(isShoppingState) && !get(isCharacterCreationStore)) {
+      if (strategy && typeof strategy.rollback === "function" && get(isShoppingState)) {
         strategy.rollback();
       }
     } catch {}
@@ -120,6 +121,14 @@
     const disallowCreationRaise = key === "reaction";
 
     if ($isCharacterCreationStore) {
+      // Reaction is derived; in creation preview we display its live value store
+      // (which is written by the Attributes container effect) and disable chevrons.
+      if (key === "reaction") {
+        pipeDisplay(valueROStore);
+        canIncStore = writable(false);
+        canDecStore = writable(false);
+        return;
+      }
       strategy = new AttributeCreationShopping({
         actor,
         key,

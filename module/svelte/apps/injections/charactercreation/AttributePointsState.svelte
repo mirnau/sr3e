@@ -24,6 +24,8 @@
    let languagePointsStore = storeManager.GetRWStore("creation.languagePoints");
 
    console.log("NEW ACTOR", actor);
+   // Guard to prevent double-prompting when attr points hit 0
+   let promptInFlight = false;
 
    // Make pointList reactive by using derived stores
    let pointList = $derived([
@@ -41,7 +43,8 @@
    });
 
    $effect(() => {
-      if ($attributePointsStore === 0 && $attributeAssignmentLocked === false) {
+      if ($attributePointsStore === 0 && $attributeAssignmentLocked === false && !promptInFlight) {
+         promptInFlight = true;
          (async () => {
             const confirmed = await foundry.applications.api.DialogV2.confirm({
                window: {
@@ -71,6 +74,7 @@
                // Re-enable shopping for the skills phase
                $isShoppingState = true;
             }
+            promptInFlight = false;
          })();
       }
    });
