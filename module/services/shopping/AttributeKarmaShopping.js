@@ -1,30 +1,35 @@
+// services/shopping/AttributeKarmaShopping.js
 import { writable, derived, get } from "svelte/store";
 import BaseAttributeShopping from "./BaseAttributeShopping.js";
 
-const TRACE = true;
-
 function attributeMaximumFromRML(rml) {
   if (rml == null) return null;
-  return Math.floor(rml * 1.5);
+  // Attribute Maximum is 1.5 × RML — round up so 5→8, 6→9, etc.
+  return Math.ceil(rml * 1.5);
 }
 
 export default class AttributeKarmaShopping extends BaseAttributeShopping {
   constructor({ actor, key, storeManager, rml, disallowRaise, isShoppingStateStore }) {
-    const max = attributeMaximumFromRML(rml);
+    const max = attributeMaximumFromRML(rml); // hard cap at Attribute Maximum (from RML)
     super({ actor, key, storeManager, rml, max, disallowRaise });
 
+    // Actor resources
     this.goodKarma = storeManager.GetRWStore("karma.goodKarma");
     this.spentKarma = storeManager.GetRWStore("karma.spentKarma");
-    this.isShoppingStateStore = isShoppingStateStore;
 
+    // Session wiring
+    this.isShoppingStateStore = isShoppingStateStore;
     this.sessionActive = false;
     this.baselineBase = 0;
     this.baselineGoodKarma = 0;
     this.baselineSpentKarma = 0;
 
-    // Staged values MUST be real Svelte stores to trigger reactivity
+    // Staged state (real Svelte stores)
     this.stagedBase = writable(0);
     this.stagedSpent = writable(0);
+
+    // Keep baseline as store so preview recomputes after session start
+    this.baselineGoodKarmaRO = writable(0);
 
     // Display during session = stagedBase + live mod
     this.modRO = this.storeManager.GetROStore(`attributes.${this.key}.mod`);
@@ -33,6 +38,26 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
       ([$b, $m]) => ({ value: $b ?? 0, mod: $m ?? 0, sum: ($b ?? 0) + ($m ?? 0) })
     );
 
+    // Chevron booleans as stores → stable, reactive bindings for the UI
+    this.canIncrementRO = derived(
+      [this.stagedBase, this.goodKarma],
+      () => this.computeCanIncrement()
+    );
+    this.canDecrementRO = derived(
+      [this.stagedBase],
+      () => this.computeCanDecrement()
+    );
+
+    // Live Good Karma preview while staging
+    this.goodKarmaDisplayRO = derived(
+      [this.isShoppingStateStore, this.baselineGoodKarmaRO, this.stagedSpent, this.goodKarma],
+      ([$shopping, $baseline, $stagedSpent, $good]) => {
+        if ($shopping) return ($baseline ?? 0) - ($stagedSpent ?? 0);
+        return $good ?? 0;
+      }
+    );
+
+    // Start/commit session on shopping flag changes
     this._sessionUnsub = this.isShoppingStateStore.subscribe((v) => {
       if (v && !this.sessionActive) this._startSession();
       else if (!v && this.sessionActive) this._commitAndEndSession();
@@ -53,10 +78,10 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
     this.baselineBase = get(this.baseRW);
     this.baselineGoodKarma = get(this.goodKarma);
     this.baselineSpentKarma = get(this.spentKarma);
+
     this.stagedBase.set(this.baselineBase);
     this.stagedSpent.set(0);
-
-    TRACE && console.log(`[KarmaSession:start] key=${this.key} base=${this.baselineBase} goodKarma=${this.baselineGoodKarma}`);
+    this.baselineGoodKarmaRO.set(this.baselineGoodKarma);
   }
 
   _commitAndEndSession() {
@@ -69,12 +94,10 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
       this.spentKarma.set(this.baselineSpentKarma + stagedSpent);
     }
 
-    TRACE && console.log(`[KarmaSession:commit] key=${this.key} finalBase=${finalBase} spent=${stagedSpent}`);
-
     this.sessionActive = false;
   }
 
-  // Canon: 2×t up to RML, 3×t above RML
+  // Canonical SR3E costs: 2×t up to RML, 3×t above RML
   costForTarget(t) {
     if (this.rml != null && t > this.rml) return 3 * t;
     return 2 * t;
@@ -90,34 +113,17 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
   }
 
   _canIncrement(t) {
-    if (!this.sessionActive) {
-      TRACE && console.log(`[Karma:canUp] false — session inactive`);
-      return false;
-    }
-    if (this.disallowRaise) {
-      TRACE && console.log(`[Karma:canUp] false — disallowRaise for ${this.key}`);
-      return false;
-    }
-    if (!this.withinMax(t)) {
-      TRACE && console.log(`[Karma:canUp] false — at cap (max=${this.max}) target=${t}`);
-      return false;
-    }
-
+    if (!this.sessionActive) return false;
+    if (this.disallowRaise) return false;         // reaction / magic / essence not buyable
+    if (!this.withinMax(t)) return false;         // hard cap at Attribute Maximum (from RML)
     const cost = this.costForTarget(t);
-    const ok = this._availableKarma() >= cost;
-    TRACE && console.log(`[Karma:canUp] ${ok} — next=${t} cost=${cost} available=${this._availableKarma()}`);
-    return ok;
+    return this._availableKarma() >= cost;        // affordability
   }
 
   _canDecrement() {
-    if (!this.sessionActive) {
-      TRACE && console.log(`[Karma:canDown] false — session inactive`);
-      return false;
-    }
+    if (!this.sessionActive) return false;
     const cur = this._currentStagedBase();
-    const ok = cur > this.baselineBase;
-    TRACE && console.log(`[Karma:canDown] ${ok} — staged=${cur} baseline=${this.baselineBase}`);
-    return ok;
+    return cur > this.baselineBase;               // min is the session baseline
   }
 
   _applyIncrement() {
@@ -130,20 +136,16 @@ export default class AttributeKarmaShopping extends BaseAttributeShopping {
 
     this.stagedBase.set(curBase + 1);
     this.stagedSpent.set(curSpent + cost);
-
-    TRACE && console.log(`[Karma:up] to ${curBase + 1} (spent +${cost} → ${curSpent + cost})`);
   }
 
   _applyDecrement() {
     const cur = this._currentStagedBase();
     if (cur <= this.baselineBase) return;
 
-    const refund = this.costForTarget(cur);
+    const refund = this.costForTarget(cur);       // cost of the point being removed
     const curSpent = get(this.stagedSpent) || 0;
 
     this.stagedBase.set(cur - 1);
     this.stagedSpent.set(curSpent - refund);
-
-    TRACE && console.log(`[Karma:down] to ${cur - 1} (refund ${refund} → spent ${curSpent - refund})`);
   }
 }

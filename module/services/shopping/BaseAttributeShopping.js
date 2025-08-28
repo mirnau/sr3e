@@ -1,4 +1,4 @@
-import { get } from "svelte/store";
+import { get, writable, derived } from "svelte/store";
 
 export default class BaseAttributeShopping {
   constructor(opts) {
@@ -11,11 +11,16 @@ export default class BaseAttributeShopping {
     this.max = max ?? null;
     this.disallowRaise = !!disallowRaise;
 
-    this.valueRO = storeManager.GetSumROStore(`attributes.${key}`);       // { value, mod, sum } store
-    this.baseRW = storeManager.GetRWStore(`attributes.${key}.value`);     // number store
+    // Actor stores
+    this.valueRO = storeManager.GetSumROStore(`attributes.${key}`);     // { value, mod, sum }
+    this.baseRW  = storeManager.GetRWStore(`attributes.${key}.value`);  // number
+
+    // These derived booleans are provided by subclasses (we init to safe stores).
+    this.canIncrementRO = writable(false);
+    this.canDecrementRO = writable(false);
   }
 
-  // Creation uses actor base; Karma overrides this to staged base.
+  // Creation uses actor base; Karma overrides to use staged base.
   nextTarget() {
     return (get(this.baseRW) || 0) + 1;
   }

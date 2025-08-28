@@ -10,11 +10,9 @@
   import AttributeCreationShopping from "@services/shopping/AttributeCreationShopping.js";
   import AttributeKarmaShopping from "@services/shopping/AttributeKarmaShopping.js";
 
-  const TRACE = false;
-
   let { actor, localization, key } = $props();
 
-  // Local StoreManager (your pattern)
+  // StoreManager (local subscribe/unsubscribe)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
     StoreManager.Unsubscribe(actor);
@@ -25,8 +23,7 @@
   let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
   // Actor attribute stores
-  // Sum RO store that yields { value, mod, sum }
-  let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
+  let valueROStore = storeManager.GetSumROStore(`attributes.${key}`); // { value, mod, sum }
 
   // RML from metatype (never for magic)
   let metatype = $derived(actor.items.find((i) => i.type === "metatype") || null);
@@ -34,34 +31,30 @@
     key === "magic" || !metatype ? null : (metatype.system.attributeLimits?.[key] ?? null)
   );
 
-  // Resources
+  // Resources we “touch” to recompute
   let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
-  let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma");
+  let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma"); // int field in model
 
   // Strategy instance
   let strategy = null;
 
-  // --- A STABLE UI store that the template always reads from ---
-  // We pipe the appropriate source into this store on mode changes.
+  // Stable UI store for the big number; we pipe the source into it.
   const uiDisplay = writable({ value: 0, mod: 0, sum: 0 });
+  let unsubDisplay = null;
 
-  // Keep active subscription cleanup
-  let _unsubDisplay = null;
+  // Chevron boolean stores provided by the strategy
+  let canIncStore = writable(false);
+  let canDecStore = writable(false);
 
-  function _pipeDisplay(fromStore) {
-    // Clean old subscription
-    _unsubDisplay && _unsubDisplay();
-    _unsubDisplay = null;
+  function pipeDisplay(fromStore) {
+    unsubDisplay && unsubDisplay();
+    unsubDisplay = null;
 
     if (!fromStore || typeof fromStore.subscribe !== "function") {
-      // Fallback to zeros to avoid runtime errors
       uiDisplay.set({ value: 0, mod: 0, sum: 0 });
       return;
     }
-    // Pipe source store into the stable uiDisplay store
-    _unsubDisplay = fromStore.subscribe((v) => {
-      // Some Get* stores in this codebase return plain numbers or objects.
-      // Normalize to { value, mod, sum } for the template.
+    unsubDisplay = fromStore.subscribe((v) => {
       if (v && typeof v === "object" && "sum" in v) {
         uiDisplay.set({ value: v.value ?? 0, mod: v.mod ?? 0, sum: v.sum ?? 0 });
       } else if (typeof v === "number") {
@@ -73,18 +66,19 @@
   }
 
   onDestroy(() => {
-    _unsubDisplay && _unsubDisplay();
-    _unsubDisplay = null;
+    unsubDisplay && unsubDisplay();
+    unsubDisplay = null;
   });
 
-  // Strategy wiring + display source routing
+  // Strategy wiring and store routing
   $effect(() => {
     if (strategy && typeof strategy.dispose === "function") strategy.dispose();
     strategy = null;
 
     if (!$isShoppingState) {
-      TRACE && console.log(`[Card] not shopping — show live actor sum`);
-      _pipeDisplay(valueROStore);
+      pipeDisplay(valueROStore);       // non-shopping: live actor sum
+      canIncStore.set(false);
+      canDecStore.set(false);
       return;
     }
 
@@ -100,8 +94,9 @@
         max: rml ?? null,
         disallowRaise: disallowCreationRaise
       });
-      TRACE && console.log(`[Card] creation strategy for ${key} (RML=${rml ?? "n/a"})`);
-      _pipeDisplay(valueROStore); // creation changes actor immediately
+      pipeDisplay(valueROStore);       // creation applies to actor immediately
+      canIncStore = strategy.canIncrementRO;
+      canDecStore = strategy.canDecrementRO;
     } else {
       strategy = new AttributeKarmaShopping({
         actor,
@@ -111,63 +106,30 @@
         disallowRaise: disallowKarmaRaise,
         isShoppingStateStore: isShoppingState
       });
-      TRACE && console.log(`[Card] karma strategy for ${key} (RML=${rml ?? "n/a"})`);
-      _pipeDisplay(strategy.displayRO); // stagedBase + mod
+      pipeDisplay(strategy.displayRO); // stagedBase + mod
+      canIncStore = strategy.canIncrementRO;
+      canDecStore = strategy.canDecrementRO;
     }
   });
 
-  // Chevron guards — booleans computed from stable, always-existing stores
-  let canIncrement = $derived(() => {
-    if (!$isShoppingState) return false;
-    if (!strategy) return false;
-
+  // We still “touch” these to ensure any surrounding UI that uses them reacts.
+  let _touchCreation = $derived(() => {
+    if (!$isShoppingState) return 0;
     if ($isCharacterCreationStore) {
-      const _sum = $valueROStore.sum;
-      const _pts = $creationPointsStore;
-      const ok = strategy.computeCanIncrement();
-      TRACE && console.log(`[Card:canUp][creation] ${ok}`);
-      return ok;
+      const _sum = $valueROStore.sum;        // re-run on attribute change
+      const _pts = $creationPointsStore;     // re-run on points change
     } else {
-      const _stagedSum = $uiDisplay.sum; // reacts when stagedBase changes
-      const _good = $goodKarmaStore;     // reacts when good karma changes
-      const ok = strategy.computeCanIncrement();
-      TRACE && console.log(`[Card:canUp][karma] ${ok}`);
-      return ok;
+      const _stagedSum = $uiDisplay.sum;     // re-run on staging
+      const _good = $goodKarmaStore;         // re-run on good karma change
     }
+    return 0;
   });
 
-  let canDecrement = $derived(() => {
-    if (!$isShoppingState) return false;
-    if (!strategy) return false;
+  function increment() { if (strategy) strategy.applyIncrement(); }
+  function decrement() { if (strategy) strategy.applyDecrement(); }
 
-    if ($isCharacterCreationStore) {
-      const _sum = $valueROStore.sum;
-      const ok = strategy.computeCanDecrement();
-      TRACE && console.log(`[Card:canDown][creation] ${ok}`);
-      return ok;
-    } else {
-      const _stagedSum = $uiDisplay.sum; // reacts when stagedBase changes
-      const ok = strategy.computeCanDecrement();
-      TRACE && console.log(`[Card:canDown][karma] ${ok}`);
-      return ok;
-    }
-  });
-
-  function increment() {
-    TRACE && console.log(`[Card:click up] ${key}`);
-    if (!strategy) return;
-    strategy.applyIncrement();
-  }
-
-  function decrement() {
-    TRACE && console.log(`[Card:click down] ${key}`);
-    if (!strategy) return;
-    strategy.applyDecrement();
-  }
-
-  // Modal / escape handling (unchanged)
+  // Escape modal handling (unchanged)
   let activeModal = null;
-
   function handleEscape(e) {
     if (e.key === "Escape" && activeModal) {
       e.preventDefault();
@@ -185,7 +147,6 @@
     }
   });
 
-  // Non-shopping rolls (unchanged)
   async function Roll(e) {
     const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
       actor,
@@ -217,24 +178,25 @@
 
     <div class="stat-label">
       <i
-        class="fa-solid fa-circle-chevron-down decrement-attribute {canDecrement ? '' : 'disabled'}"
+        class="fa-solid fa-circle-chevron-down decrement-attribute {$canDecStore ? '' : 'disabled'}"
         role="button"
         tabindex="0"
+        aria-disabled={!$canDecStore}
         onclick={decrement}
         onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-        title={canDecrement ? "" : "At minimum for this session"}
+        title={$canDecStore ? "" : "At minimum for this session"}
       ></i>
 
-      <!-- uiDisplay is ALWAYS a store; safe to use $uiDisplay.sum -->
       <h1 class="stat-value">{$uiDisplay.sum}</h1>
 
       <i
-        class="fa-solid fa-circle-chevron-up increment-attribute {canIncrement ? '' : 'disabled'}"
+        class="fa-solid fa-circle-chevron-up increment-attribute {$canIncStore ? '' : 'disabled'}"
         role="button"
         tabindex="0"
+        aria-disabled={!$canIncStore}
         onclick={increment}
         onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-        title={canIncrement ? "" : "Cap reached or not enough Karma"}
+        title={$canIncStore ? "" : "Cap reached or not enough Karma"}
       ></i>
     </div>
   </div>
