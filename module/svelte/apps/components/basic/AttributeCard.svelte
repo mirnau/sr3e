@@ -4,7 +4,7 @@
   import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
   import { onDestroy } from "svelte";
   import { unmount } from "svelte";
-  import { writable } from "svelte/store";
+  import { writable, get } from "svelte/store";
   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
   import AttributeCreationShopping from "@services/shopping/AttributeCreationShopping.js";
@@ -15,6 +15,15 @@
   // StoreManager (local subscribe/unsubscribe)
   let storeManager = StoreManager.Subscribe(actor);
   onDestroy(() => {
+    // If shopping session is active, roll back staged changes on close
+    try {
+      if (strategy && typeof strategy.rollback === "function" && get(isShoppingState)) {
+        strategy.rollback();
+      }
+    } catch {}
+    try {
+      if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+    } catch {}
     StoreManager.Unsubscribe(actor);
   });
 
@@ -25,11 +34,37 @@
   // Actor attribute stores
   let valueROStore = storeManager.GetSumROStore(`attributes.${key}`); // { value, mod, sum }
 
-  // RML from metatype (never for magic)
+  // RML from metatype (never for magic), with alias fallback for robustness
   let metatype = $derived(actor.items.find((i) => i.type === "metatype") || null);
   let rml = $derived(
-    key === "magic" || !metatype ? null : (metatype.system.attributeLimits?.[key] ?? null)
+    key === "magic" || !metatype
+      ? null
+      : (() => {
+          const limits = metatype.system.attributeLimits ?? {};
+          const aliases = {
+            strength: ["strength", "str"],
+            quickness: ["quickness", "qui", "quick"],
+            body: ["body", "bod"],
+            charisma: ["charisma", "cha"],
+            intelligence: ["intelligence", "int"],
+            willpower: ["willpower", "wil", "will"],
+          };
+          const canonical = key;
+          const candidates = aliases[canonical] ?? [canonical];
+          for (const name of candidates) {
+            const v = limits?.[name];
+            if (typeof v === "number" && !Number.isNaN(v)) return v;
+          }
+          return null;
+        })()
   );
+
+  // Debug helper: track resolved RML per attribute
+  $effect(() => {
+    if (typeof DEBUG !== "undefined" && DEBUG && typeof LOG !== "undefined") {
+      LOG.info?.(`AttributeCard: RML(${key}) = ${rml}`, [__FILE__, __LINE__]);
+    }
+  });
 
   // Resources we “touch” to recompute
   let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
@@ -92,9 +127,11 @@
         storeManager,
         rml: rml ?? null,
         max: rml ?? null,
-        disallowRaise: disallowCreationRaise
+        disallowRaise: disallowCreationRaise,
+        isShoppingStateStore: isShoppingState
       });
-      pipeDisplay(valueROStore);       // creation applies to actor immediately
+      // creation now stages base value; display stagedBase + mod
+      pipeDisplay(strategy.displayRO);
       canIncStore = strategy.canIncrementRO;
       canDecStore = strategy.canDecrementRO;
     } else {
@@ -125,8 +162,14 @@
     return 0;
   });
 
-  function increment() { if (strategy) strategy.applyIncrement(); }
-  function decrement() { if (strategy) strategy.applyDecrement(); }
+  function increment() {
+    // Only apply when chevrons allow it
+    if (strategy && get(canIncStore)) strategy.applyIncrement();
+  }
+  function decrement() {
+    // Only apply when chevrons allow it
+    if (strategy && get(canDecStore)) strategy.applyDecrement();
+  }
 
   // Escape modal handling (unchanged)
   let activeModal = null;

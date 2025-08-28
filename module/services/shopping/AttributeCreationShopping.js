@@ -1,45 +1,118 @@
-import { get, derived } from "svelte/store";
+import { get, writable, derived } from "svelte/store";
 import BaseAttributeShopping from "./BaseAttributeShopping.js";
 
 export default class AttributeCreationShopping extends BaseAttributeShopping {
-  constructor({ actor, key, storeManager, rml, max, disallowRaise = false }) {
+  constructor({ actor, key, storeManager, rml, max, disallowRaise = false, isShoppingStateStore }) {
     super({ actor, key, storeManager, rml, max, disallowRaise });
+
+    // Resources
     this.points = storeManager.GetRWStore("creation.attributePoints");
 
-    // Booleans as stores so UI can bind and re-render reliably.
-    this.canIncrementRO = derived([this.points, this.baseRW], () => this.computeCanIncrement());
-    this.canDecrementRO = derived([this.baseRW], () => this.computeCanDecrement());
+    // Session wiring
+    this.isShoppingStateStore = isShoppingStateStore;
+    this.sessionActive = false;
+    this.baselineBase = 0;
+    this.baselinePoints = 0;
+
+    // Staged state
+    this.stagedBase = writable(0);
+    this.stagedSpent = writable(0); // attribute points spent during session
+
+    // Live mod for display
+    this.modRO = this.storeManager.GetROStore(`attributes.${this.key}.mod`);
+    this.displayRO = derived(
+      [this.stagedBase, this.modRO],
+      ([$b, $m]) => ({ value: $b ?? 0, mod: $m ?? 0, sum: ($b ?? 0) + ($m ?? 0) })
+    );
+
+    // Chevron guards based on staged values
+    this.canIncrementRO = derived([this.stagedBase, this.points], () => this.computeCanIncrement());
+    this.canDecrementRO = derived([this.stagedBase], () => this.computeCanDecrement());
+
+    // Start/commit session on shopping flag changes
+    this._sessionUnsub = this.isShoppingStateStore?.subscribe?.((v) => {
+      if (v && !this.sessionActive) this._startSession();
+      else if (!v && this.sessionActive) this._commitAndEndSession();
+    });
+  }
+
+  dispose() {
+    if (this.sessionActive) this.rollback();
+    this._sessionUnsub && this._sessionUnsub();
+  }
+
+  // Use STAGED base in Creation mode
+  nextTarget() {
+    return this._currentStagedBase() + 1;
   }
 
   _canIncrement(t) {
+    if (!this.sessionActive) return false;
     if (this.disallowRaise) return false;
-    const p = get(this.points);
-    if (p <= 0) return false;
+    // withinMax(t) is checked in Base.computeCanIncrement; keep RML guard for clarity
     if (this.rml != null && t > this.rml) return false;
-    return true;
+    return this._availablePoints() >= 1; // 1 creation point per increment
   }
 
   _canDecrement() {
+    if (!this.sessionActive) return false;
     if (this.disallowRaise) return false;
-    const base = get(this.baseRW);
-    return base > 1;
+    const cur = this._currentStagedBase();
+    return cur > this.baselineBase; // cannot drop below session baseline
   }
 
   _applyIncrement() {
-    if (this.disallowRaise) return;
-    const p = get(this.points);
-    if (p <= 0) return;
-    const b = get(this.baseRW);
-    this.points.set(p - 1);
-    this.baseRW.set(b + 1);
+    const next = this._currentStagedBase() + 1;
+    if (!this._canIncrement(next)) return;
+    const curSpent = get(this.stagedSpent) || 0;
+    const curBase = this._currentStagedBase();
+    this.stagedBase.set(curBase + 1);
+    this.stagedSpent.set(curSpent + 1);
   }
 
   _applyDecrement() {
-    if (this.disallowRaise) return;
-    const b = get(this.baseRW);
-    if (b <= 1) return;
-    this.baseRW.set(b - 1);
-    const p = get(this.points);
-    this.points.set(p + 1);
+    const cur = this._currentStagedBase();
+    if (cur <= this.baselineBase) return;
+    const curSpent = get(this.stagedSpent) || 0;
+    this.stagedBase.set(cur - 1);
+    this.stagedSpent.set(Math.max(0, curSpent - 1));
+  }
+
+  // --- Session helpers ---
+  _startSession() {
+    this.sessionActive = true;
+    this.baselineBase = get(this.baseRW) || 0;
+    this.baselinePoints = get(this.points) || 0;
+    this.stagedBase.set(this.baselineBase);
+    this.stagedSpent.set(0);
+  }
+
+  _commitAndEndSession() {
+    const finalBase = get(this.stagedBase) || this.baselineBase;
+    const stagedSpent = get(this.stagedSpent) || 0;
+    if (finalBase !== get(this.baseRW)) this.baseRW.set(finalBase);
+    if (stagedSpent !== 0) this.points.set(this.baselinePoints - stagedSpent);
+    this.sessionActive = false;
+  }
+
+  commit() {
+    if (this.sessionActive) this._commitAndEndSession();
+  }
+
+  rollback() {
+    if (!this.sessionActive) return;
+    // Discard staged changes
+    this.stagedBase.set(this.baselineBase);
+    this.stagedSpent.set(0);
+    this.sessionActive = false;
+  }
+
+  _currentStagedBase() {
+    return get(this.stagedBase) ?? this.baselineBase;
+  }
+
+  _availablePoints() {
+    const staged = get(this.stagedSpent) || 0;
+    return (this.baselinePoints || 0) - staged;
   }
 }
