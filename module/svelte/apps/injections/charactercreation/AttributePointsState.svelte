@@ -15,6 +15,8 @@
 
    let attributeAssignmentLocked = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
    let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   // Shared guard to prevent multiple prompts per actor
+   let creationPromptGuard = storeManager.GetShallowStore(actor.id, "creationAttributePromptShown", false);
 
    let intelligence = storeManager.GetSumROStore("attributes.intelligence");
    let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
@@ -43,12 +45,13 @@
    });
 
    $effect(() => {
-      if ($attributePointsStore === 0 && $attributeAssignmentLocked === false && !promptInFlight) {
+      if ($attributePointsStore === 0 && $attributeAssignmentLocked === false && !promptInFlight && !$creationPromptGuard) {
          promptInFlight = true;
+         creationPromptGuard.set(true);
          (async () => {
             const confirmed = await foundry.applications.api.DialogV2.confirm({
                window: {
-                  title: localize(config.modal.exitattributesassignment),
+                  title: localize(config.modal.exitattributesassignmenttitle),
                },
                content: localize(config.modal.exitattributesassignment),
                yes: {
@@ -85,6 +88,11 @@
 </script>
 
 <CreationPointList points={pointList} containerCSS={"attribute-point-assignment"} />
+
+
+
+
+
 
 
 
