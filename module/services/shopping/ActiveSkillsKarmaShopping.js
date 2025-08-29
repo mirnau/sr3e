@@ -20,6 +20,7 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     this.stagedBase = writable(0);
     this.sessionActive = false;
     this.baselineSpecs = [];
+    this.newSpecFloorsByIndex = new Map();
 
     // Display uses staged base directly (no mod for skills)
     this.displayBase = derived([this.stagedBase], ([$b]) => ($b ?? 0));
@@ -48,6 +49,7 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
       const curSpecs = get(this.specsRW) || [];
       this.baselineSpecs = Array.isArray(curSpecs) ? curSpecs.map((s) => ({ ...s })) : [];
     } catch { this.baselineSpecs = []; }
+    this.newSpecFloorsByIndex.clear();
     const sess = get(this.sessionKarma);
     if (!sess?.active) {
       const baseline = Number(get(this.goodKarma) ?? 0);
@@ -68,10 +70,11 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
         this.goodKarma.set(baseline - totalSpent);
         const prevSpent = Number(get(this.spentKarma) || 0);
         this.spentKarma.set(prevSpent + totalSpent);
-      }
-      this.sessionKarma.set({ active: false, baseline: 0, stagedSpent: 0 });
+    }
+    this.sessionKarma.set({ active: false, baseline: 0, stagedSpent: 0 });
     }
     this.sessionActive = false;
+    this.newSpecFloorsByIndex.clear();
   }
 
   rollback() {
@@ -82,6 +85,7 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     const sess = get(this.sessionKarma);
     if (sess?.active) this.sessionKarma.set({ active: false, baseline: 0, stagedSpent: 0 });
     this.sessionActive = false;
+    this.newSpecFloorsByIndex.clear();
   }
 
   _availableKarma() {
@@ -144,8 +148,10 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     const newRating = base + 1;
     const cost = Math.ceil(this.costForSpecializationTarget(newRating));
     if (this._availableKarma() < cost) return false;
+    const nextIndex = currentSpecs.length;
     const next = [...currentSpecs, { name, value: newRating }];
     this._setSpecs(next);
+    this.newSpecFloorsByIndex.set(nextIndex, newRating);
     const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
     this.sessionKarma.set({ ...sess, active: true, stagedSpent: (sess.stagedSpent || 0) + cost });
     return true;
@@ -175,13 +181,73 @@ export default class ActiveSkillsKarmaShopping extends BaseSkillShopping {
     const idx = specs.indexOf(specRef);
     if (idx < 0) return false;
     const cur = Number(specs[idx]?.value ?? 0) || 0;
-    const baselineCur = Number((this.baselineSpecs[idx]?.value) ?? 0) || 0;
+    const baselineCur = this._baselineSpecValue(idx, specs[idx]);
     if (cur <= baselineCur) return false;
     const refund = Math.ceil(this.costForSpecializationTarget(cur));
     specs[idx] = { ...specs[idx], value: cur - 1 };
     this._setSpecs(specs);
     const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
     this.sessionKarma.set({ ...sess, active: true, stagedSpent: Math.max(0, (sess.stagedSpent || 0) - refund) });
+    return true;
+  }
+
+  _baselineSpecValue(index, specObj) {
+    if (this.newSpecFloorsByIndex.has(index)) return Number(this.newSpecFloorsByIndex.get(index) || 0) || 0;
+    // Prefer index-aligned baseline when available to survive renames
+    try {
+      const idxBaseline = this.baselineSpecs?.[index];
+      if (idxBaseline && typeof idxBaseline.value !== "undefined") return Number(idxBaseline.value || 0) || 0;
+    } catch {}
+    try {
+      const byName = (this.baselineSpecs || []).find((s) => s?.name === specObj?.name);
+      if (byName) return Number(byName.value || 0) || 0;
+    } catch {}
+    return 0;
+  }
+
+  deleteSpecialization(specRef) {
+    if (!this.sessionActive || !specRef) return false;
+    const specs = this._specs();
+    const idx = specs.indexOf(specRef);
+    if (idx < 0) return false;
+
+    const isNewThisSession = this.newSpecFloorsByIndex.has(idx);
+    if (!isNewThisSession) {
+      specs.splice(idx, 1);
+      this._setSpecs(specs);
+      this._reindexNewSpecFloorsAfterDeletion(idx);
+      return true;
+    }
+
+    const floor = Number(this.newSpecFloorsByIndex.get(idx) || 0) || 0;
+    const cur = Number(specs[idx]?.value || 0) || 0;
+    let totalRefund = 0;
+    for (let r = cur; r >= floor; r--) totalRefund += Math.ceil(this.costForSpecializationTarget(r));
+
+    specs.splice(idx, 1);
+    this._setSpecs(specs);
+    this._reindexNewSpecFloorsAfterDeletion(idx);
+
+    const sess = get(this.sessionKarma) || { active: true, baseline: 0, stagedSpent: 0 };
+    this.sessionKarma.set({ ...sess, active: true, stagedSpent: Math.max(0, (sess.stagedSpent || 0) - totalRefund) });
+    return true;
+  }
+
+  _reindexNewSpecFloorsAfterDeletion(deletedIndex) {
+    if (!this.newSpecFloorsByIndex || this.newSpecFloorsByIndex.size === 0) return;
+    const next = new Map();
+    for (const [i, floor] of this.newSpecFloorsByIndex.entries()) {
+      if (i === deletedIndex) continue;
+      next.set(i > deletedIndex ? i - 1 : i, floor);
+    }
+    this.newSpecFloorsByIndex = next;
+  }
+
+  // Public commit: finalize staged changes and optionally restart session baseline
+  commit(restart = true) {
+    if (!this.sessionActive) return false;
+    this._commitAndEndSession();
+    if (restart) this._startSession();
     return true;
   }
 }

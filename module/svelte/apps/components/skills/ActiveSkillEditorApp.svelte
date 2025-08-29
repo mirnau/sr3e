@@ -25,9 +25,11 @@
    let strategy = null;
    let uiValue = $state(0);
 
-   onMount(() => {
+  onMount(() => {
       karmaShoppingService ??= new KarmaShoppingService(skill);
       uiValue = $valueStore;
+      // Expose commit trigger to hosting Application header control
+      if (app) app.requestCommit = () => { try { strategy?.commit?.(false); } catch {} };
    });
 
    onDestroy(() => {
@@ -39,6 +41,7 @@
       } catch {}
       strategy = null;
       karmaShoppingService = null;
+      if (app && app.requestCommit) { try { delete app.requestCommit; } catch { app.requestCommit = undefined; } }
    });
 
    // Strategy wiring for shopping sessions
@@ -80,10 +83,10 @@
    let canInc = $state(false);
    let canDec = $state(false);
 
-   async function addNewSpecialization() {
-      let newSkillSpecialization;
+  async function addNewSpecialization() {
+     let newSkillSpecialization;
 
-      if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+     if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
          if ($specializationsStore.length > 0) {
             ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
             return;
@@ -96,7 +99,11 @@
 
          $valueStore -= 1;
       } else {
-         console.log("TODO: create a addSpecialization procedure for Karma");
+         if ($isShoppingStateStore && strategy) {
+            strategy.addSpecialization(localize(config.skill.newspecialization));
+            // strategy updates the specs store; trigger UI update
+            $specializationsStore = [...$specializationsStore];
+         }
       }
 
       if (newSkillSpecialization) {
@@ -214,6 +221,13 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
+      if ($isShoppingStateStore && !$isCharacterCreationStore) {
+         if (strategy) {
+            strategy.deleteSpecialization(toDelete);
+            $specializationsStore = [...$specializationsStore];
+         }
+         return;
+      }
       $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
@@ -293,14 +307,26 @@
                   {localize(config.skill.specializations)}
                </h1>
                <div class="stat-grid single-column">
-                  {#each $specializationsStore as specialization, i}
-                     <SpecializationCard
-                        bind:specialization={$specializationsStore[i]}
-                        {actor}
-                        {skill}
-                        on:arrayChanged={() => {
-                           $specializationsStore = [...$specializationsStore];
-                           console.log("array was reassigned");
+                 {#each $specializationsStore as specialization, i}
+                    <SpecializationCard
+                       bind:specialization={$specializationsStore[i]}
+                       {actor}
+                       {skill}
+                       on:arrayChanged={() => {
+                          $specializationsStore = [...$specializationsStore];
+                          console.log("array was reassigned");
+                       }}
+                        on:increment={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.incrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
+                        }}
+                        on:decrement={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.decrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
                         }}
                         on:delete={deleteSpecialization}
                      />
@@ -311,6 +337,7 @@
       </div>
    </div>
 </div>
+
 
 
 

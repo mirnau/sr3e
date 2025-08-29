@@ -49,7 +49,7 @@
    });
 
    // Strategy wiring for shopping sessions (preview staged value)
-   $effect(() => {
+  $effect(() => {
       try {
          if (strategy?._unsubDisplay) strategy._unsubDisplay();
          if (strategy?._unsubCanInc) strategy._unsubCanInc();
@@ -69,6 +69,18 @@
          strategy._unsubCanInc = strategy.canIncrementRO.subscribe((v) => (canInc = !!v));
          strategy._unsubCanDec = strategy.canDecrementRO.subscribe((v) => (canDec = !!v));
       }
+      if (app) app.requestCommit = () => { try { strategy?.commit?.(false); } catch {} };
+   });
+
+   onDestroy(() => {
+      try {
+         if (strategy?._unsubDisplay) strategy._unsubDisplay();
+         if (strategy?._unsubCanInc) strategy._unsubCanInc();
+         if (strategy?._unsubCanDec) strategy._unsubCanDec();
+         if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+      } catch {}
+      strategy = null;
+      if (app && app.requestCommit) { try { delete app.requestCommit; } catch { app.requestCommit = undefined; } }
    });
 
    async function addNewSpecialization() {
@@ -211,6 +223,13 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
+      if ($isShoppingStateStore && !$isCharacterCreationStore) {
+         if (strategy) {
+            strategy.deleteSpecialization(toDelete);
+            $specializationsStore = [...$specializationsStore];
+         }
+         return;
+      }
       $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
@@ -302,6 +321,18 @@
                         {skill}
                         on:arrayChanged={() => {
                            $specializationsStore = [...$specializationsStore];
+                        }}
+                        on:increment={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.incrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
+                        }}
+                        on:decrement={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.decrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
                         }}
                         on:delete={deleteSpecialization}
                      />

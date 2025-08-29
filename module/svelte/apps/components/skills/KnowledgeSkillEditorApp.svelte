@@ -25,9 +25,10 @@
    let strategy = null;
    let uiValue = $state(0);
 
-   onMount(() => {
+  onMount(() => {
       karmaShoppingService ??= new KarmaShoppingService(skill);
       uiValue = $valueStore;
+      if (app) app.requestCommit = () => { try { strategy?.commit?.(false); } catch {} };
    });
 
    onDestroy(() => {
@@ -39,6 +40,7 @@
       } catch {}
       strategy = null;
       karmaShoppingService = null;
+      if (app && app.requestCommit) { try { delete app.requestCommit; } catch { app.requestCommit = undefined; } }
    });
 
    // Strategy wiring for shopping sessions
@@ -78,8 +80,8 @@
    let canInc = $state(false);
    let canDec = $state(false);
 
-   async function addNewSpecialization() {
-      let newSkillSpecialization;
+  async function addNewSpecialization() {
+     let newSkillSpecialization;
 
       if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
          if ($specializations.length > 0) {
@@ -94,7 +96,10 @@
 
         $valueStore -= 1;
       } else {
-         console.log("TODO: create a addSpecialization procedure for Karma");
+         if ($isShoppingStateStore && strategy) {
+            strategy.addSpecialization(localize(config.skill.newspecialization));
+            $specializations = [...$specializations];
+         }
       }
 
       if (newSkillSpecialization) {
@@ -212,6 +217,13 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
+      if ($isShoppingStateStore && !$isCharacterCreationStore) {
+         if (strategy) {
+            strategy.deleteSpecialization(toDelete);
+            $specializations = [...$specializations];
+         }
+         return;
+      }
       $specializations = $specializations.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
@@ -300,6 +312,18 @@
                            $specializations = [...$specializations];
                            console.log("array was reassigned");
                         }}
+                        on:increment={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.incrementSpecialization(e.detail.specialization);
+                              $specializations = [...$specializations];
+                           }
+                        }}
+                        on:decrement={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.decrementSpecialization(e.detail.specialization);
+                              $specializations = [...$specializations];
+                           }
+                        }}
                         on:delete={deleteSpecialization}
                      />
                   {/each}
@@ -309,5 +333,6 @@
       </div>
    </div>
 </div>
+
 
 

@@ -63,8 +63,10 @@ export default class BaseSkillShopping {
   }
 
   // Specializations constraints
-  // Count limit per rules: cannot exceed linked Attribute rating
-  maxSpecializationsAllowed(_baseRating) { return Math.max(0, Number(this.linkedAttributeSum() || 0)); }
+  // Count limit per rules: may have up to base skill rating specializations
+  maxSpecializationsAllowed(baseRating) {
+    return Math.max(0, Number(baseRating || 0));
+  }
   maxSpecRating(baseRating) {
     const b = Number(baseRating || 0);
     if (b <= 1) return 3; // exception: base 1 allows spec 3

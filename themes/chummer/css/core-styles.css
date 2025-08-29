@@ -1164,7 +1164,8 @@
     white-space: nowrap;
     width: auto;
   }
-  .buttons-horizontal-distribution.square > button {
+  .buttons-horizontal-distribution.square > button,
+  .buttons-horizontal-distribution.square > a {
     aspect-ratio: 1 / 1;
     width: 1.5rem;
     height: 1.5rem;
