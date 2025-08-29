@@ -221,6 +221,25 @@
          "concealability": "Conceal",
          "weight": "Weight"
       },
+      "procedure": {
+         "difficulty": "Difficulty",
+         "challenge": "Challenge",
+         "roll": "Roll",
+         "standardDefense": "Standard Defense",
+         "fullDefense": "Full Defense",
+         "fire": "Fire",
+         "attack": "Attack",
+         "resist": "Resist",
+         "challengeFailed": "sr3e.procedure.Challenge Failed",
+         "defaultNotAllowed": "Default Not Allowed",
+         "defaultTN8": "Default target number can't exceed 8",
+         "contestexpired": "Contest Expired",
+         "weapondifficulty": "Weapon Difficulty",
+         "dodgetitle": "Select dodge action",
+         "dodge": "Dodge",
+         "dodgebutton": "Dodge",
+         "dodgedescription": "Dodge the incomming attack"
+      },
       "sheet": {
          "attributepoints": "Attribute Points",
          "buyupgrades": "Buy upgrades",

@@ -7,7 +7,7 @@
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
    import WearableComponent from "@sveltecomponent/AssetManager/components/WearableComponent.svelte";
-   import { ProcedureFactory } from "@services/procedure/FSM/ProcedureFactory.js";
+   import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
    let { item, config } = $props();
 
@@ -85,8 +85,17 @@
       }
    }
 
-   function performItemAction() {
-      item.parent.sheet.displayRollComposer(ProcedureFactory(item.parent, item));
+   function performItemAction(e) {
+      const kind = ProcedureFactory.resolveProcedureType(item);
+
+      DEBUG && !kind && LOG.error("Unsupported weapon type or mode.", [__FILE__, __LINE__]);
+
+      const proc = ProcedureFactory.Create(kind, { actor: item.parent, item });
+
+      DEBUG && !proc && LOG.error("Could not create procedure.", [__FILE__, __LINE__]);
+
+      item.parent.sheet.displayRollComposer(proc);
+      e.preventDefault();
    }
 
    async function onTrashClick() {
@@ -103,7 +112,14 @@
 </script>
 
 <!-- svelte-ignore a11y_unknown_aria_attribute -->
-<div data-item-id="{item.id}" class="asset-card" role="presentation" aria-role="presentation" draggable="true" ondragstart={onDragStart}>
+<div
+   data-item-id={item.id}
+   class="asset-card"
+   role="presentation"
+   aria-role="presentation"
+   draggable="true"
+   ondragstart={onDragStart}
+>
    <div class="asset-background-layer"></div>
    <div class="image-mask">
       <img src={item.img} role="presentation" alt={item.name} />

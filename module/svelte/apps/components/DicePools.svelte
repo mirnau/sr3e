@@ -4,6 +4,7 @@
    import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
+   import { flags } from "@services/commonConsts.js";
    import { onDestroy } from "svelte";
 
 
@@ -16,6 +17,8 @@
    });
 
    const storeManager = StoreManager.Subscribe(actor);
+   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+   let attributePreview = storeManager.GetShallowStore(actor.id, "shoppingAttributePreview", { active: false, values: {} });
 
    let intelligence = storeManager.GetSumROStore("attributes.intelligence");
    let willpower = storeManager.GetSumROStore("attributes.willpower");
@@ -40,10 +43,18 @@
    let spellValueStore = storeManager.GetRWStore("dicePools.spell.value");
 
    $effect(() => {
-      $controlValueStore = $reaction.sum;
-      $combatValueStore = Math.floor(($intelligence.sum + $quickness.sum + $willpower.sum) * 0.5);
-      $astralValueStore = Math.floor(($intelligence.sum + $charisma.sum + $willpower.sum) * 0.5);
-      $spellValueStore = Math.floor(($intelligence.sum + $magic.sum + $willpower.sum) * 0.5);
+      const previewOrFallback = (key, fallback) => $isShoppingState ? ($attributePreview?.values?.[key] ?? fallback) : fallback;
+      const intelligenceValue = previewOrFallback("intelligence", $intelligence.sum);
+      const quicknessValue = previewOrFallback("quickness", $quickness.sum);
+      const willpowerValue = previewOrFallback("willpower", $willpower.sum);
+      const charismaValue = previewOrFallback("charisma", $charisma.sum);
+      const magicValue = previewOrFallback("magic", $magic.sum);
+      const reactionPreview = Math.floor((intelligenceValue + quicknessValue) * 0.5);
+
+      $controlValueStore = reactionPreview;                                   // preview Reaction
+      $combatValueStore = Math.floor((intelligenceValue + quicknessValue + willpowerValue) * 0.5); // (/2)
+      $astralValueStore = Math.floor((intelligenceValue + charismaValue + willpowerValue) * 0.5);  // (/2)
+      $spellValueStore = Math.floor((intelligenceValue + magicValue + willpowerValue) / 3);        // (/3)
    });
 
    onDestroy(() => {

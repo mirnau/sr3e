@@ -1,178 +1,272 @@
 <script>
-   import { localize } from "@services/utilities.js";
-   import { flags } from "@services/commonConsts.js";
-   import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
-   import { onDestroy } from "svelte";
-   import { mount, unmount } from "svelte";
-   import RollComposerComponent from "@sveltecomponent/RollComposerComponent.svelte";
-   import SR3ERoll from "@documents/SR3ERoll.js";
-   import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
-   import UncontestedAttributeProcedure from "@services/procedure/FSM/UncontestedAttributeProcedure.js";
+  import { localize } from "@services/utilities.js";
+  import { flags } from "@services/commonConsts.js";
+  import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
+  import { onDestroy } from "svelte";
+  import { unmount } from "svelte";
+  import { writable, get } from "svelte/store";
+  import ProcedureFactory from "@services/procedure/FSM/ProcedureFactory.js";
 
-   let { actor, localization, key } = $props();
+  import AttributeCreationShopping from "@services/shopping/AttributeCreationShopping.js";
+  import AttributeKarmaShopping from "@services/shopping/AttributeKarmaShopping.js";
 
-   const storeManager = StoreManager.Subscribe(actor);
+  let { actor, localization, key, config } = $props();
 
-   let valueROStore = storeManager.GetSumROStore(`attributes.${key}`);
-   let baseValueStore = storeManager.GetRWStore(`attributes.${key}.value`);
-   let attributePointStore = storeManager.GetRWStore("creation.attributePoints");
-
-   let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
-   let attributeAssignmentLockedStore = storeManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
-
-   let metatype = $derived(actor.items.find((i) => i.type === "metatype") || []);
-   let attributeLimit = $derived(key === "magic" ? null : (metatype.system.attributeLimits[key] ?? 0));
-
-   let committedValue = null;
-
-   $effect(() => {
-      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue === null) {
-         committedValue = $valueROStore.value;
+  // StoreManager (local subscribe/unsubscribe)
+  let storeManager = StoreManager.Subscribe(actor);
+  onDestroy(() => {
+    // Roll back uncommitted sessions on close for both creation and karma
+    // (manager commit path flips isShoppingState=false beforehand, so this will not fire on commit).
+    try {
+      if (strategy && typeof strategy.rollback === "function" && get(isShoppingState)) {
+        strategy.rollback();
       }
-   });
+    } catch {}
+    try { if (strategy && typeof strategy.dispose === "function") strategy.dispose(); } catch {}
+    StoreManager.Unsubscribe(actor);
+  });
 
-   let isMinLimit = $state(false);
+  // Mode flags
+  let isShoppingState = storeManager.GetFlagStore(flags.actor.isShoppingState);
+  let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
 
-   $effect(() => {
-      if ($isShoppingState && $attributeAssignmentLockedStore && committedValue !== null) {
-         isMinLimit = $valueROStore.value <= committedValue;
+  // Actor attribute stores
+  let valueROStore = storeManager.GetSumROStore(`attributes.${key}`); // { value, mod, sum }
+
+  // RML from metatype (never for magic), with alias fallback for robustness
+  let metatype = $derived(actor.items.find((i) => i.type === "metatype") || null);
+  let rml = $derived(
+    key === "magic" || !metatype
+      ? null
+      : (() => {
+          const limits = metatype.system.attributeLimits ?? {};
+          const aliases = {
+            strength: ["strength", "str"],
+            quickness: ["quickness", "qui", "quick"],
+            body: ["body", "bod"],
+            charisma: ["charisma", "cha"],
+            intelligence: ["intelligence", "int"],
+            willpower: ["willpower", "wil", "will"],
+          };
+          const canonical = key;
+          const candidates = aliases[canonical] ?? [canonical];
+          for (const name of candidates) {
+            const v = limits?.[name];
+            if (typeof v === "number" && !Number.isNaN(v)) return v;
+          }
+          return null;
+        })()
+  );
+
+  // Debug helper: track resolved RML per attribute
+  $effect(() => {
+    if (typeof DEBUG !== "undefined" && DEBUG && typeof LOG !== "undefined") {
+      LOG.info?.(`AttributeCard: RML(${key}) = ${rml}`, [__FILE__, __LINE__]);
+    }
+  });
+
+  // Resources we “touch” to recompute
+  let creationPointsStore = storeManager.GetRWStore("creation.attributePoints");
+  let goodKarmaStore = storeManager.GetRWStore("karma.goodKarma"); // int field in model
+
+  // Strategy instance
+  let strategy = null;
+
+  // Stable UI store for the big number; we pipe the source into it.
+  const uiDisplay = writable({ value: 0, mod: 0, sum: 0 });
+  let unsubDisplay = null;
+
+  // Chevron boolean stores provided by the strategy
+  let canIncStore = writable(false);
+  let canDecStore = writable(false);
+
+  function pipeDisplay(fromStore) {
+    unsubDisplay && unsubDisplay();
+    unsubDisplay = null;
+
+    if (!fromStore || typeof fromStore.subscribe !== "function") {
+      uiDisplay.set({ value: 0, mod: 0, sum: 0 });
+      return;
+    }
+    unsubDisplay = fromStore.subscribe((v) => {
+      if (v && typeof v === "object" && "sum" in v) {
+        uiDisplay.set({ value: v.value ?? 0, mod: v.mod ?? 0, sum: v.sum ?? 0 });
+      } else if (typeof v === "number") {
+        uiDisplay.set({ value: v, mod: 0, sum: v });
       } else {
-         isMinLimit = $valueROStore.value <= 1;
+        uiDisplay.set({ value: 0, mod: 0, sum: 0 });
       }
-   });
+    });
+  }
 
-   let currentDicePoolSelectionStore = storeManager.GetShallowStore(actor.id, stores.dicepoolSelection);
+  onDestroy(() => {
+    unsubDisplay && unsubDisplay();
+    unsubDisplay = null;
+  });
 
-   let valueRWStore = $derived($isShoppingState && !$attributeAssignmentLockedStore ? baseValueStore : null);
+  // Strategy wiring and store routing
+  $effect(() => {
+    if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+    strategy = null;
 
-   $effect(() => {
-      if (
-         !$attributeAssignmentLockedStore &&
-         $isShoppingState &&
-         $valueROStore.value + $valueROStore.mod < 1 &&
-         $valueROStore.mod < 0 &&
-         valueRWStore
-      ) {
-         let deficit = 1 - ($valueROStore.value + $valueROStore.mod);
-         while (deficit > 0 && $attributePointStore > 0) {
-            $attributePointStore -= 1;
-            $valueRWStore += 1;
-            deficit -= 1;
-         }
+    if (!$isShoppingState) {
+      pipeDisplay(valueROStore);       // non-shopping: live actor sum
+      // Reinitialize chevron stores (avoid calling .set on a derived store)
+      canIncStore = writable(false);
+      canDecStore = writable(false);
+      return;
+    }
+
+    const disallowKarmaRaise = key === "reaction" || key === "magic" || key === "essence";
+    const disallowCreationRaise = key === "reaction";
+
+    if ($isCharacterCreationStore) {
+      // Reaction is derived; in creation preview we display its live value store
+      // (which is written by the Attributes container effect) and disable chevrons.
+      if (key === "reaction") {
+        pipeDisplay(valueROStore);
+        canIncStore = writable(false);
+        canDecStore = writable(false);
+        return;
       }
-   });
-
-   let activeModal = null;
-
-   function add(change) {
-      if (!$attributeAssignmentLockedStore && $isShoppingState && valueRWStore) {
-         const newPoints = $attributePointStore - change;
-         const newValue = $valueRWStore + change;
-
-         if (newPoints >= 0 && (attributeLimit === null || newValue <= attributeLimit)) {
-            $attributePointStore = newPoints;
-            $valueRWStore = newValue;
-         }
-      }
-   }
-
-   const increment = () => add(1);
-   const decrement = () => {
-      if (!isMinLimit) add(-1);
-   };
-
-   function handleEscape(e) {
-      if (e.key === "Escape" && activeModal) {
-         e.preventDefault();
-         e.stopImmediatePropagation();
-         e.stopPropagation();
-         unmount(activeModal);
-         activeModal = null;
-      }
-   }
-
-   onDestroy(() => {
-      StoreManager.Unsubscribe(actor);
-      if (activeModal) {
-         unmount(activeModal);
-         activeModal = null;
-      }
-   });
-
-   async function Roll(e) {
-      const dice = $valueROStore?.sum ?? 0;
-      const basis = { type: "attribute", key, dice };
-
-      const id = ProcedureLock.assertEnter({
-         ownerKey: `uncontested-attribute:${actor.id}`,
-         priority: "simple",
-         onDenied: () => Hooks.callAll("sr3e:procedure-basis-override", { actorId: actor.id, basis }),
+      strategy = new AttributeCreationShopping({
+        actor,
+        key,
+        storeManager,
+        rml: rml ?? null,
+        max: rml ?? null,
+        disallowRaise: disallowCreationRaise,
+        isShoppingStateStore: isShoppingState
       });
-      if (!id) {
-         e.preventDefault();
-         return;
-      }
+      // creation now stages base value; display stagedBase + mod
+      pipeDisplay(strategy.displayRO);
+      canIncStore = strategy.canIncrementRO;
+      canDecStore = strategy.canDecrementRO;
+    } else {
+      strategy = new AttributeKarmaShopping({
+        actor,
+        key,
+        storeManager,
+        rml: rml ?? null,
+        disallowRaise: disallowKarmaRaise,
+        isShoppingStateStore: isShoppingState
+      });
+      pipeDisplay(strategy.displayRO); // stagedBase + mod
+      canIncStore = strategy.canIncrementRO;
+      canDecStore = strategy.canDecrementRO;
+    }
+  });
 
-      try {
-         const proc = new UncontestedAttributeProcedure(actor, null, {
-            attributeKey: key,
-            title: localize(localization[key]),
-         });
-         if (e.shiftKey) actor.sheet.displayRollComposer(proc);
-         else await proc.execute();
-      } finally {
-         ProcedureLock.release(id);
-      }
+  // We still “touch” these to ensure any surrounding UI that uses them reacts.
+  let _touchCreation = $derived(() => {
+    if (!$isShoppingState) return 0;
+    if ($isCharacterCreationStore) {
+      const _sum = $valueROStore.sum;        // re-run on attribute change
+      const _pts = $creationPointsStore;     // re-run on points change
+    } else {
+      const _stagedSum = $uiDisplay.sum;     // re-run on staging
+      const _good = $goodKarmaStore;         // re-run on good karma change
+    }
+    return 0;
+  });
 
+  function increment() {
+    // Only apply when chevrons allow it
+    if (strategy && get(canIncStore)) strategy.applyIncrement();
+  }
+  function decrement() {
+    // Only apply when chevrons allow it
+    if (strategy && get(canDecStore)) strategy.applyDecrement();
+  }
+
+  // Escape modal handling (unchanged)
+  let activeModal = null;
+  function handleEscape(e) {
+    if (e.key === "Escape" && activeModal) {
       e.preventDefault();
-   }
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      unmount(activeModal);
+      activeModal = null;
+    }
+  }
+
+  onDestroy(() => {
+    if (activeModal) {
+      unmount(activeModal);
+      activeModal = null;
+    }
+  });
+
+  async function Roll(e) {
+    const proc = ProcedureFactory.Create(ProcedureFactory.type.attribute, {
+      actor,
+      args: { attributeKey: key, title: localize((localization && localization[key]) ?? (config?.attributes?.[key]) ?? key) }
+    });
+
+    DEBUG && !proc && LOG.error("Could not create attribute procedure.", [__FILE__, __LINE__]);
+
+    const useComposer = actor?.sheet?.displayRollComposer && (e.shiftKey || proc.isOpposed);
+
+    if (useComposer) {
+      proc.setDefaultTNForComposer?.();
+      if (proc.isOpposed && typeof proc.setOpposedEnabled === "function") {
+        proc.setOpposedEnabled(true);
+      }
+      actor.sheet.displayRollComposer(proc);
+    } else {
+      await proc.execute();
+    }
+  }
 </script>
 
 <svelte:window on:keydown|capture={handleEscape} />
 
 {#if $isShoppingState}
-   <div class="stat-card" role="button" tabindex="0">
-      <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
-      <div class="stat-card-background"></div>
+  <div class="stat-card" role="button" tabindex="0">
+    <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
+    <div class="stat-card-background"></div>
 
-      <div class="stat-label">
-         {#if key !== "reaction"}
-            <i
-               class="fa-solid fa-circle-chevron-down decrement-attribute {isMinLimit ? 'disabled' : ''}"
-               role="button"
-               tabindex="0"
-               onclick={decrement}
-               onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
-            ></i>
-         {/if}
+    <div class="stat-label">
+      <i
+        class="fa-solid fa-circle-chevron-down decrement-attribute {$canDecStore ? '' : 'disabled'}"
+        role="button"
+        tabindex="0"
+        aria-disabled={!$canDecStore}
+        onclick={decrement}
+        onkeydown={(e) => (e.key === "ArrowDown" || e.key === "s") && decrement()}
+        title={$canDecStore ? "" : "At minimum for this session"}
+      ></i>
 
-         <h1 class="stat-value">{$valueROStore.sum}</h1>
-         {#if key !== "reaction"}
-            <i
-               class="fa-solid fa-circle-chevron-up increment-attribute {$attributePointStore === 0 ? 'disabled' : ''}"
-               role="button"
-               tabindex="0"
-               onclick={increment}
-               onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
-            ></i>
-         {/if}
-      </div>
-   </div>
+      <h1 class="stat-value">{$uiDisplay.sum}</h1>
+
+      <i
+        class="fa-solid fa-circle-chevron-up increment-attribute {$canIncStore ? '' : 'disabled'}"
+        role="button"
+        tabindex="0"
+        aria-disabled={!$canIncStore}
+        onclick={increment}
+        onkeydown={(e) => (e.key === "ArrowUp" || e.key === "w") && increment()}
+        title={$canIncStore ? "" : "Cap reached or not enough Karma"}
+      ></i>
+    </div>
+  </div>
 {:else}
-   <div
-      class="stat-card button"
-      role="button"
-      tabindex="0"
-      onclick={Roll}
-      onkeydown={(e) => {
-         if (e.key === "Enter" || e.key === " ") Roll(e);
-      }}
-   >
-      <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
-      <div class="stat-card-background"></div>
+  <div
+    class="stat-card button"
+    role="button"
+    tabindex="0"
+    onclick={Roll}
+    onkeydown={(e) => {
+      if (e.key === "Enter" || e.key === " ") Roll(e);
+    }}
+  >
+    <h4 class="no-margin uppercase">{localize(localization[key])}</h4>
+    <div class="stat-card-background"></div>
 
-      <div class="stat-label">
-         <h1 class="stat-value">{$valueROStore.sum}</h1>
-      </div>
-   </div>
+    <div class="stat-label">
+      <h1 class="stat-value">{$valueROStore.sum}</h1>
+    </div>
+  </div>
 {/if}
+

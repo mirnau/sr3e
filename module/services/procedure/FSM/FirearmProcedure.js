@@ -3,28 +3,20 @@ import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import FirearmService from "@families/FirearmService.js";
 import { writable, get } from "svelte/store";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+import { localize } from "@services/utilities.js";
 
-const config = Config.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class FirearmProcedure extends AbstractProcedure {
    #attackCtx = null;
    #selectedPoolKey = null;
 
    constructor(caller, item) {
-      super(caller, item);
+      super(caller, item, { lockPriority: "advanced" });
       this.weaponModeStore = writable(item?.system?.mode ?? "semiauto");
       this.ammoAvailableStore = writable(this.#ammo());
-      ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${caller?.id}`,
-         priority: "advanced",
-         onDenied: () => {},
-      });
-   }
-
-   onDestroy() {
-      super.onDestroy?.();
-      ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
    }
 
    get tnModifiers() {
@@ -110,21 +102,20 @@ export default class FirearmProcedure extends AbstractProcedure {
          await this.onChallengeResolved?.({ roll, actor });
          return roll;
       } catch (err) {
-         ui.notifications.error(game.i18n.localize?.(config.error.challengeFailed) ?? "Challenge failed");
+         DEBUG && ui.notifications.error("Challenge failed");
          throw err;
       }
    }
 
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.(config.button.challenge) ?? "Challenge!";
-      const fire = t?.(config.button.fire) ?? "Fire";
+      if (this.hasTargets) return localize(RuntimeConfig().procedure.challenge);
+      const fire = localize(RuntimeConfig().procedure.fire);
       const weapon = this.item?.name ?? "";
       return weapon ? `${fire} ${weapon}` : fire;
    }
 
    getKindOfRollLabel() {
-      return this.hasTargets ? "Challenge" : "Roll";
+      return this.hasTargets ? localize(RuntimeConfig().procedure.challenge) : localize(RuntimeConfig().procedure.roll);
    }
 
    getItemLabel() {
@@ -155,7 +146,7 @@ export default class FirearmProcedure extends AbstractProcedure {
          type: "attribute",
          key: "reaction",
          tnMod: 0,
-         tnLabel: "Weapon difficulty",
+         tnLabel: localize(RuntimeConfig().procedure.weapondifficulty),
       };
    }
 
@@ -201,8 +192,8 @@ export default class FirearmProcedure extends AbstractProcedure {
       const headerBits = this.#attackHeader(exportCtx);
       const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
       const tSummary = this.#summarizeRollGeneric(target, targetRoll);
-      const iHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tHtml = SR3ERoll.renderVanilla(target, targetRoll);
+      const iHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tHtml = SR3ERoll.renderRollOutcome(targetRoll);
       const winner = netSuccesses > 0 ? initiator : target;
       const html = `
     ${top}
@@ -374,7 +365,7 @@ export default class FirearmProcedure extends AbstractProcedure {
       return tail.length ? `<p class="sr3e-roll-summary"><small>${tail.join(" • ")}</small></p>` : "";
    }
 
-   #summarizeRollGeneric(_actor, rollJson) {
+   #summarizeRollGeneric(actor, rollJson) {
       const o = rollJson?.options || {};
       const readName = (v) => {
          if (v == null) return null;
@@ -382,10 +373,21 @@ export default class FirearmProcedure extends AbstractProcedure {
          if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
          return null;
       };
-      const skillName = readName(o.skillKey ?? o.skill);
-      const specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
-      const attrName = readName(o.attributeKey ?? o.attribute);
-      const isDefault = !!(o.isDefaulting ?? o.defaulting);
+      let skillName = readName(o.skillKey ?? o.skill);
+      let specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      let attrName = readName(o.attributeKey ?? o.attribute);
+      let isDefault = !!(o.isDefaulting ?? o.defaulting);
+
+      // Fallback: attacker’s item may carry the skill/specialization/defaulting info
+      if (!skillName && !attrName && actor?.id === this.caller?.id) {
+         const info = this.#resolveItemSkillAndSpec();
+         if (info) {
+            skillName = info.skillName ?? skillName;
+            specName = info.specName ?? specName;
+            isDefault = info.isDefault ?? isDefault;
+         }
+      }
+
       const mainBits = [];
       if (skillName) {
          mainBits.push(`Skill: ${this.#cap(skillName)}`);

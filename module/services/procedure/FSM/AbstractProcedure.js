@@ -2,8 +2,12 @@ import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
 import { writable, derived, get, readable } from "svelte/store";
 import { localize } from "@services/utilities.js";
 import SR3ERoll from "@documents/SR3ERoll.js";
+import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+import OpposeRollService from "@services/OpposeRollService.js";
 
-const config = Config.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class AbstractProcedure {
    // ---------- static: serialization registry & helpers ----------
@@ -56,12 +60,12 @@ export default class AbstractProcedure {
     * opts.resolveActor?: async ({uuid,id}) => Actor
     * opts.resolveItem?: async ({uuid,id}, actor) => Item
     */
+   // AbstractProcedure.js
    static async fromJSON(obj, opts = {}) {
       if (!obj || typeof obj !== "object") throw new Error("fromJSON: invalid payload");
       const { schema = 1, kind, actor, item, state = {}, extra = null } = obj;
 
       if (schema !== AbstractProcedure.#SCHEMA_VERSION) {
-         // optional: migrate or just warn
          DEBUG &&
             LOG.warn(`AbstractProcedure.fromJSON: schema mismatch ${schema} != ${AbstractProcedure.#SCHEMA_VERSION}`, [
                __FILE__,
@@ -69,7 +73,6 @@ export default class AbstractProcedure {
             ]);
       }
 
-      // Default resolvers (allow override via opts)
       const resolveActor =
          opts.resolveActor ||
          (async (ref) => {
@@ -81,6 +84,7 @@ export default class AbstractProcedure {
             }
             return game.actors?.get(ref.id) ?? null;
          });
+
       const resolveItem =
          opts.resolveItem ||
          (async (ref, resolvedActor) => {
@@ -93,19 +97,25 @@ export default class AbstractProcedure {
             return resolvedActor?.items?.get(ref.id) || game.items?.get(ref.id) || null;
          });
 
-      const callerDoc = await resolveActor(actor);
-      const itemDoc = await resolveItem(item, callerDoc);
-      if (!callerDoc || !itemDoc) throw new Error("fromJSON: could not resolve caller and/or item");
-
-      // Find the concrete class
+      // Find subclass first; some may not require an item
       const Ctor = AbstractProcedure.getCtor(kind);
       if (!Ctor) throw new Error(`fromJSON: no registered subclass for kind="${kind}"`);
 
+      const callerDoc = await resolveActor(actor);
+      if (!callerDoc) throw new Error("fromJSON: could not resolve caller");
+
+      // Only require item if one was actually sent
+      const itemRequested = !!(item && (item.id || item.uuid));
+      const itemDoc = itemRequested ? await resolveItem(item, callerDoc) : null;
+      if (itemRequested && !itemDoc) throw new Error("fromJSON: could not resolve item");
+
       const proc = new Ctor(callerDoc, itemDoc);
 
-      // Base state
+      // Restore base state
       if (typeof state.title === "string") proc.#titleStore.set(state.title);
-      if (Number.isFinite(Number(state.targetNumber))) proc.#targetNumberStore.set(Number(state.targetNumber));
+      const tn = state.targetNumber;
+      if (tn != null && Number.isFinite(Number(tn))) proc.#targetNumberStore.set(Number(tn));
+
       const mods = Array.isArray(state.modifiers) ? state.modifiers.map((m) => ({ ...m })) : [];
       proc.#modifiersArrayStore.set(mods);
       if (Number.isFinite(Number(state.dice))) proc.#diceStore.set(Math.max(0, Number(state.dice)));
@@ -116,7 +126,6 @@ export default class AbstractProcedure {
          proc.#linkedAttributeStore.set(state.linkedAttribute ?? null);
       proc.#contestIds = Array.isArray(state.contestIds) ? state.contestIds.filter(Boolean) : [];
 
-      // Subclass extras
       if (typeof proc.fromJSONExtra === "function") {
          await proc.fromJSONExtra(extra ?? null, { opts, payload: obj });
       }
@@ -128,12 +137,14 @@ export default class AbstractProcedure {
    #caller;
    #item;
    #isDefaulting = false;
+   #lockKey = null;
 
    #subSkill = null;
    #specialization = null;
    #readwrite = null;
+   #contestId = null;
+   #responseBasis = null;
    #contestIds = [];
-   #responderBasis = null;
 
    #targetNumberStore;
    #modifiersArrayStore;
@@ -164,12 +175,14 @@ export default class AbstractProcedure {
       return () => Hooks.off("targetToken", update);
    });
 
-   constructor(caller = null, item = null) {
+   // AbstractProcedure.js
+   // AbstractProcedure.js
+   constructor(caller = null, item = null, { lockPriority = "normal" } = {}) {
       if (this.constructor === AbstractProcedure) {
          DEBUG && LOG.error("Cannot instantiate abstract class AbstractProcedure", [__FILE__, __LINE__]);
          ui.notifications.warn("Cannot instantiate abstract class AbstractProcedure");
       } else {
-         this.#targetNumberStore = writable(4);
+         this.#targetNumberStore = writable(null);
          this.#modifiersArrayStore = writable([]);
          this.#titleStore = writable("Roll");
          this.#diceStore = writable(0);
@@ -181,12 +194,12 @@ export default class AbstractProcedure {
             arr.reduce((a, m) => a + (Number(m?.value) || 0), 0)
          );
          this.#finalTNStore = derived([this.#targetNumberStore, this.#modifiersTotalStore], ([base, add]) =>
-            Math.max(2, Number(base ?? 4) + Number(add ?? 0))
+            base == null ? null : Math.max(2, Number(base) + Number(add ?? 0))
          );
          this.#difficultyStore = derived(this.#targetNumberStore, (tn) => {
             if (tn == null) return "";
             const n = Number(tn);
-            const d = config.difficulty || {};
+           const d = localize(RuntimeConfig().procedure.difficulty) || {};
             if (n === 2) return d.simple || "";
             if (n === 3) return d.routine || "";
             if (n === 4) return d.average || "";
@@ -199,10 +212,19 @@ export default class AbstractProcedure {
          });
       }
 
-      if (caller && item) {
-         this.#caller = caller;
-         this.#item = item;
+      const ownerKey = `${this.constructor.name}:${caller?.id}`;
+      const id = ProcedureLock.assertEnter({ ownerKey, priority: lockPriority });
+      if (id) this.#lockKey = ownerKey;
 
+      // ✅ Always set caller when provided (even if there is no item)
+      if (caller) this.#caller = caller;
+
+      // If an item is supplied, a caller is required
+      if (item && !caller) throw new Error("AbstractProcedure: item provided without caller");
+
+      // Item-specific initialization (only when we actually have an item)
+      if (item) {
+         this.#item = item;
          this.#titleStore.set(item.name);
 
          const itemStoreManager = StoreManager.Subscribe(this.#item);
@@ -250,12 +272,15 @@ export default class AbstractProcedure {
 
          StoreManager.Unsubscribe(this.#caller);
          StoreManager.Unsubscribe(this.#item);
+      }
 
+      // ✅ Penalty hook belongs to the actor, not to the item — do it whenever we have a caller
+      if (this.#caller) {
          const penaltyStore = StoreManager.Subscribe(this.#caller).GetRWStore("health.penalty");
          const unsubPenalty = penaltyStore.subscribe((p) => {
             const v = Number(p ?? 0);
             this._removeModById("penalty");
-            if (v > 0) this.upsertMod({ id: "penalty", name: localize(config.health?.penalty), value: -v });
+            if (v > 0) this.upsertMod({ id: "penalty", name: localize(RuntimeConfig().health.penalty), value: -v });
          });
          this.#disposers.push(unsubPenalty);
       }
@@ -289,7 +314,10 @@ export default class AbstractProcedure {
          item: { id: this.#item?.id ?? null, uuid: this.#item?.uuid ?? null },
          state: {
             title: get(this.#titleStore),
-            targetNumber: Number(get(this.#targetNumberStore) ?? 4),
+            targetNumber: (() => {
+               const v = get(this.#targetNumberStore);
+               return v == null ? null : Number(v);
+            })(),
             modifiers: (get(this.#modifiersArrayStore) ?? []).map((m) => ({ ...m })),
             dice: Number(get(this.#diceStore) ?? 0),
             poolDice: Number(get(this.#poolDiceStore) ?? 0),
@@ -318,10 +346,6 @@ export default class AbstractProcedure {
 
    get linkedAttribute() {
       return get(this.#linkedAttributeStore);
-   }
-
-   setLinkedAttributeKey(key) {
-      if (typeof key === "string" && key) this.#linkedAttributeStore?.set?.(key);
    }
 
    get caller() {
@@ -401,8 +425,47 @@ export default class AbstractProcedure {
       return this.#contestIds.slice();
    }
 
+   setContestId(id) {
+      this.#contestId = id ?? null;
+   }
+
+   get contestId() {
+      return this.#contestId;
+   }
+
+   setResponseBasis(basis = null) {
+      this.#responseBasis = basis || null;
+
+      const n = Number(basis?.dice);
+      if (Number.isFinite(n)) this.dice = Math.max(0, Math.floor(n));
+
+      if (basis?.type === "attribute" && basis?.key) {
+         this.#linkedAttributeStore?.set?.(String(basis.key));
+      }
+   }
+
+   resetResponseBasis() {
+      this.#responseBasis = null;
+      this.#linkedAttributeStore?.set?.(null);
+   }
+
+   getResponseBasis() {
+      return this.#responseBasis;
+   }
+
+   deliverContestResponse(rollOrJson) {
+      const id = this.#contestId;
+      if (!id) return;
+      const payload = typeof rollOrJson?.toJSON === "function" ? rollOrJson.toJSON() : rollOrJson;
+      if (payload) OpposeRollService.deliverResponse(id, payload);
+   }
+
    get isOpposed() {
       return (game.user?.targets?.size ?? 0) > 0;
+   }
+
+   setDefaultTNForComposer(n = 4) {
+      if (get(this.#targetNumberStore) == null) this.#targetNumberStore.set(Number(n));
    }
 
    shouldSelfPublish() {
@@ -411,8 +474,9 @@ export default class AbstractProcedure {
 
    // The default label; subclasses override as they like.
    getKindOfRollLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      return this.hasTargets ? t?.(config.label.challenge) ?? "Challenge" : t?.(config.label.roll) ?? "Roll";
+      return this.hasTargets
+         ? localize(RuntimeConfig().procedure.challenge)
+         : localize(RuntimeConfig().procedure.resist);
    }
 
    getItemLabel() {
@@ -422,18 +486,15 @@ export default class AbstractProcedure {
 
    // (keep these from earlier)
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      return this.hasTargets ? t?.(config.button.challenge) ?? "Challenge!" : t?.(config.button.roll) ?? "Roll!";
+      return this.hasTargets
+         ? localize(RuntimeConfig().procedure.challenge)
+         : t?.(RuntimeConfig().procedure.resist);
    }
 
    isPrimaryActionEnabled() {
-      const tn = Number(this.finalTN({ floor: 2 }));
-      return Number.isFinite(tn) && tn > 1;
-   }
-
-   // Whether the main action is enabled (TN must be >= 2)
-   isPrimaryActionEnabled() {
-      const tn = Number(this.finalTN({ floor: 2 }));
+      const baseRaw = get(this.#targetNumberStore);
+      if (baseRaw == null) return true;
+      const tn = this.finalTN({ floor: 2 });
       return Number.isFinite(tn) && tn > 1;
    }
 
@@ -456,54 +517,6 @@ export default class AbstractProcedure {
    setSelectedPoolKey(name) {
       if (typeof name === "string" && name.trim()) {
          this.#associatedPoolKey = name.trim(); // used in onChallengeWillRoll to name the pool contribution
-      }
-   }
-
-   setResponderBasis(basis = null) {
-      this.#responderBasis = basis ? { ...basis } : null;
-   }
-
-   getResponderBasis() {
-      return this.#responderBasis ? { ...this.#responderBasis } : null;
-   }
-
-   applyResponderBasisDice() {
-      const actor = this.caller;
-      const b = this.#responderBasis;
-      if (!actor || !b || !b.type) return;
-
-      if (b.type === "attribute") {
-         const key = String(b.key || "").toLowerCase();
-         const a = actor?.system?.attributes?.[key];
-         const rating = Number(a?.total ?? a?.value ?? 0) || 0;
-         this.setLinkedAttributeKey(key);
-         this.dice = Math.max(0, rating);
-         return;
-      }
-
-      if (b.type === "skill") {
-         const skill = actor?.items?.get?.(b.id);
-         if (!skill) return;
-         const type = skill.system?.skillType;
-         const sub = type ? (skill.system?.[`${type}Skill`] ?? {}) : {};
-         const specs = Array.isArray(sub?.specializations) ? sub.specializations : [];
-         let dice = Number(sub?.value ?? 0) || 0;
-
-         if (Number.isFinite(Number(b.specIndex))) {
-            const s = specs[Number(b.specIndex)];
-            const v = Number(s?.value);
-            if (Number.isFinite(v)) dice = v;
-         } else if (b.specialization) {
-            const s = specs.find((s) => (s?.name ?? s?.label) === b.specialization);
-            const v = Number(s?.value);
-            if (Number.isFinite(v)) dice = v;
-         }
-
-         this.dice = Math.max(0, Math.floor(dice));
-
-         const poolKey = sub?.associatedDicePool || null;
-         if (poolKey) this.setSelectedPoolKey(poolKey);
-         return;
       }
    }
 
@@ -539,8 +552,10 @@ export default class AbstractProcedure {
 
    // ---------- math ----------
    finalTN({ floor = null } = {}) {
+      const baseRaw = get(this.#targetNumberStore);
+      if (baseRaw == null) return null;
       const mods = get(this.#modifiersArrayStore) ?? [];
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const base = Number(baseRaw);
       const sum = mods.reduce((a, m) => a + (Number(m?.value) || 0), base);
       return floor == null ? sum : Math.max(floor, sum);
    }
@@ -573,7 +588,6 @@ export default class AbstractProcedure {
       const baseDice = Math.max(0, Math.floor(Number(this.dice) || 0));
       const poolDice = Math.max(0, Math.floor(this.#computeClampedPoolDice(this.poolDice)));
       const karmaDice = Math.max(0, Math.floor(Number(this.karmaDice) || 0));
-
       const totalDice = baseDice + poolDice + karmaDice;
       if (!Number.isFinite(totalDice) || totalDice <= 0) return "0d6";
 
@@ -581,10 +595,9 @@ export default class AbstractProcedure {
       if (!explodes) return base;
 
       const tnBase = get(this.#targetNumberStore);
-      const isOpen = this.#isOpenTest() || tnBase == null;
-      if (isOpen) return `${base}x`;
+      if (tnBase == null) return `${base}x`;
 
-      const tn = Math.max(2, Number(this.finalTN()) || 2);
+      const tn = Math.max(2, Number(this.finalTN({ floor: 2 })) || 2);
       return `${base}x${tn}`;
    }
 
@@ -607,6 +620,10 @@ export default class AbstractProcedure {
          } catch {}
       }
       this.#disposers = [];
+      if (this.#lockKey) {
+         ProcedureLock.release(this.#lockKey);
+         this.#lockKey = null;
+      }
    }
 
    async execute(/* opts */) {
@@ -626,84 +643,77 @@ export default class AbstractProcedure {
       // --- attach options (used later by contested message rendering) ------------
       const o = (baseRoll.options = baseRoll.options || {});
 
-      // Total & base dice (useful for debugging and UI summaries)
       if (o.baseDice == null) o.baseDice = baseDice;
       if (o.dice == null) o.dice = baseDice + poolDice + karmaDice;
 
-      // Karma
       if (karmaDice > 0 && o.karmaDice == null) o.karmaDice = karmaDice;
 
-      // Defaulting
       if (this.#isDefaulting) {
          const lk = get(this.#linkedAttributeStore);
          if (lk) {
-            o.attributeKey = lk; // helps the defender/attacker summary block label correctly
+            o.attributeKey = lk;
             o.defaulting = true;
          }
       }
 
-      // Pools (normalize into a single array so renderers don't guess)
       if (!Array.isArray(o.pools)) o.pools = [];
-
       const prettyPool = (k) => {
          if (!k) return "Pool";
-         // Try config label first, then prettify the key
-         const label = config.dicepools?.[k];
+         const label = CONFIG?.sr3e?.dicepools?.[k];
          if (label) return typeof game?.i18n?.localize === "function" ? game.i18n.localize(label) : String(label);
          return String(k)
             .replace(/([A-Z])/g, " $1")
-            .replace(/^\w/, (c) => c.toUpperCase()); // e.g., combatPool → Combat Pool
+            .replace(/^\w/, (c) => c.toUpperCase());
       };
 
       if (poolDice > 0) {
-         // If this roll has an associated pool key (from the linked skill), record both a
-         // key-specific field (for legacy consumers) AND a normalized pools[] entry.
          if (this.#associatedPoolKey) {
-            const key = `${this.#associatedPoolKey}Dice`; // e.g. "combatPoolDice"
+            const key = `${this.#associatedPoolKey}Dice`;
             if (o[key] == null) o[key] = poolDice;
             o.pools.push({ name: prettyPool(this.#associatedPoolKey), key: this.#associatedPoolKey, dice: poolDice });
          } else {
-            // Generic/unknown pool selection
             o.pools.push({ name: "Pool", key: "pool", dice: poolDice });
          }
       }
 
-      // TN snapshot for full transparency (base + individual modifiers + final)
-      // These reflect what the composer currently shows.
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const baseRaw = get(this.#targetNumberStore);
       const mods = (get(this.#modifiersArrayStore) ?? []).map((m) => ({
          id: m.id ?? null,
          name: m.name ?? "",
          value: Number(m.value) || 0,
       }));
-
-      if (o.tnBase == null) o.tnBase = base;
       if (!Array.isArray(o.tnMods)) o.tnMods = mods.slice();
-      if (o.targetNumber == null)
-         o.targetNumber = Math.max(2, base + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
+      if (o.tnBase == null) o.tnBase = baseRaw == null ? null : Number(baseRaw);
+      if (o.targetNumber == null) {
+         o.targetNumber =
+            baseRaw == null
+               ? null
+               : Math.max(2, Number(baseRaw) + mods.reduce((a, m) => a + (Number(m.value) || 0), 0));
+      }
 
-      const b = this.#responderBasis;
-      if (b && b.type === "attribute") {
-         const key = typeof b.key === "string" ? b.key : get(this.#linkedAttributeStore);
-         if (key) {
-            o.attributeKey = key;
-            if (o.defaulting == null) o.defaulting = false;
-            o.type = o.type || "attribute";
+      const basis = this.#responseBasis;
+      if (basis && typeof basis === "object") {
+         if (basis.type === "attribute") {
+            o.type = "attribute";
+            if (basis.key) o.attributeKey = String(basis.key);
+            if (basis.isDefaulting != null) o.isDefaulting = !!basis.isDefaulting;
+            if (Number.isFinite(Number(basis.dice))) o.attributeDice = Math.max(0, Math.floor(Number(basis.dice)));
+         } else if (basis.type === "skill") {
+            o.type = "skill";
+            o.skill = { id: basis.id ?? null, name: basis.name ?? "Skill" };
+            if (basis.specialization) o.specialization = basis.specialization;
+            if (Number.isFinite(Number(basis.specIndex))) o.specIndex = Number(basis.specIndex);
+            if (basis.poolKey) {
+               const sel = this.#computeClampedPoolDice(this.poolDice);
+               if (sel > 0) o.pools.push({ name: prettyPool(basis.poolKey), key: basis.poolKey, dice: sel });
+            }
+            if (Number.isFinite(Number(basis.dice))) o.skillDice = Math.max(0, Math.floor(Number(basis.dice)));
+         } else if (basis.type === "item") {
+            o.type = "item";
+            o.itemKey = basis.id ?? null;
+            if (basis.name) o.itemName = basis.name;
+            if (Number.isFinite(Number(basis.dice))) o.itemDice = Math.max(0, Math.floor(Number(basis.dice)));
          }
-      } else if (b && b.type === "skill") {
-         const actor = this.caller;
-         const skill = actor?.items?.get?.(b.id);
-         const skillName = skill?.name || "Skill";
-         o.skill = { id: b.id || null, name: skillName };
-         if (b.specialization) o.specialization = b.specialization;
-         if (Number.isFinite(Number(b.specIndex))) o.specIndex = Number(b.specIndex);
-         if (this.#associatedPoolKey && !o.pools.some((p) => p.key === this.#associatedPoolKey)) {
-            const sel = clampInt(this.poolDice);
-            if (sel > 0)
-               o.pools.push({ name: prettyPool(this.#associatedPoolKey), key: this.#associatedPoolKey, dice: sel });
-         }
-         if (o.type == null) o.type = "skill";
-         if (o.defaulting == null) o.defaulting = false;
       }
    }
 
@@ -719,8 +729,8 @@ export default class AbstractProcedure {
       const initName = initiator?.name ?? "Attacker";
       const tgtName = target?.name ?? "Defender";
 
-      const initHtml = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tgtHtml = SR3ERoll.renderVanilla(target, targetRoll);
+      const initHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tgtHtml = SR3ERoll.renderRollOutcome(targetRoll);
       const winner = netSuccesses > 0 ? initName : tgtName;
 
       return {
@@ -743,7 +753,7 @@ export default class AbstractProcedure {
     * Build the defense procedure instance that should run on the defender side.
     * Default: use exportCtx.next.kind to choose a registered procedure and hydrate it.
     * Subclasses may override for custom behavior.
-    */
+   */
    async buildDefenseProcedure(exportCtx, { defender, contestId }) {
       if (!exportCtx?.next?.kind) {
          throw new Error("export.next.kind is required to build the defense procedure");
@@ -753,7 +763,16 @@ export default class AbstractProcedure {
       if (!DefenseCtor) {
          throw new Error(`No registered procedure for kind="${kind}"`);
       }
-      const proc = new DefenseCtor(defender, /* item */ null);
+
+      // Always pass contestId into the defense proc.
+      const baseArgs = exportCtx?.next?.args || {};
+      const proc = new DefenseCtor(defender, /* item */ null, { ...baseArgs, contestId });
+
+      // NEW: start from a clean basis (avoid sticky basis from a previous contest).
+      if (typeof proc.resetResponseBasis === "function") {
+         proc.resetResponseBasis();
+      }
+
       if (typeof proc.fromContestExport === "function") {
          await proc.fromContestExport(exportCtx, { contestId, initiatorExport: exportCtx });
       }
@@ -808,7 +827,7 @@ export default class AbstractProcedure {
    }
 
    #preDefaultTN() {
-      const base = Number(get(this.#targetNumberStore) ?? 4);
+      const base = Number(get(this.#targetNumberStore));
       const mods = get(this.#modifiersArrayStore) ?? [];
       const add = mods
          .filter((m) => !String(m?.id || "").startsWith("auto-default-"))
@@ -819,26 +838,25 @@ export default class AbstractProcedure {
    #assertDefaultAllowed() {
       if (this.#item?.system?.noDefault) {
          DEBUG && LOG.warn("Defaulting not allowed for this test", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize(config.warn.defaultNotAllowed));
          return false;
       }
       if (this.#preDefaultTN() >= 8) {
          DEBUG && LOG.warn("Defaulting disallowed at TN ≥ 8 before defaulting", [__FILE__, __LINE__]);
-         ui.notifications.warn(localize(config.warn.defaultTN8));
          return false;
       }
       return true;
    }
 
+   /* NOT UP TO DATE TODO: Fix this later
    #isOpenTest() {
       return this.#item?.system?.openTest === true || this.#item?.system?.testType === "open";
    }
-
+   
    defaultFromSkillToAttribute() {
       if (!this.#assertDefaultAllowed()) return;
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
-
+      
       let attrKey = get(this.#linkedAttributeStore);
       if (!attrKey) {
          attrKey = this.#item?.system?.governingAttribute ?? this.#item?.system?.defaultAttributeKey ?? "strength";
@@ -847,7 +865,7 @@ export default class AbstractProcedure {
       const a = this.#caller?.system?.attributes?.[attrKey];
       const attrVal = Number(a?.total ?? a?.value ?? 0) || 0;
       this.#diceStore.set(Math.max(0, attrVal));
-
+      
       const mod = {
          id: "auto-default-attr",
          name: "Skill to attribute",
@@ -863,8 +881,8 @@ export default class AbstractProcedure {
       if (!this.#assertDefaultAllowed()) return;
       const rating = Number(this.#subSkill?.value ?? 0);
       DEBUG &&
-         (!Number.isFinite(rating) || rating <= 0) &&
-         LOG.error("No base skill to default to", [__FILE__, __LINE__]);
+      (!Number.isFinite(rating) || rating <= 0) &&
+      LOG.error("No base skill to default to", [__FILE__, __LINE__]);
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
       const cap = Math.floor(rating / 2);
@@ -877,13 +895,13 @@ export default class AbstractProcedure {
       };
       this.#upsertMod(mod);
    }
-
+   
    defaultFromSkillToSpecialization() {
       if (!this.#assertDefaultAllowed()) return;
       const baseRating = Number(this.#subSkill?.value ?? 0);
       DEBUG &&
-         (!Number.isFinite(baseRating) || baseRating <= 0) &&
-         LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
+      (!Number.isFinite(baseRating) || baseRating <= 0) &&
+      LOG.error("No related base skill for specialization default", [__FILE__, __LINE__]);
       this.#clearDefaultingMods();
       const isOpen = this.#isOpenTest();
       const cap = Math.floor(baseRating / 2);
@@ -896,4 +914,5 @@ export default class AbstractProcedure {
       };
       this.#upsertMod(mod);
    }
+   */
 }

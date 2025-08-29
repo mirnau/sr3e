@@ -1,6 +1,7 @@
 <script>
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { flags } from "@services/commonConsts.js";
+   
    import { createEventDispatcher, onDestroy } from "svelte";
    import TextInput from "../basic/TextInput.svelte";
 
@@ -14,7 +15,9 @@
    });
 
    let isCharacterCreationStore = storeManager.GetFlagStore(flags.actor.isCharacterCreation);
+   // base value is resolved per skill type by the strategy; keep legacy for creation deletion rule
    let baseValue = storeManager.GetRWStore("activeSkill.value");
+   
 
    let liveText = specialization.name;
 
@@ -38,11 +41,11 @@
    }
 
    function increment() {
-      console.log("increment Entered");
+      dispatch("increment", { specialization });
    }
 
    function decrement() {
-      console.log("decrement Entered");
+      dispatch("decrement", { specialization });
    }
 
    function deleteThis() {

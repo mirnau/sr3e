@@ -4,15 +4,18 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import ResistanceEngine from "@rules/ResistanceEngine.js";
+import { localize } from "@services/utilities.js";
 
-const config = Config.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 export default class ResistanceProcedure extends AbstractProcedure {
    #prep;
    #defender;
 
    constructor(defender, _item = null, { prep } = {}) {
-      super(defender, _item); // base class won’t set #caller because item is null
+      super(defender, _item, { lockPriority: "advanced" }); // base class won’t set #caller because item is null
       this.#defender = defender; // keep our own pointer to the actor
       this.#prep = prep;
 
@@ -54,7 +57,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
       return 1;
    }
    getCaller() {
-      return { type: "attribute", key: "body", name: game.i18n.localize(config.attributes.body) };
+      return { type: "attribute", key: "body", name: "Body" };
    }
 
    getFlavor() {
@@ -67,7 +70,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    async onChallengeWillRoll({ baseRoll, actor }) {
       await super.onChallengeWillRoll?.({ baseRoll, actor });
       baseRoll.options = baseRoll.options || {};
-      baseRoll.options.attribute = { key: "body", name: game.i18n.localize(config.attributes.body) };
+      baseRoll.options.attribute = { key: "body", name: "Body" };
 
       const tnBase = Number(get(this.targetNumberStore));
       const tnMods = (get(this.modifiersArrayStore) || []).map((m) => ({
@@ -81,8 +84,7 @@ export default class ResistanceProcedure extends AbstractProcedure {
    }
 
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      return t?.(config.button.resist) ?? "Resist";
+      return localize(RuntimeConfig().procedure.resist);
    }
 
    finalTN({ floor = 2 } = {}) {

@@ -4,9 +4,12 @@ import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure";
 import SR3ERoll from "@documents/SR3ERoll.js";
 import OpposeRollService from "@services/OpposeRollService.js";
 import MeleeService from "@families/MeleeService.js";
-import ProcedureLock from "@services/procedure/FSM/ProcedureLock.js";
+import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
+import { localize } from "@services/utilities.js";
 
-const config = Config.sr3e;
+function RuntimeConfig() {
+   return CONFIG?.sr3e || {};
+}
 
 /**
  * Attacker procedure for melee.
@@ -18,17 +21,7 @@ export default class MeleeProcedure extends AbstractProcedure {
    #packet = null; // DamagePacket (snapshot)
 
    constructor(caller, item) {
-      super(caller, item);
-      ProcedureLock.assertEnter({
-         ownerKey: `${this.constructor.name}:${caller?.id}`,
-         priority: "advanced",
-         onDenied: () => {},
-      });
-   }
-
-   onDestroy() {
-      super.onDestroy?.();
-      ProcedureLock.release(`${this.constructor.name}:${this.caller?.id}`);
+      super(caller, item, { lockPriority: "advanced" });
    }
 
    // Minimal flavor used by SR3ERoll when needed
@@ -43,9 +36,8 @@ export default class MeleeProcedure extends AbstractProcedure {
 
    // Primary button label
    getPrimaryActionLabel() {
-      const t = game?.i18n?.localize?.bind(game.i18n);
-      if (this.hasTargets) return t?.(config.button.challenge) ?? "Challenge!";
-      const atk = t?.(config.button.attack) ?? "Attack";
+      if (this.hasTargets) return localize(RuntimeConfig().procedure.challenge);
+      const atk = localize(RuntimeConfig().procedure.attack);
       const weapon = this.item?.name ?? "";
       return weapon ? `${atk} ${weapon}` : atk;
    }
@@ -93,7 +85,6 @@ export default class MeleeProcedure extends AbstractProcedure {
          return roll;
       } catch (err) {
          DEBUG && LOG.error("Melee challenge flow failed", [__FILE__, __LINE__, err]);
-         ui.notifications.error(game.i18n.localize?.(config.error.challengeFailed) ?? "Challenge failed");
          throw err;
       }
    }
@@ -136,38 +127,98 @@ export default class MeleeProcedure extends AbstractProcedure {
     * The responder harness should pass a third arg { responderKey } with "standard" or "full".
     * If your harness doesn’t yet, you can also embed a tiny switch there to rewrite `next.kind`.
     */
-   buildDefenseProcedure(exportCtx, { defender, contestId, responderKey = "standard" }) {
-      const key = responderKey === "full" ? "melee-full" : "melee-standard";
+   buildDefenseProcedure(exportCtx, { defender, contestId, responderKey = "standard", defenseHint = null }) {
+      // Unified defender procedure + mode flag
+      const key = "melee-defense"; // <-- single class
+      const mode = responderKey === "full" ? "full" : "standard";
       const Ctor = AbstractProcedure.getCtor(key);
       if (!Ctor) throw new Error(`No registered defense procedure for key="${key}"`);
+
       const baseArgs = exportCtx?.next?.args || {};
-      return new Ctor(defender, null, { ...baseArgs, contestId });
-   }
 
-   // ---------- contested result rendering (strict) ----------
-   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
-      const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
+      // --- 1) Try to honor an explicit hint (attribute or skill), and hydrate its dice via StoreManager
+      let basis = null;
 
-      const top = `
-      <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
-      <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
-    `;
+      if (defenseHint && defenseHint.type) {
+         if (defenseHint.type === "attribute") {
+            const attrKey = String(defenseHint.key || "strength");
+            const sm = StoreManager.Subscribe(defender);
+            try {
+               const st = sm.GetSumROStore(`attributes.${attrKey}`);
+               const snap = get(st) || {};
+               const dice = Math.max(0, Number(snap.sum) || 0);
+               basis = {
+                  type: "attribute",
+                  key: attrKey,
+                  name: attrKey.charAt(0).toUpperCase() + attrKey.slice(1),
+                  isDefaulting: defenseHint.isDefaulting ?? true,
+                  dice,
+               };
+            } finally {
+               StoreManager.Unsubscribe(defender);
+            }
+         } else if (defenseHint.type === "skill") {
+            const skillId = defenseHint.id || defenseHint.skillId;
+            const skill = defender?.items?.get?.(skillId);
+            if (skill) {
+               const smSkill = StoreManager.Subscribe(skill);
+               try {
+                  const valueStore = smSkill.GetRWStore("activeSkill.value");
+                  const specsStore = smSkill.GetRWStore("activeSkill.specializations");
 
-      const iSummary = SR3ERoll.renderVanilla(initiator, initiatorRoll);
-      const tSummary = SR3ERoll.renderVanilla(target, targetRoll);
-      const winner = netSuccesses > 0 ? initiator : target;
+                  let dice = Number(get(valueStore)) || 0;
+                  if (Number.isFinite(Number(defenseHint.specIndex))) {
+                     const specs = get(specsStore) || [];
+                     dice = Number(specs[Number(defenseHint.specIndex)]?.value) || dice;
+                  } else if (defenseHint.specialization) {
+                     const specs = get(specsStore) || [];
+                     const found = specs.find(
+                        (s) => s?.name === defenseHint.specialization || s?.label === defenseHint.specialization
+                     );
+                     dice = Number(found?.value) || dice;
+                  }
 
-      const html = `
-      ${top}
-      <h4>${initiator.name}</h4>
-      ${iSummary}
-      <h4>${target.name}</h4>
-      ${tSummary}
-      <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
-    `;
+                  basis = {
+                     type: "skill",
+                     id: skill.id,
+                     name: skill.name,
+                     dice: Math.max(0, Math.floor(dice)),
+                     specialization: defenseHint.specialization ?? null,
+                     specIndex: Number.isFinite(Number(defenseHint.specIndex)) ? Number(defenseHint.specIndex) : null,
+                  };
+               } finally {
+                  StoreManager.Unsubscribe(skill);
+               }
+            }
+         }
+      }
 
-      const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
-      return { html, resistancePrep };
+      // --- 2) Fallback: Strength via StoreManager (matches your UI value)
+      if (!basis || !Number.isFinite(Number(basis.dice))) {
+         const sm = StoreManager.Subscribe(defender);
+         try {
+            const st = sm.GetSumROStore("attributes.strength");
+            const snap = get(st) || {};
+            const dice = Math.max(0, Number(snap.sum) || 0);
+            basis = {
+               type: "attribute",
+               key: "strength",
+               name: "Strength",
+               isDefaulting: true,
+               dice,
+            };
+         } finally {
+            StoreManager.Unsubscribe(defender);
+         }
+      }
+
+      // --- 3) Instantiate the unified defender procedure with hydrated basis + mode
+      const proc = new Ctor(defender, null, { ...baseArgs, contestId, basis, mode });
+
+      if (typeof proc.fromContestExport === "function") {
+         proc.fromContestExport(exportCtx, { contestId, initiatorExport: exportCtx });
+      }
+      return proc;
    }
 
    /**
@@ -190,6 +241,87 @@ export default class MeleeProcedure extends AbstractProcedure {
       prep.tnMods = Array.isArray(prep.tnMods) ? prep.tnMods : [];
 
       return prep;
+   }
+
+   async renderContestOutcome(exportCtx, { initiator, target, initiatorRoll, targetRoll, netSuccesses }) {
+      const weaponName = this.item?.name || exportCtx?.weaponName || "Attack";
+      const top = `
+    <p><strong>Contested roll between ${initiator.name} and ${target.name}</strong></p>
+    <p><strong>${initiator.name}</strong> attacks <strong>${target.name}</strong> with <em>${weaponName}</em>.</p>
+  `;
+      const iSummary = this.#summarizeRollGeneric(initiator, initiatorRoll);
+      const tSummary = this.#summarizeRollGeneric(target, targetRoll);
+      const iHtml = SR3ERoll.renderRollOutcome(initiatorRoll);
+      const tHtml = SR3ERoll.renderRollOutcome(targetRoll);
+      const winner = netSuccesses > 0 ? initiator : target;
+      const html = `
+    ${top}
+    <h4>${initiator.name}</h4>${iSummary}${iHtml}
+    <h4>${target.name}</h4>${tSummary}${tHtml}
+    <p><strong>${winner.name}</strong> wins the opposed roll (${Math.abs(netSuccesses)} net successes)</p>
+  `;
+      const resistancePrep = netSuccesses > 0 ? this.buildResistancePrep(exportCtx, { initiator, target }) : null;
+      return { html, resistancePrep };
+   }
+
+   #summarizeRollGeneric(actor, rollJson) {
+      const o = rollJson?.options || {};
+      const readName = (v) => {
+         if (v == null) return null;
+         if (typeof v === "string") return v;
+         if (typeof v === "object") return v.name ?? v.label ?? v.key ?? null;
+         return null;
+      };
+      let skillName = readName(o.skillKey ?? o.skill);
+      let specName = readName(o.specialization ?? o.spec ?? o.specKey ?? o.specializationName);
+      let attrName = readName(o.attributeKey ?? o.attribute);
+      let isDefault = !!(o.isDefaulting ?? o.defaulting);
+
+      if (!skillName && !attrName && actor?.id === this.caller?.id) {
+         const info = this.#resolveItemSkillAndSpec();
+         if (info) {
+            skillName = info.skillName ?? skillName;
+            specName = info.specName ?? specName;
+            isDefault = info.isDefault ?? isDefault;
+         }
+      }
+
+      const bits = [];
+      if (skillName) {
+         bits.push(`Skill: ${this.#cap(skillName)}`);
+         if (specName) bits.push(`Specialization: ${this.#cap(specName)}`);
+         if (isDefault) bits.push("Defaulting");
+      } else if (attrName) {
+         bits.push(`Attribute: ${this.#cap(attrName)}`);
+      }
+      return bits.length ? `<p class="sr3e-roll-summary"><small>${bits.join(", ")}</small></p>` : "";
+   }
+
+   #resolveItemSkillAndSpec() {
+      const sys = this.item?.system ?? {};
+      const linked = String(sys.linkedSkillId ?? "").trim();
+      if (!linked) return null;
+      const [skillId, specIndexRaw] = linked.split("::");
+      if (!skillId) return null;
+      const skill = this.caller?.items?.get?.(skillId);
+      if (!skill) return null;
+      const type = skill.system?.skillType;
+      const sub = type ? skill.system?.[`${type}Skill`] ?? {} : {};
+      const specs = Array.isArray(sub.specializations) ? sub.specializations : [];
+      const specIndex = Number.parseInt(specIndexRaw, 10);
+      const specObj = Number.isFinite(specIndex) ? specs[specIndex] : null;
+      const skillName = skill.name ?? (type ? String(type) : null);
+      const specName = specObj?.name ?? (typeof specObj === "string" ? specObj : null);
+      const isDefault = !!sys.isDefaulting;
+      return { skillName, specName, isDefault };
+   }
+
+   #cap(s) {
+      if (!s) return "";
+      const t = String(s)
+         .replace(/[_\-]+/g, " ")
+         .trim();
+      return t.charAt(0).toUpperCase() + t.slice(1);
    }
 
    // ---------- contest export ----------
@@ -239,8 +371,3 @@ export default class MeleeProcedure extends AbstractProcedure {
       };
    }
 }
-
-// Register (if your AbstractProcedure exposes a register method; otherwise, do it in your registry file)
-try {
-   AbstractProcedure.register?.("melee", MeleeProcedure);
-} catch {}

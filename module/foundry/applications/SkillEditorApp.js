@@ -92,11 +92,69 @@ export default class ActiveSkillEditorSheet extends foundry.applications.api.App
 			});
 		}
 
+		// Inject header commit button next to close control
+		try {
+			const form = windowContent.parentNode;
+			const header = form?.querySelector?.("header.window-header");
+			if (header) this.#injectCommitButton(header);
+		} catch {}
+
 		return windowContent;
+	}
+
+	#injectCommitButton(header) {
+		// Avoid duplicates
+		if (header.querySelector?.('[data-action="sr3e-commit-skill"]')) return;
+
+        // Commit control as a real header button (match Foundry header style)
+        const btn = document.createElement('button');
+        btn.setAttribute('type', 'button');
+        btn.classList.add('header-control', 'icon', 'fa-solid', 'fa-thumbs-up');
+        btn.setAttribute('data-action', 'sr3e-commit-skill');
+        btn.setAttribute('data-responder', 'yes');
+        try {
+            const title = game?.i18n?.localize?.(this.config?.karma?.commit) ?? 'Commit Changes';
+            btn.setAttribute('data-tooltip', title);
+            btn.setAttribute('aria-label', title);
+            btn.setAttribute('title', title);
+        } catch { btn.setAttribute('data-tooltip', 'Commit Changes'); btn.setAttribute('aria-label', 'Commit Changes'); btn.setAttribute('title', 'Commit Changes'); }
+        btn.textContent = '';
+		btn.addEventListener('click', (ev) => {
+			ev.preventDefault();
+			try { this.requestCommit?.(); } catch {}
+			try { this.close(); } catch {}
+		});
+
+        const placeButton = () => {
+            const closeBtn = header.querySelector('button[data-action="close"]');
+            if (closeBtn) {
+                header.insertBefore(btn, closeBtn);
+                return true;
+            }
+            // Temporarily append; will be repositioned once Close exists
+            if (!btn.isConnected) header.appendChild(btn);
+            return false;
+        };
+
+        const placed = placeButton();
+        if (!placed) {
+            // Reposition when Close button is created
+            try {
+                const mo = new MutationObserver(() => {
+                    if (placeButton()) {
+                        try { mo.disconnect(); } catch {}
+                        this._commitMO = null;
+                    }
+                });
+                mo.observe(header, { childList: true });
+                this._commitMO = mo;
+            } catch {}
+        }
 	}
 
 	async _tearDown() {
 
+		if (this._commitMO) { try { this._commitMO.disconnect(); } catch {} this._commitMO = null; }
 		if (this.#app) await unmount(this.#app);
 		this.#app = null;
 		return super._tearDown();

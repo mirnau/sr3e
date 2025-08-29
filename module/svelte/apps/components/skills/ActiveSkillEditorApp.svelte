@@ -5,6 +5,8 @@
    import { flags } from "@services/commonConsts.js";
    import { get, set } from "svelte/store";
    import KarmaShoppingService from "@services/KarmaShoppingService.js";
+   import ActiveSkillsKarmaShopping from "@services/shopping/ActiveSkillsKarmaShopping.js";
+   import ActiveSkillsCreationShopping from "@services/shopping/ActiveSkillsCreationShopping.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import Karma from "../Karma.svelte";
    import { onMount } from "svelte";
@@ -19,13 +21,50 @@
    let valueStore = itemStoreManager.GetRWStore("activeSkill.value");
 
    let karmaShoppingService = null;
+   let isShoppingStateStore = actorStoreManager.GetFlagStore(flags.actor.isShoppingState);
+   let strategy = null;
+   let uiValue = $state(0);
 
-   onMount(() => {
+  onMount(() => {
       karmaShoppingService ??= new KarmaShoppingService(skill);
+      uiValue = $valueStore;
+      // Expose commit trigger to hosting Application header control
+      if (app) app.requestCommit = () => { try { strategy?.commit?.(false); } catch {} };
    });
 
    onDestroy(() => {
+      try {
+         if (strategy?._unsubDisplay) strategy._unsubDisplay();
+         if (strategy?._unsubCanInc) strategy._unsubCanInc();
+         if (strategy?._unsubCanDec) strategy._unsubCanDec();
+         if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+      } catch {}
+      strategy = null;
       karmaShoppingService = null;
+      if (app && app.requestCommit) { try { delete app.requestCommit; } catch { app.requestCommit = undefined; } }
+   });
+
+   // Strategy wiring for shopping sessions
+   $effect(() => {
+      try {
+         if (strategy?._unsubDisplay) strategy._unsubDisplay();
+         if (strategy?._unsubCanInc) strategy._unsubCanInc();
+         if (strategy?._unsubCanDec) strategy._unsubCanDec();
+         if (strategy && typeof strategy.dispose === "function") strategy.dispose();
+      } catch {}
+      strategy = null;
+      uiValue = $valueStore;
+
+      if ($isShoppingStateStore) {
+         if ($isCharacterCreationStore) {
+            strategy = new ActiveSkillsCreationShopping({ actor, skill, actorStoreManager, itemStoreManager, isShoppingStateStore });
+         } else {
+            strategy = new ActiveSkillsKarmaShopping({ actor, skill, actorStoreManager, itemStoreManager, isShoppingStateStore });
+         }
+         strategy._unsubDisplay = strategy.displayBase.subscribe((v) => (uiValue = v ?? $valueStore));
+         strategy._unsubCanInc = strategy.canIncrementRO.subscribe((v) => (canInc = !!v));
+         strategy._unsubCanDec = strategy.canDecrementRO.subscribe((v) => (canDec = !!v));
+      }
    });
 
    let isCharacterCreationStore = actorStoreManager.GetFlagStore(flags.actor.isCharacterCreation);
@@ -41,11 +80,13 @@
    );
 
    let attributeAssignmentLockedStore = actorStoreManager.GetFlagStore(flags.actor.attributeAssignmentLocked);
+   let canInc = $state(false);
+   let canDec = $state(false);
 
-   async function addNewSpecialization() {
-      let newSkillSpecialization;
+  async function addNewSpecialization() {
+     let newSkillSpecialization;
 
-      if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
+     if (actor.getFlag(flags.sr3e, flags.actor.isCharacterCreation)) {
          if ($specializationsStore.length > 0) {
             ui.notifications.info(localize(config.skill.onlyonespecializationatcreation));
             return;
@@ -58,7 +99,11 @@
 
          $valueStore -= 1;
       } else {
-         console.log("TODO: create a addSpecialization procedure for Karma");
+         if ($isShoppingStateStore && strategy) {
+            strategy.addSpecialization(localize(config.skill.newspecialization));
+            // strategy updates the specs store; trigger UI update
+            $specializationsStore = [...$specializationsStore];
+         }
       }
 
       if (newSkillSpecialization) {
@@ -88,10 +133,8 @@
                   }
                }
             }
-         } else {
-            karmaShoppingService = new KarmaShoppingService(skill);
-
-            console.log("TODO: implement karma based shopping");
+         } else if ($isShoppingStateStore && strategy) {
+            strategy.applyIncrement();
          }
       } else {
          ui.notifications.warn(localize(config.notifications.assignattributesfirst));
@@ -113,8 +156,8 @@
                $valueStore -= 1;
                $activeSkillPointsStore += refundForCurrentLevel;
             }
-         } else {
-            console.log("TODO: implement karma based shopping");
+         } else if ($isShoppingStateStore && strategy) {
+            strategy.applyDecrement();
          }
       } else {
          ui.notifications.warn(localize(config.notifications.assignattributesfirst));
@@ -178,6 +221,13 @@
 
    function deleteSpecialization(event) {
       const toDelete = event.detail.specialization;
+      if ($isShoppingStateStore && !$isCharacterCreationStore) {
+         if (strategy) {
+            strategy.deleteSpecialization(toDelete);
+            $specializationsStore = [...$specializationsStore];
+         }
+         return;
+      }
       $specializationsStore = $specializationsStore.filter((s) => s !== toDelete);
       $valueStore += 1;
    }
@@ -206,7 +256,7 @@
                   </div>
                   <div class="stat-card">
                      <div class="stat-card-background"></div>
-                     <h1>{$valueStore}</h1>
+                     <h1>{uiValue}</h1>
                   </div>
                   <div class="stat-card">
                      <div class="stat-card-background"></div>
@@ -215,7 +265,7 @@
                            class="header-control icon sr3e-toolbar-button"
                            aria-label="Toggle card span"
                            onclick={increment}
-                           disabled={disableValueControls}
+                           disabled={disableValueControls || ($isShoppingStateStore && strategy && !canInc)}
                         >
                            <i class="fa-solid fa-plus"></i>
                         </button>
@@ -223,7 +273,7 @@
                            class="header-control icon sr3e-toolbar-button"
                            aria-label="Toggle card span"
                            onclick={decrement}
-                           disabled={disableValueControls}
+                           disabled={disableValueControls || ($isShoppingStateStore && strategy && !canDec)}
                         >
                            <i class="fa-solid fa-minus"></i>
                         </button>
@@ -257,14 +307,26 @@
                   {localize(config.skill.specializations)}
                </h1>
                <div class="stat-grid single-column">
-                  {#each $specializationsStore as specialization, i}
-                     <SpecializationCard
-                        bind:specialization={$specializationsStore[i]}
-                        {actor}
-                        {skill}
-                        on:arrayChanged={() => {
-                           $specializationsStore = [...$specializationsStore];
-                           console.log("array was reassigned");
+                 {#each $specializationsStore as specialization, i}
+                    <SpecializationCard
+                       bind:specialization={$specializationsStore[i]}
+                       {actor}
+                       {skill}
+                       on:arrayChanged={() => {
+                          $specializationsStore = [...$specializationsStore];
+                          console.log("array was reassigned");
+                       }}
+                        on:increment={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.incrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
+                        }}
+                        on:decrement={(e) => {
+                           if ($isShoppingStateStore && strategy) {
+                              strategy.decrementSpecialization(e.detail.specialization);
+                              $specializationsStore = [...$specializationsStore];
+                           }
                         }}
                         on:delete={deleteSpecialization}
                      />
@@ -275,3 +337,7 @@
       </div>
    </div>
 </div>
+
+
+
+

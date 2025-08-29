@@ -7,6 +7,8 @@
    import FirearmService from "@families/FirearmService.js";
    import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
    import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
+   import AttributeProcedure from "@services/procedure/FSM/AttributeProcedure.js";
+   import SkillProcedure from "@services/procedure/FSM/SkillProcedure.js";
    import { recoilState, clearAllRecoilForActor } from "@services/ComposerAttackController.js";
 
    let { actor, config = Config.sr3e } = $props();
@@ -77,17 +79,7 @@
    let ammoAvailable = $state(null);
    let phaseKey = $state("");
 
-   let caller = $state({
-      type: null,
-      key: null,
-      dice: 0,
-      value: 0,
-      skillId: "",
-      specialization: "",
-      name: "",
-      responseMode: false,
-      contestId: null,
-   });
+   let caller = $state({});
 
    let shouldDisplaySheen = actorStoreManager.GetShallowStore(actor.id, stores.shouldDisplaySheen, false);
 
@@ -140,8 +132,48 @@
 
    export function setCallerData(currentProcedure) {
       if (!(currentProcedure instanceof AbstractProcedure)) throw new Error("Unfit data type");
+
+      const existing = $procedureStore;
+      const inContest = !!existing?.contestId;
+      const isBasisProc = currentProcedure instanceof AttributeProcedure || currentProcedure instanceof SkillProcedure;
+
+      // CASE 1: We already have a responder in an active contest and user picked a basis proc => convert to basis
+      if (existing && inContest && isBasisProc && typeof existing.setResponseBasis === "function") {
+         let basis = null;
+         if (currentProcedure instanceof AttributeProcedure) {
+            const extra = currentProcedure.toJSONExtra?.() || {};
+            basis = { type: "attribute", key: extra.attributeKey, dice: currentProcedure.dice };
+         } else {
+            const extra = currentProcedure.toJSONExtra?.() || {};
+            basis = {
+               type: "skill",
+               id: extra.skillId ?? null,
+               name: extra.skillName ?? "Skill",
+               specialization: extra.specName ?? null,
+               poolKey: extra.poolKey ?? null,
+               dice: currentProcedure.dice,
+            };
+         }
+         if (basis) {
+            existing.setResponseBasis(basis);
+            existing.args = existing.args || {};
+            existing.args.basis = basis;
+            if (Number.isFinite(Number(basis.dice))) existing.dice = Math.max(0, Math.floor(Number(basis.dice)));
+            // Tag caller with this contest’s basis only
+            caller = { ...basis, __contestId: existing.contestId };
+         }
+         return;
+      }
+
+      // CASE 2: New procedure (likely a new contest): reset caller to avoid sticky basis
       clearStoreSubscriptions();
       $procedureStore = currentProcedure;
+
+      // If this is a fresh responder with a different contest id, nuke any previous caller basis.
+      const cid = $procedureStore?.contestId ?? null;
+      if (!cid || caller?.__contestId !== cid) {
+         caller = {};
+      }
 
       rangePrimedForWeaponId = null;
       rangeSuppressedForWeaponId = null;
@@ -157,6 +189,7 @@
       addSub($procedureStore.weaponModeStore, (v) => (weaponMode = v));
       addSub($procedureStore.ammoAvailableStore, (v) => (ammoAvailable = v));
 
+      $procedureStore.setDefaultTNForComposer();
       visible = true;
    }
 
@@ -220,12 +253,28 @@
 
    $effect(() => {
       if (!visible) return;
-      caller;
+
+      const proc = $procedureStore;
+      if (!proc) return;
+
       hasTargets;
       declaredRounds;
       weaponMode;
       phaseKey;
-      $procedureStore?.syncRecoil?.({ declaredRounds, ammoAvailable });
+
+      // Only push a basis if the caller is tagged for THIS contest and has a type.
+      if (caller && caller.__contestId === proc.contestId && typeof caller.type === "string" && caller.type.trim()) {
+         if (typeof proc.setResponseBasis === "function") {
+            proc.setResponseBasis(caller);
+            proc.args = proc.args || {};
+            proc.args.basis = caller;
+            if (Number.isFinite(Number(caller.dice))) {
+               proc.dice = Math.max(0, Math.floor(Number(caller.dice)));
+            }
+         }
+      }
+
+      proc?.syncRecoil?.({ declaredRounds, ammoAvailable });
    });
 
    $effect(() => {
@@ -429,18 +478,37 @@
          </div>
       {/if}
 
-      <div class="roll-composer-card">
-         <h4>{kindOfRoll}</h4>
-         {#if itemName}<h4>{itemName}</h4>{/if}
-         <button
-            class="regular"
-            type="button"
-            disabled={!primaryEnabled}
-            onclick={async () => await $procedureStore.execute({ OnClose, CommitEffects })}
-         >
-            {primaryLabel}
-         </button>
-      </div>
+      <button
+         class="regular"
+         type="button"
+         disabled={!primaryEnabled}
+         onclick={async () => {
+            const proc = $procedureStore;
+            if (!proc) return;
+
+            // Karma + Pool
+            proc.karmaDice = Math.max(0, Number(diceBought) || 0);
+            if (proc?.constructor?.name === "MeleeFullDefenseProcedure") {
+               // Full Defense initial test ignores pool
+               proc.poolDice = 0;
+            } else {
+               proc.poolDice = Math.max(0, Number(currentDicePoolAddition) || 0);
+            }
+
+            // Debug & roll via the procedure (keeps logic in the chain, not here)
+            console.debug("DEF submit ->", {
+               kind: proc?.constructor?.name,
+               basis: proc?.args?.basis,
+               dice: proc?.dice,
+               pool: proc?.poolDice,
+               karma: proc?.karmaDice,
+            });
+
+            await proc.execute({ OnClose, CommitEffects });
+         }}
+      >
+         {primaryLabel}
+      </button>
 
       {#if $procedureStore instanceof FirearmProcedure}
          {#if weaponMode === "burst" || weaponMode === "fullauto"}
