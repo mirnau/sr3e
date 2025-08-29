@@ -197,6 +197,15 @@
       }
    }
 
+   // When embedding the generic TextInput component, clear its container chrome
+   .input-component-container {
+      background: transparent;
+      padding: 0;
+      height: auto;
+      min-height: 2rem;
+      flex: 1 1 auto;
+   }
+
    .specialization-name {
       display: block;
       max-width: 12rem;
@@ -217,11 +226,15 @@
 .embedded-value {
    position: relative;
    flex-shrink: 0;
+   align-self: stretch; // fill card height instead of hugging text
+   display: flex;       // keep the number centered when stretched
+   align-items: center;
+   justify-content: center;
    min-width: 2rem;
    text-align: center;
    background: var(--highlight-color-primary);
    padding: 0.25rem 0.5rem;
-   margin: 0.25rem, 0rem, 0rem, 0.25rem;
+   margin: 0; // parent padding handles spacing
    .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
 
    &::before {
@@ -237,4 +250,10 @@
       pointer-events: none;
       .clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
    }
+}
+
+// Ensure the value block doesn't expand unexpectedly
+.skill-specialization-card .embedded-value,
+.skill-specialization-card .embedded-value.no-margin {
+   width: auto;
 }

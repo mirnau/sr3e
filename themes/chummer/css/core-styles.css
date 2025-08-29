@@ -855,6 +855,13 @@
   .skill-specialization-card.button:active .stat-card-background {
     box-shadow: inset 0 0 30px var(--highlight-color-primary);
   }
+  .skill-specialization-card .input-component-container {
+    background: transparent;
+    padding: 0;
+    height: auto;
+    min-height: 2rem;
+    flex: 1 1 auto;
+  }
   .skill-specialization-card .specialization-name {
     display: block;
     max-width: 12rem;
@@ -873,11 +880,15 @@
   .embedded-value {
     position: relative;
     flex-shrink: 0;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-width: 2rem;
     text-align: center;
     background: var(--highlight-color-primary);
     padding: 0.25rem 0.5rem;
-    margin: 0.25rem, 0rem, 0rem, 0.25rem;
+    margin: 0;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
   }
   .embedded-value::before {
@@ -892,6 +903,10 @@
     box-shadow: inset 0 0 12px var(--highlight-color-primary);
     pointer-events: none;
     clip-path: polygon(0.5rem 0px, calc(100% - 0.5rem) 0px, 100% 0.5rem, 100% calc(100% - 0.5rem), calc(100% - 0.5rem) 100%, 0.5rem 100%, 0px calc(100% - 0.5rem), 0px 0.5rem);
+  }
+  .skill-specialization-card .embedded-value,
+  .skill-specialization-card .embedded-value.no-margin {
+    width: auto;
   }
   .skill-container-masonry-grid {
     margin: 0 auto;
