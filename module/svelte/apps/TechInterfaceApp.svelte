@@ -242,26 +242,39 @@
             <div class="stat-card-background"></div>
             <div class="stat-grid two-column">
               <!-- UUID hidden from UI; managed internally -->
-              <div>
-                <h4 class="no-margin uppercase">{localize(config.techinterface?.programKind ?? "sr3e.techinterface.programKind")}</h4>
-                <select bind:value={$programsStore[i].kind} onchange={() => ($programsStore = [...$programsStore])}>
-                  {#each kvOptions(config.programKinds) as opt}
-                    <option value={opt.value}>{opt.label}</option>
-                  {/each}
-                </select>
-              </div>
-              <div>
-                <h4 class="no-margin uppercase">{localize(config.techinterface?.programTag ?? "sr3e.techinterface.programTag")}</h4>
-                <input type="text" bind:value={$programsStore[i].tag} onchange={() => ($programsStore = [...$programsStore])} />
-              </div>
-              <div>
-                <h4 class="no-margin uppercase">{localize(config.techinterface?.programRating ?? "sr3e.techinterface.programRating")}</h4>
-                <input type="number" bind:value={$programsStore[i].rating} onchange={() => ($programsStore = [...$programsStore])} />
-              </div>
-              <div>
-                <h4 class="no-margin uppercase">{localize(config.techinterface?.programActive ?? "sr3e.techinterface.programActive")}</h4>
-                <input type="checkbox" bind:checked={$programsStore[i].active} onchange={() => ($programsStore = [...$programsStore])} />
-              </div>
+              <StatCard
+                {item}
+                key="kind"
+                label={localize(config.techinterface?.programKind ?? "sr3e.techinterface.programKind")}
+                value={$programsStore[i].kind}
+                path={`system.loaded.programs.${i}`}
+                type="select"
+                options={kvOptions(config.programKinds)}
+              />
+              <StatCard
+                {item}
+                key="tag"
+                label={localize(config.techinterface?.programTag ?? "sr3e.techinterface.programTag")}
+                value={$programsStore[i].tag}
+                path={`system.loaded.programs.${i}`}
+                type="text"
+              />
+              <StatCard
+                {item}
+                key="rating"
+                label={localize(config.techinterface?.programRating ?? "sr3e.techinterface.programRating")}
+                value={$programsStore[i].rating}
+                path={`system.loaded.programs.${i}`}
+                type="number"
+              />
+              <StatCard
+                {item}
+                key="active"
+                label={localize(config.techinterface?.programActive ?? "sr3e.techinterface.programActive")}
+                value={$programsStore[i].active}
+                path={`system.loaded.programs.${i}`}
+                type="checkbox"
+              />
               <div class="buttons-horizontal-distribution">
                 <button type="button" class="header-control icon sr3e-toolbar-button" aria-label="Delete Program" onclick={() => deleteProgram(i)}>
                   <i class="fa-solid fa-trash-can"></i>
