@@ -3,6 +3,7 @@
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
    import { localize } from "@services/utilities.js";
+   import { flags } from "@services/commonConsts.js";
    import FirearmService from "@families/FirearmService.js";
    import WeaponComponent from "@sveltecomponent/AssetManager/components/WeaponComponent.svelte";
    import AmmunitionComponent from "@sveltecomponent/AssetManager/components/AmmunitionComponent.svelte";
@@ -67,6 +68,24 @@
    $effect(() => {
       $isFavoriteStore = isFavorite;
       $isEquippedStore = isEquipped;
+   });
+
+   // Enforce: only one techinterface can be equipped at a time
+   $effect(async () => {
+      if (item?.type !== "techinterface") return;
+      if (!isEquipped) return;
+      // Enforcement handled centrally via updateItem hook; no local action needed
+   });
+
+   // Keep local toggle in sync if flags are changed externally
+   $effect(() => {
+      if (!item) return;
+      const hook = (doc) => {
+         if (doc.id !== item.id) return;
+         isEquipped = !!doc.getFlag(flags.sr3e, "isEquipped");
+      };
+      Hooks.on("updateItem", hook);
+      return () => Hooks.off("updateItem", hook);
    });
 
    onDestroy(() => {

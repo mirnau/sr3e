@@ -61,6 +61,7 @@ import { initializeNewsService } from "@hooks/ready/initializeNewsService.js";
 import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js";
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
+import { enforceSingleTechinterfaceEquipped } from "@hooks/updateItem/enforceSingleTechinterfaceEquipped.js";
 
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
@@ -199,7 +200,8 @@ function registerHooks() {
    Hooks.on(hooks.preCreateActor, chain(setFlagsOnCharacterPreCreate, stopDefaultCharacterSheetRenderOnCreation));
    Hooks.on(hooks.createActor, chain(debugFlagsOnActor, displayCreationDialog));
    Hooks.on(hooks.ready, initializeNewsService);
-   Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
+  Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
+  Hooks.on("updateItem", enforceSingleTechinterfaceEquipped);
 
    if (DEBUG) {
       //Hooks.once(hooks.ready, enableDebugHooks);
