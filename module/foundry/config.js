@@ -493,3 +493,59 @@ sr3e.wearable = {
    impact: "sr3e.wearable.impact",
    canlayer: "sr3e.wearable.canlayer",
 };
+
+// Active Effects heading
+sr3e.activeeffects = {
+   activeeffects: "sr3e.activeeffects.activeeffects",
+};
+
+// Tech Interface (Cyberdeck, Cyberterminal, RC Deck)
+sr3e.techinterface = {
+   techinterface: "sr3e.techinterface.techinterface",
+   subtype: "sr3e.techinterface.subtype",
+   make: "sr3e.techinterface.make",
+   model: "sr3e.techinterface.model",
+   matrix: "sr3e.techinterface.matrix",
+   persona: "sr3e.techinterface.persona",
+   mpcp: "sr3e.techinterface.mpcp",
+   bod: "sr3e.techinterface.bod",
+   evasion: "sr3e.techinterface.evasion",
+   masking: "sr3e.techinterface.masking",
+   sensor: "sr3e.techinterface.sensor",
+   hardening: "sr3e.techinterface.hardening",
+   activeMp: "sr3e.techinterface.activeMp",
+   storageMp: "sr3e.techinterface.storageMp",
+   ioMpPerCT: "sr3e.techinterface.ioMpPerCT",
+   responseIncrease: "sr3e.techinterface.responseIncrease",
+   programs: "sr3e.techinterface.programs",
+   programUuid: "sr3e.techinterface.programUuid",
+   programKind: "sr3e.techinterface.programKind",
+   programTag: "sr3e.techinterface.programTag",
+   programRating: "sr3e.techinterface.programRating",
+   programActive: "sr3e.techinterface.programActive",
+   rigger: "sr3e.techinterface.rigger",
+   rating: "sr3e.techinterface.rating",
+   fluxRating: "sr3e.techinterface.fluxRating",
+   subscribers: "sr3e.techinterface.subscribers",
+   subscriberId: "sr3e.techinterface.subscriberId",
+   riggerModes: "sr3e.techinterface.riggerModes",
+};
+
+sr3e.techinterfaceSubtypes = {
+   cyberdeck: "sr3e.techinterfaceSubtypes.cyberdeck",
+   cyberterminal: "sr3e.techinterfaceSubtypes.cyberterminal",
+   rcdeck: "sr3e.techinterfaceSubtypes.rcdeck",
+};
+
+sr3e.programKinds = {
+   operational: "sr3e.programKinds.operational",
+   special: "sr3e.programKinds.special",
+   offensive: "sr3e.programKinds.offensive",
+   defensive: "sr3e.programKinds.defensive",
+};
+
+sr3e.riggerModes = {
+   "captains-chair": "sr3e.riggerModes.captainschair",
+   primary: "sr3e.riggerModes.primary",
+   secondary: "sr3e.riggerModes.secondary",
+};

@@ -310,6 +310,9 @@
          "thermographic": "Thermographic vision",
          "lowlight": "Low-light vision"
       },
+      "activeeffects": {
+         "activeeffects": "Active Effects"
+      },
       "weapon": {
          "ammunitionClass": "Ammunition Class",
          "damageType": "Damage Type",
@@ -442,6 +445,53 @@
          "hermetic": "Hermetic",
          "shamanic": "Shamanic",
          "other": "Other"
+      }
+      ,
+      "techinterface": {
+         "techinterface": "Tech Interface",
+         "subtype": "Interface Type",
+         "make": "Make",
+         "model": "Model",
+         "matrix": "Matrix Specs",
+         "persona": "Persona Programs",
+         "mpcp": "MPCP",
+         "bod": "Bod",
+         "evasion": "Evasion",
+         "masking": "Masking",
+         "sensor": "Sensor",
+         "hardening": "Hardening",
+         "activeMp": "Active Memory (Mp)",
+         "storageMp": "Storage Memory (Mp)",
+         "ioMpPerCT": "I/O Speed (Mp/CT)",
+         "responseIncrease": "Response Increase",
+         "programs": "Loaded Programs",
+         "programUuid": "Program UUID",
+         "programKind": "Program Kind",
+         "programTag": "Program Tag",
+         "programRating": "Program Rating",
+         "programActive": "Active",
+         "rigger": "Rigger Deck",
+         "rating": "Rating",
+         "fluxRating": "Flux Rating",
+         "subscribers": "Subscribers",
+         "subscriberId": "Subscriber ID",
+         "riggerModes": "Rigger Modes"
+      },
+      "techinterfaceSubtypes": {
+         "cyberdeck": "Cyberdeck",
+         "cyberterminal": "Cyberterminal",
+         "rcdeck": "Remote Control Deck"
+      },
+      "programKinds": {
+         "operational": "Operational",
+         "special": "Special",
+         "offensive": "Offensive",
+         "defensive": "Defensive"
+      },
+      "riggerModes": {
+         "captainschair": "Captain's Chair",
+         "primary": "Primary",
+         "secondary": "Secondary"
       }
    }
 }

@@ -55,6 +55,7 @@ export function configureProject() {
       weapon: localize(CONFIG.sr3e.weapon.weapon),
       wearable: localize(CONFIG.sr3e.wearable.wearable),
       gadget: localize(CONFIG.sr3e.gadget.gadget),
+      techinterface: localize(CONFIG.sr3e.techinterface.techinterface),
    };
 
    foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");
