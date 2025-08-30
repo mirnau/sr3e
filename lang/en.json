@@ -339,6 +339,7 @@
       },
       "wearable": {
          "wearable": "Wearable",
+         "apparel": "Apparel",
          "ballistic": "Ballistic",
          "impact": "Impact",
          "canlayer": "Can Layer"

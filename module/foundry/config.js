@@ -489,6 +489,7 @@ sr3e.archetypes = {
 };
 sr3e.wearable = {
    wearable: "sr3e.wearable.wearable",
+   apparel: "sr3e.wearable.apparel",
    ballistic: "sr3e.wearable.ballistic",
    impact: "sr3e.wearable.impact",
    canlayer: "sr3e.wearable.canlayer",
