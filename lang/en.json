@@ -25,6 +25,49 @@
       "broadcaster": {
          "broadcaster": "Broadcaster"
       },
+      "mechanical": {
+         "mechanical": "Mechanical",
+         "category": "Category",
+         "power": "Power Source",
+         "handling": "Handling",
+         "speed": "Speed",
+         "accel": "Acceleration",
+         "body": "Body",
+         "armor": "Armor",
+         "signature": "Signature",
+         "autonav": "Autonav",
+         "pilot": "Pilot",
+         "sensor": "Sensor",
+         "cargo": "Cargo",
+         "load": "Load",
+         "speedTurbo": "Speed (Turbo)",
+         "accelTurbo": "Acceleration (Turbo)",
+         "seating": "Seating",
+         "entryPoints": "Entry Points",
+         "setupBreakdownMinutes": "Setup/Breakdown (min)",
+         "landingTakeoff": "Landing/Takeoff",
+         "riggerAdaptation": "Rigger Adaptation",
+         "remoteControlInterface": "Remote Control Interface",
+         "performance": "Performance",
+         "capacity": "Capacity",
+         "droneOps": "Drone Operations",
+         "mounts": {
+            "title": "Weapon Mounts",
+            "firmpoints": "Firmpoints",
+            "hardpoints": "Hardpoints",
+            "turrets": "Turrets",
+            "externalFixed": "External Fixed",
+            "internalFixed": "Internal Fixed",
+            "pintles": "Pintles",
+            "miniTurrets": "Mini Turrets"
+         },
+         "medium": {
+            "air": "Air",
+            "land": "Land",
+            "water": "Water",
+            "drone": "Drone"
+         }
+      },
       "chat": {
          "contestexpried ": "Contest Expired!",
          "resist": "Resist damage"
@@ -53,7 +96,39 @@
          "custom": "Custom",
          "other": "Other",
          "details": "Details",
-         "isdefaulting": "Defaulting"
+         "isdefaulting": "Defaulting",
+         "unknown": "Unknown"
+      },
+      "mechanicalCategories": {
+         "car": "Car",
+         "truck": "Truck",
+         "bike": "Bike",
+         "hovercraft": "Hovercraft",
+         "boat": "Boat",
+         "ship": "Ship",
+         "submarine": "Submarine",
+         "fixedWing": "Fixed-Wing Aircraft",
+         "rotor": "Rotorcraft",
+         "vectoredThrust": "Vectored Thrust",
+         "lta": "Lighter-than-Air",
+         "security": "Security Vehicle",
+         "military": "Military Vehicle",
+         "tBird": "T-Bird",
+         "drone": "Drone"
+      },
+      "powerSources": {
+         "electric": "Electric",
+         "petrochem": "Petrochemical",
+         "methanol": "Methanol",
+         "fusion": "Fusion",
+         "sail": "Sail",
+         "other": "Other"
+      },
+      "landingTakeoff": {
+         "VTOL": "VTOL",
+         "VSTOL": "VSTOL",
+         "Runway": "Runway",
+         "LaunchRecovery": "Launch/Recovery"
       },
       "dicepools": {
          "associateselect": "Choose an Associated Dicepool...",

@@ -13,6 +13,7 @@ import TransactionModel from "@models/item/TransactionModel.js";
 import GadgetModel from "@models/item/GadgetModel.js";
 import FocusModel from "@models/item/FocusModel.js";
 import TechInterfaceModel from "@models/item/TechInterfaceModel.js";
+import MechanicalModel from "@models/actor/MechanicalModel.js";
 import SpellModel from "@models/item/SpellModel.js";
 import WearableModel from "@models/item/WearableModel.js";
 import WearableItemSheet from "@sheets/WearableItemSheet.js";
@@ -29,6 +30,7 @@ import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
 import GadgetItemSheet from "@sheets/GadgetItemSheet.js";
 import FocusItemSheet from "@sheets/FocusItemSheet.js";
 import TechInterfaceItemSheet from "@sheets/TechInterfaceItemSheet.js";
+import MechanicalActorSheet from "@sheets/MechanicalActorSheet.js";
 import SpellItemSheet from "@sheets/SpellItemSheet.js";
 
 import { hooks, flags } from "@services/commonConsts.js";
@@ -110,6 +112,12 @@ function initializeSystem() {
          },
          {
             docClass: Actor,
+            type: "mechanical",
+            model: MechanicalModel,
+            sheet: MechanicalActorSheet,
+         },
+         {
+            docClass: Actor,
             type: "broadcaster",
             model: BroadcasterModel,
             sheet: BroadcasterActorSheet,
@@ -168,7 +176,7 @@ function initializeSystem() {
             model: TechInterfaceModel,
             sheet: TechInterfaceItemSheet,
          },
-         {
+          {
             docClass: Item,
             type: "spell",
             model: SpellModel,

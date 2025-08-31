@@ -45,6 +45,7 @@ export function configureProject() {
       broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
       character: localize(CONFIG.sr3e.sheet.playercharacter),
       storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+      mechanical: localize(CONFIG.sr3e.mechanical?.mechanical ?? "sr3e.mechanical.mechanical"),
    };
    CONFIG.Item.typeLabels = {
       ammunition: localize(CONFIG.sr3e.ammunition.ammunition),

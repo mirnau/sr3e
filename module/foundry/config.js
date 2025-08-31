@@ -28,6 +28,86 @@ sr3e.broadcaster = {
    broadcaster: "sr3e.broadcaster.broadcaster",
 };
 
+// Mechanical (Actor type)
+sr3e.mechanical = {
+   mechanical: "sr3e.mechanical.mechanical",
+   category: "sr3e.mechanical.category",
+   power: "sr3e.mechanical.power",
+   handling: "sr3e.mechanical.handling",
+   speed: "sr3e.mechanical.speed",
+   accel: "sr3e.mechanical.accel",
+   body: "sr3e.mechanical.body",
+   armor: "sr3e.mechanical.armor",
+   signature: "sr3e.mechanical.signature",
+   autonav: "sr3e.mechanical.autonav",
+   pilot: "sr3e.mechanical.pilot",
+   sensor: "sr3e.mechanical.sensor",
+   cargo: "sr3e.mechanical.cargo",
+   load: "sr3e.mechanical.load",
+   speedTurbo: "sr3e.mechanical.speedTurbo",
+   accelTurbo: "sr3e.mechanical.accelTurbo",
+   seating: "sr3e.mechanical.seating",
+   entryPoints: "sr3e.mechanical.entryPoints",
+   setupBreakdownMinutes: "sr3e.mechanical.setupBreakdownMinutes",
+   landingTakeoff: "sr3e.mechanical.landingTakeoff",
+   riggerAdaptation: "sr3e.mechanical.riggerAdaptation",
+   remoteControlInterface: "sr3e.mechanical.remoteControlInterface",
+   performance: "sr3e.mechanical.performance",
+   capacity: "sr3e.mechanical.capacity",
+   droneOps: "sr3e.mechanical.droneOps",
+   medium: {
+      air: "sr3e.mechanical.medium.air",
+      land: "sr3e.mechanical.medium.land",
+      water: "sr3e.mechanical.medium.water",
+      drone: "sr3e.mechanical.medium.drone",
+   },
+   mounts: {
+      title: "sr3e.mechanical.mounts.title",
+      firmpoints: "sr3e.mechanical.mounts.firmpoints",
+      hardpoints: "sr3e.mechanical.mounts.hardpoints",
+      turrets: "sr3e.mechanical.mounts.turrets",
+      externalFixed: "sr3e.mechanical.mounts.externalFixed",
+      internalFixed: "sr3e.mechanical.mounts.internalFixed",
+      pintles: "sr3e.mechanical.mounts.pintles",
+      miniTurrets: "sr3e.mechanical.mounts.miniTurrets",
+   },
+};
+
+// Mechanical enumerations
+sr3e.mechanicalCategories = {
+   car: "sr3e.mechanicalCategories.car",
+   truck: "sr3e.mechanicalCategories.truck",
+   bike: "sr3e.mechanicalCategories.bike",
+   hovercraft: "sr3e.mechanicalCategories.hovercraft",
+   boat: "sr3e.mechanicalCategories.boat",
+   ship: "sr3e.mechanicalCategories.ship",
+   submarine: "sr3e.mechanicalCategories.submarine",
+   fixedWing: "sr3e.mechanicalCategories.fixedWing",
+   rotor: "sr3e.mechanicalCategories.rotor",
+   vectoredThrust: "sr3e.mechanicalCategories.vectoredThrust",
+   lta: "sr3e.mechanicalCategories.lta",
+   security: "sr3e.mechanicalCategories.security",
+   military: "sr3e.mechanicalCategories.military",
+   tBird: "sr3e.mechanicalCategories.tBird",
+   drone: "sr3e.mechanicalCategories.drone",
+};
+
+sr3e.powerSources = {
+   electric: "sr3e.powerSources.electric",
+   petrochem: "sr3e.powerSources.petrochem",
+   methanol: "sr3e.powerSources.methanol",
+   fusion: "sr3e.powerSources.fusion",
+   sail: "sr3e.powerSources.sail",
+   other: "sr3e.powerSources.other",
+};
+
+sr3e.landingTakeoff = {
+   VTOL: "sr3e.landingTakeoff.VTOL",
+   VSTOL: "sr3e.landingTakeoff.VSTOL",
+   Runway: "sr3e.landingTakeoff.Runway",
+   LaunchRecovery: "sr3e.landingTakeoff.LaunchRecovery",
+};
+
 sr3e.difficulty = {
    simple: "sr3e.difficulty.simple",
    routine: "sr3e.difficulty.routine",
@@ -117,6 +197,7 @@ sr3e.common = {
    custom: "sr3e.common.custom",
    details: "sr3e.common.details",
    isdefaulting: "sr3e.common.isdefaulting",
+   unknown: "sr3e.common.unknown",
 };
 
 sr3e.dicepools = {
