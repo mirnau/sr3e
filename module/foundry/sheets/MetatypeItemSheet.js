@@ -1,5 +1,5 @@
 import { localize } from "@services/utilities.js";
-import metatypeApp from "../../svelte/apps/metatypeApp.svelte";
+import metatypeApp from "@apps/metatypeApp.svelte";
 import { mount, unmount } from "svelte";
 
 export default class MetatypeItemSheet extends foundry.applications.sheets.ItemSheetV2 {
