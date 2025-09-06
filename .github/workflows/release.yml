@@ -4,51 +4,54 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Extract version from tag
-      id: version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-    
-    - name: Update manifest URLs
-      run: |
-        VERSION="${{ steps.version.outputs.VERSION }}"
-        REPO_URL="https://github.com/mirnau/sr3e"
-        RAW_URL="https://raw.githubusercontent.com/mirnau/sr3e"
-        
-        # Update system.json with new URLs
-        jq --arg ver "$VERSION" \
-           --arg manifest "$RAW_URL/v$VERSION/system.json" \
-           --arg download "$REPO_URL/releases/download/v$VERSION/sr3e-$VERSION.zip" \
-           '.version = $ver | .manifest = $manifest | .download = $download' \
-           system.json > system.json.tmp && mv system.json.tmp system.json
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Create release archive
-      run: |
-        VERSION="${{ steps.version.outputs.VERSION }}"
-        zip -r "sr3e-${VERSION}.zip" . -x "node_modules/*" ".git/*" "*.zip"
-    
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: sr3e-${{ steps.version.outputs.VERSION }}.zip
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update manifest URLs
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          REPO_URL="https://github.com/mirnau/sr3e"
+          RAW_URL="https://raw.githubusercontent.com/mirnau/sr3e"
+
+          # Keep manifest pointing to main; download points to this tag's zip
+          jq --arg ver "$VERSION" \
+             --arg manifest "$RAW_URL/main/system.json" \
+             --arg download "$REPO_URL/releases/download/v$VERSION/sr3e-$VERSION.zip" \
+             '.version = $ver | .manifest = $manifest | .download = $download' \
+             system.json > system.json.tmp && mv system.json.tmp system.json
+
+      - name: Build project
+        run: npm run build
+
+      - name: Create release archive
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          zip -r "sr3e-${VERSION}.zip" . -x "node_modules/*" ".git/*" "*.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sr3e-${{ steps.version.outputs.VERSION }}.zip
+          generate_release_notes: true
