@@ -8,7 +8,8 @@
       "preview": "vite preview",
       "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build .",
       "release": "standard-version",
-      "release:alpha": "standard-version --prerelease alpha"
+      "release:alpha": "standard-version",
+      "release:alpha:dry": "standard-version --dry-run"
    },
    "devDependencies": {
       "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
