@@ -3,8 +3,7 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch: {}
+      - 'v*'       # tags created by standard-version (alpha/beta/prod all match)
 
 permissions:
   contents: write
@@ -19,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -29,16 +28,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq zip
 
-      - name: Read version from tag
+      - name: Extract version from tag
         id: v
         run: |
-          # e.g. refs/tags/v1.2.3-alpha.0 → v1.2.3-alpha.0
-          TAG="${GITHUB_REF_NAME}"
-          VERSION="${TAG#v}"
-          echo "tag=$TAG"       >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          TAG="${GITHUB_REF_NAME}"         # e.g. v1.2.3-alpha.0
+          VERSION="${TAG#v}"               # e.g. 1.2.3-alpha.0
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Install deps + build
+      - name: Install deps & build
         run: |
           npm ci
           npm run build
@@ -53,11 +51,11 @@ jobs:
           MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
-          # Pinned manifest (exact version)
+          # Pinned manifest for this exact version
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
 
-          # Latest channel manifest (always points to latest release asset)
+          # "Latest" channel manifest (points to the latest release assets)
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
 
@@ -78,10 +76,10 @@ jobs:
           [ -f README.md ] && cp README.md "$ROOT/"
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
-          # Prepare "latest" manifest file as a separate asset
+          # Prepare the "latest" manifest as a separate asset
           cp system.latest.json system.json
 
-      - name: Write release body
+      - name: Compose release body
         id: body
         run: |
           VERSION="${{ steps.v.outputs.version }}"
@@ -89,24 +87,29 @@ jobs:
             echo "Install/Update manifest (latest channel): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
             echo "Pinned manifest for this version: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/system.json"
             echo
-            echo "This is an alpha build. No migration scripts are in effect, any work done in the current"
-            echo "system may break without warning or future fixes."
+            if echo "$VERSION" | grep -q -- "-alpha\\."; then
+              echo "This is an alpha build. No migration scripts are in effect, any work done in the current"
+              echo "system may break without warning or future fixes."
+            fi
           } > RELEASE_BODY.md
-          echo "path=RELEASE_BODY.md" >> "$GITHUB_OUTPUT"
+          echo "path=RELEASE_BODY.md" >> $GITHUB_OUTPUT
 
-      - name: Decide prerelease + latest flags
+      - name: Decide prerelease + make_latest
         id: flags
         run: |
           VERSION="${{ steps.v.outputs.version }}"
-          if echo "$VERSION" | grep -q -- "-alpha\."; then
-            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
-            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          if echo "$VERSION" | grep -q -- "-alpha\\."; then
+            echo "prerelease=true"  >> $GITHUB_OUTPUT
+            echo "make_latest=false" >> $GITHUB_OUTPUT
+          elif echo "$VERSION" | grep -q -- "-beta\\."; then
+            echo "prerelease=true"  >> $GITHUB_OUTPUT
+            echo "make_latest=false" >> $GITHUB_OUTPUT
           else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+            echo "make_latest=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create GitHub Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.v.outputs.tag }}
