@@ -3,7 +3,7 @@
    import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
    import ActorDataService from "@services/ActorDataService.js";
    import { flags, inventory } from "@services/commonConsts.js";
-   import { StoreManager } from "@sveltehelpers/Storemanager.svelte.js";
+   import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { onDestroy } from "svelte";
    import { localize } from "@services/utilities.js";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";
