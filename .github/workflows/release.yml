@@ -17,94 +17,73 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
 
       - name: Install tooling
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq zip
+        run: sudo apt-get update && sudo apt-get install -y jq zip
 
       - name: Install dependencies
         run: npm ci
 
       - name: Extract version from tag
-        id: version
+        id: v
         run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Update system.json (version / manifest / download)
+      - name: Update system.json (bump + URLs)
         run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          OWNER_REPO="${GITHUB_REPOSITORY}"
-          REPO_URL="https://github.com/${OWNER_REPO}"
-          ZIP_NAME="sr3e-${VERSION}.zip"
+          VERSION="${{ steps.v.outputs.VERSION }}"
+          REPO="https://github.com/${GITHUB_REPOSITORY}"
+          ZIP="sr3e-${VERSION}.zip"
 
-          MANIFEST_LATEST="${REPO_URL}/releases/latest/download/system.json"
-          MANIFEST_PINNED="${REPO_URL}/releases/download/v${VERSION}/system.json"
-          DOWNLOAD_URL="${REPO_URL}/releases/download/v${VERSION}/${ZIP_NAME}"
+          # Pinned (this release) + Latest (auto-update channel)
+          MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
+          MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
+          DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
-          # Keep manifest stable so installs auto-update, but also upload a pinned asset.
-          jq --arg ver        "$VERSION" \
-             --arg manifest   "$MANIFEST_LATEST" \
-             --arg download   "$DOWNLOAD_URL" \
-             '.version = $ver | .manifest = $manifest | .download = $download' \
+          # Keep internal manifest pointing at "latest" so installs can auto-update later
+          jq --arg ver "$VERSION" \
+             --arg manifest "$MANIFEST_LATEST" \
+             --arg download "$DOWNLOAD_URL" \
+             '.version=$ver | .manifest=$manifest | .download=$download' \
              system.json > system.json.tmp && mv system.json.tmp system.json
 
-          # Save URLs for later steps
-          {
-            echo "MANIFEST_LATEST=$MANIFEST_LATEST"
-            echo "MANIFEST_PINNED=$MANIFEST_PINNED"
-            echo "ZIP_URL=$DOWNLOAD_URL"
-          } >> "$GITHUB_ENV"
+          echo "MANIFEST_PINNED=$MANIFEST_PINNED" >> "$GITHUB_ENV"
 
-      - name: Build project
+      - name: Build
         run: npm run build
 
       - name: Create package (players only)
         run: |
           set -e
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          PKG_ROOT="package/sr3e"
-          mkdir -p "$PKG_ROOT"
+          VERSION="${{ steps.v.outputs.VERSION }}"
+          ROOT="package/sr3e"
+          mkdir -p "$ROOT"
 
-          # Required
-          cp system.json "$PKG_ROOT/"
-          cp -r build "$PKG_ROOT/"
-          cp -r lang "$PKG_ROOT/"
+          cp system.json "$ROOT/"
+          cp -r build "$ROOT/"
+          cp -r lang "$ROOT/"
+          [ -d themes ]    && cp -r themes "$ROOT/"
+          [ -d textures ]  && cp -r textures "$ROOT/"
+          [ -d fonts ]     && cp -r fonts "$ROOT/"
+          [ -d styles ]    && cp -r styles "$ROOT/"
+          [ -d licences ]  && cp -r licences "$ROOT/"
+          [ -d licenses ]  && cp -r licenses "$ROOT/"
+          [ -f README.md ] && cp README.md "$ROOT/"
 
-          # Optional runtime assets
-          [ -d themes ]    && cp -r themes "$PKG_ROOT/"
-          [ -d textures ]  && cp -r textures "$PKG_ROOT/"
-          [ -d fonts ]     && cp -r fonts "$PKG_ROOT/"
-          [ -d licences ]  && cp -r licences "$PKG_ROOT/"
-          [ -d licenses ]  && cp -r licenses "$PKG_ROOT/"
-          [ -f README.md ] && cp README.md "$PKG_ROOT/"
-
-          # Zip with a top-level folder for clean extraction
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
-      - name: Compose release body
-        id: relbody
+      - name: Write release body (manifest link)
         run: |
-          {
-            echo "BODY<<'EOF'"
-            echo "Foundry VTT manifest (latest channel): ${MANIFEST_LATEST}"
-            echo
-            echo "Foundry VTT manifest (this version):  ${MANIFEST_PINNED}"
-            echo
-            echo "Direct ZIP (this version):            ${ZIP_URL}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          echo "Foundry VTT manifest: ${MANIFEST_PINNED}" > RELEASE_BODY.md
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.relbody.outputs.BODY }}
-          prerelease: ${{ contains(steps.version.outputs.VERSION, 'alpha') }}
+          body_path: RELEASE_BODY.md
           files: |
-            sr3e-${{ steps.version.outputs.VERSION }}.zip
+            sr3e-${{ steps.v.outputs.VERSION }}.zip
             system.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
