@@ -24,7 +24,7 @@ jobs:
       - name: Install tooling
         run: sudo apt-get update && sudo apt-get install -y jq zip
 
-      - name: Configure git (for tagging/committing)
+      - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -32,22 +32,32 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Skip versioning if this push is the release commit itself
       - name: Determine bump type
         id: bump
         if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
         run: |
           set -e
-          BUMP=$(npx conventional-recommended-bump -p angular -r 0 || true)
-          BUMP=$(echo "$BUMP" | tr -d '\r\n' | xargs)
-          echo "BUMP_TYPE=$BUMP" >> $GITHUB_ENV
-          echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
+          TYPE=$(npx conventional-recommended-bump -p angular -r 0 | jq -r '.releaseType // empty')
+          if [ -z "$TYPE" ]; then
+            echo "bump=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "BUMP_TYPE=$TYPE" >> "$GITHUB_ENV"
+          echo "bump=$TYPE" >> "$GITHUB_OUTPUT"
 
-      - name: Version bump + tag
+      - name: Version bump + tag (force alpha.0)
         if: steps.bump.outputs.bump != ''
         run: |
-          # IMPORTANT: don't pass --prerelease; .versionrc.json handles prerelease=alpha
-          npx standard-version --release-as "${BUMP_TYPE}"
+          set -e
+          BASE=$(node -p "require('./package.json').version.split('-')[0]")
+          IFS='.' read -r MA MI PA <<< "$BASE"
+          case "$BUMP_TYPE" in
+            major) MA=$((MA+1)); MI=0; PA=0 ;;
+            minor) MI=$((MI+1)); PA=0 ;;
+            patch|*) PA=$((PA+1)) ;;
+          esac
+          NEXT_BASE="${MA}.${MI}.${PA}"
+          npx standard-version --release-as "${NEXT_BASE}-alpha.0"
           git push --follow-tags origin HEAD:main
 
       - name: Read version
@@ -87,7 +97,6 @@ jobs:
           ROOT="package/sr3e"
           mkdir -p "$ROOT"
 
-          # Package the PINNED manifest inside the zip
           cp system.pinned.json "$ROOT/system.json"
           cp -r build "$ROOT/"
           cp -r lang "$ROOT/"
@@ -101,7 +110,6 @@ jobs:
 
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
-          # Prepare assets for upload
           cp system.latest.json system.json
 
       - name: Write release body
