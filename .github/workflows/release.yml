@@ -5,75 +5,85 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Extract version from tag
-      id: version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-    
-    - name: Update manifest URLs
-      run: |
-        VERSION="${{ steps.version.outputs.VERSION }}"
-        REPO_URL="https://github.com/mirnau/sr3e"
-        RAW_URL="https://raw.githubusercontent.com/mirnau/sr3e"
-        
-        # Update system.json with new URLs
-        jq --arg ver "$VERSION" \
-           --arg manifest "$RAW_URL/v$VERSION/system.json" \
-           --arg download "$REPO_URL/releases/download/v$VERSION/sr3e-$VERSION.zip" \
-           '.version = $ver | .manifest = $manifest | .download = $download' \
-           system.json > system.json.tmp && mv system.json.tmp system.json
-    
-    - name: Build project
-      run: npm run build
-    
-    - name: Create release archive
-      run: |
-        VERSION="${{ steps.version.outputs.VERSION }}"
-        # Create clean directory structure
-        mkdir release
-        
-        # Copy only necessary files for the system
-        cp system.json release/
-        cp -r build/ release/
-        cp -r themes/ release/
-        cp -r lang/ release/
-        cp -r textures/ release/
-        cp -r fonts/ release/
-        cp -r licences/ release/
-        cp README.md release/
-        cp CHANGELOG.md release/
-        
-        # Create zip from release directory
-        cd release && zip -r "../sr3e-${VERSION}.zip" .
-    
-    - name: Create GitHub Release
-      run: |
-        VERSION="${{ steps.version.outputs.VERSION }}"
-        MANIFEST_URL="https://raw.githubusercontent.com/mirnau/sr3e/v${VERSION}/system.json"
-        
-        # Create release with manifest URL in description
-        gh release create "v${VERSION}" \
-          "sr3e-${VERSION}.zip" \
-          --title "Release v${VERSION}" \
-          --notes "**Foundry VTT Manifest URL:**
-        \`${MANIFEST_URL}\`
-        
-        ---
-        
-        $(gh api repos/:owner/:repo/releases/generate-notes -f tag_name="v${VERSION}" --jq '.body')"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq zip
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Update manifest URLs
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          OWNER_REPO="${GITHUB_REPOSITORY}"
+          REPO_URL="https://github.com/${OWNER_REPO}"
+          LATEST_DL="${REPO_URL}/releases/latest/download"
+          ZIP_NAME="sr3e-${VERSION}.zip"
+
+          # Set a **stable** manifest URL (latest) and a versioned download URL
+          jq --arg ver "$VERSION" \
+             --arg manifest "${LATEST_DL}/system.json" \
+             --arg download "${REPO_URL}/releases/download/v${VERSION}/${ZIP_NAME}" \
+             '.version = $ver | .manifest = $manifest | .download = $download' \
+             system.json > system.json.tmp && mv system.json.tmp system.json
+
+      - name: Build project
+        run: npm run build
+        # make sure your Vite outDir is "build" to match the copy step below
+
+      - name: Create package (only what players need)
+        run: |
+          set -e
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          PKG_ROOT="package/sr3e"
+          mkdir -p "$PKG_ROOT"
+
+          # Required
+          cp system.json "$PKG_ROOT/"
+          cp -r build "$PKG_ROOT/"
+          cp -r lang "$PKG_ROOT/"
+
+          # Optional assets (copy only if present)
+          [ -d themes ]    && cp -r themes "$PKG_ROOT/"
+          [ -d textures ]  && cp -r textures "$PKG_ROOT/"
+          [ -d fonts ]     && cp -r fonts "$PKG_ROOT/"
+          [ -d licences ]  && cp -r licences "$PKG_ROOT/"   # if your repo uses this spelling
+          [ -d licenses ]  && cp -r licenses "$PKG_ROOT/"   # or this one
+          [ -f README.md ] && cp README.md "$PKG_ROOT/"
+          # If you truly don't want the changelog, drop the next line:
+          [ -f CHANGELOG.md ] && cp CHANGELOG.md "$PKG_ROOT/"
+
+          # Zip with a top-level "sr3e/" folder (clean extraction in Foundry)
+          (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          files: |
+            sr3e-${{ steps.version.outputs.VERSION }}.zip
+            system.json   # upload the manifest as a separate asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
