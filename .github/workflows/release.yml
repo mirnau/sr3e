@@ -32,28 +32,37 @@ jobs:
 
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Update manifest URLs
+      - name: Update system.json (version / manifest / download)
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           OWNER_REPO="${GITHUB_REPOSITORY}"
           REPO_URL="https://github.com/${OWNER_REPO}"
-          LATEST_DL="${REPO_URL}/releases/latest/download"
           ZIP_NAME="sr3e-${VERSION}.zip"
 
-          # Set a **stable** manifest URL (latest) and a versioned download URL
-          jq --arg ver "$VERSION" \
-             --arg manifest "${LATEST_DL}/system.json" \
-             --arg download "${REPO_URL}/releases/download/v${VERSION}/${ZIP_NAME}" \
+          MANIFEST_LATEST="${REPO_URL}/releases/latest/download/system.json"
+          MANIFEST_PINNED="${REPO_URL}/releases/download/v${VERSION}/system.json"
+          DOWNLOAD_URL="${REPO_URL}/releases/download/v${VERSION}/${ZIP_NAME}"
+
+          # Keep manifest stable so installs auto-update, but also upload a pinned asset.
+          jq --arg ver        "$VERSION" \
+             --arg manifest   "$MANIFEST_LATEST" \
+             --arg download   "$DOWNLOAD_URL" \
              '.version = $ver | .manifest = $manifest | .download = $download' \
              system.json > system.json.tmp && mv system.json.tmp system.json
 
+          # Save URLs for later steps
+          {
+            echo "MANIFEST_LATEST=$MANIFEST_LATEST"
+            echo "MANIFEST_PINNED=$MANIFEST_PINNED"
+            echo "ZIP_URL=$DOWNLOAD_URL"
+          } >> "$GITHUB_ENV"
+
       - name: Build project
         run: npm run build
-        # make sure your Vite outDir is "build" to match the copy step below
 
-      - name: Create package (only what players need)
+      - name: Create package (players only)
         run: |
           set -e
           VERSION="${{ steps.version.outputs.VERSION }}"
@@ -65,25 +74,37 @@ jobs:
           cp -r build "$PKG_ROOT/"
           cp -r lang "$PKG_ROOT/"
 
-          # Optional assets (copy only if present)
+          # Optional runtime assets
           [ -d themes ]    && cp -r themes "$PKG_ROOT/"
           [ -d textures ]  && cp -r textures "$PKG_ROOT/"
           [ -d fonts ]     && cp -r fonts "$PKG_ROOT/"
-          [ -d licences ]  && cp -r licences "$PKG_ROOT/"   # if your repo uses this spelling
-          [ -d licenses ]  && cp -r licenses "$PKG_ROOT/"   # or this one
+          [ -d licences ]  && cp -r licences "$PKG_ROOT/"
+          [ -d licenses ]  && cp -r licenses "$PKG_ROOT/"
           [ -f README.md ] && cp README.md "$PKG_ROOT/"
-          # If you truly don't want the changelog, drop the next line:
-          [ -f CHANGELOG.md ] && cp CHANGELOG.md "$PKG_ROOT/"
 
-          # Zip with a top-level "sr3e/" folder (clean extraction in Foundry)
+          # Zip with a top-level folder for clean extraction
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
+      - name: Compose release body
+        id: relbody
+        run: |
+          {
+            echo "BODY<<'EOF'"
+            echo "Foundry VTT manifest (latest channel): ${MANIFEST_LATEST}"
+            echo
+            echo "Foundry VTT manifest (this version):  ${MANIFEST_PINNED}"
+            echo
+            echo "Direct ZIP (this version):            ${ZIP_URL}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          generate_release_notes: true
+          body: ${{ steps.relbody.outputs.BODY }}
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'alpha') }}
           files: |
             sr3e-${{ steps.version.outputs.VERSION }}.zip
-            system.json   # upload the manifest as a separate asset
+            system.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
