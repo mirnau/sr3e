@@ -61,9 +61,19 @@ jobs:
         cd release && zip -r "../sr3e-${VERSION}.zip" .
     
     - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: sr3e-${{ steps.version.outputs.VERSION }}.zip
-        generate_release_notes: true
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        MANIFEST_URL="https://raw.githubusercontent.com/mirnau/sr3e/v${VERSION}/system.json"
+        
+        # Create release with manifest URL in description
+        gh release create "v${VERSION}" \
+          "sr3e-${VERSION}.zip" \
+          --title "Release v${VERSION}" \
+          --notes "**Foundry VTT Manifest URL:**
+        \`${MANIFEST_URL}\`
+        
+        ---
+        
+        $(gh api repos/:owner/:repo/releases/generate-notes -f tag_name="v${VERSION}" --jq '.body')"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
