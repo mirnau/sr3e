@@ -2,8 +2,8 @@ name: Create Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -24,25 +24,45 @@ jobs:
       - name: Install tooling
         run: sudo apt-get update && sudo apt-get install -y jq zip
 
+      - name: Configure git (for tagging/committing)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Extract version from tag
+      # Skip bumping if this push IS the release commit
+      - name: Determine bump type
+        id: bump
+        if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
+        run: |
+          npx conventional-recommended-bump -p angular -r 0 | jq -r '.releaseType // "patch"' > .bump
+          echo "BUMP_TYPE=$(cat .bump)" >> $GITHUB_ENV
+          echo "bump=$(cat .bump)" >> "$GITHUB_OUTPUT"
+
+      - name: Version bump + tag
+        if: steps.bump.outputs.bump != ''
+        run: |
+          npx standard-version --release-as "${BUMP_TYPE}"
+          git push --follow-tags origin HEAD:main
+
+      - name: Read version
         id: v
-        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        if: steps.bump.outputs.bump != ''
+        run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
 
       - name: Update system.json (bump + URLs)
+        if: steps.v.outputs.VERSION != ''
         run: |
           VERSION="${{ steps.v.outputs.VERSION }}"
           REPO="https://github.com/${GITHUB_REPOSITORY}"
           ZIP="sr3e-${VERSION}.zip"
 
-          # Pinned (this release) + Latest (auto-update channel)
           MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
           MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
-          # Keep internal manifest pointing at "latest" so installs can auto-update later
           jq --arg ver "$VERSION" \
              --arg manifest "$MANIFEST_LATEST" \
              --arg download "$DOWNLOAD_URL" \
@@ -52,9 +72,11 @@ jobs:
           echo "MANIFEST_PINNED=$MANIFEST_PINNED" >> "$GITHUB_ENV"
 
       - name: Build
+        if: steps.v.outputs.VERSION != ''
         run: npm run build
 
       - name: Create package (players only)
+        if: steps.v.outputs.VERSION != ''
         run: |
           set -e
           VERSION="${{ steps.v.outputs.VERSION }}"
@@ -75,10 +97,12 @@ jobs:
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
       - name: Write release body (manifest link)
+        if: steps.v.outputs.VERSION != ''
         run: |
           echo "Foundry VTT manifest: ${MANIFEST_PINNED}" > RELEASE_BODY.md
 
       - name: Create GitHub Release
+        if: steps.v.outputs.VERSION != ''
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_BODY.md
