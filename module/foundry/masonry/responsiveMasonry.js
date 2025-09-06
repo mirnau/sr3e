@@ -1,5 +1,3 @@
-import Masonry from "masonry-layout";
-
 export function setupMasonry({
   container,
   itemSelector,
