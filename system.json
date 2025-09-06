@@ -1,63 +1,63 @@
 {
-    "id": "sr3e",
-    "title": "Shadowrun Third Edition Homebrew",
-    "description": "An unofficial fan system for Shadowrun Third Edition",
-    "background": "textures/ai/cyberpunkcity.webp",
-    "authors": [
-        {
-            "name": "Otterbeast"
-        }
-    ],
-    "version": "0.0.2-alpha.15",
-    "url": "https://github.com/mirnau/sr3e",
-    "readme": "https://raw.githubusercontent.com/mirnau/sr3e/main/README.md",
-    "changelog": "https://raw.githubusercontent.com/mirnau/sr3e/main/CHANGELOG.md",
-    "manifest": "https://raw.githubusercontent.com/mirnau/sr3e/v0.0.2-alpha.1/system.json",
-    "download": "https://github.com/mirnau/sr3e/releases/download/v0.0.2-alpha.1/sr3e-0.0.2-alpha.1.zip",
-    "compatibility": {
-        "minimum": "13.340",
-        "verified": "13.341"
+  "id": "sr3e",
+  "title": "Shadowrun Third Edition Homebrew",
+  "description": "An unofficial fan system for Shadowrun Third Edition",
+  "background": "textures/ai/cyberpunkcity.webp",
+  "authors": [
+    {
+      "name": "Otterbeast"
+    }
+  ],
+  "version": "0.0.2-alpha.15",
+  "url": "https://github.com/mirnau/sr3e",
+  "readme": "https://raw.githubusercontent.com/mirnau/sr3e/main/README.md",
+  "changelog": "https://raw.githubusercontent.com/mirnau/sr3e/main/CHANGELOG.md",
+  "manifest": "https://raw.githubusercontent.com/mirnau/sr3e/main/system.json",
+  "download": "https://github.com/mirnau/sr3e/releases/download/v0.0.2-alpha.15/sr3e-0.0.2-alpha.15.zip",
+  "compatibility": {
+    "minimum": "13.340",
+    "verified": "13.341"
+  },
+  "esmodules": [
+    "build/bundle.js"
+  ],
+  "scripts": [
+    "https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
+  ],
+  "documentTypes": {
+    "Actor": {
+      "character": {},
+      "storytellerscreen": {},
+      "broadcaster": {},
+      "mechanical": {}
     },
-    "esmodules": [
-        "build/bundle.js"
-    ],
-    "scripts": [
-        "https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"
-    ],
-    "documentTypes": {
-        "Actor": {
-            "character": {},
-            "storytellerscreen": {},
-            "broadcaster": {},
-            "mechanical": {}
-        },
-        "Item": {
-            "metatype": {},
-            "magic": {},
-            "weapon": {},
-            "ammunition": {},
-            "skill": {},
-            "transaction": {},
-            "wearable": {},
-            "techinterface": {},
-            "spell": {},
-            "focus": {},
-            "gadget": {}
-        }
-    },
-    "styles": [
-        "themes/chummer/css/core-styles.css",
-        "themes/chummer/css/chummer-light.css",
-        "themes/chummer/css/chummer-dark.css"
-    ],
-    "languages": [
-        {
-            "lang": "en",
-            "name": "English",
-            "path": "lang/en.json"
-        }
-    ],
-    "socket": true,
-    "primaryTokenAttribute": "wounds",
-    "initiative": "1D6 + @reaction"
+    "Item": {
+      "metatype": {},
+      "magic": {},
+      "weapon": {},
+      "ammunition": {},
+      "skill": {},
+      "transaction": {},
+      "wearable": {},
+      "techinterface": {},
+      "spell": {},
+      "focus": {},
+      "gadget": {}
+    }
+  },
+  "styles": [
+    "themes/chummer/css/core-styles.css",
+    "themes/chummer/css/chummer-light.css",
+    "themes/chummer/css/chummer-dark.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true,
+  "primaryTokenAttribute": "wounds",
+  "initiative": "1D6 + @reaction"
 }
