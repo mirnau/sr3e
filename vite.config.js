@@ -49,7 +49,7 @@ function sr3eInjectLocation() {
             last = 0;
          };
 
-         // __FILE__
+         // __FILE__ // Test
          replaceAll(/__FILE__/g, () => JSON.stringify(relFile));
 
          // __DIR__

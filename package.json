@@ -13,6 +13,7 @@
    "devDependencies": {
       "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
       "@sveltejs/vite-plugin-svelte": "^5.0.3",
+      "conventional-recommended-bump": "^11.2.0",
       "gulp": "^5.0.0",
       "gulp-less": "^5.0.0",
       "less": "^4.2.1",
