@@ -4,6 +4,12 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 'alpha | beta | release'
+        required: false
+        type: choice
+        options: [alpha, beta, release]
 
 permissions:
   contents: write
@@ -31,73 +37,91 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Guard: must already be alpha
+      - name: "State"
         run: |
-          set -e
-          CURR="$(node -p "require('./package.json').version")"
-          echo "$CURR" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$'
+          echo "HEAD=$(git rev-parse --short HEAD)"
+          echo "MSG=$(git log -1 --pretty=%s)"
+          echo "PKG=$(node -p "require('./package.json').version")"
+          git tag --list | sort -V || true
 
-      - name: Decide next version (bump base + bump build)
-        id: ver
+      - name: "Decide channel"
+        id: ch
         run: |
-          set -e
+          IN="${{ github.event.inputs.channel }}"
           CURR="$(node -p "require('./package.json').version")"
-          BASE="${CURR%%-*}"
-          BUILD="${CURR##*-alpha.}"
+          if [ -z "$IN" ]; then
+            if echo "$CURR" | grep -Eq -- '-alpha\.[0-9]+$'; then CH=alpha
+            elif echo "$CURR" | grep -Eq -- '-beta\.[0-9]+$'; then CH=beta
+            else CH=release
+            fi
+          else
+            CH="$IN"
+          fi
+          echo "channel=$CH" >> "$GITHUB_OUTPUT"
 
+      - name: "Determine bump type"
+        id: bump
+        run: |
           TYPE="$(npx conventional-recommended-bump -p angular -r 0 || true)"
           TYPE="$(echo "$TYPE" | tr -d '\r\n' | xargs)"
           if [ -z "$TYPE" ]; then TYPE=patch; fi
+          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
 
+      - name: "Compute next version"
+        id: ver
+        run: |
+          CH="${{ steps.ch.outputs.channel }}"
+          CURR="$(node -p "require('./package.json').version")"
+          BASE="${CURR%%-*}"
           IFS='.' read -r MA MI PA <<< "$BASE"
-          case "$TYPE" in
+          case "${{ steps.bump.outputs.type }}" in
             major) MA=$((MA+1)); MI=0; PA=0 ;;
             minor) MI=$((MI+1)); PA=0 ;;
             patch|*) PA=$((PA+1)) ;;
           esac
-
-          NEXT_BUILD=$((BUILD+1))
           NEXT_BASE="${MA}.${MI}.${PA}"
-          NEXT="${NEXT_BASE}-alpha.${NEXT_BUILD}"
-
-          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+          if [ "$CH" = "alpha" ] || [ "$CH" = "beta" ]; then
+            if echo "$CURR" | grep -Eq -- "-${CH}\.[0-9]+$"; then
+              BUILD="$(echo "$CURR" | sed -E 's/.*-'"$CH"'\.([0-9]+)$/\1/')"
+              BUILD=$((BUILD+1))
+            else
+              BUILD=0
+            fi
+            NEXT="${NEXT_BASE}-${CH}.${BUILD}"
+          else
+            NEXT="${NEXT_BASE}"
+          fi
+          echo "channel=$CH"     >> "$GITHUB_OUTPUT"
           echo "next_base=$NEXT_BASE" >> "$GITHUB_OUTPUT"
-          echo "next_build=$NEXT_BUILD" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT"      >> "$GITHUB_OUTPUT"
 
-      - name: Version bump (exact)
+      - name: "Version bump"
         run: |
-          set -e
           npx standard-version --release-as "${{ steps.ver.outputs.next }}"
           git push --follow-tags origin HEAD:main
 
-      - name: Read version
+      - name: "Read version"
         id: v
         run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
 
-      - name: Build manifests (latest + pinned)
+      - name: "Build manifests (latest + pinned)"
         run: |
-          set -e
           VERSION="${{ steps.v.outputs.VERSION }}"
           REPO="https://github.com/${GITHUB_REPOSITORY}"
           ZIP="sr3e-${VERSION}.zip"
           MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
           MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
-
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
-             '.version=$ver | .manifest=$manifest | .download=$download' \
-             system.json > system.latest.json
-
+             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
-             '.version=$ver | .manifest=$manifest | .download=$download' \
-             system.json > system.pinned.json
+             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
 
       - name: Build
         run: npm run build
 
-      - name: Create package (players only)
+      - name: "Create package (players only)"
         run: |
-          set -e
           VERSION="${{ steps.v.outputs.VERSION }}"
           ROOT="package/sr3e"
           mkdir -p "$ROOT"
@@ -114,7 +138,7 @@ jobs:
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
           cp system.latest.json system.json
 
-      - name: Write release body + summary
+      - name: "Write release body + summary"
         run: |
           VERSION="${{ steps.v.outputs.VERSION }}"
           {
@@ -126,9 +150,10 @@ jobs:
             echo "- Latest: https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
             echo "- Pinned: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/system.json"
             echo "- Zip: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/sr3e-${VERSION}.zip"
+            echo "- Channel: ${{ steps.ver.outputs.channel }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create GitHub Release
+      - name: "Create GitHub Release"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.v.outputs.VERSION }}
@@ -138,7 +163,7 @@ jobs:
             sr3e-${{ steps.v.outputs.VERSION }}.zip
             system.json
             system.pinned.json
-          prerelease: true
+          prerelease: ${{ steps.ch.outputs.channel != 'release' }}
           make_latest: true
           fail_on_unmatched_files: true
         env:
