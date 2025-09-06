@@ -32,24 +32,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # If the latest pushed commit is the release commit, skip bumping
       - name: Determine bump type
         id: bump
-        if: ${{ !contains(github.event.head_commit.message, 'chore(release)') }}
+        if: ${{ !contains(github.event.head_commit.message || '', 'chore(release)') }}
         run: |
           set -e
-          TYPE=$(npx conventional-recommended-bump -p angular -r 0 | jq -r '.releaseType // empty')
+          TYPE="$(npx conventional-recommended-bump -p angular -r 0 || true)"
+          TYPE="$(echo "$TYPE" | tr -d '\r\n' | xargs)"
           if [ -z "$TYPE" ]; then
+            echo "No conventional commits since last tag. Skipping."
             echo "bump=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "BUMP_TYPE=$TYPE" >> "$GITHUB_ENV"
           echo "bump=$TYPE" >> "$GITHUB_OUTPUT"
 
-      - name: Version bump + tag (force alpha.0)
+      # Force-reset prerelease to alpha.0 by computing the next BASE version
+      - name: Version bump + tag (alpha.0)
         if: steps.bump.outputs.bump != ''
         run: |
           set -e
-          BASE=$(node -p "require('./package.json').version.split('-')[0]")
+          BASE="$(node -p "require('./package.json').version.split('-')[0]")"
           IFS='.' read -r MA MI PA <<< "$BASE"
           case "$BUMP_TYPE" in
             major) MA=$((MA+1)); MI=0; PA=0 ;;
@@ -110,6 +114,7 @@ jobs:
 
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
 
+          # prepare upload alias
           cp system.latest.json system.json
 
       - name: Write release body
