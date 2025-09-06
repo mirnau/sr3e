@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2-alpha.33](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.32...v0.0.2-alpha.33) (2025-09-06)
+
 ### [0.0.2-alpha.32](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.31...v0.0.2-alpha.32) (2025-09-06)
 
 
