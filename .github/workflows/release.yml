@@ -11,7 +11,6 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,77 +31,55 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Git state (debug)
+      - name: Guard: must already be alpha
         run: |
           set -e
-          echo "HEAD: $(git rev-parse --short HEAD)"
-          echo "HEAD msg: $(git log -1 --pretty=%s)"
-          echo "Tags local:"
-          git tag --list | sort -V || true
-          echo "Tags remote:"
-          git ls-remote --tags origin || true
-          echo "package.json version:"
-          node -p "require('./package.json').version"
+          CURR="$(node -p "require('./package.json').version")"
+          echo "$CURR" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-alpha\.[0-9]+$'
 
-      # Skip if this push IS the release commit
-      - name: Guard: skip on release commit
-        id: guard
-        run: |
-          MSG="$(git log -1 --pretty=%s)"
-          if echo "$MSG" | grep -q "chore(release)"; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Determine bump type (fallback to patch)
-        id: bump
-        if: steps.guard.outputs.skip == 'false'
+      - name: Decide next version (bump base + bump build)
+        id: ver
         run: |
           set -e
+          CURR="$(node -p "require('./package.json').version")"
+          BASE="${CURR%%-*}"
+          BUILD="${CURR##*-alpha.}"
+
           TYPE="$(npx conventional-recommended-bump -p angular -r 0 || true)"
           TYPE="$(echo "$TYPE" | tr -d '\r\n' | xargs)"
           if [ -z "$TYPE" ]; then TYPE=patch; fi
-          echo "BUMP_TYPE=$TYPE" | tee -a "$GITHUB_ENV"
-          echo "type=$TYPE" >> "$GITHUB_OUTPUT"
 
-      - name: Compute next base version
-        id: next
-        if: steps.guard.outputs.skip == 'false'
-        run: |
-          set -e
-          BASE="$(node -p "require('./package.json').version.split('-')[0]")"
           IFS='.' read -r MA MI PA <<< "$BASE"
-          case "${{ steps.bump.outputs.type }}" in
+          case "$TYPE" in
             major) MA=$((MA+1)); MI=0; PA=0 ;;
             minor) MI=$((MI+1)); PA=0 ;;
             patch|*) PA=$((PA+1)) ;;
           esac
-          NEXT_BASE="${MA}.${MI}.${PA}"
-          echo "BASE=$BASE  ->  NEXT_BASE=$NEXT_BASE"
-          echo "base=$BASE"       >> "$GITHUB_OUTPUT"
-          echo "next_base=$NEXT_BASE" >> "$GITHUB_OUTPUT"
 
-      - name: Version bump + tag (force alpha.0)
-        if: steps.guard.outputs.skip == 'false'
+          NEXT_BUILD=$((BUILD+1))
+          NEXT_BASE="${MA}.${MI}.${PA}"
+          NEXT="${NEXT_BASE}-alpha.${NEXT_BUILD}"
+
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "next_base=$NEXT_BASE" >> "$GITHUB_OUTPUT"
+          echo "next_build=$NEXT_BUILD" >> "$GITHUB_OUTPUT"
+
+      - name: Version bump (exact)
         run: |
           set -e
-          npx standard-version --release-as "${{ steps.next.outputs.next_base }}-alpha.0"
+          npx standard-version --release-as "${{ steps.ver.outputs.next }}"
           git push --follow-tags origin HEAD:main
 
       - name: Read version
         id: v
-        if: steps.guard.outputs.skip == 'false'
         run: echo "VERSION=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
 
       - name: Build manifests (latest + pinned)
-        if: steps.guard.outputs.skip == 'false'
         run: |
           set -e
           VERSION="${{ steps.v.outputs.VERSION }}"
           REPO="https://github.com/${GITHUB_REPOSITORY}"
           ZIP="sr3e-${VERSION}.zip"
-
           MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
           MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
@@ -116,17 +93,14 @@ jobs:
              system.json > system.pinned.json
 
       - name: Build
-        if: steps.guard.outputs.skip == 'false'
         run: npm run build
 
       - name: Create package (players only)
-        if: steps.guard.outputs.skip == 'false'
         run: |
           set -e
           VERSION="${{ steps.v.outputs.VERSION }}"
           ROOT="package/sr3e"
           mkdir -p "$ROOT"
-
           cp system.pinned.json "$ROOT/system.json"
           cp -r build "$ROOT/"
           cp -r lang "$ROOT/"
@@ -137,14 +111,10 @@ jobs:
           [ -d licences ]  && cp -r licences "$ROOT/"
           [ -d licenses ]  && cp -r licenses "$ROOT/"
           [ -f README.md ] && cp README.md "$ROOT/"
-
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
-
-          # upload alias for latest-channel
           cp system.latest.json system.json
 
       - name: Write release body + summary
-        if: steps.guard.outputs.skip == 'false'
         run: |
           VERSION="${{ steps.v.outputs.VERSION }}"
           {
@@ -159,14 +129,17 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Create GitHub Release
-        if: steps.guard.outputs.skip == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.v.outputs.VERSION }}
+          name: v${{ steps.v.outputs.VERSION }}
           body_path: RELEASE_BODY.md
           files: |
             sr3e-${{ steps.v.outputs.VERSION }}.zip
             system.json
             system.pinned.json
+          prerelease: true
+          make_latest: true
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
