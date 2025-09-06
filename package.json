@@ -1,12 +1,14 @@
 {
    "name": "my-svelte-project",
-   "version": "1.0.0",
+   "version": "0.0.2-alpha.5",
    "type": "module",
    "scripts": {
       "dev": "vite",
       "build": "vite build",
       "preview": "vite preview",
-      "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build ."
+      "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build .",
+      "release": "standard-version",
+      "release:alpha": "standard-version --prerelease alpha"
    },
    "devDependencies": {
       "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
@@ -15,6 +17,7 @@
       "gulp-less": "^5.0.0",
       "less": "^4.2.1",
       "sloc": "^0.3.2",
+      "standard-version": "^9.5.0",
       "svelte": "^5.19.3",
       "vite": "^6.3.5"
    },

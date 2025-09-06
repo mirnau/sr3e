@@ -4,7 +4,6 @@
    const { id } = $props();
 
    function handleMove(direction) {
-      console.log("handle move called");
       moveCardById(id, direction);
    }
 

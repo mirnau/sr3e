@@ -25,6 +25,7 @@
    const isWeaponStore = actorStoreManager.GetFlagStore("isWeapon");
    const isWornStore = actorStoreManager.GetFlagStore("isWorn");
    const isGadgetStore = actorStoreManager.GetFlagStore("isGadget");
+   const isTechStore = actorStoreManager.GetFlagStore("isTech");
 
    let isFavorite = $state($isFavoriteStore);
    let isEquipped = $state($isEquippedStore);
@@ -32,6 +33,7 @@
    let isWeapon = $state($isWeaponStore);
    let isWorn = $state($isWornStore);
    let isGadget = $state($isGadgetStore);
+   let isTech = $state($isTechStore);
 
    $effect(() => {
       isFavorite = $isFavoriteStore;
@@ -40,6 +42,7 @@
       isWeapon = $isWeaponStore;
       isWorn = $isWornStore;
       isGadget = $isGadgetStore;
+      isTech = $isTechStore;
    });
 
    $effect(() => {
@@ -49,11 +52,12 @@
       isWeaponStore.set(isWeapon);
       isWornStore.set(isWorn);
       isGadgetStore.set(isGadget);
+      isTechStore.set(isTech);
    });
 
    $effect(() => {
       const _ = actor.items.contents;
-      allItems = ActorDataService.getInventory(actor, ["ammunition", "weapon", "wearable", "gadget"]);
+      allItems = ActorDataService.getInventory(actor, ["ammunition", "weapon", "wearable", "gadget", "techinterface"]);
    });
 
    $effect(() => {
@@ -64,9 +68,10 @@
             (isAmmunition && item.type === "ammunition") ||
             (isWeapon && item.type === "weapon") ||
             (isWorn && item.type === "wearable") ||
-            (isGadget && item.type === "gadget");
+            (isGadget && item.type === "gadget") ||
+            (isTech && item.type === "techinterface");
 
-         const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget;
+         const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget || isTech;
          const passesTypeFilter = hasTypeFilter ? typeMatches : true;
 
          const itemFlags = item.flags?.sr3e || {};
@@ -112,10 +117,15 @@
    <FilterToggle bind:checked={isWeapon} label={localize(config.weapon.weapon)} svgName="rifle-gun-svgrepo-com.svg" />
    <FilterToggle
       bind:checked={isWorn}
-      label={localize(config.wearable.wearables)}
+      label={localize(config.wearable.apparel ?? config.wearable.wearable)}
       svgName="coat-with-pockets-svgrepo-com.svg"
    />
    <FilterToggle bind:checked={isGadget} label={localize(config.gadget.gadget)} svgName="cogs-f-svgrepo-com.svg" />
+   <FilterToggle
+      bind:checked={isTech}
+      label={localize(config.techinterface.techinterface)}
+      svgName="router-svgrepo-com.svg"
+   />
 </div>
 
 <div class="asset-category-container static-full-width">

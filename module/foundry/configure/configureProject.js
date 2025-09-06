@@ -45,6 +45,7 @@ export function configureProject() {
       broadcaster: localize(CONFIG.sr3e.broadcaster.broadcaster),
       character: localize(CONFIG.sr3e.sheet.playercharacter),
       storytellerscreen: localize(CONFIG.sr3e.storytellerscreen.storytellerscreen),
+      mechanical: localize(CONFIG.sr3e.mechanical?.mechanical ?? "sr3e.mechanical.mechanical"),
    };
    CONFIG.Item.typeLabels = {
       ammunition: localize(CONFIG.sr3e.ammunition.ammunition),
@@ -55,6 +56,7 @@ export function configureProject() {
       weapon: localize(CONFIG.sr3e.weapon.weapon),
       wearable: localize(CONFIG.sr3e.wearable.wearable),
       gadget: localize(CONFIG.sr3e.gadget.gadget),
+      techinterface: localize(CONFIG.sr3e.techinterface.techinterface),
    };
 
    foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, flags.core, "ActorSheetV2");

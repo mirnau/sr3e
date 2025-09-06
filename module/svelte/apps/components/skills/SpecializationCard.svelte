@@ -61,9 +61,17 @@
    }
 </script>
 
-<TextInput text={liveText} oninput={handleInput} onkeydown={handleKeyDown}>
+<div class="skill-specialization-card">
+   <TextInput
+      text={liveText}
+      oninput={handleInput}
+      onkeydown={handleKeyDown}
+      hideBackground={true}
+      textClass="specialization-name"
+   />
    <h1 class="embedded-value no-margin">{specialization.value}</h1>
-</TextInput>
+   
+</div>
 
 <div class="buttons-horizontal-distribution">
    <button

@@ -19,6 +19,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
    #creation;
    #footer;
    #composer;
+   #resizeObserver;
 
    static get DEFAULT_OPTIONS() {
       return {
@@ -101,6 +102,9 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
       this._enableGmRightClickOwnership(windowContent);
       SR3DLog.success("Svelte mounted", this.constructor.name);
+
+      // Apply saved window size and begin observing resize to persist.
+      this.#applySavedWindowSize(windowContent);
       return windowContent;
    }
 
@@ -346,5 +350,42 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
       } else {
          ui.notifications.info("Only one metatype type allowed.");
       }
+   }
+
+   async #applySavedWindowSize(windowContent) {
+      const root = windowContent?.closest?.(".window-app") ?? windowContent?.closest?.(".app");
+      if (!root) return;
+
+      const size = await this.document.getFlag("sr3e", "windowSize");
+      if (size && Number.isFinite(size.width) && Number.isFinite(size.height)) {
+         root.style.width = `${Math.round(size.width)}px`;
+         root.style.height = `${Math.round(size.height)}px`;
+      }
+
+      // Observe and persist size changes (debounced)
+      if (this.#resizeObserver) {
+         try { this.#resizeObserver.disconnect(); } catch {}
+         this.#resizeObserver = null;
+      }
+      let saveTimeout = null;
+      this.#resizeObserver = new ResizeObserver((entries) => {
+         const entry = entries?.[0];
+         if (!entry) return;
+         const { width, height } = entry.contentRect ?? {};
+         if (!Number.isFinite(width) || !Number.isFinite(height)) return;
+         clearTimeout(saveTimeout);
+         saveTimeout = setTimeout(() => {
+            this.document.setFlag("sr3e", "windowSize", { width: Math.round(width), height: Math.round(height) });
+         }, 200);
+      });
+      this.#resizeObserver.observe(root);
+   }
+
+   async close(options) {
+      if (this.#resizeObserver) {
+         try { this.#resizeObserver.disconnect(); } catch {}
+         this.#resizeObserver = null;
+      }
+      return super.close(options);
    }
 }

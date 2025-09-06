@@ -79,7 +79,11 @@ Use tables as given (see GM Screen PDF).
 
 Meta-house rules must be flagged and documented separately.
 
-8. When in Doubt
+8. Respect file naming conventions
+
+Do not rename old files on the fly without approval.
+
+9. When in Doubt
 
 Prefer generalized solutions in AbstractProcedure over one-off hacks.
 

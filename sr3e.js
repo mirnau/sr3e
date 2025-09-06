@@ -13,6 +13,7 @@ import TransactionModel from "@models/item/TransactionModel.js";
 import GadgetModel from "@models/item/GadgetModel.js";
 import FocusModel from "@models/item/FocusModel.js";
 import TechInterfaceModel from "@models/item/TechInterfaceModel.js";
+import MechanicalModel from "@models/actor/MechanicalModel.js";
 import SpellModel from "@models/item/SpellModel.js";
 import WearableModel from "@models/item/WearableModel.js";
 import WearableItemSheet from "@sheets/WearableItemSheet.js";
@@ -29,6 +30,7 @@ import BroadcasterActorSheet from "@sheets/BroadcasterActorSheet.js";
 import GadgetItemSheet from "@sheets/GadgetItemSheet.js";
 import FocusItemSheet from "@sheets/FocusItemSheet.js";
 import TechInterfaceItemSheet from "@sheets/TechInterfaceItemSheet.js";
+import MechanicalActorSheet from "@sheets/MechanicalActorSheet.js";
 import SpellItemSheet from "@sheets/SpellItemSheet.js";
 
 import { hooks, flags } from "@services/commonConsts.js";
@@ -61,6 +63,7 @@ import { initializeNewsService } from "@hooks/ready/initializeNewsService.js";
 import { wrapChatMessage } from "@hooks/renderChatMessageHTML/wrapChatMessage.js";
 import { addOpposedResponseButton } from "@hooks/renderChatMessageHTML/addOpposedResponseButton.js";
 import { addResistDamageButton } from "@hooks/renderChatMessageHTML/addResistDamageButton.js";
+import { enforceSingleTechinterfaceEquipped } from "@hooks/updateItem/enforceSingleTechinterfaceEquipped.js";
 
 import AbstractProcedure from "@services/procedure/FSM/AbstractProcedure.js";
 import FirearmProcedure from "@services/procedure/FSM/FirearmProcedure.js";
@@ -106,6 +109,12 @@ function initializeSystem() {
             type: "storytellerscreen",
             model: StorytellerScreenModel,
             sheet: StorytellerScreenActorSheet,
+         },
+         {
+            docClass: Actor,
+            type: "mechanical",
+            model: MechanicalModel,
+            sheet: MechanicalActorSheet,
          },
          {
             docClass: Actor,
@@ -167,7 +176,7 @@ function initializeSystem() {
             model: TechInterfaceModel,
             sheet: TechInterfaceItemSheet,
          },
-         {
+          {
             docClass: Item,
             type: "spell",
             model: SpellModel,
@@ -199,7 +208,8 @@ function registerHooks() {
    Hooks.on(hooks.preCreateActor, chain(setFlagsOnCharacterPreCreate, stopDefaultCharacterSheetRenderOnCreation));
    Hooks.on(hooks.createActor, chain(debugFlagsOnActor, displayCreationDialog));
    Hooks.on(hooks.ready, initializeNewsService);
-   Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
+  Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
+  Hooks.on("updateItem", enforceSingleTechinterfaceEquipped);
 
    if (DEBUG) {
       //Hooks.once(hooks.ready, enableDebugHooks);

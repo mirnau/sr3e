@@ -1,5 +1,15 @@
 <script>
-   let { text = "", onblur = () => {}, oninput = () => {}, onkeydown = () => {}, children } = $props();
+   let {
+      text = "",
+      onblur = () => {},
+      oninput = () => {},
+      onkeydown = () => {},
+      children,
+      // Optional styling hooks
+      containerClass = "",
+      textClass = "",
+      hideBackground = false,
+   } = $props();
 
    let editableEl;
 
@@ -16,11 +26,13 @@
    
 </script>
 
-<div class="input-component-container">
+<div class={`input-component-container ${containerClass}`}>
+   {#if !hideBackground}
    <div class="input-component-container-background"></div>
+   {/if}
    <div
       bind:this={editableEl}
-      class="input-container-text"
+      class={`input-container-text ${textClass}`}
       contenteditable
       role="textbox"
       aria-multiline="false"
