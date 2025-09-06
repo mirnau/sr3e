@@ -1,15 +1,15 @@
 {
    "name": "my-svelte-project",
-   "version": "0.0.2-alpha.36",
+   "version": "0.0.2-alpha.37",
    "type": "module",
    "scripts": {
       "dev": "vite",
       "build": "vite build",
       "preview": "vite preview",
       "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build .",
-      "release:alpha": "standard-version --prerelease alpha && git push --follow-tags origin HEAD:main",
-      "release:beta": "standard-version --prerelease beta && git push --follow-tags origin HEAD:main",
-      "release": "standard-version && git push --follow-tags origin HEAD:main"
+      "release:alpha": "standard-version --prerelease alpha && git push --follow-tags origin main",
+      "release:beta": "standard-version --prerelease beta && git push --follow-tags origin main",
+      "release": "standard-version && git push --follow-tags origin main"
    },
    "devDependencies": {
       "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
