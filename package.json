@@ -1,6 +1,6 @@
 {
    "name": "my-svelte-project",
-   "version": "0.0.2-alpha.13",
+   "version": "0.0.2-alpha.14",
    "type": "module",
    "scripts": {
       "dev": "vite",
