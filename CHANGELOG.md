@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2-alpha.29](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.28...v0.0.2-alpha.29) (2025-09-06)
+
+
+### Bug Fixes
+
+* force test bump ([4667fda](https://github.com/mirnau/sr3e/commit/4667fdaac66fae27d3a8f458ab8639bacdb62dd4))
+
 ### 0.0.2-alpha.28 (2025-09-06)
 
 
