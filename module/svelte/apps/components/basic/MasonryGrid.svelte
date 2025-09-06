@@ -1,5 +1,5 @@
 <script>
-  import masonry from "masonry-layout";
+  
   import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
   import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";
   import { tick } from "svelte";
