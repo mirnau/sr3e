@@ -3,24 +3,23 @@ name: Create Release
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch: {}   # optional, lets you rerun manually
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
   release:
-    # extra guard so we only run on tag pushes or manual dispatch
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -29,21 +28,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq zip
 
-      # Use the event ref directly. For tag pushes this is rock solid.
-      - name: Extract version from ref
+      - name: Read version from tag
         id: v
         run: |
-          TAG="${GITHUB_REF_NAME}"      # e.g. v1.2.3-alpha.0
-          VERSION="${TAG#v}"            #     1.2.3-alpha.0
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Install deps & build
         run: |
           npm ci
           npm run build
 
-      - name: Build manifests (latest + pinned)
+      - name: Build manifests (pinned + latest)
         run: |
           VERSION="${{ steps.v.outputs.version }}"
           REPO="https://github.com/${GITHUB_REPOSITORY}"
@@ -53,11 +48,11 @@ jobs:
           MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
-          # Pinned for this exact version
+          # Pinned manifest for this exact version
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
 
-          # Latest channel
+          # "Latest" channel manifest (always points to latest release asset)
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
 
@@ -76,35 +71,29 @@ jobs:
           [ -d licences ]  && cp -r licences "$ROOT/"
           [ -d licenses ]  && cp -r licenses "$ROOT/"
           [ -f README.md ] && cp README.md "$ROOT/"
-
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
-
-          # prepare "latest" manifest as separate asset
+          # upload "latest" manifest as a separate asset
           cp system.latest.json system.json
 
       - name: Compose release body
         id: body
         run: |
-          VERSION="${{ steps.v.outputs.version }}"
+          V="${{ steps.v.outputs.version }}"
           {
-            echo "Install/Update manifest (latest channel): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
-            echo "Pinned manifest for this version: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${VERSION}/system.json"
+            echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
+            echo "Pinned manifest: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${V}/system.json"
             echo
-            if echo "$VERSION" | grep -q -- "-alpha\\."; then
+            if echo "$V" | grep -q -- "-alpha\\."; then
               echo "This is an alpha build. No migration scripts are in effect, any work done in the current"
               echo "system may break without warning or future fixes."
             fi
           } > RELEASE_BODY.md
-          echo "path=RELEASE_BODY.md" >> "$GITHUB_OUTPUT"
 
-      - name: Decide prerelease + latest flags
+      - name: Decide prerelease + latest
         id: flags
         run: |
-          VERSION="${{ steps.v.outputs.version }}"
-          if echo "$VERSION" | grep -q -- "-alpha\\."; then
-            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
-            echo "make_latest=false" >> "$GITHUB_OUTPUT"
-          elif echo "$VERSION" | grep -q -- "-beta\\."; then
+          V="${{ steps.v.outputs.version }}"
+          if echo "$V" | grep -Eq -- "-(alpha|beta)\\."; then
             echo "prerelease=true"  >> "$GITHUB_OUTPUT"
             echo "make_latest=false" >> "$GITHUB_OUTPUT"
           else
@@ -115,16 +104,16 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}             # <— use the event tag verbatim
-          name: ${{ github.ref_name }}                 # title shown on Releases page
-          body_path: ${{ steps.body.outputs.path }}
+          # tag_name defaults to the current tag (github.ref_name)
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_BODY.md
           files: |
             sr3e-${{ steps.v.outputs.version }}.zip
             system.json
             system.pinned.json
           prerelease: ${{ steps.flags.outputs.prerelease }}
           make_latest: ${{ steps.flags.outputs.make_latest }}
-          # Temporarily set to false to avoid hard-failing before release creation
+          # set to true after first success run if you like
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
