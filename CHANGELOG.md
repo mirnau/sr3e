@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2-alpha.6](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.5...v0.0.2-alpha.6) (2025-09-06)
+
+
+### Features
+
+* allow generic responder basis ([2f5be94](https://github.com/mirnau/sr3e/commit/2f5be946e2f470ba7125f2526e9af7bca15ec91c))
+
 ### [0.0.2-alpha.5](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.4...v0.0.2-alpha.5) (2025-09-06)
 
 ### [0.0.2-alpha.4](https://github.com/mirnau/sr3e/compare/v0.0.2-alpha.3...v0.0.2-alpha.4) (2025-09-06)
