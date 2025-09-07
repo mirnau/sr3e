@@ -1,4 +1,4 @@
-const config = Config.sr3e;
+const config = CONFIG.sr3e;
 
 export default class AmmoService {
   static getAttachedAmmo(actor, weapon) {
