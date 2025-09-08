@@ -176,7 +176,7 @@ function initializeSystem() {
             model: TechInterfaceModel,
             sheet: TechInterfaceItemSheet,
          },
-          {
+         {
             docClass: Item,
             type: "spell",
             model: SpellModel,
@@ -208,8 +208,8 @@ function registerHooks() {
    Hooks.on(hooks.preCreateActor, chain(setFlagsOnCharacterPreCreate, stopDefaultCharacterSheetRenderOnCreation));
    Hooks.on(hooks.createActor, chain(debugFlagsOnActor, displayCreationDialog));
    Hooks.on(hooks.ready, initializeNewsService);
-  Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
-  Hooks.on("updateItem", enforceSingleTechinterfaceEquipped);
+   Hooks.on(hooks.dropCanvasData, handleCanvasItemDrop);
+   Hooks.on("updateItem", enforceSingleTechinterfaceEquipped);
 
    if (DEBUG) {
       //Hooks.once(hooks.ready, enableDebugHooks);
@@ -228,7 +228,7 @@ function registerHooks() {
 
    Hooks.once(hooks.init, initializeSystem);
 
-   DEBUG && LOG.success("Initialization Complete", { file: "sr3e.js", method: registerHooks.name, line: 203 });
+   DEBUG && LOG.success("Initialization Complete", [__FILE__, __LINE__]);
 }
 
 registerHooks();

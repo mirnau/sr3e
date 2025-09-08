@@ -67,62 +67,65 @@ function sr3eInjectLocation() {
    };
 }
 
-export default defineConfig({
-   define: {
-      DEBUG: JSON.stringify(true),
-   },
-   plugins: [
-      sr3eInjectLocation(),
-      svelte({
-         compilerOptions: { runes: true },
-         onwarn(warning, handler) {
-            if (warning.code === "event_directive_deprecated") return;
-            handler(warning);
-         },
-      }),
-   ],
-
-   resolve: {
-      alias: {
-         ...generateFolderAliases(),
-         "@root": projectRoot,
-         "@applications": path.resolve(projectRoot, "module/foundry/applications"),
-         "@masonry": path.resolve(projectRoot, "module/foundry/masonry"),
-         "@models": path.resolve(projectRoot, "module/models"),
-         "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
-         "@services": path.resolve(projectRoot, "module/services"),
-         "@rules": path.resolve(projectRoot, "module/services/procedure/rules"),
-         "@families": path.resolve(projectRoot, "module/services/procedure/families"),
-         "@common": path.resolve(projectRoot, "module/services/procedure/common"),
-         "@game": path.resolve(projectRoot, "module/services/procedure/game"),
-         "@registry": path.resolve(projectRoot, "module/services/procedure/registry"),
-         "@hooks": path.resolve(projectRoot, "module/foundry/hooks"),
-         "@documents": path.resolve(projectRoot, "module/foundry/documents"),
-         "@apps": path.resolve(projectRoot, "module/svelte/apps"),
-         "@config": path.resolve(projectRoot, "module/foundry"),
-         "@sveltecomponent": path.resolve(projectRoot, "module/svelte/apps/components"),
-         "@sveltehelpers": path.resolve(projectRoot, "module/svelte/svelteHelpers"),
-         "@injections": path.resolve(projectRoot, "module/svelte/apps/injections"),
+export default defineConfig(({ mode }) => {
+   return {
+      define: {
+         // During testing, keep DEBUG enabled even for builds
+         DEBUG: JSON.stringify(true),
       },
-   },
+      plugins: [
+         sr3eInjectLocation(),
+         svelte({
+            compilerOptions: { runes: true },
+            onwarn(warning, handler) {
+               if (warning.code === "event_directive_deprecated") return;
+               handler(warning);
+            },
+         }),
+      ],
 
-   build: {
-      sourcemap: true, // keep this for readable file/line in dev/staging
-      minify: "esbuild", // set to 'esbuild' (or 'terser') when you want minified output
-      outDir: "build",
-      emptyOutDir: true,
-      rollupOptions: {
-         input: "sr3e.js",
-         output: {
-            format: "es",
-            dir: "build",
-            entryFileNames: "bundle.js",
+      resolve: {
+         alias: {
+            ...generateFolderAliases(),
+            "@root": projectRoot,
+            "@applications": path.resolve(projectRoot, "module/foundry/applications"),
+            "@masonry": path.resolve(projectRoot, "module/foundry/masonry"),
+            "@models": path.resolve(projectRoot, "module/models"),
+            "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
+            "@services": path.resolve(projectRoot, "module/services"),
+            "@rules": path.resolve(projectRoot, "module/services/procedure/rules"),
+            "@families": path.resolve(projectRoot, "module/services/procedure/families"),
+            "@common": path.resolve(projectRoot, "module/services/procedure/common"),
+            "@game": path.resolve(projectRoot, "module/services/procedure/game"),
+            "@registry": path.resolve(projectRoot, "module/services/procedure/registry"),
+            "@hooks": path.resolve(projectRoot, "module/foundry/hooks"),
+            "@documents": path.resolve(projectRoot, "module/foundry/documents"),
+            "@apps": path.resolve(projectRoot, "module/svelte/apps"),
+            "@config": path.resolve(projectRoot, "module/foundry"),
+            "@sveltecomponent": path.resolve(projectRoot, "module/svelte/apps/components"),
+            "@sveltehelpers": path.resolve(projectRoot, "module/svelte/svelteHelpers"),
+            "@injections": path.resolve(projectRoot, "module/svelte/apps/injections"),
          },
       },
-   },
 
-   server: {
-      port: 3000,
-      open: false,
-   },
+      build: {
+         sourcemap: true, // keep this for readable file/line in dev/staging
+         minify: "esbuild", // adjust as needed for prod
+         outDir: "build",
+         emptyOutDir: true,
+         rollupOptions: {
+            input: "sr3e.js",
+            output: {
+               format: "es",
+               dir: "build",
+               entryFileNames: "bundle.js",
+            },
+         },
+      },
+
+      server: {
+         port: 3000,
+         open: false,
+      },
+   };
 });

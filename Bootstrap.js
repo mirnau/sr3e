@@ -1,7 +1,8 @@
 import Log from "@services/Log.js";
 
 // Make globally available in Foundry runtime
-window.DEBUG = true;
+// DEBUG is a build-time constant from Vite (true in dev, false in prod)
+window.DEBUG = DEBUG;
 window.LOG = Log;
 
 // Optional: shorthand global
