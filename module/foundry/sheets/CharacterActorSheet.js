@@ -264,7 +264,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
             if (!Cfg) return ui.notifications?.warn?.("Ownership config UI unavailable.");
             new Cfg(doc).render(true); // open "Configure Ownership" for that embedded doc
          } catch (e) {
-            console.error("[sr3e] Ownership config open failed:", e);
+            DEBUG && LOG.error("[sr3e] Ownership config open failed", [__FILE__, __LINE__], e);
             ui.notifications?.error?.("Could not open Configure Ownership.");
          }
       });
@@ -310,7 +310,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
       const storeKey = storeKeyByType[skillType];
       if (!storeKey) {
-         console.warn("Unsupported skillType dropped:", skillType);
+         DEBUG && LOG.warn("Unsupported skillType dropped", [__FILE__, __LINE__], skillType);
          return;
       }
 
@@ -320,7 +320,7 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
 
       const createdItem = created?.[0];
       if (!createdItem) {
-         console.warn("Skill creation failed or returned no result.");
+         DEBUG && LOG.warn("Skill creation failed or returned no result", [__FILE__, __LINE__]);
          return;
       }
 

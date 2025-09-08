@@ -22,11 +22,11 @@
                 onclose: (result) => {
                     unmount(modal);
                     if (result) {
-                        console.log("User clicked OK", { result });
+                        DEBUG && LOG.inspect("User clicked OK", [__FILE__, __LINE__], { result });
                         journalId = result.value;
                         onJournalContentSelected?.(result);
                     } else {
-                        console.log("User clicked Cancel");
+                        DEBUG && LOG.info("User clicked Cancel", [__FILE__, __LINE__]);
                     }
                 },
             },

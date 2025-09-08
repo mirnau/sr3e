@@ -36,7 +36,7 @@ export default class ElectroCardiogramService {
          });
       });
 
-      console.log(html);
+      DEBUG && LOG.inspect("ElectroCardiogramService html", [__FILE__, __LINE__], html);
 
       this.#resizeObserver.observe(html);
 

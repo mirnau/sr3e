@@ -310,7 +310,7 @@
                         {skill}
                         on:arrayChanged={() => {
                            $specializations = [...$specializations];
-                           console.log("array was reassigned");
+                           DEBUG && LOG.info("array was reassigned", [__FILE__, __LINE__]);
                         }}
                         on:increment={(e) => {
                            if ($isShoppingStateStore && strategy) {

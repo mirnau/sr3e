@@ -23,7 +23,7 @@ export function configureThemes() {
 export function setupMouseLightSourceEffect(includedThemes) {
    Hooks.on(hooks.renderApplicationV2, (app, html) => {
       const activeTheme = game.settings.get("sr3e", "theme");
-      console.log("active theme", activeTheme);
+      DEBUG && LOG.inspect("active theme", [__FILE__, __LINE__], activeTheme);
       if (includedThemes.includes(activeTheme)) {
          attachLightEffect(html, activeTheme);
       }

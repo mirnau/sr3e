@@ -46,11 +46,12 @@
       }
 
       metatypeItem = metatypes.find((m) => m.name === "Human") || metatypes[0];
-      console.log(
+      DEBUG && LOG.inspect(
          "Available metatypes:",
+         [__FILE__, __LINE__],
          metatypes.map((m) => m.name)
       );
-      console.log("Selected default metatype:", metatypeItem?.name);
+      DEBUG && LOG.inspect("Selected default metatype:", [__FILE__, __LINE__], metatypeItem?.name);
    });
 
    const metatypeDropdownOptions = $derived(ItemDataService.getAllMetatypes(metatypes));
@@ -67,7 +68,7 @@
       magics[0]
    );
 
-   console.log("CHARACTER", actor);
+   DEBUG && LOG.inspect("CHARACTER", [__FILE__, __LINE__], actor);
 
    $effect(() => {
       if (selectedmetatype) {
@@ -136,7 +137,7 @@
    async function handleSubmit(event) {
       event.preventDefault();
 
-      console.log("Handle submit was entered");
+      DEBUG && LOG.info("Handle submit was entered", [__FILE__, __LINE__]);
 
       const metatype = metatypes.find((m) => m.id === selectedmetatype);
       const worldmetatype = game.items.get(metatype.id);
@@ -179,7 +180,7 @@
 
       onSubmit?.(true);
 
-      console.log("Handle submit was exited");
+      DEBUG && LOG.info("Handle submit was exited", [__FILE__, __LINE__]);
    }
 
    function handleRandomize() {

@@ -3,7 +3,7 @@
 
     let { document = {}, config = {} } = $props();
 
-    console.log("DOCUMENT", document);
+    DEBUG && LOG.inspect("DOCUMENT", [__FILE__, __LINE__], document);
 
     let toolbar;
     let journalId = $state(document.system.journalId ?? null);

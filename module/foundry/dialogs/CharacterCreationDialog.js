@@ -10,11 +10,11 @@ export default class CharacterCreationDialog extends Dialog {
             buttons: {
                 ok: {
                     label: "OK",
-                    callback: async (html) => console.log("OK clicked")
+                    callback: async (html) => { DEBUG && LOG.info("OK clicked", [__FILE__, __LINE__]); }
                 },
                 cancel: {
                     label: "Cancel",
-                    callback: () => console.log("Cancel clicked")
+                    callback: () => { DEBUG && LOG.info("Cancel clicked", [__FILE__, __LINE__]); }
                 }
             },
             render: (html) => {

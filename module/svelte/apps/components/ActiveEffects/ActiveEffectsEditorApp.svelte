@@ -106,7 +106,7 @@
             throw new Error("Target 'vehicle' not yet supported in ActiveEffectsEditorApp.");
          }
          default: {
-            console.warn(`Unhandled target type: ${target}`);
+            DEBUG && LOG.warn(`Unhandled target type: ${target}`, [__FILE__, __LINE__]);
          }
       }
 

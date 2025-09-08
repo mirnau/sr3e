@@ -1,5 +1,4 @@
 import { CharacterCreationApp } from "../../applications/CharacterCreationApp.js"; // Adjust path as needed
-import Log from "../../../services/Log.js";
 
 export default async function displayCreationDialog(actor, options, userId) {
    if (actor.type !== "character") return true;
@@ -8,7 +7,7 @@ export default async function displayCreationDialog(actor, options, userId) {
    const dialogResult = await _runCharacterCreationDialog(actor);
 
    if (!dialogResult) {
-      console.log(`Character creation canceled for actor: ${actor.name}. Deleting actor.`);
+      DEBUG && LOG.info(`Character creation canceled for actor: ${actor.name}. Deleting actor.`, [__FILE__, __LINE__]);
       await actor.delete();
       return false;
    }
@@ -33,7 +32,7 @@ async function _runCharacterCreationDialog(actor) {
          // Render the application - this handles all DOM management automatically
          app.render(true);
       } catch (e) {
-         console.error("Failed to create character creation dialog:", e);
+         DEBUG && LOG.error("Failed to create character creation dialog", [__FILE__, __LINE__], e);
          resolve(false);
       }
    });

@@ -4,5 +4,5 @@ export function Print(message = "Combat Service Print Function") {
    const finalMessage = `${tag} ${timestamp} - ${message}`;
 
    ui.notifications.info(message);
-   console.log(finalMessage);
+   DEBUG && LOG.info(finalMessage, [__FILE__, __LINE__]);
 }

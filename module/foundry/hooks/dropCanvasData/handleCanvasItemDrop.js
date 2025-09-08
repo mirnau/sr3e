@@ -11,7 +11,7 @@ export async function handleCanvasItemDrop(_canvas, data) {
    const tokenDoc = targetToken.document;
    const worldActor = game.actors.get(tokenDoc.actorId);
    if (!worldActor) {
-      console.warn("[SR3E] No base actor for token:", tokenDoc);
+      DEBUG && LOG.warn("[SR3E] No base actor for token", [__FILE__, __LINE__], tokenDoc);
       return;
    }
 
@@ -22,10 +22,10 @@ export async function handleCanvasItemDrop(_canvas, data) {
    if (!confirmed) return;
 
    await worldActor.createEmbeddedDocuments("Item", [item.toObject()]);
-   console.log("[SR3E] Item added to target:", worldActor.name);
+   DEBUG && LOG.info("[SR3E] Item added to target", [__FILE__, __LINE__], worldActor.name);
 
    if (item.actor?.id !== worldActor.id) {
       await game.actors.get(item.actor.id).deleteEmbeddedDocuments("Item", [item.id]);
-      console.log("[SR3E] Item removed from source:", item.actor.name);
+      DEBUG && LOG.info("[SR3E] Item removed from source", [__FILE__, __LINE__], item.actor.name);
    }
 }

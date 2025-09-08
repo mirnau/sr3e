@@ -65,11 +65,11 @@
    }
 
    onMount(() => {
-      console.log("NewsFeed: Mounted");
+      DEBUG && LOG.info("NewsFeed: Mounted", [__FILE__, __LINE__]);
       const unsub = NewsService.currentDisplayFrame.subscribe(applyFrame);
 
       const handleResync = () => {
-         console.log("NewsFeed: Force resync triggered");
+         DEBUG && LOG.info("NewsFeed: Force resync triggered", [__FILE__, __LINE__]);
          restartAnimation();
       };
       

@@ -78,6 +78,12 @@ import AttributeResponseProcedure from "@services/procedure/FSM/AttributeRespons
 
 function debugFlagsOnActor(actor, options, userId) {
    const actorFlags = actor.flags?.[flags.sr3e];
+   if (!actorFlags) {
+      DEBUG && LOG.warn("No sr3e flags found on actor", [__FILE__, __LINE__], actor);
+      return;
+   }
+   DEBUG && LOG.inspect(`Flags for actor "${actor.name}"`, [__FILE__, __LINE__], actorFlags);
+   return;
    if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
 
    console.groupCollapsed(`Flags for actor "${actor.name}"`);

@@ -152,7 +152,7 @@ export async function addOpposedResponseButton(message, html /*, data */) {
             if (authorUser) authorUser.query("sr3e.markOpposedResponded", { messageId: message.id });
          } catch (e) {
             ui.notifications?.error?.(e?.message || "Defense flow failed");
-            console.error(e);
+            DEBUG && LOG.error("Defense flow error", [__FILE__, __LINE__], e);
          }
       };
    }

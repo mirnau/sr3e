@@ -23,11 +23,10 @@ export function debugActorPoolUpdates() {
          const isToken = this.isToken;
          const before = {};
          for (const [k] of touched) before[k] = foundry.utils.getProperty(this, k);
-         console.group(`[sr3e] dicePools update -> ${this.name} ${isToken ? "(token)" : "(actor)"}`);
-         console.table(Object.fromEntries(touched));
-         console.log("before", before);
-         console.trace("stack");
-         console.groupEnd();
+         DEBUG && LOG.info(`[sr3e] dicePools update -> ${this.name} ${isToken ? "(token)" : "(actor)"}`, [__FILE__, __LINE__]);
+         DEBUG && LOG.inspect("dicePools touched", [__FILE__, __LINE__], Object.fromEntries(touched));
+         DEBUG && LOG.inspect("before", [__FILE__, __LINE__], before);
+         DEBUG && LOG.inspect("stack", [__FILE__, __LINE__], new Error().stack);
       }
 
       const result = await _update.call(this, data, opts);
@@ -35,7 +34,7 @@ export function debugActorPoolUpdates() {
       if (touched.length) {
          const after = {};
          for (const [k] of touched) after[k] = foundry.utils.getProperty(this, k);
-         console.log("[sr3e] after", after);
+         DEBUG && LOG.inspect("[sr3e] after", [__FILE__, __LINE__], after);
       }
       return result;
    };
@@ -50,16 +49,15 @@ export function debugAECreate() {
    ActorClass.prototype.createEmbeddedDocuments = async function (embeddedName, data, ctx) {
       if (embeddedName === "ActiveEffect") {
          const arr = Array.isArray(data) ? data : [data];
-         console.group(`[sr3e] AE create on ${this.name} ${this.isToken ? "(token)" : "(actor)"}`);
+         DEBUG && LOG.info(`[sr3e] AE create on ${this.name} ${this.isToken ? "(token)" : "(actor)"}`, [__FILE__, __LINE__]);
          for (const ae of arr) {
-            console.log("AE payload", {
+            DEBUG && LOG.inspect("AE payload", [__FILE__, __LINE__], {
                label: ae.label || ae.name,
                flags: ae.flags,
                changes: ae.changes,
             });
          }
-         console.trace("stack");
-         console.groupEnd();
+         DEBUG && LOG.inspect("stack", [__FILE__, __LINE__], new Error().stack);
       }
       return _createEmbedded.call(this, embeddedName, data, ctx);
    };

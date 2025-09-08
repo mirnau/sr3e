@@ -17,7 +17,7 @@
       } else {
          item.update({ [`${path}.${key}`]: val }, { render: false });
       }
-      console.log(`Updated ${key} to`, val);
+      DEBUG && LOG.inspect(`Updated ${key} to`, [__FILE__, __LINE__], val);
    }
 </script>
 

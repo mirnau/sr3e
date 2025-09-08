@@ -496,7 +496,7 @@
             }
 
             // Debug & roll via the procedure (keeps logic in the chain, not here)
-            console.debug("DEF submit ->", {
+            DEBUG && LOG.inspect("DEF submit ->", [__FILE__, __LINE__], {
                kind: proc?.constructor?.name,
                basis: proc?.args?.basis,
                dice: proc?.dice,

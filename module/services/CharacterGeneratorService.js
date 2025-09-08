@@ -3,7 +3,7 @@ export default class CharacterGeneratorService {
 
 	static generatePriorityCombination({ metatypeOptions = [], magicOptions = [] } = {}) {
 		const priorities = [...this.VALID_PRIORITIES];
-		console.log(`sr3d | Randomizer | Initial Priorities: ${priorities.join(", ")}`);
+		DEBUG && LOG.info(`sr3d | Randomizer | Initial Priorities: ${priorities.join(", ")}`,[__FILE__, __LINE__]);
 
 		const weights = {
 			metatype: { E: 64, C: 18, D: 18 },
@@ -18,7 +18,7 @@ export default class CharacterGeneratorService {
 			? this._forcePriority(priorities, metatypeOptions[0].priority)
 			: this._draw(priorities, weights.metatype);
 
-		console.log(`sr3d | Randomizer | metatype Priority: ${combination.metatype}`);
+		DEBUG && LOG.info(`sr3d | Randomizer | metatype Priority: ${combination.metatype}`,[__FILE__, __LINE__]);
 
 		// Same logic for magic
 		const isOnlyOneMagic = magicOptions.length === 1;
@@ -26,14 +26,14 @@ export default class CharacterGeneratorService {
 			? this._forcePriority(priorities, magicOptions[0].priority)
 			: this._draw(priorities, weights.magic);
 
-		console.log(`sr3d | Randomizer | Magic Priority: ${combination.magic}`);
+		DEBUG && LOG.info(`sr3d | Randomizer | Magic Priority: ${combination.magic}`,[__FILE__, __LINE__]);
 
 		// Assign remaining priorities
 		["attribute", "skills", "resources"].forEach(type => {
 			combination[type] = this._draw(priorities);
 		});
 
-		console.log("sr3d | Randomizer | Final Combination:", combination);
+		DEBUG && LOG.inspect("sr3d | Randomizer | Final Combination", [__FILE__, __LINE__], combination);
 		return combination;
 	}
 

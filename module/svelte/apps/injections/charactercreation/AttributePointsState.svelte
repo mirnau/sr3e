@@ -25,7 +25,7 @@
    let knowledgePointsStore = storeManager.GetRWStore("creation.knowledgePoints");
    let languagePointsStore = storeManager.GetRWStore("creation.languagePoints");
 
-   console.log("NEW ACTOR", actor);
+   DEBUG && LOG.inspect("NEW ACTOR", [__FILE__, __LINE__], actor);
    // Guard to prevent double-prompting when attr points hit 0
    let promptInFlight = false;
 

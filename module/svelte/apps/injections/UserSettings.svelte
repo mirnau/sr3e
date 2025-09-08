@@ -75,7 +75,7 @@ let user = null;  // Should be null (not an empty object)
   // (Optional) Action when clicking the main character image
   function openCharacterSelector() {
     // You could focus the select element or open a custom dialog here.
-    console.log("Main character image clicked");
+    DEBUG && LOG.info("Main character image clicked", [__FILE__, __LINE__]);
   }
 </script>
 
