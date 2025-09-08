@@ -1,6 +1,6 @@
 {
    "name": "my-svelte-project",
-   "version": "0.0.3-alpha.5",
+   "version": "0.0.3-alpha.6",
    "type": "module",
    "engines": {
       "node": ">=22 <23"
