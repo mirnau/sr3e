@@ -83,14 +83,6 @@ function debugFlagsOnActor(actor, options, userId) {
       return;
    }
    DEBUG && LOG.inspect(`Flags for actor "${actor.name}"`, [__FILE__, __LINE__], actorFlags);
-   return;
-   if (!actorFlags) return console.warn("No sr3e flags found on actor:", actor);
-
-   console.groupCollapsed(`Flags for actor "${actor.name}"`);
-   for (const [key, value] of Object.entries(actorFlags)) {
-      console.log(`→ ${key}:`, value);
-   }
-   console.groupEnd();
 }
 
 function enableDebugHooks() {
@@ -218,10 +210,10 @@ function registerHooks() {
    Hooks.on("updateItem", enforceSingleTechinterfaceEquipped);
 
    if (DEBUG) {
-      //Hooks.once(hooks.ready, enableDebugHooks);
+      // Hooks.once(hooks.ready, enableDebugHooks);
    }
 
-   // registration map — do this once during init/startup
+   // registration map - do this once during init/startup
    AbstractProcedure.registerSubclass("firearm", FirearmProcedure);
    AbstractProcedure.registerSubclass("dodge", DodgeProcedure);
    AbstractProcedure.registerSubclass("resistance", ResistanceProcedure);
@@ -238,3 +230,4 @@ function registerHooks() {
 }
 
 registerHooks();
+

@@ -2,19 +2,19 @@ export default class Log {
    static timers = new Map();
 
    static error(message, location, obj) {
-      this._print("❌", "coral", message, location, obj);
+      this._print("✖", "coral", message, location, obj);
    }
    static warn(message, location, obj) {
-      this._print("⚠️", "orange", message, location, obj);
+      this._print("⚠", "orange", message, location, obj);
    }
    static info(message, location, obj) {
-      this._print("ℹ️", "white", message, location, obj);
+      this._print("ℹ", "white", message, location, obj);
    }
    static success(message, location, obj) {
-      this._print("✅", "lightgreen", message, location, obj);
+      this._print("✔", "lightgreen", message, location, obj);
    }
    static inspect(message, location, obj) {
-      this._print("🔎", "white", message, location, obj);
+      this._print("🔍", "white", message, location, obj);
    }
 
    static time(label) {
@@ -172,3 +172,4 @@ export default class Log {
       return noQuery.split(/[\\/]/).pop();
    }
 }
+
