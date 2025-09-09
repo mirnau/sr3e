@@ -1,0 +1,219 @@
+{"0": {
+    "doc": "Attributes",
+    "title": "Attributes – Spec",
+    "content": "TBD . ",
+    "url": "/01-specs/actors/components/attributes.html#attributes--spec",
+    
+    "relUrl": "/01-specs/actors/components/attributes.html#attributes--spec"
+  },"1": {
+    "doc": "Attributes",
+    "title": "Attributes",
+    "content": " ",
+    "url": "/01-specs/actors/components/attributes.html",
+    
+    "relUrl": "/01-specs/actors/components/attributes.html"
+  },"2": {
+    "doc": "Dossier",
+    "title": "Dossier – Spec",
+    "content": "TBD . ",
+    "url": "/01-specs/actors/components/dossier.html#dossier--spec",
+    
+    "relUrl": "/01-specs/actors/components/dossier.html#dossier--spec"
+  },"3": {
+    "doc": "Dossier",
+    "title": "Dossier",
+    "content": " ",
+    "url": "/01-specs/actors/components/dossier.html",
+    
+    "relUrl": "/01-specs/actors/components/dossier.html"
+  },"4": {
+    "doc": "Health",
+    "title": "Health - Spec",
+    "content": "The Health component owns condition tracks, overflow, life state, and the derived penalty it exposes to Procedures. Cards below define one capability or invariant each with concrete ACs and clear integration boundaries. REQ-ACT-PC-HEALTH-001 MUST Model fields (authoritative) . Component: Actors &gt; Components &gt; Health Description Canonical fields exposed by system.health. Acceptance Criteria (local) - AC-001.1: system.health has stun, physical, overflow (each with { value:int, mod:int }). - AC-001.2: system.health has isAlive:boolean (initial true). - AC-001.3: system.health has penalty:number (derived, read-only; see 004). - AC-001.4: A RO store exists for penalty; RW stores exist for stun.value, physical.value, overflow.value, isAlive. Out of scope / Non-goals Does not define UI layout or labels; Controllers/Procedures own rule application. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-002 MUST Track &amp; Overflow bounds . Component: Actors &gt; Components &gt; Health Description Stun/Physical tracks are 10 boxes (0-10); Overflow is a non-negative integer. Acceptance Criteria (local) - AC-002.1: Setting system.health.stun.value to -1 fails validation. - AC-002.2: Setting system.health.stun.value or physical.value above 10 fails validation. - AC-002.3: Non-integer assignment to a track value fails validation. - AC-002.4: Setting system.health.overflow.value to -1 fails validation. - AC-002.5: Assigning a non-integer to system.health.overflow.value fails validation. - AC-002.6: Increasing overflow does not change penalty directly (see 004). Out of scope / Non-goals Box rendering and overflow controls are UI concerns; this card constrains data only. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-004 MUST Stage &amp; penalty derivation . Component: Actors &gt; Components &gt; Health Description Derive stage per track and expose penalty as a read-only function of stages. Acceptance Criteria (local) - AC-004.1: Value 0 =&gt; stage 'None'; 1-2 =&gt; 'L'; 3-5 =&gt; 'M'; 6-9 =&gt; 'S'; 10 =&gt; 'D'. - AC-004.2: getStage('stun') and getStage('physical') return the expected stage string for current values. - AC-004.3: system.health.penalty is derived as max(stage(stun), stage(physical)) mapped to 0|1|2|3 (D caps at 3). - AC-004.4: Changing either track updates penalty immediately (no manual refresh). - AC-004.5: Writing to system.health.penalty is rejected with an explicit error. Out of scope / Non-goals Application of penalty to TN/initiative is handled by Procedures; UI display is separate. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-006 MUST Deadly semantics . Component: Actors &gt; Components &gt; Health Description Define effects of Deadly by track. Acceptance Criteria (local) - AC-006.1: Deadly Stun marks the actor unconscious (exposed as boolean or event for consumers). - AC-006.2: Deadly Physical confers no penalty beyond stage 'D' (penalty remains 3). - AC-006.3: Deadly by itself does not flip isAlive (see 007). Out of scope / Non-goals No knockout timers or recovery; those live in Controllers/Procedures. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-007 MUST Death threshold . Component: Actors &gt; Components &gt; Health Description Overflow beyond Body determines life state. Acceptance Criteria (local) - AC-007.1: When system.health.overflow.value &gt; system.attributes.body.value, system.health.isAlive becomes false. - AC-007.2: Toggling isAlive emits a life-state change event for consumers. - AC-007.3: Reducing overflow back to &lt;= Body allows isAlive to be set true by controllers (no auto-resurrection). Out of scope / Non-goals How Body changes or revival flows occur is out of scope. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-008 SHOULD Stabilized gating . Component: Actors &gt; Components &gt; Health Description When stabilized, overflow must not increase via health APIs. Acceptance Criteria (local) - AC-008.1: With stabilized=true, attempts to increment overflow are rejected with an explicit error. - AC-008.2: With stabilized=true, decrements to overflow are allowed. - AC-008.3: Stabilized state is exposed as a boolean store or read-only flag; consumers can check before updates. Out of scope / Non-goals Who sets/clears stabilized and when is decided by Procedures/Controllers. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-009 MUST Events and stores (integration surface) . Component: Actors &gt; Components &gt; Health Description Define what Health exposes for other layers. Acceptance Criteria (local) - AC-009.1: RW stores exist: health.stun.value, health.physical.value, health.overflow.value, health.isAlive. - AC-009.2: RO store exists: health.penalty (number); writing to it throws. - AC-009.3: Emitted on any change: 'sr3e.actor.health.changed' with { track, value, stage, penalty }. - AC-009.4: Emitted when isAlive toggles: 'sr3e.actor.health.lifeStateChanged' with { isAlive }. Out of scope / Non-goals Consumers decide how to respond; Health does not dispatch game effects. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-010 SHOULD Healing normalization . Component: Actors &gt; Components &gt; Health Description Stage-based healing can snap to the low end of the new stage. Acceptance Criteria (local) - AC-010.1: Setting a track to stage 'M' normalizes value to 3. - AC-010.2: 'S' normalizes to 6; 'L' normalizes to 1; 'None' to 0. - AC-010.3: Normalization is optional helper behavior; controllers may set exact values when required. Out of scope / Non-goals Does not prescribe healing rates or test/First Aid procedures. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-012 SHOULD Presentation . Component: Actors &gt; Components &gt; Health Description ECG reflects life state only; no hidden rule effects. Acceptance Criteria (local) - AC-012.1: When isAlive=false, ECG shows a flatline indicator. - AC-012.2: When isAlive=true, ECG animates; animation rate may vary with stage but has no mechanical impact. - AC-012.3: Toggling isAlive updates the indicator without page reload. Out of scope / Non-goals ECG does not apply or imply penalties; purely representational. Create issue Reopen issue Copy link . REQ-ACT-PC-HEALTH-013 MAY Miraculous Survival (house rule) . Component: Actors &gt; Components &gt; Health Description Optional one-time revive control gated by karma flag. Acceptance Criteria (local) - AC-013.1: Control is visible only when karma.miraculousSurvival is false. - AC-013.2: Confirming sets overflow.value=0 and isAlive=true, then flips karma.miraculousSurvival to true. - AC-013.3: After use, the control hides without requiring a reload. Out of scope / Non-goals Rule justification and availability are documented separately as a house rule. Create issue Reopen issue Copy link ",
+    "url": "/01-specs/actors/components/health.html#health---spec",
+    
+    "relUrl": "/01-specs/actors/components/health.html#health---spec"
+  },"5": {
+    "doc": "Health",
+    "title": "Health",
+    "content": " ",
+    "url": "/01-specs/actors/components/health.html",
+    
+    "relUrl": "/01-specs/actors/components/health.html"
+  },"6": {
+    "doc": "Components",
+    "title": "Components",
+    "content": "Purpose. Each component is a self-contained UI + logic unit on the PC sheet. Specs here define MUST / SHOULD / WON’T behavior and Acceptance Criteria for each component. ",
+    "url": "/01-specs/actors/components/",
+    
+    "relUrl": "/01-specs/actors/components/"
+  },"7": {
+    "doc": "Components",
+    "title": "What belongs here",
+    "content": ". | Fields owned by the component (data shape, defaults). | UI states and transitions (enabled/disabled, visible/hidden). | Events emitted/consumed (e.g., sr3e.actor.health.changed). | Config keys it relies on (must use sr3e.* as-is; no remaps). | Example canonical keys: sr3e.damageType.*, sr3e.weaponMode.*. | . | . Out of scope. Cross-component flows (e.g., global combat rules) live in their domain specs (Combat, Rolls, Items). ",
+    "url": "/01-specs/actors/components/#what-belongs-here",
+    
+    "relUrl": "/01-specs/actors/components/#what-belongs-here"
+  },"8": {
+    "doc": "Components",
+    "title": "Requirement IDs",
+    "content": "Format: REQ-ACT-PC-&lt;COMP&gt;-NNN Examples: REQ-ACT-PC-HEALTH-001, REQ-ACT-PC-DOSSIER-002. ",
+    "url": "/01-specs/actors/components/#requirement-ids",
+    
+    "relUrl": "/01-specs/actors/components/#requirement-ids"
+  },"9": {
+    "doc": "Components",
+    "title": "Components (specs)",
+    "content": ". | Health — life state, damage, recovery, revive action. | Dossier — identity, meta, portrait/banner, notes. | . ",
+    "url": "/01-specs/actors/components/#components-specs",
+    
+    "relUrl": "/01-specs/actors/components/#components-specs"
+  },"10": {
+    "doc": "Components",
+    "title": "Planned (stubs you can add next)",
+    "content": ". | attributes.md — base stats &amp; derived values | skills.md — list, pools, specialization marks | inventory.md — containers, equip states, weight | cyberware.md — essence, grades, install states | magic.md — spell list, drain tracking | matrix.md — deck status, marks, alerts | rigging.md — control deck, subscribers, vehicle link | notes.md — per-character journal | . ",
+    "url": "/01-specs/actors/components/#planned-stubs-you-can-add-next",
+    
+    "relUrl": "/01-specs/actors/components/#planned-stubs-you-can-add-next"
+  },"11": {
+    "doc": "Components",
+    "title": "File layout",
+    "content": " ",
+    "url": "/01-specs/actors/components/#file-layout",
+    
+    "relUrl": "/01-specs/actors/components/#file-layout"
+  },"12": {
+    "doc": "Specs",
+    "title": "Citations",
+    "content": "We cite physical rulebooks using Harvard-style in-text references (Abbrev Year, p. X). See ../00-about/references.md for full entries. ",
+    "url": "/01-specs/#citations",
+    
+    "relUrl": "/01-specs/#citations"
+  },"13": {
+    "doc": "Specs",
+    "title": "How to Write Specs",
+    "content": "Use the RFC 2119 / RFC 8174 convention (UPPERCASE “normative keywords”). Add this one‑liner at the top of every spec: . This spec uses the key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY as defined in RFC 2119/RFC 8174. ",
+    "url": "/01-specs/#how-to-write-specs",
+    
+    "relUrl": "/01-specs/#how-to-write-specs"
+  },"14": {
+    "doc": "Specs",
+    "title": "Normative keywords",
+    "content": ". | MUST: absolute requirement; non‑conformant if unmet. | MUST NOT: absolute prohibition. | SHOULD: strongly recommended; may be violated if there’s a documented, specific reason. | SHOULD NOT: strongly discouraged; exceptions must be documented. | MAY / OPTIONAL: truly optional behavior. | . ",
+    "url": "/01-specs/#normative-keywords",
+    
+    "relUrl": "/01-specs/#normative-keywords"
+  },"15": {
+    "doc": "Specs",
+    "title": "“WON’T” vs “MUST NOT”",
+    "content": ". | MUST NOT: forbidden behavior within scope. | WON’T (Out of scope): intentionally not implemented feature. Put these under an “Out of scope / Non‑goals” section, not in the normative list. | . ",
+    "url": "/01-specs/#wont-vs-must-not",
+    
+    "relUrl": "/01-specs/#wont-vs-must-not"
+  },"16": {
+    "doc": "Specs",
+    "title": "House style for SR3E specs",
+    "content": ". | One requirement per line; start with the keyword, then the behavior. | Give each requirement an ID like REQ-ACT-PC-HEALTH-001. | Follow with Acceptance Criteria (AC1, AC2, …); tests map 1:1 to ACs. | Reference config keys exactly (e.g., sr3e.damageType.*), no remaps. | . ",
+    "url": "/01-specs/#house-style-for-sr3e-specs",
+    
+    "relUrl": "/01-specs/#house-style-for-sr3e-specs"
+  },"17": {
+    "doc": "Specs",
+    "title": "Template snippet",
+    "content": "--- title: &lt;Feature&gt; parent: &lt;Section&gt; grand_parent: &lt;Parent&gt; --- &gt; This spec uses the key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY as defined in RFC 2119/RFC 8174. ## Requirements - REQ-&lt;DOMAIN&gt;-&lt;AREA&gt;-&lt;NNN&gt; — MUST &lt;behavior&gt; - REQ-&lt;DOMAIN&gt;-&lt;AREA&gt;-&lt;NNN&gt; — SHOULD &lt;behavior&gt; ## Acceptance Criteria - AC1: &lt;verifiable outcome for REQ‑NNN&gt; - AC2: &lt;verifiable outcome for REQ‑NNN&gt; ## Out of scope / Non‑goals - WON’T &lt;behavior/feature&gt;; rationale &lt;short reason&gt; ## Notes - Uses `sr3e.&lt;key&gt;` config; e.g., `sr3e.damageType.l`, `sr3e.weaponMode.burst`. ",
+    "url": "/01-specs/#template-snippet",
+    
+    "relUrl": "/01-specs/#template-snippet"
+  },"18": {
+    "doc": "Specs",
+    "title": "Specs",
+    "content": " ",
+    "url": "/01-specs/",
+    
+    "relUrl": "/01-specs/"
+  },"19": {
+    "doc": "Actors",
+    "title": "Actors — Overview",
+    "content": "Player Character, NPCs, Vehicles, Spirits. ",
+    "url": "/01-specs/actors/#actors--overview",
+    
+    "relUrl": "/01-specs/actors/#actors--overview"
+  },"20": {
+    "doc": "Actors",
+    "title": "Actors",
+    "content": " ",
+    "url": "/01-specs/actors/",
+    
+    "relUrl": "/01-specs/actors/"
+  },"21": {
+    "doc": "Player Character",
+    "title": "Player Character — Feature Map",
+    "content": "Components: Health, Dossier, … . ",
+    "url": "/01-specs/actors/player-character/#player-character--feature-map",
+    
+    "relUrl": "/01-specs/actors/player-character/#player-character--feature-map"
+  },"22": {
+    "doc": "Player Character",
+    "title": "Player Character",
+    "content": " ",
+    "url": "/01-specs/actors/player-character/",
+    
+    "relUrl": "/01-specs/actors/player-character/"
+  },"23": {
+    "doc": "Home",
+    "title": "SR3E Docs",
+    "content": ". | Specs — see the Specs hub | Actors — Actors | Items — Items | About — vision, architecture (optional) | . ",
+    "url": "/#sr3e-docs",
+    
+    "relUrl": "/#sr3e-docs"
+  },"24": {
+    "doc": "Home",
+    "title": "Home",
+    "content": "This started as a side project to run my own Shadowrun 3rd Edition campaign. Over time it grew bigger than planned, and it felt like a shame not to share. SR3E experiments with reactive sheets, flexible theming, and a vibe that feels alive with neon and grime. It’s rough, it’s in progress — PRs welcome. ",
+    "url": "/",
+    
+    "relUrl": "/"
+  },"25": {
+    "doc": "Movement",
+    "title": "Movement – Spec",
+    "content": "TBD . ",
+    "url": "/01-specs/actors/components/movement.html#movement--spec",
+    
+    "relUrl": "/01-specs/actors/components/movement.html#movement--spec"
+  },"26": {
+    "doc": "Movement",
+    "title": "Movement",
+    "content": " ",
+    "url": "/01-specs/actors/components/movement.html",
+    
+    "relUrl": "/01-specs/actors/components/movement.html"
+  },"27": {
+    "doc": "References",
+    "title": "References",
+    "content": "List full entries here; fill in authors, year, place, and publisher from your physical copies. We do not host, quote, or reproduce content from the books. ",
+    "url": "/00-about/references.html",
+    
+    "relUrl": "/00-about/references.html"
+  },"28": {
+    "doc": "References",
+    "title": "Templates",
+    "content": ". | SR3 — Author S., Author T. (Year) Shadowrun, Third Edition. Place: Publisher. | MiTS — Author S. (Year) Magic in the Shadows. Place: Publisher. | M&amp;M — Author S. (Year) Man &amp; Machine: Cyberware. Place: Publisher. | R3 — Author S. (Year) Rigger 3. Place: Publisher. | SR3-GMS — Author/Editor (Year) Shadowrun Gamemaster’s Screen (3E). Place: Publisher. | . ",
+    "url": "/00-about/references.html#templates",
+    
+    "relUrl": "/00-about/references.html#templates"
+  },"29": {
+    "doc": "References",
+    "title": "In‑text usage examples",
+    "content": ". | Single: … overflow applies (SR3 1998, p. 126). | Multiple: … (SR3 1998, p. 126; MiTS 1999, pp. 44–45). | Figure/table: … see table (R3 2001, p. 73). | . ",
+    "url": "/00-about/references.html#intext-usage-examples",
+    
+    "relUrl": "/00-about/references.html#intext-usage-examples"
+  },"30": {
+    "doc": "References",
+    "title": "Entries",
+    "content": ". | SR3 — Mulvihill, M. and Boyle, R. (2002) Shadowrun, Third Edition. Edited by Ippolito, D. Chicago: Fantasy Productions. | . ",
+    "url": "/00-about/references.html#entries",
+    
+    "relUrl": "/00-about/references.html#entries"
+  }
+}

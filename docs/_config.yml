@@ -1,3 +1,8 @@
-title: "Shadowrun 3rd Edition Homebrew"
-description: "SR3E - a Foundry VTT system and tooling"
-theme: jekyll-theme-cayman
+title: SR3E Docs
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+# Nice defaults
+search_enabled: true
+color_scheme: dark   # or light

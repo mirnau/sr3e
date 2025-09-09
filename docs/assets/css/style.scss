@@ -1,0 +1,149 @@
+---
+---
+
+.ref {
+  font-size: 0.8em;
+  opacity: 0.65;
+}
+
+/* Requirement cards (dark mode friendly, compact) */
+.req-card {
+  border: 1px solid #555;        /* medium gray border */
+  border-radius: 6px;
+  padding: 10px 12px;            /* tighter padding */
+  margin: 10px 0;                /* less vertical space */
+  background: #1e1e1e;           /* dark neutral background */
+  color: #f0f0f0;                /* light gray text */
+}
+
+.req-card__header {
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 0px;                      /* reduced gap */
+  margin-bottom: 0px;
+  flex-wrap: wrap;               /* allow title to move to its own line */
+}
+
+.req-card__badge {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.8em;
+  background: #2d2d2d;
+  border: 1px solid #666;
+  padding: 1px 6px;              /* tighter badge padding */
+  border-radius: 6px;
+  color: #bbb;                   /* softer contrast */
+}
+
+.req-card__title {
+  line-height: 0.8;
+  height: auto;
+  font-size: 1rem;               /* slightly smaller */
+  margin: 0;
+  color: #ffdb80;                /* softer gold */
+  flex: 0 0 100%;                /* force title onto its own line */
+}
+
+.req-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;                      /* less gap */
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.req-card__pre {
+  white-space: pre-wrap;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  line-height: 1.3;
+}
+
+/* Compact line-height for the card body */
+.req-card__body {
+  line-height: 0.8;
+}
+
+/* Sub-sections inside a card (slightly lighter than card background) */
+.req-card__section {
+  background: #262626;          /* slightly lighter than #1e1e1e */
+  border: 1px solid #444;       /* subtle inner border */
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 6px 0;
+}
+
+.req-card .req-card__section details {    /* remove extra spacing inside section */
+  margin: 0;
+}
+
+.req-card__section > details > summary {
+  cursor: pointer;
+  margin: 0 0 6px 0;
+  color: #ddd;
+}
+
+.req-card__actions {
+  display: flex;
+  gap: 6px;                      /* smaller gap */
+  margin-top: 6px;
+}
+
+/* status text removed; button label conveys state */
+
+.req-card__btn {
+  display: inline-block;
+  padding: 4px 10px;              /* slightly wider for touch targets */
+  font-size: 0.85em;
+  border-radius: 6px;
+  border: 1px solid #0891b2;      /* cyan-600 border */
+  background: linear-gradient(180deg, #14b8a6 0%, #0ea5b6 100%); /* teal->cyan */
+  color: #ffffff;                  /* strong contrast */
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.req-card__btn:hover {
+  background: linear-gradient(180deg, #2dd4bf 0%, #22c6d6 100%);
+  border-color: #06b6d4;          /* cyan-500 */
+}
+
+.req-card__btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #001b1f, 0 0 0 4px #67e8f9; /* dark ring + cyan ring */
+}
+
+.req-card__btn:active {
+  transform: translateY(1px);
+}
+
+.req-card__btn[disabled],
+.req-card__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(10%);
+}
+
+.req-card details {
+  margin: 4px 0;                 /* smaller spacing between details */
+}
+
+/* Level pill next to REQ ID (right-aligned in header) */
+.req-card__level {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.78em;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid #777;
+  background: #2a2a2a;
+  color: #eee;
+  margin-left: auto;            /* push to the right of the header row */
+  align-self: center;
+}
+.req-card__level.level-must { background: #244c2a; border-color: #3b7a41; color: #bfe7c5; }
+.req-card__level.level-must-not { background: #5a1f1f; border-color: #a34a4a; color: #ffd6d6; }
+.req-card__level.level-should { background: #2c3552; border-color: #4b5d8f; color: #cbd8ff; }
+.req-card__level.level-should-not { background: #5d3d1f; border-color: #b17334; color: #ffe2c8; }
+.req-card__level.level-may { background: #3d3d3d; border-color: #777; color: #eee; }
