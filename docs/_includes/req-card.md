@@ -20,23 +20,26 @@
 
   <div class="req-card__body">
     <div class="req-card__section req-card__section--desc">
-      <details open>
+      <details>
         <summary><strong>Description</strong></summary>
-        <pre class="req-card__pre">{{ include.description | default: include.notes | default: "" }}</pre>
+        {% assign _desc = include.description | default: include.notes | default: '' | replace: "\r\n", "\n" | strip %}
+        <div class="req-card__text">{{ _desc | markdownify }}</div>
       </details>
     </div>
 
     <div class="req-card__section req-card__section--ac">
-      <details open>
+      <details>
         <summary><strong>Acceptance Criteria (local)</strong></summary>
-        <pre class="req-card__pre">{{ include.ac | default: "" }}</pre>
+        {% assign _ac = include.ac | default: '' | replace: "\r\n", "\n" | strip %}
+        <div class="req-card__text">{{ _ac | markdownify }}</div>
       </details>
     </div>
 
     <div class="req-card__section req-card__section--non-goals">
       <details>
         <summary><strong>Out of scope / Non-goals</strong></summary>
-        <pre class="req-card__pre">{{ include.non_goals | default: "" }}</pre>
+        {% assign _ng = include.non_goals | default: '' | replace: "\r\n", "\n" | strip %}
+        <div class="req-card__text">{{ _ng | markdownify }}</div>
       </details>
     </div>
   </div>
@@ -51,10 +54,5 @@
     </a>
 
     <button class="req-card__btn js-req-reopen-btn" style="display:none" type="button">Reopen issue</button>
-
-    <button class="req-card__btn" type="button" onclick="navigator.clipboard.writeText('{{ site.url }}{{ site.baseurl }}{{ page.url }}#{{ include.id }}')">
-      Copy link
-    </button>
   </div>
 </div>
-

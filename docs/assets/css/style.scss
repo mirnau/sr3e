@@ -62,7 +62,7 @@
 
 /* Compact line-height for the card body */
 .req-card__body {
-  line-height: 0.8;
+  line-height: 1.8;
 }
 
 /* Sub-sections inside a card (slightly lighter than card background) */
@@ -81,7 +81,49 @@
 .req-card__section > details > summary {
   cursor: pointer;
   margin: 0 0 6px 0;
-  color: #ddd;
+  color: #bfbfbf;               /* 25% grey */
+  text-indent: 1rem;            /* indent summary text */
+}
+
+/* Collapsible body text tweaks */
+.req-card__section .req-card__pre {
+  /* legacy: kept in case any page still uses <pre> */
+  color: #bfbfbf;
+  margin-left: 1rem;            /* paragraph margin instead of first-line indent */
+  text-indent: 0;
+}
+
+/* New body container using markdownified content */
+.req-card__text {
+  color: #bfbfbf;               /* 25% grey */
+  margin-left: 2rem;            /* deeper offset than summary */
+}
+
+.req-card__text p {
+  margin: 0 0 0.5rem 0;         /* compact paragraphs */
+}
+
+.req-card__text ul {
+  margin: 0.25rem 0 0.5rem 0;    /* compact spacing */
+  padding-left: 0;               /* we indent on li */
+  list-style: none;              /* custom bullet to avoid UA toggles */
+}
+
+.req-card__text li {
+  position: relative;
+  margin: 0.15rem 0;
+  padding-left: 1.5rem;          /* larger, consistent hanging indent */
+  text-indent: 0;                /* no first-line indent */
+}
+
+.req-card__text li::before {
+  content: '•';                  /* explicit bullet, not disclosure marker */
+  position: absolute;
+  left: 0;                       /* align inside the padded gutter */
+  top: 0.15rem;                  /* vertical align to first line */
+  color: #bfbfbf;                /* 25% grey */
+  font-size: 0.95rem;            /* slightly larger, readable */
+  line-height: 1;
 }
 
 .req-card__actions {

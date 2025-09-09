@@ -23,7 +23,7 @@ Specs here define **MUST / SHOULD / WON’T** behavior and **Acceptance Criteria
 
 ## Requirement IDs
 Format: `REQ-ACT-PC-<COMP>-NNN`  
-Examples: `REQ-ACT-PC-HEALTH-001`, `REQ-ACT-PC-DOSSIER-002`.
+Examples: `REQ-ACT-C-HEALTH-001`, `REQ-ACT-PC-DOSSIER-002`.
 
 ## Components (specs)
 - **[Health](health.md)** — life state, damage, recovery, revive action.

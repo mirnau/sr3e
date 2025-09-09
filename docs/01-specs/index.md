@@ -4,9 +4,6 @@ nav_order: 2
 has_children: true
 ---
 
-# Citations
-We cite physical rulebooks using Harvard-style in-text references (Abbrev Year, p. X). See ../00-about/references.md for full entries.
-
 # How to Write Specs
 
 Use the RFC 2119 / RFC 8174 convention (UPPERCASE “normative keywords”). Add this one‑liner at the top of every spec:
@@ -25,32 +22,27 @@ Use the RFC 2119 / RFC 8174 convention (UPPERCASE “normative keywords”). Add
 - WON’T (Out of scope): intentionally not implemented feature. Put these under an “Out of scope / Non‑goals” section, not in the normative list.
 
 ## House style for SR3E specs
-- One requirement per line; start with the keyword, then the behavior.
-- Give each requirement an ID like `REQ-ACT-PC-HEALTH-001`.
-- Follow with Acceptance Criteria (AC1, AC2, …); tests map 1:1 to ACs.
-- Reference config keys exactly (e.g., `sr3e.damageType.*`), no remaps.
+- One capability/invariant per card (not a mixed list).
+- Give each card an ID like `REQ-ACT-C-HEALTH-001`.
+- 2–5 Acceptance Criteria bullets per card; tests map 1:1 to ACs.
+- Use AC numbering tied to the card: `AC-<NNN>.<index>` (e.g., `AC-001.3`).
 
-## Template snippet
-```
----
-title: <Feature>
-parent: <Section>
-grand_parent: <Parent>
----
+## Example card snippet (from Health)
 
-> This spec uses the key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY as defined in RFC 2119/RFC 8174.
+{% raw %}
 
-## Requirements
-- REQ-<DOMAIN>-<AREA>-<NNN> — MUST <behavior>
-- REQ-<DOMAIN>-<AREA>-<NNN> — SHOULD <behavior>
-
-## Acceptance Criteria
-- AC1: <verifiable outcome for REQ‑NNN>
-- AC2: <verifiable outcome for REQ‑NNN>
-
-## Out of scope / Non‑goals
-- WON’T <behavior/feature>; rationale <short reason>
-
-## Notes
-- Uses `sr3e.<key>` config; e.g., `sr3e.damageType.l`, `sr3e.weaponMode.burst`.
-```
+{% include req-card.md
+   id="REQ-ACT-C-HEALTH-002"
+   title="Track & Overflow bounds"
+   component="Actors > Components > Health"
+   level="MUST"
+   description="Stun/Physical tracks are 10 boxes (0-10); Overflow is a non-negative integer."
+   ac="- AC-002.1: Setting system.health.stun.value to -1 fails validation.
+- AC-002.2: Setting system.health.stun.value or physical.value above 10 fails validation.
+- AC-002.3: Non-integer assignment to a track value fails validation.
+- AC-002.4: Setting system.health.overflow.value to -1 fails validation.
+- AC-002.5: Assigning a non-integer to system.health.overflow.value fails validation.
+- AC-002.6: Increasing overflow does not change penalty directly (see 004)."
+   non_goals="Box rendering and overflow controls are UI concerns; this card constrains data only."
+%}
+{% endraw %}

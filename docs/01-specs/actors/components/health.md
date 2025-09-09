@@ -10,7 +10,7 @@ toc: true
 The Health component owns condition tracks, overflow, life state, and the derived penalty it exposes to Procedures. Cards below define one capability or invariant each with concrete ACs and clear integration boundaries.
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-001"
+   id="REQ-ACT-C-HEALTH-001"
    title="Model fields (authoritative)"
    component="Actors > Components > Health"
    level="MUST"
@@ -23,7 +23,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-002"
+   id="REQ-ACT-C-HEALTH-002"
    title="Track & Overflow bounds"
    component="Actors > Components > Health"
    level="MUST"
@@ -40,7 +40,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-004"
+   id="REQ-ACT-C-HEALTH-004"
    title="Stage & penalty derivation"
    component="Actors > Components > Health"
    level="MUST"
@@ -56,7 +56,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-006"
+   id="REQ-ACT-C-HEALTH-006"
    title="Deadly semantics"
    component="Actors > Components > Health"
    level="MUST"
@@ -68,7 +68,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-007"
+   id="REQ-ACT-C-HEALTH-007"
    title="Death threshold"
    component="Actors > Components > Health"
    level="MUST"
@@ -80,7 +80,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-008"
+   id="REQ-ACT-C-HEALTH-008"
    title="Stabilized gating"
    component="Actors > Components > Health"
    level="SHOULD"
@@ -92,7 +92,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-009"
+   id="REQ-ACT-C-HEALTH-009"
    title="Events and stores (integration surface)"
    component="Actors > Components > Health"
    level="MUST"
@@ -105,7 +105,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-010"
+   id="REQ-ACT-C-HEALTH-010"
    title="Healing normalization"
    component="Actors > Components > Health"
    level="SHOULD"
@@ -117,7 +117,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-012"
+   id="REQ-ACT-C-HEALTH-012"
    title="Presentation"
    component="Actors > Components > Health"
    level="SHOULD"
@@ -129,7 +129,7 @@ The Health component owns condition tracks, overflow, life state, and the derive
 %}
 
 {% include req-card.md
-   id="REQ-ACT-PC-HEALTH-013"
+   id="REQ-ACT-C-HEALTH-013"
    title="Miraculous Survival (house rule)"
    component="Actors > Components > Health"
    level="MAY"
