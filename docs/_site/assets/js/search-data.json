@@ -28,11 +28,11 @@
     "relUrl": "/01-specs/actors/components/dossier.html"
   },"4": {
     "doc": "Health",
-    "title": "Health - Spec",
-    "content": "The Health component owns condition tracks, overflow, life state, and the derived penalty it exposes to Procedures. Cards below define one capability or invariant each with concrete ACs and clear integration boundaries. REQ-ACT-C-HEALTH-001 MUST Model fields (authoritative) . Component: Actors &gt; Components &gt; Health Description Canonical fields exposed by system.health. Acceptance Criteria (local) . | AC-001.1: system.health has stun, physical, overflow (each with { value:int, mod:int }). | AC-001.2: system.health has isAlive:boolean (initial true). | AC-001.3: system.health has penalty:number (derived, read-only; see 004). | AC-001.4: A RO store exists for penalty; RW stores exist for stun.value, physical.value, overflow.value, isAlive. | . Out of scope / Non-goals Does not define UI layout or labels; Controllers/Procedures own rule application. Create issue Reopen issue . REQ-ACT-C-HEALTH-002 MUST Track &amp; Overflow bounds . Component: Actors &gt; Components &gt; Health Description Stun/Physical tracks are 10 boxes (0-10); Overflow is a non-negative integer. Acceptance Criteria (local) . | AC-002.1: Setting system.health.stun.value to -1 fails validation. | AC-002.2: Setting system.health.stun.value or physical.value above 10 fails validation. | AC-002.3: Non-integer assignment to a track value fails validation. | AC-002.4: Setting system.health.overflow.value to -1 fails validation. | AC-002.5: Assigning a non-integer to system.health.overflow.value fails validation. | AC-002.6: Increasing overflow does not change penalty directly (see 004). | . Out of scope / Non-goals Box rendering and overflow controls are UI concerns; this card constrains data only. Create issue Reopen issue . REQ-ACT-C-HEALTH-004 MUST Stage &amp; penalty derivation . Component: Actors &gt; Components &gt; Health Description Derive stage per track and expose penalty as a read-only function of stages. Acceptance Criteria (local) . | AC-004.1: Value 0 =&gt; stage ‘None’; 1-2 =&gt; ‘L’; 3-5 =&gt; ‘M’; 6-9 =&gt; ‘S’; 10 =&gt; ‘D’. | AC-004.2: getStage(‘stun’) and getStage(‘physical’) return the expected stage string for current values. | | AC-004.3: system.health.penalty is derived as max(stage(stun), stage(physical)) mapped to 0 | 1 | 2 | 3 (D caps at 3). | . | AC-004.4: Changing either track updates penalty immediately (no manual refresh). | AC-004.5: Writing to system.health.penalty is rejected with an explicit error. | . Out of scope / Non-goals Application of penalty to TN/initiative is handled by Procedures; UI display is separate. Create issue Reopen issue . REQ-ACT-C-HEALTH-006 MUST Deadly semantics . Component: Actors &gt; Components &gt; Health Description Define effects of Deadly by track. Acceptance Criteria (local) . | AC-006.1: Deadly Stun marks the actor unconscious (exposed as boolean or event for consumers). | AC-006.2: Deadly Physical confers no penalty beyond stage ‘D’ (penalty remains 3). | AC-006.3: Deadly by itself does not flip isAlive (see 007). | . Out of scope / Non-goals No knockout timers or recovery; those live in Controllers/Procedures. Create issue Reopen issue . REQ-ACT-C-HEALTH-007 MUST Death threshold . Component: Actors &gt; Components &gt; Health Description Overflow beyond Body determines life state. Acceptance Criteria (local) . | AC-007.1: When system.health.overflow.value &gt; system.attributes.body.value, system.health.isAlive becomes false. | AC-007.2: Toggling isAlive emits a life-state change event for consumers. | AC-007.3: Reducing overflow back to &lt;= Body allows isAlive to be set true by controllers (no auto-resurrection). | . Out of scope / Non-goals How Body changes or revival flows occur is out of scope. Create issue Reopen issue . REQ-ACT-C-HEALTH-008 SHOULD Stabilized gating . Component: Actors &gt; Components &gt; Health Description When stabilized, overflow must not increase via health APIs. Acceptance Criteria (local) . | AC-008.1: With stabilized=true, attempts to increment overflow are rejected with an explicit error. | AC-008.2: With stabilized=true, decrements to overflow are allowed. | AC-008.3: Stabilized state is exposed as a boolean store or read-only flag; consumers can check before updates. | . Out of scope / Non-goals Who sets/clears stabilized and when is decided by Procedures/Controllers. Create issue Reopen issue . REQ-ACT-C-HEALTH-009 MUST Events and stores (integration surface) . Component: Actors &gt; Components &gt; Health Description Define what Health exposes for other layers. Acceptance Criteria (local) . | AC-009.1: RW stores exist: health.stun.value, health.physical.value, health.overflow.value, health.isAlive. | AC-009.2: RO store exists: health.penalty (number); writing to it throws. | AC-009.3: Emitted on any change: ‘sr3e.actor.health.changed’ with { track, value, stage, penalty }. | AC-009.4: Emitted when isAlive toggles: ‘sr3e.actor.health.lifeStateChanged’ with { isAlive }. | . Out of scope / Non-goals Consumers decide how to respond; Health does not dispatch game effects. Create issue Reopen issue . REQ-ACT-C-HEALTH-010 SHOULD Healing normalization . Component: Actors &gt; Components &gt; Health Description Stage-based healing can snap to the low end of the new stage. Acceptance Criteria (local) . | AC-010.1: Setting a track to stage ‘M’ normalizes value to 3. | AC-010.2: ‘S’ normalizes to 6; ‘L’ normalizes to 1; ‘None’ to 0. | AC-010.3: Normalization is optional helper behavior; controllers may set exact values when required. | . Out of scope / Non-goals Does not prescribe healing rates or test/First Aid procedures. Create issue Reopen issue . REQ-ACT-C-HEALTH-012 SHOULD Presentation . Component: Actors &gt; Components &gt; Health Description ECG reflects life state only; no hidden rule effects. Acceptance Criteria (local) . | AC-012.1: When isAlive=false, ECG shows a flatline indicator. | AC-012.2: When isAlive=true, ECG animates; animation rate may vary with stage but has no mechanical impact. | AC-012.3: Toggling isAlive updates the indicator without page reload. | . Out of scope / Non-goals ECG does not apply or imply penalties; purely representational. Create issue Reopen issue . REQ-ACT-C-HEALTH-013 MAY Miraculous Survival (house rule) . Component: Actors &gt; Components &gt; Health Description Optional one-time revive control gated by karma flag. Acceptance Criteria (local) . | AC-013.1: Control is visible only when karma.miraculousSurvival is false. | AC-013.2: Confirming sets overflow.value=0 and isAlive=true, then flips karma.miraculousSurvival to true. | AC-013.3: After use, the control hides without requiring a reload. | . Out of scope / Non-goals Rule justification and availability are documented separately as a house rule. Create issue Reopen issue ",
-    "url": "/01-specs/actors/components/health.html#health---spec",
+    "title": "Health — Spec",
+    "content": "The Health component represents condition tracks, overflow, wound penalties, and life/death state in accordance with SR3E rules. Each card defines one rule-driven capability with concrete acceptance criteria. REQ-ACT-C-HEALTH-001 MUST Stun track . Component: Actors &gt; Components &gt; Health Description Show and track Stun damage boxes (SR3 p.125). Acceptance Criteria (local) . | AC-001.1: Health exposes a Stun track of 10 boxes. | AC-001.2: Stun can accumulate from 0 (None) to Deadly. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-002 MUST Physical track &amp; Overflow . Component: Actors &gt; Components &gt; Health Description Show and track Physical damage and carry excess into Overflow (SR3 p.125–126). Acceptance Criteria (local) . | AC-002.1: Physical track has 10 boxes from None to Deadly. | AC-002.2: Damage beyond Physical spills into Overflow. | AC-002.3: Overflow accumulates without upper bound until Body threshold is checked. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-003 MUST Wound penalties . Component: Actors &gt; Components &gt; Health Description Expose wound modifiers based on worst damage stage (SR3 p.113). Acceptance Criteria (local) . | AC-003.1: Penalty is 0/–1/–2/–3 for L/M/S/D respectively. | AC-003.2: Penalty is derived from maximum of Stun or Physical stage. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-004 MUST Death threshold . Component: Actors &gt; Components &gt; Health Description Determine when the character is dead (SR3 p.126). Acceptance Criteria (local) . | AC-004.1: Character is dead if Overflow exceeds Body. | AC-004.2: Life state flips from alive to not-alive at that point. | AC-004.3: Reducing Overflow below Body allows controllers to restore life state. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-005 MUST Miraculous Survival (Hand of God) . Component: Actors &gt; Components &gt; Health Description Support optional Hand of God mechanic (SR3 p.246). Acceptance Criteria (local) . | AC-005.1: Actor may spend Karma to miraculously survive once. | AC-005.2: Activating resets Overflow to 0 and restores alive state. | AC-005.3: Mechanic can only be used once per character. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-006 SHOULD Stabilized state . Component: Actors &gt; Components &gt; Health Description Prevent further Overflow increase while stabilized (SR3 p.126). Acceptance Criteria (local) . | AC-006.1: Stabilized actors cannot gain additional Overflow. | AC-006.2: Stabilized actors are unstabilized on taking new damage. | AC-006.3: Stabilization can be toggled manually. | AC-006.4: Stabilization is represented on the Karma data model. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-008 SHOULD State Monitor . Component: Actors &gt; Components &gt; Health Description Provide a visual indicator of life state. Acceptance Criteria (local) . | AC-008.1: Alive shows ECG animation. | AC-008.2: Dead shows flatline. | AC-008.3: Indicator updates immediately on state. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-009 SHOULD Miraculous Survival opt-out (GM system setting) . Component: Actors &gt; Components &gt; Health Description Provide a GM-only world setting to disable the Miraculous Survival mechanic. Acceptance Criteria (local) . | AC-009.1: A GM-only setting toggles availability of Miraculous Survival. | . Create issue Reopen issue . REQ-ACT-C-HEALTH-010 SHOULD Revive dead character (GM action) . Component: Actors &gt; Components &gt; Health Description Allow the GM to explicitly restore a dead actor to the alive state. Acceptance Criteria (local) . | AC-010.1: A GM-only control exists on the actor to Revive. | AC-010.2: Revive sets Overflow to 0 and flips life state to alive. | AC-010.3: The control is conditionally displayed in the death state. | . Create issue Reopen issue ",
+    "url": "/01-specs/actors/components/health.html#health--spec",
     
-    "relUrl": "/01-specs/actors/components/health.html#health---spec"
+    "relUrl": "/01-specs/actors/components/health.html#health--spec"
   },"5": {
     "doc": "Health",
     "title": "Health",
@@ -43,753 +43,718 @@
   },"6": {
     "doc": "Components",
     "title": "Components",
-    "content": "Purpose. Each component is a self-contained UI + logic unit on the PC sheet. Specs here define MUST / SHOULD / WON’T behavior and Acceptance Criteria for each component. ",
+    "content": "Purpose. Each component is a self-contained UI + logic unit on the PC sheet. ",
     "url": "/01-specs/actors/components/",
     
     "relUrl": "/01-specs/actors/components/"
   },"7": {
-    "doc": "Components",
-    "title": "What belongs here",
-    "content": ". | Fields owned by the component (data shape, defaults). | UI states and transitions (enabled/disabled, visible/hidden). | Events emitted/consumed (e.g., sr3e.actor.health.changed). | Config keys it relies on (must use sr3e.* as-is; no remaps). | Example canonical keys: sr3e.damageType.*, sr3e.weaponMode.*. | . | . Out of scope. Cross-component flows (e.g., global combat rules) live in their domain specs (Combat, Rolls, Items). ",
-    "url": "/01-specs/actors/components/#what-belongs-here",
-    
-    "relUrl": "/01-specs/actors/components/#what-belongs-here"
-  },"8": {
-    "doc": "Components",
-    "title": "Requirement IDs",
-    "content": "Format: REQ-ACT-PC-&lt;COMP&gt;-NNN Examples: REQ-ACT-C-HEALTH-001, REQ-ACT-PC-DOSSIER-002. ",
-    "url": "/01-specs/actors/components/#requirement-ids",
-    
-    "relUrl": "/01-specs/actors/components/#requirement-ids"
-  },"9": {
-    "doc": "Components",
-    "title": "Components (specs)",
-    "content": ". | Health — life state, damage, recovery, revive action. | Dossier — identity, meta, portrait/banner, notes. | . ",
-    "url": "/01-specs/actors/components/#components-specs",
-    
-    "relUrl": "/01-specs/actors/components/#components-specs"
-  },"10": {
-    "doc": "Components",
-    "title": "Planned (stubs you can add next)",
-    "content": ". | attributes.md — base stats &amp; derived values | skills.md — list, pools, specialization marks | inventory.md — containers, equip states, weight | cyberware.md — essence, grades, install states | magic.md — spell list, drain tracking | matrix.md — deck status, marks, alerts | rigging.md — control deck, subscribers, vehicle link | notes.md — per-character journal | . ",
-    "url": "/01-specs/actors/components/#planned-stubs-you-can-add-next",
-    
-    "relUrl": "/01-specs/actors/components/#planned-stubs-you-can-add-next"
-  },"11": {
-    "doc": "Components",
-    "title": "File layout",
-    "content": " ",
-    "url": "/01-specs/actors/components/#file-layout",
-    
-    "relUrl": "/01-specs/actors/components/#file-layout"
-  },"12": {
     "doc": "Specs",
     "title": "How to Write Specs",
     "content": "Use the RFC 2119 / RFC 8174 convention (UPPERCASE “normative keywords”). Add this one‑liner at the top of every spec: . This spec uses the key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY as defined in RFC 2119/RFC 8174. ",
     "url": "/01-specs/#how-to-write-specs",
     
     "relUrl": "/01-specs/#how-to-write-specs"
-  },"13": {
+  },"8": {
     "doc": "Specs",
     "title": "Normative keywords",
     "content": ". | MUST: absolute requirement; non‑conformant if unmet. | MUST NOT: absolute prohibition. | SHOULD: strongly recommended; may be violated if there’s a documented, specific reason. | SHOULD NOT: strongly discouraged; exceptions must be documented. | MAY / OPTIONAL: truly optional behavior. | . ",
     "url": "/01-specs/#normative-keywords",
     
     "relUrl": "/01-specs/#normative-keywords"
-  },"14": {
+  },"9": {
     "doc": "Specs",
     "title": "“WON’T” vs “MUST NOT”",
     "content": ". | MUST NOT: forbidden behavior within scope. | WON’T (Out of scope): intentionally not implemented feature. Put these under an “Out of scope / Non‑goals” section, not in the normative list. | . ",
     "url": "/01-specs/#wont-vs-must-not",
     
     "relUrl": "/01-specs/#wont-vs-must-not"
-  },"15": {
+  },"10": {
     "doc": "Specs",
     "title": "House style for SR3E specs",
     "content": ". | One capability/invariant per card (not a mixed list). | Give each card an ID like REQ-ACT-C-HEALTH-001. | 2–5 Acceptance Criteria bullets per card; tests map 1:1 to ACs. | Use AC numbering tied to the card: AC-&lt;NNN&gt;.&lt;index&gt; (e.g., AC-001.3). | . ",
     "url": "/01-specs/#house-style-for-sr3e-specs",
     
     "relUrl": "/01-specs/#house-style-for-sr3e-specs"
-  },"16": {
+  },"11": {
     "doc": "Specs",
     "title": "Example card snippet (from Health)",
     "content": "{% include req-card.md id=”REQ-ACT-C-HEALTH-002” title=”Track &amp; Overflow bounds” component=”Actors &gt; Components &gt; Health” level=”MUST” description=”Stun/Physical tracks are 10 boxes (0-10); Overflow is a non-negative integer.” ac=”- AC-002.1: Setting system.health.stun.value to -1 fails validation. | AC-002.2: Setting system.health.stun.value or physical.value above 10 fails validation. | AC-002.3: Non-integer assignment to a track value fails validation. | AC-002.4: Setting system.health.overflow.value to -1 fails validation. | AC-002.5: Assigning a non-integer to system.health.overflow.value fails validation. | AC-002.6: Increasing overflow does not change penalty directly (see 004).” non_goals=”Box rendering and overflow controls are UI concerns; this card constrains data only.” %} | . ",
     "url": "/01-specs/#example-card-snippet-from-health",
     
     "relUrl": "/01-specs/#example-card-snippet-from-health"
-  },"17": {
+  },"12": {
     "doc": "Specs",
     "title": "Specs",
     "content": " ",
     "url": "/01-specs/",
     
     "relUrl": "/01-specs/"
-  },"18": {
+  },"13": {
     "doc": "Actors",
     "title": "Actors — Overview",
     "content": "Player Character, NPCs, Vehicles, Spirits. ",
     "url": "/01-specs/actors/#actors--overview",
     
     "relUrl": "/01-specs/actors/#actors--overview"
-  },"19": {
+  },"14": {
     "doc": "Actors",
     "title": "Actors",
     "content": " ",
     "url": "/01-specs/actors/",
     
     "relUrl": "/01-specs/actors/"
-  },"20": {
+  },"15": {
     "doc": "Player Character",
     "title": "Player Character — Feature Map",
     "content": "Components: Health, Dossier, … . ",
     "url": "/01-specs/actors/player-character/#player-character--feature-map",
     
     "relUrl": "/01-specs/actors/player-character/#player-character--feature-map"
-  },"21": {
+  },"16": {
     "doc": "Player Character",
     "title": "Player Character",
     "content": " ",
     "url": "/01-specs/actors/player-character/",
     
     "relUrl": "/01-specs/actors/player-character/"
-  },"22": {
+  },"17": {
     "doc": "Explosive Procedure",
     "title": "ExplosiveProcedure",
     "content": "Placeholder subclass reserved for explosive/grenade/launcher actions. The class currently extends AbstractProcedure without custom logic; the family services and full flow will be documented once implemented. ",
     "url": "/02-docs/procedures/explosive-procedure/#explosiveprocedure",
     
     "relUrl": "/02-docs/procedures/explosive-procedure/#explosiveprocedure"
-  },"23": {
+  },"18": {
     "doc": "Explosive Procedure",
     "title": "Status",
     "content": ". | Registered in ProcedureFactory and routing, but not yet feature-complete. | Will mirror firearm/melee patterns: plan → compose → execute → export contest (if any) → resistance. | . ",
     "url": "/02-docs/procedures/explosive-procedure/#status",
     
     "relUrl": "/02-docs/procedures/explosive-procedure/#status"
-  },"24": {
+  },"19": {
     "doc": "Explosive Procedure",
     "title": "Intended responsibilities",
     "content": ". | Precompute blast template, range, and cover effects. | Export appropriate responder prompt (likely Dodge or Evasion). | Provide resistance-prep for area damage and staging. | . ",
     "url": "/02-docs/procedures/explosive-procedure/#intended-responsibilities",
     
     "relUrl": "/02-docs/procedures/explosive-procedure/#intended-responsibilities"
-  },"25": {
+  },"20": {
     "doc": "Explosive Procedure",
     "title": "Explosive Procedure",
     "content": " ",
     "url": "/02-docs/procedures/explosive-procedure/",
     
     "relUrl": "/02-docs/procedures/explosive-procedure/"
-  },"26": {
+  },"21": {
     "doc": "Home",
     "title": "SR3E Docs",
     "content": ". | Specs — see the Specs hub | Actors — Actors | Items — Items | About — vision, architecture (optional) | . ",
     "url": "/#sr3e-docs",
     
     "relUrl": "/#sr3e-docs"
-  },"27": {
+  },"22": {
     "doc": "Home",
     "title": "Home",
     "content": "This started as a side project to run my own Shadowrun 3rd Edition campaign. Over time it grew bigger than planned, and it felt like a shame not to share. SR3E experiments with reactive sheets, flexible theming, and a vibe that feels alive with neon and grime. It’s rough, it’s in progress — PRs welcome. ",
     "url": "/",
     
     "relUrl": "/"
-  },"28": {
+  },"23": {
     "doc": "Persistence",
     "title": "Persistence",
     "content": "Short guides for state and persistence helpers used across SR3E (e.g., StoreManager, flags, and document hooks). ",
     "url": "/02-docs/persistance/",
     
     "relUrl": "/02-docs/persistance/"
-  },"29": {
+  },"24": {
     "doc": "Abstract Procedure",
     "title": "AbstractProcedure",
     "content": "AbstractProcedure is the abstract base class for all procedures in SR3E. It provides the scaffolding needed to formalize advanced and opposed rolls: how they are set up, how modifiers are applied, how dice are rolled, and how outcomes are published. Concrete subclasses (e.g. FirearmProcedure, MeleeProcedure, SpellcastingProcedure) inherit from this base and override specific hooks. ",
     "url": "/02-docs/procedures/abstract-procedure/#abstractprocedure",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/#abstractprocedure"
-  },"30": {
+  },"25": {
     "doc": "Abstract Procedure",
     "title": "Responsibilities",
     "content": ". | Registration &amp; serialization . | Each subclass registers itself under a kind string. | Procedures can be serialized to JSON and deserialized back, including actor/item references and internal state. | . | State management . | Writable Svelte stores for title, target number, dice, pool dice, karma dice. | Derived stores for total modifiers, final target number, difficulty label. | Tracks whether the roll is defaulting, what attribute it links to, and contest identifiers for opposed rolls. | . | Locking . | Integrates with ProcedureLock to ensure only one procedure flow per actor at a time. | . | Contest support . | Knows whether it is opposed (hasTargets). | Maintains contest identifiers and can deliver contest responses through OpposeRollService. | Can build a matching defense procedure on the target side. | . | Hooks for subclasses . | execute() — must be overridden; drives the actual roll. | onChallengeWillRoll() — optional pre-roll hook (attach metadata, adjust dice). | onChallengeResolved() — optional post-roll hook. | buildResistancePrep() — subclasses can return structured data for follow-up resistance rolls. | getResponderPromptHTML() — customize defender prompts in opposed rolls. | . | . ",
     "url": "/02-docs/procedures/abstract-procedure/#responsibilities",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/#responsibilities"
-  },"31": {
+  },"26": {
     "doc": "Abstract Procedure",
     "title": "State model",
     "content": "| Store | Type | Purpose / Notes | . | targetNumberStore | writable&lt;number | null&gt; | Base TN before modifiers; finalTNStore clamps to ≥ 2. | . | modifiersArrayStore | writable&lt;Array&lt;{id?, name, value, poolCap?, forbidPool?, meta?}» | Source of TN adjustments and pool caps/forbid flags. | . | modifiersTotalStore | derived | Sum of modifier values. | . | finalTNStore | derived&lt;number | null&gt; | max(2, target + sum(mods)); null if no base. | . | difficultyStore | derived | Localized label from TN (Simple/Routine/Hard/etc.). | . | titleStore | writable | Panel/roll title; defaults to item name if present. | . | diceStore | writable | Base dice (skill/attr/spec/default). | . | poolDiceStore | writable | User-selected pool dice; clamped by availability and poolCap/forbidPool. | . | karmaDiceStore | writable | Bonus dice from Karma. | . | linkedAttributeStore | writable&lt;string | null&gt; | For defaulting and labeling (e.g., Reaction). | . | hasTargetsStore | readable | Live “do I have targets selected?” signal. | . Helper: getTotalDiceBreakdown() returns { baseDice, poolDice, karmaDice, totalDice }. ",
     "url": "/02-docs/procedures/abstract-procedure/#state-model",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/#state-model"
-  },"32": {
+  },"27": {
     "doc": "Abstract Procedure",
     "title": "Roll lifecycle",
     "content": "execute({ OnClose?, CommitEffects? }) → OnClose?.() // close composer UI → baseRoll = SR3ERoll.create(buildFormula(true), { actor }) → onChallengeWillRoll({ baseRoll, actor }) // attach options: dice, pools, TN, basis → roll = await baseRoll.evaluate(this) → await baseRoll.waitForResolution() → CommitEffects?.() // apply ammo/recoil/etc. in subclasses → deliverContestResponse(roll) // if contestId is set → onChallengeResolved({ roll, actor }) → return roll . ",
     "url": "/02-docs/procedures/abstract-procedure/#roll-lifecycle",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/#roll-lifecycle"
-  },"33": {
+  },"28": {
     "doc": "Abstract Procedure",
     "title": "API reference",
     "content": "Construction . | ProcedureFactory.Create(kind, { actor, item?, args? }) → AbstractProcedure | null: Create the correct subclass instance; used by the Composer, not directly. | AbstractProcedure.registerSubclass(kind, Ctor): Register a subclass so it can be deserialized and used in contests. | AbstractProcedure.getCtor(kind): Look up a registered subclass constructor. | AbstractProcedure.listKinds(): List all currently registered kinds. | . Targeting &amp; contests . | hasTargets: boolean: Snapshot — whether the user currently has targets selected. | hasTargetsStore: Readable&lt;boolean&gt;: Reactive store that updates on targeting changes. | contestId: string | null: Current contest identifier, if attached. | setContestId(id): Bind this procedure to a contest. | setContestIds(ids): Replace the local list of contest ids (initiator side). | appendContestId(id): Add another contest id. | clearContests(): Clear all locally tracked contest ids. | deliverContestResponse(rollOrJson): Send roll results back into the contest service. | . Core stores &amp; numbers . | targetNumberStore: Writable&lt;number | null&gt;: Base target number before modifiers. | modifiersArrayStore: Writable&lt;Array&gt;: Collection of TN mods and pool restrictions. | finalTNStore: Derived&lt;number | null&gt;: Base + modifiers, clamped at minimum 2. | difficultyStore: Derived&lt;string&gt;: Localized label for the TN (Simple, Hard, etc.). | dice: number / diceStore: Writable&lt;number&gt;: Base dice (skill, attribute, specialization). | poolDice: number / poolDiceStore: Writable&lt;number&gt;: User-selected pool dice (clamped). | karmaDice: number / karmaDiceStore: Writable&lt;number&gt;: Bonus dice from Karma. | linkedAttribute: string | null: Governing attribute, if any. | isPrimaryActionEnabled(): Checks if the roll button should be active (TN ≥ 2). | finalTN({ floor? }): Compute the effective TN with optional floor. | getTotalDiceBreakdown(): Return { baseDice, poolDice, karmaDice, totalDice }. | . Modifiers &amp; pools . | upsertMod({ id?, name, value, poolCap?, forbidPool? }): Add or replace a modifier entry. | removeModByIndex(i): Remove a modifier by array index. | markModTouchedAt(i): Mark a modifier as user-touched. | setSelectedPoolKey(key): Hint which named pool the pool dice come from. | . Roll orchestration . | buildFormula(explodes = true) → \"Xd6xTN\": Construct the dice formula string. | async execute({ OnClose?, CommitEffects? }): Entry point for running a roll; must be implemented by subclasses. | async onChallengeWillRoll({ baseRoll, actor }): Pre-roll hook to attach metadata/options. | async onChallengeResolved({ roll, actor }): Post-roll hook to apply side-effects. | shouldSelfPublish(): Whether this roll should be self-published to chat/logs. | . Opposed flow helpers . | exportForContest(): Package state into a payload for building a defense step. | async buildDefenseProcedure(exportCtx, { defender, contestId }): Construct the matching defense procedure on the responder side. | async getResponderPromptHTML(exportCtx, { contest }): Build the HTML prompt for the responder; default is yes/no. | async renderContestOutcome(exportCtx, ctx): Render contested outcome; subclasses override for detailed breakdowns. | buildResistancePrep(exportCtx, { initiator, target }): Return structured data for resistance rolls (damage soak, etc.). | . Serialization . | toJSON(): Serialize to a plain JS object. | serialize(): Serialize to a JSON string. | static fromJSON(obj, { resolveActor?, resolveItem? }): Deserialize from a JSON object. | static deserialize(json, opts?): Deserialize from a JSON string. | static registerSubclass(kind, Ctor): Register a new subclass (needed for deserialization). | static getCtor(kind): Look up a registered subclass. | static listKinds(): List all registered kinds. | . ",
     "url": "/02-docs/procedures/abstract-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/#api-reference"
-  },"34": {
+  },"29": {
     "doc": "Abstract Procedure",
     "title": "Abstract Procedure",
     "content": " ",
     "url": "/02-docs/procedures/abstract-procedure/",
     
     "relUrl": "/02-docs/procedures/abstract-procedure/"
-  },"35": {
+  },"30": {
     "doc": "Attribute Procedure",
     "title": "AttributeProcedure",
     "content": "Initiator-side pure attribute test (e.g., Strength, Reaction). Can export an opposed prompt handled by AttributeResponseProcedure. ",
     "url": "/02-docs/procedures/attribute-procedure/#attributeprocedure",
     
     "relUrl": "/02-docs/procedures/attribute-procedure/#attributeprocedure"
-  },"36": {
+  },"31": {
     "doc": "Attribute Procedure",
     "title": "Role in the system",
     "content": ". | Simple attribute checks that still benefit from the composer and contest plumbing. | Hydrates dice directly from the actor’s attribute total and sets a readable title. | Can export a responder prompt for an opposed attribute contest. | . ",
     "url": "/02-docs/procedures/attribute-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/attribute-procedure/#role-in-the-system"
-  },"37": {
+  },"32": {
     "doc": "Attribute Procedure",
     "title": "Behavior",
     "content": ". | Constructor accepts { attributeKey = \"strength\", title? }. | Title uses config.attributes[attributeKey] when available. | Dice equals attribute rating (total/value) for the key. | Self-publishes results; not limited to opposed contexts. | . ",
     "url": "/02-docs/procedures/attribute-procedure/#behavior",
     
     "relUrl": "/02-docs/procedures/attribute-procedure/#behavior"
-  },"38": {
+  },"33": {
     "doc": "Attribute Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"attribute\", { actor, args: { attributeKey, title? } }). | shouldSelfPublish(): true. | getFlavor() / getChatDescription(): “ Test/… test”. | async execute({ OnClose?, CommitEffects? }): . | Attaches options.type = \"attribute\" and options.attributeKey. | . | exportForContest(): { familyKey: \"attribute\", attributeKey, next: { kind: \"attribute-response\" } }. | Serialization extras: attribute key persisted via toJSONExtra() / fromJSONExtra(). | . ",
     "url": "/02-docs/procedures/attribute-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/attribute-procedure/#api-reference"
-  },"39": {
+  },"34": {
     "doc": "Attribute Procedure",
     "title": "Attribute Procedure",
     "content": " ",
     "url": "/02-docs/procedures/attribute-procedure/",
     
     "relUrl": "/02-docs/procedures/attribute-procedure/"
-  },"40": {
+  },"35": {
     "doc": "Attribute Response Procedure",
     "title": "AttributeResponseProcedure",
     "content": "Defender-side response to an AttributeProcedure contest. Hydrates attribute key from the export and returns a single response roll. ",
     "url": "/02-docs/procedures/attribute-response-procedure/#attributeresponseprocedure",
     
     "relUrl": "/02-docs/procedures/attribute-response-procedure/#attributeresponseprocedure"
-  },"41": {
+  },"36": {
     "doc": "Attribute Response Procedure",
     "title": "Role in the system",
     "content": ". | Defender-only; never initiates a contest. | Reads attributeKey from export or basis and sets dice from the defender’s attribute. | Does not self-publish; delivers the response to the contest service. | . ",
     "url": "/02-docs/procedures/attribute-response-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/attribute-response-procedure/#role-in-the-system"
-  },"42": {
+  },"37": {
     "doc": "Attribute Response Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"attribute-response\", { actor, args: { contestId } }). | hasTargets: false; isOpposed: false. | shouldSelfPublish(): false. | getKindOfRollLabel() / getPrimaryActionLabel(): localized Respond. | setResponseBasis(basis): accepts { key: attributeKey, dice?, isDefaulting? } and updates title/dice. | async fromContestExport(exportCtx, { contestId }): set contest id; resolve attribute key; hydrate dice/title. | async execute({ OnClose?, CommitEffects? }): attaches options.type = \"attribute\" and options.attributeKey; delivers response. | Serialization extras: contest id and attributeKey via toJSONExtra() / fromJSONExtra(). | . ",
     "url": "/02-docs/procedures/attribute-response-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/attribute-response-procedure/#api-reference"
-  },"43": {
+  },"38": {
     "doc": "Attribute Response Procedure",
     "title": "Attribute Response Procedure",
     "content": " ",
     "url": "/02-docs/procedures/attribute-response-procedure/",
     
     "relUrl": "/02-docs/procedures/attribute-response-procedure/"
-  },"44": {
+  },"39": {
     "doc": "Dodge Procedure",
     "title": "DodgeProcedure",
     "content": "Defender-side procedure for ranged (firearm) challenges. Instantiated by FirearmProcedure and returns a single defense roll to the contest service. ",
     "url": "/02-docs/procedures/dodge-procedure/#dodgeprocedure",
     
     "relUrl": "/02-docs/procedures/dodge-procedure/#dodgeprocedure"
-  },"45": {
+  },"40": {
     "doc": "Dodge Procedure",
     "title": "Role in the system",
     "content": ". | Defender in firearm contests; never starts a contest. | Title and labels are localized (Dodge/Dodge! etc.). | Seeds base TN to 4; composer modifiers apply as usual. | Does not self-publish; responds into the contest. | . ",
     "url": "/02-docs/procedures/dodge-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/dodge-procedure/#role-in-the-system"
-  },"46": {
+  },"41": {
     "doc": "Dodge Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"dodge\", { actor, args: { contestId } }). | hasTargets: false. | shouldSelfPublish(): false. | getKindOfRollLabel() / getPrimaryActionLabel(): localized Dodge labels. | getChatDescription(): localized description. | async execute({ OnClose?, CommitEffects? }): Standard roll lifecycle; calls deliverContestResponse(roll). | . ",
     "url": "/02-docs/procedures/dodge-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/dodge-procedure/#api-reference"
-  },"47": {
+  },"42": {
     "doc": "Dodge Procedure",
     "title": "Dodge Procedure",
     "content": " ",
     "url": "/02-docs/procedures/dodge-procedure/",
     
     "relUrl": "/02-docs/procedures/dodge-procedure/"
-  },"48": {
+  },"43": {
     "doc": "Documentation",
     "title": "Developer Docs",
     "content": "Quick links to core technologies used by the SR3E system. | Svelte 5 (runes mode): https://svelte.dev/docs/svelte/overview | LESS (CSS preprocessor): https://lesscss.org/ | Foundry VTT v13 API: https://foundryvtt.com/api/ | Foundry VTT Systems Guide: https://foundryvtt.com/article/systems/ | Just the Docs (site theme): https://just-the-docs.github.io/just-the-docs/ | . Notes . | This repository targets Foundry VTT v13+. Ensure your local dev world runs on v13+. | Svelte usage follows strict runes mode; see codebase for component patterns. | LESS compiles via the project build; avoid inline CSS. | . ",
     "url": "/02-docs/#developer-docs",
     
     "relUrl": "/02-docs/#developer-docs"
-  },"49": {
+  },"44": {
     "doc": "Documentation",
     "title": "Documentation",
     "content": " ",
     "url": "/02-docs/",
     
     "relUrl": "/02-docs/"
-  },"50": {
+  },"45": {
     "doc": "Firearm Procedure",
     "title": "FirearmProcedure",
     "content": "FirearmProcedure is the concrete subclass of AbstractProcedure for firearm attacks. It drives the entire ranged attack sequence: assembling dice pools, applying recoil/range modifiers, executing the roll, and exporting contest information for the defender. ",
     "url": "/02-docs/procedures/firearm-procedure/#firearmprocedure",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#firearmprocedure"
-  },"51": {
+  },"46": {
     "doc": "Firearm Procedure",
     "title": "Role in the system",
     "content": ". | Attacker-side only. Represents the shooter’s action. The defender is usually a DodgeProcedure. | Extended flow. In addition to the base roll lifecycle, firearm attacks manage recoil, ammo, range, and pre-computed attack contexts. | Contest integration. Exports a responder prompt (Dodge? Yes/No) and builds resistance-prep data if the attack succeeds. | Locking. Uses lockPriority: \"advanced\" so only one firearm attack per actor runs at a time. | . ",
     "url": "/02-docs/procedures/firearm-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#role-in-the-system"
-  },"52": {
+  },"47": {
     "doc": "Firearm Procedure",
     "title": "Responsibilities",
     "content": ". | Precompute context. | Call into FirearmService.beginAttack() to snapshot plan/damage and ammo state. | Maintain #attackCtx with plan/damage/ammoId for later resolution. | . | Modifiers. | Sync recoil modifiers (syncRecoil) and reset recoil state (resetRecoil). | Apply range modifiers with primeRangeForWeapon. | . | Execution. | Standard roll lifecycle: execute → onChallengeWillRoll → SR3ERoll.evaluate → onChallengeResolved. | On resolution, commits effects (ammo, recoil) and clears local contests. | . | Contest export. | exportForContest() builds defender prompt (kind: \"dodge\"). | Includes attack plan, damage snapshot, TN base/modifiers, and prompt text. | . | Resistance prep. | buildResistancePrep() returns a structure for ResistanceProcedure, including base TN (attack power) and resistance modifiers. | . | . ",
     "url": "/02-docs/procedures/firearm-procedure/#responsibilities",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#responsibilities"
-  },"53": {
+  },"48": {
     "doc": "Firearm Procedure",
     "title": "Typical flow",
     "content": ". | Setup. Attacker + weapon item bound. | Precompute. Call precompute() with situational data (rounds, ammo, tokens, range). | Compose. Recoil and range modifiers are upserted automatically. | Execute. Attacker rolls, results published to chat/log. | Contest. If targets are present, exportForContest() builds a Dodge defense prompt. | Resolution. On success, buildResistancePrep() creates the resistance step for the target. | . ",
     "url": "/02-docs/procedures/firearm-procedure/#typical-flow",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#typical-flow"
-  },"54": {
+  },"49": {
     "doc": "Firearm Procedure",
     "title": "State model (additions)",
     "content": "Besides the AbstractProcedure stores, FirearmProcedure introduces: . | Store/Field | Purpose | . | weaponModeStore: Writable&lt;string&gt; | Tracks current fire mode (semiauto, burst, etc.). | . | ammoAvailableStore: Writable&lt;number&gt; | Tracks remaining ammo in the weapon. | . | #attackCtx (private) | Snapshot of plan/damage/ammo for resolution. | . | #selectedPoolKey (private) | Override for which pool key contributes. | . ",
     "url": "/02-docs/procedures/firearm-procedure/#state-model-additions",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#state-model-additions"
-  },"55": {
+  },"50": {
     "doc": "Firearm Procedure",
     "title": "Roll lifecycle",
     "content": "execute({ OnClose?, CommitEffects? }) ├─ OnClose?.() ├─ baseRoll = SR3ERoll.create(buildFormula(true), { actor }) ├─ onChallengeWillRoll({ baseRoll, actor }) ├─ roll = await baseRoll.evaluate(this) ├─ await baseRoll.waitForResolution() ├─ CommitEffects?.() ├─ expire local contests (if any) ├─ Hooks.callAll(\"actorSystemRecalculated\", actor) ├─ onChallengeResolved({ roll, actor }) → FirearmService.onAttackResolved └─ return roll . ",
     "url": "/02-docs/procedures/firearm-procedure/#roll-lifecycle",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#roll-lifecycle"
-  },"56": {
+  },"51": {
     "doc": "Firearm Procedure",
     "title": "API reference",
     "content": "Modifiers &amp; recoil . | resetRecoil() – Reset all recoil for the actor via FirearmService. | syncRecoil({ declaredRounds, ammoAvailable? }) – Compute recoil modifier and update tnModifiers. | primeRangeForWeapon(attackerToken, targetToken, rangeShiftLeft?) – Compute and apply range modifiers. | tnModifiers – Alias of modifiersArrayStore for recoil/range. | . Precompute &amp; context . | precompute({ declaredRounds?, ammoAvailable?, attackerToken?, targetToken?, rangeShiftLeft? }) – Build plan/damage context for the shot and seed ammo/mode stores. | weaponModeStore – Writable fire mode state. | ammoAvailableStore – Writable ammo state. | . Roll orchestration . | async execute({ OnClose?, CommitEffects? }) – Standard lifecycle; commits ammo/recoil effects and expires contests. | async onChallengeResolved({ roll, actor }) – If no #attackCtx, recomputes; then calls FirearmService.onAttackResolved. | . Contest &amp; resistance . | getPrimaryActionLabel() – Returns “Fire [Weapon]” or generic fire label. | getKindOfRollLabel() – Returns localized “Challenge” or “Roll”. | exportForContest() – Exports contest payload (attacker, weapon, TNs, plan/damage, prompt for Dodge). | getResponderPromptHTML(exportCtx) – Builds the Dodge prompt (Yes/No). | buildDefenseProcedure(exportCtx, { defender, contestId }) – Instantiates a DodgeProcedure for the target. | buildResistancePrep(exportCtx, { initiator, target }) – Returns TN base (attack power) + resistance mods for damage soak. | renderContestOutcome(exportCtx, ctx) – Custom contested outcome: attacker vs. defender with TN breakdown and pools. | . ",
     "url": "/02-docs/procedures/firearm-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#api-reference"
-  },"57": {
+  },"52": {
     "doc": "Firearm Procedure",
     "title": "Scope of this documentation",
     "content": "This page describes the attacker-side firearm flow. Defender-side (DodgeProcedure) and damage resolution (ResistanceProcedure) are documented separately. ",
     "url": "/02-docs/procedures/firearm-procedure/#scope-of-this-documentation",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/#scope-of-this-documentation"
-  },"58": {
+  },"53": {
     "doc": "Firearm Procedure",
     "title": "Firearm Procedure",
     "content": " ",
     "url": "/02-docs/procedures/firearm-procedure/",
     
     "relUrl": "/02-docs/procedures/firearm-procedure/"
-  },"59": {
+  },"54": {
     "doc": "Melee Defense Procedure",
     "title": "MeleeDefenseProcedure",
     "content": "Defender-side procedure for melee contests. Built by MeleeProcedure with a hydrated defense basis and a mode: Standard or Full Defense. ",
     "url": "/02-docs/procedures/melee-defense-procedure/#meleedefenseprocedure",
     
     "relUrl": "/02-docs/procedures/melee-defense-procedure/#meleedefenseprocedure"
-  },"60": {
+  },"55": {
     "doc": "Melee Defense Procedure",
     "title": "Role in the system",
     "content": ". | Defender step in a melee contest; never opens a new contest itself. | Accepts a pre-hydrated basis (attribute or skill) and mode via args. | Delivers the roll back to the contest service; does not self-publish. | . ",
     "url": "/02-docs/procedures/melee-defense-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/melee-defense-procedure/#role-in-the-system"
-  },"61": {
+  },"56": {
     "doc": "Melee Defense Procedure",
     "title": "Behavior",
     "content": ". | Modes: . | Standard: base dice + pool dice + karma. | Full: base dice + karma (pool dice excluded on the initial test). | . | Labels: title reflects Standard vs Full; flavor mirrors panel title. | Basis: setResponseBasis(basis) sets dice and metadata (attribute/skill, specialization). | . ",
     "url": "/02-docs/procedures/melee-defense-procedure/#behavior",
     
     "relUrl": "/02-docs/procedures/melee-defense-procedure/#behavior"
-  },"62": {
+  },"57": {
     "doc": "Melee Defense Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"melee-defense\", { actor, args: { contestId, basis, mode } }). | buildFormula(explodes = true): Computes total dice from basis/pool/karma and attaches TN. | shouldSelfPublish(): false; defender replies via deliverContestResponse. | getKindOfRollLabel() / getPrimaryActionLabel(): reflect Standard vs Full defense. | getFlavor() / getChatDescription(): human-readable summary. | async execute({ OnClose? }): Runs roll, packs metadata into roll JSON (basis and mode), delivers contest response. | . ",
     "url": "/02-docs/procedures/melee-defense-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/melee-defense-procedure/#api-reference"
-  },"63": {
+  },"58": {
     "doc": "Melee Defense Procedure",
     "title": "Melee Defense Procedure",
     "content": " ",
     "url": "/02-docs/procedures/melee-defense-procedure/",
     
     "relUrl": "/02-docs/procedures/melee-defense-procedure/"
-  },"64": {
+  },"59": {
     "doc": "Melee Procedure",
     "title": "MeleeProcedure",
     "content": "MeleeProcedure orchestrates attacker-side melee strikes. It composes a basic TN from the composer, exports a two-choice defender prompt (Standard vs Full Defense), and renders contested outcomes plus resistance prep on hit. ",
     "url": "/02-docs/procedures/melee-procedure/#meleeprocedure",
     
     "relUrl": "/02-docs/procedures/melee-procedure/#meleeprocedure"
-  },"65": {
+  },"60": {
     "doc": "Melee Procedure",
     "title": "Role in the system",
     "content": ". | Attacker-side melee action; defender is a MeleeDefenseProcedure. | Uses MeleeService to pre-plan a strike and to prepare damage resistance steps. | Exports a responder UI that asks the defender to choose Standard or Full defense. | Uses lockPriority: “advanced”; only one melee flow per actor at a time. | . ",
     "url": "/02-docs/procedures/melee-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/melee-procedure/#role-in-the-system"
-  },"66": {
+  },"61": {
     "doc": "Melee Procedure",
     "title": "Responsibilities",
     "content": ". | Precompute (optional): MeleeService.planStrike to snapshot a DamagePacket. | Execute: standard lifecycle; expires local contests after roll. | Defense hint: provides UI label and default TN hint for the defender. | Contest export: builds next step with next.kind: \"melee-standard\" (UI may switch to full). | Resistance prep: builds ResistanceProcedure input via MeleeService.prepareDamageResolution. | . ",
     "url": "/02-docs/procedures/melee-procedure/#responsibilities",
     
     "relUrl": "/02-docs/procedures/melee-procedure/#responsibilities"
-  },"67": {
+  },"62": {
     "doc": "Melee Procedure",
     "title": "Typical flow",
     "content": ". | Setup: attacker + melee weapon bound. | Optional precompute: precompute({ defender?, situational? }). | Compose: user adjusts TN and dice; no recoil/range automation here. | Execute: attacker rolls; results published. | Contest: export asks defender to pick Standard or Full defense. | Resolution: on success, build damage resistance prep for the target. | . ",
     "url": "/02-docs/procedures/melee-procedure/#typical-flow",
     
     "relUrl": "/02-docs/procedures/melee-procedure/#typical-flow"
-  },"68": {
+  },"63": {
     "doc": "Melee Procedure",
     "title": "API reference",
     "content": ". | precompute({ defender?, situational? }): Snapshot a DamagePacket for later resistance. | getDefenseHint(): Returns { type: \"skill\", key: \"melee\", tnMod: 0, tnLabel: \"Melee difficulty\" }. | async getResponderPromptHTML(exportCtx): Renders defender choice buttons. | buildDefenseProcedure(exportCtx, { defender, contestId, responderKey, defenseHint? }): . | Hydrates basis from defenseHint (attribute or skill) via StoreManager. | Creates MeleeDefenseProcedure with mode \"standard\" | \"full\". | . | exportForContest(): Returns { familyKey: \"melee\", weaponId, weaponName, damage?, tnBase, tnMods, next: { kind: \"melee-standard\", ui, args } }. | buildResistancePrep(exportCtx, { initiator, target }): Returns { familyKey: \"melee\", weaponId, weaponName, ... } from MeleeService. | async renderContestOutcome(exportCtx, ctx): Attacker/defender summaries + roll HTML + winner message. | . ",
     "url": "/02-docs/procedures/melee-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/melee-procedure/#api-reference"
-  },"69": {
+  },"64": {
     "doc": "Melee Procedure",
     "title": "Melee Procedure",
     "content": " ",
     "url": "/02-docs/procedures/melee-procedure/",
     
     "relUrl": "/02-docs/procedures/melee-procedure/"
-  },"70": {
+  },"65": {
     "doc": "Resistance Procedure",
     "title": "ResistanceProcedure",
     "content": "Damage resistance step run by the defender after a successful attack. Built from a prepared payload (prep) produced by the attacking family (Firearm/Melee). ",
     "url": "/02-docs/procedures/resistance-procedure/#resistanceprocedure",
     
     "relUrl": "/02-docs/procedures/resistance-procedure/#resistanceprocedure"
-  },"71": {
+  },"66": {
     "doc": "Resistance Procedure",
     "title": "Role in the system",
     "content": ". | Standalone follow-up test; not opposed and not a responder prompt. | Receives prep containing weapon identifiers, base TN, and resistance TN modifiers. | Computes final TN and runs a Body test by default. | Applies damage outcomes via OpposeRollService on resolution. | . ",
     "url": "/02-docs/procedures/resistance-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/resistance-procedure/#role-in-the-system"
-  },"72": {
+  },"67": {
     "doc": "Resistance Procedure",
     "title": "Responsibilities",
     "content": ". | Seed state from prep: . | targetNumberStore = prep.tnBase. | modifiersArrayStore = prep.tnMods (armor and situational effects). | dice = Body (from defender attributes). | . | Annotate SR3ERoll options with TN breakdown for rendering. | On resolve, call OpposeRollService.resolveDamageResistanceFromRoll with full context. | . ",
     "url": "/02-docs/procedures/resistance-procedure/#responsibilities",
     
     "relUrl": "/02-docs/procedures/resistance-procedure/#responsibilities"
-  },"73": {
+  },"68": {
     "doc": "Resistance Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"resistance\", { actor, args: { prep } }). | caller: overridden to always return the defender actor provided at construction. | getFlavor() / getChatDescription(): includes attack name and staged step information. | finalTN({ floor = 2 }): Computes clamp base + sum(modifiers), default floor 2. | async onChallengeWillRoll({ baseRoll, actor }): attaches TN base/mods/targetNumber into roll options. | async execute({ OnClose?, CommitEffects? }): Standard lifecycle; on resolve updates actor state. | exportForContest(): lightweight snapshot — familyKey/weapon references. | toJSON() / static fromJSON(obj): simplified serialization using only prep. | . ",
     "url": "/02-docs/procedures/resistance-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/resistance-procedure/#api-reference"
-  },"74": {
+  },"69": {
     "doc": "Resistance Procedure",
     "title": "Resistance Procedure",
     "content": " ",
     "url": "/02-docs/procedures/resistance-procedure/",
     
     "relUrl": "/02-docs/procedures/resistance-procedure/"
-  },"75": {
+  },"70": {
     "doc": "Skill Procedure",
     "title": "SkillProcedure",
     "content": "Initiator-side generic skill test. Optionally targets a specialization and associated dice pool, and can export an opposed prompt handled by SkillResponseProcedure. ",
     "url": "/02-docs/procedures/skill-procedure/#skillprocedure",
     
     "relUrl": "/02-docs/procedures/skill-procedure/#skillprocedure"
-  },"76": {
+  },"71": {
     "doc": "Skill Procedure",
     "title": "Role in the system",
     "content": ". | Non-weapon, actor-driven skill checks (Active/Knowledge/Language). | Can export a simple “respond to my skill test” contest. | Applies specialization cap (half base skill) as a pool cap when relevant. | . ",
     "url": "/02-docs/procedures/skill-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/skill-procedure/#role-in-the-system"
-  },"77": {
+  },"72": {
     "doc": "Skill Procedure",
     "title": "Behavior",
     "content": ". | Construction hydrates from the actor’s Item skill by id and optional specIndex. | Sets title to the skill name; dice to spec value or base value. | If specialization used without explicit spec rating, inserts spec-cap modifier with poolCap = floor(value / 2). | . ",
     "url": "/02-docs/procedures/skill-procedure/#behavior",
     
     "relUrl": "/02-docs/procedures/skill-procedure/#behavior"
-  },"78": {
+  },"73": {
     "doc": "Skill Procedure",
     "title": "API reference",
     "content": ". | Construction: ProcedureFactory.Create(\"skill\", { actor, args: { skillId, specIndex?, title? } }). | shouldSelfPublish(): true. | getFlavor() / getChatDescription(): label includes specialization when present. | async execute({ OnClose?, CommitEffects? }): . | Attaches options.type = \"skill\", options.skill = { id, name }, options.specialization?, and options.pools?. | . | exportForContest(): { familyKey: \"skill\", skillId, skillName, specName, poolKey, next: { kind: \"skill-response\", ui, args } }. | Serialization extras: toJSONExtra() / fromJSONExtra() capture skill/spec/pool identifiers and names. | . ",
     "url": "/02-docs/procedures/skill-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/skill-procedure/#api-reference"
-  },"79": {
+  },"74": {
     "doc": "Skill Procedure",
     "title": "Skill Procedure",
     "content": " ",
     "url": "/02-docs/procedures/skill-procedure/",
     
     "relUrl": "/02-docs/procedures/skill-procedure/"
-  },"80": {
+  },"75": {
     "doc": "Skill Response Procedure",
     "title": "SkillResponseProcedure",
     "content": "Defender-side response to a SkillProcedure contest. Hydrates from the export and replies with a single roll to the contest service. ",
     "url": "/02-docs/procedures/skill-response-procedure/#skillresponseprocedure",
     
     "relUrl": "/02-docs/procedures/skill-response-procedure/#skillresponseprocedure"
-  },"81": {
+  },"76": {
     "doc": "Skill Response Procedure",
     "title": "Role in the system",
     "content": ". | Defender-only; never initiates a contest. | Uses the skill id and names from the export to configure dice and labels. | Mirrors specialization cap logic for pool dice when needed. | Does not self-publish; replies into the contest. | . ",
     "url": "/02-docs/procedures/skill-response-procedure/#role-in-the-system",
     
     "relUrl": "/02-docs/procedures/skill-response-procedure/#role-in-the-system"
-  },"82": {
+  },"77": {
     "doc": "Skill Response Procedure",
     "title": "API reference",
     "content": ". | Construction: via export + ProcedureFactory.Create(\"skill-response\", { actor, args: { contestId } }). | hasTargets: false; isOpposed: false. | shouldSelfPublish(): false. | getKindOfRollLabel() / getPrimaryActionLabel(): localized Respond. | setResponseBasis(basis): configure from a hydrated { type: \"skill\", id, name, specialization?, poolKey?, dice }. | async fromContestExport(exportCtx, { contestId }): resolve skill from id and set dice, title, and pool cap when relevant. | async execute({ OnClose?, CommitEffects? }): attaches options.type = \"skill\" plus skill/specialization/pool metadata; delivers response. | Serialization extras: contest id and skill/spec/pool identifiers and names. | . ",
     "url": "/02-docs/procedures/skill-response-procedure/#api-reference",
     
     "relUrl": "/02-docs/procedures/skill-response-procedure/#api-reference"
-  },"83": {
+  },"78": {
     "doc": "Skill Response Procedure",
     "title": "Skill Response Procedure",
     "content": " ",
     "url": "/02-docs/procedures/skill-response-procedure/",
     
     "relUrl": "/02-docs/procedures/skill-response-procedure/"
-  },"84": {
+  },"79": {
     "doc": "Procedures",
     "title": "Procedures",
     "content": "Procedures are the system’s way of formalizing rolls that are more than a single die check. They provide a consistent sequence for how complex rolls are set up, executed, and resolved. The main reasons for using Procedures are: . | Opposed rolls: Procedures enforce that opposed rolls are carried out in a specific, rule-correct order. Attacker and defender contributions are processed in turn, and the final outcome is published in a predictable way. | Advanced rolls: Anything that passes through the RollComposer component—rolls with target numbers, modifiers, dice pool logic, and explosion caps—needs more structure than a single function call. Procedures provide that structure. | Outcome publishing: By running through a Procedure, results are surfaced consistently to the rest of the system (for example, updating health, initiative, or logging results). | . Internally, each Procedure is state-machine inspired. They move through well-defined stages—such as setup, roll assembly, resolution, and outcome publishing. Design notes: why an abstract base? . We model procedures with an abstract base class (AbstractProcedure) and concrete subclasses. | Substitutability (LSP). Callers keep a reference to AbstractProcedure. Any concrete procedure must be usable in its place without changing caller behavior. Concretely: do not strengthen preconditions, do not weaken postconditions, and preserve base invariants and events. | Extension (OCP). New procedures are added by subclassing; orchestration code and consumers are not edited to “know” about each new type. | Inversion (DIP). Factories and controllers depend on AbstractProcedure. Concrete types are resolved at runtime and returned as the abstraction. | . Implementation pattern: Template Method + state-machine-inspired flow. The abstract base defines the sequence (setup → compose roll → apply modifiers → resolve → publish outcome) and exposes overridable hooks for each stage. Concrete procedures override hooks, not the orchestration. ",
     "url": "/02-docs/procedures/",
     
     "relUrl": "/02-docs/procedures/"
-  },"85": {
+  },"80": {
     "doc": "Services",
     "title": "Services",
     "content": "Reusable modules that encapsulate SR3E system behavior and helpers. Import explicitly from @services/…. ",
     "url": "/02-docs/services/",
     
     "relUrl": "/02-docs/services/"
-  },"86": {
+  },"81": {
     "doc": "Log",
     "title": "@services/Log.js",
     "content": "Styled console logging utility used in development. Exposed globally as LOG in Bootstrap.js and gated by DEBUG. Import (optional): import Log from \"@services/Log.js\". ",
     "url": "/02-docs/services/log.html#serviceslogjs",
     
     "relUrl": "/02-docs/services/log.html#serviceslogjs"
-  },"87": {
+  },"82": {
     "doc": "Log",
     "title": "Behavior",
     "content": ". | No-ops when DEBUG is falsy (production builds). In dev, prints styled messages with timestamp and best-effort location inference. | Accepts a flexible location parameter for contextual breadcrumbs: . | Array-like: [file, line?, method?] | Object: { file, line?, class?, method? } | String: file | Omitted: attempts to infer from the current stack. | . | . ",
     "url": "/02-docs/services/log.html#behavior",
     
     "relUrl": "/02-docs/services/log.html#behavior"
-  },"88": {
+  },"83": {
     "doc": "Log",
     "title": "API",
     "content": ". | LOG.error(message, location?, obj?) | LOG.warn(message, location?, obj?) | LOG.info(message, location?, obj?) | LOG.success(message, location?, obj?) | LOG.inspect(message, location?, obj?) . | When obj is provided, logs as a collapsed group with the object content. | . | . Timers: . | LOG.time(label) | LOG.timeEnd(label, location?) → prints elapsed ms for label. | . Utilities (internal): . | Location inference parses stack frames and extracts filename, method, and line. | . ",
     "url": "/02-docs/services/log.html#api",
     
     "relUrl": "/02-docs/services/log.html#api"
-  },"89": {
+  },"84": {
     "doc": "Log",
     "title": "Usage",
     "content": "DEBUG &amp;&amp; LOG.info(\"Mounted component\", [__FILE__, __LINE__]); DEBUG &amp;&amp; LOG.inspect(\"State\", [__FILE__, __LINE__], state); . ",
     "url": "/02-docs/services/log.html#usage",
     
     "relUrl": "/02-docs/services/log.html#usage"
-  },"90": {
+  },"85": {
     "doc": "Log",
     "title": "Log",
     "content": " ",
     "url": "/02-docs/services/log.html",
     
     "relUrl": "/02-docs/services/log.html"
-  },"91": {
+  },"86": {
     "doc": "Movement",
     "title": "Movement – Spec",
     "content": "TBD . ",
     "url": "/01-specs/actors/components/movement.html#movement--spec",
     
     "relUrl": "/01-specs/actors/components/movement.html#movement--spec"
-  },"92": {
+  },"87": {
     "doc": "Movement",
     "title": "Movement",
     "content": " ",
     "url": "/01-specs/actors/components/movement.html",
     
     "relUrl": "/01-specs/actors/components/movement.html"
-  },"93": {
+  },"88": {
     "doc": "Oppose Roll Service",
     "title": "@services/OpposeRollService.js",
     "content": "Coordinator for opposed challenges and damage resistance. Manages contest lifecycle, message stubs across clients, responder routing, and post-roll resolution. Import: import OpposeRollService from \"@services/OpposeRollService.js\". ",
     "url": "/02-docs/services/oppose-roll-service.html#servicesopposerollservicejs",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#servicesopposerollservicejs"
-  },"94": {
+  },"89": {
     "doc": "Oppose Roll Service",
     "title": "Responsibilities",
     "content": ". | Create and track contest records keyed by contestId. | Build and distribute lightweight stubs (ids + exports) to the defender’s client. | Await defender response (waitForResponse) and route it back to the initiator flow. | Rehydrate initiator procedure from JSON and render combined opposed outcomes. | Prompt and resolve damage resistance (family-specific via FirearmService/MeleeService). | Fail loud, fail fast: explicit precondition checks; no hidden fallbacks. | . ",
     "url": "/02-docs/services/oppose-roll-service.html#responsibilities",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#responsibilities"
-  },"95": {
+  },"90": {
     "doc": "Oppose Roll Service",
     "title": "Contest lifecycle",
     "content": ". | getContestById(id) → contest | undefined | waitForResponse(contestId) → Promise&lt;rollData&gt;: Resolves when defender replies. | deliverResponse(contestId, rollData): Completes the pending promise for a contest. | expireContest(contestId): Clears timers, removes record, resolves waiter with { __aborted: true }. | abortOpposedRoll(contestId, { reason?, byUserId? }) → true . | Expires and updates the originating chat message flags; emits sr3e:contest-cancelled. | . | . ",
     "url": "/02-docs/services/oppose-roll-service.html#contest-lifecycle",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#contest-lifecycle"
-  },"96": {
+  },"91": {
     "doc": "Oppose Roll Service",
     "title": "Starting a contest",
     "content": ". | async startProcedure({ procedure, targetActor, targetToken?, roll }) → string . | Preconditions: procedure, procedure.caller, targetActor, and roll are required. | Creates a contestId and a local contest record with: . | initiatorRoll: roll snapshot with options.targetNumber and UI metadata. | procedure: { class, json, export } from the initiator procedure. | Optional defenseHint from procedure.getDefenseHint(). | . | Broadcasts a responder prompt (handled elsewhere) that will call back into this service. | . | registerContestStub(stub) → contest . | Called on the defender’s client with a light payload (ids only); resolves actor docs locally and stores a contest entry. | . | . ",
     "url": "/02-docs/services/oppose-roll-service.html#starting-a-contest",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#starting-a-contest"
-  },"97": {
+  },"92": {
     "doc": "Oppose Roll Service",
     "title": "Resolving opposed rolls",
     "content": ". | async resolveTargetRoll(contestId, rollData) . | Marks contest resolved and stores targetRoll. | Rehydrates the initiator procedure via AbstractProcedure.fromJSON(procJSON). | Calls initiatorProc.onChallengeResolved for initiator bookkeeping if present. | Computes netSuccesses (initiator − target) and asks the initiator procedure to renderContestOutcome(...). | Posts a combined chat message honoring current roll mode and scoping to the right users. | . | . Utilities: . | computeNetSuccesses(initiatorRollData, targetRollData) → number | getSuccessCount(rollData) → number | resolveControllingUser(actor) → User | . ",
     "url": "/02-docs/services/oppose-roll-service.html#resolving-opposed-rolls",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#resolving-opposed-rolls"
-  },"98": {
+  },"93": {
     "doc": "Oppose Roll Service",
     "title": "Damage resistance flow",
     "content": ". | async promptDamageResistance({ contestId, initiatorId, defenderId, weaponId, prep }) . | Builds a defender-facing whisper prompt to run a resistance test. | Uses prep.tnBase and prep.tnMods to display a TN breakdown; no hidden defaults. | . | async resolveDamageResistanceFromRoll({ defenderId, weaponId, prep, rollData }) . | Computes TN = max(2, tnBase + sum(tnMods)) and counts successes. | Delegates outcome math to FirearmService/MeleeService by prep.familyKey. | Applies boxes to the correct track (stun/physical) and posts a concise result message. | . | . ",
     "url": "/02-docs/services/oppose-roll-service.html#damage-resistance-flow",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html#damage-resistance-flow"
-  },"99": {
+  },"94": {
     "doc": "Oppose Roll Service",
     "title": "Oppose Roll Service",
     "content": " ",
     "url": "/02-docs/services/oppose-roll-service.html",
     
     "relUrl": "/02-docs/services/oppose-roll-service.html"
-  },"100": {
+  },"95": {
     "doc": "References",
     "title": "References",
     "content": "List full entries here; fill in authors, year, place, and publisher from your physical copies. We do not host, quote, or reproduce content from the books. ",
     "url": "/00-about/references.html",
     
     "relUrl": "/00-about/references.html"
-  },"101": {
+  },"96": {
     "doc": "References",
     "title": "Templates",
     "content": ". | SR3 — Author S., Author T. (Year) Shadowrun, Third Edition. Place: Publisher. | MiTS — Author S. (Year) Magic in the Shadows. Place: Publisher. | M&amp;M — Author S. (Year) Man &amp; Machine: Cyberware. Place: Publisher. | R3 — Author S. (Year) Rigger 3. Place: Publisher. | SR3-GMS — Author/Editor (Year) Shadowrun Gamemaster’s Screen (3E). Place: Publisher. | . ",
     "url": "/00-about/references.html#templates",
     
     "relUrl": "/00-about/references.html#templates"
-  },"102": {
+  },"97": {
     "doc": "References",
     "title": "In‑text usage examples",
     "content": ". | Single: … overflow applies (SR3 1998, p. 126). | Multiple: … (SR3 1998, p. 126; MiTS 1999, pp. 44–45). | Figure/table: … see table (R3 2001, p. 73). | . ",
     "url": "/00-about/references.html#intext-usage-examples",
     
     "relUrl": "/00-about/references.html#intext-usage-examples"
-  },"103": {
+  },"98": {
     "doc": "References",
     "title": "Entries",
     "content": ". | SR3 — Mulvihill, M. and Boyle, R. (2002) Shadowrun, Third Edition. Edited by Ippolito, D. Chicago: Fantasy Productions. | . ",
     "url": "/00-about/references.html#entries",
     
     "relUrl": "/00-about/references.html#entries"
-  },"104": {
+  },"99": {
     "doc": "Utilities",
     "title": "@services/utilities.js",
     "content": "General-purpose helpers used across the system. Import with: . import { localize, openFilePicker, activateTextEditor, kvOptions, moveCardById, toggleCardSpanById, getRandomIntinRange, getRandomBellCurveWithMode, lerpColor, lerpColorToHexAsString, lerp } from \"@services/utilities.js\"; . ",
     "url": "/02-docs/services/utilities.html#servicesutilitiesjs",
     
     "relUrl": "/02-docs/services/utilities.html#servicesutilitiesjs"
-  },"105": {
+  },"100": {
     "doc": "Utilities",
     "title": "Localization",
     "content": ". | localize(key: string) → string . | Thin wrapper over Foundry game.i18n.localize(key). | Use for all player-facing strings. Keys should come from config.sr3e.*. | . | . ",
     "url": "/02-docs/services/utilities.html#localization",
     
     "relUrl": "/02-docs/services/utilities.html#localization"
-  },"106": {
+  },"101": {
     "doc": "Utilities",
     "title": "File picker",
     "content": ". | async openFilePicker(document: Document) → Promise&lt;string&gt; . | Opens Foundry’s FilePicker for images. | Seeds with document.img, updates the document with the selected path, and resolves with that path. | Throws: none; user cancellation simply leaves the document unchanged. | . | . ",
     "url": "/02-docs/services/utilities.html#file-picker",
     
     "relUrl": "/02-docs/services/utilities.html#file-picker"
-  },"107": {
+  },"102": {
     "doc": "Utilities",
     "title": "Rich text editor",
     "content": ". | activateTextEditor({ target, content, owner, editable, callback }) . | If editable, mounts Foundry’s TextEditor on target (height 300); calls callback(html) on save. | If not editable, enriches content into target.innerHTML. | . | . ",
     "url": "/02-docs/services/utilities.html#rich-text-editor",
     
     "relUrl": "/02-docs/services/utilities.html#rich-text-editor"
-  },"108": {
+  },"103": {
     "doc": "Utilities",
     "title": "Option helpers",
     "content": ". | kvOptions(map: Record&lt;string,string&gt;) → Array&lt;{ value: string, label: string }&gt; . | Converts an object map into UI-ready options using localize(token) for labels. | Example: { short: config.procedure.range.short, long: config.procedure.range.long }. | . | . ",
     "url": "/02-docs/services/utilities.html#option-helpers",
     
     "relUrl": "/02-docs/services/utilities.html#option-helpers"
-  },"109": {
+  },"104": {
     "doc": "Utilities",
     "title": "Card layout helpers",
     "content": ". | moveCardById(id: string, direction: \"up\" | \"down\") . | Reorders a card in the cardLayout Svelte store. | No-op if card not found or bounds exceeded. | . | toggleCardSpanById(id: string) . | Cycles a card’s span through 1 → 2 → 3 → 1 in the cardLayout store. | . | . Note: These depend on the cardLayout store from module/svelteStore.js. ",
     "url": "/02-docs/services/utilities.html#card-layout-helpers",
     
     "relUrl": "/02-docs/services/utilities.html#card-layout-helpers"
-  },"110": {
+  },"105": {
     "doc": "Utilities",
     "title": "Randomization",
     "content": ". | getRandomIntinRange(x: number, y: number) → number . | Inclusive integer in [x, y]. | . | getRandomBellCurveWithMode(min: number, max: number, mode: number) → number . | Truncated normal-ish integer sampler using Box–Muller; clamps to [min, max] and skews by mode. | Throws if min ≥ max or mode is outside the range. | . | . ",
     "url": "/02-docs/services/utilities.html#randomization",
     
     "relUrl": "/02-docs/services/utilities.html#randomization"
-  },"111": {
+  },"106": {
     "doc": "Utilities",
     "title": "Interpolation",
     "content": ". | lerp(a: number, b: number, t: number) → number . | Linear interpolation for scalars. | . | lerpColor(hex1: \"#RRGGBB\", hex2: \"#RRGGBB\", t: number) → \"#RRGGBB\" . | Interpolates two hex colors and returns a hex string. | . | lerpColorToHexAsString(color1: \"#RRGGBB\", color2: \"#RRGGBB\", t: number) → \"#RRGGBB\" . | Equivalent to lerpColor; kept for compatibility. | . | . ",
     "url": "/02-docs/services/utilities.html#interpolation",
     
     "relUrl": "/02-docs/services/utilities.html#interpolation"
-  },"112": {
+  },"107": {
     "doc": "Utilities",
     "title": "Utilities",
     "content": " ",
     "url": "/02-docs/services/utilities.html",
     
     "relUrl": "/02-docs/services/utilities.html"
-  },"113": {
+  },"108": {
     "doc": "StoreManager",
     "title": "StoreManager",
     "content": "# StoreManager (reactive document state) StoreManager is a thin wrapper around Svelte stores that binds them to Foundry documents (Actor, Item). It gives you reactive, path-based access to document data and keeps both sides in sync via Foundry hooks, without sprinkling `update` calls around your user interface code. ## What it does - One manager per document: `StoreManager.Subscribe(document)` returns a cached manager keyed by document identifier; `Unsubscribe(document)` cleans up hooks when the last subscriber leaves. - Path-based stores: `GetRWStore(\"path.to.field\")` returns a writable store that updates the document and re-renders consumers; `GetROStore` mirrors document changes without writing. System is omitted from the path! - Derived totals: `GetSumROStore(\"attributes.reaction\")` returns `{ value, mod, sum }` as a derived store pattern used across attributes/pools. Sum returns value + mod. This pattern is used because Active Effects must be separated to not cause infinite recursion. - Flags and ephemeral state: `GetFlagStore(flagKey)` binds to `flags.sr3e.`; `GetShallowStore(documentId, name, initial)` is for view-only ephemeral state. - Syncs with Foundry: Managers listen to `update` and `actorSystemRecalculated` to keep stores fresh when other parts of the app change the document. ## Scope & boundaries - Provides reactive access to document fields and writes back via `update`. - Validation and rules belong to Procedures/Controllers and the spec for that component. - User interface components consume stores and emit intent; they do not implement business rules here. ## Quick usage ```html ``` ## API surface (most used) - `StoreManager.Subscribe(document)` -> `manager` - `StoreManager.Unsubscribe(document)` -> void - `manager.GetRWStore(path: string, isRoot = false)` -> `Writable` - `manager.GetROStore(path: string)` -> `Writable` (do not set to write) - `manager.GetSumROStore(path: string)` -> `Derived` - `manager.GetShallowStore(documentId: string, name: string, initial?: T)` -> `Writable` - `manager.GetFlagStore(key: string)` -> `Writable` (backs `flags.sr3e.`) Notes - `GetRWStore(\"health.stun.value\")` targets `system.health.stun.value`. Pass `isRoot=true` to target a root property, for example `name`. - Updates call `document.update({ [fullPath]: value }, { render: false })` and rely on Svelte for a reactive user interface. - Always unsubscribe in `onDestroy` to release hooks when a sheet or widget is torn down. ",
