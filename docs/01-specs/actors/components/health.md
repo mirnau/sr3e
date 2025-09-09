@@ -83,7 +83,7 @@ ac="
 -  AC-006.1: Stabilized actors cannot gain additional Overflow.
 -  AC-006.2: Stabilized actors are unstabilized on taking new damage.
 -  AC-006.3: Stabilization can be toggled manually.
--  AC-006.4: Stabilization is represented on the Karma data model."
+-  AC-006.4: Stabilization is represented on the Health data model."
    %}
 
 {% include req-card.md
