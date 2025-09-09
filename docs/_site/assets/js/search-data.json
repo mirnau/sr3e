@@ -167,118 +167,181 @@
     
     "relUrl": "/"
   },"24": {
-    "doc": "Procedures",
-    "title": "Procedures",
-    "content": "Procedures are the system’s way of formalizing rolls that are more than a single die check. They provide a consistent sequence for how complex rolls are set up, executed, and resolved. The main reasons for using Procedures are: . | Opposed rolls: Procedures enforce that opposed rolls are carried out in a specific, rule-correct order. Attacker and defender contributions are processed in turn, and the final outcome is published in a predictable way. | Advanced rolls: Anything that passes through the RollComposer component—rolls with target numbers, modifiers, dice pool logic, and explosion caps—needs more structure than a single function call. Procedures provide that structure. | Outcome publishing: By running through a Procedure, results are surfaced consistently to the rest of the system (for example, updating health, initiative, or logging results). | . Internally, each Procedure is state-machine inspired. They move through well-defined stages—such as setup, roll assembly, resolution, and outcome publishing. Design notes: why an abstract base? . We model procedures with an abstract base class (AbstractProcedure) and concrete subclasses. | Substitutability (LSP). Callers keep a reference to AbstractProcedure. Any concrete procedure must be usable in its place without changing caller behavior. Concretely: do not strengthen preconditions, do not weaken postconditions, and preserve base invariants and events. | Extension (OCP). New procedures are added by subclassing; orchestration code and consumers are not edited to “know” about each new type. | Inversion (DIP). Factories and controllers depend on AbstractProcedure. Concrete types are resolved at runtime and returned as the abstraction. | . Implementation pattern: Template Method + state-machine-inspired flow. The abstract base defines the sequence (setup → compose roll → apply modifiers → resolve → publish outcome) and exposes overridable hooks for each stage. Concrete procedures override hooks, not the orchestration. ",
-    "url": "/02-docs/procedures/",
-    
-    "relUrl": "/02-docs/procedures/"
-  },"25": {
-    "doc": "Persistence",
-    "title": "Persistence",
-    "content": "Short guides for state and persistence helpers used across SR3E (e.g., StoreManager, flags, and document hooks). ",
-    "url": "/02-docs/persistance/",
-    
-    "relUrl": "/02-docs/persistance/"
-  },"26": {
-    "doc": "Abstract Procedure",
-    "title": "AbstractProcedure",
-    "content": "AbstractProcedure is the abstract base class for all procedures in SR3E. It provides the scaffolding needed to formalize advanced and opposed rolls: how they are set up, how modifiers are applied, how dice are rolled, and how outcomes are published. Concrete subclasses (e.g. FirearmProcedure, MeleeProcedure, SpellcastingProcedure) inherit from this base and override specific hooks. ",
-    "url": "/02-docs/procedures/abstract-procedure/#abstractprocedure",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/#abstractprocedure"
-  },"27": {
-    "doc": "Abstract Procedure",
-    "title": "Responsibilities",
-    "content": ". | Registration &amp; serialization . | Each subclass registers itself under a kind string. | Procedures can be serialized to JSON and deserialized back, including actor/item references and internal state. | . | State management . | Writable Svelte stores for title, target number, dice, pool dice, karma dice. | Derived stores for total modifiers, final target number, difficulty label. | Tracks whether the roll is defaulting, what attribute it links to, and contest identifiers for opposed rolls. | . | Locking . | Integrates with ProcedureLock to ensure only one procedure flow per actor at a time. | . | Contest support . | Knows whether it is opposed (hasTargets). | Maintains contest identifiers and can deliver contest responses through OpposeRollService. | Can build a matching defense procedure on the target side. | . | Hooks for subclasses . | execute() — must be overridden; drives the actual roll. | onChallengeWillRoll() — optional pre-roll hook (attach metadata, adjust dice). | onChallengeResolved() — optional post-roll hook. | buildResistancePrep() — subclasses can return structured data for follow-up resistance rolls. | getResponderPromptHTML() — customize defender prompts in opposed rolls. | . | . ",
-    "url": "/02-docs/procedures/abstract-procedure/#responsibilities",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/#responsibilities"
-  },"28": {
-    "doc": "Abstract Procedure",
-    "title": "State model",
-    "content": "| Store | Type | Purpose / Notes | . | targetNumberStore | writable&lt;number | null&gt; | Base TN before modifiers; finalTNStore clamps to ≥ 2. | . | modifiersArrayStore | writable&lt;Array&lt;{id?, name, value, poolCap?, forbidPool?, meta?}» | Source of TN adjustments and pool caps/forbid flags. | . | modifiersTotalStore | derived | Sum of modifier values. | . | finalTNStore | derived&lt;number | null&gt; | max(2, target + sum(mods)); null if no base. | . | difficultyStore | derived | Localized label from TN (Simple/Routine/Hard/etc.). | . | titleStore | writable | Panel/roll title; defaults to item name if present. | . | diceStore | writable | Base dice (skill/attr/spec/default). | . | poolDiceStore | writable | User-selected pool dice; clamped by availability and poolCap/forbidPool. | . | karmaDiceStore | writable | Bonus dice from Karma. | . | linkedAttributeStore | writable&lt;string | null&gt; | For defaulting and labeling (e.g., Reaction). | . | hasTargetsStore | readable | Live “do I have targets selected?” signal. | . Helper: getTotalDiceBreakdown() returns { baseDice, poolDice, karmaDice, totalDice }. ",
-    "url": "/02-docs/procedures/abstract-procedure/#state-model",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/#state-model"
-  },"29": {
-    "doc": "Abstract Procedure",
-    "title": "Roll lifecycle",
-    "content": "execute({ OnClose?, CommitEffects? }) → OnClose?.() // close composer UI → baseRoll = SR3ERoll.create(buildFormula(true), { actor }) → onChallengeWillRoll({ baseRoll, actor }) // attach options: dice, pools, TN, basis → roll = await baseRoll.evaluate(this) → await baseRoll.waitForResolution() → CommitEffects?.() // apply ammo/recoil/etc. in subclasses → deliverContestResponse(roll) // if contestId is set → onChallengeResolved({ roll, actor }) → return roll . ",
-    "url": "/02-docs/procedures/abstract-procedure/#roll-lifecycle",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/#roll-lifecycle"
-  },"30": {
-    "doc": "Abstract Procedure",
-    "title": "API reference",
-    "content": "Construction . | ProcedureFactory.Create(kind, { actor, item?, args? }) → AbstractProcedure | null: Create the correct subclass instance; used by the Composer, not directly. | AbstractProcedure.registerSubclass(kind, Ctor): Register a subclass so it can be deserialized and used in contests. | AbstractProcedure.getCtor(kind): Look up a registered subclass constructor. | AbstractProcedure.listKinds(): List all currently registered kinds. | . Targeting &amp; contests . | hasTargets: boolean: Snapshot — whether the user currently has targets selected. | hasTargetsStore: Readable&lt;boolean&gt;: Reactive store that updates on targeting changes. | contestId: string | null: Current contest identifier, if attached. | setContestId(id): Bind this procedure to a contest. | setContestIds(ids): Replace the local list of contest ids (initiator side). | appendContestId(id): Add another contest id. | clearContests(): Clear all locally tracked contest ids. | deliverContestResponse(rollOrJson): Send roll results back into the contest service. | . Core stores &amp; numbers . | targetNumberStore: Writable&lt;number | null&gt;: Base target number before modifiers. | modifiersArrayStore: Writable&lt;Array&gt;: Collection of TN mods and pool restrictions. | finalTNStore: Derived&lt;number | null&gt;: Base + modifiers, clamped at minimum 2. | difficultyStore: Derived&lt;string&gt;: Localized label for the TN (Simple, Hard, etc.). | dice: number / diceStore: Writable&lt;number&gt;: Base dice (skill, attribute, specialization). | poolDice: number / poolDiceStore: Writable&lt;number&gt;: User-selected pool dice (clamped). | karmaDice: number / karmaDiceStore: Writable&lt;number&gt;: Bonus dice from Karma. | linkedAttribute: string | null: Governing attribute, if any. | isPrimaryActionEnabled(): Checks if the roll button should be active (TN ≥ 2). | finalTN({ floor? }): Compute the effective TN with optional floor. | getTotalDiceBreakdown(): Return { baseDice, poolDice, karmaDice, totalDice }. | . Modifiers &amp; pools . | upsertMod({ id?, name, value, poolCap?, forbidPool? }): Add or replace a modifier entry. | removeModByIndex(i): Remove a modifier by array index. | markModTouchedAt(i): Mark a modifier as user-touched. | setSelectedPoolKey(key): Hint which named pool the pool dice come from. | . Roll orchestration . | buildFormula(explodes = true) → \"Xd6xTN\": Construct the dice formula string. | async execute({ OnClose?, CommitEffects? }): Entry point for running a roll; must be implemented by subclasses. | async onChallengeWillRoll({ baseRoll, actor }): Pre-roll hook to attach metadata/options. | async onChallengeResolved({ roll, actor }): Post-roll hook to apply side-effects. | shouldSelfPublish(): Whether this roll should be self-published to chat/logs. | . Opposed flow helpers . | exportForContest(): Package state into a payload for building a defense step. | async buildDefenseProcedure(exportCtx, { defender, contestId }): Construct the matching defense procedure on the responder side. | async getResponderPromptHTML(exportCtx, { contest }): Build the HTML prompt for the responder; default is yes/no. | async renderContestOutcome(exportCtx, ctx): Render contested outcome; subclasses override for detailed breakdowns. | buildResistancePrep(exportCtx, { initiator, target }): Return structured data for resistance rolls (damage soak, etc.). | . Serialization . | toJSON(): Serialize to a plain JS object. | serialize(): Serialize to a JSON string. | static fromJSON(obj, { resolveActor?, resolveItem? }): Deserialize from a JSON object. | static deserialize(json, opts?): Deserialize from a JSON string. | static registerSubclass(kind, Ctor): Register a new subclass (needed for deserialization). | static getCtor(kind): Look up a registered subclass. | static listKinds(): List all registered kinds. | . ",
-    "url": "/02-docs/procedures/abstract-procedure/#api-reference",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/#api-reference"
-  },"31": {
-    "doc": "Abstract Procedure",
-    "title": "Abstract Procedure",
-    "content": " ",
-    "url": "/02-docs/procedures/abstract-procedure/",
-    
-    "relUrl": "/02-docs/procedures/abstract-procedure/"
-  },"32": {
     "doc": "Documentation",
     "title": "Developer Docs",
     "content": "Quick links to core technologies used by the SR3E system. | Svelte 5 (runes mode): https://svelte.dev/docs/svelte/overview | LESS (CSS preprocessor): https://lesscss.org/ | Foundry VTT v13 API: https://foundryvtt.com/api/ | Foundry VTT Systems Guide: https://foundryvtt.com/article/systems/ | Just the Docs (site theme): https://just-the-docs.github.io/just-the-docs/ | . Notes . | This repository targets Foundry VTT v13+. Ensure your local dev world runs on v13+. | Svelte usage follows strict runes mode; see codebase for component patterns. | LESS compiles via the project build; avoid inline CSS. | . ",
     "url": "/02-docs/#developer-docs",
     
     "relUrl": "/02-docs/#developer-docs"
-  },"33": {
+  },"25": {
     "doc": "Documentation",
     "title": "Documentation",
     "content": " ",
     "url": "/02-docs/",
     
     "relUrl": "/02-docs/"
+  },"26": {
+    "doc": "Persistence",
+    "title": "Persistence",
+    "content": "Short guides for state and persistence helpers used across SR3E (e.g., StoreManager, flags, and document hooks). ",
+    "url": "/02-docs/persistance/",
+    
+    "relUrl": "/02-docs/persistance/"
+  },"27": {
+    "doc": "Abstract Procedure",
+    "title": "AbstractProcedure",
+    "content": "AbstractProcedure is the abstract base class for all procedures in SR3E. It provides the scaffolding needed to formalize advanced and opposed rolls: how they are set up, how modifiers are applied, how dice are rolled, and how outcomes are published. Concrete subclasses (e.g. FirearmProcedure, MeleeProcedure, SpellcastingProcedure) inherit from this base and override specific hooks. ",
+    "url": "/02-docs/procedures/abstract-procedure/#abstractprocedure",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/#abstractprocedure"
+  },"28": {
+    "doc": "Abstract Procedure",
+    "title": "Responsibilities",
+    "content": ". | Registration &amp; serialization . | Each subclass registers itself under a kind string. | Procedures can be serialized to JSON and deserialized back, including actor/item references and internal state. | . | State management . | Writable Svelte stores for title, target number, dice, pool dice, karma dice. | Derived stores for total modifiers, final target number, difficulty label. | Tracks whether the roll is defaulting, what attribute it links to, and contest identifiers for opposed rolls. | . | Locking . | Integrates with ProcedureLock to ensure only one procedure flow per actor at a time. | . | Contest support . | Knows whether it is opposed (hasTargets). | Maintains contest identifiers and can deliver contest responses through OpposeRollService. | Can build a matching defense procedure on the target side. | . | Hooks for subclasses . | execute() — must be overridden; drives the actual roll. | onChallengeWillRoll() — optional pre-roll hook (attach metadata, adjust dice). | onChallengeResolved() — optional post-roll hook. | buildResistancePrep() — subclasses can return structured data for follow-up resistance rolls. | getResponderPromptHTML() — customize defender prompts in opposed rolls. | . | . ",
+    "url": "/02-docs/procedures/abstract-procedure/#responsibilities",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/#responsibilities"
+  },"29": {
+    "doc": "Abstract Procedure",
+    "title": "State model",
+    "content": "| Store | Type | Purpose / Notes | . | targetNumberStore | writable&lt;number | null&gt; | Base TN before modifiers; finalTNStore clamps to ≥ 2. | . | modifiersArrayStore | writable&lt;Array&lt;{id?, name, value, poolCap?, forbidPool?, meta?}» | Source of TN adjustments and pool caps/forbid flags. | . | modifiersTotalStore | derived | Sum of modifier values. | . | finalTNStore | derived&lt;number | null&gt; | max(2, target + sum(mods)); null if no base. | . | difficultyStore | derived | Localized label from TN (Simple/Routine/Hard/etc.). | . | titleStore | writable | Panel/roll title; defaults to item name if present. | . | diceStore | writable | Base dice (skill/attr/spec/default). | . | poolDiceStore | writable | User-selected pool dice; clamped by availability and poolCap/forbidPool. | . | karmaDiceStore | writable | Bonus dice from Karma. | . | linkedAttributeStore | writable&lt;string | null&gt; | For defaulting and labeling (e.g., Reaction). | . | hasTargetsStore | readable | Live “do I have targets selected?” signal. | . Helper: getTotalDiceBreakdown() returns { baseDice, poolDice, karmaDice, totalDice }. ",
+    "url": "/02-docs/procedures/abstract-procedure/#state-model",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/#state-model"
+  },"30": {
+    "doc": "Abstract Procedure",
+    "title": "Roll lifecycle",
+    "content": "execute({ OnClose?, CommitEffects? }) → OnClose?.() // close composer UI → baseRoll = SR3ERoll.create(buildFormula(true), { actor }) → onChallengeWillRoll({ baseRoll, actor }) // attach options: dice, pools, TN, basis → roll = await baseRoll.evaluate(this) → await baseRoll.waitForResolution() → CommitEffects?.() // apply ammo/recoil/etc. in subclasses → deliverContestResponse(roll) // if contestId is set → onChallengeResolved({ roll, actor }) → return roll . ",
+    "url": "/02-docs/procedures/abstract-procedure/#roll-lifecycle",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/#roll-lifecycle"
+  },"31": {
+    "doc": "Abstract Procedure",
+    "title": "API reference",
+    "content": "Construction . | ProcedureFactory.Create(kind, { actor, item?, args? }) → AbstractProcedure | null: Create the correct subclass instance; used by the Composer, not directly. | AbstractProcedure.registerSubclass(kind, Ctor): Register a subclass so it can be deserialized and used in contests. | AbstractProcedure.getCtor(kind): Look up a registered subclass constructor. | AbstractProcedure.listKinds(): List all currently registered kinds. | . Targeting &amp; contests . | hasTargets: boolean: Snapshot — whether the user currently has targets selected. | hasTargetsStore: Readable&lt;boolean&gt;: Reactive store that updates on targeting changes. | contestId: string | null: Current contest identifier, if attached. | setContestId(id): Bind this procedure to a contest. | setContestIds(ids): Replace the local list of contest ids (initiator side). | appendContestId(id): Add another contest id. | clearContests(): Clear all locally tracked contest ids. | deliverContestResponse(rollOrJson): Send roll results back into the contest service. | . Core stores &amp; numbers . | targetNumberStore: Writable&lt;number | null&gt;: Base target number before modifiers. | modifiersArrayStore: Writable&lt;Array&gt;: Collection of TN mods and pool restrictions. | finalTNStore: Derived&lt;number | null&gt;: Base + modifiers, clamped at minimum 2. | difficultyStore: Derived&lt;string&gt;: Localized label for the TN (Simple, Hard, etc.). | dice: number / diceStore: Writable&lt;number&gt;: Base dice (skill, attribute, specialization). | poolDice: number / poolDiceStore: Writable&lt;number&gt;: User-selected pool dice (clamped). | karmaDice: number / karmaDiceStore: Writable&lt;number&gt;: Bonus dice from Karma. | linkedAttribute: string | null: Governing attribute, if any. | isPrimaryActionEnabled(): Checks if the roll button should be active (TN ≥ 2). | finalTN({ floor? }): Compute the effective TN with optional floor. | getTotalDiceBreakdown(): Return { baseDice, poolDice, karmaDice, totalDice }. | . Modifiers &amp; pools . | upsertMod({ id?, name, value, poolCap?, forbidPool? }): Add or replace a modifier entry. | removeModByIndex(i): Remove a modifier by array index. | markModTouchedAt(i): Mark a modifier as user-touched. | setSelectedPoolKey(key): Hint which named pool the pool dice come from. | . Roll orchestration . | buildFormula(explodes = true) → \"Xd6xTN\": Construct the dice formula string. | async execute({ OnClose?, CommitEffects? }): Entry point for running a roll; must be implemented by subclasses. | async onChallengeWillRoll({ baseRoll, actor }): Pre-roll hook to attach metadata/options. | async onChallengeResolved({ roll, actor }): Post-roll hook to apply side-effects. | shouldSelfPublish(): Whether this roll should be self-published to chat/logs. | . Opposed flow helpers . | exportForContest(): Package state into a payload for building a defense step. | async buildDefenseProcedure(exportCtx, { defender, contestId }): Construct the matching defense procedure on the responder side. | async getResponderPromptHTML(exportCtx, { contest }): Build the HTML prompt for the responder; default is yes/no. | async renderContestOutcome(exportCtx, ctx): Render contested outcome; subclasses override for detailed breakdowns. | buildResistancePrep(exportCtx, { initiator, target }): Return structured data for resistance rolls (damage soak, etc.). | . Serialization . | toJSON(): Serialize to a plain JS object. | serialize(): Serialize to a JSON string. | static fromJSON(obj, { resolveActor?, resolveItem? }): Deserialize from a JSON object. | static deserialize(json, opts?): Deserialize from a JSON string. | static registerSubclass(kind, Ctor): Register a new subclass (needed for deserialization). | static getCtor(kind): Look up a registered subclass. | static listKinds(): List all registered kinds. | . ",
+    "url": "/02-docs/procedures/abstract-procedure/#api-reference",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/#api-reference"
+  },"32": {
+    "doc": "Abstract Procedure",
+    "title": "Abstract Procedure",
+    "content": " ",
+    "url": "/02-docs/procedures/abstract-procedure/",
+    
+    "relUrl": "/02-docs/procedures/abstract-procedure/"
+  },"33": {
+    "doc": "Firearm Procedure",
+    "title": "FirearmProcedure",
+    "content": "FirearmProcedure is the concrete subclass of AbstractProcedure for firearm attacks. It drives the entire ranged attack sequence: assembling dice pools, applying recoil/range modifiers, executing the roll, and exporting contest information for the defender. ",
+    "url": "/02-docs/procedures/firearm-procedure/#firearmprocedure",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#firearmprocedure"
   },"34": {
+    "doc": "Firearm Procedure",
+    "title": "Role in the system",
+    "content": ". | Attacker-side only. Represents the shooter’s action. The defender is usually a DodgeProcedure. | Extended flow. In addition to the base roll lifecycle, firearm attacks manage recoil, ammo, range, and pre-computed attack contexts. | Contest integration. Exports a responder prompt (Dodge? Yes/No) and builds resistance-prep data if the attack succeeds. | Locking. Uses lockPriority: \"advanced\" so only one firearm attack per actor runs at a time. | . ",
+    "url": "/02-docs/procedures/firearm-procedure/#role-in-the-system",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#role-in-the-system"
+  },"35": {
+    "doc": "Firearm Procedure",
+    "title": "Responsibilities",
+    "content": ". | Precompute context. | Call into FirearmService.beginAttack() to snapshot plan/damage and ammo state. | Maintain #attackCtx with plan/damage/ammoId for later resolution. | . | Modifiers. | Sync recoil modifiers (syncRecoil) and reset recoil state (resetRecoil). | Apply range modifiers with primeRangeForWeapon. | . | Execution. | Standard roll lifecycle: execute → onChallengeWillRoll → SR3ERoll.evaluate → onChallengeResolved. | On resolution, commits effects (ammo, recoil) and clears local contests. | . | Contest export. | exportForContest() builds defender prompt (kind: \"dodge\"). | Includes attack plan, damage snapshot, TN base/modifiers, and prompt text. | . | Resistance prep. | buildResistancePrep() returns a structure for ResistanceProcedure, including base TN (attack power) and resistance modifiers. | . | . ",
+    "url": "/02-docs/procedures/firearm-procedure/#responsibilities",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#responsibilities"
+  },"36": {
+    "doc": "Firearm Procedure",
+    "title": "Typical flow",
+    "content": ". | Setup. Attacker + weapon item bound. | Precompute. Call precompute() with situational data (rounds, ammo, tokens, range). | Compose. Recoil and range modifiers are upserted automatically. | Execute. Attacker rolls, results published to chat/log. | Contest. If targets are present, exportForContest() builds a Dodge defense prompt. | Resolution. On success, buildResistancePrep() creates the resistance step for the target. | . ",
+    "url": "/02-docs/procedures/firearm-procedure/#typical-flow",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#typical-flow"
+  },"37": {
+    "doc": "Firearm Procedure",
+    "title": "State model (additions)",
+    "content": "Besides the AbstractProcedure stores, FirearmProcedure introduces: . | Store/Field | Purpose | . | weaponModeStore: Writable&lt;string&gt; | Tracks current fire mode (semiauto, burst, etc.). | . | ammoAvailableStore: Writable&lt;number&gt; | Tracks remaining ammo in the weapon. | . | #attackCtx (private) | Snapshot of plan/damage/ammo for resolution. | . | #selectedPoolKey (private) | Override for which pool key contributes. | . ",
+    "url": "/02-docs/procedures/firearm-procedure/#state-model-additions",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#state-model-additions"
+  },"38": {
+    "doc": "Firearm Procedure",
+    "title": "Roll lifecycle",
+    "content": "execute({ OnClose?, CommitEffects? }) ├─ OnClose?.() ├─ baseRoll = SR3ERoll.create(buildFormula(true), { actor }) ├─ onChallengeWillRoll({ baseRoll, actor }) ├─ roll = await baseRoll.evaluate(this) ├─ await baseRoll.waitForResolution() ├─ CommitEffects?.() ├─ expire local contests (if any) ├─ Hooks.callAll(\"actorSystemRecalculated\", actor) ├─ onChallengeResolved({ roll, actor }) → FirearmService.onAttackResolved └─ return roll . ",
+    "url": "/02-docs/procedures/firearm-procedure/#roll-lifecycle",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#roll-lifecycle"
+  },"39": {
+    "doc": "Firearm Procedure",
+    "title": "API reference",
+    "content": "Modifiers &amp; recoil . | resetRecoil() – Reset all recoil for the actor via FirearmService. | syncRecoil({ declaredRounds, ammoAvailable? }) – Compute recoil modifier and update tnModifiers. | primeRangeForWeapon(attackerToken, targetToken, rangeShiftLeft?) – Compute and apply range modifiers. | tnModifiers – Alias of modifiersArrayStore for recoil/range. | . Precompute &amp; context . | precompute({ declaredRounds?, ammoAvailable?, attackerToken?, targetToken?, rangeShiftLeft? }) – Build plan/damage context for the shot and seed ammo/mode stores. | weaponModeStore – Writable fire mode state. | ammoAvailableStore – Writable ammo state. | . Roll orchestration . | async execute({ OnClose?, CommitEffects? }) – Standard lifecycle; commits ammo/recoil effects and expires contests. | async onChallengeResolved({ roll, actor }) – If no #attackCtx, recomputes; then calls FirearmService.onAttackResolved. | . Contest &amp; resistance . | getPrimaryActionLabel() – Returns “Fire [Weapon]” or generic fire label. | getKindOfRollLabel() – Returns localized “Challenge” or “Roll”. | exportForContest() – Exports contest payload (attacker, weapon, TNs, plan/damage, prompt for Dodge). | getResponderPromptHTML(exportCtx) – Builds the Dodge prompt (Yes/No). | buildDefenseProcedure(exportCtx, { defender, contestId }) – Instantiates a DodgeProcedure for the target. | buildResistancePrep(exportCtx, { initiator, target }) – Returns TN base (attack power) + resistance mods for damage soak. | renderContestOutcome(exportCtx, ctx) – Custom contested outcome: attacker vs. defender with TN breakdown and pools. | . ",
+    "url": "/02-docs/procedures/firearm-procedure/#api-reference",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#api-reference"
+  },"40": {
+    "doc": "Firearm Procedure",
+    "title": "Scope of this documentation",
+    "content": "This page describes the attacker-side firearm flow. Defender-side (DodgeProcedure) and damage resolution (ResistanceProcedure) are documented separately. ",
+    "url": "/02-docs/procedures/firearm-procedure/#scope-of-this-documentation",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/#scope-of-this-documentation"
+  },"41": {
+    "doc": "Firearm Procedure",
+    "title": "Firearm Procedure",
+    "content": " ",
+    "url": "/02-docs/procedures/firearm-procedure/",
+    
+    "relUrl": "/02-docs/procedures/firearm-procedure/"
+  },"42": {
+    "doc": "Procedures",
+    "title": "Procedures",
+    "content": "Procedures are the system’s way of formalizing rolls that are more than a single die check. They provide a consistent sequence for how complex rolls are set up, executed, and resolved. The main reasons for using Procedures are: . | Opposed rolls: Procedures enforce that opposed rolls are carried out in a specific, rule-correct order. Attacker and defender contributions are processed in turn, and the final outcome is published in a predictable way. | Advanced rolls: Anything that passes through the RollComposer component—rolls with target numbers, modifiers, dice pool logic, and explosion caps—needs more structure than a single function call. Procedures provide that structure. | Outcome publishing: By running through a Procedure, results are surfaced consistently to the rest of the system (for example, updating health, initiative, or logging results). | . Internally, each Procedure is state-machine inspired. They move through well-defined stages—such as setup, roll assembly, resolution, and outcome publishing. Design notes: why an abstract base? . We model procedures with an abstract base class (AbstractProcedure) and concrete subclasses. | Substitutability (LSP). Callers keep a reference to AbstractProcedure. Any concrete procedure must be usable in its place without changing caller behavior. Concretely: do not strengthen preconditions, do not weaken postconditions, and preserve base invariants and events. | Extension (OCP). New procedures are added by subclassing; orchestration code and consumers are not edited to “know” about each new type. | Inversion (DIP). Factories and controllers depend on AbstractProcedure. Concrete types are resolved at runtime and returned as the abstraction. | . Implementation pattern: Template Method + state-machine-inspired flow. The abstract base defines the sequence (setup → compose roll → apply modifiers → resolve → publish outcome) and exposes overridable hooks for each stage. Concrete procedures override hooks, not the orchestration. ",
+    "url": "/02-docs/procedures/",
+    
+    "relUrl": "/02-docs/procedures/"
+  },"43": {
     "doc": "Movement",
     "title": "Movement – Spec",
     "content": "TBD . ",
     "url": "/01-specs/actors/components/movement.html#movement--spec",
     
     "relUrl": "/01-specs/actors/components/movement.html#movement--spec"
-  },"35": {
+  },"44": {
     "doc": "Movement",
     "title": "Movement",
     "content": " ",
     "url": "/01-specs/actors/components/movement.html",
     
     "relUrl": "/01-specs/actors/components/movement.html"
-  },"36": {
+  },"45": {
     "doc": "References",
     "title": "References",
     "content": "List full entries here; fill in authors, year, place, and publisher from your physical copies. We do not host, quote, or reproduce content from the books. ",
     "url": "/00-about/references.html",
     
     "relUrl": "/00-about/references.html"
-  },"37": {
+  },"46": {
     "doc": "References",
     "title": "Templates",
     "content": ". | SR3 — Author S., Author T. (Year) Shadowrun, Third Edition. Place: Publisher. | MiTS — Author S. (Year) Magic in the Shadows. Place: Publisher. | M&amp;M — Author S. (Year) Man &amp; Machine: Cyberware. Place: Publisher. | R3 — Author S. (Year) Rigger 3. Place: Publisher. | SR3-GMS — Author/Editor (Year) Shadowrun Gamemaster’s Screen (3E). Place: Publisher. | . ",
     "url": "/00-about/references.html#templates",
     
     "relUrl": "/00-about/references.html#templates"
-  },"38": {
+  },"47": {
     "doc": "References",
     "title": "In‑text usage examples",
     "content": ". | Single: … overflow applies (SR3 1998, p. 126). | Multiple: … (SR3 1998, p. 126; MiTS 1999, pp. 44–45). | Figure/table: … see table (R3 2001, p. 73). | . ",
     "url": "/00-about/references.html#intext-usage-examples",
     
     "relUrl": "/00-about/references.html#intext-usage-examples"
-  },"39": {
+  },"48": {
     "doc": "References",
     "title": "Entries",
     "content": ". | SR3 — Mulvihill, M. and Boyle, R. (2002) Shadowrun, Third Edition. Edited by Ippolito, D. Chicago: Fantasy Productions. | . ",
     "url": "/00-about/references.html#entries",
     
     "relUrl": "/00-about/references.html#entries"
-  },"40": {
+  },"49": {
     "doc": "StoreManager",
     "title": "StoreManager",
     "content": "# StoreManager (reactive document state) StoreManager is a thin wrapper around Svelte stores that binds them to Foundry documents (Actor, Item). It gives you reactive, path-based access to document data and keeps both sides in sync via Foundry hooks, without sprinkling `update` calls around your user interface code. ## What it does - One manager per document: `StoreManager.Subscribe(document)` returns a cached manager keyed by document identifier; `Unsubscribe(document)` cleans up hooks when the last subscriber leaves. - Path-based stores: `GetRWStore(\"path.to.field\")` returns a writable store that updates the document and re-renders consumers; `GetROStore` mirrors document changes without writing. System is omitted from the path! - Derived totals: `GetSumROStore(\"attributes.reaction\")` returns `{ value, mod, sum }` as a derived store pattern used across attributes/pools. Sum returns value + mod. This pattern is used because Active Effects must be separated to not cause infinite recursion. - Flags and ephemeral state: `GetFlagStore(flagKey)` binds to `flags.sr3e.`; `GetShallowStore(documentId, name, initial)` is for view-only ephemeral state. - Syncs with Foundry: Managers listen to `update` and `actorSystemRecalculated` to keep stores fresh when other parts of the app change the document. ## Scope & boundaries - Provides reactive access to document fields and writes back via `update`. - Validation and rules belong to Procedures/Controllers and the spec for that component. - User interface components consume stores and emit intent; they do not implement business rules here. ## Quick usage ```html ``` ## API surface (most used) - `StoreManager.Subscribe(document)` -> `manager` - `StoreManager.Unsubscribe(document)` -> void - `manager.GetRWStore(path: string, isRoot = false)` -> `Writable` - `manager.GetROStore(path: string)` -> `Writable` (do not set to write) - `manager.GetSumROStore(path: string)` -> `Derived` - `manager.GetShallowStore(documentId: string, name: string, initial?: T)` -> `Writable` - `manager.GetFlagStore(key: string)` -> `Writable` (backs `flags.sr3e.`) Notes - `GetRWStore(\"health.stun.value\")` targets `system.health.stun.value`. Pass `isRoot=true` to target a root property, for example `name`. - Updates call `document.update({ [fullPath]: value }, { render: false })` and rely on Svelte for a reactive user interface. - Always unsubscribe in `onDestroy` to release hooks when a sheet or widget is torn down. ",
