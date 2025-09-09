@@ -35,13 +35,7 @@
       </details>
     </div>
 
-    <div class="req-card__section req-card__section--non-goals">
-      <details>
-        <summary><strong>Out of scope / Non-goals</strong></summary>
-        {% assign _ng = include.non_goals | default: '' | replace: "\r\n", "\n" | strip %}
-        <div class="req-card__text">{{ _ng | markdownify }}</div>
-      </details>
-    </div>
+    
   </div>
 
   <div class="req-card__actions">
