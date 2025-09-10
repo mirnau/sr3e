@@ -1,26 +1,29 @@
-# .github/ISSUE_TEMPLATE/epic.yml
+# .github/ISSUE_TEMPLATE/epic-requirement.yml
 name: Epic Requirement
 description: Propose a new requirement.
 labels: [EPIC, REQ]
 title: "REQ-"
 
 body:
-   - type: markdown
-     attributes:
-        value: |
-           **Naming convention**
-           Use `REQ-domain-subdomain-component`. Lowercase, hyphen-separated, unique.
-           Examples:
-           - `REQ-actor-healthcomponent-001-overflow`
-           - `REQ-procedure-firearm-001-fire`
+  - type: markdown
+    attributes:
+      value: |
+        **Naming convention**
+        Use `REQ-domain-subdomain-component`. Lowercase, hyphen-separated, unique.
+        Examples:
+        - `REQ-actor-healthcomponent-001-overflow`
+        - `REQ-procedure-firearm-001-fire`
 
-           ** Add one of the following tags** 
-           [MUST][MUST][MAY] to this issue, to indiciate priority.
+        **Add one tag**
+        Add exactly one of these labels to this issue to indicate priority: `MUST`, `SHOULD`, `MAY`.
 
-   - type: textarea
-     id: summary
-     attributes:
-        label: Summary
-        description: One or two sentences describing the requirement.
-     validations:
-        required: true
+        **Acceptance**
+        Completion is determined solely by child issues being closed.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the requirement.
+    validations:
+      required: true

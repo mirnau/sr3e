@@ -1,4 +1,4 @@
-# .github/ISSUE_TEMPLATE/epic.yml
+# .github/ISSUE_TEMPLATE/granular-requirement.yml
 name: Granular Requirement
 description: Propose a new requirement.
 labels: [REQ]
@@ -14,8 +14,8 @@ body:
         - `REQ-actor-healthcomponent-001-overflow`
         - `REQ-procedure-firearm-001-fire`
 
-        ** Add one of the following tags** 
-        [MUST][MUST][MAY] to this issue, to indiciate priority.
+        **Add one tag**
+        Add exactly one of these labels to this issue to indicate priority: `MUST`, `SHOULD`, `MAY`.
 
   - type: textarea
     id: summary
