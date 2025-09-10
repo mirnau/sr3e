@@ -19,13 +19,14 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 
 ## 2) Tech
 
-- JavaScript (ESNext)
-- Svelte 5 (runes)
-- LESS
-- Vite bundler
-- Gulp automated build/watch
-- Foundry v13.342 (V2)
-- Node 22.x
+
+- JavaScript (ESNext): [MDN JavaScript](https://developer.mozilla.org/docs/Web/JavaScript) | [ECMAScript Spec](https://tc39.es/ecma262/)
+- Svelte 5 (runes): [Svelte Docs](https://svelte.dev/docs/svelte/overview)
+- LESS: [lesscss.org](https://lesscss.org/)
+- Vite bundler: [Vite Guide](https://vite.dev/guide/)
+- Gulp automated build/watch: [Gulp Quick Start](https://gulpjs.com/docs/en/getting-started/quick-start)
+- Foundry v13.342 (V2): [Foundry API v13](https://foundryvtt.com/api/) | [Systems Guide](https://foundryvtt.com/article/systems/)
+- Node 22.x: [Node.js 22 Docs](https://nodejs.org/docs/latest-v22.x/)
 
 ---
 
@@ -37,7 +38,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 - Clone or copy the repo directly into `FoundryVTT/Data/systems/sr3e`.
 - Builds are automated on save (via gulp). `npm run build` is rarely needed.
 
-**Option B: Symlink**
+**Option B: Symlink (according to AI)**
 
 - Run `npm ci`.
 - Keep the repo in a separate folder.
