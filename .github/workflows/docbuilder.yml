@@ -5,7 +5,8 @@ on:
     branches: [ main ]
     paths:
       - 'docs/**'
-      - '.github/workflows/pages.yml'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
   workflow_dispatch:
 
 permissions:
