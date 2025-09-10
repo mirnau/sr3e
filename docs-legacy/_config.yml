@@ -1,8 +1,0 @@
-title: SR3E Docs
-remote_theme: just-the-docs/just-the-docs
-plugins:
-  - jekyll-remote-theme
-
-# Nice defaults
-search_enabled: true
-color_scheme: dark   # or light
