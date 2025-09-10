@@ -19,7 +19,7 @@ sr3e is a Shadowrun Third Edition Homebrew game system. In Foundry Virtual Table
 
 # Documentation
 
-[Documentation](https://mirnau.github.io/sr3e/) has been added and underway. To save on time, it leans heavy on AI generation, which ofcourse means, there might be mistakes present. Documetation is also open for contribution. All you need to start colaborating can be found in the [documentation](https://mirnau.github.io/sr3e/)
+[Documentation](https://mirnau.github.io/sr3e/) has been added and underway. To save on time, it leans heavy on AI generation, which of course means, there might be mistakes present. Documetation is also open for contribution. All you need to start colaborating can be found [here](https://mirnau.github.io/sr3e/)
 
 ## What is Shadowrun Third Edition
 
