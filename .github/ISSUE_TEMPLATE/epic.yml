@@ -1,6 +1,6 @@
 # .github/ISSUE_TEMPLATE/epic-requirement.yml
 name: Epic Requirement
-description: Propose a new requirement.
+description: Propose a new requirement, that will hold granular requirements as children.
 labels: [EPIC, REQ]
 title: "REQ-"
 
@@ -16,9 +16,6 @@ body:
 
         **Add one tag**
         Add exactly one of these labels to this issue to indicate priority: `MUST`, `SHOULD`, `MAY`.
-
-        **Acceptance**
-        Completion is determined solely by child issues being closed.
 
   - type: textarea
     id: summary
