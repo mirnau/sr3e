@@ -19,16 +19,16 @@ const config = {
       v4: true, // Improve compatibility with the upcoming Docusaurus v4
    },
 
-   // Set the production url of your site here
-   url: "https://mirnau.github.io/sr3e",
+   // Set the production url of your site here (no sub-path)
+   url: "https://mirnau.github.io",
    // Set the /<baseUrl>/ pathname under which your site is served
    // For GitHub pages deployment, it is often '/<projectName>/'
-   baseUrl: "/",
+   baseUrl: "/sr3e/",
 
    // GitHub pages deployment config.
    // If you aren't using GitHub pages, you don't need these.
-   organizationName: "none", // Usually your GitHub org/user name.
-   projectName: "SR3E", // Usually your repo name.
+   organizationName: "mirnau", // Usually your GitHub org/user name.
+   projectName: "sr3e", // Usually your repo name.
 
    onBrokenLinks: "throw",
    onBrokenMarkdownLinks: "warn",
