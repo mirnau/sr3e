@@ -1,4 +1,5 @@
-name: Deploy Docs (GitHub Pages, main)
+# .github/workflows/pages.yml
+name: Deploy Docs (GitHub Pages)
 
 on:
   push:
@@ -11,41 +12,36 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "deploy-pages"
-  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
+          cache: npm
+          cache-dependency-path: docs/package-lock.json   # cache tip (optional but fast)
       - name: Install deps
-        working-directory: ./docs
+        working-directory: docs
         run: npm ci
-
       - name: Build site
-        working-directory: ./docs
+        working-directory: docs
         run: npm run build
-
-      - name: Upload artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/build
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write        # required
+      id-token: write     # required
     environment:
-      name: github-pages
+      name: github-pages  # recommended default
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
