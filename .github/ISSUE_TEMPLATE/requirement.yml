@@ -1,8 +1,8 @@
-# .github/ISSUE_TEMPLATE/requirement.yml
-name: Requirement
+# .github/ISSUE_TEMPLATE/epic.yml
+name: Granular Requirement
 description: Propose a new requirement.
 labels: [REQ]
-title: "REQ-domain-subdomain-component"
+title: "REQ-"
 
 body:
   - type: markdown
@@ -11,16 +11,11 @@ body:
         **Naming convention**
         Use `REQ-domain-subdomain-component`. Lowercase, hyphen-separated, unique.
         Examples:
-        - `REQ-actor-health-overflow`
-        - `REQ-procedure-firearm-opposed`
+        - `REQ-actor-healthcomponent-001-overflow`
+        - `REQ-procedure-firearm-001-fire`
 
-  - type: dropdown
-    id: type
-    attributes:
-      label: Type
-      options: [MUST, SHOULD, MAY]
-    validations:
-      required: true
+        ** Add one of the following tags** 
+        [MUST][MUST][MAY] to this issue, to indiciate priority.
 
   - type: textarea
     id: summary
