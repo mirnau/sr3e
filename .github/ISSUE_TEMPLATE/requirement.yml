@@ -1,6 +1,6 @@
 # .github/ISSUE_TEMPLATE/granular-requirement.yml
 name: Granular Requirement
-description: Propose a new granualr requirement.
+description: Propose a new granular requirement.
 labels: [REQ]
 title: "REQ-"
 
