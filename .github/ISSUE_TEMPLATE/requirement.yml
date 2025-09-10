@@ -1,16 +1,18 @@
+# .github/ISSUE_TEMPLATE/requirement.yml
 name: Requirement
 description: Propose a new requirement.
-labels: [requirement]
+labels: [REQ]
 title: "REQ-domain-subdomain-component"
 
 body:
-  - type: input
-    id: id
+  - type: markdown
     attributes:
-      label: ID
-      placeholder: REQ-domain-subdomain-component
-    validations:
-      required: true
+      value: |
+        **Naming convention**
+        Use `REQ-domain-subdomain-component`. Lowercase, hyphen-separated, unique.
+        Examples:
+        - `REQ-actor-health-overflow`
+        - `REQ-procedure-firearm-opposed`
 
   - type: dropdown
     id: type
@@ -27,13 +29,3 @@ body:
       description: One or two sentences describing the requirement.
     validations:
       required: true
-
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance criteria (2–5)
-      description: Use checkboxes; keep it tight.
-      placeholder: |
-        - [ ] Given ...
-        - [ ] When ...
-        - [ ] Then ...
