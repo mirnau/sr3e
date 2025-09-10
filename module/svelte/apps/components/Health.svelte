@@ -17,7 +17,9 @@
    let physical = storeManager.GetRWStore("health.physical.value");
    let penalty = storeManager.GetRWStore("health.penalty.value");
    let overflow = storeManager.GetRWStore("health.overflow.value");
-   let miraculousSurvivalStore = storeManager.GetRWStore("karma.miraculousSurvival");
+   let miraculousSurvivalStore = storeManager.GetRWStore(
+      "karma.miraculousSurvival",
+   );
    let isAlive = storeManager.GetRWStore("health.isAlive");
 
    let maxDegree = $state(0);
@@ -115,7 +117,6 @@
 </script>
 
 <CardToolbar {id} />
-
 <div bind:this={ecg} class="ecg-container">
    <canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
    <canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
@@ -153,7 +154,18 @@
                {#if i === 0 || i === 2 || i === 5 || i === 9}
                   <div class="damage-description stun">
                      <h4 class="no-margin {checked ? 'lit' : 'unlit'}">
-                        {["Light", "", "Moderate", "", "", "Serious", "", "", "", "Deadly"][i]}
+                        {[
+                           "Light",
+                           "",
+                           "Moderate",
+                           "",
+                           "",
+                           "Serious",
+                           "",
+                           "",
+                           "",
+                           "Deadly",
+                        ][i]}
                      </h4>
                   </div>
                {/if}
@@ -175,7 +187,18 @@
                {#if i === 0 || i === 2 || i === 5 || i === 9}
                   <div class="damage-description physical">
                      <h4 class="no-margin {checked ? 'lit' : 'unlit'}">
-                        {["Light", "", "Moderate", "", "", "Serious", "", "", "", "Deadly"][i]}
+                        {[
+                           "Light",
+                           "",
+                           "Moderate",
+                           "",
+                           "",
+                           "Serious",
+                           "",
+                           "",
+                           "",
+                           "Deadly",
+                        ][i]}
                      </h4>
                   </div>
                {/if}
@@ -212,8 +235,16 @@
 
    <div class="health-card-container">
       <div class="stat-grid single-column">
-         <StatCard {actor} value={$penalty} label={localize(config.health.penalty)} />
-         <StatCard {actor} value={$overflow} label={localize(config.health.overflow)} />
+         <StatCard
+            {actor}
+            value={$penalty}
+            label={localize(config.health.penalty)}
+         />
+         <StatCard
+            {actor}
+            value={$overflow}
+            label={localize(config.health.overflow)}
+         />
       </div>
    </div>
 </div>

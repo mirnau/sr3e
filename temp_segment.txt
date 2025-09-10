@@ -1,0 +1,19 @@
+## State model
+
+| Store | Type | Purpose / Notes |
+|---|---|---|
+| `targetNumberStore` | writable<number \| null> | Base TN before modifiers; `finalTNStore` clamps to ≥ 2. |
+| `modifiersArrayStore` | writable<Array<{id?, name, value, poolCap?, forbidPool?, meta?}>> | Source of TN adjustments and pool caps/forbid flags. |
+| `modifiersTotalStore` | derived<number> | Sum of modifier values. |
+| `finalTNStore` | derived<number \| null> | `max(2, target + sum(mods))`; `null` if no base. |
+| `difficultyStore` | derived<string> | Localized label from TN (Simple/Routine/Hard/etc.). |
+| `titleStore` | writable<string> | Panel/roll title; defaults to item name if present. |
+| `diceStore` | writable<number> | Base dice (skill/attr/spec/default). |
+| `poolDiceStore` | writable<number> | User-selected pool dice; clamped by availability and `poolCap/forbidPool`. |
+| `karmaDiceStore` | writable<number> | Bonus dice from Karma. |
+| `linkedAttributeStore` | writable<string \| null> | For defaulting and labeling (e.g., Reaction). |
+| `hasTargetsStore` | readable<boolean> | Live “do I have targets selected?” signal. |
+
+Helper: `getTotalDiceBreakdown()` returns `{ baseDice, poolDice, karmaDice, totalDice }`.
+
+---
