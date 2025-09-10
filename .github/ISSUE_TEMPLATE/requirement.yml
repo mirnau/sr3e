@@ -1,31 +1,39 @@
 name: Requirement
-description: Propose a new requirement for the project.
+description: Propose a new requirement.
 labels: [requirement]
+title: "REQ-domain-subdomain-component"
 
 body:
-   - type: input
-     id: id
-     attributes:
-        label: Requirement ID
-        placeholder: REQ-001
-     validations:
-        required: true
+  - type: input
+    id: id
+    attributes:
+      label: ID
+      placeholder: REQ-domain-subdomain-component
+    validations:
+      required: true
 
-   - type: textarea
-     id: description
-     attributes:
-        label: Description
-        description: Describe the requirement in detail.
-     validations:
-        required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options: [MUST, SHOULD, MAY]
+    validations:
+      required: true
 
-   - type: dropdown
-     id: type
-     attributes:
-        label: Type
-        options:
-           - MUST
-           - SHOULD
-           - MAY
-     validations:
-        required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing the requirement.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria (2–5)
+      description: Use checkboxes; keep it tight.
+      placeholder: |
+        - [ ] Given ...
+        - [ ] When ...
+        - [ ] Then ...
