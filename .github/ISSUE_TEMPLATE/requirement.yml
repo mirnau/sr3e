@@ -1,0 +1,31 @@
+name: Requirement
+description: Propose a new requirement for the project.
+labels: [requirement]
+
+body:
+   - type: input
+     id: id
+     attributes:
+        label: Requirement ID
+        placeholder: REQ-001
+     validations:
+        required: true
+
+   - type: textarea
+     id: description
+     attributes:
+        label: Description
+        description: Describe the requirement in detail.
+     validations:
+        required: true
+
+   - type: dropdown
+     id: type
+     attributes:
+        label: Type
+        options:
+           - MUST
+           - SHOULD
+           - MAY
+     validations:
+        required: true
