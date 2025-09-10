@@ -11,7 +11,8 @@ body:
         **Naming convention**
         Use `REQ-domain-subdomain-component`. Lowercase, hyphen-separated, unique.
         Examples:
-        - `REQ-actor-healthcomponent-001-overflow`
+        - `REQ-actor-component-health-001-overflow`
+        - `REQ-actor-component-health-002-damagetrack`
         - `REQ-procedure-firearm-001-fire`
 
         **Add one tag**
