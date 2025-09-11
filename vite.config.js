@@ -127,5 +127,39 @@ export default defineConfig(({ mode }) => {
          port: 3000,
          open: false,
       },
+
+      // Vitest configuration
+      test: {
+         // DOM-like environment for Svelte component tests
+         environment: "jsdom",
+         globals: true,
+         // Keep test discovery simple and JS-only per project rules
+         include: [
+            "tests/**/*.{test,spec}.js",
+            "module/**/*.{test,spec}.js",
+         ],
+         exclude: [
+            "node_modules",
+            "build",
+            "dist",
+            ".git",
+            "docs",
+         ],
+         coverage: {
+            provider: "v8",
+            reporter: ["text", "lcov"],
+            reportsDirectory: "./coverage",
+            exclude: [
+               "node_modules/**",
+               "build/**",
+               "dist/**",
+               "docs/**",
+               "**/*.d.ts",
+               "**/tests/**",
+               "**/*.test.js",
+               "**/*.spec.js",
+            ],
+         },
+      },
    };
 });

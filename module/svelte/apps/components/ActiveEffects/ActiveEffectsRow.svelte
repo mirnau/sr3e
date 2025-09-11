@@ -81,7 +81,11 @@
       <div class="cell-content">{duration}</div>
    </td>
    <td>
-      <Switch checked={!$disabledStore} ariaLabel={localize(config.sheet.enabled)} onChange={onToggleEnabled} />
+      <Switch
+         checked={!$disabledStore}
+         ariaLabel={localize(config.sheet.enabled)}
+         onChange={onToggleEnabled}
+      />
    </td>
    <td>
       <div class="cell-content">

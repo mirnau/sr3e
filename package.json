@@ -17,14 +17,19 @@
    "devDependencies": {
       "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
       "@sveltejs/vite-plugin-svelte": "^5.0.3",
+      "@testing-library/svelte": "^5.2.8",
+      "@testing-library/user-event": "^14.6.1",
+      "@vitest/coverage-v8": "^3.2.4",
       "conventional-recommended-bump": "^11.2.0",
       "gulp": "^5.0.0",
       "gulp-less": "^5.0.0",
+      "jsdom": "^26.1.0",
       "less": "^4.2.1",
       "sloc": "^0.3.2",
       "standard-version": "^9.5.0",
       "svelte": "^5.19.3",
-      "vite": "^6.3.5"
+      "vite": "^6.3.5",
+      "vitest": "^3.2.4"
    },
    "dependencies": {
       "svelte-select": "^5.8.3"
