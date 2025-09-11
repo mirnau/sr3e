@@ -2,7 +2,7 @@
   "id": "sr3e",
   "title": "Shadowrun Third Edition Homebrew",
   "description": "An unofficial fan system for Shadowrun Third Edition",
-  "background": "textures/ai/cyberpunkcity.webp",
+  "background": "systems/sr3e/textures/ai/cyberpunkcity.webp",
   "authors": [
     {
       "name": "Otterbeast"
