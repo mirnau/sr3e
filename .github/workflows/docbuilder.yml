@@ -10,25 +10,40 @@ on:
       - 'CONTRIBUTING.md'
   workflow_dispatch:
 
+# Required for actions/deploy-pages
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: docs/package-lock.json   # cache tip (optional but fast)
+          cache: 'npm'
+          cache-dependency-path: docs/package-lock.json
+
       - name: Install deps
         working-directory: docs
         run: npm ci
-      - name: Build site
+
+      - name: Build Docusaurus
         working-directory: docs
         run: npm run build
+
+      # Belt & suspenders: Docusaurus usually emits this, but force it anyway
+      - name: Ensure .nojekyll
+        run: touch docs/build/.nojekyll
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -37,11 +52,8 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write        # required
-      id-token: write     # required
     environment:
-      name: github-pages  # recommended default
+      name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
