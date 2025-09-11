@@ -137,6 +137,7 @@ export default defineConfig(({ mode }) => {
          include: [
             "tests/**/*.{test,spec}.js",
             "module/**/*.{test,spec}.js",
+            "temp/**/*.{test,spec}.js",
          ],
          exclude: [
             "node_modules",
