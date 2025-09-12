@@ -50,11 +50,8 @@ Foundry Virtual Tabletop is a web-based application built primarily with JavaScr
 
 -  Software
    -  A licenced copy of Foundry Virtual Table Top
-   -  Svelte
-   -  Gulp
 
 ## Road Map
-
 -  Currenty working on
    -  Development of responsive layout
    -  Development of data structures
