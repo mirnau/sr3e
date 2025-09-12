@@ -546,8 +546,7 @@
          "hermetic": "Hermetic",
          "shamanic": "Shamanic",
          "other": "Other"
-      }
-      ,
+      },
       "techinterface": {
          "techinterface": "Tech Interface",
          "subtype": "Interface Type",
@@ -593,6 +592,26 @@
          "captainschair": "Captain's Chair",
          "primary": "Primary",
          "secondary": "Secondary"
+      },
+      "spelltype": {
+         "spelltype": "Spell Type",
+         "mana": "Mana",
+         "physical": "Physical"
+      },
+      "spellcategory": {
+         "spellcategory": "Spell Category",
+         "combat": "Combat",
+         "detection": "Detection",
+         "health": "Health",
+         "illusion": "Illusion",
+         "manipulation": "Manipulation"
+      },
+      "spellrange": {
+         "spellrange": "Spell Range",
+         "los": "Line of Sight",
+         "losa": "Line of Sight (Area)",
+         "touch": "Touch",
+         "self": "Self"
       }
    }
 }
