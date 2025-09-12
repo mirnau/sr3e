@@ -1,5 +1,7 @@
 <script>
-
+   let { actor, config } = $props();
 </script>
 
-<div>Hellow World!</div>
+<div>
+
+</div>
