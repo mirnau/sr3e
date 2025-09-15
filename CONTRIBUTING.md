@@ -46,7 +46,8 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
   - Windows: `mklink /J "%LOCALAPPDATA%/FoundryVTT/Data/systems/sr3e" "C:\path\to\repo"`
   - macOS: `ln -s /path/to/repo ~/Library/Application\ Support/FoundryVTT/Data/systems/sr3e`
   - Linux: `ln -s /path/to/repo ~/.local/share/FoundryVTT/Data/systems/sr3e`
-- Builds are automated on save (via gulp). `npm run build` is rarely needed.
+- For the first build you can run `npm run build` is rarely needed.
+- Builds are automated on save (via gulp). `npx gulp` js, LESS and svelte files are automatically handled in most scenarios.
 
 ---
 
