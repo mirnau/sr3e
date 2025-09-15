@@ -32,11 +32,12 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 
 ## 3) Local dev
 
-**Option A: In-place**
+**Option A: In-place development (Verified)**
 
 - Run `npm ci`.
 - Clone or copy the repo directly into `FoundryVTT/Data/systems/sr3e`.
-- Builds are automated on save (via gulp). `npm run build` is rarely needed.
+- For the first build you can run `npm run build`.
+- Builds are automated on save (via gulp). `npx gulp` js, LESS and svelte files are automatically handled in most scenarios.
 
 **Option B: Symlink (according to AI)**
 
