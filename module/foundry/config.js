@@ -378,6 +378,7 @@ sr3e.magic = {
    priority: "sr3e.magic.priority",
    spellPoints: "sr3e.magic.spellPoints",
    powerPoints: "sr3e.magic.powerPoints",
+   spell: "sr3e.magic.spell",
 };
 
 sr3e.notifications = {

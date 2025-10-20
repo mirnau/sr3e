@@ -3,7 +3,7 @@ export default class SpellModel extends foundry.abstract.TypeDataModel {
       return {
          type: new foundry.data.fields.StringField({
             required: true,
-            initial: "",
+            initial: "", // physical or mana
          }),
          category: new foundry.data.fields.StringField({
             required: true,

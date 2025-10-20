@@ -262,7 +262,8 @@
          "totem": "Totem",
          "priority": "Priority",
          "spellPoints": "Spell Points",
-         "powerPoints": "Power Points"
+         "powerPoints": "Power Points",
+         "spell": "Spell"
       },
       "modal": {
          "confirm": "Yes",
