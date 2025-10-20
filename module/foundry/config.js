@@ -682,3 +682,11 @@ sr3e.spellrange = {
    touch: "sr3e.spellrange.touch",
    self: "sr3e.spellrange.self"
 };
+
+// Prefer this over not nesting
+sr3e.dropdown = {
+   spelltype: {
+      physical: "sr3e.dropdown.spelltype.physical",
+      mana: "sr3e.dropdown.spelltype.mana"
+   }
+}

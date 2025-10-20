@@ -11,7 +11,8 @@
    let value = $state(item.system.skillType);
 
    let formattedAmount = $state(`${item.system.amount} ¥`);
-
+   
+   // TODO: Use KV-options (maybe use a sr3e.dropdowns.*)
    const typeOfSkillSelectOptions = [
       { value: "active", label: localize(config.skill.active) },
       { value: "knowledge", label: localize(config.skill.knowledge) },

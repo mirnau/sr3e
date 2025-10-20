@@ -1,5 +1,5 @@
 <script>
-   import { localize, openFilePicker } from "@services/utilities.js";
+   import { localize, openFilePicker, kvOptions } from "@services/utilities.js";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";
@@ -7,6 +7,9 @@
    import StatCard from "@sveltecomponent/basic/DerivedAttributeCard.svelte";
 
    let { item, config } = $props();
+
+   let spellTypeDropdown = kvOptions(config.dropdown.spelltype);
+
 </script>
 
 <ItemSheetWrapper csslayout={"single"}>
@@ -25,4 +28,5 @@
          </StatCard>
       </div>
    </ItemSheetComponent>
+   <ItemSheetComponent></ItemSheetComponent>
 </ItemSheetWrapper>

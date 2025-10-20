@@ -111,7 +111,6 @@
          "legalenforcementpriority": "Enforcement Priority",
          "isBroken": "Broken"
       },
-
       "common": {
          "max": "Maximum",
          "min": "Minimum",
@@ -174,11 +173,16 @@
          "extreme": "Extreme",
          "nearlyimpossible": "Nearly Impossible"
       },
-
       "dodge": {
          "dodge": "Dodge",
          "yes": "Yes",
          "no": "No"
+      },
+      "dropdown": {
+         "spelltype": {
+            "physical": "Physical",
+            "mana": "Mana"
+         }
       },
       "effects": {
          "effectscomposer": "Effects Composer",
@@ -593,11 +597,6 @@
          "captainschair": "Captain's Chair",
          "primary": "Primary",
          "secondary": "Secondary"
-      },
-      "spelltype": {
-         "spelltype": "Spell Type",
-         "mana": "Mana",
-         "physical": "Physical"
       },
       "spellcategory": {
          "spellcategory": "Spell Category",
