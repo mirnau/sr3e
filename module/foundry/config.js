@@ -195,7 +195,8 @@ sr3e.skill = {
    lingos: "sr3e.skill.lingos",
    linkedAttribute: "sr3e.skill.linkedAttribute",
    newspecialization: "sr3e.skill.newspecialization",
-   onlyonespecializationatcreation: "sr3e.skill.onlyonespecializationatcreation",
+   onlyonespecializationatcreation:
+      "sr3e.skill.onlyonespecializationatcreation",
    readwrite: "sr3e.skill.readwrite",
    skill: "sr3e.skill.skill",
    specializations: "sr3e.skill.specializations",
@@ -377,6 +378,7 @@ sr3e.magic = {
    priority: "sr3e.magic.priority",
    spellPoints: "sr3e.magic.spellPoints",
    powerPoints: "sr3e.magic.powerPoints",
+   spell: "sr3e.magic.spell",
 };
 
 sr3e.notifications = {
@@ -660,3 +662,36 @@ sr3e.riggerModes = {
    primary: "sr3e.riggerModes.primary",
    secondary: "sr3e.riggerModes.secondary",
 };
+
+sr3e.spelltype = {
+   mana: "sr3e.spelltype.mana",
+   physical: "sr3e.spelltype.physical"
+};
+
+sr3e.spellcategory = {
+   combat: "sr3e.spellcategory.combat",
+   detection: "sr3e.spellcategory.detection",
+   health: "sr3e.spellcategory.health",
+   illusion: "sr3e.spellcategory.illusion",
+   manipulation: "sr3e.spellcategory.manipulation"
+};
+
+sr3e.spellrange = {
+   los: "sr3e.spellrange.los",
+   losa: "sr3e.spellrange.losa",
+   touch: "sr3e.spellrange.touch",
+   self: "sr3e.spellrange.self"
+};
+
+// Prefer this over not nesting
+sr3e.dropdown = {
+   spelltype: {
+      physical: "sr3e.dropdown.spelltype.physical",
+      mana: "sr3e.dropdown.spelltype.mana"
+   },
+   spellduration: {
+      instant: "sr3e.dropdown.spellduration.instant",
+      sustained: "sr3e.dropdown.spellduration.sustained",
+      permanent: "sr3e.dropdown.spellduration.permanent"
+   }
+}

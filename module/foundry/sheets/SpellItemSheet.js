@@ -7,7 +7,7 @@ export default class SpellItemSheet extends foundry.applications.sheets
   #spell;
 
   get title() {
-    return `${localize(CONFIG.sr3e.spell.spell)}: ${this.item.name}`;
+    return `${localize(CONFIG.sr3e.magic.spell)}: ${this.item.name}`;
   }
 
   static get DEFAULT_OPTIONS() {
