@@ -182,6 +182,11 @@
          "spelltype": {
             "physical": "Physical",
             "mana": "Mana"
+         },
+         "spellduration": {
+            "instant": "Instant",
+            "sustained": "Sustained",
+            "permanent": "Permanent"
          }
       },
       "effects": {

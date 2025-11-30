@@ -688,5 +688,10 @@ sr3e.dropdown = {
    spelltype: {
       physical: "sr3e.dropdown.spelltype.physical",
       mana: "sr3e.dropdown.spelltype.mana"
+   },
+   spellduration: {
+      instant: "sr3e.dropdown.spellduration.instant",
+      sustained: "sr3e.dropdown.spellduration.sustained",
+      permanent: "sr3e.dropdown.spellduration.permanent"
    }
 }
