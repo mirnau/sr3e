@@ -1,0 +1,8 @@
+{
+  "label": "Documentation",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Hi there! Here is the documetation. Much is AI generated, so be mindful that there can be weird things showing up. I also noticed that the AI i is not awfully polite. Anyway! You are welcome to contribute, to both the project and to the documentation."
+  }
+}

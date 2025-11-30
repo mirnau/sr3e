@@ -1,0 +1,119 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq zip
+
+      - name: Read version from tag
+        id: v
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install deps & build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build manifests (pinned + latest)
+        run: |
+          VERSION="${{ steps.v.outputs.version }}"
+          REPO="https://github.com/${GITHUB_REPOSITORY}"
+          ZIP="sr3e-${VERSION}.zip"
+
+          MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
+          MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
+          DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
+
+          # Pinned manifest for this exact version
+          jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
+             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
+
+          # "Latest" channel manifest (always points to latest release asset)
+          jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
+             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
+
+      - name: Package (players only)
+        run: |
+          VERSION="${{ steps.v.outputs.version }}"
+          ROOT="package/sr3e"
+          mkdir -p "$ROOT"
+          cp system.pinned.json "$ROOT/system.json"
+          cp -r build "$ROOT/"
+          cp -r lang "$ROOT/" || true
+          [ -d themes ]    && cp -r themes "$ROOT/"
+          [ -d textures ]  && cp -r textures "$ROOT/"
+          [ -d fonts ]     && cp -r fonts "$ROOT/"
+          [ -d styles ]    && cp -r styles "$ROOT/"
+          [ -d licences ]  && cp -r licences "$ROOT/"
+          [ -d licenses ]  && cp -r licenses "$ROOT/"
+          [ -f README.md ] && cp README.md "$ROOT/"
+          (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
+          # upload "latest" manifest as a separate asset
+          cp system.latest.json system.json
+
+      - name: Compose release body
+        id: body
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          {
+            echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
+            echo "Pinned manifest: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${V}/system.json"
+            echo
+            if echo "$V" | grep -q -- "-alpha\\."; then
+              echo "This is an alpha build. No migration scripts are in effect, any work done in the current"
+              echo "system may break without warning or future fixes."
+            fi
+          } > RELEASE_BODY.md
+
+      - name: Decide prerelease + latest
+        id: flags
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          if echo "$V" | grep -Eq -- "-(alpha|beta)\\."; then
+            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # tag_name defaults to the current tag (github.ref_name)
+          name: ${{ github.ref_name }}
+          body_path: RELEASE_BODY.md
+          files: |
+            sr3e-${{ steps.v.outputs.version }}.zip
+            system.json
+            system.pinned.json
+          prerelease: ${{ steps.flags.outputs.prerelease }}
+          make_latest: ${{ steps.flags.outputs.make_latest }}
+          # set to true after first success run if you like
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

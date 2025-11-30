@@ -1,0 +1,7 @@
+{
+    "scripts": {
+        "gulp": "gulp",
+        "gulp:watch": "gulp watch",
+        "gulp:compile": "gulp compileLess"
+    }
+}

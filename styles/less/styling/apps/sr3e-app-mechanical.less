@@ -1,0 +1,26 @@
+.sr3e-waterfall--double > .mechanical-header {
+   /* Make the mechanical header span across both columns */
+   column-span: all;
+   display: block;
+}
+
+.mechanical-header {
+   /* Ensure internal component stretches nicely when spanning */
+   width: 100%;
+
+   .mechanical-banner {
+      /* Override the default square mask just for this app */
+      .image-mask {
+         aspect-ratio: 16 / 9;
+      }
+   }
+}
+
+// Small label chip used in Details card
+.sr3e.sheet.mechanical .medium-chip {
+   align-self: flex-start;
+   padding: 0.25rem 0.5rem;
+   border-radius: 9999px;
+   font-size: 0.8rem;
+   opacity: 0.8;
+}
