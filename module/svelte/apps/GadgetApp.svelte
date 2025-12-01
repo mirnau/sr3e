@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import Commodity from "@sveltecomponent/Commodity.svelte";
    import { localize, kvOptions } from "@services/utilities.js";
    import ActiveEffectsViewer from "@sveltecomponent/ActiveEffects/ActiveEffectsViewer.svelte";

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import Image from "../basic/Image.svelte";
    import ItemSheetComponent from "../basic/ItemSheetComponent.svelte";
    import ComboSearch from "../basic/ComboSearch.svelte";

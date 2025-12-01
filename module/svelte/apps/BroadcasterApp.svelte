@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize } from "@services/utilities.js";
    import { broadcastNews, stopBroadcast } from "@services/NewsService.svelte.js";
    import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";

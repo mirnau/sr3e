@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte.js";
    import { flags } from "@services/commonConsts.js";
    

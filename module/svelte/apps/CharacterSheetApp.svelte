@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Dossier from "@sveltecomponent/Dossier.svelte";
   import Attributes from "@sveltecomponent/Attributes.svelte";
   import DicePools from "@sveltecomponent/DicePools.svelte";

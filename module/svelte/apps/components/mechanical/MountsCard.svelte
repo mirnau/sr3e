@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { localize } from "@services/utilities.js";
   import StatCard from "@sveltecomponent/basic/StatCard.svelte";
   import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";

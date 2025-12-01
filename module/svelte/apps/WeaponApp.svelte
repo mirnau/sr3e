@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { localize, openFilePicker } from "@services/utilities.js";
   import { onDestroy, onMount } from "svelte";
   import JournalViewer from "@sveltecomponent/JournalViewer.svelte";

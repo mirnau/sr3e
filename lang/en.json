@@ -533,6 +533,9 @@
       "gadgettypes": {
          "weaponmod": "Weapon Modification"
       },
+      "focus": {
+         "focus": "Focus"
+      },
       "archetypes": {
          "adept": "Adept",
          "magician": "Magician"

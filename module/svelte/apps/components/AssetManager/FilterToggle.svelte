@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    let { checked = $bindable(), label = $bindable(), svgName, disabled = false, onChange = null } = $props();
    let icon = $state("");
 

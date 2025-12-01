@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize, kvOptions } from "@services/utilities.js";
    import StatCard from "@sveltecomponent/basic/StatCard.svelte";
    import Commodity from "@sveltecomponent/Commodity.svelte";
@@ -66,7 +66,7 @@
    <ItemSheetComponent>
       <Image entity={item} />
       <div class="stat-grid single-column">
-         <input type="text" value={name} onchange={(e) => item.update({ name: e.target.value })} />
+         <input type="text" value={name} onchange={(e) => item.update({ name: (e.target as HTMLInputElement)?.value })} />
       </div>
       <div class="stat-grid single-column">
          {#each ammoEntries as entry}

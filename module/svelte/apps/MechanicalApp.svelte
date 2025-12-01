@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import MasonryGrid from "@sveltecomponent/basic/MasonryGrid.svelte";
   import { cardLayout } from "../../svelteStore.js";
   import HeaderCard from "@sveltecomponent/mechanical/HeaderCard.svelte";

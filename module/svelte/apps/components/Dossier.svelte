@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { slide } from "svelte/transition";
    import CardToolbar from "@sveltecomponent/CardToolbar.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";

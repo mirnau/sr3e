@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize } from "@services/utilities.js";
    import { onMount, onDestroy } from "svelte";
    import GadgetRow from "@sveltecomponent/ActiveEffects/GadgetRow.svelte";

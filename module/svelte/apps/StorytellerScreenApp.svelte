@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import TimeManager from "@sveltecomponent/TimeManager.svelte";
     import KarmaManager from "@sveltecomponent/KarmaManager/KarmaManager.svelte";
     import DicePoolManager from "@sveltecomponent/DicePoolManager/DicePoolManager.svelte";

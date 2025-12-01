@@ -5,6 +5,21 @@
 import type { Sr3eConfig } from "@config/config";
 
 declare global {
+  /**
+   * The global game instance
+   */
+  var game: Game;
+
+  interface Game {
+    messages: foundry.utils.Collection<foundry.documents.BaseChatMessage>;
+    users: foundry.utils.Collection<foundry.documents.BaseUser>;
+    user: foundry.documents.BaseUser;
+    settings: {
+      get(namespace: string, key: string): any;
+      register(namespace: string, key: string, options: any): void;
+    };
+  }
+
   interface CONFIG {
     /**
      * SR3E system configuration object containing all i18n keys
@@ -15,6 +30,11 @@ declare global {
      * Query handlers for inter-client communication
      */
     queries?: Record<string, (...args: any[]) => Promise<any>>;
+
+    /**
+     * Allow indexing CONFIG with string keys
+     */
+    [key: string]: any;
   }
 
   /**
@@ -41,11 +61,33 @@ declare global {
 
   namespace foundry {
     namespace applications {
+      namespace sheets {
+        /**
+         * ItemSheetV2 class for v13
+         */
+        class ItemSheetV2 extends foundry.applications.api.ApplicationV2 {
+          document: foundry.documents.BaseItem;
+          get item(): foundry.documents.BaseItem;
+          get title(): string;
+          static DEFAULT_OPTIONS: foundry.applications.types.ApplicationConfiguration;
+        }
+      }
+
       namespace apps {
         /**
          * Extension for DocumentSheetConfig to add missing v13 static methods
          */
         class DocumentSheetConfig {
+          /**
+           * Register a sheet class
+           */
+          static registerSheet(
+            documentClass: any,
+            scope: string,
+            sheetClass: any,
+            options?: { types?: string[]; makeDefault?: boolean }
+          ): void;
+
           /**
            * Unregister a sheet class, removing it from the list of available Applications to use for a Document type
            * @param documentClass - The Document class to unregister the sheet for
@@ -59,6 +101,16 @@ declare global {
             sheetClass: string | (typeof foundry.applications.api.ApplicationV2) | (typeof foundry.applications.api.HandlebarsApplicationMixin),
             options?: { types?: string[] }
           ): void;
+        }
+      }
+
+      namespace api {
+        /**
+         * ApplicationV2 base class
+         */
+        class ApplicationV2 {
+          element: HTMLElement;
+          static DEFAULT_OPTIONS: foundry.applications.types.ApplicationConfiguration;
         }
       }
     }

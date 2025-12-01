@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { toggleCardSpanById, moveCardById } from "@services/utilities.js";
 
    const { id } = $props();

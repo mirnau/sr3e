@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { onMount, onDestroy } from "svelte";
    import { localize, openFilePicker } from "@services/utilities.js";
    import ActorDataService from "@services/ActorDataService.js";

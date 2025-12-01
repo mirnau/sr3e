@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Image from "@sveltecomponent/basic/Image.svelte";
   let { actor, config, id, span } = $props();
 </script>

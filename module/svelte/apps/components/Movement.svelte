@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import StatCard from "./basic/DerivedAttributeCard.svelte";
    import MasonryGrid from "./basic/MasonryGrid.svelte";
    import CardToolbar from "./CardToolbar.svelte";

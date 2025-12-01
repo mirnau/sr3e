@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import ActiveSkillCard from "./ActiveSkillCard.svelte";
     import KnowledgeSkillCard from "./KnowledgeSkillCard.svelte";
     import LanguageSkillCard from "./LanguageSkillCard.svelte";
