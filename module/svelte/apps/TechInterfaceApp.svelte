@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { localize, kvOptions } from "@services/utilities.js";
   import Image from "@sveltecomponent/basic/Image.svelte";
   import ItemSheetComponent from "@sveltecomponent/basic/ItemSheetComponent.svelte";

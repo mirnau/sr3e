@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize } from "@services/utilities.js";
    import KarmaRow from "./KarmaRow.svelte";
 

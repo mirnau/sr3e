@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import AttributePointsState from "@injections/charactercreation/AttributePointsState.svelte";
    import SkillPointsState from "@injections/charactercreation/SkillPointsState.svelte";
 

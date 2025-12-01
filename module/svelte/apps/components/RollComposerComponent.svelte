@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { onMount, onDestroy } from "svelte";
    import Counter from "./basic/Counter.svelte";
    import { StoreManager, stores } from "../../svelteHelpers/StoreManager.svelte";
@@ -11,7 +11,7 @@
    import SkillProcedure from "@services/procedure/FSM/SkillProcedure.js";
    import { recoilState, clearAllRecoilForActor } from "@services/ComposerAttackController.js";
 
-   let { actor, config = Config.sr3e } = $props();
+   let { actor, config = CONFIG.sr3e } = $props();
 
    let actorStoreManager = StoreManager.Subscribe(actor);
    onDestroy(() => {

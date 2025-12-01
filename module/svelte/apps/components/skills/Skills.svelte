@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { localize } from "@services/utilities.js";
 	import SkillsLanguage from "./SkillsLanguage.svelte";
 	import SkillsKnowledge from "./SkillsKnowledge.svelte";

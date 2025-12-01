@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     let { item = {} } = $props();
 
     let editor = $state(null);

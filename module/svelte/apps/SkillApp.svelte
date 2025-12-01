@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize, openFilePicker } from "@services/utilities.js";
    import JournalViewer from "@sveltecomponent/JournalViewer.svelte";
    import Image from "@sveltecomponent/basic/Image.svelte";

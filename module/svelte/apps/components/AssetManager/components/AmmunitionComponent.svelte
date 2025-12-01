@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { localize } from "@services/utilities.js";
    import { StoreManager } from "@sveltehelpers/StoreManager.svelte";
    let { item, config } = $props();

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import JournalViewerToolbar from "./JournalViewerToolbar.svelte";
 
     let { document = {}, config = {} } = $props();

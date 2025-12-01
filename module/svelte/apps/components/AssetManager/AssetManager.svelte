@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { getRandomIntinRange, localize } from "@services/utilities.js";
    import { flags, inventory } from "@services/commonConsts.js";
    import CardToolbar from "../CardToolbar.svelte";

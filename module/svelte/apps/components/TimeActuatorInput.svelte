@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     const { label = "Seconds", onDelta = () => {} } = $props();
     let input = $state("");
 </script>

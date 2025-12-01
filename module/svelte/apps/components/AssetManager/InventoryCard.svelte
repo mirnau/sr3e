@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { onMount, onDestroy } from "svelte";
    import { StoreManager } from "../../../svelteHelpers/StoreManager.svelte";
    import FilterToggle from "@sveltecomponent/AssetManager/FilterToggle.svelte";

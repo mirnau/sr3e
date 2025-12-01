@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import TimeActuatorInput from "./TimeActuatorInput.svelte";
     import TimeService from "@services/TimeService.js";
     import { onMount } from "svelte";

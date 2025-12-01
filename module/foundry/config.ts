@@ -569,6 +569,10 @@ export const sr3e = {
     weaponmod: "sr3e.gadgettypes.weaponmod",
   },
 
+  focus: {
+    focus: "sr3e.focus.focus",
+  },
+
   wearable: {
     wearables: "sr3e.wearable.wearables",
     wearable: "sr3e.wearable.wearable",

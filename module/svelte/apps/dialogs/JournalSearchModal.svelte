@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { localize } from "@services/utilities.js";
     const { config, onclose } = $props();
 

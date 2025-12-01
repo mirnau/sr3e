@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     // @runes
     import MyModal from "../../apps/dialogs/JournalSearchModal.svelte";
     import JournalSearchModal from "../../apps/dialogs/JournalSearchModal.svelte";

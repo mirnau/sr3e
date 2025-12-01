@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { StoreManager, stores } from "@sveltehelpers/StoreManager.svelte.js";
    import { localize } from "@services/utilities.js";
    import { onDestroy } from "svelte";

@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
    import { localize } from "@services/utilities.js";
    import Switch from "@sveltecomponent/Switch.svelte";
 
-   let { item, key, label, value, path, type = "text", options = [], onUpdate } = $props();
+   let { item, key, label, value, path, type = "text", options = [], onUpdate = undefined } = $props();
 
    function update(e) {
       let val;

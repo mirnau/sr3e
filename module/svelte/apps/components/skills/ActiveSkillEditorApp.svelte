@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import { openFilePicker, localize } from "@services/utilities.js";
    import SpecializationCard from "./SpecializationCard.svelte";
    import { onDestroy, tick } from "svelte";

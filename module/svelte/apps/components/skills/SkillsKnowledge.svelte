@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import SkillCategory from "./SkillCategory.svelte";
    import { setupMasonry } from "../../../../foundry/masonry/responsiveMasonry.js";
    import { masonryMinWidthFallbackValue } from "@services/commonConsts.js";

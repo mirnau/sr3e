@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import AttributeCard from "./basic/AttributeCard.svelte";
    import { localize } from "@services/utilities.js";
    import CardToolbar from "./CardToolbar.svelte";

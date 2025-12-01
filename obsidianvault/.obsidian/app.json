@@ -1,0 +1,9 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "current",
+  "attachmentFolderPath": "./",
+  "useMarkdownLinks": true,
+  "showLineNumber": true,
+  "strictLineBreaks": false,
+  "showFrontmatter": true
+}

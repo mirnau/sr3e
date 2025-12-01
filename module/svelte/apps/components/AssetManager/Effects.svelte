@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
    import ActiveEffectsViewer from "../ActiveEffects/ActiveEffectsViewer.svelte";
    let { actor, config } = $props();
 </script>
