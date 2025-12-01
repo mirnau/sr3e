@@ -88,7 +88,7 @@ Procedures govern **who rolls what, when, and how results are posted to chat**. 
 **Add a procedure**
 
 - Subclass `AbstractProcedure`.
-- Register it in `sr3e.js`.
+- Register it in `sr3e.ts`.
 - Respect `ProcedureLock`.
 
 See the upcoming **Procedures** chapter in the docs for end‑to‑end flow and examples.

@@ -1,10 +1,5 @@
-#Folders
+# Folders
 build/
 node_modules/
-themes/chummer/css/core-styles.css
-themes/chummer/css/core-styles.css
-themes/chummer/css/core-styles.css
 
-#Files
-build/bundle.js
-build/bundle.js.map
+# Files

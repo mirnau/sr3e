@@ -20,16 +20,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-    /* JavaScript Support (for gradual migration) */
-    "allowJs": true,
-    "checkJs": false,
-
     /* Emit */
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
     "noEmit": true,
+    "jsx": "react-jsx",
 
     /* Advanced */
     "skipLibCheck": true,
@@ -38,41 +35,6 @@
     "baseUrl": ".",
     "paths": {
       "@root": ["./"],
-      "@root/*": ["./*"],
-      "@applications": ["module/foundry/applications"],
-      "@applications/*": ["module/foundry/applications/*"],
-      "@masonry": ["module/foundry/masonry"],
-      "@masonry/*": ["module/foundry/masonry/*"],
-      "@models": ["module/models"],
-      "@models/*": ["module/models/*"],
-      "@sheets": ["module/foundry/sheets"],
-      "@sheets/*": ["module/foundry/sheets/*"],
-      "@services": ["module/services"],
-      "@services/*": ["module/services/*"],
-      "@rules": ["module/services/procedure/rules"],
-      "@rules/*": ["module/services/procedure/rules/*"],
-      "@families": ["module/services/procedure/families"],
-      "@families/*": ["module/services/procedure/families/*"],
-      "@common": ["module/services/procedure/common"],
-      "@common/*": ["module/services/procedure/common/*"],
-      "@game": ["module/services/procedure/game"],
-      "@game/*": ["module/services/procedure/game/*"],
-      "@registry": ["module/services/procedure/registry"],
-      "@registry/*": ["module/services/procedure/registry/*"],
-      "@hooks": ["module/foundry/hooks"],
-      "@hooks/*": ["module/foundry/hooks/*"],
-      "@documents": ["module/foundry/documents"],
-      "@documents/*": ["module/foundry/documents/*"],
-      "@apps": ["module/svelte/apps"],
-      "@apps/*": ["module/svelte/apps/*"],
-      "@config": ["module/foundry"],
-      "@config/*": ["module/foundry/*"],
-      "@sveltecomponent": ["module/svelte/apps/components"],
-      "@sveltecomponent/*": ["module/svelte/apps/components/*"],
-      "@sveltehelpers": ["module/svelte/svelteHelpers"],
-      "@sveltehelpers/*": ["module/svelte/svelteHelpers/*"],
-      "@injections": ["module/svelte/apps/injections"],
-      "@injections/*": ["module/svelte/apps/injections/*"]
     },
 
     /* Svelte Support */
@@ -81,7 +43,7 @@
   "include": [
     "module/**/*",
     "tests/**/*",
-    "sr3e.js",
+    "sr3e.ts",
     "vite.config.ts",
     "gulpfile.ts",
     "svelte.config.ts",

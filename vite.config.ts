@@ -1,7 +1,5 @@
-import type { Plugin, UserConfig } from "vite";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,158 +7,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname);
 
-const generateFolderAliases = (): Record<string, string> => {
-   const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
-   return Object.fromEntries(
-      entries.filter((e) => e.isDirectory()).map((dir) => [`@/${dir.name}`, path.join(projectRoot, dir.name)])
-   );
-};
-
-function sr3eInjectLocation(): Plugin {
-   return {
-      name: "sr3e-inject-location",
-      enforce: "pre",
-      transform(code, id) {
-         // ignore deps/virtual/query modules
-         if (id.includes("node_modules")) return null;
-         if (id.startsWith("\0")) return null;
-         if (id.includes("?")) return null;
-
-         if (!/(\.svelte|\.js|\.ts)$/.test(id)) return null;
-         if (!code.includes("__FILE__") && !code.includes("__LINE__") && !code.includes("__DIR__")) return null;
-
-         const relFile = path.relative(process.cwd(), id).split(path.sep).join("/");
-         const dir = path.dirname(relFile).split(path.sep).join("/");
-
-         let out = "";
-         let last = 0;
-
-         const replaceAll = (pattern: RegExp, replacer: (match: RegExpExecArray, index: number) => string) => {
-            pattern.lastIndex = 0;
-            for (;;) {
-               const m = pattern.exec(code);
-               if (!m) break;
-               out += code.slice(last, m.index);
-               out += replacer(m, m.index);
-               last = m.index + m[0].length;
-            }
-            code = out + code.slice(last);
-            out = "";
-            last = 0;
-         };
-
-         // __FILE__
-         replaceAll(/__FILE__/g, () => JSON.stringify(relFile));
-
-         // __DIR__
-         replaceAll(/__DIR__/g, () => JSON.stringify(dir));
-
-         // __LINE__
-         replaceAll(/__LINE__/g, (_, idx) => {
-            const segment = code.slice(0, idx);
-            const line = 1 + (segment.match(/\n/g)?.length ?? 0);
-            return String(line);
-         });
-
-         return { code, map: null };
-      },
-   };
-}
-
-export default defineConfig(({ mode }): UserConfig => {
-   return {
-      define: {
-         // During testing, keep DEBUG enabled even for builds
-         DEBUG: JSON.stringify(true),
-      },
-      plugins: [
-         sr3eInjectLocation(),
-         svelte({
-            compilerOptions: { runes: true },
-            onwarn(warning, handler) {
-               if (warning.code === "event_directive_deprecated") return;
-               handler(warning);
-            },
-         }),
+export default defineConfig({
+  define: {
+    DEBUG: JSON.stringify(true),
+  },
+  plugins: [
+    svelte({
+      compilerOptions: { runes: true },
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@root": projectRoot,
+    },
+  },
+  build: {
+    sourcemap: true,
+    minify: "esbuild",
+    outDir: "build",
+    emptyOutDir: true,
+    watch: {
+      include: [
+        "styles/**",
+        "module/**",
+        "lang/**",
+        "*.ts",
+        "*.js",
+        "*.json",
+        "*.svelte",
       ],
-
-      resolve: {
-         alias: {
-            ...generateFolderAliases(),
-            "@root": projectRoot,
-            "@applications": path.resolve(projectRoot, "module/foundry/applications"),
-            "@masonry": path.resolve(projectRoot, "module/foundry/masonry"),
-            "@models": path.resolve(projectRoot, "module/models"),
-            "@sheets": path.resolve(projectRoot, "module/foundry/sheets"),
-            "@services": path.resolve(projectRoot, "module/services"),
-            "@rules": path.resolve(projectRoot, "module/services/procedure/rules"),
-            "@families": path.resolve(projectRoot, "module/services/procedure/families"),
-            "@common": path.resolve(projectRoot, "module/services/procedure/common"),
-            "@game": path.resolve(projectRoot, "module/services/procedure/game"),
-            "@registry": path.resolve(projectRoot, "module/services/procedure/registry"),
-            "@hooks": path.resolve(projectRoot, "module/foundry/hooks"),
-            "@documents": path.resolve(projectRoot, "module/foundry/documents"),
-            "@apps": path.resolve(projectRoot, "module/svelte/apps"),
-            "@config": path.resolve(projectRoot, "module/foundry"),
-            "@sveltecomponent": path.resolve(projectRoot, "module/svelte/apps/components"),
-            "@sveltehelpers": path.resolve(projectRoot, "module/svelte/svelteHelpers"),
-            "@injections": path.resolve(projectRoot, "module/svelte/apps/injections"),
-         },
+    },
+    rollupOptions: {
+      input: {
+        app: path.resolve(projectRoot, "sr3e.ts"),
+        "chummer-light": path.resolve(projectRoot, "styles/chummer-light.scss"),
+        "chummer-dark": path.resolve(projectRoot, "styles/chummer-dark.scss"),
       },
-
-      build: {
-         sourcemap: true, // keep this for readable file/line in dev/staging
-         minify: "esbuild", // adjust as needed for prod
-         outDir: "build",
-         emptyOutDir: true,
-         rollupOptions: {
-            input: "sr3e.js",
-            output: {
-               format: "es",
-               dir: "build",
-               entryFileNames: "bundle.js",
-            },
-         },
+      output: {
+        format: "es",
+        dir: "build",
+        entryFileNames: "bundle/[name].js",
+        chunkFileNames: "bundle/[name].js",
+        assetFileNames: (assetInfo) =>
+          assetInfo.name && assetInfo.name.endsWith(".css")
+            ? "themes/[name]"
+            : "bundle/assets/[name]",
       },
-
-      server: {
-         port: 3000,
-         open: false,
-      },
-
-      // Vitest configuration
-      test: {
-         // DOM-like environment for Svelte component tests
-         environment: "jsdom",
-         globals: true,
-         // Keep test discovery simple and JS-only per project rules
-         include: [
-            "tests/**/*.{test,spec}.js",
-            "module/**/*.{test,spec}.js",
-            "temp/**/*.{test,spec}.js",
-         ],
-         exclude: [
-            "node_modules",
-            "build",
-            "dist",
-            ".git",
-            "docs",
-         ],
-         coverage: {
-            provider: "v8",
-            reporter: ["text", "lcov"],
-            reportsDirectory: "./coverage",
-            exclude: [
-               "node_modules/**",
-               "build/**",
-               "dist/**",
-               "docs/**",
-               "**/*.d.ts",
-               "**/tests/**",
-               "**/*.test.js",
-               "**/*.spec.js",
-            ],
-         },
-      },
-   };
+    },
+  },
+  server: {
+    port: 3000,
+    open: false,
+  },
 });
