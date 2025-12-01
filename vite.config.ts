@@ -1,4 +1,4 @@
-import Log from "./module/services/Log.js";
+import type { Plugin, UserConfig } from "vite";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import fs from "node:fs";
@@ -9,14 +9,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname);
 
-const generateFolderAliases = () => {
+const generateFolderAliases = (): Record<string, string> => {
    const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
    return Object.fromEntries(
       entries.filter((e) => e.isDirectory()).map((dir) => [`@/${dir.name}`, path.join(projectRoot, dir.name)])
    );
 };
 
-function sr3eInjectLocation() {
+function sr3eInjectLocation(): Plugin {
    return {
       name: "sr3e-inject-location",
       enforce: "pre",
@@ -35,7 +35,7 @@ function sr3eInjectLocation() {
          let out = "";
          let last = 0;
 
-         const replaceAll = (pattern, replacer) => {
+         const replaceAll = (pattern: RegExp, replacer: (match: RegExpExecArray, index: number) => string) => {
             pattern.lastIndex = 0;
             for (;;) {
                const m = pattern.exec(code);
@@ -67,7 +67,7 @@ function sr3eInjectLocation() {
    };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }): UserConfig => {
    return {
       define: {
          // During testing, keep DEBUG enabled even for builds
