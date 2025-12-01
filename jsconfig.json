@@ -15,8 +15,8 @@
   },
   "include": [
     "systems/sr3e",
-    "**/*.js",
-    "foundry-globals.js",
+    "**/*.ts",
+    "foundry-globals.d.ts",
     "module/svelte/apps/JournalEditorApp.svelte"
   ],
   "exclude": ["node_modules"]

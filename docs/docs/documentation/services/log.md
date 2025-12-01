@@ -7,7 +7,7 @@ nav_order: 3
 
 # @services/Log.js
 
-Styled console logging utility used in development. Exposed globally as `LOG` in `Bootstrap.js` and gated by `DEBUG`.
+Styled console logging utility used in development. Exposed globally as `LOG` during system startup and gated by `DEBUG`.
 
 Import (optional): `import Log from "@services/Log.js"`.
 

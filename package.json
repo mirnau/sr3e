@@ -8,7 +8,9 @@
    "scripts": {
       "dev": "vite",
       "build": "vite build",
+      "watch": "vite build --watch",
       "preview": "vite preview",
+      "typecheck": "tsc --noEmit",
       "count-lines": "npx cloc --include-ext=js,svelte,less --exclude-dir=node_modules,dist,build .",
       "release:alpha": "standard-version --prerelease alpha && git push --follow-tags origin main",
       "release:beta": "standard-version --prerelease beta && git push --follow-tags origin main",
@@ -29,6 +31,7 @@
       "gulp-less": "^5.0.0",
       "jsdom": "^26.1.0",
       "less": "^4.2.1",
+      "sass": "^1.80.6",
       "sloc": "^0.3.2",
       "standard-version": "^9.5.0",
       "svelte": "^5.19.3",

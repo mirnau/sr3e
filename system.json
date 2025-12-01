@@ -19,7 +19,7 @@
     "verified": "13.341"
   },
   "esmodules": [
-    "build/bundle.js"
+    "build/bundle/bundle.js"
   ],
   "documentTypes": {
     "Actor": {
@@ -43,9 +43,8 @@
     }
   },
   "styles": [
-    "themes/chummer/css/core-styles.css",
-    "themes/chummer/css/chummer-light.css",
-    "themes/chummer/css/chummer-dark.css"
+    "build/themes/chummer-light.css",
+    "build/themes/chummer-dark.css"
   ],
   "languages": [
     {
