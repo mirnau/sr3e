@@ -26,20 +26,9 @@ export default defineConfig({
     minify: "esbuild",
     outDir: "build",
     emptyOutDir: true,
-    watch: {
-      include: [
-        "styles/**",
-        "module/**",
-        "lang/**",
-        "*.ts",
-        "*.js",
-        "*.json",
-        "*.svelte",
-      ],
-    },
     rollupOptions: {
       input: {
-        app: path.resolve(projectRoot, "sr3e.ts"),
+        bundle: path.resolve(projectRoot, "sr3e.ts"),
         "chummer-light": path.resolve(projectRoot, "styles/chummer-light.scss"),
         "chummer-dark": path.resolve(projectRoot, "styles/chummer-dark.scss"),
       },
@@ -48,10 +37,15 @@ export default defineConfig({
         dir: "build",
         entryFileNames: "bundle/[name].js",
         chunkFileNames: "bundle/[name].js",
-        assetFileNames: (assetInfo) =>
-          assetInfo.name && assetInfo.name.endsWith(".css")
-            ? "themes/[name]"
-            : "bundle/assets/[name]",
+        assetFileNames: (assetInfo) => {
+          const name = assetInfo.name ?? "";
+          if (name.endsWith(".css")) {
+            const parsed = path.parse(name);
+            return `themes/${parsed.name}${parsed.ext}`;
+          }
+          const parsed = path.parse(name);
+          return `bundle/assets/${parsed.name}${parsed.ext}`;
+        },
       },
     },
   },

@@ -1,5 +1,9 @@
 @use "./character.scss";
 
+:root {
+  color-scheme: dark;
+}
+
 h1 {
     color: blue;
 }
