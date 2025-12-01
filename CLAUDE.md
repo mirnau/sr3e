@@ -11,6 +11,14 @@ SR3E is an unofficial Shadowrun 3rd Edition homebrew system for Foundry VTT v13.
 - **sr3e2** (`C:\Users\mikae\AppData\Local\FoundryVTT\Data\systems\sr3e2`) - Legacy JavaScript version (this folder)
 - **sr3e** (`C:\Users\mikae\AppData\Local\FoundryVTT\Data\systems\sr3e`) - New TypeScript iteration (empty, ready for setup)
 
+## Resources
+
+### Foundry VTT API Documentation
+When in doubt about Foundry VTT API types, methods, or patterns, consult the official API documentation:
+- **v13 API Docs**: https://foundryvtt.com/api/
+- Use this as the authoritative source for method signatures, class structures, and API behavior
+- The community types package (`@league-of-foundry-developers/foundry-vtt-types`) may be incomplete for v13
+
 ## Development Commands
 
 ```bash
