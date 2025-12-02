@@ -24,7 +24,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 - Svelte 5 (runes): [Svelte Docs](https://svelte.dev/docs/svelte/overview)
 - LESS: [lesscss.org](https://lesscss.org/)
 - Vite bundler: [Vite Guide](https://vite.dev/guide/)
-- Gulp automated build/watch: [Gulp Quick Start](https://gulpjs.com/docs/en/getting-started/quick-start)
+- Build/watch: `npm run build` or `npm run watch` (Vite)
 - Foundry v13.342 (V2): [Foundry API v13](https://foundryvtt.com/api/) | [Systems Guide](https://foundryvtt.com/article/systems/)
 - Node 22.x: [Node.js 22 Docs](https://nodejs.org/docs/latest-v22.x/)
 
@@ -37,7 +37,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 - Run `npm ci`.
 - Clone or copy the repo directly into `FoundryVTT/Data/systems/sr3e`.
 - For the first build you can run `npm run build`.
-- Builds are automated on save (via gulp). `npx gulp` js, LESS and svelte files are automatically handled in most scenarios.
+- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild JS/Svelte/LESS on change.
 
 **Option B: Symlink (according to AI)**
 
@@ -48,7 +48,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
   - macOS: `ln -s /path/to/repo ~/Library/Application\ Support/FoundryVTT/Data/systems/sr3e`
   - Linux: `ln -s /path/to/repo ~/.local/share/FoundryVTT/Data/systems/sr3e`
 - For the first build you can run `npm run build`.
-- Builds are automated on save (via gulp). `npx gulp` js, LESS and svelte files are automatically handled in most scenarios.
+- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild JS/Svelte/LESS on change.
 
 ---
 

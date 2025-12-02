@@ -44,10 +44,11 @@
     "module/**/*",
     "tests/**/*",
     "sr3e.ts",
+    "Bootstrap.ts",
     "vite.config.ts",
-    "gulpfile.ts",
     "svelte.config.ts",
-    "module/types/**/*.d.ts"
+    "module/types/**/*.d.ts",
+    "types/**/*"
   ],
   "exclude": [
     "node_modules",

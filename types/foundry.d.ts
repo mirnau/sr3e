@@ -1,0 +1,3 @@
+/// <reference types="@league-of-foundry-developers/foundry-vtt-types" />
+
+export {};
