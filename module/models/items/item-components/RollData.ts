@@ -1,14 +1,4 @@
-type RollDataSchema = {
-  targetNumber: SchemaField<{
-    value: NumberField;
-    mod: NumberField;
-  }>;
-};
-
-export default class RollDataModel extends TypeDataModel<
-  RollDataSchema,
-  BaseItem
-> {
+export default class RollDataModel extends TypeDataModel<RollDataSchema, BaseItem> {
   static defineSchema(): RollDataSchema {
     return {
       targetNumber: new SchemaField({
@@ -26,3 +16,10 @@ export default class RollDataModel extends TypeDataModel<
     };
   }
 }
+
+type RollDataSchema = {
+  targetNumber: SchemaField<{
+    value: NumberField;
+    mod: NumberField;
+  }>;
+};

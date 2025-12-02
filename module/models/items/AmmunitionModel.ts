@@ -1,20 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
-type AmmunitionSchema = {
-  class: StringField;
-  type: StringField;
-  reloadMechanism: StringField;
-  rounds: NumberField;
-  maxCapacity: NumberField;
-  portability: EmbeddedDataField<typeof PortabilityModel>;
-  commodity: EmbeddedDataField<typeof CommodityModel>;
-};
-
-export default class AmmunitionModel extends TypeDataModel<
-  AmmunitionSchema,
-  BaseItem
-> {
+export default class AmmunitionModel extends TypeDataModel<AmmunitionSchema, BaseItem> {
   static defineSchema(): AmmunitionSchema {
     return {
       class: new StringField({
@@ -44,3 +31,13 @@ export default class AmmunitionModel extends TypeDataModel<
     };
   }
 }
+
+type AmmunitionSchema = {
+  class: StringField;
+  type: StringField;
+  reloadMechanism: StringField;
+  rounds: NumberField;
+  maxCapacity: NumberField;
+  portability: EmbeddedDataField<typeof PortabilityModel>;
+  commodity: EmbeddedDataField<typeof CommodityModel>;
+};

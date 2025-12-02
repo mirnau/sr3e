@@ -1,43 +1,6 @@
 import CommodityModel from "./item-components/Commodity";
 import CustomTokenModel from "./item-components/CustomToken";
 
-type MountsSchema = {
-  firmpoints: NumberField;
-  hardpoints: NumberField;
-  turrets: NumberField;
-  externalFixed: NumberField;
-  internalFixed: NumberField;
-  pintles: NumberField;
-  miniTurrets: NumberField;
-};
-
-type MechanicalSchema = {
-  category: StringField;
-  power: StringField;
-  handling: NumberField;
-  speed: NumberField;
-  accel: NumberField;
-  body: NumberField;
-  armor: NumberField;
-  signature: NumberField;
-  autonav: NumberField;
-  pilot: NumberField;
-  sensor: NumberField;
-  cargo: NumberField;
-  load: NumberField;
-  speedTurbo: NumberField;
-  accelTurbo: NumberField;
-  seating: StringField;
-  entryPoints: StringField;
-  setupBreakdownMinutes: NumberField;
-  landingTakeoff: StringField;
-  riggerAdaptation: BooleanField;
-  remoteControlInterface: BooleanField;
-  mounts: SchemaField<MountsSchema>;
-  commodity: EmbeddedDataField<typeof CommodityModel>;
-  customToken: EmbeddedDataField<typeof CustomTokenModel>;
-};
-
 export default class MechanicalModel extends DataModel<
   MechanicalSchema,
   BaseItem
@@ -131,3 +94,39 @@ export default class MechanicalModel extends DataModel<
     };
   }
 }
+type MountsSchema = {
+  firmpoints: NumberField;
+  hardpoints: NumberField;
+  turrets: NumberField;
+  externalFixed: NumberField;
+  internalFixed: NumberField;
+  pintles: NumberField;
+  miniTurrets: NumberField;
+};
+
+type MechanicalSchema = {
+  category: StringField;
+  power: StringField;
+  handling: NumberField;
+  speed: NumberField;
+  accel: NumberField;
+  body: NumberField;
+  armor: NumberField;
+  signature: NumberField;
+  autonav: NumberField;
+  pilot: NumberField;
+  sensor: NumberField;
+  cargo: NumberField;
+  load: NumberField;
+  speedTurbo: NumberField;
+  accelTurbo: NumberField;
+  seating: StringField;
+  entryPoints: StringField;
+  setupBreakdownMinutes: NumberField;
+  landingTakeoff: StringField;
+  riggerAdaptation: BooleanField;
+  remoteControlInterface: BooleanField;
+  mounts: SchemaField<MountsSchema>;
+  commodity: EmbeddedDataField<typeof CommodityModel>;
+  customToken: EmbeddedDataField<typeof CustomTokenModel>;
+};

@@ -1,16 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
-type GadgetSchema = {
-  type: StringField;
-  portability: EmbeddedDataField<typeof PortabilityModel>;
-  commodity: EmbeddedDataField<typeof CommodityModel>;
-};
-
-export default class GadgetModel extends TypeDataModel<
-  GadgetSchema,
-  BaseItem
-> {
+export default class GadgetModel extends TypeDataModel<GadgetSchema, BaseItem> {
   static defineSchema(): GadgetSchema {
     return {
       type: new StringField({
@@ -22,3 +13,9 @@ export default class GadgetModel extends TypeDataModel<
     };
   }
 }
+
+type GadgetSchema = {
+  type: StringField;
+  portability: EmbeddedDataField<typeof PortabilityModel>;
+  commodity: EmbeddedDataField<typeof CommodityModel>;
+};

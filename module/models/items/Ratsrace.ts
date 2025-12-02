@@ -1,25 +1,24 @@
 import TransactionModel from "./TransactionModel";
 
-type RatsraceSchema = {
-  assets: ArrayField<EmbeddedDataField<typeof TransactionModel>>;
-  expeses: ArrayField<EmbeddedDataField<typeof TransactionModel>>;
-};
-
 export default class Ratsrace extends TypeDataModel<
   RatsraceSchema,
   BaseItem
 > {
   static defineSchema(): RatsraceSchema {
-    const transaction = () => new EmbeddedDataField(TransactionModel);
     return {
-      assets: new ArrayField(transaction(), {
+      assets: new ArrayField(new EmbeddedDataField(TransactionModel), {
         required: true,
         initial: [],
       }),
-      expeses: new ArrayField(transaction(), {
+      expeses: new ArrayField(new EmbeddedDataField(TransactionModel), {
         required: true,
         initial: [],
       }),
     };
   }
 }
+
+type RatsraceSchema = {
+  assets: ArrayField<EmbeddedDataField<typeof TransactionModel>>;
+  expeses: ArrayField<EmbeddedDataField<typeof TransactionModel>>;
+};
