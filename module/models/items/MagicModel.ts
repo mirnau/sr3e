@@ -1,28 +1,3 @@
-type AwakenedSchema = {
-  archetype: StringField;
-  priority: StringField;
-};
-
-type MagicianDataSchema = {
-  magicianType: StringField;
-  tradition: StringField;
-  drainResistanceAttribute: StringField;
-  aspect: StringField;
-  canAstrallyProject: BooleanField;
-  totem: StringField;
-  spellPoints: NumberField;
-};
-
-type AdeptDataSchema = {
-  powerPoints: NumberField;
-};
-
-type MagicSchema = {
-  awakened: SchemaField<AwakenedSchema>;
-  magicianData: SchemaField<MagicianDataSchema>;
-  adeptData: SchemaField<AdeptDataSchema>;
-};
-
 export default class MagicModel extends TypeDataModel<MagicSchema, BaseItem> {
   static defineSchema(): MagicSchema {
     return {
@@ -75,3 +50,28 @@ export default class MagicModel extends TypeDataModel<MagicSchema, BaseItem> {
     };
   }
 }
+
+type AwakenedSchema = {
+  archetype: StringField;
+  priority: StringField;
+};
+
+type MagicianDataSchema = {
+  magicianType: StringField;
+  tradition: StringField;
+  drainResistanceAttribute: StringField;
+  aspect: StringField;
+  canAstrallyProject: BooleanField;
+  totem: StringField;
+  spellPoints: NumberField;
+};
+
+type AdeptDataSchema = {
+  powerPoints: NumberField;
+};
+
+type MagicSchema = {
+  awakened: SchemaField<AwakenedSchema>;
+  magicianData: SchemaField<MagicianDataSchema>;
+  adeptData: SchemaField<AdeptDataSchema>;
+};

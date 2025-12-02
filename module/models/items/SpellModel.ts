@@ -1,18 +1,3 @@
-type SpellSchema = {
-  type: StringField;
-  category: StringField;
-  duration: SchemaField<{
-    type: StringField;
-    rounds: NumberField;
-  }>;
-  learnedForce: NumberField;
-  targeting: SchemaField<{
-    opponentsAttribute: StringField;
-    staticTargetNumber: NumberField;
-  }>;
-  drain: NumberField;
-};
-
 export default class SpellModel extends TypeDataModel<SpellSchema, BaseItem> {
   static defineSchema(): SpellSchema {
     return {
@@ -58,3 +43,18 @@ export default class SpellModel extends TypeDataModel<SpellSchema, BaseItem> {
     };
   }
 }
+
+type SpellSchema = {
+  type: StringField;
+  category: StringField;
+  duration: SchemaField<{
+    type: StringField;
+    rounds: NumberField;
+  }>;
+  learnedForce: NumberField;
+  targeting: SchemaField<{
+    opponentsAttribute: StringField;
+    staticTargetNumber: NumberField;
+  }>;
+  drain: NumberField;
+};

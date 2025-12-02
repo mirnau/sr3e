@@ -1,31 +1,3 @@
-type RangeSchema = {
-  min: NumberField;
-  average: NumberField;
-  max: NumberField;
-};
-
-type AttributeLimitsSchema = {
-  strength: NumberField;
-  quickness: NumberField;
-  body: NumberField;
-  charisma: NumberField;
-  intelligence: NumberField;
-  willpower: NumberField;
-};
-
-type MetatypeSchema = {
-  agerange: SchemaField<RangeSchema>;
-  physical: SchemaField<{
-    height: SchemaField<RangeSchema>;
-    weight: SchemaField<RangeSchema>;
-  }>;
-  attributeLimits: SchemaField<AttributeLimitsSchema>;
-  karma: SchemaField<{ factor: NumberField }>;
-  movement: SchemaField<{ factor: NumberField }>;
-  priority: StringField;
-  journalId: StringField;
-};
-
 export default class MetatypeModel extends TypeDataModel<
   MetatypeSchema,
   BaseItem
@@ -111,3 +83,32 @@ export default class MetatypeModel extends TypeDataModel<
     };
   }
 }
+
+type RangeSchema = {
+  min: NumberField;
+  average: NumberField;
+  max: NumberField;
+};
+
+type AttributeLimitsSchema = {
+  strength: NumberField;
+  quickness: NumberField;
+  body: NumberField;
+  charisma: NumberField;
+  intelligence: NumberField;
+  willpower: NumberField;
+};
+
+type MetatypeSchema = {
+  agerange: SchemaField<RangeSchema>;
+  physical: SchemaField<{
+    height: SchemaField<RangeSchema>;
+    weight: SchemaField<RangeSchema>;
+  }>;
+  attributeLimits: SchemaField<AttributeLimitsSchema>;
+  karma: SchemaField<{ factor: NumberField }>;
+  movement: SchemaField<{ factor: NumberField }>;
+  priority: StringField;
+  journalId: StringField;
+};
+

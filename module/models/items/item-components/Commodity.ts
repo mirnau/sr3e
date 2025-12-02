@@ -10,10 +10,7 @@ type CommoditySchema = {
   isBroken: BooleanField;
 };
 
-export default class CommodityModel extends TypeDataModel<
-  CommoditySchema,
-  BaseItem
-> {
+export default class CommodityModel extends TypeDataModel<CommoditySchema, BaseItem> {
   static defineSchema(): CommoditySchema {
     return {
       days: new NumberField({

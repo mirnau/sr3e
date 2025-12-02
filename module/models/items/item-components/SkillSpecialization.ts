@@ -1,12 +1,5 @@
-type SkillSpecializationSchema = {
-  name: StringField;
-  value: NumberField;
-};
 
-export default class SkillSpecializationModel extends TypeDataModel<
-  SkillSpecializationSchema,
-  BaseItem
-> {
+export default class SkillSpecializationModel extends TypeDataModel<SkillSpecializationSchema, BaseItem> {
   static defineSchema(): SkillSpecializationSchema {
     return {
       name: new StringField({
@@ -21,3 +14,8 @@ export default class SkillSpecializationModel extends TypeDataModel<
     };
   }
 }
+
+type SkillSpecializationSchema = {
+  name: StringField;
+  value: NumberField;
+};

@@ -1,37 +1,5 @@
 import SkillSpecializationModel from "./item-components/SkillSpecialization";
 
-type SkillSpecializationsField = ArrayField<EmbeddedDataField<typeof SkillSpecializationModel>>;
-
-type ActiveSkillSchema = {
-  value: NumberField;
-  linkedAttribute: StringField;
-  associatedDicePool: StringField;
-  specializations: SkillSpecializationsField;
-};
-
-type KnowledgeSkillSchema = {
-  value: NumberField;
-  linkedAttribute: StringField;
-  specializations: SkillSpecializationsField;
-};
-
-type LanguageSkillSchema = {
-  value: NumberField;
-  linkedAttribute: StringField;
-  specializations: SkillSpecializationsField;
-  readwrite: SchemaField<{
-    value: NumberField;
-  }>;
-  journalId: StringField;
-};
-
-type SkillSchema = {
-  skillType: StringField;
-  activeSkill: SchemaField<ActiveSkillSchema>;
-  knowledgeSkill: SchemaField<KnowledgeSkillSchema>;
-  languageSkill: SchemaField<LanguageSkillSchema>;
-};
-
 export default class SkillModel extends TypeDataModel<SkillSchema, BaseItem> {
   static defineSchema(): SkillSchema {
     const specializations = () =>
@@ -98,3 +66,35 @@ export default class SkillModel extends TypeDataModel<SkillSchema, BaseItem> {
     };
   }
 }
+
+type SkillSpecializationsField = ArrayField<EmbeddedDataField<typeof SkillSpecializationModel>>;
+
+type ActiveSkillSchema = {
+  value: NumberField;
+  linkedAttribute: StringField;
+  associatedDicePool: StringField;
+  specializations: SkillSpecializationsField;
+};
+
+type KnowledgeSkillSchema = {
+  value: NumberField;
+  linkedAttribute: StringField;
+  specializations: SkillSpecializationsField;
+};
+
+type LanguageSkillSchema = {
+  value: NumberField;
+  linkedAttribute: StringField;
+  specializations: SkillSpecializationsField;
+  readwrite: SchemaField<{
+    value: NumberField;
+  }>;
+  journalId: StringField;
+};
+
+type SkillSchema = {
+  skillType: StringField;
+  activeSkill: SchemaField<ActiveSkillSchema>;
+  knowledgeSkill: SchemaField<KnowledgeSkillSchema>;
+  languageSkill: SchemaField<LanguageSkillSchema>;
+};

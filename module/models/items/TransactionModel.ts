@@ -1,13 +1,3 @@
-type TransactionSchema = {
-  amount: NumberField;
-  recurrent: BooleanField;
-  isCreditStick: BooleanField;
-  type: StringField;
-  creditorId: StringField;
-  interestPerMonth: NumberField;
-  journalId: StringField;
-};
-
 export default class TransactionModel extends TypeDataModel<
   TransactionSchema,
   BaseItem
@@ -45,3 +35,13 @@ export default class TransactionModel extends TypeDataModel<
     };
   }
 }
+
+type TransactionSchema = {
+  amount: NumberField;
+  recurrent: BooleanField;
+  isCreditStick: BooleanField;
+  type: StringField;
+  creditorId: StringField;
+  interestPerMonth: NumberField;
+  journalId: StringField;
+};

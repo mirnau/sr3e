@@ -1,7 +1,3 @@
-type KarmaSchema = {
-  value: NumberField;
-};
-
 export default class KarmaModel extends TypeDataModel<KarmaSchema, BaseItem> {
   static defineSchema(): KarmaSchema {
     return {
@@ -13,3 +9,7 @@ export default class KarmaModel extends TypeDataModel<KarmaSchema, BaseItem> {
     };
   }
 }
+
+type KarmaSchema = {
+  value: NumberField;
+};

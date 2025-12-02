@@ -4,10 +4,7 @@ type CustomTokenSchema = {
   texture: StringField;
 };
 
-export default class CustomTokenModel extends DataModel<
-  CustomTokenSchema,
-  BaseItem
-> {
+export default class CustomTokenModel extends DataModel<CustomTokenSchema, BaseItem> {
   static defineSchema(): CustomTokenSchema {
     return {
       width: new NumberField({

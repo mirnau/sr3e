@@ -1,14 +1,5 @@
-type RangeBandSchema = {
-  short: NumberField;
-  medium: NumberField;
-  long: NumberField;
-  extreme: NumberField;
-};
 
-export default class RangeBandModel extends TypeDataModel<
-  RangeBandSchema,
-  BaseItem
-> {
+export default class RangeBandModel extends TypeDataModel<RangeBandSchema, BaseItem> {
   static defineSchema(): RangeBandSchema {
     return {
       short: new NumberField({
@@ -38,3 +29,10 @@ export default class RangeBandModel extends TypeDataModel<
     };
   }
 }
+
+type RangeBandSchema = {
+  short: NumberField;
+  medium: NumberField;
+  long: NumberField;
+  extreme: NumberField;
+};
