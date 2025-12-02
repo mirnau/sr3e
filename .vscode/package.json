@@ -1,7 +1,6 @@
 {
     "scripts": {
-        "gulp": "gulp",
-        "gulp:watch": "gulp watch",
-        "gulp:compile": "gulp compileLess"
+        "watch": "npm run watch --prefix ..",
+        "build": "npm run build --prefix .."
     }
 }

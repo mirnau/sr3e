@@ -10,7 +10,7 @@ repopsitory.
 # Changes from the first iteration
 
 -  Svelte has been added to manage complex databinding scenarios, thus a Svelte installation is necessary to run and build the project
--  All pre compilation has been automated to start on vs code start-up, this prevents unnecessary debugging time when the developer forgets to initiate tasks
+-  Vite watch runs automatically from the VS Code workspace task on startup to avoid missed rebuilds
 -  DataModels are used instead of a template.json
 
 # sr3e
