@@ -43,6 +43,7 @@
   "include": [
     "module/**/*",
     "tests/**/*",
+    "lang/**/*",
     "sr3e.ts",
     "Bootstrap.ts",
     "vite.config.ts",
