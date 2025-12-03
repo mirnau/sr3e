@@ -1,0 +1,60 @@
+{
+  "sr3e": {
+    "attributes": {
+      "body": "Body",
+      "charisma": "Charisma",
+      "essence": "Essence",
+      "initiative": "Initiative",
+      "intelligence": "Intelligence",
+      "isBurnedOut": "IsBurnedOut",
+      "magic": "Magic",
+      "quickness": "Quickness",
+      "reaction": "Reaction",
+      "strength": "Strength",
+      "willpower": "Willpower"
+    },
+    "creation": {
+      "activePoints": "ActivePoints",
+      "attributePoints": "AttributePoints",
+      "knowledgePoints": "KnowledgePoints",
+      "languagePoints": "LanguagePoints"
+    },
+    "dicePools": {
+      "astral": "Astral",
+      "combat": "Combat",
+      "control": "Control",
+      "hacking": "Hacking",
+      "spell": "Spell"
+    },
+    "health": {
+      "isAlive": "IsAlive",
+      "overflow": "Overflow",
+      "penalty": "Penalty",
+      "physical": "Physical",
+      "stun": "Stun"
+    },
+    "karma": {
+      "goodKarma": "GoodKarma",
+      "karmaPool": "KarmaPool",
+      "karmaPoolCeiling": "KarmaPoolCeiling",
+      "lifetimeKarma": "LifetimeKarma",
+      "miraculousSurvival": "MiraculousSurvival",
+      "pendingKarmaReward": "PendingKarmaReward",
+      "readyForCommit": "ReadyForCommit",
+      "spentKarma": "SpentKarma"
+    },
+    "movement": {
+      "running": "Running",
+      "walking": "Walking"
+    },
+    "profile": {
+      "age": "Age of Empires!",
+      "height": "Height",
+      "isDetailsOpen": "IsDetailsOpen",
+      "metaType": "MetaType",
+      "names": "Names",
+      "quote": "Quote",
+      "weight": "Weight"
+    }
+  }
+}

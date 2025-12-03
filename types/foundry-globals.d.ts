@@ -2,6 +2,39 @@
 // These are available globally without imports
 
 declare global {
+  // Foundry VTT Core Globals
+  const game: Game & {
+    i18n: Localization;
+  };
+
+  // Extend Foundry's CONFIG object with SR3E system configuration
+  interface CONFIG {
+    SR3E: import('../lang/config/AttributeComponentsConfig').SR3EConfig;
+  }
+
+  /**
+   * Global localize helper function (available after 'init' hook).
+   * Convenience wrapper around game.i18n.localize().
+   *
+   * @param key - The i18n key to localize
+   * @returns The localized string
+   *
+   * @remarks
+   * This function is initialized during the 'init' hook and is available
+   * throughout the application lifecycle. It provides a shorter syntax
+   * than game.i18n.localize() for frequent localization calls.
+   *
+   * @example
+   * ```typescript
+   * // Using global localize (shorter)
+   * localize(CONFIG.SR3E.ATTRIBUTE.body)
+   *
+   * // Using game.i18n.localize (more explicit)
+   * game.i18n.localize(CONFIG.SR3E.ATTRIBUTE.body)
+   * ```
+   */
+  function localize(key: string): string;
+
   // Data Field constructors (values)
   const BooleanField: typeof foundry.data.fields.BooleanField;
   const NumberField: typeof foundry.data.fields.NumberField;
