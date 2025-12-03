@@ -13,6 +13,12 @@
       "strength": "Strength",
       "willpower": "Willpower"
     },
+    "character": {
+      "attributes": "Attributes",
+      "dicepools": "Dicepools",
+      "movement": "Movement",
+      "profile": "Profile"
+    },
     "creation": {
       "activePoints": "ActivePoints",
       "attributePoints": "AttributePoints",
