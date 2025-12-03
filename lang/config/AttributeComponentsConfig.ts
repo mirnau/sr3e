@@ -1,6 +1,4 @@
-﻿import { createCategory } from "../config";
-
-export const ATTRIBUTES_KEYS = [
+﻿export const ATTRIBUTES_KEYS = [
   "body",
   "quickness",
   "strength",
@@ -60,21 +58,3 @@ export const PROFILE_KEYS = [
   "isDetailsOpen",
 ] as const;
 
-export const ATTRIBUTES = createCategory("attributes", ATTRIBUTES_KEYS);
-export const CREATION = createCategory("creation", CREATION_KEYS);
-export const DICE_POOLS = createCategory("dicePools", DICE_POOLS_KEYS);
-export const HEALTH = createCategory("health", HEALTH_KEYS);
-export const KARMA = createCategory("karma", KARMA_KEYS);
-export const MOVEMENT = createCategory("movement", MOVEMENT_KEYS);
-export const PROFILE = createCategory("profile", PROFILE_KEYS);
-
-// Type for extending Foundry's CONFIG.SR3E
-export type SR3EConfig = {
-  ATTRIBUTES: typeof ATTRIBUTES;
-  CREATION: typeof CREATION;
-  DICE_POOLS: typeof DICE_POOLS;
-  HEALTH: typeof HEALTH;
-  KARMA: typeof KARMA;
-  MOVEMENT: typeof MOVEMENT;
-  PROFILE: typeof PROFILE;
-};

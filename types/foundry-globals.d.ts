@@ -9,7 +9,7 @@ declare global {
 
   // Extend Foundry's CONFIG object with SR3E system configuration
   interface CONFIG {
-    SR3E: import('../lang/config/AttributeComponentsConfig').SR3EConfig;
+    SR3E: import('../lang/config').localizations;
   }
 
   /**

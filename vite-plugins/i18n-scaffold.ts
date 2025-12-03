@@ -51,10 +51,12 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
   let projectRoot: string;
   let configDirPath: string;
   let langDirPath: string;
+  let mainConfigPath: string;
   let tsProject: Project;
 
   // Track file hashes to avoid unnecessary writes
   const fileHashes = new Map<string, string>();
+  let configFiles: string[] = [];
 
   return {
     name: 'i18n-scaffold',
@@ -63,6 +65,7 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
       projectRoot = config.root;
       configDirPath = path.resolve(projectRoot, configDir);
       langDirPath = path.resolve(projectRoot, langDir);
+      mainConfigPath = path.resolve(projectRoot, configDir, '../config.ts');
 
       // Initialize ts-morph project
       tsProject = new Project({
@@ -73,7 +76,7 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
 
     async buildStart() {
       // Find all config files
-      const configFiles = await glob('**/*.ts', {
+      configFiles = await glob('**/*.ts', {
         cwd: configDirPath,
         absolute: true
       });
@@ -83,8 +86,7 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
         this.addWatchFile(file);
       }
 
-      // Also add the main config file
-      const mainConfigPath = path.resolve(projectRoot, configDir, '../config.ts');
+      // Also add the main config file (contains sr3e aggregation)
       if (existsSync(mainConfigPath)) {
         this.addWatchFile(mainConfigPath);
       }
@@ -92,102 +94,131 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
       console.log(`[i18n-scaffold] Watching ${configFiles.length} config file(s) via Vite's watch system`);
 
       // Run initial scaffold
-      for (const file of configFiles) {
-        scaffoldFromFile(file);
-      }
+      await scaffoldAll();
     },
 
-    handleHotUpdate({ file }) {
-      // Trigger when config files change (via Vite's watch)
-      if (file.startsWith(configDirPath) && file.endsWith('.ts')) {
+    async handleHotUpdate({ file }) {
+      const normalized = path.resolve(file);
+      const isConfigFile = normalized.startsWith(configDirPath) && normalized.endsWith('.ts');
+      const isMainConfig = normalized === mainConfigPath;
+
+      // Trigger when any config files change (via Vite's watch)
+      if (isConfigFile || isMainConfig) {
         console.log(`[i18n-scaffold] Config changed: ${path.relative(projectRoot, file)}`);
-        scaffoldFromFile(file);
+        await scaffoldAll();
         return [];  // Don't trigger HMR
       }
     }
   };
 
   /**
-   * Parse a TypeScript config file to extract createCategory calls
-   * Pattern: createCategory('category', KEYS_VAR)
+   * Ensure we have a fresh source file reference
    */
-  function parseConfigFile(filePath: string): ParsedConfig[] {
-    try {
-      const sourceFile = tsProject.addSourceFileAtPath(filePath);
-      const results: ParsedConfig[] = [];
+  function loadSourceFile(filePath: string) {
+    const existing = tsProject.getSourceFile(filePath);
+    if (existing) {
+      existing.refreshFromFileSystemSync();
+      return existing;
+    }
+    return tsProject.addSourceFileAtPath(filePath);
+  }
 
-      // First, find all exported const array declarations
-      const arrayDeclarations = new Map<string, string[]>();
+  /**
+   * Parse all config files to extract createCategory calls from the aggregated sr3e map
+   * Pattern: createCategory('category', KEYS_VAR) anywhere in the AST
+   */
+  function parseAllConfigFiles(): ParsedConfig[] {
+    const arrayDeclarations = new Map<string, string[]>();
+    const results: ParsedConfig[] = [];
 
-      sourceFile.getVariableStatements()
-        .filter(stmt => stmt.hasExportKeyword())
-        .flatMap(stmt => stmt.getDeclarations())
-        .forEach(decl => {
-          const name = decl.getName();
-          const initializer = decl.getInitializer();
+    // Collect array declarations from every config file (lang/config/*.ts)
+    for (const filePath of configFiles) {
+      if (!existsSync(filePath)) continue;
 
-          if (!initializer || initializer.getKind() !== SyntaxKind.AsExpression) return;
+      try {
+        const sourceFile = loadSourceFile(filePath);
+        sourceFile.getVariableStatements()
+          .filter(stmt => stmt.hasExportKeyword())
+          .flatMap(stmt => stmt.getDeclarations())
+          .forEach(decl => {
+            const name = decl.getName();
+            const initializer = decl.getInitializer();
+            if (!initializer) return;
 
-          const asExpression = initializer.asKindOrThrow(SyntaxKind.AsExpression);
-          const arrayLiteral = asExpression.getExpression();
+            let arrayLiteral = initializer.asKind(SyntaxKind.ArrayLiteralExpression);
+            if (!arrayLiteral && initializer.getKind() === SyntaxKind.AsExpression) {
+              const expr = initializer.asKindOrThrow(SyntaxKind.AsExpression).getExpression();
+              arrayLiteral = expr.asKind(SyntaxKind.ArrayLiteralExpression);
+            }
 
-          if (arrayLiteral.getKind() !== SyntaxKind.ArrayLiteralExpression) return;
+            if (!arrayLiteral) return;
 
-          const elements = arrayLiteral
-            .asKindOrThrow(SyntaxKind.ArrayLiteralExpression)
-            .getElements()
-            .filter(el => el.getKind() === SyntaxKind.StringLiteral)
-            .map(el => el.asKindOrThrow(SyntaxKind.StringLiteral).getLiteralText());
+            const elements = arrayLiteral.getElements()
+              .filter(el => el.getKind() === SyntaxKind.StringLiteral)
+              .map(el => el.asKindOrThrow(SyntaxKind.StringLiteral).getLiteralText());
 
-          if (elements.length > 0) {
-            arrayDeclarations.set(name, elements);
-          }
-        });
+            if (elements.length > 0) {
+              arrayDeclarations.set(name, elements);
+            }
+          });
+        sourceFile.forget();
+      } catch (error) {
+        console.error(`[i18n-scaffold] Error parsing array declarations in ${filePath}:`, error);
+      }
+    }
 
-      // Now find createCategory calls
-      sourceFile.getVariableStatements()
-        .filter(stmt => stmt.hasExportKeyword())
-        .flatMap(stmt => stmt.getDeclarations())
-        .forEach(decl => {
-          const initializer = decl.getInitializer();
-          if (!initializer || initializer.getKind() !== SyntaxKind.CallExpression) return;
+    // Parse the aggregated config.ts (sr3e) to find createCategory usages
+    if (existsSync(mainConfigPath)) {
+      try {
+        const sourceFile = loadSourceFile(mainConfigPath);
+        sourceFile.forEachDescendant(node => {
+          const callExpr = node.asKind(SyntaxKind.CallExpression);
+          if (!callExpr) return;
 
-          const callExpr = initializer.asKindOrThrow(SyntaxKind.CallExpression);
           const functionName = callExpr.getExpression().getText();
-
           if (functionName !== 'createCategory') return;
 
           const args = callExpr.getArguments();
           if (args.length !== 2) return;
 
-          // Get category string (first argument)
-          const categoryArg = args[0];
-          if (!categoryArg || categoryArg.getKind() !== SyntaxKind.StringLiteral) return;
-          const category = categoryArg.asKindOrThrow(SyntaxKind.StringLiteral).getLiteralValue();
+          // Category string (first argument)
+          const categoryArg = args[0].asKind(SyntaxKind.StringLiteral);
+          if (!categoryArg) return;
+          const category = categoryArg.getLiteralValue();
 
-          // Get array variable name (second argument)
-          const arrayArg = args[1];
-          if (!arrayArg) return;
-          const arrayVarName = arrayArg.getText();
+          // Keys source (second argument)
+          const keysArg = args[1];
+          let keys: string[] | undefined;
 
-          // Look up the keys from the array declaration
-          const keys = arrayDeclarations.get(arrayVarName);
-          if (!keys) return;
+          const identifier = keysArg.asKind(SyntaxKind.Identifier);
+          const arrayLiteral = keysArg.asKind(SyntaxKind.ArrayLiteralExpression);
+
+          if (identifier) {
+            keys = arrayDeclarations.get(identifier.getText());
+          } else if (arrayLiteral) {
+            keys = arrayLiteral.getElements()
+              .filter(el => el.getKind() === SyntaxKind.StringLiteral)
+              .map(el => el.asKindOrThrow(SyntaxKind.StringLiteral).getLiteralText());
+          }
+
+          if (!keys || keys.length === 0) {
+            console.warn(`[i18n-scaffold] No keys found for category "${category}". Ensure the array is exported from lang/config.`);
+            return;
+          }
 
           results.push({
             category,
             keys,
-            sourcePath: filePath
+            sourcePath: mainConfigPath
           });
         });
-
-      // Clean up
-      sourceFile.forget();
-      return results;
-    } catch (error) {
-      console.error(`[i18n-scaffold] Error parsing ${filePath}:`, error);
-      return [];
+        sourceFile.forget();
+      } catch (error) {
+        console.error(`[i18n-scaffold] Error parsing createCategory calls in ${mainConfigPath}:`, error);
+      }
     }
+
+    return results;
   }
 
   /**
@@ -211,11 +242,17 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
   }
 
   /**
-   * Parse a TypeScript file and scaffold JSON files
+   * Parse all TypeScript config files and scaffold JSON files
    */
-  function scaffoldFromFile(filePath: string) {
+  async function scaffoldAll() {
     try {
-      const parsed = parseConfigFile(filePath);
+      // Refresh config file list in case new files were added
+      configFiles = await glob('**/*.ts', {
+        cwd: configDirPath,
+        absolute: true
+      });
+
+      const parsed = parseAllConfigFiles();
       if (parsed.length === 0) {
         return;
       }
@@ -236,7 +273,7 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
         mergeIntoJson(jsonPath, parsed);
       }
     } catch (error) {
-      console.error(`[i18n-scaffold] Error processing ${filePath}:`, error);
+      console.error('[i18n-scaffold] Error processing config files:', error);
     }
   }
 

@@ -1,6 +1,8 @@
+import { ATTRIBUTES_KEYS, CREATION_KEYS, DICE_POOLS_KEYS, HEALTH_KEYS, KARMA_KEYS, MOVEMENT_KEYS, PROFILE_KEYS } from "./config/AttributeComponentsConfig";
+import { CHARACTER_KEYS } from "./config/ActorConfig";
+
 const SYSTEM_NAMESPACE = "sr3e";
 
-// A generic function that generates a mapping object from a list of keys
 function createI18nMapping<T extends readonly string[]>(
   namespace: string,
   keys: T
@@ -14,3 +16,16 @@ export function createCategory<T extends readonly string[]>(category: string, ke
   const namespace = `${SYSTEM_NAMESPACE}.${category}`;
   return createI18nMapping(namespace, keys);
 }
+
+export const sr3e = {
+  ATTRIBUTES: createCategory("attributes", ATTRIBUTES_KEYS),
+  CHARACHTER: createCategory("character", CHARACTER_KEYS),
+  CREATION: createCategory("creation", CREATION_KEYS),
+  DICE_POOLS: createCategory("dicePools", DICE_POOLS_KEYS),
+  HEALTH: createCategory("health", HEALTH_KEYS),
+  KARMA: createCategory("karma", KARMA_KEYS),
+  MOVEMENT: createCategory("movement", MOVEMENT_KEYS),
+  PROFILE: createCategory("profile", PROFILE_KEYS)
+} as const;
+
+export type localizations = typeof sr3e;
