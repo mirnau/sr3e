@@ -23,6 +23,7 @@
       "@testing-library/user-event": "^14.6.1",
       "@types/masonry-layout": "^4.2.8",
       "@types/node": "^22.10.2",
+      "@types/packery": "^1.4.37",
       "@vitest/coverage-v8": "^3.2.4",
       "conventional-recommended-bump": "^11.2.0",
       "jsdom": "^26.1.0",
@@ -39,6 +40,7 @@
    },
    "dependencies": {
       "masonry-layout": "^4.2.2",
+      "packery": "^3.0.0",
       "svelte-select": "^5.8.3"
    }
 }

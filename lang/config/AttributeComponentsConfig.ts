@@ -1,4 +1,5 @@
 ﻿export const ATTRIBUTES_KEYS = [
+  "attributes",
   "body",
   "quickness",
   "strength",
@@ -20,6 +21,7 @@ export const CREATION_KEYS = [
 ] as const;
 
 export const DICE_POOLS_KEYS = [
+  "dicePools",
   "combat",
   "astral",
   "hacking",
@@ -28,14 +30,23 @@ export const DICE_POOLS_KEYS = [
 ] as const;
 
 export const HEALTH_KEYS = [
+  "health",
   "stun",
   "physical",
   "overflow",
   "penalty",
   "isAlive",
+  "miraculousSurvival",
+  "light",
+  "medium",
+  "serious",
+  "deadly",
+  "revive",
+  "reviveConfirm",
 ] as const;
 
 export const KARMA_KEYS = [
+  "karma",
   "goodKarma",
   "karmaPool",
   "karmaPoolCeiling",
@@ -43,10 +54,10 @@ export const KARMA_KEYS = [
   "readyForCommit",
   "lifetimeKarma",
   "spentKarma",
-  "miraculousSurvival",
 ] as const;
 
 export const MOVEMENT_KEYS = [
+  "movement",
   "walking",
   "running"
 ] as const;

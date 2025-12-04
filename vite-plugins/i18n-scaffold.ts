@@ -182,12 +182,12 @@ export function i18nScaffold(options: I18nScaffoldOptions): Plugin {
           if (args.length !== 2) return;
 
           // Category string (first argument)
-          const categoryArg = args[0].asKind(SyntaxKind.StringLiteral);
+          const categoryArg = args[0]!.asKind(SyntaxKind.StringLiteral);
           if (!categoryArg) return;
           const category = categoryArg.getLiteralValue();
 
           // Keys source (second argument)
-          const keysArg = args[1];
+          const keysArg = args[1]!;
           let keys: string[] | undefined;
 
           const identifier = keysArg.asKind(SyntaxKind.Identifier);
