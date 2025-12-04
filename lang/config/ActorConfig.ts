@@ -3,4 +3,7 @@ export const CHARACTER_KEYS = [
   "dicepools",
   "movement",
   "profile",
-] as const;
+  "creation",
+  "karma",
+  "health",
+  ] as const;

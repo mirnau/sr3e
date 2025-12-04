@@ -15,7 +15,10 @@
     },
     "character": {
       "attributes": "Attributes",
+      "creation": "Creation",
       "dicepools": "Dicepools",
+      "health": "Health",
+      "karma": "Karma",
       "movement": "Movement",
       "profile": "Profile"
     },
