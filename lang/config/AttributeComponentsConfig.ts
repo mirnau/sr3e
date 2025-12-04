@@ -46,7 +46,10 @@ export const KARMA_KEYS = [
   "miraculousSurvival",
 ] as const;
 
-export const MOVEMENT_KEYS = ["walking", "running"] as const;
+export const MOVEMENT_KEYS = [
+  "walking",
+  "running"
+] as const;
 
 export const PROFILE_KEYS = [
   "names",
