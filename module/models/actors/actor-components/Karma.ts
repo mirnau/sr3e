@@ -11,7 +11,7 @@ type KarmaSchema = {
   miraculousSurvival: BooleanField;
 };
 
-export default class KarmaModel extends TypeDataModel<
+export default class KarmaModel extends foundry.abstract.DataModel<
   KarmaSchema,
   BaseActor
 > {

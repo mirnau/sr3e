@@ -1,7 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
-export default class GadgetModel extends TypeDataModel<GadgetSchema, BaseItem> {
+export default class GadgetModel extends foundry.abstract.TypeDataModel<GadgetSchema, BaseItem> {
   static defineSchema(): GadgetSchema {
     return {
       type: new StringField({

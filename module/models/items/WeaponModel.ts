@@ -22,7 +22,7 @@ type WeaponSchema = {
   commodity: EmbeddedDataField<typeof CommodityModel>;
 };
 
-export default class WeaponModel extends TypeDataModel<WeaponSchema, BaseItem> {
+export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSchema, BaseItem> {
   static defineSchema(): WeaponSchema {
     return {
       mode: new StringField({

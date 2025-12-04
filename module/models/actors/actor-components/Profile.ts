@@ -8,7 +8,7 @@ type ProfileSchema = {
   isDetailsOpen: BooleanField;
 };
 
-export default class ProfileModel extends TypeDataModel<
+export default class ProfileModel extends foundry.abstract.DataModel<
   ProfileSchema,
   BaseActor
 > {
@@ -26,34 +26,27 @@ export default class ProfileModel extends TypeDataModel<
           initial: [],
         }
       ),
-
       metaType: new StringField({
         required: false,
         initial: "",
       }),
 
-      // Age
       age: new NumberField({
         required: false,
         initial: 0,
         integer: true,
       }),
-
-      // Weight
       weight: new NumberField({
         required: false,
         initial: 0,
         integer: true,
       }),
 
-      // Height
       height: new NumberField({
         required: false,
         initial: 0,
         integer: true,
       }),
-
-      // Quote
       quote: new StringField({
         required: false,
         initial: "Alea iacta es",
@@ -62,7 +55,7 @@ export default class ProfileModel extends TypeDataModel<
       // Persistent boolean for the panel state
       isDetailsOpen: new BooleanField({
         required: false,
-        initial: false, // Default value for the panel state
+        initial: false,
       }),
     };
   }

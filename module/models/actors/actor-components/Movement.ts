@@ -5,7 +5,7 @@ type MovementSchema = {
   running: EmbeddedDataField<typeof SimpleStat>;
 };
 
-export default class MovementModel extends TypeDataModel<
+export default class MovementModel extends foundry.abstract.DataModel<
   MovementSchema,
   BaseActor
 > {

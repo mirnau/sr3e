@@ -1,4 +1,4 @@
-export default class SpellModel extends TypeDataModel<SpellSchema, BaseItem> {
+export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSchema, BaseItem> {
   static defineSchema(): SpellSchema {
     return {
       type: new StringField({

@@ -1,4 +1,4 @@
-export default class Creation extends TypeDataModel<CreationSchema, BaseActor> {
+export default class Creation extends foundry.abstract.DataModel<CreationSchema, BaseActor> {
     static defineSchema() {
       return {
         attributePoints: new NumberField({

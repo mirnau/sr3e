@@ -1,6 +1,6 @@
 import TransactionModel from "./TransactionModel";
 
-export default class Ratsrace extends TypeDataModel<
+export default class Ratsrace extends foundry.abstract.TypeDataModel<
   RatsraceSchema,
   BaseItem
 > {

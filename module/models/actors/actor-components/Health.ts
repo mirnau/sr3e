@@ -8,7 +8,7 @@ type HealthSchema = {
   isAlive: BooleanField;
 };
 
-export default class HealthModel extends TypeDataModel<
+export default class HealthModel extends foundry.abstract.DataModel<
   HealthSchema,
   BaseActor
 > {

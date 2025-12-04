@@ -1,7 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
-export default class WearableModel extends TypeDataModel<WearableSchema, BaseItem> {
+export default class WearableModel extends foundry.abstract.TypeDataModel<WearableSchema, BaseItem> {
   static defineSchema(): WearableSchema {
     return {
       ballistic: new NumberField({
