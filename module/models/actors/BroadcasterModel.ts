@@ -5,7 +5,7 @@ type BroadcasterSchema = {
   journalId: StringField;
 };
 
-export default class BroadcasterModel extends TypeDataModel<
+export default class BroadcasterModel extends foundry.abstract.TypeDataModel<
   BroadcasterSchema,
   BaseActor
 > {

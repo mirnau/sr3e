@@ -1,4 +1,4 @@
-export default class MagicModel extends TypeDataModel<MagicSchema, BaseItem> {
+export default class MagicModel extends foundry.abstract.TypeDataModel<MagicSchema, BaseItem> {
   static defineSchema(): MagicSchema {
     return {
       awakened: new SchemaField({

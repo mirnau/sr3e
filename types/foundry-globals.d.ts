@@ -56,7 +56,6 @@ declare global {
   type FilePathField = foundry.data.fields.FilePathField;
 
   // Abstract class constructors (values)
-  const TypeDataModel: typeof foundry.abstract.TypeDataModel;
   const DataModel: typeof foundry.abstract.DataModel;
 
   // Document constructors (values)
@@ -66,6 +65,16 @@ declare global {
   // Document types (for use in type positions)
   type BaseActor = foundry.documents.BaseActor;
   type BaseItem = foundry.documents.BaseItem;
+
+  // Sheet constructors (values)
+  const ActorSheetV2: typeof foundry.applications.sheets.ActorSheetV2;
+
+  // Sheet types (for use in type positions like extends)
+  type ActorSheetV2<ActorType extends Actor = Actor> = foundry.applications.sheets.ActorSheetV2<ActorType>;
+
+  // Utility types
+  type DeepPartial<T> = foundry.utils.DeepPartial<T>;
+  type RenderOptions = foundry.applications.types.ApplicationRenderOptions;
 }
 
-export {};
+export { };

@@ -1,6 +1,6 @@
 import SimpleStat from "./SimpleStat";
 
-export default class AttributesModel extends TypeDataModel<
+export default class AttributesModel extends foundry.abstract.DataModel<
   AttributesSchema,
   BaseActor
 > {

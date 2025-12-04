@@ -1,4 +1,4 @@
-export default class FocusModel extends TypeDataModel<FocusSchema, BaseItem> {
+export default class FocusModel extends foundry.abstract.TypeDataModel<FocusSchema, BaseItem> {
   static defineSchema(): FocusSchema {
     return {};
   }

@@ -1,7 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
-export default class AmmunitionModel extends TypeDataModel<AmmunitionSchema, BaseItem> {
+export default class AmmunitionModel extends foundry.abstract.TypeDataModel<AmmunitionSchema, BaseItem> {
   static defineSchema(): AmmunitionSchema {
     return {
       class: new StringField({

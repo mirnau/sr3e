@@ -8,7 +8,7 @@ type DicePoolsSchema = {
   spell: EmbeddedDataField<typeof SimpleStat>;
 };
 
-export default class DicePoolsModel extends TypeDataModel<
+export default class DicePoolsModel extends foundry.abstract.DataModel<
   DicePoolsSchema,
   BaseActor
 > {

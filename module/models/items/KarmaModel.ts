@@ -1,4 +1,4 @@
-export default class KarmaModel extends TypeDataModel<KarmaSchema, BaseItem> {
+export default class KarmaModel extends foundry.abstract.TypeDataModel<KarmaSchema, BaseItem> {
   static defineSchema(): KarmaSchema {
     return {
       value: new NumberField({

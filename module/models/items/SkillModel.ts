@@ -1,6 +1,6 @@
 import SkillSpecializationModel from "./item-components/SkillSpecialization";
 
-export default class SkillModel extends TypeDataModel<SkillSchema, BaseItem> {
+export default class SkillModel extends foundry.abstract.TypeDataModel<SkillSchema, BaseItem> {
   static defineSchema(): SkillSchema {
     const specializations = () =>
       new ArrayField(new EmbeddedDataField(SkillSpecializationModel), {

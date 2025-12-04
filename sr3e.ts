@@ -1,11 +1,36 @@
 import CharacterModel from "./module/models/actors/CharacterModel";
-import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
 import { sr3e } from "./lang/config";
-import { hooks } from "./types/configuration-keys";
+import { configkeys, hooks, typekeys } from "./types/configuration-keys";
+import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
+import SR3EActor from "./module/documents/SR3EActor";
 
+// Configure global aliases FIRST, before any model imports happen
 function configure(): void {
    CONFIG.SR3E = sr3e;
+
    globalThis.localize = (key: string): string => game.i18n.localize(key);
+
+   // Provide short aliases for frequently used Foundry constructors
+   const { fields } = foundry.data;
+   const abstracts = foundry.abstract;
+   const documents = foundry.documents;
+
+   Object.assign(globalThis, {
+      BooleanField: fields.BooleanField,
+      NumberField: fields.NumberField,
+      StringField: fields.StringField,
+      ArrayField: fields.ArrayField,
+      SchemaField: fields.SchemaField,
+      EmbeddedDataField: fields.EmbeddedDataField,
+      HTMLField: fields.HTMLField,
+      FilePathField: fields.FilePathField,
+      TypeDataModel: abstracts.TypeDataModel,
+      DataModel: abstracts.DataModel,
+      BaseActor: documents.BaseActor,
+      BaseItem: documents.BaseItem,
+   });
+
+   SR3EActor.Register();
 }
 
 function registerDocumentTypes(registrations: SR3EDocumentRegistration[]): void {
@@ -14,21 +39,30 @@ function registerDocumentTypes(registrations: SR3EDocumentRegistration[]): void 
       CONFIG[docName].dataModels ||= {};
       CONFIG[docName].dataModels[type] = model as typeof DataModel;
 
-      DocumentSheetConfig.registerSheet(docClass, "sr3e", sheet, {
-         types: [type],
-         makeDefault: true,
-      });
+      // Register ApplicationV2 sheets using DocumentSheetConfig
+      // Type assertion needed as FoundryVTT types may not be fully updated
+      (foundry.applications.apps.DocumentSheetConfig as any).registerSheet(
+         docClass,
+         configkeys.sr3e,
+         sheet,
+         {
+            types: [type],
+            makeDefault: true,
+         }
+      );
    });
 }
 
-function registerHooks(): void {
+async function registerHooks(): Promise<void> {
    console.log("SR3E | Registering system hooks");
-   
-   Hooks.once(hooks.init, () => {
+
+   Hooks.once(hooks.init, async () => {
+      // Dynamic imports AFTER configure() has run
+
       registerDocumentTypes([
          {
             docClass: Actor,
-            type: "character",
+            type: typekeys.character,
             model: CharacterModel,
             sheet: CharacterActorSheet,
          }
@@ -39,5 +73,6 @@ function registerHooks(): void {
    });
 }
 
+// Execute in correct order
 configure();
 registerHooks();

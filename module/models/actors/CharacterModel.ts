@@ -17,7 +17,7 @@ type CharacterSchema = {
   journalEntryUuid: StringField;
 };
 
-export default class CharacterModel extends TypeDataModel<
+export default class CharacterModel extends foundry.abstract.TypeDataModel<
   CharacterSchema,
   BaseActor
 > {

@@ -1,4 +1,4 @@
-export default class TransactionModel extends TypeDataModel<
+export default class TransactionModel extends foundry.abstract.TypeDataModel<
   TransactionSchema,
   BaseItem
 > {
