@@ -49,6 +49,7 @@
     "vite.config.ts",
     "svelte.config.ts",
     "module/types/**/*.d.ts",
+    "src/**/*",
     "types/**/*"
   ],
   "exclude": [
