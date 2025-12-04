@@ -1,0 +1,66 @@
+:root {
+   --sheet-card-surface: #0f141d;
+   --sheet-card-panel: #161d29;
+   --sheet-card-border: #253445;
+   --sheet-card-accent: #4bd0ff;
+   --sheet-card-text: #e8f3ff;
+   --sheet-card-shadow: rgba(0, 0, 0, 0.35);
+}
+
+.sheet-card-component {
+   border-radius: 12px;
+   background: linear-gradient(140deg, rgba(75, 208, 255, 0.08), rgba(15, 20, 29, 0.95));
+   padding: 0.6rem;
+   border: 1px solid var(--sheet-card-border);
+   box-shadow:
+      0 12px 30px var(--sheet-card-shadow),
+      0 0 0 1px rgba(75, 208, 255, 0.12);
+}
+
+.sheet-card-shadow {
+   background: linear-gradient(160deg, rgba(75, 208, 255, 0.06), rgba(22, 29, 41, 0.9));
+   border-radius: 10px;
+   padding: 0.55rem;
+}
+
+.sheet-card-displayarea {
+   background: var(--sheet-card-panel);
+   border-radius: 8px;
+   border: 1px solid rgba(75, 208, 255, 0.3);
+   padding: 0.85rem;
+   color: var(--sheet-card-text);
+   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.sheet-card-displayarea > * + * {
+   margin-top: 0.6rem;
+}
+
+.sheet-card-displayarea :is(input, textarea, select) {
+   width: 100%;
+   border-radius: 6px;
+   border: 1px solid rgba(75, 208, 255, 0.35);
+   background: rgba(0, 0, 0, 0.25);
+   color: inherit;
+   padding: 0.4rem 0.55rem;
+   transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.sheet-card-displayarea :is(input, textarea, select):focus {
+   outline: 1px solid var(--sheet-card-accent);
+   box-shadow: 0 0 0 1px rgba(75, 208, 255, 0.45);
+}
+
+.packery-grid-sizer,
+.packery-gutter-sizer {
+   display: none;
+}
+
+.packery-gutter-sizer {
+   width: 10px;
+}
+
+.packery-grid-item {
+   max-width: 300px;
+   min-width: 220px;
+}
