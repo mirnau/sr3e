@@ -18,6 +18,6 @@
     "**/*.ts",
     "foundry-globals.d.ts",
     "module/svelte/apps/JournalEditorApp.svelte"
-  ],
+, "module/utilities/StoreManager.svelte.js"  ],
   "exclude": ["node_modules"]
 }

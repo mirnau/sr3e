@@ -1,7 +1,16 @@
 import { mount, unmount } from "svelte";
 import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 
-export default class CharacterActorSheet extends foundry.applications.sheets.ActorSheetV2 {
+
+class SR3EActorBase extends foundry.applications.sheets.ActorSheetV2 {
+
+    protected async _renderHTML(_context: any, _options: DeepPartial<RenderOptions>): Promise<unknown> {
+        // Skip default template rendering; Svelte takes over in _replaceHTML.
+        return "";
+    }
+}
+
+export default class CharacterActorSheet extends SR3EActorBase {
 
     #app?: object;
 
@@ -19,11 +28,6 @@ export default class CharacterActorSheet extends foundry.applications.sheets.Act
             submitOnChange: true,
             closeOnSubmit: false,
         };
-    }
-
-    protected async _renderHTML(_context: any, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        // Skip default template rendering; Svelte takes over in _replaceHTML.
-        return "";
     }
 
     protected _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {

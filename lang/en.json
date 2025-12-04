@@ -1,6 +1,7 @@
 {
   "sr3e": {
     "attributes": {
+      "attributes": "Attributes",
       "body": "Body",
       "charisma": "Charisma",
       "essence": "Essence",
@@ -32,27 +33,37 @@
       "astral": "Astral",
       "combat": "Combat",
       "control": "Control",
+      "dicePools": "DicePools",
       "hacking": "Hacking",
       "spell": "Spell"
     },
     "health": {
+      "deadly": "Deadly",
+      "health": "Health",
       "isAlive": "IsAlive",
+      "light": "Light",
+      "medium": "Medium",
+      "miraculousSurvival": "MiraculousSurvival",
       "overflow": "Overflow",
       "penalty": "Penalty",
       "physical": "Physical",
+      "revive": "Revive",
+      "reviveConfirm": "ReviveConfirm",
+      "serious": "Serious",
       "stun": "Stun"
     },
     "karma": {
       "goodKarma": "GoodKarma",
+      "karma": "Karma",
       "karmaPool": "KarmaPool",
       "karmaPoolCeiling": "KarmaPoolCeiling",
       "lifetimeKarma": "LifetimeKarma",
-      "miraculousSurvival": "MiraculousSurvival",
       "pendingKarmaReward": "PendingKarmaReward",
       "readyForCommit": "ReadyForCommit",
       "spentKarma": "SpentKarma"
     },
     "movement": {
+      "movement": "Movement",
       "running": "Running",
       "walking": "Walking"
     },
