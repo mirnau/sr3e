@@ -27,7 +27,7 @@
    <SheetCard>
       <Movement {actor} />
    </SheetCard>
-   <SheetCard>
+   <SheetCard span={2}>
       <Health {actor} />
    </SheetCard>
 </PackeryGrid>
