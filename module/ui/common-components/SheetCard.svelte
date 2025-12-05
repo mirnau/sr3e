@@ -1,11 +1,12 @@
 <script lang="ts">
-   let { children } = $props();
+   let { span = 1, children } = $props();
 </script>
 
-<div class={"packery-grid-item"}>
-   <div class={"sheet-card-component"}>
+<div class={`packery-grid-item span-${span}`}>
+   <div class={"sheet-card-component "}>
       <div class={"sheet-card-shadow"}></div>
-      <div class={"sheet-card-displayarea"}>
+      <div class={"sheet-card-outline"}>
+         <div class={"sheet-card-displayarea"}></div>
          {@render children?.()}
       </div>
    </div>

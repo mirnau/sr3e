@@ -1,19 +1,14 @@
-@mixin clipped-corners($left-top: 20px, $right-top: 20px, $right-bottom: 20px, $left-bottom: 20px) {
-   clip-path: polygon(
-      $left-top 0px,
-      // Top-left corner
-      calc(100% - $right-top) 0px,
-      // Top-right corner
-      100% $right-top,
-      // Right-top corner
-      100% calc(100% - $right-bottom),
-      // Right-bottom corner (twice the size or custom if set)
-      calc(100% - $right-bottom) 100%,
-      // Bottom-right corner
-      $left-bottom 100%,
-      // Bottom-left corner
-      0px calc(100% - $left-bottom),
-      // Left-bottom corner
-      0px $left-top // Left-top corner
-   );
+@mixin clipped-corners($left-top: .5rem,
+    $right-top: .5rem,
+    $right-bottom: .5rem,
+    $left-bottom: .5rem,
+    $inner-offset: 0rem) {
+    clip-path: polygon(calc(#{$left-top} - #{$inner-offset}) 0,
+        calc(100% - #{$right-top} + #{$inner-offset}) 0,
+        100% calc(#{$right-top} - #{$inner-offset}),
+        100% calc(100% - #{$right-bottom} + #{$inner-offset}),
+        calc(100% - #{$right-bottom} + #{$inner-offset}) 100%,
+        calc(#{$left-bottom} - #{$inner-offset}) 100%,
+        0 calc(100% - #{$left-bottom} + #{$inner-offset}),
+        0 calc(#{$left-top} - #{$inner-offset}));
 }
