@@ -1,0 +1,233 @@
+@use "../../mixins.scss" as *;
+
+:root {
+   --health-highlight-color-primary: #4bd0ff;
+   --health-background-color: #0f141d;
+   --health-text-color: #e8f3ff;
+}
+
+.health-card-container {
+   display: inline-block;
+   width: 100%;
+   color: var(--health-text-color);
+}
+
+.ecg-container {
+   position: relative;
+   background-color: var(--health-highlight-color-primary);
+   width: 100%;
+   height: 3rem;
+   border: 0;
+   @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+
+   &::before {
+      box-shadow: inset 0 0 12px var(--health-highlight-color-primary);
+      pointer-events: none;
+      content: "";
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+      z-index: -1;
+      background: var(--health-background-color);
+   }
+
+   canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+   }
+
+   #ecg-canvas {
+      z-index: 1;
+   }
+
+   #ecg-point-canvas {
+      z-index: 2;
+   }
+}
+
+.ecg-animation {
+   width: 100%;
+   max-height: 5rem;
+   border: 0;
+}
+
+.condition-monitor {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   gap: 1rem;
+   margin: 0;
+   padding: 0;
+}
+
+.condition-meter {
+   position: relative;
+   min-height: 6rem;
+   margin-top: 1rem;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   gap: 1rem;
+}
+
+@keyframes flicker {
+   0% {
+      text-shadow: 0 0 2px var(--health-highlight-color-primary), 0 0 10px var(--health-highlight-color-primary), 0 0 20px #fff;
+      opacity: 0.8;
+   }
+   20% {
+      text-shadow: none;
+      opacity: 0.6;
+   }
+   40% {
+      text-shadow: 0 0 2px var(--health-highlight-color-primary), 0 0 8px var(--health-highlight-color-primary), 0 0 15px #fff;
+      opacity: 1;
+   }
+   60% {
+      text-shadow: none;
+      opacity: 0.4;
+   }
+   80% {
+      text-shadow: 0 0 4px var(--health-highlight-color-primary), 0 0 12px var(--health-highlight-color-primary), 0 0 25px #fff;
+      opacity: 1;
+   }
+   100% {
+      text-shadow: 0 0 4px var(--health-highlight-color-primary), 0 0 12px var(--health-highlight-color-primary), 0 0 25px #fff;
+      opacity: 1;
+   }
+}
+
+.lit {
+   animation: flicker 1s ease-in-out;
+   text-shadow: 0 0 12px var(--health-highlight-color-primary);
+}
+
+.unlit {
+   text-shadow: none;
+   opacity: 0.35;
+}
+
+.checkbox {
+   margin: 0;
+   padding: 0;
+   vertical-align: top;
+   line-height: 1.25rem;
+   height: 1.25rem;
+   width: 1.25rem;
+   accent-color: var(--health-highlight-color-primary);
+}
+
+.damage-boxes {
+   display: flex;
+   flex-wrap: wrap;
+   align-items: center;
+   gap: 0.25rem;
+   row-gap: 1rem;
+   margin: 0;
+   padding: 0;
+}
+
+.damage-box {
+   margin: 0;
+   padding: 0;
+   line-height: 1;
+   display: inline-flex;
+   align-items: center;
+   gap: 0.35rem;
+   position: relative;
+}
+
+.damage-box .severity-label {
+   font-size: 0.85rem;
+   text-transform: uppercase;
+   letter-spacing: 0.05em;
+}
+
+.damage-control {
+   margin: 0;
+   padding: 0;
+   line-height: 1;
+}
+
+.overflow-controls {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+   margin-top: 1rem;
+}
+
+.overflow-buttons {
+   display: flex;
+   align-items: center;
+   gap: 0.5rem;
+}
+
+.overflow-value {
+   min-width: 2rem;
+   text-align: center;
+   font-weight: bold;
+}
+
+.overflow-button {
+   align-self: flex-start;
+   margin-top: 0.25rem;
+   margin-bottom: 0.25rem;
+   position: relative;
+   width: 1.25rem;
+   height: 1.25rem;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 0.75rem;
+   font-weight: bold;
+   line-height: 1;
+   color: var(--health-highlight-color-primary);
+   background-color: var(--health-highlight-color-primary);
+   border: none;
+   cursor: pointer;
+   user-select: none;
+   @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+
+   &::before {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      background: var(--health-background-color);
+      z-index: -1;
+      @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+   }
+}
+
+.revival-button,
+.revive-button {
+   position: relative;
+   margin-top: 0.75rem;
+   align-self: flex-end;
+   display: inline-flex;
+   gap: 0.4rem;
+   align-items: center;
+   padding: 0.4rem 0.75rem;
+   font-weight: bold;
+   color: var(--health-background-color);
+   background: var(--health-highlight-color-primary);
+   border: none;
+   cursor: pointer;
+   @include clipped-corners(0.35rem, 0.35rem, 0.35rem, 0.35rem);
+}
+
+.health-stats {
+   display: flex;
+   gap: 0.75rem;
+   flex-wrap: wrap;
+   margin-top: 0.75rem;
+}

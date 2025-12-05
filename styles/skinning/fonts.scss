@@ -1,0 +1,31 @@
+$font-path: "/systems/sr3e/fonts";
+
+/* Import Google Fonts as primary source */
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Neonderthaw&display=swap');
+
+/* Local fonts as fallback */
+@font-face {
+   font-family: "VT323-Local";
+   src: url("#{$font-path}/VT323/VT323-Regular.ttf") format("truetype");
+   font-weight: 400;
+   font-style: normal;
+   font-display: swap;
+}
+
+@font-face {
+   font-family: "Neonderthaw-Local";
+   src: url("#{$font-path}/Neonderthaw/Neonderthaw-Regular.ttf") format("truetype");
+   font-weight: 400;
+   font-style: normal;
+   font-display: swap;
+}
+
+/* Apply to Foundry application elements - try Google Fonts first, then local, then fallback */
+.application,
+.application .window-content,
+form.sheet,
+.sheet-card-component,
+:root {
+   font-family: "VT323", "VT323-Local", monospace;
+}

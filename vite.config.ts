@@ -27,11 +27,12 @@ export default defineConfig({
       "@root": projectRoot,
     },
   },
+  publicDir: false,
   build: {
     sourcemap: true,
     minify: "esbuild",
     outDir: "build",
-    emptyOutDir: true,
+    emptyOutDir: false,
     rollupOptions: {
       input: {
         bundle: path.resolve(projectRoot, "sr3e.ts"),

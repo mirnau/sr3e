@@ -1,12 +1,7 @@
 @use "./mixins.scss" as *;
 
 :root {
-   --sheet-card-surface: #0f141d;
-   --sheet-card-panel: #161d29;
-   --sheet-card-border: #253445;
-   --sheet-card-accent: #4bd0ff;
-   --sheet-card-text: #e8f3ff;
-   --sheet-card-shadow: rgba(0, 0, 0, 0.35);
+   --text-color: #e8f3ff;
    --packery-min-card-width: 220px;
    --packery-card-gutter: 10px;
 }
@@ -52,9 +47,9 @@
 .sheet-card-outline {
    position: relative;
    z-index: 0;
-   background: white;
+   background: rgb(174, 224, 224);
    padding: 0.5rem;
-   color: var(--sheet-card-text);
+   color: var(--text-color);
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
 }
 
@@ -65,7 +60,7 @@
    left: 1px;
    width: calc(100% - 2px);
    height: calc(100% - 2px);
-   background: black;
+   background: rgb(17, 17, 17);
    box-shadow: inset 0 0 30px darkslategrey;
    pointer-events: none;
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);

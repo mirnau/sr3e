@@ -57,6 +57,36 @@ async function registerHooks(): Promise<void> {
    console.log("SR3E | Registering system hooks");
 
    Hooks.once(hooks.init, async () => {
+      // Configure custom fonts - must be done before 'setup' hook
+      CONFIG.fontDefinitions = CONFIG.fontDefinitions || {};
+
+      type FoundryFontDefinition = CONFIG.Font.Definition & { urls?: string[] };
+
+      const vt323Fonts: FoundryFontDefinition[] = [
+         {
+            url: ["systems/sr3e/fonts/VT323/VT323-Regular.ttf"],
+            urls: ["systems/sr3e/fonts/VT323/VT323-Regular.ttf"],
+         }
+      ];
+
+      CONFIG.fontDefinitions["VT323"] = {
+         editor: true,
+         fonts: vt323Fonts,
+      };
+
+      const neonderthawFonts: FoundryFontDefinition[] = [
+         {
+            url: ["systems/sr3e/fonts/Neonderthaw/Neonderthaw-Regular.ttf"],
+            urls: ["systems/sr3e/fonts/Neonderthaw/Neonderthaw-Regular.ttf"],
+            weight: "700",
+         }
+      ];
+
+      CONFIG.fontDefinitions["Neonderthaw"] = {
+         editor: true,
+         fonts: neonderthawFonts,
+      };
+
       // Dynamic imports AFTER configure() has run
 
       registerDocumentTypes([
