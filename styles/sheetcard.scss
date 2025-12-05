@@ -7,6 +7,8 @@
    --sheet-card-accent: #4bd0ff;
    --sheet-card-text: #e8f3ff;
    --sheet-card-shadow: rgba(0, 0, 0, 0.35);
+   --packery-min-card-width: 220px;
+   --packery-card-gutter: 10px;
 }
 
 .sheet-card-component {
@@ -88,19 +90,22 @@
 }
 
 .packery-gutter-sizer {
-   width: 10px;
+   width: var(--packery-card-gutter);
 }
 
 .packery-grid-item {
-   max-width: 300px;
-   min-width: 220px;
+   width: 100%;
+   max-width: none;
+   min-width: var(--packery-min-card-width);
    grid-column: span 1;
 }
 
 .packery-grid-item.span-2 {
    grid-column: span 2;
+   min-width: calc(var(--packery-min-card-width) * 2 + var(--packery-card-gutter));
 }
 
 .packery-grid-item.span-3 {
    grid-column: span 3;
+   min-width: calc(var(--packery-min-card-width) * 3 + var(--packery-card-gutter) * 2);
 }
