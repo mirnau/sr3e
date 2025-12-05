@@ -1,5 +1,15 @@
 @use "./sheetcard.scss";
 
-h1 {
-   color: blue;
+form.application.sheet.sr3e.character {
+   background-color: red;
+   overflow: visible;
+   max-height: 0rem;
+
+   section.window-content {
+      overflow: visible;
+
+      .packery-packery-grid {
+         overflow: visible;
+      }
+   }
 }
