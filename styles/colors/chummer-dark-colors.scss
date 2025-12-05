@@ -1,0 +1,8 @@
+// NOTE: The color scheme variables 
+
+:root {
+    --highlight-color-tertiary: red;
+
+    --h1-color: var(--highlight-color-tertiary);
+    --text-color: var(--highlight-color-tertiary);
+}

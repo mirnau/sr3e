@@ -130,103 +130,111 @@ function localize(key: string): string {
 </script>
 
 {#if actor && stunStore && physicalStore && penaltyStore && overflowStore}
-	<h1>{localize(localization?.health || "SR3E.health.health")}</h1>
+	<div class="health-card-container">
+		<h1>{localize(localization?.health || "SR3E.health.health")}</h1>
 
-	<!-- ECG Visualization Placeholder -->
-	<div class="ecg-container">
-		<canvas id="ecg-canvas" width="400" height="100"></canvas>
-	</div>
+		<!-- ECG Visualization Placeholder -->
+		<div class="ecg-container">
+			<canvas id="ecg-canvas" width="400" height="100"></canvas>
+		</div>
 
-	<div class="condition-monitor">
-		<!-- Stun Damage Track -->
-		<div class="damage-track stun-track">
-			<h3>{localize(localization?.stun || "SR3E.health.stun")}</h3>
-			<div class="damage-boxes">
-				{#each stunBoxes as checked, i}
-					<label class="damage-box">
-						<input
-							type="checkbox"
-							checked={checked}
-							onchange={() => toggle("stun", i)}
-						/>
-						<span class="box-number">{i + 1}</span>
-						{#if severityIndices.includes(i)}
-							<span class="severity-label">{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}</span>
-						{/if}
-					</label>
-				{/each}
+		<div class="condition-monitor">
+			<!-- Stun Damage Track -->
+			<div class="damage-track stun-track condition-meter">
+				<h3>{localize(localization?.stun || "SR3E.health.stun")}</h3>
+				<div class="damage-boxes stun-damage">
+					{#each stunBoxes as checked, i}
+						<label class={`damage-box ${checked ? "lit" : "unlit"}`}>
+							<input
+								class="checkbox"
+								type="checkbox"
+								checked={checked}
+								onchange={() => toggle("stun", i)}
+							/>
+							<span class="box-number">{i + 1}</span>
+							{#if severityIndices.includes(i)}
+								<span class={`severity-label ${checked ? "lit" : "unlit"}`}>
+									{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}
+								</span>
+							{/if}
+						</label>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Physical Damage Track -->
+			<div class="damage-track physical-track condition-meter">
+				<h3>{localize(localization?.physical || "SR3E.health.physical")}</h3>
+				<div class="damage-boxes physical-damage">
+					{#each physicalBoxes as checked, i}
+						<label class={`damage-box ${checked ? "lit" : "unlit"}`}>
+							<input
+								class="checkbox"
+								type="checkbox"
+								checked={checked}
+								onchange={() => toggle("physical", i)}
+							/>
+							<span class="box-number">{i + 1}</span>
+							{#if severityIndices.includes(i)}
+								<span class={`severity-label ${checked ? "lit" : "unlit"}`}>
+									{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}
+								</span>
+							{/if}
+						</label>
+					{/each}
+				</div>
 			</div>
 		</div>
 
-		<!-- Physical Damage Track -->
-		<div class="damage-track physical-track">
-			<h3>{localize(localization?.physical || "SR3E.health.physical")}</h3>
-			<div class="damage-boxes">
-				{#each physicalBoxes as checked, i}
-					<label class="damage-box">
-						<input
-							type="checkbox"
-							checked={checked}
-							onchange={() => toggle("physical", i)}
-						/>
-						<span class="box-number">{i + 1}</span>
-						{#if severityIndices.includes(i)}
-							<span class="severity-label">{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}</span>
-						{/if}
-					</label>
-				{/each}
+		<!-- Overflow Controls -->
+		<div class="overflow-controls damage-control">
+			<h3>{localize(localization?.overflow || "SR3E.health.overflow")}</h3>
+			<div class="overflow-buttons">
+				<button
+					type="button"
+					class="overflow-btn overflow-button"
+					onclick={decrementOverflow}
+					onkeypress={(e) => handleButtonKeypress(e, decrementOverflow)}
+					aria-label="Decrease overflow"
+				>
+					<i class="fas fa-minus"></i>
+				</button>
+				<span class="overflow-value">{$overflowStore ?? 0}</span>
+				<button
+					type="button"
+					class="overflow-btn overflow-button"
+					onclick={incrementOverflow}
+					onkeypress={(e) => handleButtonKeypress(e, incrementOverflow)}
+					aria-label="Increase overflow"
+				>
+					<i class="fas fa-plus"></i>
+				</button>
 			</div>
 		</div>
-	</div>
 
-	<!-- Overflow Controls -->
-	<div class="overflow-controls">
-		<h3>{localize(localization?.overflow || "SR3E.health.overflow")}</h3>
-		<div class="overflow-buttons">
+		<!-- Revival Button -->
+		{#if miraculousSurvivalStore && $miraculousSurvivalStore && ($overflowStore ?? 0) > 0}
 			<button
 				type="button"
-				class="overflow-btn"
-				onclick={decrementOverflow}
-				onkeypress={(e) => handleButtonKeypress(e, decrementOverflow)}
-				aria-label="Decrease overflow"
+				class="revive-button revival-button"
+				onclick={revive}
 			>
-				<i class="fas fa-minus"></i>
+				<i class="fas fa-heart"></i>
+				{localize(localization.miraculousSurvival || "SR3E.health.miraculousSurvival")}
 			</button>
-			<span class="overflow-value">{$overflowStore ?? 0}</span>
-			<button
-				type="button"
-				class="overflow-btn"
-				onclick={incrementOverflow}
-				onkeypress={(e) => handleButtonKeypress(e, incrementOverflow)}
-				aria-label="Increase overflow"
-			>
-				<i class="fas fa-plus"></i>
-			</button>
-		</div>
-	</div>
+		{/if}
 
-	<!-- Revival Button -->
-	{#if miraculousSurvivalStore && $miraculousSurvivalStore && ($overflowStore ?? 0) > 0}
-		<button
-			type="button"
-			class="revive-button"
-			onclick={revive}
-		>
-			<i class="fas fa-heart"></i>
-			{localize(localization.miraculousSurvival || "SR3E.health.miraculousSurvival")}
-		</button>
-	{/if}
+		<!-- Stat Cards -->
+		<div class="health-stats">
+			<div class="stat-card health-card" data-key="penalty">
+				<strong>{localize(localization?.penalty || "SR3E.health.penalty")}</strong>
+				<span class="stat-value">{$penaltyStore ?? 0}</span>
+			</div>
 
-	<!-- Stat Cards -->
-	<div class="health-stats">
-		<div class="stat-card health-card" data-key="penalty">
-			<strong>{localize(localization?.penalty || "SR3E.health.penalty")}</strong>
-			<span class="stat-value">{$penaltyStore ?? 0}</span>
-		</div>
-
-		<div class="stat-card health-card" data-key="overflow">
-			<strong>{localize(localization?.overflow || "SR3E.health.overflow")}</strong>
-			<span class="stat-value">{$overflowStore ?? 0}</span>
+			<div class="stat-card health-card" data-key="overflow">
+				<strong>{localize(localization?.overflow || "SR3E.health.overflow")}</strong>
+				<span class="stat-value">{$overflowStore ?? 0}</span>
+			</div>
 		</div>
 	</div>
 {:else}
