@@ -79,6 +79,10 @@ declare global {
   // Utility types
   type DeepPartial<T> = foundry.utils.DeepPartial<T>;
   type RenderOptions = foundry.applications.types.ApplicationRenderOptions;
+
+  // SR3ESvelteApp
+  type SvelteApp = Record<string, any> | null;
+  const SvelteApp: typeof Record<string, any> | null;
 }
 
 export { };

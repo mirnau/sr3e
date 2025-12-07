@@ -7,11 +7,11 @@
 
    const {
       actor,
-      storeManager = StoreManager.Instance as IStoreManager,
    }: {
       actor: SR3EActor;
-      storeManager?: IStoreManager;
    } = $props();
+
+   const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
    let malfunctioningIndexes: number[] = [];
    let actorNameStore = $state<Writable<string> | null>(null);

@@ -1,23 +1,11 @@
-import { mount, unmount } from "svelte";
+import { mount } from "svelte";
 import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 import NeonName from "../../ui/injections/NeonName.svelte";
-
-
-class SR3EActorBase extends foundry.applications.sheets.ActorSheetV2 {
-
-    get title() {
-        return this.actor.name
-    }
-
-    protected async _renderHTML(_context: any, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        // Skip default template rendering; Svelte takes over in _replaceHTML.
-        return "";
-    }
-}
+import { SR3EActorBase } from "./SR3EActorBase";
 
 export default class CharacterActorSheet extends SR3EActorBase {
-
-    #apps: object[] = [];
+    #app?: SvelteApp;
+    #neon?: SvelteApp;
 
     get title() {
         return "";
@@ -43,17 +31,17 @@ export default class CharacterActorSheet extends SR3EActorBase {
         // Clean up existing apps before mounting new ones
         this._unmountAllApps();
 
-        const form = (this.form as HTMLFormElement)!;
+        const form = this.form as HTMLFormElement;
 
         // Mount main character sheet app
-        const app = mount(CharacterSheetApp, {
+        this.#app = mount(CharacterSheetApp, {
             target: windowContent,
             props: {
                 actor: this.document as Actor,
                 form,
             },
         });
-        this.#apps.push(app);
+        this.apps.push(this.#app);
 
         const header = form.querySelector("header.window-header");
         this._injectNeonName(header);
@@ -71,19 +59,12 @@ export default class CharacterActorSheet extends SR3EActorBase {
         }
 
         if (neonSlot.childNodes.length === 0) {
-            const neon = mount(NeonName, {
+            this.#neon = mount(NeonName, {
                 target: neonSlot,
                 props: { actor: this.document },
             });
-            this.#apps.push(neon);
+            this.apps.push(this.#neon);
         }
-    }
-
-    private _unmountAllApps(): void {
-        for (const app of this.#apps) {
-            unmount(app);
-        }
-        this.#apps = [];
     }
 
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
