@@ -1,6 +1,7 @@
 <script lang="ts">
    import { getNewsService, currentDisplayFrame } from "../../services/news-service/NewsService.svelte";
-   import type { Writable } from "svelte/store";
+   import { NewsConfig } from "../../services/news-service/NewsConfig";
+   import { onMount } from "svelte";
 
    interface NewsMessage {
       sender: string;
@@ -13,74 +14,101 @@
       duration?: number;
    }
 
-   const SCROLL_SPEED = 100;
-   const newsService = getNewsService();
+   const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
+   const GAP_PX = NewsConfig.GAP_PX;
+   getNewsService();
 
    let isOn = $state(true);
    let ticker: HTMLDivElement | undefined = $state();
    let outer: HTMLDivElement | undefined = $state();
    let inner: HTMLDivElement | undefined = $state();
-   let buffer = $state<string[]>([]);
-   let lastFrameTimestamp = $state(0);
-   let frameDuration = $state(0);
-   let animationStart = $state(0);
+   let headlinePool: string[] = $state([]);
+   let nextIndex = $state(0);
+   let carts = $state<{ id: number; text: string }[]>([]);
+   let offset = 0;
+   let rafId: number | null = null;
+   let lastTick = 0;
+   let idCounter = 0;
+   let lastFrameUpdate = 0;
+   let cartUpdateThisFrame = false;
 
-   function restartAnimation() {
-      if (!inner || !outer) return;
+   const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
+   const RESYNC_COOLDOWN_MS = 500;
 
-      // Reset animation cleanly
-      inner.style.animation = "none";
-      inner.offsetHeight; // force reflow
+   function nextHeadline(): string {
+      const pool = headlinePool.length ? headlinePool : FALLBACK;
+      const text : string = pool[nextIndex % pool.length] as string;
+      nextIndex = (nextIndex + 1) % pool.length;
+      return text;
+   }
 
-      requestAnimationFrame(() => {
-         requestAnimationFrame(() => {
-            if (!inner) return;
+   function seedTrain() {
+      const initialOffset = ticker?.clientWidth ?? 400;
+      offset = initialOffset;
+      carts = [0, 1, 2].map(() => ({
+         id: ++idCounter,
+         text: nextHeadline(),
+      }));
+   }
 
-            const fullWidth = inner.scrollWidth;
-            frameDuration = Math.max((fullWidth / SCROLL_SPEED) * 1000, 5000);
-            const elapsed = Date.now() - animationStart;
+   function step(now: number) {
+      if (!lastTick) lastTick = now;
+      const dt = (now - lastTick) / 1000;
+      lastTick = now;
+      cartUpdateThisFrame = false;
 
-            document.documentElement.style.setProperty(
-               "--marquee-width",
-               `${fullWidth}px`,
-            );
-            document.documentElement.style.setProperty(
-               "--marquee-duration",
-               `${frameDuration / 1000}s`,
-            );
-            document.documentElement.style.setProperty(
-               "--marquee-delay",
-               `-${elapsed}ms`,
-            );
+      offset -= SCROLL_SPEED * dt;
+      if (inner) {
+         inner.style.transform = `translate3d(${offset}px, 0, 0)`;
+      }
 
-            inner.style.animation = "";
-         });
-      });
+      // remove carts that are fully offscreen left
+      if (!cartUpdateThisFrame && carts.length && inner?.firstElementChild instanceof HTMLElement) {
+         const firstWidth = inner.firstElementChild.offsetWidth;
+         if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
+            offset += firstWidth + GAP_PX;
+            // Apply transform immediately with adjusted offset BEFORE adding new cart
+            if (inner) {
+               inner.style.transform = `translate3d(${offset}px, 0, 0)`;
+            }
+            // Single atomic update: remove first, add last
+            carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
+            cartUpdateThisFrame = true;
+         }
+      }
+
+      if (!cartUpdateThisFrame && carts.length < 3) {
+         carts = [...carts, { id: ++idCounter, text: nextHeadline() }];
+         cartUpdateThisFrame = true;
+      }
+
+      rafId = requestAnimationFrame(step);
+   }
+
+   function startLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      lastTick = 0;
+      rafId = requestAnimationFrame(step);
+   }
+
+   function stopLoop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
    }
 
    function applyFrame(frame: DisplayFrame) {
       if (!frame || !Array.isArray(frame.buffer)) return;
       if (frame.buffer.length === 0) return;
-      if (frame.timestamp <= lastFrameTimestamp) return;
-
-      lastFrameTimestamp = frame.timestamp;
-      animationStart = frame.timestamp;
-      buffer = frame.buffer.map((m) =>
+      const incoming = frame.buffer.map((m) =>
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
+      headlinePool = incoming;
+      nextIndex = 0;
+      lastFrameUpdate = Date.now();
 
       game.socket.emit("module.sr3e", {
          type: "forceResync",
       });
-
-      if (!ticker) return;
-      const tickerWidth = ticker.clientWidth;
-      document.documentElement.style.setProperty(
-         "--ticker-width",
-         `${tickerWidth}px`,
-      );
-
-      restartAnimation();
    }
 
    function handleKeydown(event: KeyboardEvent) {
@@ -90,11 +118,18 @@
       }
    }
 
-   $effect(() => {
+   onMount(() => {
+      seedTrain();
+      startLoop();
+
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
 
       const handleResync = () => {
-         restartAnimation();
+         const timeSinceLastUpdate = Date.now() - lastFrameUpdate;
+         if (timeSinceLastUpdate < RESYNC_COOLDOWN_MS) {
+            return;
+         }
+         seedTrain();
       };
 
       window.addEventListener("keydown", handleKeydown);
@@ -104,6 +139,7 @@
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
          Hooks.off("sr3e.forceResync", handleResync);
+         stopLoop();
       };
    });
 </script>
@@ -116,10 +152,11 @@
          role="status"
          aria-live="polite"
          aria-label="News Feed"
+         style={`animation: none; column-gap: ${GAP_PX}px; will-change: transform; backface-visibility: hidden;`}
       >
          {#if isOn}
-            {#each buffer as line}
-               <span class="marquee-item">{line}</span>
+            {#each carts as cart (cart.id)}
+               <span class="marquee-item" style="transform: translateZ(0);">{cart.text}</span>
             {/each}
          {:else}
             <span> </span>
