@@ -9,4 +9,5 @@ export const configkeys = Object.freeze({
 
 export const typekeys = Object.freeze({
   character: "character",
+  broadcaster: "broadcaster",
 } as const);

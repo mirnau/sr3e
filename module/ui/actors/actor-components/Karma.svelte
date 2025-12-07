@@ -4,7 +4,8 @@ import type { Writable, Readable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 
-let { actor = null, storeManager = StoreManager.Instance as IStoreManager } = $props();
+let { actor = null } = $props();
+const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 // Store references
 let karmaPoolStore = $state<Readable<number> | null>(null);

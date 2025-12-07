@@ -1,7 +1,9 @@
 import CharacterModel from "./module/models/actors/CharacterModel";
+import BroadcasterModel from "./module/models/actors/BroadcasterModel";
 import { sr3e } from "./lang/config";
 import { configkeys, hooks, typekeys } from "./types/configuration-keys";
 import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
+import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
 import SR3EActor from "./module/documents/SR3EActor";
 
 // Configure global aliases FIRST, before any model imports happen
@@ -95,6 +97,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.character,
             model: CharacterModel,
             sheet: CharacterActorSheet,
+         },
+         {
+            docClass: Actor,
+            type: typekeys.broadcaster,
+            model: BroadcasterModel,
+            sheet: BroadcasterSheet,
          }
       ] satisfies SR3EDocumentRegistration[]
       );

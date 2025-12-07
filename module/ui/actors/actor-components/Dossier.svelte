@@ -4,7 +4,8 @@ import type { Writable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 
-let { actor = null, config = CONFIG.SR3E, storeManager = StoreManager.Instance as IStoreManager } = $props();
+let { actor = null, config = CONFIG.SR3E } = $props();
+const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 let actorNameStore = $state<Writable<string> | null>(null);
 let isDetailsOpenStore = $state<Writable<boolean> | null>(null);

@@ -3,7 +3,8 @@ import type { Readable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 
-let { actor = null, storeManager = StoreManager.Instance as IStoreManager } = $props();
+let { actor = null } = $props();
+const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 let isAwakened = $state(false);
 
