@@ -1,0 +1,146 @@
+@keyframes marquee-move {
+  from {
+    transform: translateX(var(--ticker-width));
+  }
+  to {
+    transform: translateX(calc(-1 * var(--marquee-width)));
+  }
+}
+
+.sr3e.sheet.character {
+  .news-feed-position {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 99;
+    pointer-events: none;
+
+    .ticker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 2.5rem;
+      overflow: hidden;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.8) 10%,
+        rgba(0, 0, 0, 0.9) 50%,
+        rgba(0, 0, 0, 0.8) 90%,
+        transparent 100%
+      );
+      backdrop-filter: blur(4px);
+      border-top: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
+      box-shadow:
+        0 0 10px color-mix(in srgb, var(--accent-color) 20%, transparent),
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+
+      .marquee-outer {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+
+        // Gradient fade on left edge
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 15%;
+          background: linear-gradient(
+            to right,
+            rgba(0, 0, 0, 0.9) 0%,
+            color-mix(in srgb, var(--accent-color) 30%, transparent) 25%,
+            color-mix(in srgb, var(--accent-color) 10%, transparent) 50%,
+            transparent 100%
+          );
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        // Gradient fade on right edge
+        &::after {
+          content: "";
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          width: 15%;
+          background: linear-gradient(
+            to left,
+            rgba(0, 0, 0, 0.9) 0%,
+            color-mix(in srgb, var(--accent-color) 30%, transparent) 25%,
+            color-mix(in srgb, var(--accent-color) 10%, transparent) 50%,
+            transparent 100%
+          );
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        .marquee-inner {
+          display: inline-flex;
+          white-space: nowrap;
+          animation: marquee-move var(--marquee-duration, 20s) linear infinite;
+          animation-delay: var(--marquee-delay, 0s);
+          will-change: transform;
+          align-items: center;
+          height: 100%;
+
+          .marquee-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 2rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--accent-color);
+            text-shadow:
+              0 0 3px rgba(0, 0, 0, 0.8),
+              0 0 6px rgba(0, 0, 0, 0.6),
+              0 0 10px color-mix(in srgb, var(--accent-color) 40%, transparent);
+            letter-spacing: 0.025em;
+            line-height: 1;
+
+            // Add subtle glow effect
+            animation: news-glow 3s ease-in-out infinite;
+
+            &:nth-child(2n) {
+              animation-delay: 1.5s;
+            }
+          }
+        }
+      }
+    }
+
+    // Ensure ticker is visible but doesn't block interactions
+    * {
+      pointer-events: none;
+    }
+  }
+
+  @keyframes news-glow {
+    0%, 100% {
+      text-shadow:
+        0 0 3px rgba(0, 0, 0, 0.8),
+        0 0 6px rgba(0, 0, 0, 0.6),
+        0 0 10px color-mix(in srgb, var(--accent-color) 40%, transparent);
+    }
+    50% {
+      text-shadow:
+        0 0 3px rgba(0, 0, 0, 0.8),
+        0 0 6px rgba(0, 0, 0, 0.6),
+        0 0 10px color-mix(in srgb, var(--accent-color) 60%, transparent),
+        0 0 15px color-mix(in srgb, var(--accent-color) 30%, transparent);
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { configkeys, hooks, typekeys } from "./types/configuration-keys";
 import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
 import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
 import SR3EActor from "./module/documents/SR3EActor";
+import { getNewsService } from "./module/services/news-service/NewsService.svelte";
 
 // Configure global aliases FIRST, before any model imports happen
 function configure(): void {
@@ -108,6 +109,12 @@ async function registerHooks(): Promise<void> {
       );
 
       console.log("SR3E | CONFIG.SR3E initialized, localize() ready");
+   });
+
+   Hooks.once(hooks.ready, () => {
+      // Initialize NewsService after everything is ready
+      getNewsService();
+      console.log("SR3E | NewsService initialized");
    });
 }
 
