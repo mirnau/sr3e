@@ -1,0 +1,35 @@
+@layer sr3e.prep {
+
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   h6 {
+      all: unset;
+      text-transform: uppercase;
+   }
+
+   body,
+   p {
+      font-family: unset;
+      font-size: 1rem;
+   }
+
+   footer {
+      font-family: unset;
+      font-size: 0.8rem;
+   }
+
+   input[type="checkbox"] {
+      all: unset;
+      box-sizing: border-box;
+      cursor: pointer;
+   }
+
+   .switch label.sr3e-switch,
+   .switch .sr3e-switch .slider {
+      margin: 0;
+      padding: 0;
+   }
+}
