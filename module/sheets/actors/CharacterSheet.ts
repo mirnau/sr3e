@@ -71,14 +71,22 @@ export default class CharacterActorSheet extends SR3EActorBase {
     }
 
     _injectNewsFeed(header: Element | null) {
-        if (!header?.parentElement) return;
+        if (!header) return;
 
-        let newsFeedSlot = header.nextElementSibling;
+        // Find existing news feed slot inside header
+        let newsFeedSlot = header.querySelector(".news-feed-position");
 
-        if (!newsFeedSlot || !newsFeedSlot.classList.contains("news-feed-position")) {
+        if (!newsFeedSlot) {
+            // Create new slot and insert before the first header-control button
             newsFeedSlot = document.createElement("div");
             newsFeedSlot.classList.add("news-feed-position");
-            header.parentElement.insertBefore(newsFeedSlot, header.nextSibling);
+
+            const firstControl = header.querySelector(".header-control");
+            if (firstControl) {
+                header.insertBefore(newsFeedSlot, firstControl);
+            } else {
+                header.appendChild(newsFeedSlot);
+            }
         }
 
         if (newsFeedSlot.childNodes.length === 0) {

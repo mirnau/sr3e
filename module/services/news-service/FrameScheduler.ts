@@ -46,7 +46,9 @@ export class FrameScheduler {
 		if (!timestamp) return;
 		if (expectedControllerId && controllerId !== expectedControllerId) return;
 		if (controllerId && this.#controllerId && controllerId !== this.#controllerId) return;
-		if (timestamp <= current.timestamp) return;
+
+		// Allow ±1 second tolerance to prevent rejecting frames due to network/processing delays
+		if (timestamp + NewsConfig.FRAME_TIMESTAMP_TOLERANCE_MS < current.timestamp) return;
 
 		this.currentDisplayFrame.set({ buffer, timestamp, duration });
 	}

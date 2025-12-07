@@ -8,36 +8,40 @@
 }
 
 .sr3e.sheet.character {
-  .news-feed-position {
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 99;
-    pointer-events: none;
+  .window-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
 
-    .ticker {
+    // Ensure window icon and title don't interfere
+    .window-icon,
+    .window-title {
+      flex: 0 0 auto;
+    }
+
+    // Keep header controls on the right
+    .header-control {
+      flex: 0 0 auto;
+      order: 1;
+    }
+
+    .news-feed-position {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 2.5rem;
+      pointer-events: none;
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 2.5rem;
-      overflow: hidden;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(0, 0, 0, 0.8) 10%,
-        rgba(0, 0, 0, 0.9) 50%,
-        rgba(0, 0, 0, 0.8) 90%,
-        transparent 100%
-      );
-      backdrop-filter: blur(4px);
-      border-top: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
-      border-bottom: 1px solid color-mix(in srgb, var(--accent-color) 30%, transparent);
-      box-shadow:
-        0 0 10px color-mix(in srgb, var(--accent-color) 20%, transparent),
-        inset 0 0 20px rgba(0, 0, 0, 0.5);
+      order: 0;
+
+      .ticker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 2.5rem;
+        overflow: hidden;
 
       .marquee-outer {
         position: relative;
@@ -47,43 +51,44 @@
         display: flex;
         align-items: center;
         white-space: nowrap;
+        backdrop-filter: blur(8px);
 
-        // Gradient fade on left edge
+        // Cyan-tinted gradient fade on left edge
         &::before {
           content: "";
           position: absolute;
           left: 0;
           top: 0;
           bottom: 0;
-          width: 15%;
+          width: 50%;
           background: linear-gradient(
             to right,
-            rgba(0, 0, 0, 0.9) 0%,
-            color-mix(in srgb, var(--accent-color) 30%, transparent) 25%,
-            color-mix(in srgb, var(--accent-color) 10%, transparent) 50%,
-            transparent 100%
+            var(--accent-color) 0%,
+            rgba(0, 255, 255, 0.5) 25%,
+            rgba(0, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
           );
           pointer-events: none;
-          z-index: 2;
+          z-index: 3;
         }
 
-        // Gradient fade on right edge
+        // Cyan-tinted gradient fade on right edge
         &::after {
           content: "";
           position: absolute;
           right: 0;
           top: 0;
           bottom: 0;
-          width: 15%;
+          width: 50%;
           background: linear-gradient(
             to left,
-            rgba(0, 0, 0, 0.9) 0%,
-            color-mix(in srgb, var(--accent-color) 30%, transparent) 25%,
-            color-mix(in srgb, var(--accent-color) 10%, transparent) 50%,
-            transparent 100%
+            var(--accent-color) 0%,
+            rgba(0, 255, 255, 0.5) 25%,
+            rgba(0, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
           );
           pointer-events: none;
-          z-index: 2;
+          z-index: 3;
         }
 
         .marquee-inner {
@@ -94,6 +99,8 @@
           will-change: transform;
           align-items: center;
           height: 100%;
+          contain: layout style paint;
+          isolation: isolate;
 
           .marquee-item {
             display: inline-flex;
@@ -101,30 +108,32 @@
             padding: 0 2rem;
             white-space: nowrap;
             flex-shrink: 0;
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 500;
             color: var(--accent-color);
             text-shadow:
-              0 0 3px rgba(0, 0, 0, 0.8),
-              0 0 6px rgba(0, 0, 0, 0.6),
-              0 0 10px color-mix(in srgb, var(--accent-color) 40%, transparent);
+              0 0 3px oklch(0% 0 0 / 0.35),
+              0 0 6px oklch(0% 0 0 / 0.25);
             letter-spacing: 0.025em;
             line-height: 1;
+            contain: layout paint style;
+            will-change: contents;
 
-            // Add subtle glow effect
-            animation: news-glow 3s ease-in-out infinite;
+            // Disabled glow animation to prevent flicker when carts update
+            // animation: news-glow 3s ease-in-out infinite;
 
-            &:nth-child(2n) {
-              animation-delay: 1.5s;
-            }
+            // &:nth-child(2n) {
+            //   animation-delay: 1.5s;
+            // }
           }
         }
       }
-    }
+      }
 
-    // Ensure ticker is visible but doesn't block interactions
-    * {
-      pointer-events: none;
+      // Ensure ticker is visible but doesn't block interactions
+      * {
+        pointer-events: none;
+      }
     }
   }
 
