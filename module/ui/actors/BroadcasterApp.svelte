@@ -2,7 +2,7 @@
    import {
       broadcastNews,
       stopBroadcast,
-   } from "../../services/NewsService.svelte";
+   } from "../../services/news-service/NewsService.svelte";
    import SheetCard from "../common-components/SheetCard.svelte";
    import StoreManager from "../../utilities/StoreManager.svelte";
    import type { Writable } from "svelte/store";

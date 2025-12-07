@@ -1,64 +1,65 @@
-console.log(
-	"%cNewsService module evaluated →",
-	"color:#ff66aa;font-weight:bold;",
-	import.meta.url,
-	performance.now().toFixed(1)
-);
-
-import { writable, get, derived } from "svelte/store";
+import { writable, get, readable } from "svelte/store";
 import type { Writable, Readable } from "svelte/store";
+import { NewsMessage } from "./NewsMessage";
+import { DisplayFrame } from "./DisplayFrame";
+import { SocketData } from "./SocketData";
+import { BroadcasterActor } from "./BroadcasterActor";
 
-interface NewsMessage {
-	sender: string;
-	headline: string;
-}
+/**
+ * Socket message types for news synchronization
+ */
+export type SocketMessageType =
+	| "syncBroadcast"
+	| "stopBroadcast"
+	| "frameUpdate"
+	| "controllerElection"
+	| "controllerHeartbeat"
+	| "requestStateSync"
+	| "stateSyncResponse"
+	| "controllerAnnouncement"
+	| "controllerStatusRequest"
+	| "controllerStatusResponse"
+	| "forceResync";
 
-interface DisplayFrame {
-	buffer: NewsMessage[];
-	timestamp: number;
-	duration?: number;
-}
-
-interface SocketData {
-	type: string;
-	actorName?: string;
-	headlines?: string[];
-	buffer?: NewsMessage[];
-	timestamp?: number;
-	userId?: string;
-	broadcasters?: Record<string, string[]>;
-	duration?: number;
-	controllerId?: string;
-	targetId?: string;
-}
-
+/**
+ * NewsService - Synchronized news ticker system for Shadowrun 3E
+ *
+ * Manages real-time news broadcasts from broadcaster actors, synchronized across all clients.
+ * Implements a controller election system to ensure only one client generates frames,
+ * while all others follow in perfect synchronization.
+ *
+ * @singleton
+ */
 export class NewsService {
-	activeBroadcasters: Writable<Map<string, string[]>> = writable(new Map());
-	allFeeds: Writable<Record<string, NewsMessage[]>> = writable({});
-	currentDisplayFrame: Writable<DisplayFrame> = writable({ buffer: [], timestamp: 0 });
+	// Public reactive stores
+	readonly activeBroadcasters: Writable<Map<string, string[]>> = writable(new Map());
+	readonly allFeeds: Writable<Record<string, NewsMessage[]>> = writable({});
+	readonly currentDisplayFrame: Writable<DisplayFrame> = writable({ buffer: [], timestamp: 0 });
 
+	// Private state
 	#feedBuffer: NewsMessage[] = [];
 	#currentIndices = new Map<string, number>();
 	#maxVisible = 5;
 	#lastBroadcasterIndex = -1;
-	#frameUpdateInterval: ReturnType<typeof setInterval> | null = null;
 	#initialized = false;
 	#nextTick: ReturnType<typeof setTimeout> | null = null;
-	#broadcastController: string | null = null;
 	#isController = false;
 	#controllerHeartbeat: ReturnType<typeof setInterval> | null = null;
+	#controllerHealthCheck: ReturnType<typeof setInterval> | null = null;
 	#lastHeartbeat = 0;
 	#syncRequestTimeout: ReturnType<typeof setTimeout> | null = null;
 	#electionCandidates = new Set<string>();
 	#electionInProgress = false;
+	#broadcastController: string | null = null;
 
-	AVG_CHAR_PX = 12;
-	SCROLL_SPEED = 100;
-	DEFAULT_MS = 10000;
-	CONTROLLER_TIMEOUT = 15000;
-	HEARTBEAT_INTERVAL = 5000;
-	ELECTION_DELAY = 1000;
-	ESTIMATED_TICKER_WIDTH = 400;
+	// Constants
+	readonly AVG_CHAR_PX = 12;
+	readonly SCROLL_SPEED = 100;
+	readonly DEFAULT_MS = 10000;
+	readonly CONTROLLER_TIMEOUT = 15000;
+	readonly HEARTBEAT_INTERVAL = 5000;
+	readonly ELECTION_DELAY = 1000;
+	readonly ESTIMATED_TICKER_WIDTH = 400;
 
 	#defaultMessages: NewsMessage[] = [
 		{ sender: "System", headline: "Please stand by." },
@@ -68,6 +69,11 @@ export class NewsService {
 
 	static #instance: NewsService | null = null;
 
+	/**
+	 * Gets the singleton instance of NewsService
+	 * @returns The NewsService instance
+	 * @static
+	 */
 	static Instance(): NewsService {
 		if (!this.#instance) {
 			this.#instance = new NewsService();
@@ -75,6 +81,23 @@ export class NewsService {
 		return this.#instance;
 	}
 
+	/**
+	 * Safely gets the current user's ID
+	 * @returns User ID or empty string if not available
+	 * @private
+	 */
+	#getUserId(): string {
+		return (game.user as any)?.id || "";
+	}
+
+	/**
+	 * Initializes the NewsService
+	 * - Sets up socket listeners for news synchronization
+	 * - Loads active broadcasters from game world
+	 * - Starts controller election process
+	 * - Registers service in CONFIG.SR3E
+	 * @public
+	 */
 	initialize(): void {
 		if (this.#initialized) return;
 		this.#initialized = true;
@@ -84,26 +107,45 @@ export class NewsService {
 		this.#requestControllerElection();
 		this.#startControllerHealthCheck();
 
-		CONFIG.sr3e = CONFIG.sr3e || {};
-		CONFIG.sr3e.newsService = this;
+		CONFIG.SR3E.newsService = this;
 	}
 
+	/**
+	 * Loads all active broadcasters from the game world
+	 * @private
+	 */
 	#loadActiveBroadcasters(): void {
+		if (!game.actors) return;
+
 		const allBroadcasters = game.actors.filter(
-			(actor: any) => actor.type === "broadcaster" && actor.system.isBroadcasting
+			(actor: any): actor is BroadcasterActor =>
+				actor.type === "broadcaster" && !!actor.system?.isBroadcasting
 		);
 
-		allBroadcasters.forEach((broadcaster: any) => {
+		allBroadcasters.forEach((broadcaster: BroadcasterActor) => {
 			const headlines = broadcaster.system.rollingNews || [];
 			this.#receiveBroadcastSync(broadcaster.name, headlines);
 		});
 	}
 
 	#startControllerHealthCheck(): void {
-		setInterval(() => this.#checkControllerHealth(), this.HEARTBEAT_INTERVAL);
+		if (this.#controllerHealthCheck) clearInterval(this.#controllerHealthCheck);
+		this.#controllerHealthCheck = setInterval(
+			() => this.#checkControllerHealth(),
+			this.HEARTBEAT_INTERVAL
+		);
 	}
 
+	/**
+	 * Sets up socket listeners for news synchronization
+	 * @private
+	 */
 	#setupSocket(): void {
+		if (!game.socket) {
+			console.error("NewsService: game.socket not available");
+			return;
+		}
+
 		game.socket.on("module.sr3e", (data: SocketData) => {
 			const {
 				type,
@@ -177,14 +219,21 @@ export class NewsService {
 	}
 
 	#requestControllerElection(): void {
+		const userId = this.#getUserId();
+		if (!userId) return;
 		if (this.#electionInProgress) return;
 		this.#electionInProgress = true;
 		this.#electionCandidates.clear();
-		this.#electionCandidates.add(game.user?.id || "");
+		this.#electionCandidates.add(userId);
+
+		if (!game.socket) {
+			this.#electionInProgress = false;
+			return;
+		}
 
 		game.socket.emit("module.sr3e", {
 			type: "controllerElection",
-			userId: game.user?.id,
+			userId,
 		});
 
 		if (this.#syncRequestTimeout) clearTimeout(this.#syncRequestTimeout);
@@ -198,10 +247,10 @@ export class NewsService {
 		const winner = sorted[0];
 		this.#electionInProgress = false;
 
-		if (winner === game.user?.id) {
+		if (winner === this.#getUserId()) {
 			this.#becomeController();
 		} else {
-			this.#broadcastController = winner;
+			this.#broadcastController = winner as string;
 		}
 	}
 
@@ -214,26 +263,36 @@ export class NewsService {
 
 	#becomeController(): void {
 		if (this.#isController) return;
+		const userId = this.#getUserId();
+		if (!userId) return;
 
 		this.#announceController();
 		this.#isController = true;
-		this.#broadcastController = game.user?.id || null;
+		this.#broadcastController = userId;
 		this.#startControllerHeartbeat();
 		this.#loadActiveBroadcasters();
 		this.#scheduleNextFrame();
 	}
 
 	#announceController(): void {
+		const userId = this.#getUserId();
+		if (!userId || !game.socket) return;
+
 		game.socket.emit("module.sr3e", {
 			type: "controllerAnnouncement",
-			userId: game.user?.id,
+			userId,
 		});
 	}
 
 	#requestControllerStatus(): void {
+		if (!game.socket) return;
+
+		const userId = this.#getUserId();
+		if (!userId) return;
+
 		game.socket.emit("module.sr3e", {
 			type: "controllerStatusRequest",
-			userId: game.user?.id,
+			userId,
 		});
 
 		if (this.#syncRequestTimeout) clearTimeout(this.#syncRequestTimeout);
@@ -243,16 +302,18 @@ export class NewsService {
 	}
 
 	#handleControllerStatusRequest(requesterId: string): void {
-		if (!this.#isController) return;
+		const userId = this.#getUserId();
+		if (!this.#isController || !game.socket || !userId) return;
+
 		game.socket.emit("module.sr3e", {
 			type: "controllerStatusResponse",
-			controllerId: game.user?.id,
+			controllerId: userId,
 			targetId: requesterId,
 		});
 	}
 
 	#handleControllerStatusResponse(controllerId: string, targetId: string): void {
-		if (targetId !== game.user?.id) return;
+		if (targetId !== this.#getUserId()) return;
 		this.#broadcastController = controllerId;
 		this.#lastHeartbeat = Date.now();
 	}
@@ -260,10 +321,10 @@ export class NewsService {
 	#startControllerHeartbeat(): void {
 		if (this.#controllerHeartbeat) clearInterval(this.#controllerHeartbeat);
 		this.#controllerHeartbeat = setInterval(() => {
-			if (this.#isController) {
+			if (this.#isController && game.socket) {
 				game.socket.emit("module.sr3e", {
 					type: "controllerHeartbeat",
-					userId: game.user?.id,
+					userId: this.#getUserId(),
 				});
 			}
 		}, this.HEARTBEAT_INTERVAL);
@@ -273,7 +334,7 @@ export class NewsService {
 		this.#broadcastController = userId;
 		this.#lastHeartbeat = Date.now();
 
-		if (userId === game.user?.id) return;
+		if (userId === this.#getUserId()) return;
 
 		if (this.#isController) {
 			this.#isController = false;
@@ -317,6 +378,7 @@ export class NewsService {
 			buffer,
 			timestamp: startTime,
 			duration,
+			controllerId: this.#getUserId(),
 		});
 
 		if (this.#nextTick) clearTimeout(this.#nextTick);
@@ -325,21 +387,39 @@ export class NewsService {
 		}, duration);
 	}
 
-	#receiveFrameUpdate(buffer: NewsMessage[], timestamp: number, duration?: number): void {
+	#receiveFrameUpdate(
+		buffer: NewsMessage[],
+		timestamp: number,
+		duration?: number,
+		controllerId?: string
+	): void {
 		const current = get(this.currentDisplayFrame);
 		if (!Array.isArray(buffer)) return;
 		if (!timestamp) return;
+		if (controllerId) {
+			if (this.#broadcastController && controllerId !== this.#broadcastController) return;
+			if (!this.#broadcastController) this.#broadcastController = controllerId;
+		} else if (this.#broadcastController) {
+			return;
+		}
 		if (timestamp <= current.timestamp) return;
 
 		this.currentDisplayFrame.set({ buffer, timestamp, duration });
 	}
 
+	/**
+	 * Calculates animation duration based on content width and scroll speed
+	 * Supports multi-language character width calculation (CJK, Cyrillic, Arabic, etc.)
+	 * @param buffer - Array of news messages to display
+	 * @returns Duration in milliseconds
+	 * @private
+	 */
 	#guessDuration(buffer: NewsMessage[]): number {
 		if (!Array.isArray(buffer) || buffer.length === 0) return this.DEFAULT_MS;
 
 		const FONT_SIZE_PX = 24; // 1.5rem = 24px typically
 
-		const calculateTextWidth = (text = ""): number => {
+		const calculateTextWidth = (text: string = ""): number => {
 			let totalWidth = 0;
 
 			for (const char of text) {
@@ -416,13 +496,16 @@ export class NewsService {
 	}
 
 	#handleStateSyncRequest(requestingUserId: string): void {
-		if (requestingUserId === game.user?.id) return;
+		if (requestingUserId === this.#getUserId() || !game.socket) return;
+
 		const broadcasters = get(this.activeBroadcasters);
 		if (broadcasters.size === 0) return;
+
 		const broadcastersData: Record<string, string[]> = {};
 		broadcasters.forEach((headlines, actorName) => {
 			broadcastersData[actorName] = headlines;
 		});
+
 		game.socket.emit("module.sr3e", {
 			type: "stateSyncResponse",
 			broadcasters: broadcastersData,
@@ -460,14 +543,14 @@ export class NewsService {
 	#pumpNextHeadline(): NewsMessage | null {
 		const broadcasters = get(this.activeBroadcasters);
 		if (broadcasters.size === 0) return null;
-		const broadcasterNames = Array.from(broadcasters.keys());
+		const broadcasterNames : string[] = Array.from(broadcasters.keys());
 		for (let offset = 0; offset < broadcasterNames.length; offset++) {
 			const index = (this.#lastBroadcasterIndex + offset + 1) % broadcasterNames.length;
-			const broadcasterName = broadcasterNames[index];
+			const broadcasterName : string = broadcasterNames[index] as string;
 			const headlines = broadcasters.get(broadcasterName);
 			if (!headlines || headlines.length === 0) continue;
 			const currentIndex = this.#currentIndices.get(broadcasterName) || 0;
-			const headline = headlines[currentIndex];
+			const headline : string = headlines[currentIndex] as string;
 			this.#currentIndices.set(broadcasterName, (currentIndex + 1) % headlines.length);
 			this.#lastBroadcasterIndex = index;
 			return { sender: broadcasterName, headline };
@@ -485,10 +568,9 @@ export class NewsService {
 			buffer.push(nextHeadline);
 		}
 
-		// ⛔ No broadcasters, inject default system messages
 		if (buffer.length === 0 && broadcasters.size === 0) {
 			for (let i = 0; i < minLength; i++) {
-				const msg = this.#defaultMessages[i % this.#defaultMessages.length];
+				const msg : NewsMessage = this.#defaultMessages[i % this.#defaultMessages.length] as NewsMessage;
 				buffer.push(msg);
 			}
 		}
@@ -516,32 +598,51 @@ export class NewsService {
 		const feeds: Record<string, NewsMessage[]> = {};
 		this.#feedBuffer.forEach((message) => {
 			feeds[message.sender] = feeds[message.sender] || [];
-			feeds[message.sender].push(message);
+			feeds[message.sender]!.push(message);
 		});
 		this.allFeeds.set(feeds);
 	}
 
+	/**
+	 * Requests a full resynchronization of broadcaster state
+	 * Useful when client detects desync or after reconnection
+	 * @public
+	 */
 	requestFullResync(): void {
 		this.#requestControllerStatus();
+		if (!game.socket) return;
+
 		game.socket.emit("module.sr3e", {
 			type: "requestStateSync",
-			userId: game.user?.id,
+			userId: this.#getUserId(),
 		});
 	}
 
+	/**
+	 * Cleans up all resources, timers, and socket listeners
+	 * @public
+	 */
 	destroy(): void {
+		if (!game.socket) return;
+
 		game.socket.off("module.sr3e");
 		this.#initialized = false;
 		if (this.#nextTick) clearTimeout(this.#nextTick);
 		if (this.#controllerHeartbeat) clearInterval(this.#controllerHeartbeat);
+		if (this.#controllerHealthCheck) clearInterval(this.#controllerHealthCheck);
 		if (this.#syncRequestTimeout) clearTimeout(this.#syncRequestTimeout);
 		this.#isController = false;
-		if (CONFIG.sr3e?.newsService === this) CONFIG.sr3e.newsService = null;
+		if (CONFIG.SR3E?.newsService === this) CONFIG.SR3E.newsService = null;
 	}
 }
 
 let newsServiceInstance: NewsService | null = null;
 
+/**
+ * Gets or creates the singleton NewsService instance
+ * @returns The initialized NewsService instance
+ * @public
+ */
 export const getNewsService = (): NewsService => {
 	if (!newsServiceInstance) {
 		newsServiceInstance = NewsService.Instance();
@@ -550,7 +651,19 @@ export const getNewsService = (): NewsService => {
 	return newsServiceInstance;
 };
 
+/**
+ * Broadcasts news headlines from a broadcaster actor
+ * Emits socket message to synchronize headlines across all clients
+ * @param actorName - Name of the broadcaster actor
+ * @param headlines - Array of headline strings to broadcast
+ * @public
+ */
 export const broadcastNews = (actorName: string, headlines: string[]): void => {
+	if (!game.socket) {
+		console.warn("NewsService: Cannot broadcast news - socket not available");
+		return;
+	}
+
 	game.socket.emit("module.sr3e", {
 		type: "syncBroadcast",
 		actorName,
@@ -558,21 +671,31 @@ export const broadcastNews = (actorName: string, headlines: string[]): void => {
 	});
 };
 
+/**
+ * Stops broadcasting from a broadcaster actor
+ * Emits socket message to remove broadcaster from all clients
+ * @param actorName - Name of the broadcaster actor to stop
+ * @public
+ */
 export const stopBroadcast = (actorName: string): void => {
+	if (!game.socket) {
+		console.warn("NewsService: Cannot stop broadcast - socket not available");
+		return;
+	}
+
 	game.socket.emit("module.sr3e", {
 		type: "stopBroadcast",
 		actorName,
 	});
 };
 
-export const currentDisplayFrame = derived(
-	() => CONFIG.sr3e?.newsService?.currentDisplayFrame,
-	($store: any, set: (value: DisplayFrame) => void) => {
-		if (!$store?.subscribe) {
-			set({ buffer: [], timestamp: 0 });
-			return;
-		}
-
-		return $store.subscribe(set);
-	}
+/**
+ * Derived store that provides the current display frame from the NewsService
+ * Automatically subscribes to the active NewsService instance
+ * Falls back to empty frame if NewsService not available
+ * @public
+ */
+export const currentDisplayFrame: Readable<DisplayFrame> = readable<DisplayFrame>(
+	{ buffer: [] as NewsMessage[], timestamp: 0 },
+	(set) => getNewsService().currentDisplayFrame.subscribe(set)
 );

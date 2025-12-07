@@ -9,7 +9,9 @@ declare global {
 
   // Extend Foundry's CONFIG object with SR3E system configuration
   interface CONFIG {
-    SR3E: import('../lang/config').localizations;
+    SR3E: import('../lang/config').localizations & {
+      newsService?: import('../module/services/news-service/NewsService.svelte').NewsService | null;
+    };
   }
 
   /**

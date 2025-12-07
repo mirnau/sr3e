@@ -1,11 +1,13 @@
 import { mount } from "svelte";
 import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 import NeonName from "../../ui/injections/NeonName.svelte";
+import NewsFeed from "../../ui/injections/NewsFeed.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
     #neon?: SvelteApp;
+    #newsFeed?: SvelteApp;
 
     get title() {
         return "";
@@ -45,6 +47,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
 
         const header = form.querySelector("header.window-header");
         this._injectNeonName(header);
+        this._injectNewsFeed(header);
     }
 
     _injectNeonName(header: Element | null) {
@@ -64,6 +67,25 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 props: { actor: this.document },
             });
             this.apps.push(this.#neon);
+        }
+    }
+
+    _injectNewsFeed(header: Element | null) {
+        if (!header?.parentElement) return;
+
+        let newsFeedSlot = header.nextElementSibling;
+
+        if (!newsFeedSlot || !newsFeedSlot.classList.contains("news-feed-position")) {
+            newsFeedSlot = document.createElement("div");
+            newsFeedSlot.classList.add("news-feed-position");
+            header.parentElement.insertBefore(newsFeedSlot, header.nextSibling);
+        }
+
+        if (newsFeedSlot.childNodes.length === 0) {
+            this.#newsFeed = mount(NewsFeed, {
+                target: newsFeedSlot,
+            });
+            this.apps.push(this.#newsFeed);
         }
     }
 
