@@ -4,15 +4,21 @@
 @use "./injections/newsfeed.scss";
 
 form.application.sheet.sr3e.character {
-   background-color: red;
+   background-color: rgba(42, 54, 54, 0.582);
    overflow: visible;
    max-height: 0rem;
 
+   
+   
    section.window-content {
       overflow: visible;
-
+      
       .packery-packery-grid {
          overflow: visible;
       }
    }
+}
+
+header.window-header {
+    backdrop-filter: blur(8px);
 }
