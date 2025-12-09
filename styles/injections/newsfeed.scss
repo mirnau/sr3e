@@ -41,54 +41,132 @@
         justify-content: center;
         width: 100%;
         height: 2.5rem;
-        overflow: hidden;
+        overflow: visible;
+        position: relative;
+
+        // Left emitter housing - Vaporwave purple/magenta
+        &::before {
+          content: "";
+          position: absolute;
+          left: -4px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 4px;
+          height: 80%;
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 105, 180, 0) 0%,
+            rgba(255, 105, 180, 0.8) 20%,
+            rgba(255, 20, 147, 1) 40%,
+            rgba(255, 255, 255, 1) 50%,
+            rgba(255, 20, 147, 1) 60%,
+            rgba(255, 105, 180, 0.8) 80%,
+            rgba(255, 105, 180, 0) 100%
+          );
+          box-shadow:
+            0 0 8px rgba(255, 20, 147, 0.9),
+            0 0 16px rgba(255, 105, 180, 0.6),
+            0 0 24px rgba(186, 85, 211, 0.4),
+            inset 0 0 4px rgba(255, 255, 255, 0.8);
+          border-radius: 2px;
+          z-index: 5;
+          animation: emitter-glow 2s ease-in-out infinite;
+        }
+
+        // Right emitter housing - Vaporwave purple/magenta
+        &::after {
+          content: "";
+          position: absolute;
+          right: -4px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 4px;
+          height: 80%;
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 105, 180, 0) 0%,
+            rgba(255, 105, 180, 0.8) 20%,
+            rgba(255, 20, 147, 1) 40%,
+            rgba(255, 255, 255, 1) 50%,
+            rgba(255, 20, 147, 1) 60%,
+            rgba(255, 105, 180, 0.8) 80%,
+            rgba(255, 105, 180, 0) 100%
+          );
+          box-shadow:
+            0 0 8px rgba(255, 20, 147, 0.9),
+            0 0 16px rgba(255, 105, 180, 0.6),
+            0 0 24px rgba(186, 85, 211, 0.4),
+            inset 0 0 4px rgba(255, 255, 255, 0.8);
+          border-radius: 2px;
+          z-index: 5;
+          animation: emitter-glow 2s ease-in-out infinite;
+          animation-delay: 1s;
+        }
 
       .marquee-outer {
         position: relative;
-        width: 100%;
+        width: calc(100% - 8px);
         height: 100%;
         overflow: hidden;
         display: flex;
         align-items: center;
         white-space: nowrap;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(4px);
+        margin: 0 4px;
 
-        // Cyan-tinted gradient fade on left edge
+        // Left power source emitter - Vaporwave energy field
         &::before {
           content: "";
           position: absolute;
           left: 0;
           top: 0;
           bottom: 0;
-          width: 50%;
-          background: linear-gradient(
-            to right,
-            var(--accent-color) 0%,
-            rgba(0, 255, 255, 0.5) 25%,
-            rgba(0, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0) 100%
-          );
+          width: 70%;
+          background:
+            radial-gradient(
+              ellipse at left center,
+              rgba(255, 255, 255, 0.95) 0%,
+              rgba(255, 20, 147, 0.85) 2%,
+              rgba(255, 105, 180, 0.75) 6%,
+              rgba(186, 85, 211, 0.65) 12%,
+              rgba(147, 112, 219, 0.5) 20%,
+              rgba(138, 43, 226, 0.4) 30%,
+              rgba(186, 85, 211, 0.25) 45%,
+              rgba(218, 112, 214, 0.15) 60%,
+              rgba(255, 105, 180, 0.08) 75%,
+              rgba(255, 20, 147, 0) 90%
+            );
           pointer-events: none;
           z-index: 3;
+          animation: power-pulse-left 3s ease-in-out infinite;
         }
 
-        // Cyan-tinted gradient fade on right edge
+        // Right power source emitter - Vaporwave energy field
         &::after {
           content: "";
           position: absolute;
           right: 0;
           top: 0;
           bottom: 0;
-          width: 50%;
-          background: linear-gradient(
-            to left,
-            var(--accent-color) 0%,
-            rgba(0, 255, 255, 0.5) 25%,
-            rgba(0, 255, 255, 0.2) 50%,
-            rgba(255, 255, 255, 0) 100%
-          );
+          width: 70%;
+          background:
+            radial-gradient(
+              ellipse at right center,
+              rgba(255, 255, 255, 0.95) 0%,
+              rgba(255, 20, 147, 0.85) 2%,
+              rgba(255, 105, 180, 0.75) 6%,
+              rgba(186, 85, 211, 0.65) 12%,
+              rgba(147, 112, 219, 0.5) 20%,
+              rgba(138, 43, 226, 0.4) 30%,
+              rgba(186, 85, 211, 0.25) 45%,
+              rgba(218, 112, 214, 0.15) 60%,
+              rgba(255, 105, 180, 0.08) 75%,
+              rgba(255, 20, 147, 0) 90%
+            );
           pointer-events: none;
           z-index: 3;
+          animation: power-pulse-right 3s ease-in-out infinite;
+          animation-delay: 1.5s;
         }
 
         .marquee-inner {
@@ -110,21 +188,22 @@
             flex-shrink: 0;
             font-size: 1.5rem;
             font-weight: 500;
-            color: var(--accent-color);
+            color: rgba(0, 255, 255, 0.95);
             text-shadow:
-              0 0 3px oklch(0% 0 0 / 0.35),
-              0 0 6px oklch(0% 0 0 / 0.25);
-            letter-spacing: 0.025em;
+              0 0 2px rgba(255, 255, 255, 0.8),
+              0 0 4px rgba(0, 255, 255, 0.6),
+              0 0 8px rgba(0, 255, 255, 0.4),
+              0 0 12px rgba(0, 255, 255, 0.2),
+              0 0 3px oklch(0% 0 0 / 0.4);
+            letter-spacing: 0.05em;
             line-height: 1;
             contain: layout paint style;
             will-change: contents;
+            animation: hologram-flicker 4s ease-in-out infinite;
 
-            // Disabled glow animation to prevent flicker when carts update
-            // animation: news-glow 3s ease-in-out infinite;
-
-            // &:nth-child(2n) {
-            //   animation-delay: 1.5s;
-            // }
+            &:nth-child(2n) {
+              animation-delay: 2s;
+            }
           }
         }
       }
@@ -134,6 +213,90 @@
       * {
         pointer-events: none;
       }
+    }
+  }
+
+  // Emitter housing glow animation - Vaporwave purple/magenta
+  @keyframes emitter-glow {
+    0%, 100% {
+      box-shadow:
+        0 0 8px rgba(255, 20, 147, 0.9),
+        0 0 16px rgba(255, 105, 180, 0.6),
+        0 0 24px rgba(186, 85, 211, 0.4),
+        inset 0 0 4px rgba(255, 255, 255, 0.8);
+      filter: brightness(1);
+    }
+    50% {
+      box-shadow:
+        0 0 12px rgba(255, 20, 147, 1),
+        0 0 24px rgba(255, 105, 180, 0.8),
+        0 0 36px rgba(186, 85, 211, 0.6),
+        0 0 48px rgba(138, 43, 226, 0.4),
+        inset 0 0 6px rgba(255, 255, 255, 1);
+      filter: brightness(1.5);
+    }
+  }
+
+  // Power source pulsing animations
+  @keyframes power-pulse-left {
+    0%, 100% {
+      opacity: 0.8;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 1;
+      filter: brightness(1.3);
+    }
+  }
+
+  @keyframes power-pulse-right {
+    0%, 100% {
+      opacity: 0.8;
+      filter: brightness(1);
+    }
+    50% {
+      opacity: 1;
+      filter: brightness(1.3);
+    }
+  }
+
+  // Holographic text flicker
+  @keyframes hologram-flicker {
+    0%, 100% {
+      opacity: 0.95;
+      text-shadow:
+        0 0 2px rgba(255, 255, 255, 0.8),
+        0 0 4px rgba(0, 255, 255, 0.6),
+        0 0 8px rgba(0, 255, 255, 0.4),
+        0 0 12px rgba(0, 255, 255, 0.2),
+        0 0 3px oklch(0% 0 0 / 0.4);
+    }
+    25% {
+      opacity: 1;
+      text-shadow:
+        0 0 3px rgba(255, 255, 255, 1),
+        0 0 6px rgba(0, 255, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.5),
+        0 0 16px rgba(0, 255, 255, 0.3),
+        0 0 3px oklch(0% 0 0 / 0.4);
+    }
+    50% {
+      opacity: 0.97;
+      text-shadow:
+        0 0 2px rgba(255, 255, 255, 0.9),
+        0 0 5px rgba(0, 255, 255, 0.7),
+        0 0 9px rgba(0, 255, 255, 0.45),
+        0 0 14px rgba(0, 255, 255, 0.25),
+        0 0 3px oklch(0% 0 0 / 0.4);
+    }
+    75% {
+      opacity: 1;
+      text-shadow:
+        0 0 3px rgba(255, 255, 255, 1),
+        0 0 6px rgba(0, 255, 255, 0.8),
+        0 0 10px rgba(0, 255, 255, 0.5),
+        0 0 16px rgba(0, 255, 255, 0.3),
+        0 0 3px oklch(0% 0 0 / 0.4);
     }
   }
 

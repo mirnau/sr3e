@@ -101,4 +101,23 @@ export default class CharacterActorSheet extends SR3EActorBase {
         this._unmountAllApps();
         super._tearDown(options);
     }
+
+    /**
+     * Override _updatePosition to allow the window to be dragged freely
+     * without being constrained to the viewport bounds.
+     */
+    protected _updatePosition(position: foundry.applications.api.ApplicationV2.Position): foundry.applications.api.ApplicationV2.Position {
+        // Store the requested position values before parent processing
+        const requestedTop = position.top;
+        const requestedLeft = position.left;
+
+        // Call parent to handle all normal position processing (scaling, z-index, etc.)
+        const processed = super._updatePosition(position);
+
+        // Override the constrained top/left with our unrestricted values
+        if (requestedTop !== undefined) processed.top = requestedTop;
+        if (requestedLeft !== undefined) processed.left = requestedLeft;
+
+        return processed;
+    }
 }
