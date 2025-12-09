@@ -1,35 +1,18 @@
-@layer sr3e.prep {
+// Shared sheet header layout: title on the left, controls on the right.
+.sr3e.sheet {
+  header.window-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
 
-   h1,
-   h2,
-   h3,
-   h4,
-   h5,
-   h6 {
-      all: unset;
-      text-transform: uppercase;
-   }
+  h1.window-title {
+    flex: 1 1 auto;
+    margin: 0;
+  }
 
-   body,
-   p {
-      font-family: unset;
-      font-size: 1rem;
-   }
-
-   footer {
-      font-family: unset;
-      font-size: 0.8rem;
-   }
-
-   input[type="checkbox"] {
-      all: unset;
-      box-sizing: border-box;
-      cursor: pointer;
-   }
-
-   .switch label.sr3e-switch,
-   .switch .sr3e-switch .slider {
-      margin: 0;
-      padding: 0;
-   }
+  .header-button:first-of-type,
+  .header-control:first-of-type {
+    margin-left: auto;
+  }
 }

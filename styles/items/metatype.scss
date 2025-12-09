@@ -7,24 +7,6 @@
   color: var(--text-color, #e8f3ff);
 }
 
-.sr3e.sheet.item.metatype {
-  header.window-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    h1.window-title {
-      margin: 0;
-      margin-right: auto;
-    }
-
-    .header-button,
-    .header-control {
-      margin-left: 0;
-    }
-  }
-}
-
 .metatype-header {
   display: grid;
   grid-template-columns: 2fr 1fr;
