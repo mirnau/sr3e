@@ -11,6 +11,7 @@
   "essence",
   "initiative",
   "isBurnedOut",
+  "limits",
 ] as const;
 
 export const CREATION_KEYS = [
@@ -54,12 +55,14 @@ export const KARMA_KEYS = [
   "readyForCommit",
   "lifetimeKarma",
   "spentKarma",
+  "advancementratio",
 ] as const;
 
 export const MOVEMENT_KEYS = [
   "movement",
   "walking",
-  "running"
+  "running",
+  "runSpeedModifier",
 ] as const;
 
 export const PROFILE_KEYS = [
@@ -71,4 +74,3 @@ export const PROFILE_KEYS = [
   "quote",
   "isDetailsOpen",
 ] as const;
-

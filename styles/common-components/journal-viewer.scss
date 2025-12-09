@@ -1,0 +1,299 @@
+@use "../mixins.scss" as *;
+
+// Journal Viewer Toolbar
+.toolbar.searchbuttons {
+	opacity: 0;
+	transition: opacity 150ms ease;
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+	padding: 0.5rem;
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 4px;
+
+	// reveal only when the toolbar itself is hovered or focused
+	&:hover,
+	&:focus-within {
+		opacity: 1;
+	}
+
+	.sr3e-toolbar-button {
+		padding: 0.5rem 0.75rem;
+		font-size: 1rem;
+		background: rgba(42, 42, 42, 0.8);
+		color: var(--text-color);
+		border: 1px solid rgba(75, 208, 255, 0.35);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:hover {
+			background: rgba(58, 58, 58, 0.9);
+			border-color: var(--highlight-color-primary);
+			box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
+		}
+
+		&:active {
+			transform: scale(0.95);
+		}
+
+		i {
+			pointer-events: none;
+		}
+	}
+}
+
+// Journal Preview Content
+.preview.journal-content {
+	min-height: 10rem;
+	max-height: 30rem;
+	overflow-y: auto;
+	padding: 0.75rem;
+	background: rgba(0, 0, 0, 0.25);
+	color: var(--text-color);
+	border: 1px solid rgba(75, 208, 255, 0.2);
+	border-radius: 4px;
+	font-size: 0.9rem;
+	line-height: 1.5;
+
+	// Style enriched content
+	p {
+		margin-bottom: 0.5rem;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		margin-top: 1rem;
+		margin-bottom: 0.5rem;
+		color: var(--highlight-color-primary);
+	}
+
+	a {
+		color: var(--highlight-color-secondary);
+		text-decoration: underline;
+
+		&:hover {
+			color: var(--highlight-color-primary);
+		}
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+		border-radius: 4px;
+		margin: 0.5rem 0;
+	}
+
+	ul,
+	ol {
+		margin-left: 1.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	blockquote {
+		border-left: 3px solid var(--highlight-color-primary);
+		padding-left: 1rem;
+		margin-left: 0;
+		font-style: italic;
+		opacity: 0.9;
+	}
+
+	code {
+		background: rgba(0, 0, 0, 0.4);
+		padding: 0.125rem 0.25rem;
+		border-radius: 3px;
+		font-family: monospace;
+		font-size: 0.85em;
+	}
+
+	pre {
+		background: rgba(0, 0, 0, 0.4);
+		padding: 0.75rem;
+		border-radius: 4px;
+		overflow-x: auto;
+		margin-bottom: 0.5rem;
+
+		code {
+			background: none;
+			padding: 0;
+		}
+	}
+}
+
+// Modal Popup
+.popup {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 999;
+	overflow: visible;
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(3px);
+}
+
+.popup-container {
+	position: relative;
+	background: var(--accent-color);
+	max-width: 50vw;
+	min-width: 400px;
+	padding: 1rem;
+	z-index: 1000;
+	overflow: visible;
+	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+
+	&::before {
+		content: "";
+		position: absolute;
+		inset: 1px;
+		z-index: -1;
+		background: var(--background-color);
+		box-shadow: inset 0 0 30px #1d282c;
+		@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+	}
+
+	.input-group {
+		position: relative;
+
+		input {
+			width: 100%;
+			padding: 0.75rem;
+			font-size: 1rem;
+			background: rgba(0, 0, 0, 0.4);
+			color: var(--text-color);
+			border: 1px solid rgba(75, 208, 255, 0.35);
+			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+			transition: border-color 0.2s ease;
+
+			&:focus {
+				outline: none;
+				border-color: var(--highlight-color-primary);
+				box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
+			}
+		}
+	}
+
+	.buttons {
+		margin-top: 1rem;
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+
+		button {
+			padding: 0.5rem 1.5rem;
+			font-size: 1rem;
+			background: rgba(42, 42, 42, 0.8);
+			color: var(--text-color);
+			border: 1px solid rgba(75, 208, 255, 0.35);
+			cursor: pointer;
+			transition: all 0.2s ease;
+			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+
+			&:hover:not(:disabled) {
+				background: rgba(58, 58, 58, 0.9);
+				border-color: var(--highlight-color-primary);
+				box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
+			}
+
+			&:active:not(:disabled) {
+				transform: scale(0.95);
+			}
+
+			&:disabled {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+		}
+	}
+}
+
+// Dropdown List
+.dropdown-list.floating {
+	position: fixed;
+	background: var(--background-color);
+	border: 1px solid rgba(75, 208, 255, 0.35);
+	border-top: none;
+	max-height: 300px;
+	overflow-y: auto;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+	padding: 0;
+	list-style: none;
+	backdrop-filter: blur(5px);
+	margin: 0;
+	z-index: 1001;
+	@include clipped-corners(0rem, 0rem, 0.5rem, 0.5rem);
+
+	.dropdown-item {
+		padding: 0;
+		margin: 0;
+		border-bottom: 1px solid rgba(75, 208, 255, 0.1);
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		div[role="option"] {
+			padding: 0.75rem;
+			cursor: pointer;
+			color: var(--text-color);
+			display: flex;
+			align-items: center;
+			transition: background 0.15s ease;
+
+			i {
+				margin-right: 0.5rem;
+				color: var(--highlight-color-secondary);
+			}
+
+			&:hover {
+				background: rgba(65, 233, 202, 0.1);
+			}
+
+			&[aria-selected="true"] {
+				background: rgba(65, 233, 202, 0.2);
+				color: var(--highlight-color-primary);
+			}
+		}
+	}
+
+	.dropdown-empty {
+		padding: 0.75rem;
+		color: #888;
+		text-align: center;
+		font-style: italic;
+	}
+}
+
+// Custom scrollbar for journal content and dropdowns
+.preview.journal-content,
+.dropdown-list.floating {
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: rgba(65, 233, 202, 0.3);
+		border-radius: 4px;
+
+		&:hover {
+			background: rgba(65, 233, 202, 0.5);
+		}
+	}
+}
