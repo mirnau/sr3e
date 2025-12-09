@@ -2,6 +2,7 @@
   from {
     transform: translateX(var(--ticker-width));
   }
+
   to {
     transform: translateX(calc(-1 * var(--marquee-width)));
   }
@@ -53,16 +54,14 @@
           transform: translateY(-50%);
           width: 4px;
           height: 80%;
-          background: linear-gradient(
-            to bottom,
-            rgba(255, 105, 180, 0) 0%,
-            rgba(255, 105, 180, 0.8) 20%,
-            rgba(255, 20, 147, 1) 40%,
-            rgba(255, 255, 255, 1) 50%,
-            rgba(255, 20, 147, 1) 60%,
-            rgba(255, 105, 180, 0.8) 80%,
-            rgba(255, 105, 180, 0) 100%
-          );
+          background: linear-gradient(to bottom,
+              rgba(255, 105, 180, 0) 0%,
+              rgba(255, 105, 180, 0.8) 20%,
+              rgba(255, 20, 147, 1) 40%,
+              rgba(255, 255, 255, 1) 50%,
+              rgba(255, 20, 147, 1) 60%,
+              rgba(255, 105, 180, 0.8) 80%,
+              rgba(255, 105, 180, 0) 100%);
           box-shadow:
             0 0 8px rgba(255, 20, 147, 0.9),
             0 0 16px rgba(255, 105, 180, 0.6),
@@ -82,16 +81,14 @@
           transform: translateY(-50%);
           width: 4px;
           height: 80%;
-          background: linear-gradient(
-            to bottom,
-            rgba(255, 105, 180, 0) 0%,
-            rgba(255, 105, 180, 0.8) 20%,
-            rgba(255, 20, 147, 1) 40%,
-            rgba(255, 255, 255, 1) 50%,
-            rgba(255, 20, 147, 1) 60%,
-            rgba(255, 105, 180, 0.8) 80%,
-            rgba(255, 105, 180, 0) 100%
-          );
+          background: linear-gradient(to bottom,
+              rgba(255, 105, 180, 0) 0%,
+              rgba(255, 105, 180, 0.8) 20%,
+              rgba(255, 20, 147, 1) 40%,
+              rgba(255, 255, 255, 1) 50%,
+              rgba(255, 20, 147, 1) 60%,
+              rgba(255, 105, 180, 0.8) 80%,
+              rgba(255, 105, 180, 0) 100%);
           box-shadow:
             0 0 8px rgba(255, 20, 147, 0.9),
             0 0 16px rgba(255, 105, 180, 0.6),
@@ -103,110 +100,106 @@
           animation-delay: 1s;
         }
 
-      .marquee-outer {
-        position: relative;
-        width: calc(100% - 8px);
-        height: 100%;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        backdrop-filter: blur(4px);
-        margin: 0 4px;
-
-        // Left power source emitter - Vaporwave energy field
-        &::before {
-          content: "";
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 70%;
-          background:
-            radial-gradient(
-              ellipse at left center,
-              rgba(255, 255, 255, 0.95) 0%,
-              rgba(255, 20, 147, 0.85) 2%,
-              rgba(255, 105, 180, 0.75) 6%,
-              rgba(186, 85, 211, 0.65) 12%,
-              rgba(147, 112, 219, 0.5) 20%,
-              rgba(138, 43, 226, 0.4) 30%,
-              rgba(186, 85, 211, 0.25) 45%,
-              rgba(218, 112, 214, 0.15) 60%,
-              rgba(255, 105, 180, 0.08) 75%,
-              rgba(255, 20, 147, 0) 90%
-            );
-          pointer-events: none;
-          z-index: 3;
-          animation: power-pulse-left 3s ease-in-out infinite;
-        }
-
-        // Right power source emitter - Vaporwave energy field
-        &::after {
-          content: "";
-          position: absolute;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          width: 70%;
-          background:
-            radial-gradient(
-              ellipse at right center,
-              rgba(255, 255, 255, 0.95) 0%,
-              rgba(255, 20, 147, 0.85) 2%,
-              rgba(255, 105, 180, 0.75) 6%,
-              rgba(186, 85, 211, 0.65) 12%,
-              rgba(147, 112, 219, 0.5) 20%,
-              rgba(138, 43, 226, 0.4) 30%,
-              rgba(186, 85, 211, 0.25) 45%,
-              rgba(218, 112, 214, 0.15) 60%,
-              rgba(255, 105, 180, 0.08) 75%,
-              rgba(255, 20, 147, 0) 90%
-            );
-          pointer-events: none;
-          z-index: 3;
-          animation: power-pulse-right 3s ease-in-out infinite;
-          animation-delay: 1.5s;
-        }
-
-        .marquee-inner {
-          display: inline-flex;
-          white-space: nowrap;
-          animation: marquee-move var(--marquee-duration, 20s) linear infinite;
-          animation-delay: var(--marquee-delay, 0s);
-          will-change: transform;
-          align-items: center;
+        .marquee-outer {
+          position: relative;
+          width: calc(100% - 8px);
           height: 100%;
-          contain: layout style paint;
-          isolation: isolate;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+          backdrop-filter: blur(4px);
+          margin: 0 4px;
 
-          .marquee-item {
+          // Left power source emitter - Vaporwave energy field
+          &::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background:
+              linear-gradient(to right,
+                rgba(147, 255, 250, 0.95) 0%,
+                rgba(255, 20, 147, 0.85) 2%,
+                rgba(255, 105, 180, 0.75) 6%,
+                rgba(186, 85, 211, 0.65) 12%,
+                rgba(147, 112, 219, 0.5) 20%,
+                rgba(138, 43, 226, 0.4) 30%,
+                rgba(186, 85, 211, 0.25) 45%,
+                rgba(218, 112, 214, 0.15) 60%,
+                rgba(255, 105, 180, 0.08) 90%,
+              );
+            pointer-events: none;
+            z-index: 3;
+            animation: power-pulse-left 3s ease-in-out infinite;
+          }
+
+          // Right power source emitter - Vaporwave energy field
+          &::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background:
+              linear-gradient(to left,
+                rgba(147, 255, 250, 0.95) 0%,
+                rgba(255, 20, 147, 0.85) 2%,
+                rgba(255, 105, 180, 0.75) 6%,
+                rgba(186, 85, 211, 0.65) 12%,
+                rgba(147, 112, 219, 0.5) 20%,
+                rgba(138, 43, 226, 0.4) 30%,
+                rgba(186, 85, 211, 0.25) 45%,
+                rgba(218, 112, 214, 0.15) 60%,
+                rgba(255, 105, 180, 0.08) 90%,
+              );
+            pointer-events: none;
+            z-index: 3;
+            animation: power-pulse-right 3s ease-in-out infinite;
+            animation-delay: 1.5s;
+          }
+
+          .marquee-inner {
             display: inline-flex;
-            align-items: center;
-            padding: 0 2rem;
             white-space: nowrap;
-            flex-shrink: 0;
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: rgba(0, 255, 255, 0.95);
-            text-shadow:
-              0 0 2px rgba(255, 255, 255, 0.8),
-              0 0 4px rgba(0, 255, 255, 0.6),
-              0 0 8px rgba(0, 255, 255, 0.4),
-              0 0 12px rgba(0, 255, 255, 0.2),
-              0 0 3px oklch(0% 0 0 / 0.4);
-            letter-spacing: 0.05em;
-            line-height: 1;
-            contain: layout paint style;
-            will-change: contents;
-            animation: hologram-flicker 4s ease-in-out infinite;
+            animation: marquee-move var(--marquee-duration, 20s) linear infinite;
+            animation-delay: var(--marquee-delay, 0s);
+            will-change: transform;
+            align-items: center;
+            height: 100%;
+            contain: layout style paint;
+            isolation: isolate;
 
-            &:nth-child(2n) {
-              animation-delay: 2s;
+            .marquee-item {
+              display: inline-flex;
+              align-items: center;
+              padding: 0 2rem;
+              white-space: nowrap;
+              flex-shrink: 0;
+              font-size: 1.5rem;
+              font-weight: 500;
+              color: rgba(0, 255, 255, 0.95);
+              text-shadow:
+                0 0 2px rgba(255, 255, 255, 0.8),
+                0 0 4px rgba(0, 255, 255, 0.6),
+                0 0 8px rgba(0, 255, 255, 0.4),
+                0 0 12px rgba(0, 255, 255, 0.2),
+                0 0 3px oklch(0% 0 0 / 0.4);
+              letter-spacing: 0.05em;
+              line-height: 1;
+              contain: layout paint style;
+              will-change: contents;
+              animation: hologram-flicker 4s ease-in-out infinite;
+
+              &:nth-child(2n) {
+                animation-delay: 2s;
+              }
             }
           }
         }
-      }
       }
 
       // Ensure ticker is visible but doesn't block interactions
@@ -218,7 +211,9 @@
 
   // Emitter housing glow animation - Vaporwave purple/magenta
   @keyframes emitter-glow {
-    0%, 100% {
+
+    0%,
+    100% {
       box-shadow:
         0 0 8px rgba(255, 20, 147, 0.9),
         0 0 16px rgba(255, 105, 180, 0.6),
@@ -226,6 +221,7 @@
         inset 0 0 4px rgba(255, 255, 255, 0.8);
       filter: brightness(1);
     }
+
     50% {
       box-shadow:
         0 0 12px rgba(255, 20, 147, 1),
@@ -239,10 +235,13 @@
 
   // Power source pulsing animations
   @keyframes power-pulse-left {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.8;
       filter: brightness(1);
     }
+
     50% {
       opacity: 1;
       filter: brightness(1.3);
@@ -250,10 +249,13 @@
   }
 
   @keyframes power-pulse-right {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.8;
       filter: brightness(1);
     }
+
     50% {
       opacity: 1;
       filter: brightness(1.3);
@@ -262,7 +264,9 @@
 
   // Holographic text flicker
   @keyframes hologram-flicker {
-    0%, 100% {
+
+    0%,
+    100% {
       opacity: 0.95;
       text-shadow:
         0 0 2px rgba(255, 255, 255, 0.8),
@@ -271,6 +275,7 @@
         0 0 12px rgba(0, 255, 255, 0.2),
         0 0 3px oklch(0% 0 0 / 0.4);
     }
+
     25% {
       opacity: 1;
       text-shadow:
@@ -280,6 +285,7 @@
         0 0 16px rgba(0, 255, 255, 0.3),
         0 0 3px oklch(0% 0 0 / 0.4);
     }
+
     50% {
       opacity: 0.97;
       text-shadow:
@@ -289,6 +295,7 @@
         0 0 14px rgba(0, 255, 255, 0.25),
         0 0 3px oklch(0% 0 0 / 0.4);
     }
+
     75% {
       opacity: 1;
       text-shadow:
@@ -301,12 +308,15 @@
   }
 
   @keyframes news-glow {
-    0%, 100% {
+
+    0%,
+    100% {
       text-shadow:
         0 0 3px rgba(0, 0, 0, 0.8),
         0 0 6px rgba(0, 0, 0, 0.6),
         0 0 10px color-mix(in srgb, var(--accent-color) 40%, transparent);
     }
+
     50% {
       text-shadow:
         0 0 3px rgba(0, 0, 0, 0.8),
