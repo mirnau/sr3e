@@ -110,6 +110,16 @@
           white-space: nowrap;
           backdrop-filter: blur(8px);
           margin: 0 4px;
+          mask-image: linear-gradient(to right,
+            transparent 0%,
+            black 1%,
+            black 99%,
+            transparent 100%);
+          -webkit-mask-image: linear-gradient(to right,
+            transparent 0%,
+            black 1%,
+            black 99%,
+            transparent 100%);
 
           // Left power source emitter - Vaporwave energy field
           &::before {
@@ -210,7 +220,7 @@
         0 0 16px rgba(255, 105, 180, 0.6),
         0 0 24px rgba(186, 85, 211, 0.4),
         inset 0 0 4px rgba(255, 255, 255, 0.8);
-      filter: brightness(1);
+      filter: brightness(1) blur(1px);
     }
 
     50% {
@@ -220,7 +230,7 @@
         0 0 36px rgba(186, 85, 211, 0.6),
         0 0 48px rgba(138, 43, 226, 0.4),
         inset 0 0 6px rgba(255, 255, 255, 1);
-      filter: brightness(1.5);
+      filter: brightness(1.5) blur(1.5px);
     }
   }
 
