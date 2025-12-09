@@ -1,6 +1,7 @@
 @use "./skinning/fonts.scss";
 @use "./character.scss";
 @use "./actor/sheets/broadcaster.scss";
+@use "./items/metatype.scss";
 
 :root {
   color-scheme: light;

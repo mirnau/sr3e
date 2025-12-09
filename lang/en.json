@@ -8,6 +8,7 @@
       "initiative": "Initiative",
       "intelligence": "Intelligence",
       "isBurnedOut": "IsBurnedOut",
+      "limits": "Limits",
       "magic": "Magic",
       "quickness": "Quickness",
       "reaction": "Reaction",
@@ -22,6 +23,11 @@
       "karma": "Karma",
       "movement": "Movement",
       "profile": "Profile"
+    },
+    "common": {
+      "average": "Average",
+      "max": "Max",
+      "min": "Min"
     },
     "creation": {
       "activePoints": "ActivePoints",
@@ -53,6 +59,7 @@
       "stun": "Stun"
     },
     "karma": {
+      "advancementratio": "Advancementratio",
       "goodKarma": "GoodKarma",
       "karma": "Karma",
       "karmaPool": "KarmaPool",
@@ -62,8 +69,16 @@
       "readyForCommit": "ReadyForCommit",
       "spentKarma": "SpentKarma"
     },
+    "metatype": {
+      "agerange": "Agerange",
+      "height": "Height",
+      "metatype": "Metatype",
+      "priority": "Priority",
+      "weight": "Weight"
+    },
     "movement": {
       "movement": "Movement",
+      "runSpeedModifier": "RunSpeedModifier",
       "running": "Running",
       "walking": "Walking"
     },

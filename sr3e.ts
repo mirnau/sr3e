@@ -5,7 +5,11 @@ import { configkeys, hooks, typekeys } from "./types/configuration-keys";
 import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
 import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
 import SR3EActor from "./module/documents/SR3EActor";
+import SR3EItem from "./module/documents/SR3EItem";
 import { getNewsService } from "./module/services/news-service/NewsService.svelte";
+import MetatypeModel from "./module/models/items/MetatypeModel";
+import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
+
 
 // Configure global aliases FIRST, before any model imports happen
 function configure(): void {
@@ -34,6 +38,7 @@ function configure(): void {
    });
 
    SR3EActor.Register();
+   SR3EItem.Register();
 }
 
 function registerDocumentTypes(registrations: SR3EDocumentRegistration[]): void {
@@ -104,6 +109,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.broadcaster,
             model: BroadcasterModel,
             sheet: BroadcasterSheet,
+         },
+                  {
+            docClass: Item,
+            type: typekeys.metatype,
+            model: MetatypeModel,
+            sheet: MetatypeSheet,
          }
       ] satisfies SR3EDocumentRegistration[]
       );
