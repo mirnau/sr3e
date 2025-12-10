@@ -1,13 +1,14 @@
 export async function openFilePicker(document: Actor | Item): Promise<string> {
 	return new Promise((resolve) => {
-		new foundry.applications.apps.FilePicker({
-			type: "image",
-			current: document.img,
-			callback: (path: string) => {
-				document.update({ img: path }, { render: true });
-				resolve(path);
-			},
-		}).render(true);
+		const picker = new FilePicker();
+		picker.type = "image";
+		picker.callback = (path: string) => {
+			// @ts-ignore - img exists on Actor and Item at runtime
+			document.update({ img: path });
+			resolve(path);
+		};
+		// @ts-ignore - render exists on picker
+		picker.render({ force: true });
 	});
 }
 
