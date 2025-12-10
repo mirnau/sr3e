@@ -12,40 +12,6 @@
 	filter: blur(20px);
 }
 
-// Waterfall layout
-.sr3e-waterfall-wrapper {
-	width: 100%;
-	height: 100%;
-}
-
-.sr3e-waterfall > * {
-	display: inline-block;
-	break-inside: avoid;
-	width: 100%;
-	vertical-align: top;
-}
-
-.sr3e-waterfall {
-	column-gap: var(--component-grid-gap);
-}
-
-// Single column layout
-.sr3e-waterfall--single {
-	column-count: 1;
-	column-width: auto;
-	width: var(--component-width);
-	column-gap: 0;
-}
-
-// Double column layout
-.sr3e-waterfall--double {
-	column-count: 2;
-	column-width: var(--component-width);
-	column-gap: var(--component-grid-gap);
-	width: max-content;
-	max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
-}
-
 // Item sheet component
 .item-sheet-component {
 	display: inline-block;
