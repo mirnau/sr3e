@@ -3,6 +3,7 @@
  * Implements SR3e character creation rules for attribute points, skill points, and initial setup.
  */
 
+import { configkeys } from "../../../types/configuration-keys";
 import type SR3EActor from "../../documents/SR3EActor";
 
 // Type definitions for character creation
@@ -61,12 +62,6 @@ export class CharacterInitializer {
 		const attributePoints = ATTRIBUTE_POINTS[selections.attributePriority];
 		const skillPoints = SKILL_POINTS[selections.skillPriority];
 
-		if (attributePoints === undefined || skillPoints === undefined) {
-			throw new Error(
-				`Invalid priority selections: attribute=${selections.attributePriority}, skill=${selections.skillPriority}`
-			);
-		}
-
 		// Step 2: Prepare actor update data
 		const updateData: Record<string, unknown> = {
 			// Profile data
@@ -95,10 +90,7 @@ export class CharacterInitializer {
 		await actor.update(updateData);
 
 		// Step 4: Create embedded metatype item
-		const metatypeItem = game.items?.get(selections.metatypeId);
-		if (!metatypeItem) {
-			throw new Error(`Metatype item not found: ${selections.metatypeId}`);
-		}
+		const metatypeItem = game.items?.get(selections.metatypeId)!;
 		// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
 		await actor.createEmbeddedDocuments("Item", [metatypeItem.toObject()]);
 
@@ -107,16 +99,13 @@ export class CharacterInitializer {
 		if (magicPriority === "A" || magicPriority === "B") {
 			// Create embedded magic item (if not Unawakened)
 			if (!selections.magicId.includes("foundryItemId")) {
-				const magicItem = game.items?.get(selections.magicId);
-				if (!magicItem) {
-					throw new Error(`Magic item not found: ${selections.magicId}`);
-				}
+				const magicItem = game.items?.get(selections.magicId)!;
 				// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
 				await actor.createEmbeddedDocuments("Item", [magicItem.toObject()]);
 			}
 
 			// Set awakened flag and magic attribute
-			await actor.setFlag("sr3e", "hasAwakened", true);
+			await actor.setFlag(configkeys.sr3e, flags.hasAwakened, true);
 			await actor.update({ "system.attributes.magic.value": 6 });
 		}
 	}
