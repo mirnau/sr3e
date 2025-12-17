@@ -1,6 +1,7 @@
 export const hooks = Object.freeze({
   init: "init",
   ready: "ready",
+  createActor: "createActor",
 } as const);
 
 export const configkeys = Object.freeze({
@@ -12,3 +13,7 @@ export const typekeys = Object.freeze({
   broadcaster: "broadcaster",
   metatype: "metatype"
 } as const);
+
+export const flags = Object.freeze({
+  hasAwakened: "hasAwakened"
+} as const );

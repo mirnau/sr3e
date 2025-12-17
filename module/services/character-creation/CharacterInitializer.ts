@@ -3,7 +3,7 @@
  * Implements SR3e character creation rules for attribute points, skill points, and initial setup.
  */
 
-import { configkeys } from "../../../types/configuration-keys";
+import { configkeys, flags } from "../../../types/configuration-keys";
 import type SR3EActor from "../../documents/SR3EActor";
 
 // Type definitions for character creation
@@ -70,7 +70,7 @@ export class CharacterInitializer {
 			"system.profile.weight": selections.weight,
 
 			// Creation points (attribute points minus 6 initial, skill points as active points)
-			"system.creationPoints.attributePoints": attributePoints - 6,
+			"system.creationPoints.attributePoints": attributePoints! - 6,
 			"system.creationPoints.activePoints": skillPoints,
 
 			// Initialize all attributes to 1, essence to 6

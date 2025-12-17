@@ -1,8 +1,7 @@
 import SimpleStat from "./SimpleStat";
 
 export default class AttributesModel extends foundry.abstract.DataModel<
-  AttributesSchema,
-  BaseActor
+  AttributesSchema
 > {
   static defineSchema(): AttributesSchema {
     return {

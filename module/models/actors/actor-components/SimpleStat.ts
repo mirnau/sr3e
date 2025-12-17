@@ -1,5 +1,7 @@
 
-export default class SimpleStat extends foundry.abstract.DataModel<SimpleStatSchema, BaseActor> {
+export default class SimpleStat extends foundry.abstract.DataModel<
+  SimpleStatSchema
+> {
   static defineSchema(): SimpleStatSchema {
     return {
       // The User-system interface (original value)
