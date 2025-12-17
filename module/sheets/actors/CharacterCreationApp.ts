@@ -5,7 +5,7 @@
 
 import { mount, unmount } from "svelte";
 import type SR3EActor from "../../documents/SR3EActor";
-import CharacterCreationDialog from "../../ui/actors/CharacterCreationDialog.svelte";
+import CharacterCreationDialog from "../../ui/dialogs/CharacterCreationDialog.svelte";
 
 /**
  * Character creation application wrapper.
@@ -35,7 +35,7 @@ export class CharacterCreationApp extends foundry.applications.api.ApplicationV2
 
 	static override DEFAULT_OPTIONS = {
 		id: "sr3e-character-creation",
-		classes: ["sr3e", "sheet", "charactercreation"],
+		classes: ["sr3e", "sheet", "staticlayout", "charactercreation"],
 		tag: "form",
 		window: {
 			title: "Character Creation",

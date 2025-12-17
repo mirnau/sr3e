@@ -215,7 +215,7 @@
 	<!-- Age Range -->
 	{#if agerange}
 		<ItemSheetComponent>
-			<h3 class="item">{localize(traits.agerange ?? "sr3e.metatype.agerange")}</h3>
+			<h3 class="staticlayout">{localize(traits.agerange ?? "sr3e.metatype.agerange")}</h3>
 			<div class="stat-grid">
 				{#each agerange as entry}
 					<StatCard {...entry} />
@@ -227,7 +227,7 @@
 	<!-- Height -->
 	{#if height}
 		<ItemSheetComponent>
-			<h3 class="item">{localize(traits.height ?? "sr3e.metatype.height")}</h3>
+			<h3 class="staticlayout">{localize(traits.height ?? "sr3e.metatype.height")}</h3>
 			<div class="stat-grid">
 				{#each height as entry}
 					<StatCard {...entry} />
@@ -239,7 +239,7 @@
 	<!-- Weight -->
 	{#if weight}
 		<ItemSheetComponent>
-			<h3 class="item">{localize(traits.weight ?? "sr3e.metatype.weight")}</h3>
+			<h3 class="staticlayout">{localize(traits.weight ?? "sr3e.metatype.weight")}</h3>
 			<div class="stat-grid">
 				{#each weight as entry}
 					<StatCard {...entry} />
@@ -250,7 +250,7 @@
 
 	<!-- Attribute Limits -->
 	<ItemSheetComponent>
-		<h3 class="item">{localize(attributes.limits ?? "sr3e.attributes.limits")}</h3>
+		<h3 class="staticlayout">{localize(attributes.limits ?? "sr3e.attributes.limits")}</h3>
 		<div class="stat-grid">
 			{#each attributeLimits as entry}
 				<StatCard {...entry} />
@@ -259,7 +259,7 @@
 	</ItemSheetComponent>
 
 	<ItemSheetComponent>
-		<h3 class="item">Movement</h3>
+		<h3 class="staticlayout">Movement</h3>
 		<div class="stat-grid single-column">
 			{#each movement as entry}
 				<StatCard {...entry} />
@@ -269,7 +269,7 @@
 
 	<!-- Karma -->
 	<ItemSheetComponent>
-		<h3 class="item">{localize(karmaConfig.karma ?? "sr3e.karma.karma")}</h3>
+		<h3 class="staticlayout">{localize(karmaConfig.karma ?? "sr3e.karma.karma")}</h3>
 		<div class="stat-grid single-column">
 			{#each karma as entry}
 				<StatCard {...entry} />
