@@ -14,7 +14,7 @@ export default class MetatypeSheet extends SR3EItemBase {
         return {
             ...super.DEFAULT_OPTIONS,
             id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
-            classes: ["sr3e", "sheet", "item", "metatype"],
+            classes: ["sr3e", "sheet", "staticlayout", "metatype"],
             template: null,
             position: { width: "auto", height: "auto" },
             window: {
