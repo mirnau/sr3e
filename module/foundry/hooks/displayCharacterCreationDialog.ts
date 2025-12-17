@@ -1,73 +1,107 @@
 /**
- * Hook handler for createActor - displays character creation dialog for new character actors.
- * Intercepts character creation, shows the creation dialog, and deletes the actor if canceled.
+ * Hook handler for createActor - intercepts character creation entirely.
+ * Shows dialog BEFORE creating the actor, then creates it only on submit.
  */
 
 import { CharacterCreationApp } from "../../sheets/actors/CharacterCreationApp";
 import type SR3EActor from "../../documents/SR3EActor";
 
 /**
- * Set of actor IDs currently in character creation mode.
- * Sheets for these actors will not render until creation is complete.
+ * Storage for pending character creation data
  */
-const actorsInCreation = new Set<string>();
-
-/**
- * Check if an actor is currently in character creation mode.
- */
-export function isActorInCreation(actorId: string): boolean {
-	return actorsInCreation.has(actorId);
+interface PendingCreation {
+	data: any;
+	options: object;
+	userId: string;
 }
 
-export async function displayCharacterCreationDialog(
-	actor: SR3EActor,
-	_options: object,
-	userId: string
-): Promise<boolean> {
-	console.log("SR3E | createActor hook fired", { actorType: (actor as any).type, userId });
+const pendingCreations = new Map<string, PendingCreation>();
 
-	// Only show dialog for character actors created by the current user
-	if ((actor as any).type !== "character") {
-		console.log("SR3E | Not a character actor, skipping dialog");
+/**
+ * PreCreateActor hook - intercepts character creation to show dialog FIRST
+ */
+export function preCreateCharacterActor(
+	_actor: SR3EActor,
+	data: any,
+	options: object,
+	userId: string
+): boolean {
+	console.log("SR3E | preCreateActor hook fired", { actorType: data.type, userId });
+
+	// Only intercept character actors created by current user
+	if (data.type !== "character") {
 		return true;
 	}
 	if (!game.users.get(userId)?.isSelf) {
-		console.log("SR3E | Not current user, skipping dialog");
 		return true;
 	}
 
-	// Mark actor as being in creation mode
-	actorsInCreation.add((actor as any).id);
-	console.log("SR3E | Actor marked as in creation", (actor as any).id);
-
-	console.log("SR3E | Showing character creation dialog");
-	const dialogResult = await runCharacterCreationDialog(actor);
-
-	// Remove from creation tracking
-	actorsInCreation.delete((actor as any).id);
-	console.log("SR3E | Actor removed from creation tracking", (actor as any).id);
-
-	if (!dialogResult) {
-		// User canceled - delete the actor and prevent creation
-		console.log("SR3E | User canceled, deleting actor");
-		await actor.delete();
-		return false;
+	// Check if this is a programmatic creation (has our marker)
+	if ((options as any).__sr3eAllowCreation) {
+		console.log("SR3E | Allowing programmatic character creation");
+		return true;
 	}
 
-	// Success - open the character sheet
-	console.log("SR3E | Character creation successful, rendering sheet");
-	(actor as any).sheet?.render(true);
-	return true;
+	// Prevent the actor from being created
+	console.log("SR3E | Intercepting character creation - showing dialog first");
+
+	// Store the creation data and show dialog
+	const creationId = `creation-${Date.now()}-${Math.random()}`;
+	pendingCreations.set(creationId, { data, options, userId });
+
+	// Show dialog asynchronously (don't block the hook)
+	setTimeout(() => showCharacterCreationDialog(creationId), 0);
+
+	// Return false to prevent the actor creation
+	return false;
 }
 
-async function runCharacterCreationDialog(actor: SR3EActor): Promise<boolean> {
+async function showCharacterCreationDialog(creationId: string): Promise<void> {
+	const pending = pendingCreations.get(creationId);
+	if (!pending) {
+		console.error("SR3E | Pending creation not found", creationId);
+		return;
+	}
+
+	const { data, options } = pending;
+
+	try {
+		const result = await runCharacterCreationDialog(data.name || "New Character");
+
+		if (result) {
+			// User submitted - create the actor with initialization
+			console.log("SR3E | Creating character with selections", result);
+
+			// Mark this creation as allowed
+			const createOptions = { ...options, __sr3eAllowCreation: true };
+
+			// Create the actor
+			const [actor] = await Actor.create([data], createOptions) as SR3EActor[];
+
+			if (actor) {
+				// Apply character creation initialization
+				const creationService = (await import("../../services/character-creation/CharacterCreationService")).CharacterCreationService.Instance();
+				await creationService.initializeCharacter(actor, result);
+
+				// Open the character sheet
+				(actor as any).sheet?.render(true);
+			}
+		} else {
+			console.log("SR3E | Character creation canceled");
+		}
+	} finally {
+		pendingCreations.delete(creationId);
+	}
+}
+
+async function runCharacterCreationDialog(actorName: string): Promise<any | null> {
 	return new Promise((resolve) => {
-		const app = new CharacterCreationApp(actor, {
-			onSubmit: (result: boolean) => {
+		const app = new CharacterCreationApp(actorName, {
+			onSubmit: (result: any) => {
 				resolve(result);
 			},
 			onCancel: () => {
-				resolve(false);
+				resolve(null);
 			},
 		});
 

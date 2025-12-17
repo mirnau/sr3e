@@ -4,21 +4,20 @@
       AGE_PHASES,
       PRIORITY_TABLES,
    } from "../../../types/character-creation";
-   import type SR3EActor from "../../documents/SR3EActor";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 
-   const { actor, onSubmit, onCancel } = $props<{
-      actor: SR3EActor;
+   const { actorName, onSubmit, onCancel } = $props<{
+      actorName: string;
       config: typeof CONFIG.SR3E;
-      onSubmit: (result: boolean) => void;
+      onSubmit: (result: any) => void;
       onCancel: () => void;
    }>();
 
    const creationService = CharacterCreationService.Instance();
 
    // Transient form state
-   let characterName = $state(actor.name);
+   let characterName = $state(actorName);
    let characterAge = $state(25);
    let characterHeight = $state(175);
    let characterWeight = $state(75);
@@ -32,6 +31,14 @@
    const metatypeOptions = creationService.getMetatypes();
    const magicOptions = creationService.getMagics();
 
+   // Debug: Log loaded options
+   console.log("SR3E | Character creation loaded options:", {
+      metatypes: metatypeOptions.length,
+      magics: magicOptions.length,
+      metatypeOptions,
+      magicOptions
+   });
+
    // Derived state
    const canCreate = $derived(
       selectedMetatype &&
@@ -44,6 +51,11 @@
    const metatypeItem = $derived(
       game.items?.get(selectedMetatype) as Item | undefined,
    );
+
+   // Default character icon when no metatype selected
+   const defaultCharacterIcon = "icons/svg/mystery-man.svg";
+   const metatypeImage = $derived(metatypeItem?.img || defaultCharacterIcon);
+   const metatypeName = $derived(metatypeItem?.name || "");
 
    const ageMin = 0;
    const ageMax = $derived((metatypeItem?.system as any)?.agerange?.max ?? 100);
@@ -74,10 +86,12 @@
    });
 
    // Event handlers
-   async function handleSubmit(event: Event) {
+   function handleSubmit(event: Event) {
       event.preventDefault();
 
-      await creationService.initializeCharacter(actor, {
+      // Return the selection data to be applied after actor creation
+      onSubmit({
+         name: characterName,
          metatypeId: selectedMetatype,
          magicId: selectedMagic,
          attributePriority: selectedAttribute,
@@ -87,8 +101,6 @@
          height: characterHeight,
          weight: characterWeight,
       });
-
-      onSubmit(true);
    }
 
    function handleRandomize() {
@@ -102,10 +114,16 @@
       );
       const magicOpts = magicOptions.filter((m) => m.priority === combo.magic);
 
+      // Safety check: ensure arrays aren't empty
+      if (metaOpts.length === 0 || magicOpts.length === 0) {
+         console.error("SR3E | Randomize failed: no options found for selected priorities", { combo, metaOpts, magicOpts });
+         return;
+      }
+
       selectedMetatype =
-         metaOpts[Math.floor(Math.random() * metaOpts.length)]!.foundryitemid;
+         metaOpts[Math.floor(Math.random() * metaOpts.length)].foundryitemid;
       selectedMagic =
-         magicOpts[Math.floor(Math.random() * magicOpts.length)]!.foundryitemid;
+         magicOpts[Math.floor(Math.random() * magicOpts.length)].foundryitemid;
       selectedAttribute = combo.attribute;
       selectedSkill = combo.skills;
       selectedResource = combo.resources;
@@ -148,10 +166,10 @@
       <ItemSheetComponent>
          <div class="image-mask">
             <img
-               src={metatypeItem?.img ?? ""}
+               src={metatypeImage}
                role="presentation"
-               title={metatypeItem?.name ?? ""}
-               alt={metatypeItem?.name ?? ""}
+               title={metatypeName}
+               alt={metatypeName}
             />
          </div>
          <input

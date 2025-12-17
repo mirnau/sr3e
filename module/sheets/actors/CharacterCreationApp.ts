@@ -1,10 +1,10 @@
 /**
  * Foundry ApplicationV2 wrapper for character creation dialog.
  * Manages Svelte component mounting and lifecycle.
+ * Now works WITHOUT an existing actor - actor is created after dialog submission.
  */
 
 import { mount, unmount } from "svelte";
-import type SR3EActor from "../../documents/SR3EActor";
 import CharacterCreationDialog from "../../ui/dialogs/CharacterCreationDialog.svelte";
 
 /**
@@ -12,13 +12,13 @@ import CharacterCreationDialog from "../../ui/dialogs/CharacterCreationDialog.sv
  * Extends Foundry's ApplicationV2 to provide Svelte integration.
  */
 export class CharacterCreationApp extends foundry.applications.api.ApplicationV2 {
-	#actor: SR3EActor;
-	#onSubmit: ((result: boolean) => void) | null;
+	#actorName: string;
+	#onSubmit: ((result: any) => void) | null;
 	#onCancel: (() => void) | null;
 	#svelteApp: any; // Svelte mount returns any - acceptable for Svelte integration
 	#wasSubmitted = false;
 
-	constructor(actor: SR3EActor, options: { onSubmit?: (result: boolean) => void; onCancel?: () => void } = {}) {
+	constructor(actorName: string, options: { onSubmit?: (result: any) => void; onCancel?: () => void } = {}) {
 		const mergedOptions = foundry.utils.mergeObject(
 			{
 				onSubmit: null,
@@ -28,7 +28,7 @@ export class CharacterCreationApp extends foundry.applications.api.ApplicationV2
 		);
 
 		super(mergedOptions);
-		this.#actor = actor;
+		this.#actorName = actorName;
 		this.#onSubmit = mergedOptions.onSubmit ?? null;
 		this.#onCancel = mergedOptions.onCancel ?? null;
 	}
@@ -68,9 +68,9 @@ export class CharacterCreationApp extends foundry.applications.api.ApplicationV2
 		this.#svelteApp = mount(CharacterCreationDialog, {
 			target: windowContent,
 			props: {
-				actor: this.#actor,
+				actorName: this.#actorName,
 				config: CONFIG.SR3E,
-				onSubmit: (result: boolean) => {
+				onSubmit: (result: any) => {
 					this.#wasSubmitted = true;
 					this.#onSubmit?.(result);
 					this.close();

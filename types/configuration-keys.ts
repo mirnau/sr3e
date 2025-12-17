@@ -1,6 +1,7 @@
 export const hooks = Object.freeze({
   init: "init",
   ready: "ready",
+  preCreateActor: "preCreateActor",
   createActor: "createActor",
 } as const);
 

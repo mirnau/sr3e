@@ -9,7 +9,7 @@ import SR3EItem from "./module/documents/SR3EItem";
 import { getNewsService } from "./module/services/news-service/NewsService.svelte";
 import MetatypeModel from "./module/models/items/MetatypeModel";
 import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
-import { displayCharacterCreationDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
+import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -129,8 +129,8 @@ async function registerHooks(): Promise<void> {
       console.log("SR3E | NewsService initialized");
    });
 
-   Hooks.on(hooks.createActor, displayCharacterCreationDialog);
-   console.log("SR3E | createActor hook registered");
+   Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
+   console.log("SR3E | preCreateActor hook registered");
 }
 
 // Execute in correct order
