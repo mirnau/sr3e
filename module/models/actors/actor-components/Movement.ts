@@ -6,8 +6,7 @@ type MovementSchema = {
 };
 
 export default class MovementModel extends foundry.abstract.DataModel<
-  MovementSchema,
-  BaseActor
+  MovementSchema
 > {
   static defineSchema(): MovementSchema {
     return {

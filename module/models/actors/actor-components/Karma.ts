@@ -12,8 +12,7 @@ type KarmaSchema = {
 };
 
 export default class KarmaModel extends foundry.abstract.DataModel<
-  KarmaSchema,
-  BaseActor
+  KarmaSchema
 > {
   static defineSchema(): KarmaSchema {
     return {

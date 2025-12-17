@@ -143,11 +143,12 @@ How we know this migration succeeded:
 - **Platform**: Must work within Foundry VTT framework constraints and APIs
 - **TypeScript Strict**: No `any` or `object` types as escape hatches - proper typing required
 - **SR3e Rules Compliance**: All game mechanics must accurately implement Shadowrun 3rd Edition core rulebook rules
-- **Error Philosophy**: Let it fail - no try/catch wrapping, no Result types, errors must be visible and traceable
+- **Error Philosophy**: Let it fail - no try/catch wrapping, no Result types, no exceptions, errors must be visible and traceable
 - **No Convoluted Code**: Pragmatic over academic, KISS principle applies
 - **Migration Strategy**: Parallel development - old JS remains as reference while new TS evolves feature by feature
 - **Performance**: Equal or better performance than JavaScript version
 - **Foundry Compatibility**: Must remain compatible with Foundry VTT v12+ APIs and update patterns
+- **Git Workflow**: Never commit independently - only commit when part of plan execution with SUMMARY.md, user controls all git operations outside of plan execution flow
 
 ## Decisions Made
 

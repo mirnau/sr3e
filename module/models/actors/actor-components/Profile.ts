@@ -9,8 +9,7 @@ type ProfileSchema = {
 };
 
 export default class ProfileModel extends foundry.abstract.DataModel<
-  ProfileSchema,
-  BaseActor
+  ProfileSchema
 > {
   static defineSchema(): ProfileSchema {
     return {

@@ -9,8 +9,7 @@ type HealthSchema = {
 };
 
 export default class HealthModel extends foundry.abstract.DataModel<
-  HealthSchema,
-  BaseActor
+  HealthSchema
 > {
   static defineSchema(): HealthSchema {
     return {

@@ -226,7 +226,7 @@ Will need to break this down into sub-phases after understanding scope better.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Character Creation Foundation | 0/? | Not started | - |
+| 1. Character Creation Foundation | 2/3 | In progress | - |
 | 2. Character Sheet & Permissions | 0/? | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |

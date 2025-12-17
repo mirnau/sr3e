@@ -9,8 +9,7 @@ type DicePoolsSchema = {
 };
 
 export default class DicePoolsModel extends foundry.abstract.DataModel<
-  DicePoolsSchema,
-  BaseActor
+  DicePoolsSchema
 > {
   static defineSchema(): DicePoolsSchema {
     return {
