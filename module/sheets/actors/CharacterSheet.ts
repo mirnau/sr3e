@@ -3,7 +3,6 @@ import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 import NeonName from "../../ui/injections/NeonName.svelte";
 import NewsFeed from "../../ui/injections/NewsFeed.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
-import { isActorInCreation } from "../../foundry/hooks/displayCharacterCreationDialog";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
@@ -12,18 +11,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
 
     get title() {
         return "";
-    }
-
-    /**
-     * Prevent rendering if the actor is currently in character creation mode.
-     */
-    protected _canRender(_options: DeepPartial<RenderOptions>): boolean {
-        const actorId = (this.document as any)?.id;
-        if (actorId && isActorInCreation(actorId)) {
-            console.log("SR3E | Blocking sheet render for actor in creation", actorId);
-            return false;
-        }
-        return true;
     }
 
     static get DEFAULT_OPTIONS() {
