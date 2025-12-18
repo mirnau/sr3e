@@ -66,6 +66,10 @@ async function showCharacterCreationDialog(creationId: string): Promise<void> {
 	const { data, options } = pending;
 
 	try {
+		// Ensure default items exist before showing dialog
+		const creationService = (await import("../../services/character-creation/CharacterCreationService")).CharacterCreationService.Instance();
+		await creationService.ensureDefaultItemsExist();
+
 		const result = await runCharacterCreationDialog(data.name || "New Character");
 
 		if (result) {
@@ -80,7 +84,6 @@ async function showCharacterCreationDialog(creationId: string): Promise<void> {
 
 			if (actor) {
 				// Apply character creation initialization
-				const creationService = (await import("../../services/character-creation/CharacterCreationService")).CharacterCreationService.Instance();
 				await creationService.initializeCharacter(actor, result);
 
 				// Open the character sheet
