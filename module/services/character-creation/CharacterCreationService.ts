@@ -84,6 +84,29 @@ export class CharacterCreationService {
 	}
 
 	/**
+	 * Ensures default metatype and magic items exist in the world.
+	 * Creates a default Human metatype and Full Shaman magic if none exist.
+	 * This provides a minimum viable product for character creation.
+	 */
+	async ensureDefaultItemsExist(): Promise<void> {
+		// Check if any metatype items exist
+		const metatypes = this.getMetatypes();
+		if (metatypes.length === 0) {
+			console.log("SR3E | No metatype items found, creating default Human");
+			const humanData = this.#metatypeRepo.getDefaultHuman();
+			await Item.create(humanData);
+		}
+
+		// Check if any magic items exist (excluding hardcoded Unawakened)
+		const magicItems = game.items?.filter((item: Item) => item.type === "magic") ?? [];
+		if (magicItems.length === 0) {
+			console.log("SR3E | No magic items found, creating default Full Shaman");
+			const magicData = this.#magicRepo.getDefaultMagic();
+			await Item.create(magicData);
+		}
+	}
+
+	/**
 	 * Generate random priority combination using weighted randomization.
 	 * Follows SR3e character generation patterns:
 	 * - Metatype weighted toward E (64), with C/D at 18 each
