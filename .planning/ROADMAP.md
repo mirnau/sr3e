@@ -67,30 +67,43 @@ None - Foundry VTT system development patterns are project-specific.
 
 ---
 
-### Phase 2: Character Sheet & Permissions
+### Phase 2: Character Creation Shopping Mode
 
-**Goal**: Migrate character sheet UI with proper permission enforcement - players can only buy with points, GMs can manually edit any stat.
+**Goal**: Complete the character creation workflow by implementing shopping mode - the second phase where players spend their attribute and skill creation points on the character sheet.
 
 **Scope**:
-- Character sheet layout and component structure
-- Permission system: player vs GM capabilities
-- Player mode: buying improvements with karma/points only
-- GM mode: manual editing of any character stat
-- Sheet reactivity through StoreManager
-- Proper separation: presentation in Svelte, logic in services
+- Shopping cart icon injection (top bar toggle for shopping mode)
+- Character creation manager injection (left side point pool displays)
+- Creation point calculation services (attribute points, active/knowledge/language skill points)
+- Two-phase point spending: attributes first → skills second (controlled by `attributeAssignmentLocked` flag)
+- Point pool displays: AttributePointsState and SkillPointsState components
+- Auto-enter shopping mode when opening sheet after character creation dialog
+- Point spending validation and completion logic
+- Integration with existing Attributes and DicePools components
 
-**Depends on**: Phase 1 (need character creation to have characters to edit)
+**Depends on**: Phase 1 (character creation dialog creates characters ready for shopping mode)
 
-**Research**: Unlikely (Foundry permission API is established, have UI patterns from partial migration)
+**Research**: Unlikely (have reference implementation in old JS code with shopping mode patterns)
 
-**Plans**: TBD
+**Plans**:
+1. Creation Point Services & Flag Management - Services for tracking/calculating points and flag state
+2. Shopping Mode UI Injections - Shopping cart toggle and point pool display components
+3. Shopping Mode Integration & Completion Logic - Wire services to UI, implement workflows
+
+**Flags involved**:
+- `isCharacterCreation`: Indicates character is in creation mode
+- `attributeAssignmentLocked`: Controls transition from attribute to skill spending phase
+- `isShoppingState`: Shopping cart toggle state (for later karma-based shopping)
 
 **Success criteria**:
-- Players see sheet with purchase-only controls
-- GMs see sheet with full edit capabilities
-- Permission enforcement works correctly
-- Sheet updates reactively when data changes
-- Component architecture follows established patterns
+- Character sheet auto-enters shopping mode after creation dialog
+- Shopping cart icon appears in header and toggles shopping mode
+- Point pool displays show remaining attribute and skill points
+- Players can spend attribute points in phase 1 (before skills unlock)
+- After attribute assignment complete, skill point spending unlocks
+- Point calculations follow SR3e creation rules
+- Shopping mode components follow presentational-only pattern
+- TypeScript strict mode maintained throughout
 
 ---
 
@@ -227,7 +240,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
-| 2. Character Sheet & Permissions | 0/? | Not started | - |
+| 2. Character Creation Shopping Mode | 0/3 | Plans ready | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
