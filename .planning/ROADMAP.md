@@ -240,7 +240,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
-| 2. Character Creation Shopping Mode | 0/3 | Plans ready | - |
+| 2. Character Creation Shopping Mode | 1/3 | In progress | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |

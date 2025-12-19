@@ -20,29 +20,30 @@
 
 ## Current Position
 
-Phase: 1 of 10+ (Character Creation Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2025-12-18 - Completed 01-03-PLAN.md
+Phase: 2 of 10+ (Character Creation Shopping Mode)
+Plan: 1 of 3 in current phase
+Status: Plan complete
+Last activity: 2025-12-19 - Completed 02-01-PLAN.md
 
-Progress: ███░░░░░░░ ~15%
+Progress: ████░░░░░░ ~20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 9 min
-- Total execution time: 0.47 hours
+- Total plans completed: 4
+- Average duration: 12 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 3 | 28 min | 9 min |
+| 2 | 1 | 20 min | 20 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (14m), 01-02 (6m), 01-03 (8m)
-- Trend: Stable (averaging 9 min/plan)
+- Last 5 plans: 01-01 (14m), 01-02 (6m), 01-03 (8m), 02-01 (20m)
+- Trend: Increasing (more complex service layer work)
 
 *Updated after each plan completion*
 
@@ -68,6 +69,12 @@ Progress: ███░░░░░░░ ~15%
 | 1 | Default item bootstrap | ensureDefaultItemsExist() creates Human + Full Shaman if world empty - ensures minimum viable product |
 | 1 | CSS semantic naming | Renamed "item" class to "staticlayout" for static layout sheets - clearer semantic meaning |
 | 1 | Component size pragmatism | Final component 323 lines (not 80-100 target) but maintains presentational-only pattern - size due to comprehensive UI |
+| 2 | Skill point distribution: 60/25/15 | Active skills are primary focus (60%), knowledge/language are secondary (25%/15%) in SR3e gameplay |
+| 2 | Minimum attribute value is 1 | SR3e rule - all attributes start at 1 during creation |
+| 2 | Maximum skill rating is 6 | SR3e rule - skills cap at 6 during character creation |
+| 2 | Delete skill items when rating reaches 0 | Clean up actor inventory, avoid clutter |
+| 2 | Flag namespace "sr3e" | Follows Foundry convention for system flags |
+| 2 | Racial max default to 6 | Safe fallback if metatype not found |
 
 ### Deferred Issues
 
@@ -86,6 +93,6 @@ Drift notes: None
 
 ## Session Continuity
 
-Last session: 2025-12-18 16:26
-Stopped at: Completed 01-03-PLAN.md - Phase 1 complete (Character Creation Foundation)
+Last session: 2025-12-19 08:41
+Stopped at: Completed 02-01-PLAN.md - Shopping mode services layer complete
 Resume file: None
