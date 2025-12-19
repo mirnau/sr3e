@@ -5,6 +5,7 @@
 
 import { configkeys, flags } from "../../../types/configuration-keys";
 import type SR3EActor from "../../documents/SR3EActor";
+import { CreationPointsService } from "./CreationPointsService";
 
 // Type definitions for character creation
 
@@ -60,7 +61,8 @@ export class CharacterInitializer {
 	async initializeCharacter(actor: SR3EActor, selections: CharacterCreationSelections): Promise<void> {
 		// Step 1: Calculate attribute and skill points from priorities
 		const attributePoints = ATTRIBUTE_POINTS[selections.attributePriority];
-		const skillPoints = SKILL_POINTS[selections.skillPriority];
+		const skillPoints = SKILL_POINTS[selections.skillPriority]!;
+		const pointsService = CreationPointsService.Instance();
 
 		// Step 2: Prepare actor update data
 		const updateData: Record<string, unknown> = {
@@ -69,9 +71,11 @@ export class CharacterInitializer {
 			"system.profile.height": selections.height,
 			"system.profile.weight": selections.weight,
 
-			// Creation points (attribute points minus 6 initial, skill points as active points)
+			// Creation points (attribute points minus 6 initial, skill points distributed across categories)
 			"system.creationPoints.attributePoints": attributePoints! - 6,
-			"system.creationPoints.activePoints": skillPoints,
+			"system.creationPoints.activePoints": pointsService.getDistributedSkillPoints(skillPoints, "active"),
+			"system.creationPoints.knowledgePoints": pointsService.getDistributedSkillPoints(skillPoints, "knowledge"),
+			"system.creationPoints.languagePoints": pointsService.getDistributedSkillPoints(skillPoints, "language"),
 
 			// Initialize all attributes to 1, essence to 6
 			"system.attributes.strength.value": 1,
