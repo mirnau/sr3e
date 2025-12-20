@@ -98,7 +98,11 @@ export class CharacterCreationService {
 		}
 
 		// Check if any magic items exist (excluding hardcoded Unawakened)
-		const magicItems = game.items?.filter((item: Item) => item.type === "magic") ?? [];
+		const magicItems =
+			game.items?.filter(
+				(item: BaseItem): item is BaseItem & { type: string } =>
+					this.#hasItemType(item) && item.type === "magic",
+			) ?? [];
 		if (magicItems.length === 0) {
 			console.log("SR3E | No magic items found, creating default Full Shaman");
 			const magicData = this.#magicRepo.getDefaultMagic();
@@ -195,5 +199,9 @@ export class CharacterCreationService {
 		}
 		priorities.splice(index, 1);
 		return forced;
+	}
+
+	#hasItemType(item: BaseItem): item is BaseItem & { type: string } {
+		return "type" in item;
 	}
 }

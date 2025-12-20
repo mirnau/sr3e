@@ -61,7 +61,7 @@ export class AttributeSpendingService {
 
 		await actor.update({
 			[`system.attributes.${attributeKey}.value`]: currentValue + 1,
-			"system.creationPoints.attributePoints": remainingPoints - 1,
+			"system.creation.attributePoints": remainingPoints - 1,
 		});
 	}
 
@@ -76,7 +76,7 @@ export class AttributeSpendingService {
 
 		await actor.update({
 			[`system.attributes.${attributeKey}.value`]: currentValue - 1,
-			"system.creationPoints.attributePoints": remainingPoints + 1,
+			"system.creation.attributePoints": remainingPoints + 1,
 		});
 	}
 

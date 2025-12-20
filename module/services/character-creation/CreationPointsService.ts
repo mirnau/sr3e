@@ -51,7 +51,7 @@ export class CreationPointsService {
 	 * Reads stored creation points from actor system data.
 	 */
 	getRemainingAttributePoints(actor: Actor): number {
-		const stored = (actor.system as { creationPoints?: { attributePoints?: number } }).creationPoints?.attributePoints;
+		const stored = (actor.system as { creation?: { attributePoints?: number } }).creation?.attributePoints;
 		return stored ?? 0;
 	}
 
@@ -61,7 +61,7 @@ export class CreationPointsService {
 	 */
 	getRemainingSkillPoints(actor: Actor, category: "active" | "knowledge" | "language"): number {
 		const system = actor.system as {
-			creationPoints?: {
+			creation?: {
 				activePoints?: number;
 				knowledgePoints?: number;
 				languagePoints?: number;
@@ -70,11 +70,11 @@ export class CreationPointsService {
 
 		switch (category) {
 			case "active":
-				return system.creationPoints?.activePoints ?? 0;
+				return system.creation?.activePoints ?? 0;
 			case "knowledge":
-				return system.creationPoints?.knowledgePoints ?? 0;
+				return system.creation?.knowledgePoints ?? 0;
 			case "language":
-				return system.creationPoints?.languagePoints ?? 0;
+				return system.creation?.languagePoints ?? 0;
 		}
 	}
 
