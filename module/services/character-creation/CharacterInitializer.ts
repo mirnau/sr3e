@@ -6,6 +6,7 @@
 import { configkeys, flags } from "../../../types/configuration-keys";
 import type SR3EActor from "../../documents/SR3EActor";
 import { CreationPointsService } from "./CreationPointsService";
+import { FLAGS } from "../../constants/flags";
 
 // Type definitions for character creation
 
@@ -72,10 +73,10 @@ export class CharacterInitializer {
 			"system.profile.weight": selections.weight,
 
 			// Creation points (attribute points minus 6 initial, skill points distributed across categories)
-			"system.creationPoints.attributePoints": attributePoints! - 6,
-			"system.creationPoints.activePoints": pointsService.getDistributedSkillPoints(skillPoints, "active"),
-			"system.creationPoints.knowledgePoints": pointsService.getDistributedSkillPoints(skillPoints, "knowledge"),
-			"system.creationPoints.languagePoints": pointsService.getDistributedSkillPoints(skillPoints, "language"),
+			"system.creation.attributePoints": attributePoints! - 6,
+			"system.creation.activePoints": pointsService.getDistributedSkillPoints(skillPoints, "active"),
+			"system.creation.knowledgePoints": pointsService.getDistributedSkillPoints(skillPoints, "knowledge"),
+			"system.creation.languagePoints": pointsService.getDistributedSkillPoints(skillPoints, "language"),
 
 			// Initialize all attributes to 1, essence to 6
 			"system.attributes.strength.value": 1,
@@ -112,6 +113,12 @@ export class CharacterInitializer {
 			await actor.setFlag(configkeys.sr3e, flags.hasAwakened, true);
 			await actor.update({ "system.attributes.magic.value": 6 });
 		}
+
+		// Step 6: Set character creation mode flags
+		await actor.setFlag(configkeys.sr3e, FLAGS.ACTOR.IS_CHARACTER_CREATION, true);
+		await actor.setFlag(configkeys.sr3e, FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED, false);
+
+		console.log("SR3E | Character initialized in creation mode");
 	}
 
 	/**

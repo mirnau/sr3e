@@ -2,12 +2,16 @@ import { mount } from "svelte";
 import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 import NeonName from "../../ui/injections/NeonName.svelte";
 import NewsFeed from "../../ui/injections/NewsFeed.svelte";
+import ShoppingCart from "../../ui/actors/injections/ShoppingCart.svelte";
+import CharacterCreationManager from "../../ui/actors/injections/CharacterCreationManager.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
     #neon?: SvelteApp;
     #newsFeed?: SvelteApp;
+    #shoppingCart?: SvelteApp;
+    #creationManager?: SvelteApp;
 
     get title() {
         return "";
@@ -48,6 +52,10 @@ export default class CharacterActorSheet extends SR3EActorBase {
         const header = form.querySelector("header.window-header");
         this._injectNeonName(header);
         this._injectNewsFeed(header);
+        this._injectShoppingCart(header);
+
+        // Inject creation manager into main content
+        this._injectCreationManager(windowContent);
     }
 
     _injectNeonName(header: Element | null) {
@@ -94,6 +102,51 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 target: newsFeedSlot,
             });
             this.apps.push(this.#newsFeed);
+        }
+    }
+
+    _injectShoppingCart(header: Element | null) {
+        if (!header) return;
+
+        // Shopping cart appears after all other header controls
+        let shoppingCartSlot = header.querySelector(".shopping-cart-position");
+
+        if (!shoppingCartSlot) {
+            shoppingCartSlot = document.createElement("div");
+            shoppingCartSlot.classList.add("shopping-cart-position");
+            header.appendChild(shoppingCartSlot);
+        }
+
+        if (shoppingCartSlot.childNodes.length === 0) {
+            this.#shoppingCart = mount(ShoppingCart, {
+                target: shoppingCartSlot,
+                props: { actor: this.document as Actor },
+            });
+            this.apps.push(this.#shoppingCart);
+        }
+    }
+
+    _injectCreationManager(content: Element | null) {
+        if (!content) return;
+
+        const header = this.element.querySelector("header.window-header");
+        if (!header?.parentElement) return;
+
+        // Creation manager needs to be positioned relative to header for sidebar positioning
+        let creationManagerSlot = header.previousElementSibling;
+
+        if (!creationManagerSlot || !creationManagerSlot.classList.contains("points-position")) {
+            creationManagerSlot = document.createElement("div");
+            creationManagerSlot.classList.add("points-position");
+            header.parentElement.insertBefore(creationManagerSlot, header);
+        }
+
+        if (creationManagerSlot.childNodes.length === 0) {
+            this.#creationManager = mount(CharacterCreationManager, {
+                target: creationManagerSlot,
+                props: { actor: this.document as Actor },
+            });
+            this.apps.push(this.#creationManager);
         }
     }
 

@@ -86,7 +86,7 @@ export class SkillSpendingService {
 		// Decrement appropriate point pool
 		const remainingPoints = pointsService.getRemainingSkillPoints(actor, category);
 		const pointField = this.#getPointFieldName(category);
-		await actor.update({ [`system.creationPoints.${pointField}`]: remainingPoints - 1 });
+		await actor.update({ [`system.creation.${pointField}`]: remainingPoints - 1 });
 	}
 
 	/**
@@ -110,7 +110,7 @@ export class SkillSpendingService {
 		const pointsService = CreationPointsService.Instance();
 		const remainingPoints = pointsService.getRemainingSkillPoints(actor, category);
 		const pointField = this.#getPointFieldName(category);
-		await actor.update({ [`system.creationPoints.${pointField}`]: remainingPoints + 1 });
+		await actor.update({ [`system.creation.${pointField}`]: remainingPoints + 1 });
 
 		// Optionally remove skill if rating is 0
 		if (newValue === 0) {
