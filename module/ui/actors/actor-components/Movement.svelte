@@ -2,6 +2,7 @@
 import type { Writable, Readable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import StatCard from "./StatCard.svelte";
 
 let { actor = null } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
@@ -79,18 +80,16 @@ function localize(key: string): string {
 
 {#if actor && walking && running}
 	<h1>{localize(localization.movement || "SR3E.movement.movement")}</h1>
-	<div class="masonry-grid" data-item-selector="stat-card" data-grid-prefix="attribute">
+	<div class="stat-card-grid">
 		<!-- Walking Speed -->
-		<div class="stat-card movement-card" data-key="walking">
-			<strong>{localize(localization?.walking || "SR3E.movement.walking")}</strong>
-			<span class="movement-value">{$walking ?? 0}</span>
-		</div>
+		<StatCard label={localize(localization?.walking || "SR3E.movement.walking")}>
+			<span class="attribute-value">{$walking ?? 0}</span>
+		</StatCard>
 
 		<!-- Running Speed -->
-		<div class="stat-card movement-card" data-key="running">
-			<strong>{localize(localization?.running || "SR3E.movement.running")}</strong>
-			<span class="movement-value">{$running ?? 0}</span>
-		</div>
+		<StatCard label={localize(localization?.running || "SR3E.movement.running")}>
+			<span class="attribute-value">{$running ?? 0}</span>
+		</StatCard>
 	</div>
 {:else}
 	<p>Provide an actor to initialize Movement.</p>

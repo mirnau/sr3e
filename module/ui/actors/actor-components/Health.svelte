@@ -2,6 +2,7 @@
 import type { Writable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import StatCard from "./StatCard.svelte";
 
 let { actor = null } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
@@ -226,16 +227,14 @@ function localize(key: string): string {
 		{/if}
 
 		<!-- Stat Cards -->
-		<div class="health-stats">
-			<div class="stat-card health-card" data-key="penalty">
-				<strong>{localize(localization?.penalty || "SR3E.health.penalty")}</strong>
-				<span class="stat-value">{$penaltyStore ?? 0}</span>
-			</div>
+		<div class="health-stats stat-card-grid">
+			<StatCard label={localize(localization?.penalty || "SR3E.health.penalty")}>
+				<span class="attribute-value">{$penaltyStore ?? 0}</span>
+			</StatCard>
 
-			<div class="stat-card health-card" data-key="overflow">
-				<strong>{localize(localization?.overflow || "SR3E.health.overflow")}</strong>
-				<span class="stat-value">{$overflowStore ?? 0}</span>
-			</div>
+			<StatCard label={localize(localization?.overflow || "SR3E.health.overflow")}>
+				<span class="attribute-value">{$overflowStore ?? 0}</span>
+			</StatCard>
 		</div>
 	</div>
 {:else}

@@ -7,6 +7,19 @@
 	--accent-color: rgba(0, 255, 200, 0.15);
 }
 
+// Stat Card Grid - simple flexbox grid for stat cards
+.stat-card-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--attribute-card-gutter);
+	justify-content: flex-start;
+}
+
+.stat-card-wrapper {
+	min-width: var(--attribute-min-card-width);
+	flex: 0 0 auto;
+}
+
 // Attribute Packery Grid
 .attribute-packery-grid {
 	position: relative;
