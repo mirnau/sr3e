@@ -2,6 +2,7 @@
 import type { Writable, Readable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import StatCard from "./StatCard.svelte";
 
 let { actor = null } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
@@ -202,50 +203,35 @@ function localize(key: string): string {
 
 {#if actor && combat && control && hacking && astral && spell}
 	<h1>{localize(localization.dicePools || "SR3E.dicepools.dicepools")}</h1>
-	<div class="masonry-grid" data-item-selector="stat-card" data-grid-prefix="attribute">
+	<div class="stat-card-grid">
 		<!-- Combat Pool - always shown -->
-		<div class="stat-card dice-pool-card" data-key="combat">
-			<button type="button" class="dice-pool-button">
-				<strong>{localize(localization?.combat || "SR3E.dicepools.combat")}</strong>
-				<span class="pool-value">{$combat ?? 0}</span>
-			</button>
-		</div>
+		<StatCard label={localize(localization?.combat || "SR3E.dicepools.combat")}>
+			<span class="attribute-value">{$combat ?? 0}</span>
+		</StatCard>
 
 		<!-- Control Pool - shown if has rigger interface -->
 		{#if hasRiggerInterface}
-			<div class="stat-card dice-pool-card" data-key="control">
-				<button type="button" class="dice-pool-button">
-					<strong>{localize(localization?.control || "SR3E.dicepools.control")}</strong>
-					<span class="pool-value">{$control ?? 0}</span>
-				</button>
-			</div>
+			<StatCard label={localize(localization?.control || "SR3E.dicepools.control")}>
+				<span class="attribute-value">{$control ?? 0}</span>
+			</StatCard>
 		{/if}
 
 		<!-- Hacking Pool - shown if has matrix interface -->
 		{#if hasMatrixInterface}
-			<div class="stat-card dice-pool-card" data-key="hacking">
-				<button type="button" class="dice-pool-button">
-					<strong>{localize(localization?.hacking || "SR3E.dicepools.hacking")}</strong>
-					<span class="pool-value">{$hacking ?? 0}</span>
-				</button>
-			</div>
+			<StatCard label={localize(localization?.hacking || "SR3E.dicepools.hacking")}>
+				<span class="attribute-value">{$hacking ?? 0}</span>
+			</StatCard>
 		{/if}
 
 		<!-- Astral and Spell Pools - shown if awakened -->
 		{#if isAwakened}
-			<div class="stat-card dice-pool-card" data-key="astral">
-				<button type="button" class="dice-pool-button">
-					<strong>{localize(localization?.astral || "SR3E.dicepools.astral")}</strong>
-					<span class="pool-value">{$astral ?? 0}</span>
-				</button>
-			</div>
+			<StatCard label={localize(localization?.astral || "SR3E.dicepools.astral")}>
+				<span class="attribute-value">{$astral ?? 0}</span>
+			</StatCard>
 
-			<div class="stat-card dice-pool-card" data-key="spell">
-				<button type="button" class="dice-pool-button">
-					<strong>{localize(localization?.spell || "SR3E.dicepools.spell")}</strong>
-					<span class="pool-value">{$spell ?? 0}</span>
-				</button>
-			</div>
+			<StatCard label={localize(localization?.spell || "SR3E.dicepools.spell")}>
+				<span class="attribute-value">{$spell ?? 0}</span>
+			</StatCard>
 		{/if}
 	</div>
 {:else}
