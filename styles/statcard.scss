@@ -1,5 +1,162 @@
 @use "./mixins.scss" as *;
 
+:root {
+	--attribute-min-card-width: 100px;
+	--attribute-card-gutter: 8px;
+	--highlight-color-primary: rgba(0, 255, 200, 0.8);
+	--accent-color: rgba(0, 255, 200, 0.15);
+}
+
+// Attribute Packery Grid
+.attribute-packery-grid {
+	position: relative;
+	width: 100%;
+	margin: 0 auto;
+
+	.attribute-grid-sizer {
+		width: var(--attribute-min-card-width);
+	}
+
+	.attribute-gutter-sizer {
+		width: var(--attribute-card-gutter);
+	}
+}
+
+.attribute-grid-item {
+	width: var(--attribute-min-card-width);
+	min-width: var(--attribute-min-card-width);
+	margin-bottom: var(--attribute-card-gutter);
+}
+
+// Attribute Card Component
+.attribute-card {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	padding: 0.25rem;
+}
+
+@keyframes attribute-gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.attribute-card-shadow {
+	position: absolute;
+	top: 0.75rem;
+	left: 0.75rem;
+	width: calc(100% - 0.75rem);
+	height: calc(100% - 0.75rem);
+	z-index: -2;
+	background: linear-gradient(
+		-45deg,
+		rgba(0, 255, 234, 0.6) 30%,
+		rgba(255, 34, 156, 0.6) 50%,
+		rgba(0, 255, 234, 0.6) 70%
+	);
+	background-size: 400% 400%;
+	animation: attribute-gradient 45s ease infinite;
+	filter: blur(10px);
+	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+}
+
+.attribute-card-outline {
+	position: relative;
+	z-index: 0;
+	background: linear-gradient(135deg, rgba(0, 200, 180, 0.8), rgba(0, 150, 200, 0.8));
+	padding: 2px;
+	color: var(--text-color, #e8f3ff);
+	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem, 0.15rem);
+	transition: all 0.2s ease;
+
+	&:hover {
+		background: linear-gradient(135deg, rgba(0, 255, 200, 0.9), rgba(0, 200, 255, 0.9));
+		filter: brightness(1.1);
+	}
+}
+
+.attribute-card-displayarea {
+	position: absolute;
+	z-index: -1;
+	top: 2px;
+	left: 2px;
+	width: calc(100% - 4px);
+	height: calc(100% - 4px);
+	background: linear-gradient(145deg, rgb(20, 25, 30), rgb(15, 18, 22));
+	box-shadow: inset 0 0 20px rgba(0, 80, 80, 0.5);
+	pointer-events: none;
+	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem, 0.15rem);
+}
+
+.attribute-label {
+	text-align: center;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	margin: 0.4rem 0 0.2rem 0;
+	color: rgba(0, 255, 200, 0.9);
+	text-shadow: 0 0 8px rgba(0, 255, 200, 0.4);
+}
+
+.attribute-value-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.25rem;
+	padding: 0.2rem 0 0.4rem 0;
+}
+
+.attribute-value {
+	min-width: 2rem;
+	text-align: center;
+	font-size: 1.4rem;
+	font-weight: bold;
+	color: #fff;
+	text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+}
+
+// Chevron Buttons
+.attr-chevron {
+	background: transparent;
+	border: none;
+	padding: 2px 4px;
+	cursor: pointer;
+	color: var(--highlight-color-primary);
+	font-size: 0.9rem;
+	transition: all 0.2s ease, transform 0.1s ease;
+
+	&:hover:not(:disabled) {
+		color: #fff;
+		text-shadow: 0 0 12px var(--highlight-color-primary);
+		filter: brightness(1.5);
+		transform: scale(1.3);
+	}
+
+	&:active:not(:disabled) {
+		transform: scale(1.1);
+		filter: brightness(1.2);
+	}
+
+	&:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
+		color: #666;
+	}
+
+	i {
+		pointer-events: none;
+	}
+}
+
+// Legacy masonry grid support (from old project)
 .attribute-masonry-grid {
 	margin: 0 auto;
 
