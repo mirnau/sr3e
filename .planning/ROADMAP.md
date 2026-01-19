@@ -89,6 +89,7 @@ None - Foundry VTT system development patterns are project-specific.
 1. Creation Point Services & Flag Management - Services for tracking/calculating points and flag state
 2. Shopping Mode UI Injections - Shopping cart toggle and point pool display components
 3. Shopping Mode Integration & Completion Logic - Wire services to UI, implement workflows
+4. Health Component Styling & ECG Animation - Clean up layout, bring in cardiogram animation service
 
 **Flags involved**:
 - `isCharacterCreation`: Indicates character is in creation mode
@@ -240,7 +241,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
-| 2. Character Creation Shopping Mode | 2/3 | In progress | - |
+| 2. Character Creation Shopping Mode | 2/4 | In progress | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
