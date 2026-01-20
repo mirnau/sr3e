@@ -136,7 +136,14 @@ export class ElectroCardiogramService {
 
 	/**
 	 * Calculate severity and set ECG pace based on damage degree.
-	 * Returns the penalty modifier.
+	 * Returns the penalty level (0=None, 1=Light, 2=Moderate, 3=Serious, 4=Deadly).
+	 *
+	 * SR3e damage track:
+	 * - 0 boxes: No penalty
+	 * - 1-2 boxes (Light): -1 modifier
+	 * - 3-5 boxes (Moderate): -2 modifier
+	 * - 6-8 boxes (Serious): -3 modifier
+	 * - 9+ boxes (Deadly): Incapacitated
 	 */
 	private calculateSeverity(degree: number): number {
 		if (degree === 0) {
@@ -145,23 +152,23 @@ export class ElectroCardiogramService {
 		}
 		if (degree < 3) {
 			this.setPace(2, 20);
-			return 0;
+			return 1; // Light
 		}
 		if (degree < 6) {
 			this.setPace(4, 25);
-			return -1;
+			return 2; // Moderate
 		}
 		if (degree < 9) {
 			this.setPace(8, 35);
-			return -2;
+			return 3; // Serious
 		}
 		if (degree === 9) {
 			this.setPace(10, 40);
-			return -3;
+			return 4; // Deadly
 		}
 		// degree >= 10 (dying/overflow)
 		this.setPace(1, 8);
-		return -3;
+		return 4;
 	}
 
 	/**
