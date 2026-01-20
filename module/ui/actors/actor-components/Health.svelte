@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Writable } from "svelte/store";
-import { onMount } from "svelte";
+import { onDestroy } from "svelte";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { ElectroCardiogramService } from "../../../services/health/ElectroCardiogramService";
@@ -9,50 +9,27 @@ import StatCard from "./StatCard.svelte";
 let { actor = null } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-// Store references (using .value suffix as per data model)
-let stunStore = $state<Writable<number> | null>(null);
-let physicalStore = $state<Writable<number> | null>(null);
-let penaltyStore = $state<Writable<number> | null>(null);
-let overflowStore = $state<Writable<number> | null>(null);
-let miraculousSurvivalStore = $state<Writable<boolean> | null>(null);
-let aliveStore = $state<Writable<boolean> | null>(null);
+// Store references
+let stun = $state<Writable<number> | null>(null);
+let physical = $state<Writable<number> | null>(null);
+let penalty = $state<Writable<number> | null>(null);
+let overflow = $state<Writable<number> | null>(null);
+let miraculousSurvival = $state<Writable<boolean> | null>(null);
+let isAlive = $state<Writable<boolean> | null>(null);
 
-// Local reactive values for display
-let stunValue = $state(0);
-let physicalValue = $state(0);
-let penaltyValue = $state(0);
-let overflowValue = $state(0);
-let miraculousSurvivalValue = $state(true);
-let aliveValue = $state(true);
+// ECG canvas references (use $state for reactivity with bind:this)
+let ecgCanvas = $state<HTMLCanvasElement | null>(null);
+let ecgPointCanvas = $state<HTMLCanvasElement | null>(null);
+let ecgContainer = $state<HTMLElement | null>(null);
+let ecgService = $state<ElectroCardiogramService | null>(null);
 
-// Local state
-let stunBoxes = $state<boolean[]>(Array(10).fill(false));
-let physicalBoxes = $state<boolean[]>(Array(10).fill(false));
-
-// ECG canvas references
-let ecgCanvas: HTMLCanvasElement;
-let ecgPointCanvas: HTMLCanvasElement;
-let ecgContainer: HTMLElement;
-let ecgService: ElectroCardiogramService | null = null;
+// Local state for checkbox arrays
+let stunBoxes = $state<boolean[]>([]);
+let physicalBoxes = $state<boolean[]>([]);
 
 const localization = $derived(CONFIG.SR3E.HEALTH);
 const severityLabels = ["light", "medium", "serious", "deadly"];
 const severityIndices = [0, 2, 5, 9];
-
-// Initialize ECG service on mount
-onMount(() => {
-	if (ecgCanvas && ecgPointCanvas && ecgContainer) {
-		ecgService = new ElectroCardiogramService(
-			ecgCanvas,
-			ecgPointCanvas,
-			ecgContainer
-		);
-	}
-
-	return () => {
-		ecgService?.destroy();
-	};
-});
 
 // Initialize stores and subscriptions
 $effect(() => {
@@ -60,114 +37,100 @@ $effect(() => {
 
 	storeManager.Subscribe(actor);
 
-	// Initialize health stores (with .value suffix as per data model)
-	stunStore = storeManager.GetRWStore<number>(actor, "health.stun.value");
-	physicalStore = storeManager.GetRWStore<number>(actor, "health.physical.value");
-	penaltyStore = storeManager.GetRWStore<number>(actor, "health.penalty.value");
-	overflowStore = storeManager.GetRWStore<number>(actor, "health.overflow.value");
-	miraculousSurvivalStore = storeManager.GetFlagStore<boolean>(actor, "miraculousSurvival", true);
-	aliveStore = storeManager.GetRWStore<boolean>(actor, "health.alive");
+	// Initialize health stores
+	stun = storeManager.GetRWStore<number>(actor, "health.stun.value");
+	physical = storeManager.GetRWStore<number>(actor, "health.physical.value");
+	penalty = storeManager.GetRWStore<number>(actor, "health.penalty.value");
+	overflow = storeManager.GetRWStore<number>(actor, "health.overflow.value");
+	miraculousSurvival = storeManager.GetFlagStore<boolean>(actor, "miraculousSurvival", false);
+	isAlive = storeManager.GetRWStore<boolean>(actor, "health.isAlive");
 
 	return () => {
 		storeManager.Unsubscribe(actor);
 	};
 });
 
-// Sync store values to local state for display
+// Update checkbox arrays when damage values change
 $effect(() => {
-	if (stunStore) stunValue = $stunStore ?? 0;
-});
-$effect(() => {
-	if (physicalStore) physicalValue = $physicalStore ?? 0;
-});
-$effect(() => {
-	if (penaltyStore) penaltyValue = $penaltyStore ?? 0;
-});
-$effect(() => {
-	if (overflowStore) overflowValue = $overflowStore ?? 0;
-});
-$effect(() => {
-	if (miraculousSurvivalStore) miraculousSurvivalValue = $miraculousSurvivalStore ?? true;
-});
-$effect(() => {
-	if (aliveStore) aliveValue = $aliveStore ?? true;
+	if (!stun || !physical) return;
+	stunBoxes = Array.from({ length: 10 }, (_, i) => i < ($stun ?? 0));
+	physicalBoxes = Array.from({ length: 10 }, (_, i) => i < ($physical ?? 0));
 });
 
-// Update checkbox arrays when store values change
+// Initialize ECG service when canvas elements are ready
 $effect(() => {
-	stunBoxes = Array(10).fill(false).map((_, i) => i < stunValue);
-	physicalBoxes = Array(10).fill(false).map((_, i) => i < physicalValue);
-});
-
-// Update ECG pace and calculate penalty based on damage
-$effect(() => {
-	if (!penaltyStore || !ecgService) return;
-
-	// Calculate penalty and update ECG pace
-	const penalty = ecgService.calculatePenalty(stunValue, physicalValue);
-	penaltyStore.set(penalty);
+	if (ecgCanvas && ecgPointCanvas && ecgContainer && !ecgService) {
+		ecgService = new ElectroCardiogramService(
+			ecgCanvas,
+			ecgPointCanvas,
+			ecgContainer
+		);
+	}
 });
 
 // Handle death state (flatline)
 $effect(() => {
-	if (!ecgService) return;
+	if (!ecgService || !isAlive) return;
 
-	if (!aliveValue) {
+	if (!$isAlive) {
 		ecgService.flatline();
 	} else {
 		ecgService.resume();
 	}
 });
 
-function toggle(type: "stun" | "physical", index: number) {
-	if (!stunStore || !physicalStore) return;
+// Calculate penalty when damage changes
+$effect(() => {
+	if (!ecgService || !stun || !physical || !penalty) return;
+	const calculatedPenalty = ecgService.calculatePenalty($stun ?? 0, $physical ?? 0);
+	penalty.set(calculatedPenalty);
+});
 
-	if (type === "stun") {
-		const newValue = index < stunValue ? index : index + 1;
-		stunStore.set(newValue);
-	} else {
-		const newValue = index < physicalValue ? index : index + 1;
-		physicalStore.set(newValue);
+// Cleanup on destroy
+onDestroy(() => {
+	ecgService?.destroy();
+});
+
+function toggle(localIndex: number, isStun: boolean, willBeChecked: boolean) {
+	const newValue = willBeChecked ? localIndex + 1 : localIndex;
+	if (isStun && stun) {
+		stun.set(newValue);
+	} else if (physical) {
+		physical.set(newValue);
 	}
 }
 
 function incrementOverflow() {
-	if (!overflowStore) return;
-	if (overflowValue < 10) {
-		overflowStore.set(overflowValue + 1);
-	}
+	if (!overflow) return;
+	overflow.set(Math.min(($overflow ?? 0) + 1, 10));
 }
 
 function decrementOverflow() {
-	if (!overflowStore) return;
-	if (overflowValue > 0) {
-		overflowStore.set(overflowValue - 1);
-	}
+	if (!overflow) return;
+	overflow.set(Math.max(($overflow ?? 0) - 1, 0));
 }
 
 async function revive() {
-	if (!miraculousSurvivalStore || !overflowStore || !aliveStore) return;
-
-	if (!miraculousSurvivalValue) return;
+	if (!overflow || !isAlive || !miraculousSurvival) return;
 
 	const confirmed = await foundry.applications.api.DialogV2.confirm({
-		window: { title: localize(localization.miraculousSurvival) },
-		content: `<p>${localize(localization.reviveConfirm)}</p>`,
-		yes: { label: localize(localization.revive) },
+		window: { title: localize(localization?.miraculousSurvival || "SR3E.health.miraculousSurvival") },
+		content: `<p>${localize(localization?.reviveConfirm || "SR3E.health.reviveConfirm")}</p>`,
+		yes: { label: localize(localization?.revive || "SR3E.health.revive") },
 		no: { label: "Cancel" }
 	});
 
 	if (confirmed) {
-		miraculousSurvivalStore.set(false);
-		overflowStore.set(0);
-		aliveStore.set(true);
+		overflow.set(0);
+		isAlive.set(true);
+		miraculousSurvival.set(true);
 	}
 }
 
-function handleButtonKeypress(e: KeyboardEvent, callback: () => void) {
+function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
 	if (e.key === "Enter" || e.key === " ") {
 		e.preventDefault();
-		callback();
+		fn();
 	}
 }
 
@@ -176,7 +139,7 @@ function localize(key: string): string {
 }
 </script>
 
-{#if actor && stunStore && physicalStore && penaltyStore && overflowStore}
+{#if actor && stun && physical && penalty && overflow}
 	<!-- ECG Visualization -->
 	<div bind:this={ecgContainer} class="ecg-container">
 		<canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
@@ -188,7 +151,7 @@ function localize(key: string): string {
 	<div class="condition-monitor">
 		<div class="condition-meter">
 			<!-- Revival Button -->
-			{#if !miraculousSurvivalValue}
+			{#if miraculousSurvival && !$miraculousSurvival}
 				<div class="revival-button">
 					<i
 						class="fa-solid fa-heart-circle-bolt"
@@ -211,12 +174,12 @@ function localize(key: string): string {
 							type="checkbox"
 							id={`healthBox${i + 1}`}
 							{checked}
-							onchange={() => toggle("stun", i)}
+							onchange={(e) => toggle(i, true, (e.target as HTMLInputElement).checked)}
 						/>
 						{#if severityIndices.includes(i)}
 							<div class="damage-description stun">
 								<h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
-									{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}
+									{localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
 								</h4>
 							</div>
 						{/if}
@@ -234,12 +197,12 @@ function localize(key: string): string {
 							type="checkbox"
 							id={`healthBox${i + 11}`}
 							{checked}
-							onchange={() => toggle("physical", i)}
+							onchange={(e) => toggle(i, false, (e.target as HTMLInputElement).checked)}
 						/>
 						{#if severityIndices.includes(i)}
 							<div class="damage-description physical">
 								<h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
-									{localize(localization[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization])}
+									{localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
 								</h4>
 							</div>
 						{/if}
@@ -279,10 +242,10 @@ function localize(key: string): string {
 		<div class="health-card-container">
 			<div class="stat-grid single-column">
 				<StatCard label={localize(localization?.penalty || "SR3E.health.penalty")}>
-					<span class="attribute-value">{penaltyValue}</span>
+					<span class="attribute-value">{$penalty ?? 0}</span>
 				</StatCard>
 				<StatCard label={localize(localization?.overflow || "SR3E.health.overflow")}>
-					<span class="attribute-value">{overflowValue}</span>
+					<span class="attribute-value">{$overflow ?? 0}</span>
 				</StatCard>
 			</div>
 		</div>
