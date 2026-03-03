@@ -108,6 +108,22 @@ None - Foundry VTT system development patterns are project-specific.
 
 ---
 
+### Phase 2.1: Clean Up Functional Bugs from 02-03 Shopping Mode Integration (INSERTED)
+
+**Goal:** Fix functional bugs discovered after executing the shopping mode integration plan (02-03).
+
+**Depends on:** Phase 2
+
+**Plans:** 0 plans (run `/gsd:plan-phase 2.1` to break down)
+
+Plans:
+- [ ] TBD
+
+**Details:**
+[To be added during planning]
+
+---
+
 ### Phase 3: Karma & Experience Core
 
 **Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
@@ -241,7 +257,8 @@ Will need to break this down into sub-phases after understanding scope better.
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
-| 2. Character Creation Shopping Mode | 3/4 | In progress | - |
+| 2. Character Creation Shopping Mode | 4/4 | Complete | 2026-03-03 |
+| 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |

@@ -20,29 +20,29 @@
 
 ## Current Position
 
-Phase: 2 of 10+ (Character Creation Shopping Mode)
-Plan: 3 of 4 complete in current phase
-Status: In progress
-Last activity: 2026-01-19 - Completed 02-04-PLAN.md (Health Component Styling & ECG Animation)
+Phase: 2.1 of 10+ (Shopping Mode Bug Fixes — INSERTED)
+Plan: 0 of ? planned
+Status: Not started — next up
+Last activity: 2026-03-03 - Phase 2.1 inserted for functional bug fixes discovered in 02-03
 
-Progress: █████░░░░░ ~25%
+Progress: █████░░░░░ ~30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 10 min
-- Total execution time: 0.8 hours
+- Total plans completed: 7 (Phase 1: 3, Phase 2: 4)
+- Average duration: ~10 min
+- Total execution time: ~1.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1 | 3 | 28 min | 9 min |
-| 2 | 2 | 22 min | 11 min |
+| 2 | 4 | ~40 min | ~10 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (6m), 01-03 (8m), 02-01 (20m), 02-02 (2m)
+- Last 5 plans: 02-01 (20m), 02-02 (2m), 02-03 (?m), 02-04 (15m)
 - Trend: Variable (service work is complex, UI integration is quick)
 
 *Updated after each plan completion*
@@ -77,6 +77,10 @@ Progress: █████░░░░░ ~25%
 | 2 | Racial max default to 6 | Safe fallback if metatype not found |
 | 2 | Scoped Svelte styles for chevrons | Keeps styles co-located with component, avoids global CSS pollution |
 
+### Roadmap Evolution
+
+- Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
+
 ### Deferred Issues
 
 None yet.
@@ -94,6 +98,6 @@ Drift notes: None
 
 ## Session Continuity
 
-Last session: 2026-01-14 19:47
-Stopped at: Completed 02-02-PLAN.md - Attribute chevrons for point spending
+Last session: 2026-03-03
+Stopped at: Confirmed 02-03-PLAN.md complete - Phase 2 fully done
 Resume file: None

@@ -1,23 +1,25 @@
 @use "./mixins.scss" as *;
 
 :root {
-	--attribute-min-card-width: 100px;
-	--attribute-card-gutter: 8px;
+	--attribute-card-width: 100px;
+	--attribute-card-height: 4rem;
+	--attribute-card-gutter: 6px;
 	--highlight-color-primary: rgba(0, 255, 200, 0.8);
 	--accent-color: rgba(0, 255, 200, 0.15);
 }
 
-// Stat Card Grid - simple flexbox grid for stat cards
+// Stat Card Grid - CSS grid that replicates Packery column math
+// repeat(auto-fill, minmax(100px, 1fr)) fills columns the same way Packery does:
+// a 228px container with 6px gap → 2 columns × 111px each, matching attribute cards.
 .stat-card-grid {
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(var(--attribute-card-width), 1fr));
 	gap: var(--attribute-card-gutter);
-	justify-content: flex-start;
 }
 
 .stat-card-wrapper {
-	min-width: var(--attribute-min-card-width);
-	flex: 0 0 auto;
+	width: 100%;
+	height: var(--attribute-card-height);
 }
 
 // Attribute Packery Grid
@@ -27,7 +29,7 @@
 	margin: 0 auto;
 
 	.attribute-grid-sizer {
-		width: var(--attribute-min-card-width);
+		width: var(--attribute-card-width);
 	}
 
 	.attribute-gutter-sizer {
@@ -36,8 +38,8 @@
 }
 
 .attribute-grid-item {
-	width: var(--attribute-min-card-width);
-	min-width: var(--attribute-min-card-width);
+	width: var(--attribute-card-width);
+	height: var(--attribute-card-height);
 	margin-bottom: var(--attribute-card-gutter);
 }
 
@@ -46,7 +48,7 @@
 	position: relative;
 	width: 100%;
 	height: 100%;
-	padding: 0.25rem;
+	padding: 0.15rem;
 }
 
 @keyframes attribute-gradient {
@@ -63,10 +65,10 @@
 
 .attribute-card-shadow {
 	position: absolute;
-	top: 0.75rem;
-	left: 0.75rem;
-	width: calc(100% - 0.75rem);
-	height: calc(100% - 0.75rem);
+	top: 0.5rem;
+	left: 0.5rem;
+	width: calc(100% - 0.5rem);
+	height: calc(100% - 0.5rem);
 	z-index: -2;
 	background: linear-gradient(
 		-45deg,
@@ -76,23 +78,19 @@
 	);
 	background-size: 400% 400%;
 	animation: attribute-gradient 45s ease infinite;
-	filter: blur(10px);
-	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+	filter: blur(8px);
+	@include clipped-corners(0.4rem, 0.4rem, 0.6rem, 0.4rem);
 }
 
 .attribute-card-outline {
 	position: relative;
 	z-index: 0;
+	width: 100%;
+	height: 100%;
 	background: rgb(174, 224, 224);
-	padding: 0.25rem;
+	padding: 0.15rem;
 	color: var(--text-color, #e8f3ff);
-	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem, 0.15rem);
-	transition: all 0.2s ease;
-
-	&:hover {
-		background: rgb(200, 240, 240);
-		filter: brightness(1.05);
-	}
+	@include clipped-corners(0.4rem, 0.4rem, 0.6rem, 0.4rem, 0.12rem);
 }
 
 .attribute-card-displayarea {
@@ -103,9 +101,9 @@
 	width: calc(100% - 2px);
 	height: calc(100% - 2px);
 	background: rgb(17, 17, 17);
-	box-shadow: inset 0 0 20px darkslategrey;
+	box-shadow: inset 0 0 15px darkslategrey;
 	pointer-events: none;
-	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem, 0.15rem);
+	@include clipped-corners(0.4rem, 0.4rem, 0.6rem, 0.4rem, 0.12rem);
 }
 
 .attribute-label {
@@ -113,48 +111,53 @@
 	font-size: 0.7rem;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
-	margin: 0.4rem 0 0.2rem 0;
+	letter-spacing: 0.04em;
+	margin: 0.25rem 0 0.1rem 0;
 	color: rgba(0, 255, 200, 0.9);
-	text-shadow: 0 0 8px rgba(0, 255, 200, 0.4);
+	text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .attribute-value-row {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.25rem;
-	padding: 0.2rem 0 0.4rem 0;
+	gap: 0.15rem;
+	height: 1.8rem;
+	padding: 0;
 }
 
 .attribute-value {
-	min-width: 2rem;
+	min-width: 1.5rem;
 	text-align: center;
-	font-size: 1.4rem;
+	font-size: 1.2rem;
 	font-weight: bold;
 	color: #fff;
-	text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+	text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
 }
 
 // Chevron Buttons
 .attr-chevron {
 	background: transparent;
 	border: none;
-	padding: 2px 4px;
+	padding: 1px 2px;
 	cursor: pointer;
 	color: var(--highlight-color-primary);
-	font-size: 0.9rem;
-	transition: all 0.2s ease, transform 0.1s ease;
+	font-size: 0.75rem;
+	line-height: 1;
+	transition: all 0.15s ease, transform 0.1s ease;
 
 	&:hover:not(:disabled) {
 		color: #fff;
-		text-shadow: 0 0 12px var(--highlight-color-primary);
+		text-shadow: 0 0 10px var(--highlight-color-primary);
 		filter: brightness(1.5);
-		transform: scale(1.3);
+		transform: scale(1.25);
 	}
 
 	&:active:not(:disabled) {
-		transform: scale(1.1);
+		transform: scale(1.05);
 		filter: brightness(1.2);
 	}
 

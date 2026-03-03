@@ -83,10 +83,16 @@ export class SkillSpendingService {
 			await skillItem.update({ [`system.${category}Skill.value`]: currentValue + 1 });
 		}
 
-		// Decrement appropriate point pool
-		const remainingPoints = pointsService.getRemainingSkillPoints(actor, category);
-		const pointField = this.#getPointFieldName(category);
-		await actor.update({ [`system.creation.${pointField}`]: remainingPoints - 1 });
+		// Decrement appropriate point pool.
+		// Active: decrement remaining pool. Knowledge/language: increment spent counter.
+		if (category === "active") {
+			const remainingPoints = pointsService.getRemainingSkillPoints(actor, "active");
+			await actor.update({ "system.creation.activePoints": remainingPoints - 1 });
+		} else {
+			const spentField = category === "knowledge" ? "knowledgeSpent" : "languageSpent";
+			const currentSpent = (actor.system as { creation?: Record<string, number> }).creation?.[spentField] ?? 0;
+			await actor.update({ [`system.creation.${spentField}`]: currentSpent + 1 });
+		}
 	}
 
 	/**
@@ -106,11 +112,17 @@ export class SkillSpendingService {
 		const newValue = currentValue - 1;
 		await skillItem.update({ [`system.${category}Skill.value`]: newValue });
 
-		// Refund point to appropriate pool
+		// Refund point to appropriate pool.
+		// Active: increment remaining pool. Knowledge/language: decrement spent counter.
 		const pointsService = CreationPointsService.Instance();
-		const remainingPoints = pointsService.getRemainingSkillPoints(actor, category);
-		const pointField = this.#getPointFieldName(category);
-		await actor.update({ [`system.creation.${pointField}`]: remainingPoints + 1 });
+		if (category === "active") {
+			const remainingPoints = pointsService.getRemainingSkillPoints(actor, "active");
+			await actor.update({ "system.creation.activePoints": remainingPoints + 1 });
+		} else {
+			const spentField = category === "knowledge" ? "knowledgeSpent" : "languageSpent";
+			const currentSpent = (actor.system as { creation?: Record<string, number> }).creation?.[spentField] ?? 0;
+			await actor.update({ [`system.creation.${spentField}`]: Math.max(0, currentSpent - 1) });
+		}
 
 		// Optionally remove skill if rating is 0
 		if (newValue === 0) {
@@ -141,17 +153,4 @@ export class SkillSpendingService {
 		return "active";
 	}
 
-	/**
-	 * Map skill category to point field name in actor.system.creationPoints.
-	 */
-	#getPointFieldName(category: SkillCategory): string {
-		switch (category) {
-			case "active":
-				return "activePoints";
-			case "knowledge":
-				return "knowledgePoints";
-			case "language":
-				return "languagePoints";
-		}
-	}
 }

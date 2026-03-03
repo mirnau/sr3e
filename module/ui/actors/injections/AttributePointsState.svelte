@@ -7,7 +7,8 @@
 
 	const { actor, config = CONFIG.SR3E } = $props<{ actor: Actor; config?: any }>();
 	const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
-	const actorStore = storeManager.GetROStore(actor);
+	const creationPointsStore = storeManager.GetRWStore<number>(actor, "creation.attributePoints");
+	const intelligenceStore = storeManager.GetRWStore<number>(actor, "attributes.intelligence.value");
 	const attributeLocked = storeManager.GetFlagStore(
 		actor,
 		FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED,
@@ -16,12 +17,12 @@
 
 	const pointsService = CreationPointsService.Instance();
 
-	// Create reactive point list
+	// Knowledge and language pools are Int-derived — react to both points and intelligence changes.
 	const pointList = $derived(() => {
-		$actorStore; // Trigger reactivity
+		$intelligenceStore; // re-run when intelligence changes (knowledge/language pools update)
 		return [
 			{
-				value: pointsService.getRemainingAttributePoints(actor),
+				value: $creationPointsStore ?? 0,
 				text: "Attribute Points",
 			},
 			{
@@ -41,7 +42,7 @@
 
 	// Auto-prompt when attribute points reach 0
 	$effect(() => {
-		const attrPoints = pointsService.getRemainingAttributePoints(actor);
+		const attrPoints = $creationPointsStore ?? 0;
 		if (attrPoints === 0 && !$attributeLocked) {
 			(async () => {
 				const confirmed = await Dialog.confirm({
