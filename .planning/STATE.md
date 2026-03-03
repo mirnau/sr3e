@@ -21,9 +21,9 @@
 ## Current Position
 
 Phase: 2.1 of 10+ (Shopping Mode Bug Fixes — INSERTED)
-Plan: 0 of ? planned
-Status: Not started — next up
-Last activity: 2026-03-03 - Phase 2.1 inserted for functional bug fixes discovered in 02-03
+Plan: 1 of ? (in progress — more bugs pending)
+Status: In progress
+Last activity: 2026-03-03 - 2.1-01 complete (5 bugs fixed: attr points, racial max, knowledge/language pools, stat card sizing ×2)
 
 Progress: █████░░░░░ ~30%
 
@@ -80,6 +80,7 @@ Progress: █████░░░░░ ~30%
 ### Roadmap Evolution
 
 - Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
+- Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)
 
 ### Deferred Issues
 
@@ -99,5 +100,5 @@ Drift notes: None
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Confirmed 02-03-PLAN.md complete - Phase 2 fully done
+Stopped at: 2.1-01 complete — awaiting next bug report from user
 Resume file: None

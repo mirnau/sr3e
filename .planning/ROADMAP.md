@@ -124,6 +124,21 @@ Plans:
 
 ---
 
+### Phase 2.2: Health Component Visual Polish (INSERTED)
+
+**Goal:** Visual adjustments and polish for the Health component — layout, spacing, ECG presentation, and condition monitor appearance.
+
+**Depends on:** Phase 2.1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run `/gsd:plan-phase 2.2` to break down)
+
+**Details:**
+[To be added during planning]
+
+---
+
 ### Phase 3: Karma & Experience Core
 
 **Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
@@ -259,6 +274,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
 | 2. Character Creation Shopping Mode | 4/4 | Complete | 2026-03-03 |
 | 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
+| 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
