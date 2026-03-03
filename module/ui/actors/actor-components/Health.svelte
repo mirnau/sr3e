@@ -239,15 +239,13 @@ function localize(key: string): string {
 		</div>
 
 		<!-- Stat Cards -->
-		<div class="health-card-container">
-			<div class="stat-grid single-column">
-				<StatCard label={localize(localization?.penalty || "SR3E.health.penalty")}>
-					<span class="attribute-value">{$penalty ?? 0}</span>
-				</StatCard>
-				<StatCard label={localize(localization?.overflow || "SR3E.health.overflow")}>
-					<span class="attribute-value">{$overflow ?? 0}</span>
-				</StatCard>
-			</div>
+		<div class="stat-card-grid health-stat-cards">
+			<StatCard label={localize(localization?.penalty || "SR3E.health.penalty")}>
+				<span class="attribute-value">{$penalty ?? 0}</span>
+			</StatCard>
+			<StatCard label={localize(localization?.overflow || "SR3E.health.overflow")}>
+				<span class="attribute-value">{$overflow ?? 0}</span>
+			</StatCard>
 		</div>
 	</div>
 {:else}

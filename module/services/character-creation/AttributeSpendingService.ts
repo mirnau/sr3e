@@ -4,14 +4,9 @@
  * Uses StoreManager for reactive updates without triggering sheet re-renders.
  */
 
-import { CreationPointsService } from "./CreationPointsService";
+import { get } from "svelte/store";
 import type { IStoreManager } from "../../utilities/IStoreManager";
 import { StoreManager } from "../../utilities/StoreManager.svelte";
-
-/**
- * Attribute keys in the SR3e system
- */
-type AttributeKey = "strength" | "quickness" | "body" | "charisma" | "intelligence" | "willpower";
 
 /**
  * Derived attributes that cannot be bought with points
@@ -48,17 +43,19 @@ export class AttributeSpendingService {
 	 * - Attribute is not derived (reaction, essence)
 	 * - Has remaining attribute points
 	 * - Attribute not at racial maximum
+	 *
+	 * Reads from stores (not actor.system) to get the current reactive value,
+	 * since document.update() is async and actor.system may be stale.
 	 */
 	canIncreaseAttribute(actor: Actor, attributeKey: string): boolean {
-		// Derived attributes cannot be purchased
 		if (this.#isDerivedAttribute(attributeKey)) return false;
 
-		const pointsService = CreationPointsService.Instance();
-		const remainingPoints = pointsService.getRemainingAttributePoints(actor);
-
+		const pointsStore = this.#storeManager.GetRWStore<number>(actor, "creation.attributePoints");
+		const remainingPoints = get(pointsStore) ?? 0;
 		if (remainingPoints <= 0) return false;
 
-		const currentValue = this.#getAttributeValue(actor, attributeKey);
+		const attributeStore = this.#storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
+		const currentValue = get(attributeStore) ?? 1;
 		const racialMax = this.#getRacialMaximum(actor, attributeKey);
 
 		return currentValue < racialMax;
@@ -71,73 +68,39 @@ export class AttributeSpendingService {
 	 * - Attribute not at minimum (1 for all attributes during creation)
 	 */
 	canDecreaseAttribute(actor: Actor, attributeKey: string): boolean {
-		// Derived attributes cannot be purchased
 		if (this.#isDerivedAttribute(attributeKey)) return false;
 
-		const currentValue = this.#getAttributeValue(actor, attributeKey);
-		return currentValue > 1; // Minimum attribute value is 1
+		const attributeStore = this.#storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
+		const currentValue = get(attributeStore) ?? 1;
+		return currentValue > 1;
 	}
 
 	/**
 	 * Increase an attribute by 1, spending 1 creation point.
-	 * Uses StoreManager for reactive updates without re-rendering sheet.
+	 * Reads current values from stores (not actor.system) to avoid async staleness.
 	 */
 	increaseAttribute(actor: Actor, attributeKey: string): void {
-		// Guard: derived attributes cannot be modified
 		if (this.#isDerivedAttribute(attributeKey)) return;
 
-		const currentValue = this.#getAttributeValue(actor, attributeKey);
-		const pointsService = CreationPointsService.Instance();
-		const remainingPoints = pointsService.getRemainingAttributePoints(actor);
+		const attributeStore = this.#storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
+		const pointsStore = this.#storeManager.GetRWStore<number>(actor, "creation.attributePoints");
 
-		// Get stores and update via set() - this uses render: false internally
-		const attributeStore = this.#storeManager.GetRWStore<number>(
-			actor,
-			`attributes.${attributeKey}.value`
-		);
-		const pointsStore = this.#storeManager.GetRWStore<number>(
-			actor,
-			"creation.attributePoints"
-		);
-
-		attributeStore.set(currentValue + 1);
-		pointsStore.set(remainingPoints - 1);
+		attributeStore.set((get(attributeStore) ?? 1) + 1);
+		pointsStore.set((get(pointsStore) ?? 0) - 1);
 	}
 
 	/**
 	 * Decrease an attribute by 1, refunding 1 creation point.
-	 * Uses StoreManager for reactive updates without re-rendering sheet.
+	 * Reads current values from stores (not actor.system) to avoid async staleness.
 	 */
 	decreaseAttribute(actor: Actor, attributeKey: string): void {
-		// Guard: derived attributes cannot be modified
 		if (this.#isDerivedAttribute(attributeKey)) return;
 
-		const currentValue = this.#getAttributeValue(actor, attributeKey);
-		const pointsService = CreationPointsService.Instance();
-		const remainingPoints = pointsService.getRemainingAttributePoints(actor);
+		const attributeStore = this.#storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
+		const pointsStore = this.#storeManager.GetRWStore<number>(actor, "creation.attributePoints");
 
-		// Get stores and update via set() - this uses render: false internally
-		const attributeStore = this.#storeManager.GetRWStore<number>(
-			actor,
-			`attributes.${attributeKey}.value`
-		);
-		const pointsStore = this.#storeManager.GetRWStore<number>(
-			actor,
-			"creation.attributePoints"
-		);
-
-		attributeStore.set(currentValue - 1);
-		pointsStore.set(remainingPoints + 1);
-	}
-
-	/**
-	 * Get current attribute value from actor.
-	 */
-	#getAttributeValue(actor: Actor, attributeKey: string): number {
-		const system = actor.system as {
-			attributes?: Record<string, { value?: number }>;
-		};
-		return system.attributes?.[attributeKey]?.value ?? 1;
+		attributeStore.set((get(attributeStore) ?? 1) - 1);
+		pointsStore.set((get(pointsStore) ?? 0) + 1);
 	}
 
 	/**
