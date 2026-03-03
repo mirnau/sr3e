@@ -178,7 +178,7 @@
 	overflow: hidden;
 	flex-shrink: 0;
 	flex-grow: 0;
-	@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);;
+	@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 
 	// Inner box (dark background)
 	&::before {
