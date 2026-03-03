@@ -142,10 +142,12 @@ function localize(key: string): string {
 {#if actor && stun && physical && penalty && overflow}
 	<!-- ECG Visualization -->
 	<div bind:this={ecgContainer} class="ecg-container">
-		<canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
-		<canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
-		<div class="left-gradient"></div>
-		<div class="right-gradient"></div>
+		<div class="ecg-viewport">
+			<canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
+			<canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
+			<div class="left-gradient"></div>
+			<div class="right-gradient"></div>
+		</div>
 	</div>
 
 	<div class="condition-monitor">
