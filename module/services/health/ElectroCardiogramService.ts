@@ -130,8 +130,8 @@ export class ElectroCardiogramService {
 	 * Also updates ECG pace to reflect health state.
 	 *
 	 * Stun and physical are competing independent tracks — the higher of the two drives the ECG:
-	 * - 0–8: smooth per-box escalation (healthy → frantic)
-	 * - 9+:  KO threshold — slow unconscious heartbeat
+	 * - 0–9: smooth per-box escalation (healthy → frantic)
+	 * - 10:  row fully filled — KO threshold, slow unconscious heartbeat
 	 */
 	calculatePenalty(stun: number, physical: number): number {
 		this.setEcgForDamage(stun, physical);
@@ -140,19 +140,19 @@ export class ElectroCardiogramService {
 
 	/**
 	 * Set ECG pace driven by whichever track (stun or physical) is higher.
-	 * Each track independently escalates 0–8, with 9 as KO (slow).
+	 * Each track independently escalates 0–9, with 10 (all boxes filled) as KO (slow).
 	 */
 	private setEcgForDamage(stun: number, physical: number): void {
 		const degree = Math.max(stun, physical);
 
-		if (degree >= 9) {
-			// KO — unconscious, slow heartbeat
+		if (degree >= 10) {
+			// All boxes filled — KO, slow heartbeat
 			this.setPace(1, 8);
 			return;
 		}
 
-		// Boxes 0–8: smooth per-box escalation
-		const t = degree / 9;
+		// Boxes 0–9: smooth per-box escalation
+		const t = degree / 10;
 		this.setPace(1.5 + t * 8.5, 20 + t * 20);
 	}
 

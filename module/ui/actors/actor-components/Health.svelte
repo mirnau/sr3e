@@ -161,20 +161,17 @@ function localize(key: string): string {
 
 	<div class="condition-monitor">
 		<div class="condition-meter">
-			<!-- Revival Button -->
-			{#if miraculousSurvival && !$miraculousSurvival}
-				<div class="revival-button">
-					<i
-						class="fa-solid fa-heart-circle-bolt"
-						role="button"
-						tabindex="0"
-						aria-label="Revive"
-						onclick={revive}
-						onkeydown={(e) => handleButtonKeypress(e, revive)}
-					></i>
-				</div>
+			{#if miraculousSurvival}
+				<i
+					class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}`}
+					role={!$miraculousSurvival ? "button" : undefined}
+					tabindex={!$miraculousSurvival ? 0 : undefined}
+					aria-label={!$miraculousSurvival ? "Revive" : undefined}
+					onclick={!$miraculousSurvival ? revive : undefined}
+					onkeydown={!$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
+				></i>
 			{/if}
-
+	
 			<!-- Stun Damage Track -->
 			<div class="stun-damage">
 				<h3 class="no-margin checkbox-label">{localize(localization?.stun || "SR3E.health.stun")}</h3>
