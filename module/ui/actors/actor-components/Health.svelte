@@ -79,6 +79,15 @@ $effect(() => {
 	}
 });
 
+// Auto-fill all boxes when overflow is active
+$effect(() => {
+	if (!overflow || !stun || !physical) return;
+	if (($overflow ?? 0) > 0) {
+		if (($stun ?? 0) < 10) stun.set(10);
+		if (($physical ?? 0) < 10) physical.set(10);
+	}
+});
+
 // Calculate penalty when damage changes
 $effect(() => {
 	if (!ecgService || !stun || !physical || !penalty) return;
