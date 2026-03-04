@@ -19,4 +19,9 @@ export class SR3EActorBase extends foundry.applications.sheets.ActorSheetV2 {
         }
         this.apps = [];
     }
+
+    async close(options?: DeepPartial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
+        if (this.element) this.element.style.visibility = "hidden";
+        return super.close(options);
+    }
 }
