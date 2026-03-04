@@ -128,46 +128,47 @@ export class ElectroCardiogramService {
 	/**
 	 * Calculate penalty modifier based on damage levels.
 	 * Also updates ECG pace to reflect health state.
+	 *
+	 * Stun and physical are competing independent tracks — the higher of the two drives the ECG:
+	 * - 0–8: smooth per-box escalation (healthy → frantic)
+	 * - 9+:  KO threshold — slow unconscious heartbeat
 	 */
 	calculatePenalty(stun: number, physical: number): number {
-		const maxDegree = Math.max(stun, physical);
-		return this.calculateSeverity(maxDegree);
+		this.setEcgForDamage(stun, physical);
+		return this.severityLevel(Math.max(stun, physical));
 	}
 
 	/**
-	 * Calculate severity and set ECG pace based on damage degree.
-	 * Returns the penalty level (0=None, 1=Light, 2=Moderate, 3=Serious, 4=Deadly).
-	 *
-	 * SR3e damage track:
-	 * - 0 boxes: No penalty
-	 * - 1-2 boxes (Light): -1 modifier
-	 * - 3-5 boxes (Moderate): -2 modifier
-	 * - 6-8 boxes (Serious): -3 modifier
-	 * - 9+ boxes (Deadly): Incapacitated
+	 * Set ECG pace driven by whichever track (stun or physical) is higher.
+	 * Each track independently escalates 0–8, with 9 as KO (slow).
 	 */
-	private calculateSeverity(degree: number): number {
-		if (degree === 0) {
-			this.setPace(1.5, 20);
-			return 0;
+	private setEcgForDamage(stun: number, physical: number): void {
+		const degree = Math.max(stun, physical);
+
+		if (degree >= 9) {
+			// KO — unconscious, slow heartbeat
+			this.setPace(1, 8);
+			return;
 		}
-		if (degree < 3) {
-			this.setPace(2, 20);
-			return 1; // Light
-		}
-		if (degree < 6) {
-			this.setPace(4, 25);
-			return 2; // Moderate
-		}
-		if (degree < 9) {
-			this.setPace(8, 35);
-			return 3; // Serious
-		}
-		if (degree === 9) {
-			this.setPace(10, 40);
-			return 4; // Deadly
-		}
-		// degree >= 10 (dying/overflow)
-		this.setPace(1, 8);
+
+		// Boxes 0–8: smooth per-box escalation
+		const t = degree / 9;
+		this.setPace(1.5 + t * 8.5, 20 + t * 20);
+	}
+
+	/**
+	 * Map a single-track damage degree to a SR3e penalty level.
+	 * - 0:   No penalty
+	 * - 1–2: Light   (-1)
+	 * - 3–5: Moderate (-2)
+	 * - 6–8: Serious  (-3)
+	 * - 9+:  Deadly   (incapacitated)
+	 */
+	private severityLevel(degree: number): number {
+		if (degree === 0) return 0;
+		if (degree < 3) return 1;
+		if (degree < 6) return 2;
+		if (degree < 9) return 3;
 		return 4;
 	}
 
