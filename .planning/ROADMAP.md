@@ -139,6 +139,26 @@ Plans:
 
 ---
 
+### Phase 2.3: Skills Component (INSERTED)
+
+**Goal:** Build the Skills component for the character sheet — the UI and service layer for displaying, buying, and managing active, knowledge, and language skills outside of character creation mode.
+
+**Depends on:** Phase 2.2
+**Plans:** 1 plan
+
+Plans:
+- [ ] 2.3-01: Skills UI — tab container, skill cards, category grouping, shopping mode integration, styles
+
+**Details:**
+- Tab structure: Active / Knowledge / Language
+- Active tab groups by linkedAttribute (attribute headers, flex-wrap cards)
+- Knowledge and Language are flat lists
+- SkillCard shows name, rating, specializations (read-only), R/W for language
+- Shopping buttons (+ / −) wired to existing SkillSpendingService — only shown in creation mode
+- Phase 3 adds karma-based buying; this phase is display + creation-mode spending only
+
+---
+
 ### Phase 3: Karma & Experience Core
 
 **Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
@@ -275,6 +295,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2. Character Creation Shopping Mode | 4/4 | Complete | 2026-03-03 |
 | 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
 | 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
+| 2.3. Skills Component (INSERTED) | 0/1 | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |

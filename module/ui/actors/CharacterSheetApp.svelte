@@ -7,6 +7,7 @@
    import Health from "./actor-components/Health.svelte";
    //import Karma from "./actor-components/Karma.svelte";
    import Movement from "./actor-components/Movement.svelte";
+   import Skills from "./actor-components/Skills.svelte";
 
    const { actor } = $props<{
       actor: Actor;
@@ -26,6 +27,9 @@
    </SheetCard>
    <SheetCard>
       <Movement {actor} />
+   </SheetCard>
+   <SheetCard>
+      <Skills {actor} />
    </SheetCard>
    <SheetCard span={2}>
       <Health {actor} />

@@ -1,3 +1,47 @@
+@use "../mixins.scss" as *;
+
+// SkillEditorApp is an ApplicationV2 (not a form/staticlayout), so it needs
+// its own overflow + waterfall rules to match the staticlayout behaviour.
+.application.skill-editor {
+    background: transparent;
+    backdrop-filter: blur(6px);
+    overflow: visible;
+
+    section.window-content {
+        overflow: visible;
+
+        .sr3e-waterfall-wrapper {
+            width: 100%;
+            overflow: visible;
+        }
+
+        .sr3e-waterfall > * {
+            display: inline-block;
+            break-inside: avoid;
+            width: 100%;
+            vertical-align: top;
+        }
+
+        .sr3e-waterfall--single {
+            column-count: 1;
+            column-width: auto;
+            width: var(--component-width);
+            column-gap: 0;
+        }
+
+        // Image cropped with uniform 0.25rem clipped corners
+        .image-mask {
+            @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+
+            img {
+                border-radius: 0;
+                width: 100%;
+                object-fit: cover;
+            }
+        }
+    }
+}
+
 form.application.sheet.staticlayout {
     background-color: rgba(42, 54, 54, 0.582);
     overflow: visible;

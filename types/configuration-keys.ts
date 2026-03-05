@@ -12,7 +12,8 @@ export const configkeys = Object.freeze({
 export const typekeys = Object.freeze({
   character: "character",
   broadcaster: "broadcaster",
-  metatype: "metatype"
+  metatype: "metatype",
+  skill: "skill"
 } as const);
 
 export const flags = Object.freeze({
