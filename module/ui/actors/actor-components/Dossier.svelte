@@ -61,15 +61,43 @@ function updateQuote(event: Event) {
 	actor?.update({ "system.profile.quote": target.innerText.trim() }, { render: false });
 }
 
+function editImage(): void {
+	if (!actor) return;
+	const fp = new FilePicker({
+		type: "image",
+		current: actor.img ?? "",
+		callback: (path: string) => actor.update({ img: path }),
+	});
+	fp.browse();
+}
+
 const profile = $derived(config.PROFILE);
 </script>
 
 {#if actor && actorNameStore && isDetailsOpenStore}
 	<div class="dossier">
 		{#if $isDetailsOpenStore}
-			<img src={metatype?.img || actor.img} alt={metatype?.name || actor.name} title={metatype?.name || actor.name} />
+			<img
+				src={metatype?.img || actor.img}
+				alt={metatype?.name || actor.name}
+				title="Click to change image"
+				class="dossier-img"
+				role="button"
+				tabindex="0"
+				onclick={editImage}
+				onkeydown={(e) => e.key === "Enter" && editImage()}
+			/>
 		{:else}
-			<img src={actor.img} alt={actor.name} title={actor.name} />
+			<img
+				src={actor.img}
+				alt={actor.name}
+				title="Click to change image"
+				class="dossier-img"
+				role="button"
+				tabindex="0"
+				onclick={editImage}
+				onkeydown={(e) => e.key === "Enter" && editImage()}
+			/>
 		{/if}
 
 		<div class="dossier-details">
