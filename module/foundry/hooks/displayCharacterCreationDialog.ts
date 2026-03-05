@@ -4,6 +4,7 @@
  */
 
 import { CharacterCreationApp } from "../../sheets/actors/CharacterCreationApp";
+import { CharacterCreationService } from "../../services/character-creation/CharacterCreationService";
 import type SR3EActor from "../../documents/SR3EActor";
 
 /**
@@ -67,7 +68,7 @@ async function showCharacterCreationDialog(creationId: string): Promise<void> {
 
 	try {
 		// Ensure default items exist before showing dialog
-		const creationService = (await import("../../services/character-creation/CharacterCreationService")).CharacterCreationService.Instance();
+		const creationService = CharacterCreationService.Instance();
 		await creationService.ensureDefaultItemsExist();
 
 		const result = await runCharacterCreationDialog(data.name || "New Character");

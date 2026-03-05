@@ -13,7 +13,7 @@ const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 let isAwakened = $state(false);
 
 // Packery instance
-let container: HTMLElement;
+let container = $state<HTMLElement | undefined>(undefined);
 let packeryInstance: Packery | undefined;
 let cleanup: (() => void) | undefined;
 

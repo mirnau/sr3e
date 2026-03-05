@@ -81,6 +81,7 @@ Progress: █████░░░░░ ~30%
 
 - Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
 - Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)
+- Phase 2.3 inserted after Phase 2.2: Skills component — required before karma shopping (Phase 3)
 
 ### Deferred Issues
 

@@ -164,9 +164,10 @@ function localize(key: string): string {
 			{#if miraculousSurvival}
 				<i
 					class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}`}
-					role={!$miraculousSurvival ? "button" : undefined}
-					tabindex={!$miraculousSurvival ? 0 : undefined}
-					aria-label={!$miraculousSurvival ? "Revive" : undefined}
+					role="button"
+					tabindex={$miraculousSurvival ? -1 : 0}
+					aria-label="Revive"
+					aria-disabled={$miraculousSurvival}
 					onclick={!$miraculousSurvival ? revive : undefined}
 					onkeydown={!$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
 				></i>

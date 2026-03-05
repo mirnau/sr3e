@@ -65,4 +65,5 @@
 		: ''}"
 	onclick={handleToggle}
 	title={$isCharacterCreation ? "Finish Character Creation" : "Toggle Shopping Mode"}
+	aria-label={$isCharacterCreation ? "Finish Character Creation" : "Toggle Shopping Mode"}
 ></button>

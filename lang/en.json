@@ -76,6 +76,12 @@
       "priority": "Priority",
       "weight": "Weight"
     },
+    "modal": {
+      "confirm": "Confirm",
+      "decline": "Cancel",
+      "deleteskill": "Are you sure you want to delete this skill?",
+      "deleteskilltitle": "Delete Skill"
+    },
     "movement": {
       "movement": "Movement",
       "runSpeedModifier": "RunSpeedModifier",
@@ -90,6 +96,16 @@
       "names": "Names",
       "quote": "Quote",
       "weight": "Weight"
+    },
+    "skill": {
+      "active": "Active",
+      "knowledge": "Knowledge",
+      "language": "Language",
+      "newspecialization": "Newspecialization",
+      "skill": "Skill",
+      "specialization": "Specialization",
+      "specializations": "Specializations",
+      "value": "Value"
     }
   }
 }

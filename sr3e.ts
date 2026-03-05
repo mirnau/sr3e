@@ -9,7 +9,9 @@ import SR3EItem from "./module/documents/SR3EItem";
 import { getNewsService } from "./module/services/news-service/NewsService.svelte";
 import MetatypeModel from "./module/models/items/MetatypeModel";
 import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
+import SkillSheet from "./module/sheets/items/SkillSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
+import SkillModel from "./module/models/items/SkillModel";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -116,6 +118,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.metatype,
             model: MetatypeModel,
             sheet: MetatypeSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.skill,
+            model: SkillModel,
+            sheet: SkillSheet,
          }
       ] satisfies SR3EDocumentRegistration[]
       );

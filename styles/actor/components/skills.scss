@@ -1,0 +1,312 @@
+@use "../../mixins.scss" as *;
+
+// =========================================================
+// Skills Component — tab chrome
+// =========================================================
+
+.skills-tabs {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+.skills-tab-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 0.25rem;
+	flex-wrap: nowrap;
+}
+
+.skills-tab-btn {
+	flex: 1;
+	background: transparent;
+	border: 1px solid rgba(0, 255, 200, 0.25);
+	color: rgba(0, 255, 200, 0.5);
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 0.25rem 0.4rem;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	@include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
+
+	&:hover:not(.active) {
+		color: rgba(0, 255, 200, 0.8);
+		border-color: rgba(0, 255, 200, 0.5);
+	}
+
+	&.active {
+		background: rgba(0, 255, 200, 0.12);
+		border-color: rgba(0, 255, 200, 0.6);
+		color: rgba(0, 255, 200, 0.95);
+		text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+	}
+}
+
+.skills-tab-content {
+	overflow-y: auto;
+	max-height: 20rem;
+}
+
+.no-skills {
+	font-size: 0.75rem;
+	color: rgba(232, 243, 255, 0.35);
+	text-align: center;
+	margin: 0.5rem 0;
+	font-style: italic;
+}
+
+// =========================================================
+// Active skills — attribute groups
+// =========================================================
+
+.skills-active-container {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.skill-attribute-group {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.group-header {
+	font-size: 0.65rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: rgba(0, 255, 200, 0.7);
+	border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+	padding-bottom: 0.1rem;
+	margin-bottom: 0.15rem;
+}
+
+.skill-group-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+// =========================================================
+// Skill card container
+// =========================================================
+
+.skill-card-container {
+	display: inline-block;
+	vertical-align: top;
+	box-sizing: border-box;
+	position: relative;
+	min-width: 6.5rem;
+	margin-bottom: 0.25rem;
+	overflow: visible;
+
+	// Shopping / creation mode pen icon — floats top-right of card
+	> .fa-pen-to-square {
+		position: absolute;
+		top: -0.25rem;
+		right: -0.25rem;
+		z-index: 1;
+	}
+}
+
+// =========================================================
+// Skill card face
+// =========================================================
+
+.skill-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	box-sizing: border-box;
+	position: relative;
+	background: var(--highlight-color-primary);
+	text-align: center;
+	padding: 0.5rem;
+	@include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+
+	.skill-background-layer {
+		position: absolute;
+		z-index: -1;
+		top: 1px;
+		left: 1px;
+		width: calc(100% - 2px);
+		height: calc(100% - 2px);
+		background: var(--background-color);
+		box-shadow: inset 0 0 30px var(--highlight-color-primary);
+		pointer-events: none;
+		@include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+	}
+}
+
+.skill-name {
+	flex: 1;
+	text-indent: 0;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	margin: 0;
+}
+
+// =========================================================
+// Main value container — the rollable "button" area
+// =========================================================
+
+.skill-main-container {
+	width: 100%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--highlight-color-primary);
+	padding: 0.25rem;
+	@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+	&::before {
+		content: "";
+		position: absolute;
+		z-index: -1;
+		top: 1px;
+		left: 1px;
+		width: calc(100% - 2px);
+		height: calc(100% - 2px);
+		background: var(--background-color);
+		box-shadow: inset 0 0 12px var(--highlight-color-primary);
+		pointer-events: none;
+		@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+	}
+
+	&.button {
+		cursor: pointer;
+		transition: transform 0.2s ease-out;
+		will-change: transform;
+
+		&:hover  { transform: scale(1.05); }
+		&:active { transform: scale(0.97); }
+	}
+}
+
+.skill-value {
+	position: relative;
+	min-width: 2rem;
+	width: 100%;
+	text-align: center;
+	margin: 0;
+}
+
+// =========================================================
+// Specializations
+// =========================================================
+
+.specialization-card-row {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.5rem;
+
+	.skill-specialization-card {
+		flex: 1;
+	}
+}
+
+.specialization-container {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	background: transparent;
+	overflow: visible;
+}
+
+.skill-specialization-card {
+	width: 100%;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background: var(--highlight-color-primary);
+	padding: 0.25rem 0.25rem 0.25rem 0;
+	@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+	.specialization-background {
+		position: absolute;
+		z-index: -1;
+		top: 1px;
+		left: 1px;
+		width: calc(100% - 2px);
+		height: calc(100% - 2px);
+		background: var(--background-color);
+		box-shadow: inset 0 0 12px var(--highlight-color-primary);
+		pointer-events: none;
+		@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+	}
+
+	&.button {
+		cursor: pointer;
+		transition: transform 0.2s ease-out;
+		will-change: transform;
+
+		&:hover  { transform: scale(1.05); }
+		&:active { transform: scale(0.97); }
+	}
+
+	.specialization-name {
+		display: block;
+		max-width: 12rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		flex-shrink: 1;
+		flex-grow: 0;
+		margin: 0 0 0 0.5rem;
+		padding-right: 0.5rem;
+		text-align: left;
+		position: relative;
+		z-index: 1;
+	}
+}
+
+.embedded-value {
+	position: relative;
+	flex-shrink: 0;
+	align-self: stretch;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2rem;
+	text-align: center;
+	background: var(--highlight-color-primary);
+	padding: 0.25rem 0.5rem;
+	margin: 0;
+	@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+
+	&::before {
+		content: "";
+		position: absolute;
+		z-index: -1;
+		top: 1px;
+		left: 1px;
+		width: calc(100% - 2px);
+		height: calc(100% - 2px);
+		background: var(--background-color);
+		box-shadow: inset 0 0 12px var(--highlight-color-primary);
+		pointer-events: none;
+		@include clipped-corners(0.5rem, 0.5rem, 0.5rem, 0.5rem);
+	}
+}
+
+// =========================================================
+// Shopping cart pen icon pulse animation
+// =========================================================
+
+.pulsing-green-cart {
+	color: var(--highlight-color-primary);
+	animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+	0%, 100% { opacity: 0.7; text-shadow: 0 0 4px var(--highlight-color-primary); }
+	50%       { opacity: 1;   text-shadow: 0 0 10px var(--highlight-color-primary); }
+}
