@@ -193,19 +193,17 @@
                 </div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <button
-                    type="button"
-                    class="header-control icon sr3e-toolbar-button skill-add-spec-btn"
-                    aria-label="Add specialization"
-                    onclick={addSpecialization}
-                    disabled={$valueStore <= 1 || $specializationsStore.length > 0}
-                >
-                    <i class="fa-solid fa-plus"></i>
-                    {localize(CONFIG.SR3E.SKILL?.specialization ?? "SR3E.skill.addspecialization")}
-                </button>
-            </div>
+            <button
+                type="button"
+                class="skill-add-spec-btn"
+                aria-label="Add specialization"
+                onclick={addSpecialization}
+                disabled={$valueStore <= 1 || $specializationsStore.length > 0}
+            >
+                <div class="specialization-background"></div>
+                <i class="fa-solid fa-plus"></i>
+                {localize(CONFIG.SR3E.SKILL?.specialization ?? "SR3E.skill.specialization")}
+            </button>
 
         </div>
     </ItemSheetComponent>

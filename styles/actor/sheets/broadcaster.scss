@@ -179,3 +179,12 @@
 .no-margin {
 	margin: 0;
 }
+
+.dossier-img {
+	cursor: pointer;
+	transition: filter 0.2s ease;
+
+	&:hover {
+		filter: brightness(1.15) drop-shadow(0 0 6px var(--highlight-color-primary));
+	}
+}
