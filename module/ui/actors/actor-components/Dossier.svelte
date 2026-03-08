@@ -77,27 +77,13 @@ const profile = $derived(config.PROFILE);
 {#if actor && actorNameStore && isDetailsOpenStore}
 	<div class="dossier">
 		{#if $isDetailsOpenStore}
-			<img
-				src={metatype?.img || actor.img}
-				alt={metatype?.name || actor.name}
-				title="Click to change image"
-				class="dossier-img"
-				role="button"
-				tabindex="0"
-				onclick={editImage}
-				onkeydown={(e) => e.key === "Enter" && editImage()}
-			/>
+			<button type="button" class="dossier-img-btn" onclick={editImage} title="Click to change image" aria-label="Change image">
+				<img src={metatype?.img || actor.img} alt={metatype?.name || actor.name} class="dossier-img" />
+			</button>
 		{:else}
-			<img
-				src={actor.img}
-				alt={actor.name}
-				title="Click to change image"
-				class="dossier-img"
-				role="button"
-				tabindex="0"
-				onclick={editImage}
-				onkeydown={(e) => e.key === "Enter" && editImage()}
-			/>
+			<button type="button" class="dossier-img-btn" onclick={editImage} title="Click to change image" aria-label="Change image">
+				<img src={actor.img} alt={actor.name} class="dossier-img" />
+			</button>
 		{/if}
 
 		<div class="dossier-details">

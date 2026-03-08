@@ -28,7 +28,7 @@
    <SheetCard>
       <Movement {actor} />
    </SheetCard>
-   <SheetCard>
+   <SheetCard span="dynamic">
       <Skills {actor} />
    </SheetCard>
    <SheetCard span={2}>

@@ -311,8 +311,6 @@
 
 		h4 {
 			margin: 0;
-			font-size: 0.7rem;
-			text-transform: uppercase;
 			letter-spacing: 0.05em;
 			font-weight: 600;
 		}
@@ -340,22 +338,4 @@
 // Health card container with stat grid
 .health-card-container {
 	display: inline-block;
-}
-
-// Stat grid for penalty/overflow cards
-.stat-grid {
-	display: inline-grid;
-	gap: 0.25rem;
-	margin-top: 0.25rem;
-	width: 100%;
-	grid-template-columns: repeat(3, calc(33.333% - 0.167rem));
-
-	&.single-column {
-		grid-template-columns: 100%;
-		margin-bottom: 0.25rem;
-	}
-
-	&.two-column {
-		grid-template-columns: repeat(2, calc(50% - 0.125rem));
-	}
 }

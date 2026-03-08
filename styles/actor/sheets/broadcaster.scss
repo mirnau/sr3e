@@ -180,11 +180,21 @@
 	margin: 0;
 }
 
-.dossier-img {
+.dossier-img-btn {
+	display: block;
+	padding: 0;
+	border: none;
+	background: none;
 	cursor: pointer;
-	transition: filter 0.2s ease;
+	width: 100%;
 
-	&:hover {
+	&:hover .dossier-img {
 		filter: brightness(1.15) drop-shadow(0 0 6px var(--highlight-color-primary));
 	}
+}
+
+.dossier-img {
+	display: block;
+	width: 100%;
+	transition: filter 0.2s ease;
 }
