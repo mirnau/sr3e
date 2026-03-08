@@ -2,7 +2,7 @@
 
 :root {
 	--attribute-card-width: 100px;
-	--attribute-card-height: 4rem;
+	--attribute-card-height: 3.5rem;
 	--attribute-card-gutter: 6px;
 	--highlight-color-primary: rgba(0, 255, 200, 0.8);
 	--accent-color: rgba(0, 255, 200, 0.15);
@@ -111,8 +111,8 @@
 	font-size: 0.7rem;
 	font-weight: 600;
 	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	margin: 0.25rem 0 0.1rem 0;
+	letter-spacing: 0;
+	margin: 0.25rem 0 0 0;
 	color: rgba(0, 255, 200, 0.9);
 	text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
 	white-space: nowrap;
@@ -125,7 +125,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0.15rem;
-	height: 1.8rem;
+	height: 1.6rem;
 	padding: 0;
 }
 

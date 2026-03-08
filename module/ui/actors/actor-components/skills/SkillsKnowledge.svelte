@@ -9,12 +9,8 @@ interface Props {
 let { actor = null, skills }: Props = $props();
 </script>
 
-{#if skills.length === 0}
-	<p class="no-skills">No knowledge skills yet.</p>
-{:else}
-	<div class="skill-group-cards">
-		{#each skills as item (item.id)}
-			<SkillCard {actor} {item} category="knowledge" />
-		{/each}
-	</div>
-{/if}
+<div class="skill-group-cards">
+	{#each skills as item (item.id)}
+		<SkillCard {actor} {item} category="knowledge" />
+	{/each}
+</div>

@@ -20,7 +20,7 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
 
     static getExisting(actorId: string, skillId: string): foundry.applications.api.ApplicationV2 | undefined {
         const appId = SkillEditorApp.getAppIdFor(actorId, skillId);
-        return Object.values(ui.windows as Record<string, foundry.applications.api.ApplicationV2>).find(
+        return Object.values(ui.windows as unknown as Record<string, foundry.applications.api.ApplicationV2>).find(
             (app) => app.id === appId
         );
     }
@@ -117,7 +117,7 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
         btn.setAttribute("data-responder", "yes");
 
         try {
-            const title = localize(CONFIG.SR3E.KARMA?.commit ?? "SR3E.karma.commit");
+            const title = localize(CONFIG.SR3E.COMMON.commit);
             btn.setAttribute("data-tooltip", title);
             btn.setAttribute("aria-label", title);
             btn.setAttribute("title", title);

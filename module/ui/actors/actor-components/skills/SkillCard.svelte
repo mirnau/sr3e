@@ -3,7 +3,6 @@ import type { Writable } from "svelte/store";
 import type { IStoreManager } from "../../../../utilities/IStoreManager";
 import { StoreManager } from "../../../../utilities/StoreManager.svelte";
 import SkillEditorApp from "../../../../sheets/items/SkillEditorApp";
-import { onDestroy } from "svelte";
 
 interface Props {
 	actor: Actor | null;
@@ -79,9 +78,9 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 			<div class="skill-main-container">
 				<h1 class="skill-value">{valueStore ? $valueStore : 0}</h1>
 			</div>
-			{#if specializationsStore && $specializationsStore.length > 0}
+			{#if specializationsStore && ($specializationsStore?.length ?? 0) > 0}
 				<div class="specialization-container">
-					{#each $specializationsStore as spec}
+					{#each ($specializationsStore ?? []) as spec}
 						<div class="skill-specialization-card">
 							<div class="specialization-background"></div>
 							<div class="specialization-name">{spec.name}</div>
@@ -105,7 +104,7 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 				<h1 class="skill-value">{valueStore ? $valueStore : 0}</h1>
 			</div>
 
-			{#if category === "language" && readWriteStore && $readWriteStore > 0}
+			{#if category === "language" && readWriteStore && ($readWriteStore ?? 0) > 0}
 				<div class="specialization-container">
 					<div
 						class="skill-specialization-card button"
@@ -116,14 +115,14 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 					>
 						<div class="specialization-background"></div>
 						<div class="specialization-name">Read/Write</div>
-						<h1 class="embedded-value">{$readWriteStore}</h1>
+						<h1 class="embedded-value">{$readWriteStore ?? 0}</h1>
 					</div>
 				</div>
 			{/if}
 
-			{#if specializationsStore && $specializationsStore.length > 0}
+			{#if specializationsStore && ($specializationsStore?.length ?? 0) > 0}
 				<div class="specialization-container">
-					{#each $specializationsStore as spec}
+					{#each ($specializationsStore ?? []) as spec}
 						<div
 							class="skill-specialization-card button"
 							role="button"

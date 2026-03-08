@@ -52,8 +52,13 @@ export function setupPackery({
       }
 
       container.querySelectorAll<HTMLElement>(itemSelector).forEach((el) => {
-         const m = el.className.match(/span-(\d)/);
-         const span = m ? Number(m[1]) : 1;
+         let span: number;
+         if (el.classList.contains("span-dynamic")) {
+            span = Math.min(columnCount, 3);
+         } else {
+            const m = el.className.match(/span-(\d)/);
+            span = m ? Number(m[1]) : 1;
+         }
          const spanPX = oneColPX * span + gutterPx * (span - 1);
          const spanPct = (spanPX / containerPX) * 100;
          el.style.width = `min(${spanPct}%, 100%)`;

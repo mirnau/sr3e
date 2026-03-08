@@ -26,6 +26,7 @@
     },
     "common": {
       "average": "Average",
+      "commit": "Commit",
       "max": "Max",
       "min": "Min"
     },

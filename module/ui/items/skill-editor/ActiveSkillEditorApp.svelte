@@ -144,55 +144,43 @@
         <Image entity={skill} />
     </ItemSheetComponent>
 
-    <!-- Skill info + controls -->
+    <!-- Skill HUD panel -->
     <ItemSheetComponent>
-        <div class="stat-grid single-column">
+        <div class="skill-hud-panel">
 
-            <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <h3 class="no-margin">{skill.name}</h3>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <span class="skill-editor-label">
-                    {localize(CONFIG.SR3E.SKILL?.value ?? "SR3E.skill.value")}
-                </span>
-                <h1 class="no-margin">{$valueStore}</h1>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <div class="buttons-horizontal-distribution">
-                    <button
-                        type="button"
-                        class="header-control icon sr3e-toolbar-button"
-                        aria-label="Increase skill"
-                        onclick={increment}
-                        disabled={disableValueControls}
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-                    <button
-                        type="button"
-                        class="header-control icon sr3e-toolbar-button"
-                        aria-label="Decrease skill"
-                        onclick={decrement}
-                        disabled={disableValueControls}
-                    >
-                        <i class="fa-solid fa-minus"></i>
-                    </button>
-                    <button
-                        type="button"
-                        class="header-control icon sr3e-toolbar-button"
-                        aria-label="Delete skill"
-                        onclick={deleteSkill}
-                    >
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+            <!-- Title + value on one line -->
+            <div class="skill-hud-display">
+                <div class="skill-hud-title-row">
+                    <h2 class="skill-hud-name no-margin">{skill.name}</h2>
+                    <h2 class="skill-hud-value-badge no-margin">{$valueStore}</h2>
                 </div>
             </div>
 
+            <!-- Controls: − + 🗑 -->
+            <div class="skill-hud-controls">
+                <button
+                    type="button"
+                    class="skill-hud-btn"
+                    aria-label="Decrease skill"
+                    onclick={decrement}
+                    disabled={disableValueControls}
+                ><i class="fa-solid fa-minus"></i></button>
+                <button
+                    type="button"
+                    class="skill-hud-btn"
+                    aria-label="Increase skill"
+                    onclick={increment}
+                    disabled={disableValueControls}
+                ><i class="fa-solid fa-plus"></i></button>
+                <button
+                    type="button"
+                    class="skill-hud-btn danger"
+                    aria-label="Delete skill"
+                    onclick={deleteSkill}
+                ><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+
+            <!-- Add specialization -->
             <button
                 type="button"
                 class="skill-add-spec-btn"
@@ -211,10 +199,10 @@
     <!-- Specializations -->
     {#if $specializationsStore.length > 0}
         <ItemSheetComponent>
-            <h3 class="staticlayout uppercase no-margin">
-                {localize(CONFIG.SR3E.SKILL?.specializations ?? "SR3E.skill.specializations")}
-            </h3>
-            <div class="stat-grid single-column">
+            <div class="skill-hud-spec-header">
+                <span>{localize(CONFIG.SR3E.SKILL?.specializations ?? "SR3E.skill.specializations")}</span>
+            </div>
+            <div class="skill-hud-spec-list">
                 {#each $specializationsStore as spec, i}
                     <SpecializationCard
                         bind:specialization={$specializationsStore[i]}

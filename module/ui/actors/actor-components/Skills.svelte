@@ -93,41 +93,37 @@ const languageSkills = $derived(
 
 {#if actor}
 	<h1>Skills</h1>
-	<div class="skills-tabs">
-		<div class="skills-tab-buttons">
+	<div class="skills-component">
+		<div class="skills-register">
 			<button
 				type="button"
-				class="skills-tab-btn"
+				class="skills-register-tab"
 				class:active={activeTab === "active"}
 				onclick={() => (activeTab = "active")}
-			>
-				Active
-			</button>
+			><span>Active</span></button>
 			<button
 				type="button"
-				class="skills-tab-btn"
+				class="skills-register-tab"
 				class:active={activeTab === "knowledge"}
 				onclick={() => (activeTab = "knowledge")}
-			>
-				Knowledge
-			</button>
+			><span>Knowledge</span></button>
 			<button
 				type="button"
-				class="skills-tab-btn"
+				class="skills-register-tab"
 				class:active={activeTab === "language"}
 				onclick={() => (activeTab = "language")}
-			>
-				Language
-			</button>
+			><span>Language</span></button>
 		</div>
-		<div class="skills-tab-content">
-			{#if activeTab === "active"}
-				<SkillsActive {actor} skills={activeSkills} />
-			{:else if activeTab === "knowledge"}
-				<SkillsKnowledge {actor} skills={knowledgeSkills} />
-			{:else}
-				<SkillsLanguage {actor} skills={languageSkills} />
-			{/if}
+		<div class="skills-content">
+			<div class="skills-content-inner">
+				{#if activeTab === "active"}
+					<SkillsActive {actor} skills={activeSkills} />
+				{:else if activeTab === "knowledge"}
+					<SkillsKnowledge {actor} skills={knowledgeSkills} />
+				{:else}
+					<SkillsLanguage {actor} skills={languageSkills} />
+				{/if}
+			</div>
 		</div>
 	</div>
 {:else}

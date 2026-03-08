@@ -130,7 +130,7 @@ How we know this migration succeeded:
 **Technology Stack:**
 - TypeScript with strict mode
 - Svelte 5 for UI components
-- Foundry VTT v12+ framework
+- Foundry VTT v13 framework
 - No external dependencies beyond Foundry and Svelte
 
 **Development Environment:**
@@ -147,7 +147,7 @@ How we know this migration succeeded:
 - **No Convoluted Code**: Pragmatic over academic, KISS principle applies
 - **Migration Strategy**: Parallel development - old JS remains as reference while new TS evolves feature by feature
 - **Performance**: Equal or better performance than JavaScript version
-- **Foundry Compatibility**: Must remain compatible with Foundry VTT v12+ APIs and update patterns
+- **Foundry Compatibility**: Must remain compatible with Foundry VTT v13 APIs and update patterns
 - **Git Workflow**: Never commit independently - only commit when part of plan execution with SUMMARY.md, user controls all git operations outside of plan execution flow
 
 ## Decisions Made
@@ -164,6 +164,28 @@ Key decisions from architectural exploration:
 | Migration Order | Services first, then Foundry wrapper, then Svelte refactor | Bottom-up ensures business logic is solid before UI depends on it |
 | Error Handling | Let it fail, no wrapping | Simple, visible errors in console, no obfuscation |
 | Type Safety | Strict TypeScript, no escape hatches | Full leverage of type system prevents runtime errors |
+| Styling Architecture | Skinning vs. Domain split — strictly DRY | See below |
+
+### Styling Architecture: Skinning vs. Domain
+
+Two distinct purposes, two distinct locations. Never mix them.
+
+**Skinning** (`styles/skinning/`, `styles/sheetcard.scss`, `styles/statcard.scss`):
+- Global reskin of Foundry's own elements: buttons, inputs, headings (h1–h6), dialogs, tooltips
+- Design tokens: CSS variables (`--highlight-color-primary`, `--background-color`, `--component-width`, etc.)
+- Base typographic scale — font sizes and weights for all heading levels defined once here
+- The neon-border technique, card shadow animations, `clipped-corners` mixin
+- **Rule**: if a style applies to an element type in all contexts, it lives here
+
+**Domain** (`styles/actor/`, `styles/items/`, `styles/injections/`, etc.):
+- Context-specific overrides only — delta on top of skinning
+- Layout and positioning unique to a specific component or sheet
+- **Rule**: never re-declare what skinning already defines (no `font-size` on headings, no `color` on generic buttons unless overriding for a specific reason)
+
+**Enforcement:**
+- Before adding a style to a domain file, ask: "does this apply only in this context?" If no → it belongs in skinning
+- Never set `font-size` or `font-weight` on heading elements in domain files — let `skinning/fonts.scss` own that
+- No duplicate declarations: if a rule already exists in skinning, domain files must not repeat it
 
 ## Open Questions
 

@@ -295,7 +295,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2. Character Creation Shopping Mode | 4/4 | Complete | 2026-03-03 |
 | 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
 | 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
-| 2.3. Skills Component (INSERTED) | 0/1 | Not started | - |
+| 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
