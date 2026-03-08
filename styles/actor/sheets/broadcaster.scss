@@ -180,8 +180,15 @@
 	margin: 0;
 }
 
+.dossier {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
 .dossier-img-btn {
 	display: block;
+	position: relative;
 	padding: 0;
 	border: none;
 	background: none;
@@ -191,6 +198,10 @@
 	&:hover .dossier-img {
 		filter: brightness(1.15) drop-shadow(0 0 6px var(--highlight-color-primary));
 	}
+}
+
+.details-foldout {
+	position: relative;
 }
 
 .dossier-img {

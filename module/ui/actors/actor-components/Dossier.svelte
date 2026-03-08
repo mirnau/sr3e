@@ -76,103 +76,100 @@ const profile = $derived(config.PROFILE);
 
 {#if actor && actorNameStore && isDetailsOpenStore}
 	<div class="dossier">
-		{#if $isDetailsOpenStore}
-			<button type="button" class="dossier-img-btn" onclick={editImage} title="Click to change image" aria-label="Change image">
-				<img src={metatype?.img || actor.img} alt={metatype?.name || actor.name} class="dossier-img" />
-			</button>
-		{:else}
-			<button type="button" class="dossier-img-btn" onclick={editImage} title="Click to change image" aria-label="Change image">
-				<img src={actor.img} alt={actor.name} class="dossier-img" />
-			</button>
-		{/if}
+		<div class="dossier-img-btn" onclick={editImage} title="Click to change image" role="button" tabindex="0"
+			onkeydown={(e) => e.key === "Enter" && editImage()}>
+			<img
+				src={$isDetailsOpenStore ? (metatype?.img || actor.img) : actor.img}
+				alt={$isDetailsOpenStore ? (metatype?.name || actor.name) : actor.name}
+				class="dossier-img"
+			/>
+		</div>
 
-		<div class="dossier-details">
-			<div
-				class="details-foldout"
-				role="button"
-				tabindex="0"
-				onclick={toggleDetails}
-				onkeydown={(e) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails())}
-			>
-				<span><i class="fa-solid fa-magnifying-glass"></i></span>
-				{localize(profile.isDetailsOpen)}
+		<div
+			class="details-foldout"
+			role="button"
+			tabindex="0"
+			onclick={toggleDetails}
+			onkeydown={(e) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails())}
+		>
+			<span><i class="fa-solid fa-magnifying-glass"></i></span>
+			{localize(profile.isDetailsOpen)}
+		</div>
+
+		{#if $isDetailsOpenStore}
+			<div in:slide={{ duration: 100, easing: cubicInOut }} out:slide={{ duration: 50, easing: cubicInOut }}>
+				<div>
+					<input
+						type="text"
+						id="actor-name"
+						name="name"
+						value={$actorNameStore}
+						oninput={handleActorNameChange}
+						onblur={handleActorNameChange}
+						onkeypress={(e) => e.key === "Enter" && handleActorNameChange(e)}
+					/>
+				</div>
 			</div>
 
-			{#if $isDetailsOpenStore}
-				<div in:slide={{ duration: 100, easing: cubicInOut }} out:slide={{ duration: 50, easing: cubicInOut }}>
-					<div>
-						<input
-							type="text"
-							id="actor-name"
-							name="name"
-							value={$actorNameStore}
-							oninput={handleActorNameChange}
-							onblur={handleActorNameChange}
-							onkeypress={(e) => e.key === "Enter" && handleActorNameChange(e)}
-						/>
+			<div class="flavor-edit-block">
+				<div class="editable-row">
+					<div class="label-line-wrap">
+						<div class="label">{localize(profile.age)}</div>
+						<div class="dotted-line"></div>
+					</div>
+					<div class="value-unit">
+						<div class="editable-field" contenteditable="true" onblur={updateAge}>
+							{actor.system?.profile?.age || 0}
+						</div>
+						<span class="unit">yrs</span>
 					</div>
 				</div>
 
-				<div class="flavor-edit-block">
-					<div class="editable-row">
-						<div class="label-line-wrap">
-							<div class="label">{localize(profile.age)}</div>
-							<div class="dotted-line"></div>
-						</div>
-						<div class="value-unit">
-							<div class="editable-field" contenteditable="true" onblur={updateAge}>
-								{actor.system?.profile?.age || 0}
-							</div>
-							<span class="unit">yrs</span>
-						</div>
+				<div class="editable-row">
+					<div class="label-line-wrap">
+						<div class="label">{localize(profile.height)}</div>
+						<div class="dotted-line"></div>
 					</div>
-
-					<div class="editable-row">
-						<div class="label-line-wrap">
-							<div class="label">{localize(profile.height)}</div>
-							<div class="dotted-line"></div>
+					<div class="value-unit">
+						<div class="editable-field" contenteditable="true" onblur={updateHeight}>
+							{actor.system?.profile?.height || 0}
 						</div>
-						<div class="value-unit">
-							<div class="editable-field" contenteditable="true" onblur={updateHeight}>
-								{actor.system?.profile?.height || 0}
-							</div>
-							<span class="unit">cm</span>
-						</div>
-					</div>
-
-					<div class="editable-row">
-						<div class="label-line-wrap">
-							<div class="label">{localize(profile.weight)}</div>
-							<div class="dotted-line"></div>
-						</div>
-						<div class="value-unit">
-							<div class="editable-field" contenteditable="true" onblur={updateWeight}>
-								{actor.system?.profile?.weight || 0}
-							</div>
-							<span class="unit">kg</span>
-						</div>
+						<span class="unit">cm</span>
 					</div>
 				</div>
 
-				<div class="flavor-edit-block last-flavor-edit-block">
-					<h4>{localize(profile.quote)}</h4>
-					<div
-						class="editable-field quote"
-						role="presentation"
-						contenteditable="true"
-						onblur={updateQuote}
-						onkeypress={(e) => {
-							if (e.key === "Enter") {
-								e.preventDefault();
-								e.currentTarget.blur();
-							}
-						}}
-					>
-						{actor.system?.profile?.quote || ""}
+				<div class="editable-row">
+					<div class="label-line-wrap">
+						<div class="label">{localize(profile.weight)}</div>
+						<div class="dotted-line"></div>
+					</div>
+					<div class="value-unit">
+						<div class="editable-field" contenteditable="true" onblur={updateWeight}>
+							{actor.system?.profile?.weight || 0}
+						</div>
+						<span class="unit">kg</span>
 					</div>
 				</div>
-			{/if}
-		</div>
+			</div>
+
+			<div class="flavor-edit-block last-flavor-edit-block">
+				<h4>{localize(profile.quote)}</h4>
+				<div
+					class="editable-field quote"
+					role="presentation"
+					contenteditable="true"
+					onblur={updateQuote}
+					onkeypress={(e) => {
+						if (e.key === "Enter") {
+							e.preventDefault();
+							e.currentTarget.blur();
+						}
+					}}
+				>
+					{actor.system?.profile?.quote || ""}
+				</div>
+			</div>
+		{/if}
 	</div>
 {:else}
 	<p>Provide an actor to initialize Dossier.</p>

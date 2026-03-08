@@ -203,9 +203,9 @@
                 <span>{localize(CONFIG.SR3E.SKILL?.specializations ?? "SR3E.skill.specializations")}</span>
             </div>
             <div class="skill-hud-spec-list">
-                {#each $specializationsStore as spec, i}
+                {#each $specializationsStore as _spec, i}
                     <SpecializationCard
-                        bind:specialization={$specializationsStore[i]}
+                        bind:specialization={$specializationsStore[i]!}
                         {actor}
                         {skill}
                         isCreationMode={$isCreation}
