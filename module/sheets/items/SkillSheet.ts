@@ -16,7 +16,7 @@ export default class SkillSheet extends SR3EItemBase {
             id: `sr3e-item-sheet-${foundry.utils.randomID()}`,
             classes: ["sr3e", "sheet", "staticlayout", "skill"],
             template: null,
-            position: { width: 360, height: "auto" },
+            position: { width: "auto" as unknown as number, height: "auto" as unknown as number },
             window: {
                 resizable: false,
             },
