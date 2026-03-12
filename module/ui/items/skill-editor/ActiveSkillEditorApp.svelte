@@ -19,7 +19,6 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const attrLocked = storeManager.GetFlagStore<boolean>(actor, "attributeAssignmentLocked", false);
     const activePoints = storeManager.GetRWStore<number>(actor, "creation.activePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "activeSkill.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
@@ -49,28 +48,21 @@
     // ─── Increment / Decrement ────────────────────────────────────────────────
 
     function increment(): void {
-        if (!$attrLocked) {
-            ui.notifications?.warn(localize("SR3E.notifications.assignattributesfirst"));
-            return;
-        }
         if (!$isCreation) return; // Phase 3: karma shopping
         if ($valueStore >= 6) return;
         const cost = $valueStore < linkedAttrRating ? 1 : 2;
-        if ($activePoints < cost) return;
+        const points = $activePoints ?? 0;
+        if (points < cost) return;
         $valueStore += 1;
-        $activePoints -= cost;
+        $activePoints = points - cost;
     }
 
     function decrement(): void {
-        if (!$attrLocked) {
-            ui.notifications?.warn(localize("SR3E.notifications.assignattributesfirst"));
-            return;
-        }
-        if (!$isCreation) return;
+        if (!$isCreation) return; // Phase 3: karma shopping
         if ($valueStore <= 0) return;
         const refund = $valueStore > linkedAttrRating ? 2 : 1;
         $valueStore -= 1;
-        $activePoints += refund;
+        $activePoints = ($activePoints ?? 0) + refund;
     }
 
     // ─── Specializations ──────────────────────────────────────────────────────
@@ -78,7 +70,7 @@
     function addSpecialization(): void {
         if (!$isCreation) return;
         if ($specializationsStore.length > 0) {
-            ui.notifications?.info(localize("SR3E.skill.onlyonespecializationatcreation"));
+            ui.notifications?.info(localize(CONFIG.SR3E.SKILL?.onlyonespecializationatcreation ?? "sr3e.skill.onlyonespecializationatcreation"));
             return;
         }
         if ($valueStore <= 1) return;
@@ -188,9 +180,7 @@
                 onclick={addSpecialization}
                 disabled={$valueStore <= 1 || $specializationsStore.length > 0}
             >
-                <div class="specialization-background"></div>
-                <i class="fa-solid fa-plus"></i>
-                {localize(CONFIG.SR3E.SKILL?.specialization ?? "SR3E.skill.specialization")}
+                {localize(CONFIG.SR3E.SKILL?.specialize ?? "sr3e.skill.specialize")}
             </button>
 
         </div>

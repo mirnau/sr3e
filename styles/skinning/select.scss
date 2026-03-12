@@ -2,6 +2,8 @@
 // Ported from old project: styles/less/styling/components/sr3e-select.less
 // Scoped to .sr3e to avoid touching Foundry's own UI elements.
 
+@use "../mixins.scss" as *;
+
 .sr3e {
 	select {
 		appearance: none;
@@ -10,9 +12,10 @@
 		color: #ff80c8;
 		width: 100%;
 		border: none;
-		border-radius: 0.25rem;
+		border-radius: 0;
 		box-shadow: inset 0 0 1rem var(--accent-color);
 		margin: 0;
+		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 	}
 
 	optgroup {
@@ -23,10 +26,12 @@
 		text-indent: 0.5rem;
 		background-color: #003856;
 		border: none;
+		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 	}
 
 	select option {
 		background-color: #1b1f24;
 		color: var(--accent-color);
+		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 	}
 }

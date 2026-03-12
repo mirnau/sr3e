@@ -3,6 +3,9 @@
     import { localize } from "../../../services/utilities";
     import { StoreManager } from "../../../utilities/StoreManager.svelte";
     import type { IStoreManager } from "../../../utilities/IStoreManager";
+    import Image from "../../common-components/Image.svelte";
+    import ItemSheetWrapper from "../../common-components/ItemSheetWrapper.svelte";
+    import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelte";
     import SpecializationCard from "./SpecializationCard.svelte";
 
     let { actor, skill, app }: { actor: Actor; skill: Item; app: any } = $props();
@@ -16,8 +19,8 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const attrLocked = storeManager.GetFlagStore<boolean>(actor, "attributeAssignmentLocked", false);
-    const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");
+    const knowledgeSpent = storeManager.GetRWStore<number>(actor, "creation.knowledgeSpent");
+    const intelligenceStore = storeManager.GetRWStore<number>(actor, "attributes.intelligence.value");
     const valueStore = storeManager.GetRWStore<number>(skill, "knowledgeSkill.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
         skill,
@@ -33,6 +36,7 @@
 
     // ─── Derived state ────────────────────────────────────────────────────────
 
+    const availableKnowledgePoints = $derived(($intelligenceStore ?? 1) * 5 - ($knowledgeSpent ?? 0));
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
 
     // ─── Commit trigger exposure ──────────────────────────────────────────────
@@ -46,28 +50,20 @@
     // ─── Increment / Decrement ────────────────────────────────────────────────
 
     function increment(): void {
-        if (!$attrLocked) {
-            ui.notifications?.warn(localize("SR3E.notifications.assignattributesfirst"));
-            return;
-        }
         if (!$isCreation) return; // Phase 3: karma shopping
         if ($valueStore >= 6) return;
         const cost = $valueStore < linkedAttrRating ? 1 : 2;
-        if ($knowledgePoints < cost) return;
+        if (availableKnowledgePoints < cost) return;
         $valueStore += 1;
-        $knowledgePoints -= cost;
+        $knowledgeSpent = ($knowledgeSpent ?? 0) + cost;
     }
 
     function decrement(): void {
-        if (!$attrLocked) {
-            ui.notifications?.warn(localize("SR3E.notifications.assignattributesfirst"));
-            return;
-        }
-        if (!$isCreation) return;
+        if (!$isCreation) return; // Phase 3: karma shopping
         if ($valueStore <= 0) return;
         const refund = $valueStore > linkedAttrRating ? 2 : 1;
         $valueStore -= 1;
-        $knowledgePoints += refund;
+        $knowledgeSpent = ($knowledgeSpent ?? 0) - refund;
     }
 
     // ─── Specializations ──────────────────────────────────────────────────────
@@ -75,12 +71,12 @@
     function addSpecialization(): void {
         if (!$isCreation) return;
         if ($specializationsStore.length > 0) {
-            ui.notifications?.info(localize("SR3E.skill.onlyonespecializationatcreation"));
+            ui.notifications?.info(localize(CONFIG.SR3E.SKILL?.onlyonespecializationatcreation ?? "sr3e.skill.onlyonespecializationatcreation"));
             return;
         }
         if ($valueStore <= 1) return;
         const newSpec = {
-            name: localize("SR3E.skill.newspecialization"),
+            name: localize(CONFIG.SR3E.SKILL?.newspecialization ?? "sr3e.skill.newspecialization"),
             value: $valueStore + 1,
         };
         $valueStore -= 1;
@@ -114,7 +110,7 @@
                 for (let i = 1; i <= $valueStore; i++) {
                     refund += i <= linkedAttrRating ? 1 : 2;
                 }
-                $knowledgePoints += refund;
+                $knowledgeSpent = ($knowledgeSpent ?? 0) - refund;
                 $valueStore = 0;
                 ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
             }
@@ -134,100 +130,82 @@
     });
 </script>
 
-<div class="sr3e-waterfall-wrapper">
-    <div class="sr3e-waterfall sr3e-waterfall--single">
+<ItemSheetWrapper csslayout="single">
 
-        <!-- Panel 1: Skill info + controls -->
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <div class="image-mask">
-                        <img
-                            src={skill.img}
-                            role="presentation"
-                            data-edit="img"
-                            title={skill.name}
-                            alt={skill.name}
-                        />
-                    </div>
-                    <div class="stat-grid single-column">
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <h1>{skill.name}</h1>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <h1>{$valueStore}</h1>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card-background"></div>
-                            <div class="buttons-horizontal-distribution">
-                                <button
-                                    type="button"
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Increase skill"
-                                    onclick={increment}
-                                    disabled={disableControls}
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Decrease skill"
-                                    onclick={decrement}
-                                    disabled={disableControls}
-                                >
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Delete skill"
-                                    onclick={deleteSkill}
-                                >
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                                <button
-                                    type="button"
-                                    class="header-control icon sr3e-toolbar-button"
-                                    aria-label="Add specialization"
-                                    onclick={addSpecialization}
-                                    disabled={$valueStore <= 1}
-                                >
-                                    {localize(CONFIG.SR3E.SKILL?.specialization ?? "SR3E.skill.addspecialization")}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Image -->
+    <ItemSheetComponent>
+        <Image entity={skill} />
+    </ItemSheetComponent>
+
+    <!-- Skill HUD panel -->
+    <ItemSheetComponent>
+        <div class="skill-hud-panel">
+
+            <!-- Title + value on one line -->
+            <div class="skill-hud-display">
+                <div class="skill-hud-title-row">
+                    <h2 class="skill-hud-name no-margin">{skill.name}</h2>
+                    <h2 class="skill-hud-value-badge no-margin">{$valueStore}</h2>
                 </div>
             </div>
-        </div>
 
-        <!-- Panel 2: Specializations -->
-        <div class="item-sheet-component">
-            <div class="sr3e-inner-background-container">
-                <div class="fake-shadow"></div>
-                <div class="sr3e-inner-background">
-                    <h1 class="uppercase">
-                        {localize(CONFIG.SR3E.SKILL?.specialization ?? "SR3E.skill.specializations")}
-                    </h1>
-                    <div class="stat-grid single-column">
-                        {#each $specializationsStore as spec, _i}
-                            <SpecializationCard
-                                bind:specialization={$specializationsStore[_i]}
-                                {actor}
-                                {skill}
-                                isCreationMode={$isCreation}
-                                ondelete={deleteSpecialization}
-                                onchange={() => { $specializationsStore = [...$specializationsStore]; }}
-                            />
-                        {/each}
-                    </div>
-                </div>
+            <!-- Controls: − + 🗑 -->
+            <div class="skill-hud-controls">
+                <button
+                    type="button"
+                    class="skill-hud-btn"
+                    aria-label="Decrease skill"
+                    onclick={decrement}
+                    disabled={disableControls}
+                ><i class="fa-solid fa-minus"></i></button>
+                <button
+                    type="button"
+                    class="skill-hud-btn"
+                    aria-label="Increase skill"
+                    onclick={increment}
+                    disabled={disableControls}
+                ><i class="fa-solid fa-plus"></i></button>
+                <button
+                    type="button"
+                    class="skill-hud-btn danger"
+                    aria-label="Delete skill"
+                    onclick={deleteSkill}
+                ><i class="fa-solid fa-trash-can"></i></button>
             </div>
-        </div>
 
-    </div>
-</div>
+            <!-- Add specialization -->
+            <button
+                type="button"
+                class="skill-add-spec-btn"
+                aria-label="Add specialization"
+                onclick={addSpecialization}
+                disabled={$valueStore <= 1 || $specializationsStore.length > 0}
+            >
+                {localize(CONFIG.SR3E.SKILL?.specialize ?? "sr3e.skill.specialize")}
+            </button>
+
+        </div>
+    </ItemSheetComponent>
+
+    <!-- Specializations -->
+    {#if $specializationsStore.length > 0}
+        <ItemSheetComponent>
+            <div class="skill-hud-spec-header">
+                <span>{localize(CONFIG.SR3E.SKILL?.specializations ?? "SR3E.skill.specializations")}</span>
+            </div>
+            <div class="skill-hud-spec-list">
+                {#each $specializationsStore as _spec, i}
+                    <SpecializationCard
+                        bind:specialization={$specializationsStore[i]!}
+                        {actor}
+                        {skill}
+                        isCreationMode={$isCreation}
+                        ondelete={deleteSpecialization}
+                        onchange={() => { $specializationsStore = [...$specializationsStore]; }}
+                    />
+                {/each}
+            </div>
+        </ItemSheetComponent>
+    {/if}
+
+</ItemSheetWrapper>

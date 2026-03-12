@@ -100,12 +100,18 @@
     },
     "skill": {
       "active": "Active",
+      "addlingo": "Add Lingo",
       "knowledge": "Knowledge",
       "language": "Language",
-      "newspecialization": "Newspecialization",
+      "lingos": "Lingos",
+      "linkedAttribute": "Linked Attribute",
+      "newspecialization": "New Specialization",
+      "onlyonespecializationatcreation": "You can only have one specialization during character creation.",
+      "readwrite": "Read/Write",
       "skill": "Skill",
       "specialization": "Specialization",
       "specializations": "Specializations",
+      "specialize": "Specialize",
       "value": "Value"
     }
   }

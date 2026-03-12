@@ -6,5 +6,11 @@ export const SKILL_KEYS = [
   "knowledge",
   "language",
   "value",
-  "newspecialization"
+  "newspecialization",
+  "readwrite",
+  "addlingo",
+  "lingos",
+  "onlyonespecializationatcreation",
+  "linkedAttribute",
+  "specialize",
   ] as const;
