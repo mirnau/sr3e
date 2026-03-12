@@ -347,9 +347,10 @@
 .skill-add-spec-btn {
 	position: relative;
 	width: 100%;
-	background: var(--highlight-color-primary);
+	background: transparent;
 	border: none;
-	color: var(--text-color);
+	color: var(--btn-color);
+	box-shadow: inset 0 0 12px var(--highlight-color-primary);
 	cursor: pointer;
 	padding: 0.35rem 0.5rem;
 	display: flex;
