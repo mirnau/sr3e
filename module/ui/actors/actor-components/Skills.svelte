@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Writable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import SkillsActive from "./skills/SkillsActive.svelte";
@@ -10,13 +11,17 @@ const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 let itemsUpdateTick = $state(0);
 
-// Tab state
-let activeTab = $state<"active" | "knowledge" | "language">("active");
+// Tab state — shallow store survives sheet re-renders (Foundry remounts on every actor update)
+let activeTabStore = $state<Writable<"active" | "knowledge" | "language"> | null>(null);
 
 $effect(() => {
 	if (!actor) return;
 
 	storeManager.Subscribe(actor);
+
+	activeTabStore = storeManager.GetShallowStore<"active" | "knowledge" | "language">(
+		actor, "skillsActiveTab", "active"
+	);
 
 	// Setup item collection listeners (pattern from DicePools.svelte)
 	const collection = actor.items?.collection;
@@ -98,27 +103,27 @@ const languageSkills = $derived(
 			<button
 				type="button"
 				class="skills-register-tab"
-				class:active={activeTab === "active"}
-				onclick={() => (activeTab = "active")}
+				class:active={$activeTabStore === "active"}
+				onclick={() => activeTabStore?.set("active")}
 			><span>Active</span></button>
 			<button
 				type="button"
 				class="skills-register-tab"
-				class:active={activeTab === "knowledge"}
-				onclick={() => (activeTab = "knowledge")}
+				class:active={$activeTabStore === "knowledge"}
+				onclick={() => activeTabStore?.set("knowledge")}
 			><span>Knowledge</span></button>
 			<button
 				type="button"
 				class="skills-register-tab"
-				class:active={activeTab === "language"}
-				onclick={() => (activeTab = "language")}
+				class:active={$activeTabStore === "language"}
+				onclick={() => activeTabStore?.set("language")}
 			><span>Language</span></button>
 		</div>
 		<div class="skills-content">
 			<div class="skills-content-inner">
-				{#if activeTab === "active"}
+				{#if $activeTabStore === "active"}
 					<SkillsActive {actor} skills={activeSkills} />
-				{:else if activeTab === "knowledge"}
+				{:else if $activeTabStore === "knowledge"}
 					<SkillsKnowledge {actor} skills={knowledgeSkills} />
 				{:else}
 					<SkillsLanguage {actor} skills={languageSkills} />
