@@ -198,22 +198,24 @@ Plans:
 
 ### Phase 3: Karma & Experience Core
 
-**Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
+**Goal**: Implement karma management and character advancement system — Good Karma tracking and spending on attributes, skills, and specializations via the shopping mode toggle.
 
 **Scope**:
-- Karma pool tracking and management
-- storytellerscreen actor type implementation
-- GM distributes karma rewards to characters
-- Players spend karma on improvements
-- Character advancement rules (SR3e karma costs)
-- Experience point tracking
-- Karma spending validation
+- Good Karma tracking (total earned + unspent balance — already in KarmaModel)
+- Karma spending on Attributes, Active/Knowledge/Language Skills, Specializations
+- KarmaSpendingService with SR3e cost formulas
+- Shopping mode toggle reused for karma mode (isShoppingState + !isCharacterCreation)
 
-**Depends on**: Phase 2 (need character sheet and permissions)
+**Out of scope**: storytellerscreen actor, karma distribution UI, Karma Pool (deferred)
 
-**Research**: Unlikely (have karma mechanics in reference code, SR3e rules are established)
+**Depends on**: Phase 2 (character sheet and shopping mode infrastructure)
 
-**Plans**: TBD
+**Research**: Unlikely
+
+**Plans**:
+- [ ] 3-01: KarmaSpendingService — staged attr session + skill cost helpers
+- [ ] 3-02: Attribute session UI wiring (ShoppingCart, AttributeCard, Karma.svelte, CharacterSheet teardown)
+- [ ] 3-03: Skill editor staged karma wiring + human verify checkpoint
 
 **Actor types involved**: character (karma tracking), storytellerscreen
 
@@ -335,7 +337,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
-| 3. Karma & Experience Core | 0/? | Not started | - |
+| 3. Karma & Experience Core | 0/3 | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |
