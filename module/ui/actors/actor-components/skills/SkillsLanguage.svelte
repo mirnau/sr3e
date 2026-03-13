@@ -1,6 +1,5 @@
 <script lang="ts">
 import SkillCard from "./SkillCard.svelte";
-import PackeryGrid from "../../../common-components/PackeryGrid.svelte";
 
 interface Props {
 	actor: Actor | null;
@@ -10,8 +9,8 @@ interface Props {
 let { actor = null, skills }: Props = $props();
 </script>
 
-<PackeryGrid gridPrefix="skills" itemSelector="skill-card-container">
+<div class="skill-group-cards">
 	{#each skills as item (item.id)}
 		<SkillCard {actor} {item} category="language" />
 	{/each}
-</PackeryGrid>
+</div>
