@@ -150,6 +150,19 @@ export default class CharacterActorSheet extends SR3EActorBase {
         }
     }
 
+    protected override async _onDropItem(event: DragEvent, data: Record<string, unknown>): Promise<unknown> {
+        const item = await (Item as any).fromDropData(data) as Item | null;
+        if (item?.type === "skill") {
+            const actor = this.document as Actor;
+            if (actor.items.getName(item.name!)) {
+                ui.notifications?.warn(`"${item.name}" is already on this sheet.`);
+                return;
+            }
+        }
+        // @ts-expect-error — Foundry v13 _onDropItem signature not fully typed
+        return super._onDropItem(event, data);
+    }
+
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
         this._unmountAllApps();
         super._tearDown(options);

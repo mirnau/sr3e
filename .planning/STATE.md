@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 2.4 of 10+ (Buying Mechanics Overhaul — COMPLETE)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-13 - 2.4-02 complete (SkillSpendingService extracted, editors presentational-only)
+Phase: 2.5 of 10+ (Character Sheet UX Polish — In progress)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-13 - 2.5-01 complete (linked attr on SkillCard, duplicate drop prevention)
 
 Progress: ██████░░░░ ~42%
 
@@ -87,6 +87,7 @@ Progress: ██████░░░░ ~42%
 - Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)
 - Phase 2.3 inserted after Phase 2.2: Skills component — required before karma shopping (Phase 3)
 - Phase 2.4 inserted after Phase 2.3: Buying mechanics overhaul — SR3e rule compliance, creation point/buying relationship, unified IStoreManager usage (URGENT)
+- Phase 2.5 inserted after Phase 2.4: Character sheet UX polish — lock modal timing, linked attr in SkillCard, Packery layout, duplicate skill prevention (URGENT)
 
 ### Deferred Issues
 

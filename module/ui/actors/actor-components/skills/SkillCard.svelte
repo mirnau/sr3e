@@ -60,6 +60,15 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 	e.preventDefault();
 	// TODO Phase 3: specialization roll
 }
+
+function capitalize(s: string): string {
+	return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
+}
+
+const linkedAttrName =
+	category === "active"
+		? capitalize((item.system as Record<string, any>)?.activeSkill?.linkedAttribute ?? "")
+		: "Intelligence";
 </script>
 
 <div class="skill-card-container" data-item-id={item.id}>
@@ -75,6 +84,7 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 		<div class="skill-card">
 			<div class="skill-background-layer"></div>
 			<h6 class="no-margin skill-name" title={item.name}>{item.name}</h6>
+			<h5 class="no-margin">({linkedAttrName})</h5>
 			<div class="skill-main-container">
 				<h1 class="skill-value">{valueStore ? $valueStore : 0}</h1>
 			</div>
@@ -94,6 +104,7 @@ function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
 		<div class="skill-card">
 			<div class="skill-background-layer"></div>
 			<h6 class="no-margin skill-name" title={item.name}>{item.name}</h6>
+			<h5 class="no-margin">({linkedAttrName})</h5>
 			<div
 				class="skill-main-container button"
 				role="button"
