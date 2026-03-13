@@ -20,12 +20,12 @@
 
 ## Current Position
 
-Phase: 2.3 of 10+ (Skills Component — COMPLETE)
-Plan: 1 of 1 (complete — SUMMARY.md written)
-Status: Phase complete — ready for Phase 3
-Last activity: 2026-03-08 - 2.3-01 complete (Skills card built + skill editor polished + style architecture enforcement audit)
+Phase: 2.4 of 10+ (Buying Mechanics Overhaul — In Progress)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-03-13 - 2.4-01 complete (routing fix, Intelligence-linked cost formula, Int-derived pools)
 
-Progress: ██████░░░░ ~40%
+Progress: ██████░░░░ ~42%
 
 ## Performance Metrics
 
@@ -78,6 +78,8 @@ Progress: ██████░░░░ ~40%
 | 2 | Flag namespace "sr3e" | Follows Foundry convention for system flags |
 | 2 | Racial max default to 6 | Safe fallback if metatype not found |
 | 2 | Scoped Svelte styles for chevrons | Keeps styles co-located with component, avoids global CSS pollution |
+| 2.4 | Hardcode Intelligence for knowledge/language editors | SR3e rules mandate Intelligence always; hardcoding is robust against item data defaults (SkillModel skillType defaults are unreliable) |
+| 2.4 | All skill types use same linked-attr cost formula | Knowledge/language have Intelligence as threshold — same `value < linkedAttr ? 1 : 2` as active skills. Flat-cost assumption was wrong. |
 
 ### Roadmap Evolution
 
@@ -103,6 +105,6 @@ Drift notes: None
 
 ## Session Continuity
 
-Last session: 2026-03-08
-Stopped at: 2.3 complete — skill editor polish, style architecture enforcement, SUMMARY written
+Last session: 2026-03-13
+Stopped at: 2.4-01 complete — ready for 2.4-02 (SkillSpendingService extraction)
 Resume file: None
