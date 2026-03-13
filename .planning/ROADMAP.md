@@ -177,6 +177,25 @@ Plans:
 
 ---
 
+### Phase 2.5: Character Sheet UX Polish (INSERTED)
+
+**Goal:** Four targeted UX improvements to the character sheet: lock modal timing, linked attribute display in skill cards, Packery layout for active skills, and duplicate skill prevention.
+
+**Depends on:** Phase 2.4
+**Plans:** 2 plans
+
+Plans:
+- [x] 2.5-01: Linked attribute display in SkillCard + duplicate skill drop prevention
+- [ ] 2.5-02: Packery layout for all three skill tabs + lock modal timing fix
+
+**Details:**
+1. **Lock modal timing**: Don't show the attribute-lock confirmation modal until all attribute points are spent AND all skill editors are closed
+2. **Linked attribute in SkillCard**: Show linked attribute name in `<h4>` (in parentheses) directly under the skill name
+3. **Packery layout for all skill tabs**: Replace CSS grid in all three skill containers (active, knowledge, language) with Packery
+4. **Duplicate skill prevention**: Block drag-and-drop of a skill onto an actor sheet if a skill with the same name already exists
+
+---
+
 ### Phase 3: Karma & Experience Core
 
 **Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
@@ -315,6 +334,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
 | 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
+| 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
