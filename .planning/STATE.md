@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 2.4 of 10+ (Buying Mechanics Overhaul — In Progress)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-13 - 2.4-01 complete (routing fix, Intelligence-linked cost formula, Int-derived pools)
+Phase: 2.4 of 10+ (Buying Mechanics Overhaul — COMPLETE)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-13 - 2.4-02 complete (SkillSpendingService extracted, editors presentational-only)
 
 Progress: ██████░░░░ ~42%
 
@@ -106,5 +106,5 @@ Drift notes: None
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: 2.4-01 complete — ready for 2.4-02 (SkillSpendingService extraction)
+Stopped at: 2.4 complete — SkillSpendingService extracted, all editors presentational-only
 Resume file: None

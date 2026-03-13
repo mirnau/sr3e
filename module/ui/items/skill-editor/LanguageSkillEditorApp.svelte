@@ -3,12 +3,23 @@
     import { localize } from "../../../services/utilities";
     import { StoreManager } from "../../../utilities/StoreManager.svelte";
     import type { IStoreManager } from "../../../utilities/IStoreManager";
+    import { SkillSpendingService } from "../../../services/character-creation/SkillSpendingService";
+    import type { SkillCategory } from "../../../services/character-creation/SkillSpendingService";
     import Image from "../../common-components/Image.svelte";
     import ItemSheetWrapper from "../../common-components/ItemSheetWrapper.svelte";
     import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelte";
     import SpecializationCard from "./SpecializationCard.svelte";
 
     let { actor, skill, app }: { actor: Actor; skill: Item; app: any } = $props();
+
+    const SKILL_CATEGORY: SkillCategory = "language";
+    const spendingService = SkillSpendingService.Instance();
+
+    // ─── Linked attribute rating (Intelligence — always the linked attr for language skills per SR3e rules) ──────────────────────────────
+
+    const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
+    const linkedAttrRating =
+        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
 
     // ─── StoreManager setup ───────────────────────────────────────────────────
 
@@ -19,7 +30,6 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const languagePoints = storeManager.GetRWStore<number>(actor, "creation.languagePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "languageSkill.value");
     const readwriteStore = storeManager.GetRWStore<number>(skill, "languageSkill.readwrite.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
@@ -27,16 +37,9 @@
         "languageSkill.specializations"
     );
 
-    // ─── Linked attribute rating (Intelligence — always the linked attr for language skills per SR3e rules) ──────────────────────────────
-
-    const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
-    const linkedAttrRating =
-        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
-
     // ─── Derived state ────────────────────────────────────────────────────────
 
     const readWrite = $derived($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
-    const availableLanguagePoints = $derived($languagePoints ?? 0);
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
 
     // ─── Sync readwrite to Foundry whenever valueStore changes ───────────────
@@ -57,19 +60,14 @@
 
     function increment(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore >= 6) return;
-        const cost = $valueStore < linkedAttrRating ? 1 : 2;
-        if (availableLanguagePoints < cost) return;
-        $valueStore += 1;
-        $languagePoints = ($languagePoints ?? 0) - cost;
+        if (!spendingService.canIncrease(actor, skill, SKILL_CATEGORY, linkedAttrRating)) return;
+        spendingService.increase(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     function decrement(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore <= 0) return;
-        const refund = $valueStore > linkedAttrRating ? 2 : 1;
-        $valueStore -= 1;
-        $languagePoints = ($languagePoints ?? 0) + refund;
+        if (!spendingService.canDecrease(actor, skill, SKILL_CATEGORY)) return;
+        spendingService.decrease(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     // ─── Specializations / Lingos ─────────────────────────────────────────────
@@ -107,19 +105,11 @@
         });
 
         if (confirmed) {
-            let refundedPoints: number | undefined;
             if ($isCreation) {
-                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
-                let refund = 0;
-                for (let i = 1; i <= baseRating; i++) {
-                    refund += i <= linkedAttrRating ? 1 : 2;
-                }
-                refundedPoints = ($languagePoints ?? 0) + refund;
-            }
-            await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
-            if (refundedPoints !== undefined) {
-                $languagePoints = refundedPoints;
+                await spendingService.deleteWithRefund(actor, skill, SKILL_CATEGORY, linkedAttrRating);
                 ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            } else {
+                await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
             }
             app?.close();
         }

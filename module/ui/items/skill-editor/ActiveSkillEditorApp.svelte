@@ -3,12 +3,17 @@
     import { localize } from "../../../services/utilities";
     import { StoreManager } from "../../../utilities/StoreManager.svelte";
     import type { IStoreManager } from "../../../utilities/IStoreManager";
+    import { SkillSpendingService } from "../../../services/character-creation/SkillSpendingService";
+    import type { SkillCategory } from "../../../services/character-creation/SkillSpendingService";
     import Image from "../../common-components/Image.svelte";
     import ItemSheetWrapper from "../../common-components/ItemSheetWrapper.svelte";
     import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelte";
     import SpecializationCard from "./SpecializationCard.svelte";
 
     let { actor, skill, app }: { actor: Actor; skill: Item; app: any } = $props();
+
+    const SKILL_CATEGORY: SkillCategory = "active";
+    const spendingService = SkillSpendingService.Instance();
 
     // ─── StoreManager setup ───────────────────────────────────────────────────
 
@@ -19,14 +24,13 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const activePoints = storeManager.GetRWStore<number>(actor, "creation.activePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "activeSkill.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
         skill,
         "activeSkill.specializations"
     );
 
-    // ─── Linked attribute rating (computed once) ──────────────────────────────
+    // ─── Linked attribute rating (computed once — attrs locked during skill phase) ──────────────────────────────
 
     const linkedAttribute = (skill.system as Record<string, any>).activeSkill.linkedAttribute as string;
     const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
@@ -49,20 +53,14 @@
 
     function increment(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore >= 6) return;
-        const cost = $valueStore < linkedAttrRating ? 1 : 2;
-        const points = $activePoints ?? 0;
-        if (points < cost) return;
-        $valueStore += 1;
-        $activePoints = points - cost;
+        if (!spendingService.canIncrease(actor, skill, SKILL_CATEGORY, linkedAttrRating)) return;
+        spendingService.increase(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     function decrement(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore <= 0) return;
-        const refund = $valueStore > linkedAttrRating ? 2 : 1;
-        $valueStore -= 1;
-        $activePoints = ($activePoints ?? 0) + refund;
+        if (!spendingService.canDecrease(actor, skill, SKILL_CATEGORY)) return;
+        spendingService.decrease(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     // ─── Specializations ──────────────────────────────────────────────────────
@@ -100,19 +98,11 @@
         });
 
         if (confirmed) {
-            let refundedPoints: number | undefined;
             if ($isCreation) {
-                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
-                let refund = 0;
-                for (let i = 1; i <= baseRating; i++) {
-                    refund += i <= linkedAttrRating ? 1 : 2;
-                }
-                refundedPoints = ($activePoints ?? 0) + refund;
-            }
-            await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
-            if (refundedPoints !== undefined) {
-                $activePoints = refundedPoints;
+                await spendingService.deleteWithRefund(actor, skill, SKILL_CATEGORY, linkedAttrRating);
                 ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            } else {
+                await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
             }
             app?.close();
         }
