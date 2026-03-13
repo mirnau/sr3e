@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 2.5 of 10+ (Character Sheet UX Polish — In progress)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-13 - 2.5-01 complete (linked attr on SkillCard, duplicate drop prevention)
+Phase: 2.5 of 10+ (Character Sheet UX Polish — COMPLETE)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-03-13 - 2.5-02 complete (Packery for all skill tabs, flat active skills, lock modal timing)
 
 Progress: ██████░░░░ ~42%
 

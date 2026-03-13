@@ -186,7 +186,7 @@ Plans:
 
 Plans:
 - [x] 2.5-01: Linked attribute display in SkillCard + duplicate skill drop prevention
-- [ ] 2.5-02: Packery layout for all three skill tabs + lock modal timing fix
+- [x] 2.5-02: Packery layout for all three skill tabs + lock modal timing fix
 
 **Details:**
 1. **Lock modal timing**: Don't show the attribute-lock confirmation modal until all attribute points are spent AND all skill editors are closed

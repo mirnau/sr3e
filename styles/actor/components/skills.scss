@@ -92,39 +92,20 @@
 }
 
 // =========================================================
-// Active skills — attribute groups
+// Active skills — Packery sizers
 // =========================================================
 
-// CSS Grid auto-fill: 1 col < ~26rem, 2 cols < ~39rem, 3 cols at 39rem+
-// Matches the old project's Masonry min-width: 13rem behavior — no JS needed
-.skills-active-container {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-	gap: 0.5rem;
-	align-items: start;
+:root {
+	--skills-min-card-width: 6.5rem;
 }
 
-.skill-attribute-group {
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
+.skills-grid-sizer,
+.skills-gutter-sizer {
+	display: none;
 }
 
-.group-header {
-	font-size: 0.65rem;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	color: rgba(0, 255, 200, 0.7);
-	border-bottom: 1px solid rgba(0, 255, 200, 0.2);
-	padding-bottom: 0.1rem;
-	margin-bottom: 0.15rem;
-}
-
-.skill-group-cards {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
-	gap: 0.25rem;
+.skills-gutter-sizer {
+	width: 0;
 }
 
 // =========================================================
@@ -132,13 +113,13 @@
 // =========================================================
 
 .skill-card-container {
-	display: inline-block;
-	vertical-align: top;
+	width: 100%;
+	max-width: none;
+	min-width: var(--skills-min-card-width);
 	box-sizing: border-box;
 	position: relative;
-	min-width: 6.5rem;
-	margin-bottom: 0.25rem;
 	overflow: visible;
+	padding: 0.125rem;
 
 	// Shopping / creation mode pen icon — floats top-right of card
 	> .fa-pen-to-square {
