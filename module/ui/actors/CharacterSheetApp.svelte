@@ -5,7 +5,7 @@
    import DicePools from "./actor-components/DicePools.svelte";
    import Dossier from "./actor-components/Dossier.svelte";
    import Health from "./actor-components/Health.svelte";
-   //import Karma from "./actor-components/Karma.svelte";
+   import Karma from "./actor-components/Karma.svelte";
    import Movement from "./actor-components/Movement.svelte";
    import Skills from "./actor-components/Skills.svelte";
 
@@ -27,6 +27,9 @@
    </SheetCard>
    <SheetCard>
       <Movement {actor} />
+   </SheetCard>
+   <SheetCard>
+      <Karma {actor} />
    </SheetCard>
    <SheetCard span="dynamic">
       <Skills {actor} />
