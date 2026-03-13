@@ -159,6 +159,24 @@ Plans:
 
 ---
 
+### Phase 2.4: Buying Mechanics Overhaul (INSERTED)
+
+**Goal:** Overhaul skill buying mechanics to comply with SR3e game rules, clarify the relationship between creation points and buying, and enforce unified IStoreManager usage across all buying flows.
+
+**Depends on:** Phase 2.3
+**Plans:** 0 plans
+
+Plans:
+- [ ] 2.4-01: Fix routing (category param) + rules-compliant pools (Int-derived) + flat knowledge/language cost
+- [ ] 2.4-02: Extract buying logic to SkillSpendingService — editors become presentational only
+
+**Details:**
+- **Routing fix**: `SkillEditorApp` opens wrong editor for knowledge/language when `skillType` not set — fix by passing `category` from `SkillCard` explicitly
+- **Rules compliance**: knowledge pool = `Int × 5`, language pool = `floor(Int × 1.5)`, both calculated at attribute-lock time. Knowledge/language cost is flat 1 CP (not the 1/2 linked-attr formula)
+- **Architecture**: All buy/sell/delete logic moves to `SkillSpendingService` — Svelte editors are display-only
+
+---
+
 ### Phase 3: Karma & Experience Core
 
 **Goal**: Implement karma management and character advancement system, including storytellerscreen actor for karma distribution.
@@ -296,6 +314,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
 | 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
 | 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
+| 2.4. Buying Mechanics Overhaul (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |

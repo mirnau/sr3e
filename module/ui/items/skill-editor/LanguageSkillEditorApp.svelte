@@ -19,32 +19,30 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const languageSpent = storeManager.GetRWStore<number>(actor, "creation.languageSpent");
-    const intelligenceStore = storeManager.GetRWStore<number>(actor, "attributes.intelligence.value");
+    const languagePoints = storeManager.GetRWStore<number>(actor, "creation.languagePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "languageSkill.value");
+    const readwriteStore = storeManager.GetRWStore<number>(skill, "languageSkill.readwrite.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
         skill,
         "languageSkill.specializations"
     );
 
-    // ─── Linked attribute rating (computed once) ──────────────────────────────
+    // ─── Linked attribute rating (Intelligence — always the linked attr for language skills per SR3e rules) ──────────────────────────────
 
-    const linkedAttribute = (skill.system as Record<string, any>).languageSkill.linkedAttribute as string;
     const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
     const linkedAttrRating =
-        Number(attrs[linkedAttribute]?.value ?? 0) + Number(attrs[linkedAttribute]?.modifier ?? 0);
+        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
 
     // ─── Derived state ────────────────────────────────────────────────────────
 
     const readWrite = $derived($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
-    const availableLanguagePoints = $derived(Math.floor(($intelligenceStore ?? 1) * 1.5) - ($languageSpent ?? 0));
+    const availableLanguagePoints = $derived($languagePoints ?? 0);
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
 
     // ─── Sync readwrite to Foundry whenever valueStore changes ───────────────
 
     $effect(() => {
-        const rw = $valueStore <= 1 ? 0 : Math.floor($valueStore / 2);
-        skill.update({ "system.languageSkill.readwrite.value": rw }, { render: false }).catch(() => { /* no-op */ });
+        readwriteStore.set($valueStore <= 1 ? 0 : Math.floor($valueStore / 2));
     });
 
     // ─── Commit trigger exposure ──────────────────────────────────────────────
@@ -63,7 +61,7 @@
         const cost = $valueStore < linkedAttrRating ? 1 : 2;
         if (availableLanguagePoints < cost) return;
         $valueStore += 1;
-        $languageSpent = ($languageSpent ?? 0) + cost;
+        $languagePoints = ($languagePoints ?? 0) - cost;
     }
 
     function decrement(): void {
@@ -71,7 +69,7 @@
         if ($valueStore <= 0) return;
         const refund = $valueStore > linkedAttrRating ? 2 : 1;
         $valueStore -= 1;
-        $languageSpent = ($languageSpent ?? 0) - refund;
+        $languagePoints = ($languagePoints ?? 0) + refund;
     }
 
     // ─── Specializations / Lingos ─────────────────────────────────────────────
@@ -109,20 +107,20 @@
         });
 
         if (confirmed) {
+            let refundedPoints: number | undefined;
             if ($isCreation) {
-                if ($specializationsStore.length > 0) {
-                    $specializationsStore = [];
-                    $valueStore += 1;
-                }
+                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
                 let refund = 0;
-                for (let i = 1; i <= $valueStore; i++) {
+                for (let i = 1; i <= baseRating; i++) {
                     refund += i <= linkedAttrRating ? 1 : 2;
                 }
-                $languageSpent = ($languageSpent ?? 0) - refund;
-                $valueStore = 0;
-                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+                refundedPoints = ($languagePoints ?? 0) + refund;
             }
             await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
+            if (refundedPoints !== undefined) {
+                $languagePoints = refundedPoints;
+                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            }
             app?.close();
         }
     }
@@ -156,8 +154,8 @@
                     <h2 class="skill-hud-value-badge no-margin">{$valueStore}</h2>
                 </div>
                 <div class="skill-hud-title-row">
-                    <span class="skill-hud-sub-label">{localize(CONFIG.SR3E.SKILL?.readwrite ?? "SR3E.skill.readwrite")}</span>
-                    <span class="skill-hud-sub-value">{readWrite}</span>
+                    <h4>{localize(CONFIG.SR3E.SKILL?.readwrite ?? "SR3E.skill.readwrite")}</h4>
+                    <h4>{readWrite}</h4>
                 </div>
             </div>
 

@@ -100,20 +100,20 @@
         });
 
         if (confirmed) {
+            let refundedPoints: number | undefined;
             if ($isCreation) {
-                if ($specializationsStore.length > 0) {
-                    $specializationsStore = [];
-                    $valueStore += 1;
-                }
+                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
                 let refund = 0;
-                for (let i = 1; i <= $valueStore; i++) {
+                for (let i = 1; i <= baseRating; i++) {
                     refund += i <= linkedAttrRating ? 1 : 2;
                 }
-                $activePoints += refund;
-                $valueStore = 0;
-                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+                refundedPoints = ($activePoints ?? 0) + refund;
             }
             await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
+            if (refundedPoints !== undefined) {
+                $activePoints = refundedPoints;
+                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            }
             app?.close();
         }
     }

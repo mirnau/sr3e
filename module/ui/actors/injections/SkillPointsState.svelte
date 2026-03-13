@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { CreationPointsService } from "../../../services/character-creation/CreationPointsService";
 	import { StoreManager } from "../../../utilities/StoreManager.svelte";
 	import type { IStoreManager } from "../../../utilities/IStoreManager";
 	import { FLAGS } from "../../../constants/flags";
@@ -7,48 +6,40 @@
 
 	const { actor, config = CONFIG.SR3E } = $props<{ actor: Actor; config?: any }>();
 	const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
-	const actorStore = storeManager.GetROStore(actor);
+	const activePoints = storeManager.GetRWStore<number>(actor, "creation.activePoints");
+	const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");
+	const languagePoints = storeManager.GetRWStore<number>(actor, "creation.languagePoints");
 	const isCharacterCreation = storeManager.GetFlagStore(
 		actor,
 		FLAGS.ACTOR.IS_CHARACTER_CREATION,
 		false,
 	);
 
-	const pointsService = CreationPointsService.Instance();
-
-	// Create reactive point list (attribute points greyed out, skill points highlighted)
-	const pointList = $derived(() => {
-		$actorStore; // Trigger reactivity
-		return [
-			{
-				value: 0, // Attributes are locked, show 0
-				text: "Attribute Points",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "active"),
-				text: "Active Skills",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "knowledge"),
-				text: "Knowledge Skills",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "language"),
-				text: "Language Skills",
-			},
-		];
-	});
+	const pointList = $derived(() => [
+		{
+			value: 0, // Attributes are locked during skill phase
+			text: "Attribute Points",
+		},
+		{
+			value: $activePoints ?? 0,
+			text: "Active Skills",
+		},
+		{
+			value: $knowledgePoints ?? 0,
+			text: "Knowledge Skills",
+		},
+		{
+			value: $languagePoints ?? 0,
+			text: "Language Skills",
+		},
+	]);
 
 	// Auto-prompt when all skill points spent
 	$effect(() => {
-		const activePoints = pointsService.getRemainingSkillPoints(actor, "active");
-		const knowledgePoints = pointsService.getRemainingSkillPoints(actor, "knowledge");
-		const languagePoints = pointsService.getRemainingSkillPoints(actor, "language");
-
 		if (
-			activePoints === 0 &&
-			knowledgePoints === 0 &&
-			languagePoints === 0 &&
+			($activePoints ?? 0) === 0 &&
+			($knowledgePoints ?? 0) === 0 &&
+			($languagePoints ?? 0) === 0 &&
 			$isCharacterCreation
 		) {
 			(async () => {

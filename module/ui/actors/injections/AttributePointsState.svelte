@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { CreationPointsService } from "../../../services/character-creation/CreationPointsService";
 	import { StoreManager } from "../../../utilities/StoreManager.svelte";
 	import type { IStoreManager } from "../../../utilities/IStoreManager";
 	import { FLAGS } from "../../../constants/flags";
@@ -8,6 +7,9 @@
 	const { actor, config = CONFIG.SR3E } = $props<{ actor: Actor; config?: any }>();
 	const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 	const creationPointsStore = storeManager.GetRWStore<number>(actor, "creation.attributePoints");
+	const activePoints = storeManager.GetRWStore<number>(actor, "creation.activePoints");
+	const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");
+	const languagePoints = storeManager.GetRWStore<number>(actor, "creation.languagePoints");
 	const intelligenceStore = storeManager.GetRWStore<number>(actor, "attributes.intelligence.value");
 	const attributeLocked = storeManager.GetFlagStore(
 		actor,
@@ -15,30 +17,24 @@
 		false,
 	);
 
-	const pointsService = CreationPointsService.Instance();
-
-	// Knowledge and language pools are Int-derived — react to both points and intelligence changes.
-	const pointList = $derived(() => {
-		$intelligenceStore; // re-run when intelligence changes (knowledge/language pools update)
-		return [
-			{
-				value: $creationPointsStore ?? 0,
-				text: "Attribute Points",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "active"),
-				text: "Active Skills",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "knowledge"),
-				text: "Knowledge Skills",
-			},
-			{
-				value: pointsService.getRemainingSkillPoints(actor, "language"),
-				text: "Language Skills",
-			},
-		];
-	});
+	const pointList = $derived(() => [
+		{
+			value: $creationPointsStore ?? 0,
+			text: "Attribute Points",
+		},
+		{
+			value: $activePoints ?? 0,
+			text: "Active Skills",
+		},
+		{
+			value: $knowledgePoints ?? 0,
+			text: "Knowledge Skills",
+		},
+		{
+			value: $languagePoints ?? 0,
+			text: "Language Skills",
+		},
+	]);
 
 	// Auto-prompt when attribute points reach 0
 	$effect(() => {
@@ -52,6 +48,9 @@
 				});
 
 				if (confirmed) {
+					const finalInt = $intelligenceStore ?? 1;
+					$knowledgePoints = finalInt * 5;
+					$languagePoints = Math.floor(finalInt * 1.5);
 					await attributeLocked.update(() => true);
 				}
 			})();

@@ -9,6 +9,7 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
     #app?: SvelteApp;
     #actor: Actor;
     #skill: Item;
+    #category?: "active" | "knowledge" | "language";
     /** MutationObserver used for injecting the commit button */
     private _commitMO: MutationObserver | null = null;
 
@@ -25,24 +26,25 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
         );
     }
 
-    static launch(actor: Actor, skill: Item): SkillEditorApp {
+    static launch(actor: Actor, skill: Item, category?: "active" | "knowledge" | "language"): SkillEditorApp {
         const existing = SkillEditorApp.getExisting(actor.id!, (skill as Record<string, any>)._id ?? skill.id!);
         if (existing) {
             existing.bringToTop();
             return existing as SkillEditorApp;
         }
-        const sheet = new SkillEditorApp(actor, skill);
+        const sheet = new SkillEditorApp(actor, skill, category);
         sheet.render(true);
         return sheet;
     }
 
     // ─── Constructor ──────────────────────────────────────────────────────────
 
-    constructor(actor: Actor, skill: Item) {
+    constructor(actor: Actor, skill: Item, category?: "active" | "knowledge" | "language") {
         const appId = SkillEditorApp.getAppIdFor(actor.id!, (skill as Record<string, any>)._id ?? skill.id!);
         super({ id: appId });
         this.#actor = actor;
         this.#skill = skill;
+        this.#category = category;
     }
 
     // ─── Default options ──────────────────────────────────────────────────────
@@ -79,7 +81,7 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
         }
 
         const skillSystem = (this.#skill.system as Record<string, any>);
-        const skillType: string = skillSystem.skillType ?? "active";
+        const skillType: string = this.#category ?? skillSystem.skillType ?? "active";
 
         const props = {
             actor: this.#actor,

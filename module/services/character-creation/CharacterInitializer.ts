@@ -72,12 +72,10 @@ export class CharacterInitializer {
 			"system.profile.height": selections.height,
 			"system.profile.weight": selections.weight,
 
-			// Creation points (attribute points minus 6 initial for base stats, active skills from priority)
-			// Knowledge/language pools are Int-derived (Int×5 and floor(Int×1.5)) — tracked via spent counters
+			// Creation points (attribute points minus 6 initial for base stats, skill points from priority table)
+			// Knowledge/language pools are calculated from final Intelligence at attribute-lock time, not here
 			"system.creation.attributePoints": attributePoints! - 6,
 			"system.creation.activePoints": pointsService.getDistributedSkillPoints(skillPoints, "active"),
-			"system.creation.knowledgeSpent": 0,
-			"system.creation.languageSpent": 0,
 
 			// Initialize all attributes to 1, essence to 6
 			"system.attributes.strength.value": 1,
