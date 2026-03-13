@@ -21,9 +21,9 @@
 ## Current Position
 
 Phase: 3 of 10+ (Karma & Experience Core — In Progress)
-Plan: 0 of 3 in current phase
-Status: Plans written, ready to execute
-Last activity: 2026-03-13 - Phase 3 planned (3 plans: KarmaSpendingService + attr session UI + skill editor wiring)
+Plan: 1 of 3 in current phase
+Status: In progress — 3-01 complete, 3-02 next
+Last activity: 2026-03-13 - 3-01 complete (KarmaSpendingService: staged attr session + skill cost helpers)
 
 Progress: ██████░░░░ ~42%
 
@@ -109,5 +109,5 @@ Drift notes: None
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Phase 3 planned (3 plans, staged spending model) — ready to execute 3-01
+Stopped at: 3-01 complete — ready to execute 3-02 (attribute session UI wiring)
 Resume file: None
