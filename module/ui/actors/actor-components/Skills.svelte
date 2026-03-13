@@ -1,4 +1,5 @@
 <script lang="ts">
+import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
@@ -11,17 +12,16 @@ const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 let itemsUpdateTick = $state(0);
 
-// Tab state — shallow store survives sheet re-renders (Foundry remounts on every actor update)
-let activeTabStore = $state<Writable<"active" | "knowledge" | "language"> | null>(null);
+// Tab state — initialized synchronously so $activeTabStore is reactive from first render.
+// GetShallowStore caches by actor UUID, so the selected tab survives sheet re-mounts.
+const activeTabStore: Writable<"active" | "knowledge" | "language"> = actor
+	? storeManager.GetShallowStore<"active" | "knowledge" | "language">(actor, "skillsActiveTab", "active")
+	: writable("active");
 
 $effect(() => {
 	if (!actor) return;
 
 	storeManager.Subscribe(actor);
-
-	activeTabStore = storeManager.GetShallowStore<"active" | "knowledge" | "language">(
-		actor, "skillsActiveTab", "active"
-	);
 
 	// Setup item collection listeners (pattern from DicePools.svelte)
 	const collection = actor.items?.collection;
