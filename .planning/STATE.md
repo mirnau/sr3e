@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 2.5 of 10+ (Character Sheet UX Polish — COMPLETE)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-03-13 - 2.5-02 complete (Packery for all skill tabs, flat active skills, lock modal timing)
+Phase: 3 of 10+ (Karma & Experience Core — In Progress)
+Plan: 0 of 3 in current phase
+Status: Plans written, ready to execute
+Last activity: 2026-03-13 - Phase 3 planned (3 plans: KarmaSpendingService + attr session UI + skill editor wiring)
 
 Progress: ██████░░░░ ~42%
 
@@ -80,6 +80,8 @@ Progress: ██████░░░░ ~42%
 | 2 | Scoped Svelte styles for chevrons | Keeps styles co-located with component, avoids global CSS pollution |
 | 2.4 | Hardcode Intelligence for knowledge/language editors | SR3e rules mandate Intelligence always; hardcoding is robust against item data defaults (SkillModel skillType defaults are unreliable) |
 | 2.4 | All skill types use same linked-attr cost formula | Knowledge/language have Intelligence as threshold — same `value < linkedAttr ? 1 : 2` as active skills. Flat-cost assumption was wrong. |
+| 3 | Staged karma spending model | Player can "play around" with changes before committing — attribute session commits when shopping cart toggles OFF; skill session commits via thumbs-up in editor header; sheet close or editor close without thumbs-up cancels (reverts changes, no GK debit) |
+| 3 | Karma.svelte display: goodKarma - stagedSpent | Live formula instead of stale baseline — skill editor commits debit goodKarma directly, auto-reflecting in display without extra bookkeeping |
 
 ### Roadmap Evolution
 
@@ -107,5 +109,5 @@ Drift notes: None
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: 2.4 complete — SkillSpendingService extracted, all editors presentational-only
+Stopped at: Phase 3 planned (3 plans, staged spending model) — ready to execute 3-01
 Resume file: None
