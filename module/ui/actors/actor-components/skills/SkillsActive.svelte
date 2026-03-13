@@ -1,5 +1,6 @@
 <script lang="ts">
 import SkillCard from "./SkillCard.svelte";
+import PackeryGrid from "../../../common-components/PackeryGrid.svelte";
 
 interface Props {
 	actor: Actor | null;
@@ -7,33 +8,10 @@ interface Props {
 }
 
 let { actor = null, skills }: Props = $props();
-
-// Group skills by linkedAttribute, sorted alphabetically by attribute name
-const groupedSkills = $derived(() => {
-	const map = new Map<string, Item[]>();
-
-	for (const item of skills) {
-		const sys = item.system as Record<string, string>;
-		const attr = sys?.linkedAttribute ?? "unknown";
-		if (!map.has(attr)) map.set(attr, []);
-		map.get(attr)!.push(item);
-	}
-
-	const sorted = [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
-	return sorted;
-});
 </script>
 
-<div class="skills-active-container">
-	{#each groupedSkills() as [, groupSkills]}
-		{#if groupSkills.length > 0}
-			<div class="skill-attribute-group">
-				<div class="skill-group-cards">
-					{#each groupSkills as item (item.id)}
-						<SkillCard {actor} {item} category="active" />
-					{/each}
-				</div>
-			</div>
-		{/if}
+<PackeryGrid gridPrefix="skills" itemSelector="skill-card-container">
+	{#each skills as item (item.id)}
+		<SkillCard {actor} {item} category="active" />
 	{/each}
-</div>
+</PackeryGrid>
