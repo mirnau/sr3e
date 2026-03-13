@@ -341,15 +341,15 @@ export class StoreManager implements IStoreManager {
     const currentValue = document.getFlag("sr3e", flagName);
     const store = writable<T>(currentValue !== undefined ? currentValue : initialValue);
 
-    // Subscribe to store changes and sync to flags
+    // Subscribe to store changes and sync to flags (render:false prevents full sheet remount)
     store.subscribe((value) => {
       const currentFlag = document.getFlag("sr3e", flagName);
 
       // Skip if value hasn't changed
       if (JSON.stringify(currentFlag) === JSON.stringify(value)) return;
 
-      // Update the flag
-      document.setFlag("sr3e", flagName, value);
+      // Update the flag without triggering a sheet re-render — Svelte stores handle reactivity
+      (document as any).update({ [`flags.sr3e.${flagName}`]: value }, { render: false });
     });
 
     this.#flagStores.set(key, store);
