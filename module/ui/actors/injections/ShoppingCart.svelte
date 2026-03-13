@@ -3,6 +3,7 @@
 	import type { IStoreManager } from "../../../utilities/IStoreManager";
 	import { CreationPointsService } from "../../../services/character-creation/CreationPointsService";
 	import { FLAGS } from "../../../constants/flags";
+	import { KarmaSpendingService } from "../../../services/karma/KarmaSpendingService";
 
 	const { actor } = $props<{ actor: Actor }>();
 	const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
@@ -16,8 +17,16 @@
 	async function handleToggle() {
 		if ($isCharacterCreation) {
 			await terminateCreation();
+			return;
+		}
+		if ($isShoppingState) {
+			// Turning OFF: commit staged attr changes, then deactivate
+			KarmaSpendingService.Instance().commitAttrSession(actor);
+			await isShoppingState.set(false);
 		} else {
-			await isShoppingState.update((v) => !v);
+			// Turning ON: snapshot attrs, then activate
+			KarmaSpendingService.Instance().startAttrSession(actor);
+			await isShoppingState.set(true);
 		}
 	}
 

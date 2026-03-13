@@ -5,6 +5,7 @@ import NewsFeed from "../../ui/injections/NewsFeed.svelte";
 import ShoppingCart from "../../ui/actors/injections/ShoppingCart.svelte";
 import CharacterCreationManager from "../../ui/actors/injections/CharacterCreationManager.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
+import { KarmaSpendingService } from "../../services/karma/KarmaSpendingService";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
@@ -164,6 +165,8 @@ export default class CharacterActorSheet extends SR3EActorBase {
     }
 
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
+        // Cancel any staged attribute karma session (reverts attrs to snapshot, no GK debit)
+        KarmaSpendingService.Instance().cancelAttrSession(this.document as Actor);
         this._unmountAllApps();
         super._tearDown(options);
     }
