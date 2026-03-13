@@ -92,13 +92,20 @@
 }
 
 // =========================================================
-// Skill card grid layout
+// Active skills — Packery sizers
 // =========================================================
 
-.skill-group-cards {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.25rem;
+:root {
+	--skills-min-card-width: 6.5rem;
+}
+
+.skills-grid-sizer,
+.skills-gutter-sizer {
+	display: none;
+}
+
+.skills-gutter-sizer {
+	width: 0;
 }
 
 // =========================================================
