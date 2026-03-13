@@ -3,6 +3,8 @@
  * Manages separate point pools for active, knowledge, and language skills.
  */
 
+import { get } from "svelte/store";
+import { StoreManager } from "../../utilities/StoreManager.svelte";
 import { CreationPointsService } from "./CreationPointsService";
 
 type SkillCategory = "active" | "knowledge" | "language";
@@ -62,7 +64,6 @@ export class SkillSpendingService {
 	 */
 	async increaseSkill(actor: Actor, skillId: string, category: SkillCategory): Promise<void> {
 		const skillItem = actor.items.get(skillId);
-		const pointsService = CreationPointsService.Instance();
 
 		if (!skillItem) {
 			// Skill doesn't exist on character yet - create it
@@ -72,27 +73,21 @@ export class SkillSpendingService {
 			// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
 			await actor.createEmbeddedDocuments("Item", [worldSkill.toObject()]);
 
-			// Update the newly created skill to rating 1
+			// Update the newly created skill to rating 1 via StoreManager
 			const newSkill = actor.items.find((item) => item.name === worldSkill.name && item.type === "skill");
 			if (newSkill) {
-				await newSkill.update({ [`system.${category}Skill.value`]: 1 });
+				StoreManager.Instance.GetRWStore<number>(newSkill, `${category}Skill.value`).set(1);
 			}
 		} else {
-			// Skill exists - increase rating
+			// Skill exists - increase rating via StoreManager
 			const currentValue = this.#getSkillValue(actor, skillId, category);
-			await skillItem.update({ [`system.${category}Skill.value`]: currentValue + 1 });
+			StoreManager.Instance.GetRWStore<number>(skillItem, `${category}Skill.value`).set(currentValue + 1);
 		}
 
-		// Decrement appropriate point pool.
-		// Active: decrement remaining pool. Knowledge/language: increment spent counter.
-		if (category === "active") {
-			const remainingPoints = pointsService.getRemainingSkillPoints(actor, "active");
-			await actor.update({ "system.creation.activePoints": remainingPoints - 1 });
-		} else {
-			const spentField = category === "knowledge" ? "knowledgeSpent" : "languageSpent";
-			const currentSpent = (actor.system as { creation?: Record<string, number> }).creation?.[spentField] ?? 0;
-			await actor.update({ [`system.creation.${spentField}`]: currentSpent + 1 });
-		}
+		// Decrement appropriate point pool via StoreManager.
+		const pointsField = category === "active" ? "activePoints" : category === "knowledge" ? "knowledgePoints" : "languagePoints";
+		const pointsStore = StoreManager.Instance.GetRWStore<number>(actor, `creation.${pointsField}`);
+		pointsStore.set((get(pointsStore) ?? 0) - 1);
 	}
 
 	/**
@@ -108,25 +103,20 @@ export class SkillSpendingService {
 
 		if (currentValue <= 0) return;
 
-		// Decrease rating
 		const newValue = currentValue - 1;
-		await skillItem.update({ [`system.${category}Skill.value`]: newValue });
 
-		// Refund point to appropriate pool.
-		// Active: increment remaining pool. Knowledge/language: decrement spent counter.
-		const pointsService = CreationPointsService.Instance();
-		if (category === "active") {
-			const remainingPoints = pointsService.getRemainingSkillPoints(actor, "active");
-			await actor.update({ "system.creation.activePoints": remainingPoints + 1 });
-		} else {
-			const spentField = category === "knowledge" ? "knowledgeSpent" : "languageSpent";
-			const currentSpent = (actor.system as { creation?: Record<string, number> }).creation?.[spentField] ?? 0;
-			await actor.update({ [`system.creation.${spentField}`]: Math.max(0, currentSpent - 1) });
-		}
+		// Refund point to appropriate pool via StoreManager.
+		const pointsField = category === "active" ? "activePoints" : category === "knowledge" ? "knowledgePoints" : "languagePoints";
+		const pointsStore = StoreManager.Instance.GetRWStore<number>(actor, `creation.${pointsField}`);
 
-		// Optionally remove skill if rating is 0
 		if (newValue === 0) {
+			// Delete first, then refund — avoids updateActor hook overwriting the pending store write
 			await skillItem.delete();
+			pointsStore.set((get(pointsStore) ?? 0) + 1);
+		} else {
+			// Decrease rating via StoreManager, then refund
+			StoreManager.Instance.GetRWStore<number>(skillItem, `${category}Skill.value`).set(newValue);
+			pointsStore.set((get(pointsStore) ?? 0) + 1);
 		}
 	}
 

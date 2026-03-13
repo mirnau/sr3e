@@ -84,6 +84,7 @@ Progress: ██████░░░░ ~40%
 - Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
 - Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)
 - Phase 2.3 inserted after Phase 2.2: Skills component — required before karma shopping (Phase 3)
+- Phase 2.4 inserted after Phase 2.3: Buying mechanics overhaul — SR3e rule compliance, creation point/buying relationship, unified IStoreManager usage (URGENT)
 
 ### Deferred Issues
 

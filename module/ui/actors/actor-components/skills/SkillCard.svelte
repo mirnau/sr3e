@@ -47,7 +47,7 @@ $effect(() => {
 
 function openSkillEditor(): void {
 	if (!actor) return;
-	SkillEditorApp.launch(actor, item);
+	SkillEditorApp.launch(actor, item, category);
 }
 
 // Roll placeholder — Phase 3 will implement full roll logic

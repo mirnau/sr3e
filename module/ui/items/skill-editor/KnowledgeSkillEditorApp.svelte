@@ -19,24 +19,22 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const knowledgeSpent = storeManager.GetRWStore<number>(actor, "creation.knowledgeSpent");
-    const intelligenceStore = storeManager.GetRWStore<number>(actor, "attributes.intelligence.value");
+    const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "knowledgeSkill.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
         skill,
         "knowledgeSkill.specializations"
     );
 
-    // ─── Linked attribute rating (computed once) ──────────────────────────────
+    // ─── Linked attribute rating (Intelligence — always the linked attr for knowledge skills per SR3e rules) ──────────────────────────────
 
-    const linkedAttribute = (skill.system as Record<string, any>).knowledgeSkill.linkedAttribute as string;
     const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
     const linkedAttrRating =
-        Number(attrs[linkedAttribute]?.value ?? 0) + Number(attrs[linkedAttribute]?.modifier ?? 0);
+        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
 
     // ─── Derived state ────────────────────────────────────────────────────────
 
-    const availableKnowledgePoints = $derived(($intelligenceStore ?? 1) * 5 - ($knowledgeSpent ?? 0));
+    const availableKnowledgePoints = $derived($knowledgePoints ?? 0);
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
 
     // ─── Commit trigger exposure ──────────────────────────────────────────────
@@ -55,7 +53,7 @@
         const cost = $valueStore < linkedAttrRating ? 1 : 2;
         if (availableKnowledgePoints < cost) return;
         $valueStore += 1;
-        $knowledgeSpent = ($knowledgeSpent ?? 0) + cost;
+        $knowledgePoints = ($knowledgePoints ?? 0) - cost;
     }
 
     function decrement(): void {
@@ -63,7 +61,7 @@
         if ($valueStore <= 0) return;
         const refund = $valueStore > linkedAttrRating ? 2 : 1;
         $valueStore -= 1;
-        $knowledgeSpent = ($knowledgeSpent ?? 0) - refund;
+        $knowledgePoints = ($knowledgePoints ?? 0) + refund;
     }
 
     // ─── Specializations ──────────────────────────────────────────────────────
@@ -101,20 +99,20 @@
         });
 
         if (confirmed) {
+            let refundedPoints: number | undefined;
             if ($isCreation) {
-                if ($specializationsStore.length > 0) {
-                    $specializationsStore = [];
-                    $valueStore += 1;
-                }
+                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
                 let refund = 0;
-                for (let i = 1; i <= $valueStore; i++) {
+                for (let i = 1; i <= baseRating; i++) {
                     refund += i <= linkedAttrRating ? 1 : 2;
                 }
-                $knowledgeSpent = ($knowledgeSpent ?? 0) - refund;
-                $valueStore = 0;
-                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+                refundedPoints = ($knowledgePoints ?? 0) + refund;
             }
             await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
+            if (refundedPoints !== undefined) {
+                $knowledgePoints = refundedPoints;
+                ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            }
             app?.close();
         }
     }

@@ -1,13 +1,8 @@
 /**
  * Service for calculating and tracking creation point expenditure during character creation.
  * Handles attribute points and skill points (active/knowledge/language categories).
- *
- * Knowledge and language pools are intelligence-derived (Int×5 and floor(Int×1.5))
- * and dynamically reflect the current store value of intelligence.
  */
 
-import { get } from "svelte/store";
-import { StoreManager } from "../../utilities/StoreManager.svelte";
 import { FLAGS } from "../../constants/flags";
 
 /**
@@ -64,40 +59,25 @@ export class CreationPointsService {
 	 * Calculate remaining skill points by category.
 	 *
 	 * Active: priority-based pool stored in creation.activePoints (remaining).
-	 * Knowledge: Int × 5 minus creation.knowledgeSpent. Reads intelligence from
-	 *   the reactive store to reflect mid-creation attribute changes immediately.
-	 * Language: floor(Int × 1.5) minus creation.languageSpent. Same approach.
+	 * Knowledge: remaining pool stored in creation.knowledgePoints.
+	 * Language: remaining pool stored in creation.languagePoints.
 	 */
 	getRemainingSkillPoints(actor: Actor, category: "active" | "knowledge" | "language"): number {
 		const system = actor.system as {
 			creation?: {
 				activePoints?: number;
-				knowledgeSpent?: number;
-				languageSpent?: number;
+				knowledgePoints?: number;
+				languagePoints?: number;
 			};
 		};
 
 		switch (category) {
 			case "active":
 				return system.creation?.activePoints ?? 0;
-			case "knowledge": {
-				const intelStore = StoreManager.Instance.GetRWStore<number>(
-					actor as unknown as import("../../utilities/IStoreManager").FoundryDocument,
-					"attributes.intelligence.value"
-				);
-				const intel = get(intelStore) ?? 1;
-				const spent = system.creation?.knowledgeSpent ?? 0;
-				return (intel * 5) - spent;
-			}
-			case "language": {
-				const intelStore = StoreManager.Instance.GetRWStore<number>(
-					actor as unknown as import("../../utilities/IStoreManager").FoundryDocument,
-					"attributes.intelligence.value"
-				);
-				const intel = get(intelStore) ?? 1;
-				const spent = system.creation?.languageSpent ?? 0;
-				return Math.floor(intel * 1.5) - spent;
-			}
+			case "knowledge":
+				return system.creation?.knowledgePoints ?? 0;
+			case "language":
+				return system.creation?.languagePoints ?? 0;
 		}
 	}
 
