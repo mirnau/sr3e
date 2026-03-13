@@ -26,7 +26,7 @@
       packeryInstance = result.packeryInstance;
       cleanup = result.cleanup;
 
-      container.dispatchEvent(new CustomEvent("packeryreflow", { bubbles: true }));
+      container.dispatchEvent(new CustomEvent("packeryreflow", { bubbles: false }));
 
       return () => {
          cleanup?.();
