@@ -1,146 +1,204 @@
 /**
  * Service for handling skill point spending during character creation.
  * Manages separate point pools for active, knowledge, and language skills.
+ *
+ * SR3e cost rules (all skill types use the same formula):
+ *   cost = currentValue < linkedAttrRating ? 1 : 2
+ *
+ *   Active skills:   linkedAttrRating = skill's linked attribute
+ *   Knowledge skills: linkedAttrRating = Intelligence (always, per SR3e rules)
+ *   Language skills:  linkedAttrRating = Intelligence (always, per SR3e rules)
  */
 
 import { get } from "svelte/store";
 import { StoreManager } from "../../utilities/StoreManager.svelte";
-import { CreationPointsService } from "./CreationPointsService";
 
-type SkillCategory = "active" | "knowledge" | "language";
+export type SkillCategory = "active" | "knowledge" | "language";
 
 /**
  * Maximum skill rating during character creation (SR3e rule: skills cap at 6)
  */
 const MAX_SKILL_RATING = 6;
 
+/** Maps category to the actor's creation point pool path */
+const POOL_PATH: Record<SkillCategory, string> = {
+    active: "creation.activePoints",
+    knowledge: "creation.knowledgePoints",
+    language: "creation.languagePoints",
+};
+
+/** Maps category to the skill item's value path */
+const VALUE_PATH: Record<SkillCategory, string> = {
+    active: "activeSkill.value",
+    knowledge: "knowledgeSkill.value",
+    language: "languageSkill.value",
+};
+
+/** Maps category to the skill item's specializations path */
+const SPEC_PATH: Record<SkillCategory, string> = {
+    active: "activeSkill.specializations",
+    knowledge: "knowledgeSkill.specializations",
+    language: "languageSkill.specializations",
+};
+
 /**
  * Skill spending service for character creation.
  * Follows singleton pattern established in Phase 1.
+ *
+ * IMPORTANT: This service does NOT call storeManager.Subscribe/Unsubscribe —
+ * that is the component's responsibility.
  */
 export class SkillSpendingService {
-	static #instance: SkillSpendingService | null = null;
+    static #instance: SkillSpendingService | null = null;
 
-	static Instance(): SkillSpendingService {
-		if (!this.#instance) this.#instance = new SkillSpendingService();
-		return this.#instance;
-	}
+    static Instance(): SkillSpendingService {
+        if (!this.#instance) this.#instance = new SkillSpendingService();
+        return this.#instance;
+    }
 
-	/**
-	 * Check if character can increase a skill.
-	 * Validates:
-	 * - Has remaining points in the skill's category pool
-	 * - Skill not at maximum rating (6)
-	 */
-	canIncreaseSkill(actor: Actor, skillId: string, category: SkillCategory): boolean {
-		const pointsService = CreationPointsService.Instance();
-		const remainingPoints = pointsService.getRemainingSkillPoints(actor, category);
+    // ─── Cost helpers ─────────────────────────────────────────────────────────
 
-		if (remainingPoints <= 0) return false;
+    /**
+     * Compute the cost to increase a skill from its current value to current+1.
+     * All skill types: cost = currentValue < linkedAttrRating ? 1 : 2
+     * (Knowledge/language callers pass Intelligence as linkedAttrRating)
+     */
+    #increaseCost(currentValue: number, linkedAttrRating: number): number {
+        return currentValue < linkedAttrRating ? 1 : 2;
+    }
 
-		const currentValue = this.#getSkillValue(actor, skillId, category);
-		return currentValue < MAX_SKILL_RATING;
-	}
+    /**
+     * Compute the refund for decreasing a skill from its current value to current-1.
+     * All skill types: refund = currentValue > linkedAttrRating ? 2 : 1
+     */
+    #decreaseRefund(currentValue: number, linkedAttrRating: number): number {
+        return currentValue > linkedAttrRating ? 2 : 1;
+    }
 
-	/**
-	 * Check if character can decrease a skill.
-	 * Validates:
-	 * - Skill rating > 0
-	 */
-	canDecreaseSkill(actor: Actor, skillId: string): boolean {
-		// Find skill item to determine category
-		const skillItem = actor.items.get(skillId);
-		if (!skillItem || skillItem.type !== "skill") return false;
+    // ─── Store accessors ──────────────────────────────────────────────────────
 
-		const category = this.#getSkillCategory(skillItem);
-		const currentValue = this.#getSkillValue(actor, skillId, category);
+    #getValueStore(skill: Item, category: SkillCategory) {
+        return StoreManager.Instance.GetRWStore<number>(skill, VALUE_PATH[category]);
+    }
 
-		return currentValue > 0;
-	}
+    #getPoolStore(actor: Actor, category: SkillCategory) {
+        return StoreManager.Instance.GetRWStore<number>(actor, POOL_PATH[category]);
+    }
 
-	/**
-	 * Increase a skill by 1, spending 1 creation point from appropriate pool.
-	 * Creates skill item if it doesn't exist, otherwise updates existing skill.
-	 */
-	async increaseSkill(actor: Actor, skillId: string, category: SkillCategory): Promise<void> {
-		const skillItem = actor.items.get(skillId);
+    #getSpecStore(skill: Item, category: SkillCategory) {
+        return StoreManager.Instance.GetRWStore<Array<{ name: string; value: number }>>(
+            skill,
+            SPEC_PATH[category]
+        );
+    }
 
-		if (!skillItem) {
-			// Skill doesn't exist on character yet - create it
-			const worldSkill = game.items?.get(skillId);
-			if (!worldSkill) return; // Skill not found in world items
+    // ─── Public API ───────────────────────────────────────────────────────────
 
-			// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
-			await actor.createEmbeddedDocuments("Item", [worldSkill.toObject()]);
+    /**
+     * Check if the character can increase a skill.
+     * Validates: has enough points in the pool AND skill not at max rating.
+     */
+    canIncrease(actor: Actor, skill: Item, category: SkillCategory, linkedAttrRating: number): boolean {
+        const valueStore = this.#getValueStore(skill, category);
+        const currentValue = get(valueStore) ?? 0;
 
-			// Update the newly created skill to rating 1 via StoreManager
-			const newSkill = actor.items.find((item) => item.name === worldSkill.name && item.type === "skill");
-			if (newSkill) {
-				StoreManager.Instance.GetRWStore<number>(newSkill, `${category}Skill.value`).set(1);
-			}
-		} else {
-			// Skill exists - increase rating via StoreManager
-			const currentValue = this.#getSkillValue(actor, skillId, category);
-			StoreManager.Instance.GetRWStore<number>(skillItem, `${category}Skill.value`).set(currentValue + 1);
-		}
+        if (currentValue >= MAX_SKILL_RATING) return false;
 
-		// Decrement appropriate point pool via StoreManager.
-		const pointsField = category === "active" ? "activePoints" : category === "knowledge" ? "knowledgePoints" : "languagePoints";
-		const pointsStore = StoreManager.Instance.GetRWStore<number>(actor, `creation.${pointsField}`);
-		pointsStore.set((get(pointsStore) ?? 0) - 1);
-	}
+        const poolStore = this.#getPoolStore(actor, category);
+        const remainingPoints = get(poolStore) ?? 0;
+        const cost = this.#increaseCost(currentValue, linkedAttrRating);
 
-	/**
-	 * Decrease a skill by 1, refunding 1 creation point to appropriate pool.
-	 * If skill reaches 0, optionally remove the item.
-	 */
-	async decreaseSkill(actor: Actor, skillId: string): Promise<void> {
-		const skillItem = actor.items.get(skillId);
-		if (!skillItem || skillItem.type !== "skill") return;
+        return remainingPoints >= cost;
+    }
 
-		const category = this.#getSkillCategory(skillItem);
-		const currentValue = this.#getSkillValue(actor, skillId, category);
+    /**
+     * Increase a skill by 1, spending points from the appropriate pool.
+     * cost = currentValue < linkedAttrRating ? 1 : 2 (active only; knowledge/language always 1)
+     */
+    increase(actor: Actor, skill: Item, category: SkillCategory, linkedAttrRating: number): void {
+        const valueStore = this.#getValueStore(skill, category);
+        const currentValue = get(valueStore) ?? 0;
+        const cost = this.#increaseCost(currentValue, linkedAttrRating);
 
-		if (currentValue <= 0) return;
+        const poolStore = this.#getPoolStore(actor, category);
+        const currentPool = get(poolStore) ?? 0;
 
-		const newValue = currentValue - 1;
+        valueStore.set(currentValue + 1);
+        poolStore.set(currentPool - cost);
+    }
 
-		// Refund point to appropriate pool via StoreManager.
-		const pointsField = category === "active" ? "activePoints" : category === "knowledge" ? "knowledgePoints" : "languagePoints";
-		const pointsStore = StoreManager.Instance.GetRWStore<number>(actor, `creation.${pointsField}`);
+    /**
+     * Check if the character can decrease a skill.
+     * Validates: skill rating > 0.
+     */
+    canDecrease(actor: Actor, skill: Item, category: SkillCategory): boolean {
+        const valueStore = this.#getValueStore(skill, category);
+        const currentValue = get(valueStore) ?? 0;
+        return currentValue > 0;
+    }
 
-		if (newValue === 0) {
-			// Delete first, then refund — avoids updateActor hook overwriting the pending store write
-			await skillItem.delete();
-			pointsStore.set((get(pointsStore) ?? 0) + 1);
-		} else {
-			// Decrease rating via StoreManager, then refund
-			StoreManager.Instance.GetRWStore<number>(skillItem, `${category}Skill.value`).set(newValue);
-			pointsStore.set((get(pointsStore) ?? 0) + 1);
-		}
-	}
+    /**
+     * Decrease a skill by 1, refunding points to the appropriate pool.
+     * refund = currentValue > linkedAttrRating ? 2 : 1 (active only; knowledge/language always 1)
+     */
+    decrease(actor: Actor, skill: Item, category: SkillCategory, linkedAttrRating: number): void {
+        const valueStore = this.#getValueStore(skill, category);
+        const currentValue = get(valueStore) ?? 0;
 
-	/**
-	 * Get current skill rating value.
-	 */
-	#getSkillValue(actor: Actor, skillId: string, category: SkillCategory): number {
-		const skillItem = actor.items.get(skillId);
-		if (!skillItem || skillItem.type !== "skill") return 0;
+        if (currentValue <= 0) return;
 
-		const system = skillItem.system as Record<string, { value?: number }>;
-		return system[`${category}Skill`]?.value ?? 0;
-	}
+        const refund = this.#decreaseRefund(currentValue, linkedAttrRating);
 
-	/**
-	 * Get skill category from skill item.
-	 */
-	#getSkillCategory(skillItem: Item): SkillCategory {
-		const system = skillItem.system as { skillType?: string };
-		const skillType = system.skillType ?? "active";
+        const poolStore = this.#getPoolStore(actor, category);
+        const currentPool = get(poolStore) ?? 0;
 
-		if (skillType === "knowledge") return "knowledge";
-		if (skillType === "language") return "language";
-		return "active";
-	}
+        valueStore.set(currentValue - 1);
+        poolStore.set(currentPool + refund);
+    }
 
+    /**
+     * Delete a skill and refund all spent points to the pool.
+     *
+     * Delete-first-then-refund pattern:
+     *   1. Snapshot the full refund amount BEFORE deletion
+     *   2. await deleteEmbeddedDocuments (prevents race with updateActor hook)
+     *   3. Apply refund via store.set()
+     *
+     * Specialization-aware: if a specialization exists, base rating = displayedValue + 1
+     * (the specialization was "funded" by reducing base by 1, so we restore that level too).
+     *
+     * All skill types use: cost per level i = i <= linkedAttrRating ? 1 : 2
+     */
+    async deleteWithRefund(
+        actor: Actor,
+        skill: Item,
+        category: SkillCategory,
+        linkedAttrRating: number
+    ): Promise<void> {
+        // 1. Snapshot values BEFORE delete
+        const valueStore = this.#getValueStore(skill, category);
+        const specStore = this.#getSpecStore(skill, category);
+        const currentValue = get(valueStore) ?? 0;
+        const specs = get(specStore) ?? [];
+
+        // Account for specialization: the displayed value was reduced by 1 when spec was added
+        const baseRating = specs.length > 0 ? currentValue + 1 : currentValue;
+
+        // Sum the cost of each level (1-indexed: level i costs were paid going from i-1 to i)
+        // All skill types use the same formula: i <= linkedAttrRating ? 1 : 2
+        let refund = 0;
+        for (let i = 1; i <= baseRating; i++) {
+            refund += i <= linkedAttrRating ? 1 : 2;
+        }
+
+        const poolStore = this.#getPoolStore(actor, category);
+        const currentPool = get(poolStore) ?? 0;
+        const newPool = currentPool + refund;
+
+        // 2. Delete first (prevents race condition with updateActor hook)
+        await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
+
+        // 3. Apply refund after delete
+        poolStore.set(newPool);
+    }
 }

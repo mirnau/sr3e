@@ -3,12 +3,23 @@
     import { localize } from "../../../services/utilities";
     import { StoreManager } from "../../../utilities/StoreManager.svelte";
     import type { IStoreManager } from "../../../utilities/IStoreManager";
+    import { SkillSpendingService } from "../../../services/character-creation/SkillSpendingService";
+    import type { SkillCategory } from "../../../services/character-creation/SkillSpendingService";
     import Image from "../../common-components/Image.svelte";
     import ItemSheetWrapper from "../../common-components/ItemSheetWrapper.svelte";
     import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelte";
     import SpecializationCard from "./SpecializationCard.svelte";
 
     let { actor, skill, app }: { actor: Actor; skill: Item; app: any } = $props();
+
+    const SKILL_CATEGORY: SkillCategory = "knowledge";
+    const spendingService = SkillSpendingService.Instance();
+
+    // ─── Linked attribute rating (Intelligence — always the linked attr for knowledge skills per SR3e rules) ──────────────────────────────
+
+    const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
+    const linkedAttrRating =
+        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
 
     // ─── StoreManager setup ───────────────────────────────────────────────────
 
@@ -19,22 +30,14 @@
     // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
-    const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");
     const valueStore = storeManager.GetRWStore<number>(skill, "knowledgeSkill.value");
     const specializationsStore = storeManager.GetRWStore<Array<{ name: string; value: number }>>(
         skill,
         "knowledgeSkill.specializations"
     );
 
-    // ─── Linked attribute rating (Intelligence — always the linked attr for knowledge skills per SR3e rules) ──────────────────────────────
-
-    const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
-    const linkedAttrRating =
-        Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
-
     // ─── Derived state ────────────────────────────────────────────────────────
 
-    const availableKnowledgePoints = $derived($knowledgePoints ?? 0);
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
 
     // ─── Commit trigger exposure ──────────────────────────────────────────────
@@ -49,19 +52,14 @@
 
     function increment(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore >= 6) return;
-        const cost = $valueStore < linkedAttrRating ? 1 : 2;
-        if (availableKnowledgePoints < cost) return;
-        $valueStore += 1;
-        $knowledgePoints = ($knowledgePoints ?? 0) - cost;
+        if (!spendingService.canIncrease(actor, skill, SKILL_CATEGORY, linkedAttrRating)) return;
+        spendingService.increase(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     function decrement(): void {
         if (!$isCreation) return; // Phase 3: karma shopping
-        if ($valueStore <= 0) return;
-        const refund = $valueStore > linkedAttrRating ? 2 : 1;
-        $valueStore -= 1;
-        $knowledgePoints = ($knowledgePoints ?? 0) + refund;
+        if (!spendingService.canDecrease(actor, skill, SKILL_CATEGORY)) return;
+        spendingService.decrease(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     // ─── Specializations ──────────────────────────────────────────────────────
@@ -99,19 +97,11 @@
         });
 
         if (confirmed) {
-            let refundedPoints: number | undefined;
             if ($isCreation) {
-                const baseRating = $specializationsStore.length > 0 ? ($valueStore ?? 0) + 1 : ($valueStore ?? 0);
-                let refund = 0;
-                for (let i = 1; i <= baseRating; i++) {
-                    refund += i <= linkedAttrRating ? 1 : 2;
-                }
-                refundedPoints = ($knowledgePoints ?? 0) + refund;
-            }
-            await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
-            if (refundedPoints !== undefined) {
-                $knowledgePoints = refundedPoints;
+                await spendingService.deleteWithRefund(actor, skill, SKILL_CATEGORY, linkedAttrRating);
                 ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
+            } else {
+                await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
             }
             app?.close();
         }
