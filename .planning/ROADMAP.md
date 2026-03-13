@@ -337,7 +337,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
-| 3. Karma & Experience Core | 1/3 | In progress | - |
+| 3. Karma & Experience Core | 2/3 | In progress | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |

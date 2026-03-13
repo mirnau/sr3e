@@ -50,7 +50,7 @@ $effect(() => {
 	shoppingKarmaSession = storeManager.GetShallowStore<any>(
 		actor,
 		"shoppingKarmaSession",
-		{ active: false, baseline: 0, stagedSpent: 0 }
+		{ active: false, stagedSpent: 0, attrSnapshot: {} }
 	);
 
 	// Create derived store for good karma display with shopping preview
@@ -58,7 +58,7 @@ $effect(() => {
 		[isShoppingState, shoppingKarmaSession, goodKarmaStore],
 		([$shopping, $session, $good]) => {
 			if ($shopping && $session?.active) {
-				return ($session.baseline ?? 0) - ($session.stagedSpent ?? 0);
+				return ($good ?? 0) - ($session?.stagedSpent ?? 0);
 			}
 			return $good ?? 0;
 		}

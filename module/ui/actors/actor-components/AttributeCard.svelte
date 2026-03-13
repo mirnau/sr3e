@@ -4,6 +4,7 @@ import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { FLAGS } from "../../../constants/flags";
 import { AttributeSpendingService } from "../../../services/character-creation/AttributeSpendingService";
+import { KarmaSpendingService } from "../../../services/karma/KarmaSpendingService";
 
 interface Props {
 	actor: Actor | null;
@@ -26,6 +27,14 @@ const isCharacterCreation = $derived(
 const attributeLocked = $derived(
 	actor ? storeManager.GetFlagStore(actor, FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED, false) : null
 );
+const isShoppingState = $derived(
+	actor ? storeManager.GetFlagStore<boolean>(actor, FLAGS.ACTOR.IS_SHOPPING_STATE, false) : null
+);
+
+// Karma mode: shopping is ON and character creation is OFF
+const isKarmaMode = $derived(
+	!!(isShoppingState && isCharacterCreation && $isShoppingState && !$isCharacterCreation)
+);
 
 // Creation points store for reactivity on point changes
 const creationPointsStore = $derived<Writable<number> | null>(
@@ -35,42 +44,61 @@ const creationPointsStore = $derived<Writable<number> | null>(
 // Attribute spending service
 const spendingService = AttributeSpendingService.Instance();
 
-// Derived attributes that cannot be bought with points
-const isDerivedAttribute = $derived(attributeKey === "reaction" || attributeKey === "essence");
+// Derived attributes that cannot be bought with points or karma
+const isDerivedAttribute = $derived(
+	attributeKey === "reaction" ||
+	attributeKey === "essence" ||
+	attributeKey === "magic" ||
+	attributeKey === "initiative"
+);
 
-// Show chevrons only in creation mode when attributes not locked, and not for derived attributes
+// Show chevrons in creation mode (when attrs not locked) or in karma mode
 const showChevrons = $derived(() => {
 	if (isDerivedAttribute) return false;
-	if (!isCharacterCreation || !attributeLocked) return false;
-	const inCreation = $isCharacterCreation;
-	const locked = $attributeLocked;
-	return inCreation && !locked;
+	return (
+		(!!isCharacterCreation && !!attributeLocked && $isCharacterCreation && !$attributeLocked) ||
+		isKarmaMode
+	);
 });
 
 // Chevron validation helpers (trigger reactivity via stores)
 function canIncrease(): boolean {
-	if (!actor || !attributeValueStore || !creationPointsStore) return false;
-	// Touch stores to trigger reactivity
-	$attributeValueStore;
+	if (!actor || !attributeValueStore) return false;
+	$attributeValueStore; // reactive touch
+	if (isKarmaMode) {
+		return KarmaSpendingService.Instance().canStageAttrIncrement(actor, attributeKey);
+	}
 	$creationPointsStore;
 	return spendingService.canIncreaseAttribute(actor, attributeKey);
 }
 
 function canDecrease(): boolean {
 	if (!actor || !attributeValueStore) return false;
-	// Touch store to trigger reactivity
-	$attributeValueStore;
+	$attributeValueStore; // reactive touch
+	if (isKarmaMode) {
+		return KarmaSpendingService.Instance().canStageAttrDecrement(actor, attributeKey);
+	}
 	return spendingService.canDecreaseAttribute(actor, attributeKey);
 }
 
 // Chevron click handlers (synchronous - store updates are handled by service)
-function increaseAttribute() {
+function increaseAttribute(): void {
 	if (!actor) return;
+	if (isKarmaMode) {
+		if (!KarmaSpendingService.Instance().canStageAttrIncrement(actor, attributeKey)) return;
+		KarmaSpendingService.Instance().stageAttrIncrement(actor, attributeKey);
+		return;
+	}
 	spendingService.increaseAttribute(actor, attributeKey);
 }
 
-function decreaseAttribute() {
+function decreaseAttribute(): void {
 	if (!actor) return;
+	if (isKarmaMode) {
+		if (!KarmaSpendingService.Instance().canStageAttrDecrement(actor, attributeKey)) return;
+		KarmaSpendingService.Instance().stageAttrDecrement(actor, attributeKey);
+		return;
+	}
 	spendingService.decreaseAttribute(actor, attributeKey);
 }
 </script>
