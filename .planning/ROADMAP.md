@@ -300,10 +300,10 @@ Plans:
 
 **Depends on:** Phase 3.2
 
-**Plans:** 0 plans (run `/gsd:plan-phase 3.3` to break down)
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD
+- [x] 3.3-01: TimeService + TimeActuatorInput + TimeManager + App wiring
 
 **Details:**
 - TimeService: reads/writes `game.time.worldTime` (Foundry built-in, seconds since epoch) and exposes formatted Y/M/D/H/M/S accessors with advance/rewind methods
@@ -425,7 +425,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
 | 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
 | 3.2. Storyteller Screen (INSERTED) | 2/2 | Complete | 2026-03-14 |
-| 3.3. Time Manager (INSERTED) | 0/? | Not started | - |
+| 3.3. Time Manager (INSERTED) | 1/1 | Complete | 2026-03-14 |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |
