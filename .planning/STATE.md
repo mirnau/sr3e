@@ -21,11 +21,11 @@
 ## Current Position
 
 Phase: 3.1 of 10+ (Svelte Component Debloat — In Progress)
-Plan: 2 of 4 in current phase
-Status: Plan 2 complete — Health.svelte + AttributeCard.svelte debloated
-Last activity: 2026-03-14 - 3.1-02 complete: moved 6 stores to top-level in Health, stunBoxes/physicalBoxes to $derived, stores out of $derived re-runs in AttributeCard
+Plan: 3 of 4 in current phase
+Status: Plan 3 complete — Skills layer + injections debloated
+Last activity: 2026-03-14 - 3.1-03 complete: removed itemsUpdateTick/hooks from Skills.svelte, moved 5 stores to top-level in SkillCard, fixed nullable actor props in SkillsActive/Knowledge/Language, fixed $derived function-wrapping in AttributePointsState/SkillPointsState
 
-Progress: ███████░░░ ~50%
+Progress: ████████░░ ~75%
 
 ## Performance Metrics
 
