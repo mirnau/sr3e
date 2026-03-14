@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 3.2 — in progress
-Plan: 1 of 2 in phase 3.2 complete
-Status: Phase 3.2-01 complete (model, sheet, registration, app shell). Phase 3.2-02 not started.
-Last activity: 2026-03-14 - Phase 3.2-01 complete: StorytellerScreen model, sheet, registration, and app shell
+Phase: 3.2 — complete
+Plan: 2 of 2 in phase 3.2 complete
+Status: Phase 3.2 complete. KarmaDistributionService + KarmaManager + KarmaRow implemented. Ready for Phase 3.3.
+Last activity: 2026-03-14 - Phase 3.2-02 complete: KarmaDistributionService, KarmaManager, KarmaRow, StorytellerScreenApp wired
 
 Progress: █████████░ ~88%
 
