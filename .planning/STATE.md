@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 3 of 10+ (Karma & Experience Core — Complete)
-Plan: 3 of 3 in current phase
-Status: Phase complete — ready for Phase 4+ planning
-Last activity: 2026-03-13 - Phase 3 complete (staged karma: attrs, skills, Karma.svelte StatCard pair)
+Phase: 3.1 of 10+ (Svelte Component Debloat — In Progress)
+Plan: 1 of 4 in current phase
+Status: Plan 1 complete — Attributes.svelte + Dossier.svelte debloated
+Last activity: 2026-03-14 - 3.1-01 complete: removed $state+$effect store anti-pattern from Attributes and Dossier
 
 Progress: ███████░░░ ~50%
 
@@ -85,6 +85,7 @@ Progress: ███████░░░ ~50%
 
 ### Roadmap Evolution
 
+- Phase 3.1 inserted after Phase 3: Svelte component debloat — normalize all 38 Svelte files to DicePools.svelte patterns (stores as top-level const, no redundant hooks, no localize wrappers, no ?? after stores, required actor props) (URGENT)
 - Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
 - Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)
 - Phase 2.3 inserted after Phase 2.2: Skills component — required before karma shopping (Phase 3)
