@@ -95,7 +95,6 @@ export class CharacterInitializer {
 
 		// Step 4: Create embedded metatype item
 		const metatypeItem = game.items?.get(selections.metatypeId)!;
-		// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
 		await actor.createEmbeddedDocuments("Item", [metatypeItem.toObject()]);
 
 		// Step 5: Handle magic awakening for priority A or B
@@ -104,7 +103,6 @@ export class CharacterInitializer {
 			// Create embedded magic item (if not Unawakened)
 			if (!selections.magicId.includes("foundryItemId")) {
 				const magicItem = game.items?.get(selections.magicId)!;
-				// @ts-expect-error - Foundry VTT createEmbeddedDocuments has complex typing that toObject() satisfies at runtime
 				await actor.createEmbeddedDocuments("Item", [magicItem.toObject()]);
 			}
 
