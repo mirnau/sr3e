@@ -1,262 +1,203 @@
 <script lang="ts">
-import type { Writable } from "svelte/store";
 import { onDestroy } from "svelte";
+import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { ElectroCardiogramService } from "../../../services/health/ElectroCardiogramService";
+import type SR3EActor from "../../../documents/SR3EActor";
 import StatCard from "./StatCard.svelte";
 
-let { actor = null } = $props();
+let { actor }: { actor: SR3EActor } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-// Store references
-let stun = $state<Writable<number> | null>(null);
-let physical = $state<Writable<number> | null>(null);
-let penalty = $state<Writable<number> | null>(null);
-let overflow = $state<Writable<number> | null>(null);
-let miraculousSurvival = $state<Writable<boolean> | null>(null);
-let isAlive = $state<Writable<boolean> | null>(null);
+storeManager.Subscribe(actor);
+const stun = storeManager.GetRWStore<number>(actor, "health.stun.value");
+const physical = storeManager.GetRWStore<number>(actor, "health.physical.value");
+const penalty = storeManager.GetRWStore<number>(actor, "health.penalty.value");
+const overflow = storeManager.GetRWStore<number>(actor, "health.overflow.value");
+const miraculousSurvival = storeManager.GetFlagStore<boolean>(actor, "miraculousSurvival", false);
+const isAlive = storeManager.GetRWStore<boolean>(actor, "health.isAlive");
 
-// ECG canvas references (use $state for reactivity with bind:this)
 let ecgCanvas = $state<HTMLCanvasElement | null>(null);
 let ecgPointCanvas = $state<HTMLCanvasElement | null>(null);
 let ecgContainer = $state<HTMLElement | null>(null);
 let ecgService = $state<ElectroCardiogramService | null>(null);
 
-// Local state for checkbox arrays
-let stunBoxes = $state<boolean[]>([]);
-let physicalBoxes = $state<boolean[]>([]);
+const stunBoxes = $derived(Array.from({ length: 10 }, (_, i) => i < $stun));
+const physicalBoxes = $derived(Array.from({ length: 10 }, (_, i) => i < $physical));
 
 const localization = $derived(CONFIG.SR3E.HEALTH);
 const severityLabels = ["light", "medium", "serious", "deadly"];
 const severityIndices = [0, 2, 5, 9];
 
-// Initialize stores and subscriptions
 $effect(() => {
-	if (!actor) return;
-
-	storeManager.Subscribe(actor);
-
-	// Initialize health stores
-	stun = storeManager.GetRWStore<number>(actor, "health.stun.value");
-	physical = storeManager.GetRWStore<number>(actor, "health.physical.value");
-	penalty = storeManager.GetRWStore<number>(actor, "health.penalty.value");
-	overflow = storeManager.GetRWStore<number>(actor, "health.overflow.value");
-	miraculousSurvival = storeManager.GetFlagStore<boolean>(actor, "miraculousSurvival", false);
-	isAlive = storeManager.GetRWStore<boolean>(actor, "health.isAlive");
-
-	return () => {
-		storeManager.Unsubscribe(actor);
-	};
+   if (ecgCanvas && ecgPointCanvas && ecgContainer && !ecgService) {
+      ecgService = new ElectroCardiogramService(
+         ecgCanvas,
+         ecgPointCanvas,
+         ecgContainer
+      );
+   }
 });
-
-// Update checkbox arrays when damage values change
 $effect(() => {
-	if (!stun || !physical) return;
-	stunBoxes = Array.from({ length: 10 }, (_, i) => i < ($stun ?? 0));
-	physicalBoxes = Array.from({ length: 10 }, (_, i) => i < ($physical ?? 0));
-});
+   if (!ecgService) return;
 
-// Initialize ECG service when canvas elements are ready
+   if (!$isAlive) {
+      ecgService.flatline();
+   } else {
+      ecgService.resume();
+   }
+});
 $effect(() => {
-	if (ecgCanvas && ecgPointCanvas && ecgContainer && !ecgService) {
-		ecgService = new ElectroCardiogramService(
-			ecgCanvas,
-			ecgPointCanvas,
-			ecgContainer
-		);
-	}
+   if ($overflow > 0) {
+      if ($stun < 10) stun.set(10);
+      if ($physical < 10) physical.set(10);
+   }
 });
-
-// Handle death state (flatline)
 $effect(() => {
-	if (!ecgService || !isAlive) return;
-
-	if (!$isAlive) {
-		ecgService.flatline();
-	} else {
-		ecgService.resume();
-	}
+   if (!ecgService) return;
+   const calculatedPenalty = ecgService.calculatePenalty($stun, $physical);
+   penalty.set(calculatedPenalty);
 });
-
-// Auto-fill all boxes when overflow is active
-$effect(() => {
-	if (!overflow || !stun || !physical) return;
-	if (($overflow ?? 0) > 0) {
-		if (($stun ?? 0) < 10) stun.set(10);
-		if (($physical ?? 0) < 10) physical.set(10);
-	}
-});
-
-// Calculate penalty when damage changes
-$effect(() => {
-	if (!ecgService || !stun || !physical || !penalty) return;
-	const calculatedPenalty = ecgService.calculatePenalty($stun ?? 0, $physical ?? 0);
-	penalty.set(calculatedPenalty);
-});
-
-// Cleanup on destroy
 onDestroy(() => {
-	ecgService?.destroy();
+   storeManager.Unsubscribe(actor);
+   ecgService?.destroy();
 });
 
 function toggle(localIndex: number, isStun: boolean, willBeChecked: boolean) {
-	const newValue = willBeChecked ? localIndex + 1 : localIndex;
-	if (isStun && stun) {
-		stun.set(newValue);
-	} else if (physical) {
-		physical.set(newValue);
-	}
+   const newValue = willBeChecked ? localIndex + 1 : localIndex;
+   if (isStun) {
+      stun.set(newValue);
+   } else {
+      physical.set(newValue);
+   }
 }
 
 function incrementOverflow() {
-	if (!overflow) return;
-	overflow.set(Math.min(($overflow ?? 0) + 1, 10));
+   overflow.set(Math.min($overflow + 1, 10));
 }
 
 function decrementOverflow() {
-	if (!overflow) return;
-	overflow.set(Math.max(($overflow ?? 0) - 1, 0));
+   overflow.set(Math.max($overflow - 1, 0));
 }
 
 async function revive() {
-	if (!overflow || !isAlive || !miraculousSurvival) return;
+   const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize(localization?.miraculousSurvival) },
+      content: `<p>${localize(localization?.reviveConfirm)}</p>`,
+      yes: { label: localize(localization?.revive) },
+      no: { label: "Cancel" }
+   });
 
-	const confirmed = await foundry.applications.api.DialogV2.confirm({
-		window: { title: localize(localization?.miraculousSurvival || "SR3E.health.miraculousSurvival") },
-		content: `<p>${localize(localization?.reviveConfirm || "SR3E.health.reviveConfirm")}</p>`,
-		yes: { label: localize(localization?.revive || "SR3E.health.revive") },
-		no: { label: "Cancel" }
-	});
-
-	if (confirmed) {
-		overflow.set(0);
-		isAlive.set(true);
-		miraculousSurvival.set(true);
-	}
+   if (confirmed) {
+      overflow.set(0);
+      isAlive.set(true);
+      miraculousSurvival.set(true);
+   }
 }
 
 function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
-	if (e.key === "Enter" || e.key === " ") {
-		e.preventDefault();
-		fn();
-	}
-}
-
-function localize(key: string): string {
-	return game.i18n.localize(key);
+   if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      fn();
+   }
 }
 </script>
 
-{#if actor && stun && physical && penalty && overflow}
-	<!-- ECG Visualization -->
-	<div bind:this={ecgContainer} class="ecg-container">
-		<div class="ecg-viewport">
-			<canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
-			<canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
-			<div class="left-gradient"></div>
-			<div class="right-gradient"></div>
-		</div>
-	</div>
+<div bind:this={ecgContainer} class="ecg-container">
+      <div class="ecg-viewport">
+         <canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
+         <canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
+         <div class="left-gradient"></div>
+         <div class="right-gradient"></div>
+      </div>
+   </div>
 
-	<div class="condition-monitor">
-		<div class="condition-meter">
-			{#if miraculousSurvival}
-				<i
-					class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}`}
-					role="button"
-					tabindex={$miraculousSurvival ? -1 : 0}
-					aria-label="Revive"
-					aria-disabled={$miraculousSurvival}
-					onclick={!$miraculousSurvival ? revive : undefined}
-					onkeydown={!$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
-				></i>
-			{/if}
-	
-			<!-- Stun Damage Track -->
-			<div class="stun-damage">
-				<h3 class="no-margin checkbox-label">{localize(localization?.stun || "SR3E.health.stun")}</h3>
-				{#each stunBoxes as checked, i}
-					<div class="damage-input">
-						<input
-							class="checkbox"
-							type="checkbox"
-							id={`healthBox${i + 1}`}
-							{checked}
-							onchange={(e) => toggle(i, true, (e.target as HTMLInputElement).checked)}
-						/>
-						{#if severityIndices.includes(i)}
-							<div class="damage-description stun">
-								<h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
-									{localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
-								</h4>
-							</div>
-						{/if}
-					</div>
-				{/each}
-			</div>
+   <div class="condition-monitor">
+      <div class="condition-meter">
+         <i
+            class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}`}
+            role="button"
+            tabindex={$miraculousSurvival ? -1 : 0}
+            aria-label="Revive"
+            aria-disabled={$miraculousSurvival}
+            onclick={!$miraculousSurvival ? revive : undefined}
+            onkeydown={!$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
+         ></i>
+<div class="stun-damage">
+            <h3 class="no-margin checkbox-label">{localize(localization?.stun)}</h3>
+            {#each stunBoxes as checked, i}
+               <div class="damage-input">
+                  <input
+                     class="checkbox"
+                     type="checkbox"
+                     id={`healthBox${i + 1}`}
+                     {checked}
+                     onchange={(e) => toggle(i, true, (e.target as HTMLInputElement).checked)}
+                  />
+                  {#if severityIndices.includes(i)}
+                     <div class="damage-description stun">
+                        <h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
+                           {localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
+                        </h4>
+                     </div>
+                  {/if}
+               </div>
+            {/each}
+         </div>
+<div class="physical-damage">
+            <h3 class="no-margin checkbox-label">{localize(localization?.physical)}</h3>
+            {#each physicalBoxes as checked, i}
+               <div class="damage-input">
+                  <input
+                     class="checkbox"
+                     type="checkbox"
+                     id={`healthBox${i + 11}`}
+                     {checked}
+                     onchange={(e) => toggle(i, false, (e.target as HTMLInputElement).checked)}
+                  />
+                  {#if severityIndices.includes(i)}
+                     <div class="damage-description physical">
+                        <h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
+                           {localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
+                        </h4>
+                     </div>
+                  {/if}
+               </div>
+            {/each}
+<div class="damage-control">
+               <div class="overflow-button">
+                  <i
+                     class="fa-solid fa-plus"
+                     role="button"
+                     tabindex="0"
+                     aria-label="Increase overflow"
+                     onclick={incrementOverflow}
+                     onkeydown={(e) => handleButtonKeypress(e, incrementOverflow)}
+                  ></i>
+               </div>
+            </div>
 
-			<!-- Physical Damage Track -->
-			<div class="physical-damage">
-				<h3 class="no-margin checkbox-label">{localize(localization?.physical || "SR3E.health.physical")}</h3>
-				{#each physicalBoxes as checked, i}
-					<div class="damage-input">
-						<input
-							class="checkbox"
-							type="checkbox"
-							id={`healthBox${i + 11}`}
-							{checked}
-							onchange={(e) => toggle(i, false, (e.target as HTMLInputElement).checked)}
-						/>
-						{#if severityIndices.includes(i)}
-							<div class="damage-description physical">
-								<h4 class={`no-margin ${checked ? "lit" : "unlit"}`}>
-									{localize(localization?.[severityLabels[severityIndices.indexOf(i)] as keyof typeof localization] || "")}
-								</h4>
-							</div>
-						{/if}
-					</div>
-				{/each}
-
-				<!-- Overflow Controls inline with physical damage -->
-				<div class="damage-control">
-					<div class="overflow-button">
-						<i
-							class="fa-solid fa-plus"
-							role="button"
-							tabindex="0"
-							aria-label="Increase overflow"
-							onclick={incrementOverflow}
-							onkeydown={(e) => handleButtonKeypress(e, incrementOverflow)}
-						></i>
-					</div>
-				</div>
-
-				<div class="damage-control">
-					<div class="overflow-button">
-						<i
-							class="fa-solid fa-minus"
-							role="button"
-							tabindex="0"
-							aria-label="Decrease overflow"
-							onclick={decrementOverflow}
-							onkeydown={(e) => handleButtonKeypress(e, decrementOverflow)}
-						></i>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Stat Cards -->
-		<div class="stat-card-grid health-stat-cards">
-			<StatCard label={localize(localization?.penalty || "SR3E.health.penalty")}>
-				<span class="attribute-value">{$penalty ?? 0}</span>
-			</StatCard>
-			<StatCard label={localize(localization?.overflow || "SR3E.health.overflow")}>
-				<span class="attribute-value">{$overflow ?? 0}</span>
-			</StatCard>
-		</div>
-	</div>
-{:else}
-	<p>Provide an actor to initialize Health.</p>
-{/if}
+            <div class="damage-control">
+               <div class="overflow-button">
+                  <i
+                     class="fa-solid fa-minus"
+                     role="button"
+                     tabindex="0"
+                     aria-label="Decrease overflow"
+                     onclick={decrementOverflow}
+                     onkeydown={(e) => handleButtonKeypress(e, decrementOverflow)}
+                  ></i>
+               </div>
+            </div>
+         </div>
+      </div>
+<div class="stat-card-grid health-stat-cards">
+         <StatCard label={localize(localization?.penalty)}>
+            <span class="attribute-value">{$penalty}</span>
+         </StatCard>
+         <StatCard label={localize(localization?.overflow)}>
+            <span class="attribute-value">{$overflow}</span>
+         </StatCard>
+      </div>
+   </div>
