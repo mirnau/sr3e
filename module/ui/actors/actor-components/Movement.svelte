@@ -1,96 +1,72 @@
 <script lang="ts">
-import type { Writable, Readable } from "svelte/store";
-import type { IStoreManager } from "../../../utilities/IStoreManager";
-import { StoreManager } from "../../../utilities/StoreManager.svelte";
-import StatCard from "./StatCard.svelte";
+   import { onDestroy } from "svelte";
+   import { localize } from "../../../services/utilities";
+   import type { IStoreManager } from "../../../utilities/IStoreManager";
+   import { StoreManager } from "../../../utilities/StoreManager.svelte";
+   import StatCard from "./StatCard.svelte";
 
-let { actor = null } = $props();
-const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
+   let { actor }: { actor: Actor } = $props();
+   const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-// Store references
-let quicknessStore = $state<Readable<number> | null>(null);
-let walking = $state<Readable<number> | null>(null);
-let walkingValue = $state<Writable<number> | null>(null);
-let running = $state<Readable<number> | null>(null);
-let runningValue = $state<Writable<number> | null>(null);
-let isShoppingState = $state<Writable<boolean> | null>(null);
-let attributePreview = $state<Writable<any> | null>(null);
+   const localization = $derived(CONFIG.SR3E.MOVEMENT);
+   const metatype = $derived(
+      actor?.items.find((i: any) => i.type === "metatype"),
+   );
 
-const localization = $derived(CONFIG.SR3E.MOVEMENT);
-const metatype = $derived(actor?.items.find((i: any) => i.type === "metatype"));
+   function sumStore(path: string) {
+      const value = storeManager.GetRWStore<number>(actor, `${path}.value`);
+      const modifier = storeManager.GetRWStore<number>(
+         actor,
+         `${path}.modifier`,
+      );
+      return storeManager.GetSumROStore([value, modifier]);
+   }
 
-// Helper to create a sum store for an attribute (value + modifier)
-function createAttributeSumStore(actor: any, attrPath: string): Readable<number> {
-	const valueStore = storeManager.GetRWStore<number>(actor, `${attrPath}.value`);
-	const modifierStore = storeManager.GetRWStore<number>(actor, `${attrPath}.modifier`);
-	return storeManager.GetSumROStore([valueStore, modifierStore]);
-}
+   storeManager.Subscribe(actor);
 
-// Helper to create a sum store for movement (value + modifier)
-function createMovementSumStore(actor: any, movementPath: string): Readable<number> {
-	const valueStore = storeManager.GetRWStore<number>(actor, `${movementPath}.value`);
-	const modifierStore = storeManager.GetRWStore<number>(actor, `${movementPath}.modifier`);
-	return storeManager.GetSumROStore([valueStore, modifierStore]);
-}
+   const quicknessStore = sumStore("attributes.quickness");
+   const walking = sumStore("movement.walking");
+   const walkingValue = storeManager.GetRWStore<number>(
+      actor,
+      "movement.walking.value",
+   );
+   const running = sumStore("movement.running");
+   const runningValue = storeManager.GetRWStore<number>(
+      actor,
+      "movement.running.value",
+   );
+   const isShoppingState = storeManager.GetFlagStore<boolean>(
+      actor,
+      "isShoppingState",
+      false,
+   );
+   const attributePreview = storeManager.GetShallowStore<any>(
+      actor,
+      "shoppingAttributePreview",
+      { active: false, values: {} },
+   );
 
-// Initialize stores and subscriptions
-$effect(() => {
-	if (!actor) return;
+   onDestroy(() => storeManager.Unsubscribe(actor));
+   $effect(() => {
+      if (!metatype) return;
 
-	storeManager.Subscribe(actor);
+      const runningMod = metatype.system?.movement?.factor ?? 3;
+      const quicknessSum = $quicknessStore ?? 0;
+      const quicknessPreview = $isShoppingState
+         ? ($attributePreview?.values?.quickness ?? quicknessSum)
+         : quicknessSum;
 
-	// Initialize attribute and movement stores
-	quicknessStore = createAttributeSumStore(actor, "attributes.quickness");
-
-	walking = createMovementSumStore(actor, "movement.walking");
-	walkingValue = storeManager.GetRWStore<number>(actor, "movement.walking.value");
-
-	running = createMovementSumStore(actor, "movement.running");
-	runningValue = storeManager.GetRWStore<number>(actor, "movement.running.value");
-
-	// Initialize flag and shallow stores
-	isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
-	attributePreview = storeManager.GetShallowStore<any>(actor, "shoppingAttributePreview", { active: false, values: {} });
-
-	return () => {
-		storeManager.Unsubscribe(actor);
-	};
-});
-
-// Calculate movement speeds based on quickness and metatype
-$effect(() => {
-	if (!actor || !quicknessStore || !walkingValue || !runningValue || !isShoppingState || !attributePreview) return;
-	if (!metatype) return;
-
-	const runningMod = metatype.system?.movement?.factor ?? 3;
-	const quicknessSum = $quicknessStore ?? 0;
-
-	const quicknessPreview = $isShoppingState
-		? ($attributePreview?.values?.quickness ?? quicknessSum)
-		: quicknessSum;
-
-	walkingValue.set(quicknessPreview);
-	runningValue.set(Math.floor(quicknessPreview * runningMod));
-});
-
-function localize(key: string): string {
-	return game.i18n.localize(key);
-}
+      walkingValue.set(quicknessPreview);
+      runningValue.set(Math.floor(quicknessPreview * runningMod));
+   });
 </script>
 
-{#if actor && walking && running}
-	<h1>{localize(localization.movement || "SR3E.movement.movement")}</h1>
-	<div class="stat-card-grid">
-		<!-- Walking Speed -->
-		<StatCard label={localize(localization?.walking || "SR3E.movement.walking")}>
-			<span class="attribute-value">{$walking ?? 0}</span>
-		</StatCard>
-
-		<!-- Running Speed -->
-		<StatCard label={localize(localization?.running || "SR3E.movement.running")}>
-			<span class="attribute-value">{$running ?? 0}</span>
-		</StatCard>
-	</div>
-{:else}
-	<p>Provide an actor to initialize Movement.</p>
-{/if}
+<h1>{localize(localization.movement)}</h1>
+<div class="stat-card-grid">
+   <StatCard label={localize(localization?.walking)}>
+      <span class="attribute-value">{$walking ?? 0}</span>
+   </StatCard>
+   <StatCard label={localize(localization?.running)}>
+      <span class="attribute-value">{$running ?? 0}</span>
+   </StatCard>
+</div>

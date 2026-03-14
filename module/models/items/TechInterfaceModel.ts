@@ -36,7 +36,7 @@ type TechInterfaceSchema = {
   commodity: EmbeddedDataField<typeof CommodityModel>;
 };
 
-export default class TechnicalInterfaceModel extends foundry.abstract.DataModel<
+export default class TechnicalInterfaceModel extends foundry.abstract.TypeDataModel<
   TechInterfaceSchema,
   BaseItem
 > {

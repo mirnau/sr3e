@@ -56,7 +56,7 @@ export class BroadcastRegistry {
 		return [...this.#feedBuffer];
 	}
 
-	private #pumpNextHeadline(): NewsMessage | null {
+	#pumpNextHeadline(): NewsMessage | null {
 		const broadcasters = get(this.activeBroadcasters);
 		if (broadcasters.size === 0) return null;
 		const broadcasterNames: string[] = Array.from(broadcasters.keys());

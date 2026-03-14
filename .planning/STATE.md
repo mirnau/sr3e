@@ -20,12 +20,12 @@
 
 ## Current Position
 
-Phase: 3.1 of 10+ (Svelte Component Debloat — In Progress)
-Plan: 3 of 4 in current phase
-Status: Plan 3 complete — Skills layer + injections debloated
-Last activity: 2026-03-14 - 3.1-03 complete: removed itemsUpdateTick/hooks from Skills.svelte, moved 5 stores to top-level in SkillCard, fixed nullable actor props in SkillsActive/Knowledge/Language, fixed $derived function-wrapping in AttributePointsState/SkillPointsState
+Phase: 3.1 complete — ready for Phase 4+ planning
+Plan: 4 of 4 in phase 3.1 (all complete)
+Status: Phase 3.1 complete — all 38 Svelte files normalized, TypeScript build clean
+Last activity: 2026-03-14 - 3.1-04 complete: fixed item editors (MetatypeApp, NeonName, BroadcasterApp), scanned and confirmed 16 files clean, fixed 14 pre-existing TypeScript errors across item models/services/sheets
 
-Progress: ████████░░ ~75%
+Progress: █████████░ ~88%
 
 ## Performance Metrics
 
@@ -111,6 +111,6 @@ Drift notes: None
 
 ## Session Continuity
 
-Last session: 2026-03-13
-Stopped at: Phase 3 complete — all 3 plans done, karma spending fully functional
+Last session: 2026-03-14
+Stopped at: Phase 3.1 complete — all 4 plans done, all 38 Svelte files normalized, TypeScript build clean
 Resume file: None

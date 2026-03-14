@@ -151,7 +151,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
         }
     }
 
-    protected override async _onDropItem(event: DragEvent, data: Record<string, unknown>): Promise<unknown> {
+    protected async _onDropItem(event: DragEvent, data: Record<string, unknown>): Promise<unknown> {
         const item = await (Item as any).fromDropData(data) as Item | null;
         if (item?.type === "skill") {
             const actor = this.document as Actor;

@@ -1,7 +1,7 @@
 import CommodityModel from "./item-components/Commodity";
 import CustomTokenModel from "./item-components/CustomToken";
 
-export default class MechanicalModel extends foundry.abstract.DataModel<
+export default class MechanicalModel extends foundry.abstract.TypeDataModel<
   MechanicalSchema,
   BaseItem
 > {

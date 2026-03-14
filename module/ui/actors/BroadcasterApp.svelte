@@ -1,11 +1,11 @@
 <script lang="ts">
+   import { onDestroy } from "svelte";
    import {
       broadcastNews,
       stopBroadcast,
    } from "../../services/news-service/NewsService.svelte";
    import SheetCard from "../common-components/SheetCard.svelte";
    import StoreManager from "../../utilities/StoreManager.svelte";
-   import type { Writable } from "svelte/store";
    import type { IStoreManager } from "../../utilities/IStoreManager";
 
    let { actor } = $props<{
@@ -13,40 +13,20 @@
    }>();
 
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
+   storeManager.Subscribe(actor);
 
-   let preparedNewsStore = $state<Writable<string[]> | null>(null);
-   let rollingNewsStore = $state<Writable<string[]> | null>(null);
-   let isBroadcastingStore = $state<Writable<boolean> | null>(null);
+   const preparedNewsStore = storeManager.GetRWStore<string[]>(actor, "preparedNews");
+   const rollingNewsStore = storeManager.GetRWStore<string[]>(actor, "rollingNews");
+   const isBroadcastingStore = storeManager.GetRWStore<boolean>(actor, "isBroadcasting");
+
    let headlineInput = $state("");
    let selectedPrepared = $state<number[]>([]);
    let selectedRolling = $state<number[]>([]);
    let isEditing = $state(false);
 
-   $effect(() => {
-      if (!actor) return;
-
-      storeManager.Subscribe(actor);
-      preparedNewsStore = storeManager.GetRWStore<string[]>(
-         actor,
-         "preparedNews",
-      );
-      rollingNewsStore = storeManager.GetRWStore<string[]>(
-         actor,
-         "rollingNews",
-      );
-      isBroadcastingStore = storeManager.GetRWStore<boolean>(
-         actor,
-         "isBroadcasting",
-      );
-
-      return () => {
-         storeManager.Unsubscribe(actor);
-      };
-   });
+   onDestroy(() => storeManager.Unsubscribe(actor));
 
    $effect(() => {
-      if (!isBroadcastingStore || !rollingNewsStore) return;
-
       if ($isBroadcastingStore) {
          broadcastNews(actor.name, $rollingNewsStore as string[]);
       } else {
@@ -82,8 +62,6 @@
          const headlinesToDelete = selectedPrepared
             .map((i) => currentPrepared[i])
             .filter(Boolean);
-
-         // Also remove from rolling news
          rollingNewsStore?.update((currentRolling) =>
             currentRolling.filter((h) => !headlinesToDelete.includes(h)),
          );
@@ -103,8 +81,6 @@
          const moved = selectedPrepared
             .map((i) => currentPrepared[i])
             .filter(Boolean) as string[];
-
-         // Add to rolling news (avoid duplicates)
          rollingNewsStore?.update((currentRolling) => [
             ...currentRolling,
             ...moved.filter((h) => !currentRolling.includes(h)),
@@ -125,8 +101,6 @@
          const moved = selectedRolling
             .map((i) => currentRolling[i])
             .filter(Boolean) as string[];
-
-         // Add to prepared news (avoid duplicates)
          preparedNewsStore?.update((currentPrepared) => [
             ...currentPrepared,
             ...moved.filter((h) => !currentPrepared.includes(h)),

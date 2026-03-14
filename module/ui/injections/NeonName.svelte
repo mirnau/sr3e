@@ -1,37 +1,26 @@
 <script lang="ts">
-   import type { Writable } from "svelte/store";
+   import { onDestroy } from "svelte";
    import type { IStoreManager } from "../../utilities/IStoreManager";
    import type SR3EActor from "../../documents/SR3EActor";
    import { StoreManager } from "../../utilities/StoreManager.svelte";
    import { randomInRange } from "../../utilities/MathUtils";
 
-   const {
-      actor,
-   }: {
-      actor: SR3EActor;
-   } = $props();
+   const { actor }: { actor: SR3EActor } = $props();
 
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
+   storeManager.Subscribe(actor);
+
+   const actorNameStore = storeManager.GetShallowStore<string>(
+      actor,
+      "actorName",
+      actor.name as string,
+   );
+
+   onDestroy(() => storeManager.Unsubscribe(actor));
 
    let malfunctioningIndexes: number[] = [];
-   let actorNameStore = $state<Writable<string> | null>(null);
 
-   $effect(() => {
-      if (!actor) return;
-
-      storeManager.Subscribe(actor);
-      actorNameStore = storeManager.GetShallowStore<string>(
-         actor,
-         "actorName",
-         actor.name as string,
-      );
-
-      return () => {
-         storeManager.Unsubscribe(actor);
-      };
-   });
-
-   let name = $derived(actorNameStore ? $actorNameStore : "") as string;
+   let name = $derived($actorNameStore);
    let neonHTML = $derived(getNeonHtml(name));
 
    function escapeHtml(text: string): string {

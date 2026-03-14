@@ -61,17 +61,13 @@
       if (inner) {
          inner.style.transform = `translate3d(${offset}px, 0, 0)`;
       }
-
-      // remove carts that are fully offscreen left
       if (!cartUpdateThisFrame && carts.length && inner?.firstElementChild instanceof HTMLElement) {
          const firstWidth = inner.firstElementChild.offsetWidth;
          if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
             offset += firstWidth + GAP_PX;
-            // Apply transform immediately with adjusted offset BEFORE adding new cart
             if (inner) {
                inner.style.transform = `translate3d(${offset}px, 0, 0)`;
             }
-            // Single atomic update: remove first, add last
             carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
             cartUpdateThisFrame = true;
          }

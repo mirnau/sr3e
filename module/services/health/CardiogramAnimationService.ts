@@ -44,8 +44,6 @@ export interface EcgAnimatorOptions {
  * Bottom canvas shows the scrolling ECG line, top canvas shows the moving point.
  */
 export class CardiogramAnimationService {
-	private lineCanvas: HTMLCanvasElement;
-	private pointCanvas: HTMLCanvasElement;
 	private lineCtx: CanvasRenderingContext2D;
 	private pointCtx: CanvasRenderingContext2D;
 
@@ -78,9 +76,6 @@ export class CardiogramAnimationService {
 			bottomColor = "#00FFFF",
 			topColor = "#0000FF"
 		} = options;
-
-		this.lineCanvas = lineCanvas;
-		this.pointCanvas = pointCanvas;
 
 		this.lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true })!;
 		this.pointCtx = pointCanvas.getContext("2d", { willReadFrequently: true })!;

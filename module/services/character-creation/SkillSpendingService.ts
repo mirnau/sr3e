@@ -131,7 +131,7 @@ export class SkillSpendingService {
      * Check if the character can decrease a skill.
      * Validates: skill rating > 0.
      */
-    canDecrease(actor: Actor, skill: Item, category: SkillCategory): boolean {
+    canDecrease(_actor: Actor, skill: Item, category: SkillCategory): boolean {
         const valueStore = this.#getValueStore(skill, category);
         const currentValue = get(valueStore) ?? 0;
         return currentValue > 0;

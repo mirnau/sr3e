@@ -109,7 +109,7 @@ export class AttributeSpendingService {
 	 */
 	#getRacialMaximum(actor: Actor, attributeKey: string): number {
 		// Find metatype item on actor
-		const metatypeItem = actor.items.find((item) => item.type === "metatype");
+		const metatypeItem = actor.items.find((item: Item) => item.type === "metatype");
 
 		if (!metatypeItem) return 6; // Default racial max
 

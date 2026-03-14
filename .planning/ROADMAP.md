@@ -240,7 +240,7 @@ Plans:
 - [x] 3.1-01: Attributes.svelte + Dossier.svelte
 - [x] 3.1-02: Health.svelte + AttributeCard.svelte
 - [x] 3.1-03: Skills layer (Skills, SkillCard, SkillsActive/Knowledge/Language) + injections
-- [ ] 3.1-04: Item editors + common components + dialogs + TypeScript build
+- [x] 3.1-04: Item editors + common components + dialogs + TypeScript build
 
 **Rules to enforce across all files:**
 1. Stores are top-level `const` declarations — never inside `$effect` or `$state`
@@ -369,7 +369,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
-| 3.1. Svelte Component Debloat (INSERTED) | 3/4 | In Progress | - |
+| 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |

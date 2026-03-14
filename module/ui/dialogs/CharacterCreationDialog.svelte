@@ -15,8 +15,6 @@
    }>();
 
    const creationService = CharacterCreationService.Instance();
-
-   // Transient form state
    let characterName = $state(actorName);
    let characterAge = $state(25);
    let characterHeight = $state(175);
@@ -26,20 +24,8 @@
    let selectedAttribute = $state("");
    let selectedSkill = $state("");
    let selectedResource = $state("");
-
-   // Data from service
    const metatypeOptions = creationService.getMetatypes();
    const magicOptions = creationService.getMagics();
-
-   // Debug: Log loaded options
-   console.log("SR3E | Character creation loaded options:", {
-      metatypes: metatypeOptions.length,
-      magics: magicOptions.length,
-      metatypeOptions,
-      magicOptions
-   });
-
-   // Derived state
    const canCreate = $derived(
       selectedMetatype &&
          selectedMagic &&
@@ -51,8 +37,6 @@
    const metatypeItem = $derived(
       game.items?.get(selectedMetatype) as Item | undefined,
    );
-
-   // Default character icon when no metatype selected
    const defaultCharacterIcon = "icons/svg/mystery-man.svg";
    const metatypeImage = $derived(metatypeItem?.img || defaultCharacterIcon);
    const metatypeName = $derived(metatypeItem?.name || "");
@@ -84,12 +68,8 @@
       if (selectedResource) arr.push(selectedResource);
       usedPriorities = arr;
    });
-
-   // Event handlers
    function handleSubmit(event: Event) {
       event.preventDefault();
-
-      // Return the selection data to be applied after actor creation
       onSubmit({
          name: characterName,
          metatypeId: selectedMetatype,
@@ -113,10 +93,7 @@
          (m) => m.priority === combo.metatype,
       );
       const magicOpts = magicOptions.filter((m) => m.priority === combo.magic);
-
-      // Safety check: ensure arrays aren't empty
       if (metaOpts.length === 0 || magicOpts.length === 0) {
-         console.error("SR3E | Randomize failed: no options found for selected priorities", { combo, metaOpts, magicOpts });
          return;
       }
 
@@ -162,7 +139,6 @@
 
 <form onsubmit={handleSubmit}>
    <ItemSheetWrapper csslayout="double">
-      <!-- Metatype Image and Character Name -->
       <ItemSheetComponent>
          <div class="image-mask">
             <img
@@ -180,8 +156,6 @@
             placeholder="Enter character name"
          />
       </ItemSheetComponent>
-
-      <!-- Physical Characteristics -->
       <ItemSheetComponent>
          <div class="creation-stats">
             <div>Age: {characterAge} ({currentPhase()})</div>
@@ -212,8 +186,6 @@
             />
          </div>
       </ItemSheetComponent>
-
-      <!-- Priority Selections -->
       <ItemSheetComponent>
          <div class="creation-grid">
             <div class="creation-dropdwn">
@@ -293,8 +265,6 @@
             </div>
          </div>
       </ItemSheetComponent>
-
-      <!-- Action Buttons -->
       <ItemSheetComponent>
          <div class="character-creation-buttonpanel">
             <button type="button" onclick={handleRandomize}>

@@ -148,6 +148,7 @@ How we know this migration succeeded:
 - **Migration Strategy**: Parallel development - old JS remains as reference while new TS evolves feature by feature
 - **Performance**: Equal or better performance than JavaScript version
 - **Foundry Compatibility**: Must remain compatible with Foundry VTT v13 APIs and update patterns
+- **No Localize Fallbacks**: Never write `localize(key ?? "fallback")` or `localize(key || "fallback")`. If it compiles without the fallback, the fallback is dead code. Trust the localization keys to exist.
 - **Git Workflow**: Never commit independently - only commit when part of plan execution with SUMMARY.md, user controls all git operations outside of plan execution flow
 
 ## Decisions Made

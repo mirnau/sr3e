@@ -11,7 +11,6 @@
 
    const { actor } = $props<{
       actor: Actor;
-      form: HTMLFormElement;
    }>();
 </script>
 
