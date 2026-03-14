@@ -61,14 +61,14 @@ declare global {
   const DataModel: typeof foundry.abstract.DataModel;
 
   // Document constructors (values)
-  const Actor: typeof foundry.documents.BaseActor;
-  const Item: typeof foundry.documents.BaseItem;
+  const Actor: typeof globalThis.Actor;
+  const Item: typeof globalThis.Item;
   const BaseActor: typeof foundry.documents.BaseActor;
   const BaseItem: typeof foundry.documents.BaseItem;
 
   // Document instance types (for use in type positions)
-  type Actor = InstanceType<typeof foundry.documents.BaseActor>;
-  type Item = InstanceType<typeof foundry.documents.BaseItem>;
+  type Actor = globalThis.Actor;
+  type Item = globalThis.Item;
   type BaseActor = InstanceType<typeof foundry.documents.BaseActor>;
   type BaseItem = InstanceType<typeof foundry.documents.BaseItem>;
 
