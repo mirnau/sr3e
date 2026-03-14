@@ -259,6 +259,60 @@ Plans:
 
 ---
 
+### Phase 3.2: Storyteller Screen (INSERTED)
+
+**Goal:** Implement the Storyteller Screen actor — a GM dashboard with karma distribution, dice pool refresh, and time management. Unblocks karma spending verification (Phase 3 blocker: players need Good Karma before they can spend it).
+
+**Depends on:** Phase 3.1
+
+**Plans:** 2 plans
+
+Plans:
+- [x] 3.2-01: Model + Sheet + Registration + App Shell
+- [ ] 3.2-02: KarmaDistributionService + KarmaManager + KarmaRow
+
+**Details:**
+
+**Three panels:**
+1. **Karma Manager** — GM enters `pendingKarmaReward` per player, marks them ready, commits. Formula:
+   - `lifetimeKarma += pendingKarmaReward`
+   - `karmaPoolCeiling = floor(lifetimeKarma × metatype.karma.factor)`
+   - `goodKarma = lifetimeKarma - spentKarma - karmaPoolCeiling`
+2. **Dice Pool Manager** — GM refreshes player dice pools (combat, astral, spell, control, hacking)
+3. **Time Manager** — In-game world time display and adjustment
+
+**Actor type:** `"storytellerscreen"` (already registered in system.json)
+
+**Data model:** `StorytellerScreenModel` — minimal, only `journalEntryUuid: string`; all karma/pool data lives on player actors
+
+**Architecture decisions to make:**
+- KarmaManager and DicePoolManager filter actors by type ("character"/"npc") — verify filter still valid in TS model
+- Dice pool refresh methods (`RefreshCombatPool`, etc.) need to exist on the character actor — check if these exist in the TS migration or need to be added
+- TimeService dependency — assess whether an existing service can be reused or a new one needed
+
+**No sockets required** — all updates go through StoreManager → actor.update() directly
+
+---
+
+### Phase 3.3: Time Manager (INSERTED)
+
+**Goal:** Implement the in-game world clock panel for the Storyteller Screen — a TimeService and TimeManager Svelte component that display and advance game time (year/month/day/hour/minute/second). Foundation for later combat round integration.
+
+**Depends on:** Phase 3.2
+
+**Plans:** 0 plans (run `/gsd:plan-phase 3.3` to break down)
+
+Plans:
+- [ ] TBD
+
+**Details:**
+- TimeService: reads/writes `game.time.worldTime` (Foundry built-in, seconds since epoch) and exposes formatted Y/M/D/H/M/S accessors with advance/rewind methods
+- TimeManager.svelte: displays the formatted time, GM can increment/decrement each unit
+- Deferred from Phase 3.2 to keep that phase focused on karma distribution
+- Future integration: combat round timer will call TimeService.advance() each round (deferred to sockets/game loop phase)
+
+---
+
 ### Phase 4+: Skills System (Tentative)
 
 **Goal**: Complete skills implementation - buying, progression, testing, specializations.
@@ -370,6 +424,8 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
 | 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
+| 3.2. Storyteller Screen (INSERTED) | 0/? | Not started | - |
+| 3.3. Time Manager (INSERTED) | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |

@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 3.1 complete — ready for Phase 4+ planning
-Plan: 4 of 4 in phase 3.1 (all complete)
-Status: Phase 3.1 complete — all 38 Svelte files normalized, TypeScript build clean
-Last activity: 2026-03-14 - 3.1-04 complete: fixed item editors (MetatypeApp, NeonName, BroadcasterApp), scanned and confirmed 16 files clean, fixed 14 pre-existing TypeScript errors across item models/services/sheets
+Phase: 3.2 — in progress
+Plan: 1 of 2 in phase 3.2 complete
+Status: Phase 3.2-01 complete (model, sheet, registration, app shell). Phase 3.2-02 not started.
+Last activity: 2026-03-14 - Phase 3.2-01 complete: StorytellerScreen model, sheet, registration, and app shell
 
 Progress: █████████░ ~88%
 
@@ -85,6 +85,8 @@ Progress: █████████░ ~88%
 
 ### Roadmap Evolution
 
+- Phase 3.3 inserted after Phase 3.2: Time Manager — TimeService + TimeManager Svelte component for in-game world clock. Deferred from Phase 3.2 to keep it focused on karma distribution.
+- Phase 3.2 inserted after Phase 3.1: Storyteller Screen actor — GM karma distribution dashboard (KarmaManager + search). Dice Pool Manager deferred to sockets/game loop phase. Unblocks Phase 3 karma spending verification.
 - Phase 3.1 inserted after Phase 3: Svelte component debloat — normalize all 38 Svelte files to DicePools.svelte patterns (stores as top-level const, no redundant hooks, no localize wrappers, no ?? after stores, required actor props) (URGENT)
 - Phase 2.1 inserted after Phase 2: Clean up functional bugs from 02-03 shopping mode integration (URGENT)
 - Phase 2.2 inserted after Phase 2.1: Health component visual polish (URGENT)

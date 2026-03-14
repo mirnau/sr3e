@@ -1,9 +1,11 @@
 import CharacterModel from "./module/models/actors/CharacterModel";
 import BroadcasterModel from "./module/models/actors/BroadcasterModel";
+import StorytellerScreenModel from "./module/models/actors/StorytellerScreenModel";
 import { sr3e } from "./lang/config";
 import { configkeys, hooks, typekeys } from "./types/configuration-keys";
 import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
 import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
+import StorytellerScreenSheet from "./module/sheets/actors/StorytellerScreenSheet";
 import SR3EActor from "./module/documents/SR3EActor";
 import SR3EItem from "./module/documents/SR3EItem";
 import { getNewsService } from "./module/services/news-service/NewsService.svelte";
@@ -112,6 +114,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.broadcaster,
             model: BroadcasterModel,
             sheet: BroadcasterSheet,
+         },
+         {
+            docClass: Actor,
+            type: typekeys.storytellerscreen,
+            model: StorytellerScreenModel,
+            sheet: StorytellerScreenSheet,
          },
          {
             docClass: Item,
