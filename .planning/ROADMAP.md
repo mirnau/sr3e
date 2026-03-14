@@ -269,7 +269,7 @@ Plans:
 
 Plans:
 - [x] 3.2-01: Model + Sheet + Registration + App Shell
-- [ ] 3.2-02: KarmaDistributionService + KarmaManager + KarmaRow
+- [x] 3.2-02: KarmaDistributionService + KarmaManager + KarmaRow
 
 **Details:**
 
@@ -424,7 +424,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
 | 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
-| 3.2. Storyteller Screen (INSERTED) | 0/? | Not started | - |
+| 3.2. Storyteller Screen (INSERTED) | 2/2 | Complete | 2026-03-14 |
 | 3.3. Time Manager (INSERTED) | 0/? | Not started | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
