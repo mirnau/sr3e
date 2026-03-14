@@ -33,10 +33,11 @@
    }
 
    async function showLockModal(): Promise<void> {
-      const confirmed = await Dialog.confirm({
-         title: "Complete Attribute Assignment?",
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: { title: "Complete Attribute Assignment?" },
          content:
             "<p>You have spent all your attribute points.</p><p>Lock attributes and proceed to skill assignment?</p>",
+         rejectClose: false,
       });
 
       if (confirmed) {
