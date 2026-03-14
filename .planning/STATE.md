@@ -21,9 +21,9 @@
 ## Current Position
 
 Phase: 3.1 of 10+ (Svelte Component Debloat — In Progress)
-Plan: 1 of 4 in current phase
-Status: Plan 1 complete — Attributes.svelte + Dossier.svelte debloated
-Last activity: 2026-03-14 - 3.1-01 complete: removed $state+$effect store anti-pattern from Attributes and Dossier
+Plan: 2 of 4 in current phase
+Status: Plan 2 complete — Health.svelte + AttributeCard.svelte debloated
+Last activity: 2026-03-14 - 3.1-02 complete: moved 6 stores to top-level in Health, stunBoxes/physicalBoxes to $derived, stores out of $derived re-runs in AttributeCard
 
 Progress: ███████░░░ ~50%
 
