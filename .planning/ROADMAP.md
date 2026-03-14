@@ -228,6 +228,37 @@ Plans:
 
 ---
 
+### Phase 3.1: Svelte Component Debloat (INSERTED)
+
+**Goal:** Normalize all 38 Svelte components to follow the same clean patterns established in `DicePools.svelte`. Eliminate bloat: stores created inside `$effect`, redundant Foundry hook registrations, local `localize()` wrappers, `?? fallback` after dereferenced stores, and any code that fights Svelte 5 reactivity instead of leveraging it.
+
+**Depends on:** Phase 3
+
+**Plans:** 4 plans
+
+Plans:
+- [x] 3.1-01: Attributes.svelte + Dossier.svelte
+- [ ] 3.1-02: Health.svelte + AttributeCard.svelte
+- [ ] 3.1-03: Skills layer (Skills, SkillCard, SkillsActive/Knowledge/Language) + injections
+- [ ] 3.1-04: Item editors + common components + dialogs + TypeScript build
+
+**Rules to enforce across all files:**
+1. Stores are top-level `const` declarations — never inside `$effect` or `$state`
+2. `onDestroy(() => storeManager.Unsubscribe(actor))` — never inside `$effect` cleanup
+3. No local `localize()` wrapper — import from `services/utilities` only
+4. No `?? fallback` after a dereferenced store — stores always provide defaults
+5. No redundant Foundry hook registration for data that StoreManager already handles
+6. Required props typed as `{ actor: SR3EActor }` — no `= null` defaults unless genuinely optional
+7. `$derived` for computed values that read stores — no `$effect` writing to `$state` for display values
+
+**Details:**
+- `DicePools.svelte` is the reference implementation — all others follow its pattern
+- Actor components: `Health.svelte`, `Attributes.svelte`, `Dossier.svelte`, `Karma.svelte`, `Movement.svelte`, `Skills.svelte`, `SkillCard.svelte`
+- Item editors: `ActiveSkillEditorApp.svelte`, `KnowledgeSkillEditorApp.svelte`, `LanguageSkillEditorApp.svelte`
+- Remaining: character sheet, shopping mode injections, dialogs, any other Svelte files
+
+---
+
 ### Phase 4+: Skills System (Tentative)
 
 **Goal**: Complete skills implementation - buying, progression, testing, specializations.
@@ -338,6 +369,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
 | 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
+| 3.1. Svelte Component Debloat (INSERTED) | 1/4 | In Progress | - |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |
