@@ -1,5 +1,8 @@
 {
   "sr3e": {
+    "GMSCREEN": {
+      "storytellerscreen": "Storyteller's Screen"
+    },
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",
@@ -79,9 +82,9 @@
     },
     "modal": {
       "confirm": "Confirm",
-      "decline": "Cancel",
-      "deleteskill": "Are you sure you want to delete this skill?",
-      "deleteskilltitle": "Delete Skill"
+      "decline": "Decline",
+      "deleteskill": "Deleteskill",
+      "deleteskilltitle": "Deleteskilltitle"
     },
     "movement": {
       "movement": "Movement",

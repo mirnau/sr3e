@@ -1,5 +1,5 @@
 import { ATTRIBUTES_KEYS, CREATION_KEYS, DICE_POOLS_KEYS, HEALTH_KEYS, KARMA_KEYS, MOVEMENT_KEYS, PROFILE_KEYS } from "./config/AttributeComponentsConfig";
-import { CHARACTER_KEYS } from "./config/ActorConfig";
+import { CHARACTER_KEYS, GMSCREEN_KEYS } from "./config/ActorConfig";
 import { METATYPE_KEYS } from "./config/MetaTypeConfig";
 import { COMMON_KEYS, MODAL_KEYS } from "./config/CommonConfig";
 import { SKILL_KEYS } from "./config/SkillConfig";
@@ -32,7 +32,8 @@ export const sr3e = {
   PROFILE: createCategory("profile", PROFILE_KEYS),
   METATYPE:createCategory("metatype", METATYPE_KEYS),
   SKILL:createCategory("skill", SKILL_KEYS),
-  MODAL:createCategory("modal", MODAL_KEYS)
+  MODAL:createCategory("modal", MODAL_KEYS),
+  GMSCREEN:createCategory("GMSCREEN", GMSCREEN_KEYS)
 } as const;
 
 export type localizations = typeof sr3e;
