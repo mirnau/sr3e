@@ -10,6 +10,12 @@ export class KarmaDistributionService {
 
     private constructor() {}
 
+    getCharacterActors(): Actor[] {
+        const actors = game.actors as Collection<Actor> | undefined;
+        if (!actors) return [];
+        return [...actors.values()].filter(a => a.type === "character");
+    }
+
     async CommitSelected(actor: Actor): Promise<void> {
         // Only commit if actor is marked ready
         const system = actor.system as {
@@ -35,7 +41,7 @@ export class KarmaDistributionService {
         const newCeiling = Math.floor(newLifetime * factor);
         const newGoodKarma = newLifetime - spent - newCeiling;
 
-        await (actor as any).update({
+        await actor.update({
             "system.karma.lifetimeKarma": newLifetime,
             "system.karma.karmaPoolCeiling": newCeiling,
             "system.karma.goodKarma": newGoodKarma,

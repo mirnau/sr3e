@@ -1,20 +1,12 @@
 <script lang="ts">
-   import KarmaRow from "./KarmaRow.svelte";
-
-   interface KarmaRowApi {
-      CommitSelected(): Promise<void>;
-      Select(): void;
-      Deselect(): void;
-      readonly readyForCommit: boolean;
-   }
-
-   let { actor }: { actor: Actor } = $props();
+   import KarmaRow, { type KarmaRowApi } from "./KarmaRow.svelte";
+   import { KarmaDistributionService } from "../../../services/karma/KarmaDistributionService";
 
    let delimiter = $state("");
    const rowRefs = new Map<string, KarmaRowApi>();
    let anyReady = $state(false);
 
-   const allActors = [...(game.actors as any).values()].filter((a: Actor) => a.type === "character");
+   const allActors = KarmaDistributionService.Instance().getCharacterActors();
 
    const filteredActors = $derived(
       delimiter.length > 0
@@ -83,40 +75,3 @@
       <p>No characters found.</p>
    {/if}
 </div>
-
-<style>
-   .karma-manager {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-   }
-
-   .karma-manager__toolbar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-   }
-
-   .karma-manager__search {
-      flex: 1;
-      min-width: 120px;
-   }
-
-   .karma-manager__table {
-      width: 100%;
-      border-collapse: collapse;
-   }
-
-   .karma-manager__table th,
-   .karma-manager__table :global(td) {
-      padding: 4px 8px;
-      text-align: left;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-   }
-
-   .karma-manager__table th {
-      font-weight: 600;
-      background: rgba(0, 0, 0, 0.05);
-   }
-</style>
