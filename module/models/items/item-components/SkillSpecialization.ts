@@ -1,5 +1,5 @@
 
-export default class SkillSpecializationModel extends foundry.abstract.DataModel<SkillSpecializationSchema, BaseItem> {
+export default class SkillSpecializationModel extends foundry.abstract.TypeDataModel<SkillSpecializationSchema, BaseItem> {
   static defineSchema(): SkillSpecializationSchema {
     return {
       name: new StringField({

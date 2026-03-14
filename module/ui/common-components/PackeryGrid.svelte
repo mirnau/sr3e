@@ -34,10 +34,10 @@
    });
 </script>
 
-<div bind:this={container} class={`${gridPrefix}-packery-grid`} 
+<div bind:this={container} class={`${gridPrefix}-packery-grid`}
    onpackeryreflow={() => {
-      packeryInstance?.layout(); 
-      console.log("CAT CAT CAT")}}>
+      packeryInstance?.layout();
+   }}>
    <div class={`${gridPrefix}-grid-sizer`}></div>
    <div class={`${gridPrefix}-gutter-sizer`}></div>
    {@render children?.()}

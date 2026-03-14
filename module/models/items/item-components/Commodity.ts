@@ -10,7 +10,7 @@ type CommoditySchema = {
   isBroken: BooleanField;
 };
 
-export default class CommodityModel extends foundry.abstract.DataModel<
+export default class CommodityModel extends foundry.abstract.TypeDataModel<
   CommoditySchema,
   BaseItem
 > {

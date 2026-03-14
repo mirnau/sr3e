@@ -3,10 +3,10 @@
 </script>
 
 <div class={span === "dynamic" ? "packery-grid-item span-dynamic" : `packery-grid-item span-${span}`}>
-   <div class={"sheet-card-component "}>
-      <div class={"sheet-card-shadow"}></div>
-      <div class={"sheet-card-outline"}>
-         <div class={"sheet-card-displayarea"}></div>
+   <div class="sheet-card-component">
+      <div class="sheet-card-shadow"></div>
+      <div class="sheet-card-outline">
+         <div class="sheet-card-displayarea"></div>
          {@render children?.()}
       </div>
    </div>

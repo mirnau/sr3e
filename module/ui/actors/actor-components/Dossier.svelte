@@ -55,7 +55,7 @@ function editImage(): void {
    if (!actor) return;
    const fp = new FilePicker({
       type: "image",
-      current: actor.img ?? "",
+      current: actor?.img,
       callback: (path: string) => actor.update({ img: path }),
    });
    fp.browse();

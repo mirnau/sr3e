@@ -15,19 +15,13 @@
     const SKILL_CATEGORY: SkillCategory = "knowledge";
     const spendingService = SkillSpendingService.Instance();
 
-    // ─── Linked attribute rating (Intelligence — always the linked attr for knowledge skills per SR3e rules) ──────────────────────────────
-
     const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
     const linkedAttrRating =
         Number(attrs["intelligence"]?.value ?? 0) + Number(attrs["intelligence"]?.modifier ?? 0);
 
-    // ─── StoreManager setup ───────────────────────────────────────────────────
-
     const storeManager = StoreManager.Instance as IStoreManager;
     storeManager.Subscribe(actor);
     storeManager.Subscribe(skill);
-
-    // ─── Stores ───────────────────────────────────────────────────────────────
 
     const isCreation = storeManager.GetFlagStore<boolean>(actor, "isCharacterCreation", false);
     const valueStore = storeManager.GetRWStore<number>(skill, "knowledgeSkill.value");
@@ -36,43 +30,35 @@
         "knowledgeSkill.specializations"
     );
 
-    // ─── Derived state ────────────────────────────────────────────────────────
-
     const disableControls = $derived($isCreation && $specializationsStore.length > 0);
-
-    // ─── Commit trigger exposure ──────────────────────────────────────────────
 
     $effect(() => {
         if (app) {
-            app.requestCommit = () => { /* Phase 3: karma commit hook */ };
+            app.requestCommit = () => { };
         }
     });
 
-    // ─── Increment / Decrement ────────────────────────────────────────────────
-
     function increment(): void {
-        if (!$isCreation) return; // Phase 3: karma shopping
+        if (!$isCreation) return;
         if (!spendingService.canIncrease(actor, skill, SKILL_CATEGORY, linkedAttrRating)) return;
         spendingService.increase(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
     function decrement(): void {
-        if (!$isCreation) return; // Phase 3: karma shopping
+        if (!$isCreation) return;
         if (!spendingService.canDecrease(actor, skill, SKILL_CATEGORY)) return;
         spendingService.decrease(actor, skill, SKILL_CATEGORY, linkedAttrRating);
     }
 
-    // ─── Specializations ──────────────────────────────────────────────────────
-
     function addSpecialization(): void {
         if (!$isCreation) return;
         if ($specializationsStore.length > 0) {
-            ui.notifications?.info(localize(CONFIG.SR3E.SKILL?.onlyonespecializationatcreation ?? "sr3e.skill.onlyonespecializationatcreation"));
+            ui.notifications?.info(localize(CONFIG.SR3E.SKILL?.onlyonespecializationatcreation));
             return;
         }
         if ($valueStore <= 1) return;
         const newSpec = {
-            name: localize(CONFIG.SR3E.SKILL?.newspecialization ?? "sr3e.skill.newspecialization"),
+            name: localize(CONFIG.SR3E.SKILL?.newspecialization),
             value: $valueStore + 1,
         };
         $valueStore -= 1;
@@ -83,8 +69,6 @@
         $specializationsStore = $specializationsStore.filter((s) => s !== spec);
         if ($isCreation) $valueStore += 1;
     }
-
-    // ─── Delete skill ─────────────────────────────────────────────────────────
 
     async function deleteSkill(): Promise<void> {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -107,8 +91,6 @@
         }
     }
 
-    // ─── Cleanup ──────────────────────────────────────────────────────────────
-
     onDestroy(() => {
         storeManager.Unsubscribe(actor);
         storeManager.Unsubscribe(skill);
@@ -119,26 +101,18 @@
 </script>
 
 <ItemSheetWrapper csslayout="single">
-
-    <!-- Image -->
-    <ItemSheetComponent>
+<ItemSheetComponent>
         <Image entity={skill} />
     </ItemSheetComponent>
-
-    <!-- Skill HUD panel -->
-    <ItemSheetComponent>
+<ItemSheetComponent>
         <div class="skill-hud-panel">
-
-            <!-- Title + value on one line -->
-            <div class="skill-hud-display">
+<div class="skill-hud-display">
                 <div class="skill-hud-title-row">
                     <h2 class="skill-hud-name no-margin">{skill.name}</h2>
                     <h2 class="skill-hud-value-badge no-margin">{$valueStore}</h2>
                 </div>
             </div>
-
-            <!-- Controls: − + 🗑 -->
-            <div class="skill-hud-controls">
+<div class="skill-hud-controls">
                 <button
                     type="button"
                     class="skill-hud-btn"
@@ -160,26 +134,22 @@
                     onclick={deleteSkill}
                 ><i class="fa-solid fa-trash-can"></i></button>
             </div>
-
-            <!-- Add specialization -->
-            <button
+<button
                 type="button"
                 class="skill-add-spec-btn"
                 aria-label="Add specialization"
                 onclick={addSpecialization}
                 disabled={$valueStore <= 1 || $specializationsStore.length > 0}
             >
-                {localize(CONFIG.SR3E.SKILL?.specialize ?? "sr3e.skill.specialize")}
+                {localize(CONFIG.SR3E.SKILL?.specialize)}
             </button>
 
         </div>
     </ItemSheetComponent>
-
-    <!-- Specializations -->
-    {#if $specializationsStore.length > 0}
+{#if $specializationsStore.length > 0}
         <ItemSheetComponent>
             <div class="skill-hud-spec-header">
-                <span>{localize(CONFIG.SR3E.SKILL?.specializations ?? "SR3E.skill.specializations")}</span>
+                <span>{localize(CONFIG.SR3E.SKILL?.specializations)}</span>
             </div>
             <div class="skill-hud-spec-list">
                 {#each $specializationsStore as _spec, i}

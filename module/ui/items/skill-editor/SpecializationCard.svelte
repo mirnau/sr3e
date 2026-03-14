@@ -18,8 +18,6 @@
         onincrement?: (spec: { name: string; value: number }) => void;
         ondecrement?: (spec: { name: string; value: number }) => void;
     } = $props();
-
-    // Suppress unused variable warnings — actor and skill are part of the public API
     void actor;
     void skill;
 

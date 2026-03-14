@@ -37,8 +37,6 @@
       } else if (item && path) {
          item.update({ [`${path}.${key}`]: val }, { render: false });
       }
-
-      // Update bindable value
       value = val;
    }
 </script>
