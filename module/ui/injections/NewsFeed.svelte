@@ -19,14 +19,14 @@
    getNewsService();
 
    let isOn = $state(true);
-   let ticker: HTMLDivElement | undefined = $state();
-   let outer: HTMLDivElement | undefined = $state();
-   let inner: HTMLDivElement | undefined = $state();
-   let headlinePool: string[] = $state([]);
-   let nextIndex = $state(0);
+   let ticker: HTMLDivElement | undefined;
+   let inner: HTMLDivElement | undefined;
+   let headlinePool: string[] = [];
+   let nextIndex = 0;
    let carts = $state<{ id: number; text: string }[]>([]);
    let offset = 0;
    let rafId: number | null = null;
+   let running = false;
    let lastTick = 0;
    let idCounter = 0;
    let lastFrameUpdate = 0;
@@ -81,16 +81,18 @@
          cartUpdateThisFrame = true;
       }
 
-      rafId = requestAnimationFrame(step);
+      if (running) rafId = requestAnimationFrame(step);
    }
 
    function startLoop() {
       if (rafId) cancelAnimationFrame(rafId);
+      running = true;
       lastTick = 0;
       rafId = requestAnimationFrame(step);
    }
 
    function stopLoop() {
+      running = false;
       if (rafId) cancelAnimationFrame(rafId);
       rafId = null;
    }
@@ -144,7 +146,7 @@
 </script>
 
 <div class="ticker" bind:this={ticker}>
-   <div class="marquee-outer" bind:this={outer}>
+   <div class="marquee-outer">
       <div
          class="marquee-inner"
          bind:this={inner}
@@ -155,7 +157,7 @@
       >
          {#if isOn}
             {#each carts as cart (cart.id)}
-               <span class="marquee-item" style="transform: translateZ(0);">{cart.text}</span>
+               <span class="marquee-item">{cart.text}</span>
             {/each}
          {:else}
             <span> </span>
