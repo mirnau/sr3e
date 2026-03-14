@@ -1,7 +1,7 @@
 <script lang="ts">
    import { getNewsService, currentDisplayFrame } from "../../services/news-service/NewsService.svelte";
    import { NewsConfig } from "../../services/news-service/NewsConfig";
-   import { onMount } from "svelte";
+   import { onMount, tick } from "svelte";
 
    interface NewsMessage {
       sender: string;
@@ -51,7 +51,7 @@
       }));
    }
 
-   function step(now: number) {
+   async function step(now: number) {
       if (!lastTick) lastTick = now;
       const dt = (now - lastTick) / 1000;
       lastTick = now;
@@ -61,15 +61,18 @@
       if (inner) {
          inner.style.transform = `translate3d(${offset}px, 0, 0)`;
       }
+
       if (!cartUpdateThisFrame && carts.length && inner?.firstElementChild instanceof HTMLElement) {
          const firstWidth = inner.firstElementChild.offsetWidth;
          if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
-            offset += firstWidth + GAP_PX;
+            const correction = firstWidth + GAP_PX;
+            carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
+            cartUpdateThisFrame = true;
+            await tick();
+            offset += correction;
             if (inner) {
                inner.style.transform = `translate3d(${offset}px, 0, 0)`;
             }
-            carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
-            cartUpdateThisFrame = true;
          }
       }
 
@@ -148,7 +151,7 @@
          role="status"
          aria-live="polite"
          aria-label="News Feed"
-         style={`animation: none; column-gap: ${GAP_PX}px; will-change: transform; backface-visibility: hidden;`}
+         style={`column-gap: ${GAP_PX}px;`}
       >
          {#if isOn}
             {#each carts as cart (cart.id)}
