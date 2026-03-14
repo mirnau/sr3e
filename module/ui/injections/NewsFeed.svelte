@@ -29,11 +29,9 @@
    let running = false;
    let lastTick = 0;
    let idCounter = 0;
-   let lastFrameUpdate = 0;
    let cartUpdateThisFrame = false;
 
    const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
-   const RESYNC_COOLDOWN_MS = 500;
 
    function nextHeadline(): string {
       const pool = headlinePool.length ? headlinePool : FALLBACK;
@@ -105,11 +103,6 @@
       );
       headlinePool = incoming;
       nextIndex = 0;
-      lastFrameUpdate = Date.now();
-
-      game.socket.emit("module.sr3e", {
-         type: "forceResync",
-      });
    }
 
    function handleKeydown(event: KeyboardEvent) {
@@ -125,21 +118,11 @@
 
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
 
-      const handleResync = () => {
-         const timeSinceLastUpdate = Date.now() - lastFrameUpdate;
-         if (timeSinceLastUpdate < RESYNC_COOLDOWN_MS) {
-            return;
-         }
-         seedTrain();
-      };
-
       window.addEventListener("keydown", handleKeydown);
-      Hooks.on("sr3e.forceResync", handleResync);
 
       return () => {
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
-         Hooks.off("sr3e.forceResync", handleResync);
          stopLoop();
       };
    });
