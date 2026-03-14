@@ -8,16 +8,3 @@
     <KarmaManager {actor} />
   </div>
 </div>
-
-<style>
-  .storyteller-screen {
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    gap: 8px;
-  }
-  .storyteller-screen__panel {
-    border-radius: 4px;
-    padding: 8px;
-  }
-</style>

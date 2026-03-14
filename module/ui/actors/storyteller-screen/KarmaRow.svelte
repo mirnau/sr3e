@@ -1,15 +1,17 @@
-<script lang="ts">
-   import { onDestroy, onMount } from "svelte";
-   import type { IStoreManager } from "../../../utilities/IStoreManager";
-   import { StoreManager } from "../../../utilities/StoreManager.svelte";
-   import { KarmaDistributionService } from "../../../services/karma/KarmaDistributionService";
-
-   interface KarmaRowApi {
+<script lang="ts" module>
+   export interface KarmaRowApi {
       CommitSelected(): Promise<void>;
       Select(): void;
       Deselect(): void;
       readonly readyForCommit: boolean;
    }
+</script>
+
+<script lang="ts">
+   import { onDestroy, onMount } from "svelte";
+   import type { IStoreManager } from "../../../utilities/IStoreManager";
+   import { StoreManager } from "../../../utilities/StoreManager.svelte";
+   import { KarmaDistributionService } from "../../../services/karma/KarmaDistributionService";
 
    let {
       actor,
@@ -63,7 +65,7 @@
 </script>
 
 <tr>
-   <td><img src={actor.img} alt={actor.name} /></td>
+   <td><img class="portrait" src={actor.img} alt={actor.name} /></td>
    <td>{actor.name}</td>
    <td><input type="number" bind:value={$pendingKarmaReward} min="0" /></td>
    <td>{$goodKarma}</td>
@@ -71,16 +73,3 @@
    <td>{$lifetimeKarma}</td>
    <td><input type="checkbox" bind:checked={$readyForCommit} /></td>
 </tr>
-
-<style>
-   td img {
-      width: 32px;
-      height: 32px;
-      object-fit: cover;
-      border-radius: 2px;
-   }
-
-   td input[type="number"] {
-      width: 60px;
-   }
-</style>
