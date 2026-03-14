@@ -4,6 +4,7 @@ import { SR3EActorBase } from "./SR3EActorBase";
 
 export default class StorytellerScreenSheet extends SR3EActorBase {
 	get title() {
+		this.actor.name = localize(CONFIG.SR3E.GMSCREEN.storytellerscreen);
 		return this.actor.name;
 	}
 
@@ -33,7 +34,6 @@ export default class StorytellerScreenSheet extends SR3EActorBase {
 		const app = mount(StorytellerScreenApp, {
 			target: windowContent,
 			props: {
-				actor: this.document as Actor,
 			},
 		});
 		this.apps.push(app);
