@@ -5,8 +5,13 @@
 	gap: 8px;
 
 	&__panel {
-		border-radius: 4px;
-		padding: 8px;
+		width: 100%;
+		box-sizing: border-box;
+
+		&--primary {
+			max-height: 50vh;
+			overflow-y: auto;
+		}
 	}
 }
 
