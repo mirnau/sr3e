@@ -181,7 +181,6 @@
                 0 0 3px oklch(0% 0 0 / 0.4);
               letter-spacing: 0.05em;
               line-height: 1;
-              will-change: contents;
               animation: hologram-flicker 4s ease-in-out infinite;
 
               &:nth-child(2n) {
@@ -252,49 +251,12 @@
     }
   }
 
-  // Holographic text flicker
+  // Holographic text flicker — opacity only (GPU-compositable, no repaint)
   @keyframes hologram-flicker {
-
-    0%,
-    100% {
-      opacity: 0.95;
-      text-shadow:
-        0 0 2px rgba(255, 255, 255, 0.8),
-        0 0 4px rgba(0, 255, 255, 0.6),
-        0 0 8px rgba(0, 255, 255, 0.4),
-        0 0 12px rgba(0, 255, 255, 0.2),
-        0 0 3px oklch(0% 0 0 / 0.4);
-    }
-
-    25% {
-      opacity: 1;
-      text-shadow:
-        0 0 3px rgba(255, 255, 255, 1),
-        0 0 6px rgba(0, 255, 255, 0.8),
-        0 0 10px rgba(0, 255, 255, 0.5),
-        0 0 16px rgba(0, 255, 255, 0.3),
-        0 0 3px oklch(0% 0 0 / 0.4);
-    }
-
-    50% {
-      opacity: 0.97;
-      text-shadow:
-        0 0 2px rgba(255, 255, 255, 0.9),
-        0 0 5px rgba(0, 255, 255, 0.7),
-        0 0 9px rgba(0, 255, 255, 0.45),
-        0 0 14px rgba(0, 255, 255, 0.25),
-        0 0 3px oklch(0% 0 0 / 0.4);
-    }
-
-    75% {
-      opacity: 1;
-      text-shadow:
-        0 0 3px rgba(255, 255, 255, 1),
-        0 0 6px rgba(0, 255, 255, 0.8),
-        0 0 10px rgba(0, 255, 255, 0.5),
-        0 0 16px rgba(0, 255, 255, 0.3),
-        0 0 3px oklch(0% 0 0 / 0.4);
-    }
+    0%, 100% { opacity: 0.92; }
+    25%       { opacity: 1; }
+    50%       { opacity: 0.96; }
+    75%       { opacity: 1; }
   }
 
   @keyframes news-glow {
