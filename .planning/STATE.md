@@ -100,7 +100,9 @@ None yet.
 
 ### Blockers/Concerns Carried Forward
 
-None.
+| Phase | Concern | Resolution |
+|-------|---------|------------|
+| 3 | Karma spending end-to-end not fully verified | Storyteller screen is now built — needs manual test: distribute karma via StorytellerScreen, then spend it on a character. |
 
 ## Project Alignment
 
