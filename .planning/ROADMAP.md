@@ -417,11 +417,11 @@ Will need to break this down into sub-phases after understanding scope better.
 |-------|----------------|--------|-----------|
 | 1. Character Creation Foundation | 3/3 | Complete | 2025-12-18 |
 | 2. Character Creation Shopping Mode | 4/4 | Complete | 2026-03-03 |
-| 2.1. Shopping Mode Bug Fixes (INSERTED) | 0/? | Not started | - |
-| 2.2. Health Component Visual Polish (INSERTED) | 0/? | Not started | - |
+| 2.1. Shopping Mode Bug Fixes (INSERTED) | — | Complete (no plans needed) | 2026-03-15 |
+| 2.2. Health Component Visual Polish (INSERTED) | — | Complete (no plans needed) | 2026-03-15 |
 | 2.3. Skills Component (INSERTED) | 1/1 | Complete | 2026-03-08 |
 | 2.4. Buying Mechanics Overhaul (INSERTED) | 2/2 | Complete | 2026-03-13 |
-| 2.5. Character Sheet UX Polish (INSERTED) | 0/? | Not started | - |
+| 2.5. Character Sheet UX Polish (INSERTED) | — | Complete (no plans needed) | 2026-03-15 |
 | 3. Karma & Experience Core | 3/3 | Complete | 2026-03-13 |
 | 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
 | 3.2. Storyteller Screen (INSERTED) | 2/2 | Complete | 2026-03-14 |
