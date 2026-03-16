@@ -1,7 +1,7 @@
 <script lang="ts">
    import { getNewsService, currentDisplayFrame } from "../../services/news-service/NewsService.svelte";
    import { NewsConfig } from "../../services/news-service/NewsConfig";
-   import { onMount, tick } from "svelte";
+   import { onMount } from "svelte";
 
    interface NewsMessage {
       sender: string;
@@ -29,7 +29,6 @@
    let running = false;
    let lastTick = 0;
    let idCounter = 0;
-   let cartUpdateThisFrame = false;
 
    const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
 
@@ -49,34 +48,28 @@
       }));
    }
 
-   async function step(now: number) {
+   function step(now: number) {
       if (!lastTick) lastTick = now;
       const dt = (now - lastTick) / 1000;
       lastTick = now;
-      cartUpdateThisFrame = false;
 
       offset -= SCROLL_SPEED * dt;
-      if (inner) {
-         inner.style.transform = `translate3d(${offset}px, 0, 0)`;
-      }
+      if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
 
-      if (!cartUpdateThisFrame && carts.length && inner?.firstElementChild instanceof HTMLElement) {
+      if (carts.length && inner?.firstElementChild instanceof HTMLElement) {
          const firstWidth = inner.firstElementChild.offsetWidth;
          if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
             const correction = firstWidth + GAP_PX;
-            carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
-            cartUpdateThisFrame = true;
-            await tick();
+            // Apply correction before mutating carts — both land in the same paint
+            // (Svelte flushes the DOM removal as a microtask, before the browser paints)
             offset += correction;
-            if (inner) {
-               inner.style.transform = `translate3d(${offset}px, 0, 0)`;
-            }
+            if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
+            carts = [...carts.slice(1), { id: ++idCounter, text: nextHeadline() }];
          }
       }
 
-      if (!cartUpdateThisFrame && carts.length < 3) {
+      if (carts.length < 3) {
          carts = [...carts, { id: ++idCounter, text: nextHeadline() }];
-         cartUpdateThisFrame = true;
       }
 
       if (running) rafId = requestAnimationFrame(step);
@@ -134,8 +127,6 @@
          class="marquee-inner"
          bind:this={inner}
          role="status"
-         aria-live="polite"
-         aria-label="News Feed"
          style={`column-gap: ${GAP_PX}px;`}
       >
          {#if isOn}
