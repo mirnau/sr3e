@@ -62,10 +62,6 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 - Import via Vite aliases only. Aliases are defined in [`vite.config.ts`](vite.config.ts).
 - Prefer clear, explicit names over comments. Use whole words.
 - Use strict TypeScript — no `any`, no `@ts-ignore` without a comment explaining why.
-- Use DEBUG‑gated logging. Example:
-  ```ts
-  DEBUG && LOG.info("Mounted FirearmSheet", [__FILE__, __LINE__], { actorId });
-  ```
 
 ### Foundry V2
 
