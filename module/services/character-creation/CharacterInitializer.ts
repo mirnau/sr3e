@@ -87,7 +87,7 @@ export class CharacterInitializer {
 			"system.attributes.essence.value": 6,
 
 			// Initialize karma pool
-			"system.karmaPool": 1,
+			"system.karma.karmaPool.value": 1,
 		};
 
 		// Step 3: Update the actor

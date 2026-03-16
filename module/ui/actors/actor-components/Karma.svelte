@@ -14,7 +14,7 @@ const localization = $derived(CONFIG.SR3E.KARMA);
 
 storeManager.Subscribe(actor);
 
-const lifetimeKarmaStore = storeManager.GetRWStore<number>(actor, "karma.lifetimeKarma");
+const karmaPool = storeManager.GetSimpleStatROStore(actor, "karma.karmaPool");
 const goodKarmaStore = storeManager.GetRWStore<number>(actor, "karma.goodKarma");
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
 const shoppingKarmaSession = storeManager.GetShallowStore<any>(actor, "shoppingKarmaSession", { active: false, stagedSpent: 0, attrSnapshot: {} });
@@ -36,7 +36,7 @@ onDestroy(() => storeManager.Unsubscribe(actor));
    <h1>{localize(localization.karma)}</h1>
    <div class="stat-card-grid">
 <StatCard label={localize(localization.karma)}>
-         <span class="attribute-value">{$lifetimeKarmaStore ?? 0}</span>
+         <span class="attribute-value">{$karmaPool ?? 0}</span>
       </StatCard>
 <StatCard label={localize(localization.goodKarma)}>
          <span class="attribute-value">{$goodKarmaDisplay ?? 0}</span>
