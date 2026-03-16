@@ -20,11 +20,12 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 ## 2) Tech
 
 
-- JavaScript (ESNext): [MDN JavaScript](https://developer.mozilla.org/docs/Web/JavaScript) | [ECMAScript Spec](https://tc39.es/ecma262/)
+- TypeScript (strict): [TypeScript Docs](https://www.typescriptlang.org/docs/) | [tsconfig](tsconfig.json)
 - Svelte 5 (runes): [Svelte Docs](https://svelte.dev/docs/svelte/overview)
-- LESS: [lesscss.org](https://lesscss.org/)
+- SCSS: [Sass Docs](https://sass-lang.com/documentation/)
 - Vite bundler: [Vite Guide](https://vite.dev/guide/)
 - Build/watch: `npm run build` or `npm run watch` (Vite)
+- Type check: `npm run typecheck` (tsc --noEmit)
 - Foundry v13.342 (V2): [Foundry API v13](https://foundryvtt.com/api/) | [Systems Guide](https://foundryvtt.com/article/systems/)
 - Node 22.x: [Node.js 22 Docs](https://nodejs.org/docs/latest-v22.x/)
 
@@ -37,7 +38,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 - Run `npm ci`.
 - Clone or copy the repo directly into `FoundryVTT/Data/systems/sr3e`.
 - For the first build you can run `npm run build`.
-- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild JS/Svelte/LESS on change.
+- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild TS/Svelte/SCSS on change.
 
 **Option B: Symlink (according to AI)**
 
@@ -48,7 +49,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
   - macOS: `ln -s /path/to/repo ~/Library/Application\ Support/FoundryVTT/Data/systems/sr3e`
   - Linux: `ln -s /path/to/repo ~/.local/share/FoundryVTT/Data/systems/sr3e`
 - For the first build you can run `npm run build`.
-- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild JS/Svelte/LESS on change.
+- Run `npm run watch` (auto-starts from the VS Code workspace task) to rebuild TS/Svelte/SCSS on change.
 
 ---
 
@@ -56,12 +57,13 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 
 ### Code style & structure
 
-- Follow **JavaScript conventions** (lower camelCase for variables/functions, PascalCase for classes). Follow **LESS conventions** (kebab-case filenames, variables/mixins in shared files).
+- Follow **TypeScript conventions** (lower camelCase for variables/functions, PascalCase for classes/types/interfaces). Follow **SCSS conventions** (kebab-case filenames, variables/mixins in shared files).
 - Keep modules focused (one purpose per file).
-- Import via Vite aliases only. Aliases are defined in [`vite.config.js`](vite.config.js).
+- Import via Vite aliases only. Aliases are defined in [`vite.config.ts`](vite.config.ts).
 - Prefer clear, explicit names over comments. Use whole words.
+- Use strict TypeScript — no `any`, no `@ts-ignore` without a comment explaining why.
 - Use DEBUG‑gated logging. Example:
-  ```js
+  ```ts
   DEBUG && LOG.info("Mounted FirearmSheet", [__FILE__, __LINE__], { actorId });
   ```
 
@@ -75,7 +77,7 @@ Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
 
 Treat `sr3e.*` as the **baseline reference** used across UI and logic. Use these keys directly; add new options **in config first**, then add matching i18n keys. Changing existing keys without updating all call sites will break dropdowns and labels across sheets.
 
-```js
+```ts
 sr3e.damageType = { l: "sr3e.damageType.l", m: "sr3e.damageType.m", s: "sr3e.damageType.s", d: "sr3e.damageType.d", lStun: "sr3e.damageType.lStun", mStun: "sr3e.damageType.mStun", sStun: "sr3e.damageType.sStun", dStun: "sr3e.damageType.dStun" };
 
 sr3e.weaponMode = { manual: "sr3e.weaponMode.manual", semiauto: "sr3e.weaponMode.semiauto", burst: "sr3e.weaponMode.burst", fullauto: "sr3e.weaponMode.fullauto", blade: "sr3e.weaponMode.blade", explosive: "sr3e.weaponMode.explosive", energy: "sr3e.weaponMode.energy", blunt: "sr3e.weaponMode.blunt" };
@@ -190,7 +192,11 @@ Open a Pull Request on GitHub from your branch → `main`. Describe changes, inc
 
 ### Pull Request Checklist
 
--
+- [ ] TypeScript compiles cleanly (`npm run typecheck`)
+- [ ] No `any` types introduced without justification
+- [ ] Manual verification steps listed in PR description
+- [ ] SR3 page references included where applicable
+- [ ] Screenshots/GIFs attached for UI changes
 
 ## 9) Releases
 
@@ -217,6 +223,7 @@ Open a Pull Request on GitHub from your branch → `main`. Describe changes, inc
 
 ## 12) Done
 
+- TypeScript strict mode throughout (`noImplicitAny`, `strict: true`)
 - V2 patterns in use
 - Models are state only
 - Logging behind DEBUG
