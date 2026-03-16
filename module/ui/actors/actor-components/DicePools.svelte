@@ -14,45 +14,36 @@
 
    const localization = $derived(CONFIG.SR3E.DICE_POOLS);
 
-   function sumStore(path: string) {
-      const value = storeManager.GetRWStore<number>(actor, `${path}.value`);
-      const modifier = storeManager.GetRWStore<number>(
-         actor,
-         `${path}.modifier`,
-      );
-      return storeManager.GetSumROStore([value, modifier]);
-   }
-
    storeManager.Subscribe(actor);
 
-   const intelligence = sumStore("attributes.intelligence");
-   const willpower = sumStore("attributes.willpower");
-   const charisma = sumStore("attributes.charisma");
-   const quickness = sumStore("attributes.quickness");
-   const reaction = sumStore("attributes.reaction");
-   const magic = sumStore("attributes.magic");
+   const intelligence = storeManager.GetSimpleStatROStore(actor, "attributes.intelligence");
+   const willpower = storeManager.GetSimpleStatROStore(actor, "attributes.willpower");
+   const charisma = storeManager.GetSimpleStatROStore(actor, "attributes.charisma");
+   const quickness = storeManager.GetSimpleStatROStore(actor, "attributes.quickness");
+   const reaction = storeManager.GetSimpleStatROStore(actor, "attributes.reaction");
+   const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
 
-   const combat = sumStore("dicePools.combat");
+   const combat = storeManager.GetSimpleStatROStore(actor, "dicePools.combat");
    const combatValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.combat.value",
    );
-   const control = sumStore("dicePools.control");
+   const control = storeManager.GetSimpleStatROStore(actor, "dicePools.control");
    const controlValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.control.value",
    );
-   const hacking = sumStore("dicePools.hacking");
+   const hacking = storeManager.GetSimpleStatROStore(actor, "dicePools.hacking");
    const hackingValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.hacking.value",
    );
-   const astral = sumStore("dicePools.astral");
+   const astral = storeManager.GetSimpleStatROStore(actor, "dicePools.astral");
    const astralValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.astral.value",
    );
-   const spell = sumStore("dicePools.spell");
+   const spell = storeManager.GetSimpleStatROStore(actor, "dicePools.spell");
    const spellValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.spell.value",

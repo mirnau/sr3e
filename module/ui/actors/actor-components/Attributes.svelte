@@ -14,17 +14,11 @@ let attributeKeys = $derived(Object.keys(attributes).slice(0, 7));
 
 const localization = $derived(CONFIG.SR3E.ATTRIBUTES);
 
-function createAttributeSumStore(attrPath: string) {
-   const valueStore = storeManager.GetRWStore<number>(actor, `${attrPath}.value`);
-   const modifierStore = storeManager.GetRWStore<number>(actor, `${attrPath}.modifier`);
-   return storeManager.GetSumROStore([valueStore, modifierStore]);
-}
-
 storeManager.Subscribe(actor);
 
-const intelligence = createAttributeSumStore("attributes.intelligence");
-const quickness = createAttributeSumStore("attributes.quickness");
-const reaction = createAttributeSumStore("attributes.reaction");
+const intelligence = storeManager.GetSimpleStatROStore(actor, "attributes.intelligence");
+const quickness = storeManager.GetSimpleStatROStore(actor, "attributes.quickness");
+const reaction = storeManager.GetSimpleStatROStore(actor, "attributes.reaction");
 
 const isAwakened = $derived(
    actor.items.some((item: any) => item.type === "magic") &&

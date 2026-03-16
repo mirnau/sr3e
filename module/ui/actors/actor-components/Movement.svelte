@@ -13,24 +13,15 @@
       actor?.items.find((i: any) => i.type === "metatype"),
    );
 
-   function sumStore(path: string) {
-      const value = storeManager.GetRWStore<number>(actor, `${path}.value`);
-      const modifier = storeManager.GetRWStore<number>(
-         actor,
-         `${path}.modifier`,
-      );
-      return storeManager.GetSumROStore([value, modifier]);
-   }
-
    storeManager.Subscribe(actor);
 
-   const quicknessStore = sumStore("attributes.quickness");
-   const walking = sumStore("movement.walking");
+   const quicknessStore = storeManager.GetSimpleStatROStore(actor, "attributes.quickness");
+   const walking = storeManager.GetSimpleStatROStore(actor, "movement.walking");
    const walkingValue = storeManager.GetRWStore<number>(
       actor,
       "movement.walking.value",
    );
-   const running = sumStore("movement.running");
+   const running = storeManager.GetSimpleStatROStore(actor, "movement.running");
    const runningValue = storeManager.GetRWStore<number>(
       actor,
       "movement.running.value",

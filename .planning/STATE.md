@@ -20,10 +20,10 @@
 
 ## Current Position
 
-Phase: 3.3 — complete
-Plan: 1 of 1 in phase 3.3 complete
-Status: Phase 3.3 complete. TimeService + TimeActuatorInput + TimeManager implemented and wired into StorytellerScreenApp. Phase 3 milestone fully complete — ready for Phase 4+ roadmap review.
-Last activity: 2026-03-14 - Phase 3.3-01 complete: TimeService, TimeActuatorInput, TimeManager, StorytellerScreenApp wired
+Phase: 3.4 — complete
+Plan: 1 of 1 in phase 3.4 complete
+Status: Phase 3.4 complete. Consolidated scattered sumStore helpers into GetSimpleStatROStore on StoreManager; fixed silent .modifier → .mod bug that zeroed all modifiers. Phase 3 milestone fully complete — ready for Phase 4+ roadmap review.
+Last activity: 2026-03-16 - Phase 3.4-01 complete: GetSimpleStatROStore added to StoreManager + IStoreManager, DicePools + Attributes + Movement updated
 
 Progress: █████████░ ~88%
 
@@ -85,6 +85,7 @@ Progress: █████████░ ~88%
 
 ### Roadmap Evolution
 
+- Phase 3.4 inserted after Phase 3.3: Dice Pools StoreManager Architectural Fix — fix architectural mishap in DicePools that requires updating StoreManager (URGENT)
 - Phase 3.3 inserted after Phase 3.2: Time Manager — TimeService + TimeManager Svelte component for in-game world clock. Deferred from Phase 3.2 to keep it focused on karma distribution.
 - Phase 3.2 inserted after Phase 3.1: Storyteller Screen actor — GM karma distribution dashboard (KarmaManager + search). Dice Pool Manager deferred to sockets/game loop phase. Unblocks Phase 3 karma spending verification.
 - Phase 3.1 inserted after Phase 3: Svelte component debloat — normalize all 38 Svelte files to DicePools.svelte patterns (stores as top-level const, no redundant hooks, no localize wrappers, no ?? after stores, required actor props) (URGENT)
@@ -113,6 +114,6 @@ Drift notes: None
 
 ## Session Continuity
 
-Last session: 2026-03-14
-Stopped at: Phase 3.1 complete — all 4 plans done, all 38 Svelte files normalized, TypeScript build clean
+Last session: 2026-03-16
+Stopped at: Phase 3.4 complete — GetSimpleStatROStore added, sumStore helpers removed from DicePools/Attributes/Movement, .mod bug fixed, TypeScript build clean
 Resume file: None
