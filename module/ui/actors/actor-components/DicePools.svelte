@@ -16,11 +16,26 @@
 
    storeManager.Subscribe(actor);
 
-   const intelligence = storeManager.GetSimpleStatROStore(actor, "attributes.intelligence");
-   const willpower = storeManager.GetSimpleStatROStore(actor, "attributes.willpower");
-   const charisma = storeManager.GetSimpleStatROStore(actor, "attributes.charisma");
-   const quickness = storeManager.GetSimpleStatROStore(actor, "attributes.quickness");
-   const reaction = storeManager.GetSimpleStatROStore(actor, "attributes.reaction");
+   const intelligence = storeManager.GetSimpleStatROStore(
+      actor,
+      "attributes.intelligence",
+   );
+   const willpower = storeManager.GetSimpleStatROStore(
+      actor,
+      "attributes.willpower",
+   );
+   const charisma = storeManager.GetSimpleStatROStore(
+      actor,
+      "attributes.charisma",
+   );
+   const quickness = storeManager.GetSimpleStatROStore(
+      actor,
+      "attributes.quickness",
+   );
+   const reaction = storeManager.GetSimpleStatROStore(
+      actor,
+      "attributes.reaction",
+   );
    const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
 
    const combat = storeManager.GetSimpleStatROStore(actor, "dicePools.combat");
@@ -28,12 +43,18 @@
       actor,
       "dicePools.combat.value",
    );
-   const control = storeManager.GetSimpleStatROStore(actor, "dicePools.control");
+   const control = storeManager.GetSimpleStatROStore(
+      actor,
+      "dicePools.control",
+   );
    const controlValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.control.value",
    );
-   const hacking = storeManager.GetSimpleStatROStore(actor, "dicePools.hacking");
+   const hacking = storeManager.GetSimpleStatROStore(
+      actor,
+      "dicePools.hacking",
+   );
    const hackingValue = storeManager.GetRWStore<number>(
       actor,
       "dicePools.hacking.value",
