@@ -4,6 +4,9 @@ This is an ongoing second iteration of the implementation of sr3e. It is a hobby
 If that is what you are after and you are in a rush, you are welcome to join and help me complete it. I work on this project when I have time, and
 it is a large scope.
 
+# GSD
+To work on this project, I use [Get Shit Done](https://github.com/gsd-build/get-shit-done), to improve AI-context and plan out the project.
+
 ## YouTube-video showing this project (First Iteration), click the image!
 
 [![Watch the video](https://img.youtube.com/vi/YPmnX_Gp1uk/0.jpg)](https://youtu.be/YPmnX_Gp1uk)
