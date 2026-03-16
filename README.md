@@ -1,7 +1,8 @@
 # NOTE: Second Iteration
 
-This is the second iteration of this project, you may see the prototype in the depreached
-repopsitory.
+This is an ongoing second iteration of the implementation of sr3e. It is a hobby project, and it is *not* a functional and complete system ready to play.
+If that is what you are after and you are in a rush, you are welcome to join and help me complete it. I work on this project when I have time, and
+it is a large scope.
 
 ## YouTube-video showing this project (First Iteration), click the image!
 
