@@ -89,22 +89,23 @@ export interface IStoreManager {
   GetROStore<T>(document: FoundryDocument, dataPath: string, isRoot?: boolean): Readable<T>;
 
   /**
-   * Creates a derived store that computes a sum from multiple writable stores.
-   * Useful for combining base values with modifiers.
+   * Creates or retrieves a cached derived store that sums the `.value` and `.mod` fields
+   * of a SimpleStat at the given logical data path.
    *
-   * @param stores - Array of writable stores to sum
-   * @returns A readable store containing the sum of all input stores
+   * @param document - The Foundry document to read from
+   * @param dataPath - The logical path to the SimpleStat (e.g., "attributes.body").
+   *   The method internally reads `${dataPath}.value` and `${dataPath}.mod` — NOT `.modifier`.
+   * @returns A readable store containing the sum of value + mod, cached per document+path
    *
    * @example
    * ```typescript
    * const storeManager = StoreManager.Instance;
-   * const baseStore = storeManager.GetRWStore<number>(actor, "base");
-   * const modStore = storeManager.GetRWStore<number>(actor, "modifier");
-   * const totalStore = storeManager.GetSumROStore([baseStore, modStore]);
-   * // totalStore.value = baseStore.value + modStore.value
+   * const bodyStore = storeManager.GetSimpleStatROStore(actor, "attributes.body");
+   * // Reads from: actor.system.attributes.body.value + actor.system.attributes.body.mod
+   * // Result is cached — calling again with the same document+path returns the same store
    * ```
    */
-  GetSumROStore(stores: Writable<number>[]): Readable<number>;
+  GetSimpleStatROStore(document: FoundryDocument, dataPath: string): Readable<number>;
 
   /**
    * Creates a shallow (non-persistent) store for transient UI state.

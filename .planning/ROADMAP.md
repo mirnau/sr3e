@@ -313,6 +313,29 @@ Plans:
 
 ---
 
+### Phase 3.4: SimpleStat Derived Store Consolidation (INSERTED)
+
+**Goal:** Replace the scattered `sumStore()` helper pattern in DicePools, Attributes, and Movement with a single `GetSimpleStatROStore(document, dataPath)` method on StoreManager. Also fixes a silent bug where all three components reference `${path}.modifier` but `SimpleStat` defines the field as `mod`, so modifiers have never applied.
+
+**Depends on:** Phase 3.3
+
+**Plans:** 1 plan
+
+Plans:
+- [x] 3.4-01: Add `GetSimpleStatROStore` to StoreManager + IStoreManager, update DicePools + Attributes + Movement
+
+**Details:**
+- `GetSumROStore(stores[])` is a stateless helper that takes pre-resolved stores — callers must manually get `.value` and `.modifier` stores first
+- All three components (DicePools, Attributes, Movement) duplicate the same `sumStore()` / `createAttributeSumStore()` local helper
+- The helpers fetch `${path}.modifier` but `SimpleStat.defineSchema()` defines `mod`, not `modifier` — mods have silently been 0 in all components
+- New method: `GetSimpleStatROStore(document, dataPath): Readable<number>` — fetches `${dataPath}.value` and `${dataPath}.mod`, returns cached derived store summing them
+- Remove `GetSumROStore` from IStoreManager (no production callers remain after the refactor)
+- DicePools: remove `sumStore()` helper (8 calls → direct method calls)
+- Attributes: remove `createAttributeSumStore()` helper (3 calls)
+- Movement: remove `sumStore()` helper (3 calls)
+
+---
+
 ### Phase 4+: Skills System (Tentative)
 
 **Goal**: Complete skills implementation - buying, progression, testing, specializations.
@@ -426,6 +449,7 @@ Will need to break this down into sub-phases after understanding scope better.
 | 3.1. Svelte Component Debloat (INSERTED) | 4/4 | Complete | 2026-03-14 |
 | 3.2. Storyteller Screen (INSERTED) | 2/2 | Complete | 2026-03-14 |
 | 3.3. Time Manager (INSERTED) | 1/1 | Complete | 2026-03-14 |
+| 3.4. Dice Pools StoreManager Architectural Fix (INSERTED) | 1/1 | Complete | 2026-03-16 |
 | 4+. Skills System | TBD | Planning deferred | - |
 | 5+. Active Effects & Gadgets | TBD | Planning deferred | - |
 | 6+. Chat & Socket Communication | TBD | Planning deferred | - |

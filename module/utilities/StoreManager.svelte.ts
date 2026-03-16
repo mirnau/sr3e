@@ -28,6 +28,7 @@ export class StoreManager implements IStoreManager {
   #roStores = new Map<string, Writable<any>>();
   #shallowStores = new Map<string, Writable<any>>();
   #flagStores = new Map<string, Writable<any>>();
+  #simpleStatSumStores = new Map<string, Readable<number>>();
 
   // Hook disposers per document
   #hookDisposers = new Map<string, Array<{ event: string; id: number }>>();
@@ -205,6 +206,11 @@ export class StoreManager implements IStoreManager {
         this.#flagStores.delete(key);
       }
     }
+    for (const key of this.#simpleStatSumStores.keys()) {
+      if (key.startsWith(`${docId}:`)) {
+        this.#simpleStatSumStores.delete(key);
+      }
+    }
 
     // Clear muted paths for this document
     for (const mutedPath of this.#mutedPaths) {
@@ -305,12 +311,27 @@ export class StoreManager implements IStoreManager {
   }
 
   /**
-   * Creates a derived store that sums multiple stores
+   * Creates or retrieves a cached derived store that sums the `.value` and `.mod` fields
+   * of a SimpleStat at the given logical data path.
+   *
+   * @param document - The Foundry document to read from
+   * @param dataPath - The logical path to the SimpleStat (e.g., "attributes.body").
+   *   The method internally reads `${dataPath}.value` and `${dataPath}.mod` — NOT `.modifier`.
+   * @returns A readable store containing the sum of value + mod
    */
-  GetSumROStore(stores: Writable<number>[]): Readable<number> {
-    return derived(stores, ($values) => {
-      return $values.reduce((sum, val) => sum + (val || 0), 0);
-    });
+  GetSimpleStatROStore(document: FoundryDocument, dataPath: string): Readable<number> {
+    const key = `${document.uuid}:sum:${dataPath}`;
+
+    if (this.#simpleStatSumStores.has(key)) {
+      return this.#simpleStatSumStores.get(key)!;
+    }
+
+    const valueStore = this.GetRWStore<number>(document, `${dataPath}.value`);
+    const modStore = this.GetRWStore<number>(document, `${dataPath}.mod`);
+    const sumStore = derived([valueStore, modStore], ([$v, $m]) => ($v || 0) + ($m || 0));
+
+    this.#simpleStatSumStores.set(key, sumStore);
+    return sumStore;
   }
 
   /**
