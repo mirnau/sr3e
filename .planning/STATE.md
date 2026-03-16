@@ -22,8 +22,8 @@
 
 Phase: 3.4 — complete
 Plan: 1 of 1 in phase 3.4 complete
-Status: Phase 3.4 complete. Consolidated scattered sumStore helpers into GetSimpleStatROStore on StoreManager; fixed silent .modifier → .mod bug that zeroed all modifiers. Phase 3 milestone fully complete — ready for Phase 4+ roadmap review.
-Last activity: 2026-03-16 - Phase 3.4-01 complete: GetSimpleStatROStore added to StoreManager + IStoreManager, DicePools + Attributes + Movement updated
+Status: Phase 3.4 complete + karma hotfix. Ready for Phase 4+ roadmap review.
+Last activity: 2026-03-16 - Karma hotfix: fixed karmaPool init path, pool value written on award (1 + ceiling), factor fallback 0 → 0.05, Karma.svelte display via GetSimpleStatROStore
 
 Progress: █████████░ ~88%
 
@@ -82,6 +82,8 @@ Progress: █████████░ ~88%
 | 2.4 | All skill types use same linked-attr cost formula | Knowledge/language have Intelligence as threshold — same `value < linkedAttr ? 1 : 2` as active skills. Flat-cost assumption was wrong. |
 | 3 | Staged karma spending model | Player can "play around" with changes before committing — attribute session commits when shopping cart toggles OFF; skill session commits via thumbs-up in editor header; sheet close or editor close without thumbs-up cancels (reverts changes, no GK debit) |
 | 3 | Karma.svelte display: goodKarma - stagedSpent | Live formula instead of stale baseline — skill editor commits debit goodKarma directly, auto-reflecting in display without extra bookkeeping |
+| 3.4 | karmaPool.value = 1 + karmaPoolCeiling | 1 is the free starting pool (not paid from karma); ceiling = floor(lifetimeKarma × factor) is the earned portion that reduces goodKarma budget |
+| 3.4 | karmaPool factor fallback = 0.05 | Standard metahuman rate (1 per 20 karma); human metatypes set factor = 0.1 (1 per 10 karma) in their metatype item |
 
 ### Roadmap Evolution
 
