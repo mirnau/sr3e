@@ -1,28 +1,31 @@
 <script lang="ts">
-  let { label, onDelta }: { label: string; onDelta: (n: number) => void } = $props();
-  let input = $state("");
+  let { label, value, onIncrement, onDecrement, onSet }: {
+    label: string;
+    value: number;
+    onIncrement: () => void;
+    onDecrement: () => void;
+    onSet: (n: number) => void;
+  } = $props();
 </script>
 
 <div class="time-actuator">
-  <span class="time-actuator__label">{label}</span>
-  <div class="time-actuator__controls">
-    <button type="button" aria-label={`Decrement ${label}`} onclick={() => onDelta(-1)}>
-      <i class="fa-solid fa-circle-left"></i>
+  <div class="time-actuator__header">
+    <button type="button" aria-label={`Decrement ${label}`} onclick={onDecrement}>
+      <i class="fa-solid fa-chevron-left"></i>
     </button>
-    <input
-      class="time-actuator__input"
-      type="number"
-      placeholder="±"
-      bind:value={input}
-      onblur={(e) => {
-        const delta = (e.target as HTMLInputElement).valueAsNumber;
-        if (!Number.isNaN(delta) && delta !== 0) onDelta(delta);
-        input = "";
-      }}
-      onkeydown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
-    />
-    <button type="button" aria-label={`Increment ${label}`} onclick={() => onDelta(1)}>
-      <i class="fa-solid fa-circle-right"></i>
+    <span class="time-actuator__label">{label}</span>
+    <button type="button" aria-label={`Increment ${label}`} onclick={onIncrement}>
+      <i class="fa-solid fa-chevron-right"></i>
     </button>
   </div>
+  <input
+    class="time-actuator__input"
+    type="number"
+    value={value}
+    onblur={(e) => {
+      const v = (e.target as HTMLInputElement).valueAsNumber;
+      if (!Number.isNaN(v)) onSet(v);
+    }}
+    onkeydown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+  />
 </div>

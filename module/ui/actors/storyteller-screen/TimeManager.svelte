@@ -25,19 +25,19 @@
 
 <div class="time-manager">
   <div class="time-manager__display">
-    <span class="time-manager__date">
-      {weekday}, {day.toString().padStart(2, "0")} {monthName} {year}
-    </span>
     <span class="time-manager__time">
       {hours.toString().padStart(2, "0")}:{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}
     </span>
+    <span class="time-manager__date">
+      {weekday}, {day.toString().padStart(2, "0")} {monthName} {year}
+    </span>
   </div>
   <div class="time-manager__actuators">
-    <TimeActuatorInput label="Year"    onDelta={(n) => service.advanceYears(n)} />
-    <TimeActuatorInput label="Month"   onDelta={(n) => service.advanceMonths(n)} />
-    <TimeActuatorInput label="Day"     onDelta={(n) => service.advanceDays(n)} />
-    <TimeActuatorInput label="Hours"   onDelta={(n) => service.advanceHours(n)} />
-    <TimeActuatorInput label="Minutes" onDelta={(n) => service.advanceMinutes(n)} />
-    <TimeActuatorInput label="Seconds" onDelta={(n) => service.advanceSeconds(n)} />
+    <TimeActuatorInput label="Year"    value={year}    onIncrement={() => service.advanceYears(1)}   onDecrement={() => service.advanceYears(-1)}   onSet={(n) => service.setYear(n)} />
+    <TimeActuatorInput label="Month"   value={month}   onIncrement={() => service.advanceMonths(1)}  onDecrement={() => service.advanceMonths(-1)}  onSet={(n) => service.setMonth(n)} />
+    <TimeActuatorInput label="Day"     value={day}     onIncrement={() => service.advanceDays(1)}    onDecrement={() => service.advanceDays(-1)}    onSet={(n) => service.setDay(n)} />
+    <TimeActuatorInput label="Hours"   value={hours}   onIncrement={() => service.advanceHours(1)}   onDecrement={() => service.advanceHours(-1)}   onSet={(n) => service.setHour(n)} />
+    <TimeActuatorInput label="Minutes" value={minutes} onIncrement={() => service.advanceMinutes(1)} onDecrement={() => service.advanceMinutes(-1)} onSet={(n) => service.setMinute(n)} />
+    <TimeActuatorInput label="Seconds" value={seconds} onIncrement={() => service.advanceSeconds(1)} onDecrement={() => service.advanceSeconds(-1)} onSet={(n) => service.setSecond(n)} />
   </div>
 </div>

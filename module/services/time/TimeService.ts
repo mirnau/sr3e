@@ -48,4 +48,40 @@ export class TimeService {
         d.setFullYear(d.getFullYear() + n);
         await gameTime().set(d.getTime());
     }
+
+    async setYear(year: number): Promise<void> {
+        const d = this.getDate();
+        d.setFullYear(year);
+        await gameTime().set(d.getTime());
+    }
+
+    async setMonth(month: number): Promise<void> {
+        const d = this.getDate();
+        d.setMonth(month - 1);
+        await gameTime().set(d.getTime());
+    }
+
+    async setDay(day: number): Promise<void> {
+        const d = this.getDate();
+        d.setDate(day);
+        await gameTime().set(d.getTime());
+    }
+
+    async setHour(hour: number): Promise<void> {
+        const d = this.getDate();
+        d.setHours(hour);
+        await gameTime().set(d.getTime());
+    }
+
+    async setMinute(minute: number): Promise<void> {
+        const d = this.getDate();
+        d.setMinutes(minute);
+        await gameTime().set(d.getTime());
+    }
+
+    async setSecond(second: number): Promise<void> {
+        const d = this.getDate();
+        d.setSeconds(second);
+        await gameTime().set(d.getTime());
+    }
 }
