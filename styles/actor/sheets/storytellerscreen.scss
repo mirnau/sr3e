@@ -23,15 +23,12 @@
 	&__display {
 		display: flex;
 		flex-direction: column;
+		align-items: center;
 		gap: 2px;
 		padding: 8px;
 		background: rgba(0, 0, 0, 0.05);
 		border-radius: 4px;
-	}
-
-	&__date {
-		font-size: 1rem;
-		font-weight: 600;
+		text-align: center;
 	}
 
 	&__time {
@@ -39,10 +36,15 @@
 		font-family: monospace;
 	}
 
+	&__date {
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
 	&__actuators {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
+		gap: 4px;
+		justify-content: space-between;
 	}
 }
 
@@ -52,21 +54,27 @@
 	align-items: center;
 	gap: 2px;
 
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+
 	&__label {
 		font-size: 0.75rem;
 		text-transform: uppercase;
 		opacity: 0.7;
 	}
 
-	&__controls {
-		display: flex;
-		align-items: center;
-		gap: 2px;
-	}
-
 	&__input {
-		width: 48px;
+		width: 14px;
 		text-align: center;
+		appearance: textfield;
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			display: none;
+		}
 	}
 }
 
