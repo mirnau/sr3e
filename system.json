@@ -15,8 +15,8 @@
   "manifest": "https://raw.githubusercontent.com/mirnau/sr3e/main/system.json",
   "download": "https://github.com/mirnau/sr3e/releases/download/v0.0.2-alpha.15/sr3e-0.0.2-alpha.15.zip",
   "compatibility": {
-    "minimum": "13.340",
-    "verified": "13.341"
+    "minimum": "14.361",
+    "verified": "14.361"
   },
   "esmodules": [
     "build/bundle/bundle.js"

@@ -11,11 +11,15 @@
 | 2.3 | Skills Component — tab UI, skill cards, creation-mode spending | 2026-03-08 |
 | 2.4 | Buying Mechanics Overhaul — SR3e rules compliance, SkillSpendingService | 2026-03-13 |
 | 2.5 | Character Sheet UX Polish — Packery layout, duplicate prevention, linked attr display | 2026-03-15 |
-| 3 | Karma & Experience Core — staged karma spending on attributes and skills | 2026-03-13 |
+| 3 | Karma & Experience Core — karma pool, KarmaSpendingService, staged session infrastructure | 2026-03-13 |
 | 3.1 | Svelte Component Debloat — normalized all 38 components to DicePools.svelte pattern | 2026-03-14 |
 | 3.2 | Storyteller Screen — KarmaDistributionService, KarmaManager panel | 2026-03-14 |
 | 3.3 | Time Manager — TimeService, TimeManager Svelte component | 2026-03-14 |
 | 3.4 | GetSimpleStatROStore consolidation — fixed `.modifier` → `.mod` bug in DicePools/Attributes/Movement | 2026-03-16 |
+
+## In Progress
+
+- **Karma-funded shopping** — infrastructure exists (staged session, KarmaSpendingService), UI wiring for attributes/skills/specializations not yet complete. To be planned with zone framework.
 
 ## Next: Combat System Migration
 
