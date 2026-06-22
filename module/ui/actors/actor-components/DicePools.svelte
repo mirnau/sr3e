@@ -1,12 +1,13 @@
 <script lang="ts">
-   import { onDestroy } from "svelte";
+   import { onDestroy, untrack } from "svelte";
    import { localize } from "../../../services/utilities";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import type SR3EActor from "../../../documents/SR3EActor";
    import StatCard from "./StatCard.svelte";
 
-   let { actor }: { actor: SR3EActor } = $props();
+   let { actor: _actor }: { actor: SR3EActor } = $props();
+   const actor = untrack(() => _actor);
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
    let hasMatrixInterface = $state(false);

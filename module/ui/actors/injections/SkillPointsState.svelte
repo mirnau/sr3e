@@ -1,10 +1,12 @@
 <script lang="ts">
+   import { untrack } from "svelte";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { FLAGS } from "../../../constants/flags";
    import CreationPointList from "../../common-components/CreationPointList.svelte";
 
-   const { actor, config = CONFIG.SR3E } = $props<{ actor: Actor; config?: any }>();
+   const { actor: _actor } = $props<{ actor: Actor; config?: any }>();
+   const actor = untrack(() => _actor);
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
    const activePoints = storeManager.GetRWStore<number>(actor, "creation.activePoints");
    const knowledgePoints = storeManager.GetRWStore<number>(actor, "creation.knowledgePoints");

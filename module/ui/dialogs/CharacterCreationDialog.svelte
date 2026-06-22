@@ -4,16 +4,18 @@
       AGE_PHASES,
       PRIORITY_TABLES,
    } from "../../../types/character-creation";
+   import { untrack } from "svelte";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 
-   const { actorName, onSubmit, onCancel } = $props<{
+   const { actorName: _actorName, onSubmit, onCancel } = $props<{
       actorName: string;
       config: typeof CONFIG.SR3E;
       onSubmit: (result: any) => void;
       onCancel: () => void;
    }>();
 
+   const actorName = untrack(() => _actorName);
    const creationService = CharacterCreationService.Instance();
    let characterName = $state(actorName);
    let characterAge = $state(25);

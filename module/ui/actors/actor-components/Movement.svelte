@@ -1,11 +1,12 @@
 <script lang="ts">
-   import { onDestroy } from "svelte";
+   import { onDestroy, untrack } from "svelte";
    import { localize } from "../../../services/utilities";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import StatCard from "./StatCard.svelte";
 
-   let { actor }: { actor: Actor } = $props();
+   let { actor: _actor }: { actor: Actor } = $props();
+   const actor = untrack(() => _actor);
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
    const localization = $derived(CONFIG.SR3E.MOVEMENT);

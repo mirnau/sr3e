@@ -1,5 +1,6 @@
 <script lang="ts">
-   import { localize } from "../../services/utilities";
+   import { untrack } from "svelte";
+import { localize } from "../../services/utilities";
    import StatCard from "../common-components/StatCard.svelte";
    import Image from "../common-components/Image.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
@@ -7,7 +8,8 @@
    import JournalViewer from "../common-components/JournalViewer.svelte";
    import SR3EItem from "../../documents/SR3EItem";
 
-   let { item }: { item: SR3EItem } = $props();
+   let { item: _item }: { item: SR3EItem } = $props();
+   const item = untrack(() => _item);
 
    const system = item.system;
 

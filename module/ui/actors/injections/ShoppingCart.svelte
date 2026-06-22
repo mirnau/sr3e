@@ -1,11 +1,13 @@
 <script lang="ts">
+   import { untrack } from "svelte";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { CreationPointsService } from "../../../services/character-creation/CreationPointsService";
    import { FLAGS } from "../../../constants/flags";
    import { KarmaSpendingService } from "../../../services/karma/KarmaSpendingService";
 
-   const { actor } = $props<{ actor: Actor }>();
+   const { actor: _actor } = $props<{ actor: Actor }>();
+   const actor = untrack(() => _actor);
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
    const isCharacterCreation = storeManager.GetFlagStore(
       actor,
@@ -47,7 +49,7 @@
       const knowledgePoints = service.getRemainingSkillPoints(actor, "knowledge");
       const languagePoints = service.getRemainingSkillPoints(actor, "language");
 
-      return Dialog.confirm({
+      return (await Dialog.confirm({
          title: "Finish Character Creation?",
          content: `
             <p>You have unspent creation points:</p>
@@ -59,7 +61,7 @@
             </ul>
             <p>These will be discarded. Are you sure?</p>
          `,
-      });
+      })) ?? false;
    }
 </script>
 

@@ -1,11 +1,12 @@
 <script lang="ts">
-   import { onDestroy } from "svelte";
+   import { onDestroy, untrack } from "svelte";
    import type { IStoreManager } from "../../utilities/IStoreManager";
    import type SR3EActor from "../../documents/SR3EActor";
    import { StoreManager } from "../../utilities/StoreManager.svelte";
    import { randomInRange } from "../../utilities/MathUtils";
 
-   const { actor }: { actor: SR3EActor } = $props();
+   const { actor: _actor }: { actor: SR3EActor } = $props();
+   const actor = untrack(() => _actor);
 
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
    storeManager.Subscribe(actor);

@@ -12,7 +12,10 @@ interface Props {
    label: string;
 }
 
-let { actor, attributeKey, label }: Props = $props();
+import { untrack } from "svelte";
+let { actor: _actor, attributeKey: _attributeKey, label }: Props = $props();
+const actor = untrack(() => _actor);
+const attributeKey = untrack(() => _attributeKey);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 const attributeValueStore = storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
 const isCharacterCreation = storeManager.GetFlagStore(actor, FLAGS.ACTOR.IS_CHARACTER_CREATION, false);

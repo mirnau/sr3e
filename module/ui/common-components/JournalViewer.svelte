@@ -1,4 +1,5 @@
 <script lang="ts">
+   import { untrack } from "svelte";
    import JournalViewerToolbar from "./JournalViewerToolbar.svelte";
    import ItemSheetComponent from "./ItemSheetComponent.svelte";
 
@@ -9,12 +10,13 @@
    };
 
    let {
-      document,
+      document: _document,
       config = {},
    }: {
       document: Actor | Item;
       config?: any;
    } = $props();
+   const document = untrack(() => _document);
 
    let toolbar: any;
    let journalId = $state((document.system as any).journalId ?? null);

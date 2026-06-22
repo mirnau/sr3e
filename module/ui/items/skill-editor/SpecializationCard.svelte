@@ -1,8 +1,9 @@
 <script lang="ts">
+    import { untrack } from "svelte";
     let {
         specialization = $bindable<{ name: string; value: number }>(),
-        actor,
-        skill,
+        actor: _actor,
+        skill: _skill,
         isCreationMode,
         ondelete,
         onchange,
@@ -18,8 +19,8 @@
         onincrement?: (spec: { name: string; value: number }) => void;
         ondecrement?: (spec: { name: string; value: number }) => void;
     } = $props();
-    void actor;
-    void skill;
+    const actor = untrack(() => _actor);
+    const skill = untrack(() => _skill);
 
     let liveText = $state(specialization.name);
 

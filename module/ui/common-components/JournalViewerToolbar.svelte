@@ -1,6 +1,6 @@
 <script lang="ts">
    import JournalSearchModal from "../dialogs/JournalSearchModal.svelte";
-   import { mount, unmount } from "svelte";
+   import { mount, unmount, untrack } from "svelte";
 
    type JournalOption = {
       value: string;
@@ -11,12 +11,13 @@
    const {
       onJournalContentSelected,
       config = {},
-      id = null,
+      id: _id = null,
    }: {
       onJournalContentSelected?: (result: JournalOption) => void;
       config?: any;
       id?: string | null;
    } = $props();
+   const id = untrack(() => _id);
 
    let journalId = $state(id ?? null);
 

@@ -1,11 +1,13 @@
 <script lang="ts">
+   import { untrack } from "svelte";
    import AttributePointsState from "./AttributePointsState.svelte";
    import SkillPointsState from "./SkillPointsState.svelte";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { FLAGS } from "../../../constants/flags";
 
-   const { actor } = $props<{ actor: Actor }>();
+   const { actor: _actor } = $props<{ actor: Actor }>();
+   const actor = untrack(() => _actor);
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
    const attributeAssignmentLocked = storeManager.GetFlagStore(

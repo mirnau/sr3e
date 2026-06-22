@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onDestroy } from "svelte";
+import { onDestroy, untrack } from "svelte";
 import type { IStoreManager } from "../../../../utilities/IStoreManager";
 import { StoreManager } from "../../../../utilities/StoreManager.svelte";
 import SkillEditorApp from "../../../../sheets/items/SkillEditorApp";
@@ -10,7 +10,10 @@ interface Props {
    category: "active" | "knowledge" | "language";
 }
 
-let { actor, item, category }: Props = $props();
+let { actor: _actor, item: _item, category: _category }: Props = $props();
+const actor = untrack(() => _actor);
+const item = untrack(() => _item);
+const category = untrack(() => _category);
 
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 

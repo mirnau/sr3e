@@ -8,13 +8,13 @@
 </script>
 
 <script lang="ts">
-   import { onDestroy, onMount } from "svelte";
+   import { onDestroy, onMount, untrack } from "svelte";
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import { KarmaDistributionService } from "../../../services/karma/KarmaDistributionService";
 
    let {
-      actor,
+      actor: _actor,
       onCommitStatusChange,
       onmount,
    }: {
@@ -22,6 +22,7 @@
       onCommitStatusChange: () => void;
       onmount: (api: KarmaRowApi) => void;
    } = $props();
+   const actor = untrack(() => _actor);
 
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
    storeManager.Subscribe(actor);

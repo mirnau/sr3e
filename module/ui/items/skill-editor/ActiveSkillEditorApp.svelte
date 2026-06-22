@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onDestroy } from "svelte";
+    import { onDestroy, untrack } from "svelte";
     import { localize } from "../../../services/utilities";
     import { StoreManager } from "../../../utilities/StoreManager.svelte";
     import type { IStoreManager } from "../../../utilities/IStoreManager";
@@ -10,7 +10,9 @@
     import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelte";
     import SpecializationCard from "./SpecializationCard.svelte";
 
-    let { actor, skill, app }: { actor: Actor; skill: Item; app: any } = $props();
+    let { actor: _actor, skill: _skill, app }: { actor: Actor; skill: Item; app: any } = $props();
+    const actor = untrack(() => _actor);
+    const skill = untrack(() => _skill);
 
     const SKILL_CATEGORY: SkillCategory = "active";
     const spendingService = SkillSpendingService.Instance();

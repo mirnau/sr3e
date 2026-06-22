@@ -1,11 +1,13 @@
 <script lang="ts">
-   import { localize } from "../../services/utilities";
+   import { untrack } from "svelte";
+import { localize } from "../../services/utilities";
    import Image from "../common-components/Image.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
    import JournalViewer from "../common-components/JournalViewer.svelte";
 
-   let { item }: { item: Item } = $props();
+   let { item: _item }: { item: Item } = $props();
+   const item = untrack(() => _item);
 
    const system = item.system as {
       skillType: "active" | "knowledge" | "language";

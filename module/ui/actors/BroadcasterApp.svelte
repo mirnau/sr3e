@@ -1,5 +1,5 @@
 <script lang="ts">
-   import { onDestroy } from "svelte";
+   import { onDestroy, untrack } from "svelte";
    import {
       broadcastNews,
       stopBroadcast,
@@ -8,9 +8,10 @@
    import StoreManager from "../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../utilities/IStoreManager";
 
-   let { actor } = $props<{
+   let { actor: _actor } = $props<{
       actor: Actor;
    }>();
+   const actor = untrack(() => _actor);
 
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
    storeManager.Subscribe(actor);

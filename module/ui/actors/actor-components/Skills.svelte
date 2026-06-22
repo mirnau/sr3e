@@ -1,12 +1,13 @@
 <script lang="ts">
-import { onDestroy } from "svelte";
+import { onDestroy, untrack } from "svelte";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import SkillsActive from "./skills/SkillsActive.svelte";
 import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
 
-let { actor }: { actor: Actor } = $props();
+let { actor: _actor }: { actor: Actor } = $props();
+   const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 let activeTab = $state<"active" | "knowledge" | "language">("active");
