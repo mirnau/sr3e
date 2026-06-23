@@ -8,14 +8,11 @@
    import Karma from "./actor-components/Karma.svelte";
    import Movement from "./actor-components/Movement.svelte";
    import Skills from "./actor-components/Skills.svelte";
-   import RollComposerComponent from "../../ui/combat/RollComposerComponent.svelte";
-
    const { actor } = $props<{
       actor: Actor;
    }>();
 </script>
 
-<RollComposerComponent {actor} />
 <PackeryGrid>
    <SheetCard>
       <Dossier {actor} />

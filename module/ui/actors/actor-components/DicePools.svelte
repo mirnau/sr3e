@@ -96,7 +96,7 @@
    function rollPool(e: MouseEvent, poolKey: string, title: string): void {
       const setup = buildDicePoolSetup(actor, poolKey, title);
       if (e.shiftKey) {
-         openComposer(setup);
+         openComposer(setup, actor);
       } else {
          void executeProcedure(setup, actor as never);
       }

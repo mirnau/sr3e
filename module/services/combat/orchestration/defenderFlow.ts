@@ -93,11 +93,11 @@ export function handleDefenderChoice(contestId: string, key: string | null | und
     const defender = record.target as unknown as ActorLike;
 
     if (key === "dodge") {
-        openComposer(buildDodgeSetup(defender, contestId) as never);
+        openComposer(buildDodgeSetup(defender, contestId) as never, defender);
         return;
     }
 
     const basis = resolveMeleeBasis(defender, record.defenseHint);
     const mode: MeleeDefenseMode = key === "full" ? "full" : "standard";
-    openComposer(buildMeleeDefenseSetup(defender, basis, mode, contestId) as never);
+    openComposer(buildMeleeDefenseSetup(defender, basis, mode, contestId) as never, defender);
 }

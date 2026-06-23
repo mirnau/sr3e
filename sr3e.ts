@@ -1,3 +1,4 @@
+import { mount } from "svelte";
 import CharacterModel from "./module/models/actors/CharacterModel";
 import BroadcasterModel from "./module/models/actors/BroadcasterModel";
 import StorytellerScreenModel from "./module/models/actors/StorytellerScreenModel";
@@ -19,6 +20,7 @@ import { handleDefenderChoice } from "./module/services/combat/orchestration/def
 import { handleResistanceClick } from "./module/services/combat/orchestration/resistanceHandler";
 import { registerSocketHandlers, registerCombatTurnHook } from "./module/services/combat/orchestration/socketHandlers";
 import type { ResistanceCtx } from "./module/services/combat/orchestration/resistanceHandler";
+import RollComposerComponent from "./module/ui/combat/RollComposerComponent.svelte";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -147,11 +149,16 @@ async function registerHooks(): Promise<void> {
    });
 
    Hooks.once(hooks.ready, () => {
-      // Initialize NewsService after everything is ready
       getNewsService();
       registerSocketHandlers();
       registerCombatTurnHook();
-      console.log("SR3E | NewsService initialized");
+
+      const composerRoot = document.createElement("div");
+      composerRoot.id = "sr3e-roll-composer-root";
+      document.body.appendChild(composerRoot);
+      mount(RollComposerComponent, { target: composerRoot });
+
+      console.log("SR3E | Ready");
    });
 
    Hooks.on("renderChatMessage", (msg: Record<string, unknown>, html: HTMLElement) => {

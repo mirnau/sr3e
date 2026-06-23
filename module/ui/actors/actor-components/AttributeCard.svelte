@@ -80,7 +80,7 @@ function onRollClick(e: MouseEvent): void {
     if ($isCharacterCreation || $isShoppingState || isDerivedAttribute) return;
     const setup = buildAttributeSetup(actor, attributeKey, label);
     if (e.shiftKey) {
-        openComposer(setup);
+        openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);
     }

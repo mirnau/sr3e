@@ -1,16 +1,13 @@
 <script lang="ts">
-import { onMount, onDestroy, untrack } from "svelte";
+import { onMount, onDestroy } from "svelte";
 import { sumMods, upsertMod, removeMod } from "../../services/combat/modifierList";
 import { difficultyLabel } from "../../services/combat/procedures/composerHelpers";
 import { registerComposer } from "../../services/combat/procedures/composerService";
 import { executeProcedure } from "../../services/combat/orchestration/executeProcedure";
 import type { ProcedureSetup } from "../../services/combat/procedures/simpleSetups";
 import type { RollState, Modifier } from "../../services/combat/engine/types";
-import type SR3EActor from "../../documents/SR3EActor";
 
-const p = $props<{ actor: SR3EActor }>();
-const actor = untrack(() => p.actor);
-
+let currentActor: unknown = $state(null);
 let visible = $state(false);
 let setup: ProcedureSetup | null = $state(null);
 let targetNumber = $state(4);
@@ -43,8 +40,9 @@ $effect(() => {
     if (!hasTargets) modifiers = modifiers.filter(m => m.id !== "range");
 });
 
-export function open(newSetup: ProcedureSetup): void {
+export function open(newSetup: ProcedureSetup, actorArg: unknown): void {
     setup = newSetup;
+    currentActor = actorArg;
     const s = newSetup.rollState;
     targetNumber = s.targetNumber;
     modifiers = [...s.modifiers];
@@ -71,7 +69,7 @@ async function onConfirm(): Promise<void> {
     };
     visible = false;
     const targets = typeof game !== "undefined" ? Array.from((game.user as { targets?: Set<unknown> })?.targets ?? []) : [];
-    await executeProcedure(setup, actor as never, { targets: targets as never[], rollState: finalState });
+    await executeProcedure(setup, currentActor as never, { targets: targets as never[], rollState: finalState });
 }
 
 function addMod(): void {

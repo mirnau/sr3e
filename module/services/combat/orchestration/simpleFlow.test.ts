@@ -6,6 +6,7 @@ import type { ProcedureSetup } from "../procedures/simpleSetups";
 function mockRollGlobal(results: number[]) {
     class MockRoll {
         terms = [{ results: results.map(r => ({ result: r, active: true })) }];
+        toMessage = vi.fn().mockResolvedValue(undefined);
         async evaluate() { return this; }
     }
     (globalThis as Record<string, unknown>).Roll = MockRoll;
@@ -38,18 +39,18 @@ describe("executeSimpleFlow", () => {
         await executeSimpleFlow(setup(false, fn), setup(false).rollState, await makeRoll(), {});
         expect(fn).toHaveBeenCalledOnce();
     });
-    it("ChatMessage.create not called when selfPublish false", async () => {
-        const create = vi.fn();
-        (globalThis as Record<string, unknown>).ChatMessage = { create, getSpeaker: vi.fn() };
-        await executeSimpleFlow(setup(false), setup(false).rollState, await makeRoll(), {});
-        expect(create).not.toHaveBeenCalled();
-        delete (globalThis as Record<string, unknown>).ChatMessage;
+    it("roll.toMessage not called when selfPublish false", async () => {
+        const roll = await makeRoll();
+        const spy = vi.spyOn(roll, "toMessage").mockResolvedValue(undefined);
+        await executeSimpleFlow(setup(false), setup(false).rollState, roll, {});
+        expect(spy).not.toHaveBeenCalled();
     });
-    it("ChatMessage.create called when selfPublish true", async () => {
-        const create = vi.fn().mockResolvedValue(undefined);
-        (globalThis as Record<string, unknown>).ChatMessage = { create, getSpeaker: vi.fn().mockReturnValue({}) };
-        await executeSimpleFlow(setup(true), setup(true).rollState, await makeRoll(), {});
-        expect(create).toHaveBeenCalledOnce();
+    it("roll.toMessage called with flavor when selfPublish true", async () => {
+        (globalThis as Record<string, unknown>).ChatMessage = { getSpeaker: vi.fn().mockReturnValue({}) };
+        const roll = await makeRoll();
+        const spy = vi.spyOn(roll, "toMessage").mockResolvedValue(undefined);
+        await executeSimpleFlow(setup(true), setup(true).rollState, roll, {});
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ flavor: "Skill Roll" }));
         delete (globalThis as Record<string, unknown>).ChatMessage;
     });
 });

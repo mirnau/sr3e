@@ -51,5 +51,5 @@ export function handleResistanceClick(ctx: ResistanceCtx): void {
     if (typeof game === "undefined" || !game.actors) return;
     const defender = game.actors.get(ctx.defenderActorId) as DefenderLike | undefined;
     if (!defender) return;
-    openComposer(buildResistanceSetup(defender, ctx.prep) as never);
+    openComposer(buildResistanceSetup(defender, ctx.prep) as never, defender);
 }

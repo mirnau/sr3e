@@ -122,6 +122,15 @@
 	font-weight: bold;
 	color: #fff;
 	text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
+
+	&.button {
+		cursor: pointer;
+		transition: transform 0.2s ease-out;
+		will-change: transform;
+
+		&:hover  { transform: scale(1.05); }
+		&:active { transform: scale(0.97); }
+	}
 }
 
 // Chevron Buttons

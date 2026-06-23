@@ -2,12 +2,18 @@ import type { RollSnapshot } from "../engine/types";
 
 type DieResult = { result: number; active?: boolean };
 type DieTerm = { results?: DieResult[] };
+type FoundryRoll = {
+    evaluate: () => Promise<unknown>;
+    terms: DieTerm[];
+    toMessage: (data?: Record<string, unknown>) => Promise<unknown>;
+};
 
 export class SR3ERoll {
     readonly formula: string;
     private readonly tn: number | null;
     readonly options: { targetNumber: number | null; [k: string]: unknown };
     private _terms: DieTerm[] = [];
+    private _foundryRoll: FoundryRoll | null = null;
 
     private constructor(formula: string, tn: number | null, options: Record<string, unknown> = {}) {
         this.formula = formula;
@@ -24,10 +30,15 @@ export class SR3ERoll {
     }
 
     async evaluate(): Promise<this> {
-        const roll = new Roll(this.formula, this.options as Record<string, unknown>);
+        const roll = new Roll(this.formula, this.options as Record<string, unknown>) as unknown as FoundryRoll;
         await roll.evaluate();
-        this._terms = (roll as unknown as { terms: DieTerm[] }).terms;
+        this._terms = roll.terms;
+        this._foundryRoll = roll;
         return this;
+    }
+
+    async toMessage(data: Record<string, unknown> = {}): Promise<void> {
+        await this._foundryRoll?.toMessage(data);
     }
 
     get terms(): DieTerm[] {

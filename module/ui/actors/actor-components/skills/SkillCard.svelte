@@ -47,7 +47,7 @@ function rollSkill(e: MouseEvent | KeyboardEvent): void {
     e.preventDefault();
     const setup = buildSkillSetup(actor, item.id, null, item.name ?? undefined);
     if ((e as MouseEvent).shiftKey) {
-        openComposer(setup);
+        openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);
     }
@@ -59,7 +59,7 @@ function rollSpec(e: MouseEvent | KeyboardEvent, specIndex: number): void {
     if (!spec) return;
     const setup = buildSkillSetup(actor, item.id, specIndex, `${item.name ?? ""} (${spec.name})`);
     if ((e as MouseEvent).shiftKey) {
-        openComposer(setup);
+        openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);
     }
