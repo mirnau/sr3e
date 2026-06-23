@@ -160,6 +160,7 @@
 // Using high specificity selectors to override Foundry defaults
 .condition-monitor .condition-meter .stun-damage input[type="checkbox"].checkbox,
 .condition-monitor .condition-meter .physical-damage input[type="checkbox"].checkbox {
+	display: inline-block;
 	appearance: none;
 	-webkit-appearance: none;
 	-moz-appearance: none;
