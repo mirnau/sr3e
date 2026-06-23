@@ -3,7 +3,7 @@ import { buildSkillSetup, buildAttributeSetup } from "./simpleSetups";
 
 const skill = (id: string, value: number, specs: Array<{ value?: number; name?: string }> = [], attr = "agility") => ({
     id, type: "skill",
-    system: { value, linkedAttribute: attr, specializations: specs },
+    system: { skillType: "active", activeSkill: { value, linkedAttribute: attr, specializations: specs } },
 });
 
 const actor = (skills: ReturnType<typeof skill>[], attrs: Record<string, { value: number; total?: number }> = {}) => ({

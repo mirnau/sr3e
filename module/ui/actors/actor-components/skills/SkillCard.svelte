@@ -53,11 +53,11 @@ function rollSkill(e: MouseEvent | KeyboardEvent): void {
     }
 }
 
-function rollSpec(e: MouseEvent | KeyboardEvent, spec: Specialization): void {
+function rollSpec(e: MouseEvent | KeyboardEvent, specIndex: number): void {
     e.preventDefault();
-    const specs = (item.system as Record<string, any>)?.[`${category}Skill`]?.specializations as Specialization[] | undefined;
-    const idx = specs?.indexOf(spec) ?? 0;
-    const setup = buildSkillSetup(actor, item.id, idx, `${item.name ?? ""} (${spec.name})`);
+    const spec = $specializationsStore[specIndex];
+    if (!spec) return;
+    const setup = buildSkillSetup(actor, item.id, specIndex, `${item.name ?? ""} (${spec.name})`);
     if ((e as MouseEvent).shiftKey) {
         openComposer(setup);
     } else {
@@ -137,13 +137,13 @@ const linkedAttrName =
 
          {#if $specializationsStore.length > 0}
             <div class="specialization-container">
-               {#each $specializationsStore as spec}
+               {#each $specializationsStore as spec, i}
                   <div
                      class="skill-specialization-card button"
                      role="button"
                      tabindex="0"
-                     onclick={(e) => rollSpec(e, spec)}
-                     onkeydown={(e) => (e.key === "Enter" || e.key === " ") && rollSpec(e, spec)}
+                     onclick={(e) => rollSpec(e, i)}
+                     onkeydown={(e) => (e.key === "Enter" || e.key === " ") && rollSpec(e, i)}
                   >
                      <div class="specialization-background"></div>
                      <div class="specialization-name">{spec.name}</div>

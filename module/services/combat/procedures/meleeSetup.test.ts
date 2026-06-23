@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { buildMeleeSetup } from "./meleeSetup";
 
 const skill = (id: string, value: number) => ({
-    id, type: "skill", system: { value, linkedAttribute: "quickness", specializations: [] },
+    id, type: "skill", system: { skillType: "active", activeSkill: { value, linkedAttribute: "quickness", specializations: [] } },
 });
 
 const actor = (str = 4) => ({

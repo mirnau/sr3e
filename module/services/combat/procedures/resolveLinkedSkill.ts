@@ -1,7 +1,14 @@
-type SkillSystem = {
+type SkillSubSchema = {
     value?: number;
     linkedAttribute?: string;
     specializations?: Array<{ value?: number; name?: string }>;
+};
+
+type SkillSystem = {
+    skillType?: string;
+    activeSkill?: SkillSubSchema;
+    knowledgeSkill?: SkillSubSchema;
+    languageSkill?: SkillSubSchema;
 };
 
 type Item = { id: string; type: string; system: Record<string, unknown> };
@@ -14,6 +21,7 @@ export type LinkedSkillResolution = {
     dice: number;
     linkedAttribute: string | null;
     specName: string | null;
+    specHasOwnValue: boolean;
 };
 
 export function parseLinkedSkillId(id: string): { skillId: string; specIndex: number | null } {
@@ -22,6 +30,11 @@ export function parseLinkedSkillId(id: string): { skillId: string; specIndex: nu
     if (sep === -1) return { skillId: id, specIndex: null };
     const specIndex = parseInt(id.slice(sep + 2), 10);
     return { skillId: id.slice(0, sep), specIndex: isNaN(specIndex) ? null : specIndex };
+}
+
+function resolveSubSchema(system: SkillSystem): SkillSubSchema {
+    const subKey = `${system.skillType ?? "active"}Skill` as keyof SkillSystem;
+    return (system[subKey] as SkillSubSchema | undefined) ?? {};
 }
 
 export function resolveLinkedSkill(
@@ -34,14 +47,16 @@ export function resolveLinkedSkill(
     const skill = actor.items.get?.(skillId) ?? actor.items.contents?.find(i => i.id === skillId);
     if (!skill) return null;
 
-    const ss = skill.system as SkillSystem;
+    const ss = resolveSubSchema(skill.system as SkillSystem);
     const baseRating = ss.value ?? 0;
 
     let dice = baseRating;
     let specName: string | null = null;
+    let specHasOwnValue = false;
 
     if (specIndex !== null && ss.specializations?.[specIndex] !== undefined) {
         const spec = ss.specializations[specIndex];
+        specHasOwnValue = spec.value !== undefined;
         dice = spec.value ?? baseRating;
         specName = spec.name ?? null;
     }
@@ -53,5 +68,6 @@ export function resolveLinkedSkill(
         dice,
         linkedAttribute: ss.linkedAttribute ?? null,
         specName,
+        specHasOwnValue,
     };
 }

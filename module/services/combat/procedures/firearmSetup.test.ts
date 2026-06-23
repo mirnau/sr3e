@@ -5,7 +5,7 @@ import { resetRecoil, bumpOOCShots } from "../recoilTracker";
 beforeEach(() => resetRecoil("a1"));
 
 const skill = (id: string, value: number) => ({
-    id, type: "skill", system: { value, linkedAttribute: "agility", specializations: [] },
+    id, type: "skill", system: { skillType: "active", activeSkill: { value, linkedAttribute: "agility", specializations: [] } },
 });
 
 const actor = (str = 4) => ({

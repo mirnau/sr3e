@@ -19,12 +19,6 @@ type ActorWithItems = {
     items: { get?: (id: string) => SkillItem | undefined; contents?: SkillItem[] };
 };
 
-type SkillSystem = {
-    value?: number;
-    linkedAttribute?: string;
-    specializations?: Array<{ value?: number; name?: string }>;
-};
-
 type AttributeMap = Record<string, { value?: number; total?: number }>;
 
 function attributeTN(actor: ActorWithItems, attrKey: string): number {
@@ -41,13 +35,12 @@ export function buildSkillSetup(
 ): ProcedureSetup {
     const linkedSkillId = specIndex != null ? `${skillId}::${specIndex}` : skillId;
     const resolved = resolveLinkedSkill(actor, linkedSkillId);
-    const ss = resolved?.skill.system as SkillSystem | undefined;
 
     const dice = resolved?.dice ?? 0;
     const tn = resolved?.linkedAttribute ? attributeTN(actor, resolved.linkedAttribute) : 4;
 
     const mods: Modifier[] = [];
-    if (specIndex != null && resolved && (ss?.specializations?.[specIndex]?.value === undefined)) {
+    if (specIndex != null && resolved && !resolved.specHasOwnValue) {
         mods.push({ name: "defaulting-spec", value: 2, poolCap: Math.floor(dice / 2) });
     }
 

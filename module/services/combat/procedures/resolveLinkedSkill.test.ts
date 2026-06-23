@@ -9,9 +9,12 @@ describe("parseLinkedSkillId", () => {
     it("malformed sep → no spec", () => expect(parseLinkedSkillId("abc::x")).toEqual({ skillId: "abc", specIndex: null }));
 });
 
-const skill = (id: string, value: number, specs: Array<{ value?: number; name?: string }> = [], attr = "agility") => ({
+const skill = (id: string, value: number, specs: Array<{ value?: number; name?: string }> = [], attr = "agility", type = "active") => ({
     id, type: "skill",
-    system: { value, linkedAttribute: attr, specializations: specs },
+    system: {
+        skillType: type,
+        activeSkill: { value, linkedAttribute: attr, specializations: specs },
+    },
 });
 
 const actor = (items: ReturnType<typeof skill>[]) => ({
