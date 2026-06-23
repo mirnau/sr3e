@@ -5,6 +5,9 @@ import { FLAGS } from "../../../constants/flags";
 import { AttributeSpendingService } from "../../../services/character-creation/AttributeSpendingService";
 import { KarmaSpendingService } from "../../../services/karma/KarmaSpendingService";
 import type SR3EActor from "../../../documents/SR3EActor";
+import { buildAttributeSetup } from "../../../services/combat/procedures/simpleSetups";
+import { openComposer } from "../../../services/combat/procedures/composerService";
+import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 
 interface Props {
    actor: SR3EActor;
@@ -73,6 +76,16 @@ function increaseAttribute(): void {
    spendingService.increaseAttribute(actor, attributeKey);
 }
 
+function onRollClick(e: MouseEvent): void {
+    if ($isCharacterCreation || $isShoppingState || isDerivedAttribute) return;
+    const setup = buildAttributeSetup(actor, attributeKey, label);
+    if (e.shiftKey) {
+        openComposer(setup);
+    } else {
+        void executeProcedure(setup, actor as never);
+    }
+}
+
 function decreaseAttribute(): void {
    if (!actor) return;
    if (isKarmaMode) {
@@ -102,7 +115,13 @@ function decreaseAttribute(): void {
                <i class="fa-solid fa-circle-chevron-down"></i>
             </button>
          {/if}
-         <span class="attribute-value">{displayValue}</span>
+         <span
+            class="attribute-value{!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? ' button' : ''}"
+            role={!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? 'button' : undefined}
+            tabindex={!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? 0 : undefined}
+            onclick={(e) => onRollClick(e)}
+            onkeydown={(e) => e.key === 'Enter' && onRollClick(new MouseEvent('click'))}
+         >{displayValue}</span>
          {#if showChevrons}
             <button
                type="button"

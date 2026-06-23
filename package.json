@@ -26,6 +26,7 @@
       "@types/packery": "^1.4.37",
       "@vitest/coverage-v8": "^4.1.9",
       "conventional-recommended-bump": "^11.2.0",
+      "glob": "^13.0.6",
       "jsdom": "^29.1.1",
       "less": "^4.2.1",
       "sass": "^1.80.6",

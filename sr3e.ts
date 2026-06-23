@@ -14,6 +14,11 @@ import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
 import SkillSheet from "./module/sheets/items/SkillSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
+import SR3Edie from "./module/foundry/documents/SR3Edie";
+import { handleDefenderChoice } from "./module/services/combat/orchestration/defenderFlow";
+import { handleResistanceClick } from "./module/services/combat/orchestration/resistanceHandler";
+import { registerSocketHandlers, registerCombatTurnHook } from "./module/services/combat/orchestration/socketHandlers";
+import type { ResistanceCtx } from "./module/services/combat/orchestration/resistanceHandler";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -100,6 +105,8 @@ async function registerHooks(): Promise<void> {
          fonts: neonderthawFonts,
       };
 
+      SR3Edie.Register();
+
       // Dynamic imports AFTER configure() has run
 
       registerDocumentTypes([
@@ -142,7 +149,31 @@ async function registerHooks(): Promise<void> {
    Hooks.once(hooks.ready, () => {
       // Initialize NewsService after everything is ready
       getNewsService();
+      registerSocketHandlers();
+      registerCombatTurnHook();
       console.log("SR3E | NewsService initialized");
+   });
+
+   Hooks.on("renderChatMessage", (msg: Record<string, unknown>, html: HTMLElement) => {
+      const sr3eFlags = (msg.flags as Record<string, unknown> | undefined)?.sr3e as Record<string, unknown> | undefined;
+      if (!sr3eFlags) return;
+
+      const contestId = sr3eFlags.opposed as string | undefined;
+      if (contestId) {
+         html.querySelectorAll("[data-responder]").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+               const key = (e.currentTarget as HTMLElement).dataset.responder ?? null;
+               handleDefenderChoice(contestId, key);
+            });
+         });
+      }
+
+      const resistCtx = sr3eFlags.damageResistance as ResistanceCtx | undefined;
+      if (resistCtx) {
+         html.querySelector(".sr3e-resist-damage-button")?.addEventListener("click", () => {
+            handleResistanceClick(resistCtx);
+         });
+      }
    });
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);

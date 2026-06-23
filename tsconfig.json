@@ -32,7 +32,6 @@
     "skipLibCheck": true,
 
     /* Path Mapping (matching vite.config.ts aliases) */
-    "baseUrl": ".",
     "paths": {
       "@root": ["./"],
     },

@@ -5,6 +5,9 @@
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import type SR3EActor from "../../../documents/SR3EActor";
    import StatCard from "./StatCard.svelte";
+   import { buildDicePoolSetup } from "../../../services/combat/procedures/simpleSetups";
+   import { openComposer } from "../../../services/combat/procedures/composerService";
+   import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 
    let { actor: _actor }: { actor: SR3EActor } = $props();
    const actor = untrack(() => _actor);
@@ -90,6 +93,15 @@
 
    onDestroy(() => storeManager.Unsubscribe(actor));
 
+   function rollPool(e: MouseEvent, poolKey: string, title: string): void {
+      const setup = buildDicePoolSetup(actor, poolKey, title);
+      if (e.shiftKey) {
+         openComposer(setup);
+      } else {
+         void executeProcedure(setup, actor as never);
+      }
+   }
+
    $effect(() => {
       const preview = (key: string, fallback: number) =>
          $isShoppingState
@@ -145,24 +157,44 @@
 <h1>{localize(localization.dicePools)}</h1>
 <div class="stat-card-grid">
    <StatCard label={localize(localization?.combat)}>
-      <span class="attribute-value">{$combat}</span>
+      <span class="attribute-value button" role="button" tabindex="0"
+         onclick={(e) => rollPool(e, "combat", localize(localization?.combat))}
+         onkeydown={(e) => e.key === "Enter" && rollPool(new MouseEvent("click"), "combat", localize(localization?.combat))}>
+         {$combat}
+      </span>
    </StatCard>
    {#if hasRiggerInterface}
       <StatCard label={localize(localization?.control)}>
-         <span class="attribute-value">{$control}</span>
+         <span class="attribute-value button" role="button" tabindex="0"
+            onclick={(e) => rollPool(e, "control", localize(localization?.control))}
+            onkeydown={(e) => e.key === "Enter" && rollPool(new MouseEvent("click"), "control", localize(localization?.control))}>
+            {$control}
+         </span>
       </StatCard>
    {/if}
    {#if hasMatrixInterface}
       <StatCard label={localize(localization?.hacking)}>
-         <span class="attribute-value">{$hacking}</span>
+         <span class="attribute-value button" role="button" tabindex="0"
+            onclick={(e) => rollPool(e, "hacking", localize(localization?.hacking))}
+            onkeydown={(e) => e.key === "Enter" && rollPool(new MouseEvent("click"), "hacking", localize(localization?.hacking))}>
+            {$hacking}
+         </span>
       </StatCard>
    {/if}
    {#if isAwakened}
       <StatCard label={localize(localization?.astral)}>
-         <span class="attribute-value">{$astral}</span>
+         <span class="attribute-value button" role="button" tabindex="0"
+            onclick={(e) => rollPool(e, "astral", localize(localization?.astral))}
+            onkeydown={(e) => e.key === "Enter" && rollPool(new MouseEvent("click"), "astral", localize(localization?.astral))}>
+            {$astral}
+         </span>
       </StatCard>
       <StatCard label={localize(localization?.spell)}>
-         <span class="attribute-value">{$spell}</span>
+         <span class="attribute-value button" role="button" tabindex="0"
+            onclick={(e) => rollPool(e, "spell", localize(localization?.spell))}
+            onkeydown={(e) => e.key === "Enter" && rollPool(new MouseEvent("click"), "spell", localize(localization?.spell))}>
+            {$spell}
+         </span>
       </StatCard>
    {/if}
 </div>

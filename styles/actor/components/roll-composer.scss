@@ -1,0 +1,121 @@
+.roll-composer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.roll-composer-container {
+    background: var(--color-bg, #2a3636);
+    border: 1px solid var(--color-border-dark, #556);
+    border-radius: 4px;
+    padding: 12px;
+    min-width: 240px;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.roll-composer-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 3px;
+    padding: 8px;
+}
+
+.roll-composer-title {
+    margin: 0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.roll-composer-tn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tn-display {
+    text-align: center;
+    flex: 1;
+}
+
+.tn-value {
+    font-size: 2rem;
+    font-weight: bold;
+    display: block;
+    line-height: 1;
+}
+
+.tn-difficulty {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.tn-adjust {
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.mod-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.mod-name {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+.mod-value {
+    width: 48px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.add-mod {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.roll-composer-pool,
+.roll-composer-karma,
+.roll-composer-rounds {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.pool-value {
+    min-width: 24px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.karma-cost {
+    opacity: 0.6;
+    font-size: 0.75rem;
+    margin-left: auto;
+}
+
+.sr3e-response-button-primary {
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    width: 100%;
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

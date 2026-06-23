@@ -4,10 +4,9 @@
     "module": "ESNext",
     "allowJs": true,
     "checkJs": false,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["systems/sr3e/*"],
-      "foundry/*": ["node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
+      "@/*": ["./systems/sr3e/*"],
+      "foundry/*": ["./node_modules/@league-of-foundry-developers/foundry-vtt-types/src/foundry/*"]
     },
     "typeRoots": [
       "node_modules/@types"

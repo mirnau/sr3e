@@ -3,6 +3,9 @@ import { onDestroy, untrack } from "svelte";
 import type { IStoreManager } from "../../../../utilities/IStoreManager";
 import { StoreManager } from "../../../../utilities/StoreManager.svelte";
 import SkillEditorApp from "../../../../sheets/items/SkillEditorApp";
+import { buildSkillSetup } from "../../../../services/combat/procedures/simpleSetups";
+import { openComposer } from "../../../../services/combat/procedures/composerService";
+import { executeProcedure } from "../../../../services/combat/orchestration/executeProcedure";
 
 interface Props {
    actor: Actor;
@@ -41,11 +44,25 @@ function openSkillEditor(): void {
    SkillEditorApp.launch(actor, item, category);
 }
 function rollSkill(e: MouseEvent | KeyboardEvent): void {
-   e.preventDefault();
+    e.preventDefault();
+    const setup = buildSkillSetup(actor, item.id, null, item.name ?? undefined);
+    if ((e as MouseEvent).shiftKey) {
+        openComposer(setup);
+    } else {
+        void executeProcedure(setup, actor as never);
+    }
 }
 
-function rollSpec(e: MouseEvent | KeyboardEvent, _spec: Specialization): void {
-   e.preventDefault();
+function rollSpec(e: MouseEvent | KeyboardEvent, spec: Specialization): void {
+    e.preventDefault();
+    const specs = (item.system as Record<string, any>)?.[`${category}Skill`]?.specializations as Specialization[] | undefined;
+    const idx = specs?.indexOf(spec) ?? 0;
+    const setup = buildSkillSetup(actor, item.id, idx, `${item.name ?? ""} (${spec.name})`);
+    if ((e as MouseEvent).shiftKey) {
+        openComposer(setup);
+    } else {
+        void executeProcedure(setup, actor as never);
+    }
 }
 
 function capitalize(s: string): string {
