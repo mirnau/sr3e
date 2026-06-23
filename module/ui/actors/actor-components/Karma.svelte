@@ -19,14 +19,15 @@ const karmaPool = storeManager.GetSimpleStatROStore(actor, "karma.karmaPool");
 const goodKarmaStore = storeManager.GetRWStore<number>(actor, "karma.goodKarma");
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
 const shoppingKarmaSession = storeManager.GetShallowStore<any>(actor, "shoppingKarmaSession", { active: false, stagedSpent: 0, attrSnapshot: {} });
+const skillKarmaRegistry = storeManager.GetShallowStore<Record<string, { stagedSpent: number }>>(actor, "skillKarmaRegistry", {});
 
 const goodKarmaDisplay: Readable<number> = derived(
-   [isShoppingState, shoppingKarmaSession, goodKarmaStore],
-   ([$shopping, $session, $good]) => {
-      if ($shopping && $session?.active) {
-         return ($good ?? 0) - ($session?.stagedSpent ?? 0);
-      }
-      return $good ?? 0;
+   [isShoppingState, shoppingKarmaSession, skillKarmaRegistry, goodKarmaStore],
+   ([$shopping, $session, $registry, $good]) => {
+      if (!$shopping) return $good ?? 0;
+      const attrSpend = $session?.active ? ($session.stagedSpent ?? 0) : 0;
+      const skillSpend = Object.values($registry ?? {}).reduce((sum, s) => sum + s.stagedSpent, 0);
+      return ($good ?? 0) - attrSpend - skillSpend;
    }
 );
 

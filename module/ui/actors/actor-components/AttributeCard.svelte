@@ -22,6 +22,9 @@ const isCharacterCreation = storeManager.GetFlagStore(actor, FLAGS.ACTOR.IS_CHAR
 const attributeLocked = storeManager.GetFlagStore(actor, FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED, false);
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, FLAGS.ACTOR.IS_SHOPPING_STATE, false);
 const creationPointsStore = storeManager.GetRWStore<number>(actor, "creation.attributePoints");
+const attrKarmaSession = storeManager.GetShallowStore<{ active: boolean; attrSnapshot: Record<string, number>; stagedDeltas: Record<string, number> }>(
+    actor, "shoppingKarmaSession", { active: false, attrSnapshot: {}, stagedDeltas: {} }
+);
 const spendingService = AttributeSpendingService.Instance();
 const isDerivedAttribute = $derived(
    attributeKey === "reaction" ||
@@ -30,6 +33,11 @@ const isDerivedAttribute = $derived(
    attributeKey === "initiative"
 );
 const isKarmaMode = $derived($isShoppingState && !$isCharacterCreation);
+const displayValue = $derived(
+    isKarmaMode && $attrKarmaSession?.active
+        ? ($attrKarmaSession.attrSnapshot[attributeKey] ?? $attributeValueStore) + ($attrKarmaSession.stagedDeltas?.[attributeKey] ?? 0)
+        : $attributeValueStore
+);
 const showChevrons = $derived(
    !isDerivedAttribute && (
       ($isCharacterCreation && !$attributeLocked) || isKarmaMode
@@ -37,6 +45,7 @@ const showChevrons = $derived(
 );
 function canIncrease(): boolean {
    if (!actor) return false;
+   $attrKarmaSession; // reactive dep — session changes drive re-eval in karma mode
    $attributeValueStore;
    if (isKarmaMode) {
       return KarmaSpendingService.Instance().canStageAttrIncrement(actor, attributeKey);
@@ -47,6 +56,7 @@ function canIncrease(): boolean {
 
 function canDecrease(): boolean {
    if (!actor) return false;
+   $attrKarmaSession; // reactive dep
    $attributeValueStore;
    if (isKarmaMode) {
       return KarmaSpendingService.Instance().canStageAttrDecrement(actor, attributeKey);
@@ -92,7 +102,7 @@ function decreaseAttribute(): void {
                <i class="fa-solid fa-circle-chevron-down"></i>
             </button>
          {/if}
-         <span class="attribute-value">{$attributeValueStore}</span>
+         <span class="attribute-value">{displayValue}</span>
          {#if showChevrons}
             <button
                type="button"

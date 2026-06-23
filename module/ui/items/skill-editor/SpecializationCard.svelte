@@ -5,6 +5,9 @@
         actor: _actor,
         skill: _skill,
         isCreationMode,
+        isKarmaMode = false,
+        isDeletable = false,
+        isIncrementDisabled = false,
         ondelete,
         onchange,
         onincrement,
@@ -14,6 +17,9 @@
         actor: Actor;
         skill: Item;
         isCreationMode: boolean;
+        isKarmaMode?: boolean;
+        isDeletable?: boolean;
+        isIncrementDisabled?: boolean;
         ondelete?: (spec: { name: string; value: number }) => void;
         onchange?: () => void;
         onincrement?: (spec: { name: string; value: number }) => void;
@@ -61,10 +67,10 @@
     <div class="skill-specialization-card">
         <div class="specialization-background"></div>
         <div
-            contenteditable="true"
+            contenteditable={true}
             class="specialization-name"
             role="textbox"
-            tabindex="0"
+            tabindex={0}
             aria-label="Specialization name"
             oninput={handleInput}
             onkeydown={handleKeyDown}
@@ -75,16 +81,7 @@
     <div class="buttons-horizontal-distribution">
     <button
         type="button"
-        class="header-control icon sr3e-toolbar-button"
-        aria-label="Increment specialization"
-        onclick={increment}
-        disabled={isCreationMode}
-    >
-        <i class="fa-solid fa-plus"></i>
-    </button>
-    <button
-        type="button"
-        class="header-control icon sr3e-toolbar-button"
+        class="skill-hud-btn"
         aria-label="Decrement specialization"
         onclick={decrement}
         disabled={isCreationMode}
@@ -93,9 +90,19 @@
     </button>
     <button
         type="button"
-        class="header-control icon sr3e-toolbar-button"
+        class="skill-hud-btn"
+        aria-label="Increment specialization"
+        onclick={increment}
+        disabled={isCreationMode || isIncrementDisabled}
+    >
+        <i class="fa-solid fa-plus"></i>
+    </button>
+    <button
+        type="button"
+        class="skill-hud-btn danger"
         aria-label="Delete specialization"
         onclick={deleteThis}
+        disabled={isKarmaMode && !isDeletable}
     >
         <i class="fa-solid fa-trash-can"></i>
     </button>

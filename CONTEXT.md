@@ -116,9 +116,12 @@ Detailed records live in `docs/adr/`.
 | Sheet data reads | Components get stores from StoreManager via `GetRWStore`, `GetROStore`, etc. They never read `actor.system.*` directly. |
 | Migration order | Character-first: creation, sheet, advancement, then dependent systems. |
 | Error philosophy | Prefer visible failures over hidden defensive handling. |
-| Staged karma spending | Preview changes before committing; cancelling reverts the session. |
+| Staged karma spending | Preview changes before committing; cancelling reverts the session. Applies to both attributes and skills. |
 | Karma pool | Starting pool is free; earned pool is derived from lifetime karma and metatype factor. |
 | Karma factor fallback | Standard fallback is `0.05`; humans use `0.1`. |
-| Skill deletion | Delete skill items when rating reaches 0. |
+| Skill deletion | Delete skill items when rating reaches 0. In karma mode, deletion has no GK refund — GM refunds manually. |
 | Character creation cap | Skill rating max is 6 during character creation. |
 | Minimum attribute | Attributes start at minimum rating 1. |
+| Skill karma floor | During a karma session, skill ratings cannot be reduced below their value at session open. Purchased ratings are not sellable. |
+| Post-creation specs | Multiple specializations allowed post-creation, up to skill base rating count. New spec starts at `skillRating + 1`; does not reduce base skill. Ceiling: `skillValue * 2` (exception: skillValue=1 → cap 3). Session-added specs are deletable with GK refund; pre-session specs are locked for deletion (roll back on cancel only). |
+| Skill karma registry | Shallow store `skillKarmaRegistry: Record<skillId, SkillSession>` on the actor. Each open skill editor writes its staged spend to its own key. `Karma.svelte` sums all entries for the live goodKarma preview. |
