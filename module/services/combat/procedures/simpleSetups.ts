@@ -53,6 +53,7 @@ export function buildSkillSetup(
         rollState,
         lockPriority: "simple",
         selfPublish: true,
+        openRoll: true,
         defenseHint: { type: "skill", key: skillId, tnMod: 0, tnLabel: "Skill" },
         exportFn: () => ({
             familyKey: "skill",
