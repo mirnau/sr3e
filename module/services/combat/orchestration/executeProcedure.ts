@@ -39,10 +39,11 @@ export async function executeProcedure(
 
     try {
         const state = opts.rollState ?? setup.rollState;
-        const tn = computeFinalTN(state, 2);
         const pool = computePool(state);
 
-        const roll = SR3ERoll.build(pool, tn);
+        const roll = setup.openRoll
+            ? SR3ERoll.buildOpen(pool)
+            : SR3ERoll.build(pool, computeFinalTN(state, 2));
         await roll.evaluate();
 
         const isContested = !!setup.defenseHint && (opts.targets?.length ?? 0) > 0;

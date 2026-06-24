@@ -8,6 +8,7 @@ export type ProcedureSetup = {
     rollState: RollState;
     lockPriority: "simple" | "advanced";
     selfPublish: boolean;
+    openRoll?: boolean;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;
     commitFn: (roll: unknown, actor: unknown) => Promise<void>;
@@ -84,6 +85,7 @@ export function buildAttributeSetup(
         rollState,
         lockPriority: "simple",
         selfPublish: true,
+        openRoll: true,
         defenseHint: { type: "attribute", key: attributeKey, tnMod: 0, tnLabel: attributeKey },
         exportFn: () => ({
             familyKey: "attribute",
@@ -114,6 +116,7 @@ export function buildDicePoolSetup(
         rollState,
         lockPriority: "simple",
         selfPublish: true,
+        openRoll: true,
         defenseHint: null,
         exportFn: () => ({
             familyKey: "pool",

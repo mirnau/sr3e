@@ -35,6 +35,7 @@ const isDerivedAttribute = $derived(
    attributeKey === "magic" ||
    attributeKey === "initiative"
 );
+const canRoll = attributeKey !== "essence" && attributeKey !== "magic" && attributeKey !== "initiative";
 const isKarmaMode = $derived($isShoppingState && !$isCharacterCreation);
 const displayValue = $derived(
     isKarmaMode && $attrKarmaSession?.active
@@ -77,7 +78,7 @@ function increaseAttribute(): void {
 }
 
 function onRollClick(e: MouseEvent): void {
-    if ($isCharacterCreation || $isShoppingState || isDerivedAttribute) return;
+    if ($isCharacterCreation || $isShoppingState || !canRoll) return;
     const setup = buildAttributeSetup(actor, attributeKey, label);
     if (e.shiftKey) {
         openComposer(setup, actor);
@@ -99,7 +100,13 @@ function decreaseAttribute(): void {
 
 <div class="attribute-card">
    <div class="attribute-card-shadow"></div>
-   <div class="attribute-card-outline">
+   <div
+      class="attribute-card-outline{canRoll && !$isCharacterCreation && !$isShoppingState ? ' rollable' : ''}"
+      role={canRoll && !$isCharacterCreation && !$isShoppingState ? 'button' : undefined}
+      tabindex={canRoll && !$isCharacterCreation && !$isShoppingState ? 0 : undefined}
+      onclick={(e) => onRollClick(e)}
+      onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onRollClick(new MouseEvent('click'))}
+   >
       <div class="attribute-card-displayarea"></div>
       <h4 class="attribute-label">{label}</h4>
       <div class="attribute-value-row">
@@ -108,26 +115,20 @@ function decreaseAttribute(): void {
                type="button"
                class="attr-chevron attr-chevron-down"
                disabled={!canDecrease()}
-               onclick={() => decreaseAttribute()}
+               onclick={(e) => { e.stopPropagation(); decreaseAttribute(); }}
                title="Decrease {attributeKey}"
                aria-label="Decrease {attributeKey}"
             >
                <i class="fa-solid fa-circle-chevron-down"></i>
             </button>
          {/if}
-         <span
-            class="attribute-value{!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? ' button' : ''}"
-            role={!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? 'button' : undefined}
-            tabindex={!$isCharacterCreation && !$isShoppingState && !isDerivedAttribute ? 0 : undefined}
-            onclick={(e) => onRollClick(e)}
-            onkeydown={(e) => e.key === 'Enter' && onRollClick(new MouseEvent('click'))}
-         >{displayValue}</span>
+         <span class="attribute-value">{displayValue}</span>
          {#if showChevrons}
             <button
                type="button"
                class="attr-chevron attr-chevron-up"
                disabled={!canIncrease()}
-               onclick={() => increaseAttribute()}
+               onclick={(e) => { e.stopPropagation(); increaseAttribute(); }}
                title="Increase {attributeKey}"
                aria-label="Increase {attributeKey}"
             >
