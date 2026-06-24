@@ -1,0 +1,119 @@
+@use "./mixins.scss" as *;
+
+:root {
+   --chat-text-color: #e8f3ff;
+   --chat-highlight-color: rgba(0, 255, 200, 0.9);
+   --chat-frame-color: rgb(174, 224, 224);
+   --chat-surface-color: rgb(17, 17, 17);
+}
+
+body.game .chat-message {
+   position: relative;
+   isolation: isolate;
+   padding: 0.5rem;
+   color: var(--chat-text-color);
+   background: var(--chat-frame-color);
+   border: 0;
+   border-radius: 0;
+   @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
+}
+
+body.game .chat-message::before {
+   content: "";
+   position: absolute;
+   z-index: -1;
+   inset: 1px;
+   background: var(--chat-surface-color);
+   box-shadow: inset 0 0 30px darkslategrey;
+   pointer-events: none;
+   @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
+}
+
+body.game .chat-message .message-header {
+   padding-bottom: 0.35rem;
+   color: rgba(232, 243, 255, 0.65);
+   border-bottom: 1px solid rgba(0, 255, 200, 0.2);
+}
+
+body.game .chat-message .message-header .message-sender,
+body.game .chat-message :is(.sr3e-roll-actor, .sr3e-contest-header, .sr3e-defender-header, .sr3e-resistance-header) {
+   color: var(--chat-highlight-color);
+   font-weight: 600;
+   text-transform: uppercase;
+   text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+}
+
+body.game .chat-message .message-content {
+   padding: 0.5rem 0.25rem 0.25rem;
+   color: var(--chat-text-color);
+}
+
+body.game .chat-message .message-content > * + *,
+body.game .chat-message .sr3e-roll-summary > * + * {
+   margin-top: 0.4rem;
+}
+
+body.game .chat-message :is(.dice-formula, .dice-total) {
+   color: var(--chat-text-color);
+   background: rgba(0, 0, 0, 0.25);
+   border: 1px solid rgba(75, 208, 255, 0.35);
+   border-radius: 6px;
+   box-shadow: inset 0 0 12px rgba(47, 79, 79, 0.75);
+}
+
+body.game .chat-message .dice-roll {
+   cursor: default;
+}
+
+body.game .chat-message .dice-roll .dice-tooltip {
+   grid-template-rows: 1fr;
+}
+
+body.game .chat-message .dice-roll .dice-tooltip > .wrapper {
+   overflow: visible;
+}
+
+body.game .chat-message .dice-tooltip .part-header {
+   border-color: rgba(0, 255, 200, 0.25);
+}
+
+body.game .chat-message .dice-tooltip .dice-rolls .roll {
+   color: #fff;
+   filter: drop-shadow(0 0 4px rgba(0, 255, 200, 0.35));
+}
+
+body.game .chat-message .sr3e-roll-dice {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.25rem;
+}
+
+body.game .chat-message .sr3e-die {
+   min-width: 1.75rem;
+   padding: 0.2rem 0.35rem;
+   text-align: center;
+   color: #fff;
+   background: rgba(0, 0, 0, 0.25);
+   border: 1px solid rgba(75, 208, 255, 0.35);
+   border-radius: 6px;
+   box-shadow: inset 0 0 8px darkslategrey;
+}
+
+body.game .chat-message .sr3e-die.sr3e-success,
+body.game .chat-message .sr3e-roll-successes {
+   color: var(--chat-highlight-color);
+   text-shadow: 0 0 6px rgba(0, 255, 200, 0.5);
+}
+
+body.game .chat-message button {
+   color: var(--chat-text-color);
+   background: rgba(0, 0, 0, 0.25);
+   border: 1px solid rgba(75, 208, 255, 0.35);
+   border-radius: 6px;
+   transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+body.game .chat-message button:hover {
+   border-color: var(--chat-highlight-color);
+   box-shadow: 0 0 10px rgba(0, 255, 200, 0.35);
+}
