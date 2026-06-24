@@ -6,7 +6,7 @@ import { AttributeSpendingService } from "../../../services/character-creation/A
 import { KarmaSpendingService } from "../../../services/karma/KarmaSpendingService";
 import type SR3EActor from "../../../documents/SR3EActor";
 import { buildAttributeSetup } from "../../../services/combat/procedures/simpleSetups";
-import { openComposer } from "../../../services/combat/procedures/composerService";
+import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 
 interface Props {

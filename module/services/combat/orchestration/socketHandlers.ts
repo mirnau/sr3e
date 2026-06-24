@@ -30,6 +30,25 @@ function clearFullDefenseFlag(actor: { unsetFlag?: (scope: string, key: string) 
     actor.unsetFlag?.("sr3e", FULL_DEFENSE_FLAG)?.catch(() => {});
 }
 
+export function registerPoolRefreshHook(): void {
+    if (typeof Hooks === "undefined") return;
+
+    Hooks.on("updateCombat", async (combat: unknown, changed: Record<string, unknown>) => {
+        if (!("round" in changed)) return;
+        const cbt = combat as { combatants?: { contents?: Array<{ actor?: { update?: (d: Record<string, unknown>) => Promise<void> } }> } };
+        const combatants = cbt.combatants?.contents ?? [];
+        for (const combatant of combatants) {
+            await combatant.actor?.update?.({
+                "system.dicePools.combat.spent": 0,
+                "system.dicePools.astral.spent": 0,
+                "system.dicePools.hacking.spent": 0,
+                "system.dicePools.control.spent": 0,
+                "system.dicePools.spell.spent": 0,
+            });
+        }
+    });
+}
+
 export function registerCombatTurnHook(): void {
     if (typeof Hooks === "undefined") return;
 

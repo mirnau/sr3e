@@ -1,4 +1,3 @@
-import { mount } from "svelte";
 import CharacterModel from "./module/models/actors/CharacterModel";
 import BroadcasterModel from "./module/models/actors/BroadcasterModel";
 import StorytellerScreenModel from "./module/models/actors/StorytellerScreenModel";
@@ -16,8 +15,7 @@ import SkillSheet from "./module/sheets/items/SkillSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
-import { registerSocketHandlers, registerCombatTurnHook } from "./module/services/combat/orchestration/socketHandlers";
-import RollComposerComponent from "./module/ui/combat/RollComposerComponent.svelte";
+import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook } from "./module/services/combat/orchestration/socketHandlers";
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
 
 
@@ -150,11 +148,7 @@ async function registerHooks(): Promise<void> {
       getNewsService();
       registerSocketHandlers();
       registerCombatTurnHook();
-
-      const composerRoot = document.createElement("div");
-      composerRoot.id = "sr3e-roll-composer-root";
-      document.body.appendChild(composerRoot);
-      mount(RollComposerComponent, { target: composerRoot });
+      registerPoolRefreshHook();
 
       console.log("SR3E | Ready");
    });

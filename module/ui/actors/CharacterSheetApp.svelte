@@ -1,38 +1,38 @@
 <script lang="ts">
-   import PackeryGrid from "../common-components/PackeryGrid.svelte";
-   import SheetCard from "../common-components/SheetCard.svelte";
-   import Attributes from "./actor-components/Attributes.svelte";
-   import DicePools from "./actor-components/DicePools.svelte";
-   import Dossier from "./actor-components/Dossier.svelte";
-   import Health from "./actor-components/Health.svelte";
-   import Karma from "./actor-components/Karma.svelte";
-   import Movement from "./actor-components/Movement.svelte";
-   import Skills from "./actor-components/Skills.svelte";
-   const { actor } = $props<{
-      actor: Actor;
-   }>();
+import PackeryGrid from "../common-components/PackeryGrid.svelte";
+import SheetCard from "../common-components/SheetCard.svelte";
+import Attributes from "./actor-components/Attributes.svelte";
+import DicePools from "./actor-components/DicePools.svelte";
+import Dossier from "./actor-components/Dossier.svelte";
+import Health from "./actor-components/Health.svelte";
+import Karma from "./actor-components/Karma.svelte";
+import Movement from "./actor-components/Movement.svelte";
+import Skills from "./actor-components/Skills.svelte";
+import type SR3EActor from "../../documents/SR3EActor";
+
+const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
 </script>
 
 <PackeryGrid>
-   <SheetCard>
-      <Dossier {actor} />
-   </SheetCard>
-   <SheetCard>
-      <Attributes {actor} />
-   </SheetCard>
-   <SheetCard>
-      <DicePools {actor} />
-   </SheetCard>
-   <SheetCard>
-      <Movement {actor} />
-   </SheetCard>
-   <SheetCard>
-      <Karma {actor} />
-   </SheetCard>
-   <SheetCard span="dynamic">
-      <Skills {actor} />
-   </SheetCard>
-   <SheetCard span={2}>
-      <Health {actor} />
-   </SheetCard>
+    <SheetCard>
+        <Dossier {actor} />
+    </SheetCard>
+    <SheetCard>
+        <Attributes {actor} />
+    </SheetCard>
+    <SheetCard>
+        <DicePools {actor} />
+    </SheetCard>
+    <SheetCard>
+        <Movement {actor} />
+    </SheetCard>
+    <SheetCard>
+        <Karma {actor} />
+    </SheetCard>
+    <SheetCard span="dynamic">
+        <Skills {actor} />
+    </SheetCard>
+    <SheetCard span={2}>
+        <Health {actor} />
+    </SheetCard>
 </PackeryGrid>

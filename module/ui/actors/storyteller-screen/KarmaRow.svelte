@@ -30,8 +30,13 @@
    const pendingKarmaReward = storeManager.GetRWStore<number>(actor, "karma.pendingKarmaReward");
    const goodKarma = storeManager.GetRWStore<number>(actor, "karma.goodKarma");
    const karmaPoolCeiling = storeManager.GetRWStore<number>(actor, "karma.karmaPoolCeiling");
+   const karmaPoolValue = storeManager.GetRWStore<number>(actor, "karma.karmaPool.value");
    const lifetimeKarma = storeManager.GetRWStore<number>(actor, "karma.lifetimeKarma");
    const readyForCommit = storeManager.GetRWStore<boolean>(actor, "karma.readyForCommit");
+
+   async function refreshKarmaPool(): Promise<void> {
+      await actor.update({ "system.karma.karmaPool.value": $karmaPoolCeiling });
+   }
 
    onDestroy(() => storeManager.Unsubscribe(actor));
 
@@ -70,7 +75,10 @@
    <td>{actor.name}</td>
    <td><input type="number" bind:value={$pendingKarmaReward} min="0" /></td>
    <td>{$goodKarma}</td>
-   <td>{$karmaPoolCeiling}</td>
+   <td>{$karmaPoolValue} / {$karmaPoolCeiling}</td>
    <td>{$lifetimeKarma}</td>
+   <td>
+      <button type="button" class="karma-refresh-btn" onclick={refreshKarmaPool} title="Restore karma pool to ceiling">↺</button>
+   </td>
    <td><input type="checkbox" bind:checked={$readyForCommit} /></td>
 </tr>

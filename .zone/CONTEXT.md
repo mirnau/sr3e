@@ -1,8 +1,8 @@
 ## Active Feature
-Tier 5 — combat UI → .zone/techspecs/TECHSPEC-combat-tier-5-ui.md
+Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
 
 ## Current Issue
-none — #126-#129 all closed; manual testing gate before checkpoint
+#130 — DicePoolStat model with spent field
 
 ## Blockers
 none

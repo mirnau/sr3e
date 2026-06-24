@@ -1,155 +1,203 @@
 <script lang="ts">
-import { onMount, onDestroy } from "svelte";
+import { onDestroy, onMount, untrack } from "svelte";
 import { sumMods, upsertMod, removeMod } from "../../services/combat/modifierList";
 import { difficultyLabel } from "../../services/combat/procedures/composerHelpers";
-import { registerComposer } from "../../services/combat/procedures/composerService";
+import {
+    getComposerState,
+    clearComposerState,
+    registerComposerForActor,
+    unregisterComposerForActor,
+} from "../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../services/combat/orchestration/executeProcedure";
+import type { IStoreManager } from "../../utilities/IStoreManager";
+import { StoreManager } from "../../utilities/StoreManager.svelte";
 import type { ProcedureSetup } from "../../services/combat/procedures/simpleSetups";
 import type { RollState, Modifier } from "../../services/combat/engine/types";
 
-let currentActor: unknown = $state(null);
-let visible = $state(false);
+const p = $props<{ actor: unknown; actorId: string }>();
+const actor = untrack(() => p.actor) as any;
+const actorId = untrack(() => p.actorId);
+
+const storeManager = StoreManager.Instance as IStoreManager;
+storeManager.Subscribe(actor);
+
+const karmaPoolStore = storeManager.GetRWStore<number>(actor, "karma.karmaPool.value");
+
+const composerState = getComposerState(actorId);
+
 let setup: ProcedureSetup | null = $state(null);
 let targetNumber = $state(4);
 let modifiers: Modifier[] = $state([]);
 let poolDice = $state(0);
 let karmaDice = $state(0);
-let isDefaulting = $state(false);
-let hasTargets = $state(false);
-let weaponMode = $state("");
-let declaredRounds = $state(1);
-let ammoAvailable: number | null = $state(null);
 
 const modifiersTotal = $derived(sumMods(modifiers));
 const finalTN = $derived(Math.max(2, targetNumber + modifiersTotal));
 const difficulty = $derived(difficultyLabel(finalTN));
 const canSubmit = $derived(finalTN >= 2 && !!setup);
 const karmaCost = $derived(Math.round(0.5 * karmaDice * (karmaDice + 1)));
-const isFirearm = $derived(setup?.kind === "firearm");
-const showRounds = $derived(isFirearm && (weaponMode === "burst" || weaponMode === "fullauto"));
+const karmaBalance = $derived($karmaPoolStore ?? 0);
+const maxAffordable = $derived(
+    karmaBalance > 0 ? Math.floor((-1 + Math.sqrt(1 + 8 * karmaBalance)) * 0.5) : 0
+);
+const karmaCap = $derived(Math.min(maxAffordable, setup?.rollState.dice ?? 0));
+const poolAvailable = $derived(composerState.poolAvailable);
 
-$effect(() => {
-    if (!isFirearm) return;
-    const roundCap = weaponMode === "burst" ? 3 : weaponMode === "fullauto" ? 10 : 1;
-    const mag = ammoAvailable ?? roundCap;
-    const min = weaponMode === "fullauto" ? 3 : 1;
-    const clampedRounds = Math.max(min, Math.min(declaredRounds, Math.min(roundCap, mag)));
-    if (clampedRounds !== declaredRounds) declaredRounds = clampedRounds;
-});
+$effect(() => { if (poolDice > poolAvailable) poolDice = Math.max(0, poolAvailable); });
+$effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
 
-$effect(() => {
-    if (!hasTargets && modifiers.some(m => m.id === "range")) {
-        modifiers = modifiers.filter(m => m.id !== "range");
-    }
-});
-
-export function open(newSetup: ProcedureSetup, actorArg: unknown): void {
+export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
-    currentActor = actorArg;
-    const s = newSetup.rollState;
-    targetNumber = s.targetNumber;
-    modifiers = [...s.modifiers];
-    poolDice = s.poolDice;
-    karmaDice = s.karmaDice;
-    isDefaulting = false;
-    if (newSetup.kind === "firearm") {
-        const st = newSetup as unknown as { weaponMode?: string; declaredRounds?: number; ammoAvailable?: number };
-        weaponMode = st.weaponMode ?? "";
-        declaredRounds = st.declaredRounds ?? 1;
-        ammoAvailable = st.ammoAvailable ?? null;
-    }
-    visible = true;
+    targetNumber = 4;
+    modifiers = [];
+    poolDice = 0;
+    karmaDice = 0;
+    composerState.isOpen = true;
+    composerState.selectedPoolKey = null;
+    composerState.poolAvailable = 0;
+}
+
+function onReset(): void {
+    targetNumber = 4;
+    modifiers = [];
+    poolDice = 0;
+    karmaDice = 0;
+    composerState.selectedPoolKey = null;
+    composerState.poolAvailable = 0;
+}
+
+function onClose(): void {
+    composerState.isOpen = false;
+    composerState.selectedPoolKey = null;
+    setup = null;
 }
 
 async function onConfirm(): Promise<void> {
     if (!setup || !canSubmit) return;
+
     const finalState: RollState = {
         dice: setup.rollState.dice,
-        poolDice: isDefaulting ? 0 : poolDice,
-        karmaDice: isDefaulting ? 0 : karmaDice,
+        poolDice,
+        karmaDice,
         targetNumber,
         modifiers,
     };
-    visible = false;
-    const targets = typeof game !== "undefined" ? Array.from((game.user as { targets?: Set<unknown> })?.targets ?? []) : [];
-    await executeProcedure(setup, currentActor as never, { targets: targets as never[], rollState: finalState });
+
+    const poolKey = composerState.selectedPoolKey;
+    const usedPool = poolDice;
+    const usedKarma = karmaCost;
+
+    composerState.isOpen = false;
+    composerState.selectedPoolKey = null;
+    setup = null;
+
+    if (poolKey && usedPool > 0) {
+        const pool = actor.system?.dicePools?.[poolKey];
+        if (pool) {
+            await actor.update?.({ [`system.dicePools.${poolKey}.spent`]: (pool.spent ?? 0) + usedPool });
+        }
+    }
+    if (usedKarma > 0) {
+        await actor.update?.({ "system.karma.karmaPool.value": Math.max(0, karmaBalance - usedKarma) });
+    }
+
+    const targets = typeof game !== "undefined"
+        ? Array.from((game.user as any)?.targets ?? [])
+        : [];
+    await executeProcedure(setup!, actor, { targets: targets as never[], rollState: finalState });
 }
 
 function addMod(): void {
     modifiers = upsertMod(modifiers, { id: `manual-${Date.now()}`, name: "modifier", value: 0 });
 }
 
-function removeMod_(id: string): void {
+function removeModById(id: string): void {
     modifiers = removeMod(modifiers, id);
 }
 
-let targetHook: number | null = null;
-
-onMount(() => {
-    registerComposer(open);
-    if (typeof Hooks !== "undefined") {
-        targetHook = Hooks.on("targetToken", (_user: unknown, _token: unknown, _targeted: unknown) => {
-            hasTargets = typeof game !== "undefined" && ((game.user as { targets?: Set<unknown> })?.targets?.size ?? 0) > 0;
-        });
-    }
-});
-
+onMount(() => registerComposerForActor(actorId, open));
 onDestroy(() => {
-    if (typeof Hooks !== "undefined" && targetHook !== null) {
-        Hooks.off("targetToken", targetHook);
-    }
+    unregisterComposerForActor(actorId);
+    clearComposerState(actorId);
+    storeManager.Unsubscribe(actor);
 });
 </script>
 
-{#if visible && setup}
-<div class="roll-composer-overlay" onclick={() => { visible = false; }} role="dialog" aria-modal="true" tabindex="-1">
-    <div class="roll-composer-container" onclick={(e) => e.stopPropagation()} role="presentation">
-        <div class="roll-composer-card">
-            <h4 class="roll-composer-title">{setup.title}</h4>
-        </div>
-        <div class="roll-composer-card roll-composer-tn">
-            <button class="tn-adjust" onclick={() => targetNumber--} aria-label="Decrease TN">−</button>
-            <div class="tn-display">
-                <span class="tn-value">{finalTN}</span>
-                <span class="tn-difficulty">{difficulty}</span>
+{#if composerState.isOpen && setup}
+<div class="sheet-card-component roll-composer-panel">
+    <div class="sheet-card-shadow"></div>
+    <div class="sheet-card-outline">
+        <div class="sheet-card-displayarea"></div>
+
+        <div class="roll-composer-header">
+            <h2 class="roll-composer-title">{setup.title}</h2>
+            <div class="roll-composer-header-actions">
+                <button class="composer-btn-reset" onclick={onReset} title="Reset">↺</button>
+                <button class="composer-btn-close" onclick={onClose} title="Close">✕</button>
             </div>
-            <button class="tn-adjust" onclick={() => targetNumber++} aria-label="Increase TN">+</button>
         </div>
-        <div class="roll-composer-card roll-composer-mods">
+
+        <div class="attribute-card roll-composer-tn-card">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <div class="roll-composer-tn-controls">
+                    <button class="composer-hud-btn" onclick={() => targetNumber--} aria-label="Decrease TN">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="tn-value">{finalTN}</span>
+                    <button class="composer-hud-btn" onclick={() => targetNumber++} aria-label="Increase TN">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div class="attribute-label">{difficulty}</div>
+            </div>
+        </div>
+
+        <div class="roll-composer-mods">
             {#each modifiers as mod (mod.id ?? mod.name)}
                 <div class="mod-row">
                     <input class="mod-name" bind:value={mod.name} />
                     <input class="mod-value" type="number" bind:value={mod.value} />
-                    <button onclick={() => removeMod_(mod.id ?? mod.name)} aria-label="Remove modifier">✕</button>
+                    <button class="composer-hud-btn composer-hud-btn--danger" onclick={() => removeModById(mod.id ?? mod.name)} aria-label="Remove">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
             {/each}
-            <button class="add-mod" onclick={addMod}>+ modifier</button>
+            <button class="composer-hud-btn composer-hud-btn--add" onclick={addMod}>
+                <i class="fa-solid fa-plus"></i> modifier
+            </button>
         </div>
-        {#if !isDefaulting && poolDice >= 0}
-            <div class="roll-composer-card roll-composer-pool">
-                <span>Pool dice</span>
-                <button onclick={() => poolDice = Math.max(0, poolDice - 1)}>−</button>
+
+        {#if composerState.selectedPoolKey && poolAvailable > 0}
+            <div class="roll-composer-pool">
+                <span>Pool <span class="pool-available">({poolAvailable} left)</span></span>
+                <button class="composer-hud-btn" onclick={() => poolDice = Math.max(0, poolDice - 1)}>
+                    <i class="fa-solid fa-minus"></i>
+                </button>
                 <span class="pool-value">{poolDice}</span>
-                <button onclick={() => poolDice++}>+</button>
+                <button class="composer-hud-btn" onclick={() => poolDice = Math.min(poolAvailable, poolDice + 1)}>
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        {:else}
+            <div class="roll-composer-pool-hint">
+                <span class="pool-hint-text">← click a pool to add dice</span>
             </div>
         {/if}
-        {#if !isDefaulting}
-            <div class="roll-composer-card roll-composer-karma">
-                <span>Karma dice</span>
-                <button onclick={() => karmaDice = Math.max(0, karmaDice - 1)}>−</button>
-                <span class="pool-value">{karmaDice}</span>
-                <button onclick={() => karmaDice++}>+</button>
-                {#if karmaCost > 0}<span class="karma-cost">({karmaCost} karma)</span>{/if}
-            </div>
-        {/if}
-        {#if isFirearm && showRounds}
-            <div class="roll-composer-card roll-composer-rounds">
-                <span>Rounds</span>
-                <button onclick={() => declaredRounds = Math.max(1, declaredRounds - 1)}>−</button>
-                <span class="pool-value">{declaredRounds}</span>
-                <button onclick={() => declaredRounds++}>+</button>
-            </div>
-        {/if}
+
+        <div class="roll-composer-karma">
+            <span>Karma <span class="pool-available">({karmaBalance})</span></span>
+            <button class="composer-hud-btn" onclick={() => karmaDice = Math.max(0, karmaDice - 1)}>
+                <i class="fa-solid fa-minus"></i>
+            </button>
+            <span class="pool-value">{karmaDice}</span>
+            <button class="composer-hud-btn" onclick={() => karmaDice = Math.min(karmaCap, karmaDice + 1)}>
+                <i class="fa-solid fa-plus"></i>
+            </button>
+            {#if karmaCost > 0}<span class="karma-cost">({karmaCost} karma)</span>{/if}
+        </div>
+
         <button class="sr3e-response-button-primary" onclick={onConfirm} disabled={!canSubmit}>
             Roll
         </button>

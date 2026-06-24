@@ -58,6 +58,7 @@
                <th>Good Karma</th>
                <th>Karma Pool</th>
                <th>Lifetime Karma</th>
+               <th>Refresh</th>
                <th>Commit</th>
             </tr>
          </thead>

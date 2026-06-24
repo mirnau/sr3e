@@ -21,5 +21,9 @@ Old system had `SR3Edie.js` — custom Foundry Die that disables native `x` expl
 
 **Design freedom**: implement as a pure TS accumulation loop wired as the default evaluator inside `SR3ERoll.evaluate()`. No Foundry subclass required — the injectable evaluator pattern already supports this cleanly. Register a lightweight Foundry Die shim only if the visual chat renderer needs it.
 
+## [in-plan] Clickable dice in chat for karma re-rolls
+
+After a roll, individual dice in the chat message should be clickable buttons. Pressing one re-rolls that specific die, deducts karma appropriately (incremental cost per re-roll), and updates the chat message in-place with the new result. Deferred: post-roll karma, separate UI surface from the composer.
+
 ## [done] Open test defaulting rule
 Old code had this commented out mid-implementation. The rule modifies defaulting TN penalty into a pool subtraction (instead of TN add) for open tests. Source unclear — needs SR3E rulebook verification before implementing. Stub left in `defaultingRules.ts` with TODO. Do not guess. → Tracked in TECHSPEC-combat-architecture-decisions.md line 142.

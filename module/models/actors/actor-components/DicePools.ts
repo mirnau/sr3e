@@ -1,23 +1,21 @@
-import SimpleStat from "./SimpleStat";
+import DicePoolStat from "./DicePoolStat";
 
 type DicePoolsSchema = {
-  combat: EmbeddedDataField<typeof SimpleStat>;
-  astral: EmbeddedDataField<typeof SimpleStat>;
-  hacking: EmbeddedDataField<typeof SimpleStat>;
-  control: EmbeddedDataField<typeof SimpleStat>;
-  spell: EmbeddedDataField<typeof SimpleStat>;
+    combat: EmbeddedDataField<typeof DicePoolStat>;
+    astral: EmbeddedDataField<typeof DicePoolStat>;
+    hacking: EmbeddedDataField<typeof DicePoolStat>;
+    control: EmbeddedDataField<typeof DicePoolStat>;
+    spell: EmbeddedDataField<typeof DicePoolStat>;
 };
 
-export default class DicePoolsModel extends foundry.abstract.DataModel<
-  DicePoolsSchema
-> {
-  static defineSchema(): DicePoolsSchema {
-    return {
-      combat: new EmbeddedDataField(SimpleStat),
-      astral: new EmbeddedDataField(SimpleStat),
-      hacking: new EmbeddedDataField(SimpleStat),
-      control: new EmbeddedDataField(SimpleStat),
-      spell: new EmbeddedDataField(SimpleStat),
-    };
-  }
+export default class DicePoolsModel extends foundry.abstract.DataModel<DicePoolsSchema> {
+    static defineSchema(): DicePoolsSchema {
+        return {
+            combat: new EmbeddedDataField(DicePoolStat),
+            astral: new EmbeddedDataField(DicePoolStat),
+            hacking: new EmbeddedDataField(DicePoolStat),
+            control: new EmbeddedDataField(DicePoolStat),
+            spell: new EmbeddedDataField(DicePoolStat),
+        };
+    }
 }

@@ -9,8 +9,12 @@
 [x] MUST: Tier 3 — procedure system → .zone/techspecs/TECHSPEC-combat-tier-3-procedures.md
 [x] MUST: Tier 4 — orchestration → .zone/techspecs/TECHSPEC-combat-tier-4-orchestration.md
 [x] MUST: SR3E dice accumulation engine → .zone/techspecs/TECHSPEC-dice-accumulation-engine.md
-[~] MUST: Tier 5 — combat UI → .zone/techspecs/TECHSPEC-combat-tier-5-ui.md
-[ ] SHOULD: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
+[x] MUST: Tier 5a — simple rolls (click-to-roll on skills, attributes, pools)
+[~] MUST: Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
+[ ] MUST: Tier 5b.2 — roll composer styling
+[ ] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
+[ ] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
+[ ] SHOULD: Clickable dice in chat for karma re-rolls
 [ ] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
 [ ] COULD: Magic system (SpellApp, drain, foci, astral)
 [ ] COULD: Chat / socket challenge–response flows

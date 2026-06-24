@@ -4,6 +4,7 @@ import NeonName from "../../ui/injections/NeonName.svelte";
 import NewsFeed from "../../ui/injections/NewsFeed.svelte";
 import ShoppingCart from "../../ui/actors/injections/ShoppingCart.svelte";
 import CharacterCreationManager from "../../ui/actors/injections/CharacterCreationManager.svelte";
+import RollComposerComponent from "../../ui/combat/RollComposerComponent.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 import { KarmaSpendingService } from "../../services/karma/KarmaSpendingService";
 
@@ -13,6 +14,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
     #newsFeed?: SvelteApp;
     #shoppingCart?: SvelteApp;
     #creationManager?: SvelteApp;
+    #composer?: SvelteApp;
 
     get title() {
         return "";
@@ -54,6 +56,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
         this._injectNeonName(header);
         this._injectNewsFeed(header);
         this._injectShoppingCart(header);
+        this._injectRollComposer(form, header);
 
         // Inject creation manager into main content
         this._injectCreationManager(windowContent);
@@ -124,6 +127,27 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 props: { actor: this.document as Actor },
             });
             this.apps.push(this.#shoppingCart);
+        }
+    }
+
+    _injectRollComposer(form: HTMLFormElement, header: Element | null): void {
+        if (!header?.parentElement) return;
+
+        let slot = form.querySelector(".roll-composer-position") as HTMLElement | null;
+
+        if (!slot) {
+            slot = document.createElement("div");
+            slot.classList.add("roll-composer-position");
+            header.parentElement.insertBefore(slot, header);
+        }
+
+        if (slot.childNodes.length === 0) {
+            const actor = this.document as Actor;
+            this.#composer = mount(RollComposerComponent, {
+                target: slot,
+                props: { actor, actorId: actor.id! },
+            });
+            this.apps.push(this.#composer);
         }
     }
 
