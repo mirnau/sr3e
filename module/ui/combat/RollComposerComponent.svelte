@@ -33,11 +33,14 @@ $effect(() => {
     const roundCap = weaponMode === "burst" ? 3 : weaponMode === "fullauto" ? 10 : 1;
     const mag = ammoAvailable ?? roundCap;
     const min = weaponMode === "fullauto" ? 3 : 1;
-    declaredRounds = Math.max(min, Math.min(declaredRounds, Math.min(roundCap, mag)));
+    const clampedRounds = Math.max(min, Math.min(declaredRounds, Math.min(roundCap, mag)));
+    if (clampedRounds !== declaredRounds) declaredRounds = clampedRounds;
 });
 
 $effect(() => {
-    if (!hasTargets) modifiers = modifiers.filter(m => m.id !== "range");
+    if (!hasTargets && modifiers.some(m => m.id === "range")) {
+        modifiers = modifiers.filter(m => m.id !== "range");
+    }
 });
 
 export function open(newSetup: ProcedureSetup, actorArg: unknown): void {
