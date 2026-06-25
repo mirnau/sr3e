@@ -71,7 +71,7 @@
 	background: rgb(174, 224, 224);
 	padding: 1px;
 	margin-top: -1px;
-	@include clipped-corners(0rem, 0rem, 0.75rem, 0.75rem);
+	@include clipped-corners(0rem, 0rem, 0.75rem, 0.25rem);
 }
 
 .skills-content-inner {
@@ -80,7 +80,7 @@
 	padding: 0.5rem;
 	overflow-y: auto;
 	max-height: 20rem;
-	@include clipped-corners(0rem, 0rem, 0.75rem, 0.75rem);
+	@include clipped-corners(0rem, 0rem, 0.75rem, 0.25rem);
 }
 
 .no-skills {

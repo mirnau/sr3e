@@ -50,16 +50,37 @@
    }
 
    button {
+      position: relative;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem;
+      background: var(--highlight-color-primary);
+      border: none;
+      color: var(--text-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
       transition: transform 0.15s ease;
       will-change: transform;
+      @include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
 
-      &:hover:not(:disabled) {
-         transform: scale(1.02);
+      &::after {
+         content: "";
+         position: absolute;
+         inset: 1px;
+         z-index: -1;
+         background: var(--background-color);
+         box-shadow: inset 0 0 8px var(--highlight-color-primary);
+         pointer-events: none;
+         @include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
       }
 
-      &:active:not(:disabled) {
-         transform: scale(0.99);
-      }
+      &:hover:not(:disabled) { transform: scale(1.02); }
+      &:active:not(:disabled) { transform: scale(0.99); }
+      &:disabled { opacity: 0.25; cursor: not-allowed; }
    }
 
    // Window header framing
@@ -85,7 +106,7 @@
       }
    }
 
-   .window-content {
+   .sheet.window-content {
       position: relative;
       background:
          radial-gradient(ellipse 50% 100% at 50% 0%,
@@ -94,9 +115,15 @@
             rgba(0, 138, 180, 0) 100%);
    }
 
-   form {
+
+
+   form.applicaiton {
       background: none;
       box-shadow: none;
       filter: blur(0px); //Override - hands off
+   }
+
+   img {
+      @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
    }
 }
