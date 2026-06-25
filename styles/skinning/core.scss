@@ -83,11 +83,20 @@
       &:disabled { opacity: 0.25; cursor: not-allowed; }
    }
 
+   .attr-chevron {
+      background: transparent;
+      height: auto;
+      min-width: unset;
+      padding: 1px 2px;
+      clip-path: none;
+
+      &::after { content: none; }
+   }
+
    // Window header framing
    header.window-header {
       position: relative;
       background: rgb(174, 224, 224);
-      padding: 0.5rem;
       color: var(--text-color);
       @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
 
@@ -104,6 +113,13 @@
          pointer-events: none;
          @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
       }
+
+      button {
+         font-size: 0.5625rem;
+         height: 1.5rem;
+         min-width: 1.5rem;
+         padding: 0 0.375rem;
+      }
    }
 
    .sheet.window-content {
@@ -115,9 +131,12 @@
             rgba(0, 138, 180, 0) 100%);
    }
 
+   //file picker and misc
+   form.file-picker {
+      margin:1rem;
+   }
 
-
-   form.applicaiton {
+   form.sheet {
       background: none;
       box-shadow: none;
       filter: blur(0px); //Override - hands off
