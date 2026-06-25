@@ -52,8 +52,24 @@ export class BroadcastRegistry {
 	}
 
 	getFeedBuffer(minLength = 10): NewsMessage[] {
-		this.#fillFeedBuffer(minLength);
-		return [...this.#feedBuffer];
+		const broadcasters = get(this.activeBroadcasters);
+		const batch: NewsMessage[] = [];
+
+		for (let i = 0; i < minLength; i++) {
+			const next = this.#pumpNextHeadline();
+			if (!next) break;
+			batch.push(next);
+		}
+
+		if (batch.length === 0 && broadcasters.size === 0) {
+			for (let i = 0; i < minLength; i++) {
+				batch.push(NewsConfig.DEFAULT_MESSAGES[i % NewsConfig.DEFAULT_MESSAGES.length] as NewsMessage);
+			}
+		}
+
+		this.#feedBuffer = batch.slice(0, this.maxVisible);
+		this.#publishFeed();
+		return batch;
 	}
 
 	#pumpNextHeadline(): NewsMessage | null {
@@ -74,40 +90,18 @@ export class BroadcastRegistry {
 		return null;
 	}
 
-	#fillFeedBuffer(minLength = 10): void {
-		const buffer = [...this.#feedBuffer];
-		const broadcasters = get(this.activeBroadcasters);
-
-		while (buffer.length < minLength) {
-			const nextHeadline = this.#pumpNextHeadline();
-			if (!nextHeadline) break;
-			buffer.push(nextHeadline);
-		}
-
-		if (buffer.length === 0 && broadcasters.size === 0) {
-			for (let i = 0; i < minLength; i++) {
-				const msg: NewsMessage = NewsConfig.DEFAULT_MESSAGES[i % NewsConfig.DEFAULT_MESSAGES.length] as NewsMessage;
-				buffer.push(msg);
-			}
-		}
-
-		this.#feedBuffer = buffer.slice(-this.maxVisible);
-		this.#publishFeed();
-	}
-
 	#updateFeedBuffer(): void {
 		const broadcasters = get(this.activeBroadcasters);
 		if (broadcasters.size === 0) {
 			this.#feedBuffer = [];
-			this.#publishFeed();
-			return;
+		} else {
+			this.#feedBuffer = this.#feedBuffer.filter(
+				(message) =>
+					broadcasters.has(message.sender) &&
+					(broadcasters.get(message.sender) || []).includes(message.headline)
+			);
 		}
-		this.#feedBuffer = this.#feedBuffer.filter(
-			(message) =>
-				broadcasters.has(message.sender) &&
-				(broadcasters.get(message.sender) || []).includes(message.headline)
-		);
-		this.#fillFeedBuffer(this.maxVisible);
+		this.#publishFeed();
 	}
 
 	#publishFeed(): void {

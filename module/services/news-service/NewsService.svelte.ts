@@ -90,6 +90,10 @@ export class NewsService {
 		CONFIG.SR3E.newsService = this;
 	}
 
+	reportTickerWidth(width: number): void {
+		this.#durationEstimator.setTickerWidth(width);
+	}
+
 	requestFullResync(): void {
 		this.#controller.requestControllerStatus();
 		if (!game.socket) return;

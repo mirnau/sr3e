@@ -16,7 +16,7 @@
 
    const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
    const GAP_PX = NewsConfig.GAP_PX;
-   getNewsService();
+   const service = getNewsService();
 
    let isOn = $state(true);
    let ticker: HTMLDivElement | undefined;
@@ -64,7 +64,7 @@
 
    function step(now: number) {
       if (!lastTick) lastTick = now;
-      const dt = (now - lastTick) / 1000;
+      const dt = Math.min((now - lastTick) / 1000, 0.1);
       lastTick = now;
 
       const firstWidth = carts[0]?.width ?? 0;
@@ -120,15 +120,27 @@
    });
 
    onMount(() => {
+      if (ticker) service.reportTickerWidth(ticker.clientWidth);
+
+      const resizeObserver = new ResizeObserver(() => {
+         if (ticker) service.reportTickerWidth(ticker.clientWidth);
+      });
+      if (ticker) resizeObserver.observe(ticker);
+
+      const onVisibilityChange = () => { if (!document.hidden) lastTick = 0; };
+
       seedTrain();
       startLoop();
 
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
+      document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
+         document.removeEventListener("visibilitychange", onVisibilityChange);
+         resizeObserver.disconnect();
          stopLoop();
          carts = [];
       };

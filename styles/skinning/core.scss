@@ -78,9 +78,18 @@
          @include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
       }
 
-      &:hover:not(:disabled) { transform: scale(1.02); }
-      &:active:not(:disabled) { transform: scale(0.99); }
-      &:disabled { opacity: 0.25; cursor: not-allowed; }
+      &:hover:not(:disabled) {
+         transform: scale(1.02);
+      }
+
+      &:active:not(:disabled) {
+         transform: scale(0.99);
+      }
+
+      &:disabled {
+         opacity: 0.25;
+         cursor: not-allowed;
+      }
    }
 
    .attr-chevron {
@@ -90,7 +99,9 @@
       padding: 1px 2px;
       clip-path: none;
 
-      &::after { content: none; }
+      &::after {
+         content: none;
+      }
    }
 
    // Window header framing
@@ -122,24 +133,22 @@
       }
    }
 
-   .sheet.window-content {
-      position: relative;
-      background:
-         radial-gradient(ellipse 50% 100% at 50% 0%,
-            rgba(151, 250, 209, 0.78) 0%,
-            rgba(0, 220, 220, 0.08) 75%,
-            rgba(0, 138, 180, 0) 100%);
-   }
 
-   //file picker and misc
-   form.file-picker {
-      margin:1rem;
-   }
 
    form.sheet {
       background: none;
       box-shadow: none;
       filter: blur(0px); //Override - hands off
+
+      .window-content {
+         position: relative;
+         background:
+            radial-gradient(ellipse 50% 100% at 50% 0%,
+               rgba(151, 250, 209, 0.78) 0%,
+               rgba(0, 220, 220, 0.08) 75%,
+               rgba(0, 138, 180, 0) 100%);
+      }
+
    }
 
    img {

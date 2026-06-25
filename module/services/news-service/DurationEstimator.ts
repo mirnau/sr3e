@@ -5,11 +5,19 @@ import { NewsConfig } from "./NewsConfig";
  * Estimates marquee duration based on content width and scroll speed.
  */
 export class DurationEstimator {
+	#tickerWidth: number;
+
 	constructor(
 		private readonly scrollSpeed = NewsConfig.SCROLL_SPEED,
 		private readonly defaultMs = NewsConfig.DEFAULT_MS,
-		private readonly estimatedTickerWidth = NewsConfig.ESTIMATED_TICKER_WIDTH
-	) {}
+		estimatedTickerWidth = NewsConfig.ESTIMATED_TICKER_WIDTH
+	) {
+		this.#tickerWidth = estimatedTickerWidth;
+	}
+
+	setTickerWidth(width: number): void {
+		if (width > 0) this.#tickerWidth = width;
+	}
 
 	estimate(buffer: NewsMessage[]): number {
 		if (!Array.isArray(buffer) || buffer.length === 0) return this.defaultMs;
@@ -71,7 +79,7 @@ export class DurationEstimator {
 			return sum + senderWidth + headlineWidth + itemPadding;
 		}, 0);
 
-		const totalDistance = this.estimatedTickerWidth + marqueeWidth;
+		const totalDistance = this.#tickerWidth + marqueeWidth;
 		const duration = (totalDistance / this.scrollSpeed) * 1000;
 
 		return Math.max(Math.ceil(duration), this.defaultMs);
