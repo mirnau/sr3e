@@ -20,7 +20,6 @@ export class FrameScheduler {
 		private readonly currentDisplayFrame: Writable<DisplayFrame>,
 		private readonly durationEstimator: DurationEstimator,
 		private readonly socket: SocketEmitter,
-		private readonly beforeFrame?: () => void
 	) {}
 
 	start(controllerId: string): void {
@@ -60,7 +59,6 @@ export class FrameScheduler {
 	#scheduleNextFrame(): void {
 		if (!this.#controllerId) return;
 
-		this.beforeFrame?.();
 		const buffer = this.registry.getFeedBuffer(10);
 
 		if (buffer.length === 0) {

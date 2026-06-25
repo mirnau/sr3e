@@ -37,13 +37,13 @@ export class NewsService {
 	readonly currentDisplayFrame: Writable<DisplayFrame> = writable({ buffer: [], timestamp: 0 });
 
 	#initialized = false;
+	#hookIds: { name: string; id: number }[] = [];
 	#durationEstimator = new DurationEstimator();
 	#scheduler = new FrameScheduler(
 		this.registry,
 		this.currentDisplayFrame,
 		this.#durationEstimator,
 		game.socket,
-		() => this.#loadActiveBroadcasters()
 	);
 	#controller = new ControllerCoordinator(
 		() => this.#getUserId(),
@@ -85,6 +85,7 @@ export class NewsService {
 		this.#socketManager.bind();
 		this.#loadActiveBroadcasters();
 		this.#controller.initialize();
+		this.#registerActorHooks();
 
 		CONFIG.SR3E.newsService = this;
 	}
@@ -103,6 +104,8 @@ export class NewsService {
 		this.#socketManager.unbind();
 		this.#controller.destroy();
 		this.#scheduler.destroy();
+		this.#hookIds.forEach(({ name, id }) => Hooks.off(name, id));
+		this.#hookIds = [];
 		this.#initialized = false;
 		if (CONFIG.SR3E?.newsService === this) CONFIG.SR3E.newsService = null;
 	}
@@ -129,6 +132,33 @@ export class NewsService {
 				actor.type === "broadcaster" && !!actor.system?.isBroadcasting
 		);
 		this.registry.loadFromActors(actors);
+	}
+
+	#registerActorHooks(): void {
+		this.#hookIds = [
+			{ name: "createActor", id: Hooks.on("createActor", (a: any) => this.#handleCreateActor(a)) },
+			{ name: "updateActor", id: Hooks.on("updateActor", (a: any) => this.#handleUpdateActor(a)) },
+			{ name: "deleteActor", id: Hooks.on("deleteActor", (a: any) => this.#handleDeleteActor(a)) },
+		];
+	}
+
+	#handleCreateActor(actor: any): void {
+		if (actor.type !== "broadcaster" || !actor.system?.isBroadcasting) return;
+		this.registry.receiveBroadcastSync(actor.name, actor.system.rollingNews ?? []);
+	}
+
+	#handleUpdateActor(actor: any): void {
+		if (actor.type !== "broadcaster") return;
+		if (!actor.system?.isBroadcasting) {
+			this.registry.stopBroadcaster(actor.name);
+		} else {
+			this.registry.receiveBroadcastSync(actor.name, actor.system.rollingNews ?? []);
+		}
+	}
+
+	#handleDeleteActor(actor: any): void {
+		if (actor.type !== "broadcaster") return;
+		this.registry.stopBroadcaster(actor.name);
 	}
 
 	#handleStateSyncRequest(requestingUserId: string): void {
