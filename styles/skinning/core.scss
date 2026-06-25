@@ -45,14 +45,21 @@
       border: none;
    }
 
-   .no-margin { margin: 0; }
+   .no-margin {
+      margin: 0;
+   }
 
    button {
       transition: transform 0.15s ease;
       will-change: transform;
 
-      &:hover:not(:disabled)  { transform: scale(1.02); }
-      &:active:not(:disabled) { transform: scale(0.99); }
+      &:hover:not(:disabled) {
+         transform: scale(1.02);
+      }
+
+      &:active:not(:disabled) {
+         transform: scale(0.99);
+      }
    }
 
    // Window header framing
@@ -76,5 +83,19 @@
          pointer-events: none;
          @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
       }
+   }
+
+   .window-content {
+      position: relative;
+      background:
+         radial-gradient(ellipse 50% 100% at 50% 0%,
+            rgba(151, 250, 209, 0.78) 0%,
+            rgba(0, 220, 220, 0.08) 75%,
+            rgba(0, 138, 180, 0) 100%);
+   }
+
+   form {
+      background: none;
+      filter: blur(0px); //Override - hands off
    }
 }
