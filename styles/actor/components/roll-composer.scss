@@ -32,13 +32,58 @@
     .sheet-card-outline {
         display: flex;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 0;
         padding: 0.75rem;
         color: var(--text-color);
+
+        > * + * { margin-top: 0; }
     }
 }
 
-// ── Header ──────────────────────────────────────────────────────────────────
+// ── Composer unit — attribute-card with auto height ──────────────────────────
+
+.composer-unit {
+    height: auto;
+    padding: 0 0 0.25rem 0;
+
+    .attribute-card-outline {
+        height: auto;
+        padding: 0.25rem 0.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        transition: transform 0.15s ease;
+        will-change: transform;
+
+        &:hover  { transform: scale(1.02); }
+        &:active { transform: scale(0.99); }
+    }
+
+    &--hint .attribute-card-outline {
+        align-items: center;
+        justify-content: center;
+        padding: 0.4rem 0.6rem;
+    }
+}
+
+.composer-unit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+
+.composer-unit-meta {
+    font-size: 0.73rem;
+    opacity: 0.6;
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
+
+    &--center { text-align: center; }
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
 
 .roll-composer-header {
     display: flex;
@@ -48,15 +93,11 @@
 }
 
 .roll-composer-title {
-    font-size: 0.9rem;
-    font-weight: bold;
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .roll-composer-header-actions {
@@ -115,8 +156,6 @@
 
     i, span { position: relative; z-index: 1; }
 
-    &:hover:not(:disabled)  { transform: scale(1.08); }
-    &:active:not(:disabled) { transform: scale(0.93); }
     &:disabled { opacity: 0.25; cursor: not-allowed; }
 
     &--danger {
@@ -132,51 +171,24 @@
     }
 }
 
-// ── TN ──────────────────────────────────────────────────────────────────────
+// ── Counter ──────────────────────────────────────────────────────────────────
 
-.roll-composer-tn-card {
-    width: 100%;
-    height: 5rem;
-    padding: 0.15rem;
-
-    .attribute-card-outline {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        padding: 0.4rem 0.25rem 0.25rem;
-        gap: 0.15rem;
-    }
-}
-
-.roll-composer-tn-controls {
+.composer-counter {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 0.25rem;
-    position: relative;
-    z-index: 1;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.tn-value {
-    font-size: 2rem;
-    font-weight: bold;
-    line-height: 1;
-    color: #fff;
-    text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
-    flex: 1;
+.counter-value {
+    min-width: 2rem;
     text-align: center;
+    margin: 0;
+
+    &--sm { min-width: 1.5rem; }
 }
 
-// ── Modifiers ────────────────────────────────────────────────────────────────
-
-.roll-composer-mods {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
+// ── Modifier rows ─────────────────────────────────────────────────────────────
 
 .mod-row {
     display: flex;
@@ -189,63 +201,25 @@
     font-size: 0.8rem;
 }
 
-.mod-value {
-    width: 48px;
-    font-size: 0.8rem;
-    text-align: center;
+.composer-counter--compact {
+    gap: 0.2rem;
+
+    .composer-hud-btn {
+        min-width: 1.6rem;
+        height: 1.6rem;
+    }
 }
 
-// ── Pool / Karma rows ─────────────────────────────────────────────────────────
-
-.roll-composer-pool,
-.roll-composer-karma {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.85rem;
-
-    > span:first-child { flex: 1; }
-}
-
-.roll-composer-pool-hint {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+// ── Pool hint ─────────────────────────────────────────────────────────────────
 
 .pool-hint-text {
     font-size: 0.78rem;
     opacity: 0.55;
     font-style: italic;
+    margin: 0;
 }
 
-.pool-available {
-    font-size: 0.75rem;
-    opacity: 0.6;
-}
-
-.pool-value {
-    min-width: 24px;
-    text-align: center;
-    font-weight: bold;
-}
-
-.karma-cost {
-    opacity: 0.6;
-    font-size: 0.75rem;
-}
-
-// ── Roll button ──────────────────────────────────────────────────────────────
-
-.roll-composer-panel .sr3e-response-button-primary {
-    padding: 6px 0;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
-}
-
-// ── Storyteller screen ───────────────────────────────────────────────────────
+// ── Storyteller screen ────────────────────────────────────────────────────────
 
 .karma-refresh-btn {
     cursor: pointer;

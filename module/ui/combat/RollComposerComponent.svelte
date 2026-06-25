@@ -30,6 +30,7 @@ let targetNumber = $state(4);
 let modifiers: Modifier[] = $state([]);
 let poolDice = $state(0);
 let karmaDice = $state(0);
+let isDefaulting = $state(false);
 
 const modifiersTotal = $derived(sumMods(modifiers));
 const finalTN = $derived(Math.max(2, targetNumber + modifiersTotal));
@@ -52,6 +53,7 @@ export function open(newSetup: ProcedureSetup): void {
     modifiers = [];
     poolDice = 0;
     karmaDice = 0;
+    isDefaulting = false;
     composerState.isOpen = true;
     composerState.selectedPoolKey = null;
     composerState.poolAvailable = 0;
@@ -62,6 +64,7 @@ function onReset(): void {
     modifiers = [];
     poolDice = 0;
     karmaDice = 0;
+    isDefaulting = false;
     composerState.selectedPoolKey = null;
     composerState.poolAvailable = 0;
 }
@@ -129,77 +132,132 @@ onDestroy(() => {
     <div class="sheet-card-outline">
         <div class="sheet-card-displayarea"></div>
 
-        <div class="roll-composer-header">
-            <h2 class="roll-composer-title">{setup.title}</h2>
-            <div class="roll-composer-header-actions">
-                <button class="composer-btn-reset" onclick={onReset} title="Reset">↺</button>
-                <button class="composer-btn-close" onclick={onClose} title="Close">✕</button>
-            </div>
-        </div>
-
-        <div class="attribute-card roll-composer-tn-card">
+        <!-- Header: title, roll type, reset/close -->
+        <div class="attribute-card composer-unit">
             <div class="attribute-card-shadow"></div>
             <div class="attribute-card-outline">
                 <div class="attribute-card-displayarea"></div>
-                <div class="roll-composer-tn-controls">
+                <div class="roll-composer-header">
+                    <h2 class="roll-composer-title">{setup.title}</h2>
+                    <div class="roll-composer-header-actions">
+                        <button class="composer-btn-reset" onclick={onReset} title="Reset">↺</button>
+                        <button class="composer-btn-close" onclick={onClose} title="Close">✕</button>
+                    </div>
+                </div>
+                <select bind:value={isDefaulting} class="roll-composer-type-select">
+                    <option value={false}>Regular roll</option>
+                    <option value={true}>Defaulting</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Target Number -->
+        <div class="attribute-card composer-unit">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <h3 class="no-margin">Target Number</h3>
+                <p class="composer-unit-meta composer-unit-meta--center">{difficulty} · Final: {finalTN}</p>
+                <div class="composer-counter">
                     <button class="composer-hud-btn" onclick={() => targetNumber--} aria-label="Decrease TN">
                         <i class="fa-solid fa-minus"></i>
                     </button>
-                    <span class="tn-value">{finalTN}</span>
+                    <h1 class="counter-value">{targetNumber}</h1>
                     <button class="composer-hud-btn" onclick={() => targetNumber++} aria-label="Increase TN">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <div class="attribute-label">{difficulty}</div>
             </div>
         </div>
 
-        <div class="roll-composer-mods">
-            {#each modifiers as mod (mod.id ?? mod.name)}
-                <div class="mod-row">
-                    <input class="mod-name" bind:value={mod.name} />
-                    <input class="mod-value" type="number" bind:value={mod.value} />
-                    <button class="composer-hud-btn composer-hud-btn--danger" onclick={() => removeModById(mod.id ?? mod.name)} aria-label="Remove">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+        <!-- T.N. Modifiers -->
+        <div class="attribute-card composer-unit">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <div class="composer-unit-row">
+                    <h3 class="no-margin">T.N. Modifiers</h3>
+                    <span class="composer-unit-meta">Total: {modifiersTotal > 0 ? `+${modifiersTotal}` : modifiersTotal}</span>
                 </div>
-            {/each}
-            <button class="composer-hud-btn composer-hud-btn--add" onclick={addMod}>
-                <i class="fa-solid fa-plus"></i> modifier
-            </button>
+                <button class="composer-hud-btn composer-hud-btn--add" onclick={addMod}>
+                    <i class="fa-solid fa-plus"></i> modifier
+                </button>
+                {#each modifiers as mod (mod.id ?? mod.name)}
+                    <div class="mod-row">
+                        <input class="mod-name" bind:value={mod.name} />
+                        <div class="composer-counter composer-counter--compact">
+                            <button class="composer-hud-btn" onclick={() => { mod.value--; modifiers = [...modifiers]; }}>
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <h1 class="counter-value counter-value--sm">{mod.value}</h1>
+                            <button class="composer-hud-btn" onclick={() => { mod.value++; modifiers = [...modifiers]; }}>
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <button class="composer-hud-btn composer-hud-btn--danger" onclick={() => removeModById(mod.id ?? mod.name)} aria-label="Remove">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {/each}
+            </div>
         </div>
 
-        {#if composerState.selectedPoolKey && poolAvailable > 0}
-            <div class="roll-composer-pool">
-                <span>Pool <span class="pool-available">({poolAvailable} left)</span></span>
-                <button class="composer-hud-btn" onclick={() => poolDice = Math.max(0, poolDice - 1)}>
-                    <i class="fa-solid fa-minus"></i>
-                </button>
-                <span class="pool-value">{poolDice}</span>
-                <button class="composer-hud-btn" onclick={() => poolDice = Math.min(poolAvailable, poolDice + 1)}>
-                    <i class="fa-solid fa-plus"></i>
-                </button>
+        <!-- Dice Pool -->
+        {#if !isDefaulting && composerState.selectedPoolKey}
+            <div class="attribute-card composer-unit">
+                <div class="attribute-card-shadow"></div>
+                <div class="attribute-card-outline">
+                    <div class="attribute-card-displayarea"></div>
+                    <div class="composer-unit-row">
+                        <h3 class="no-margin">{composerState.selectedPoolKey}</h3>
+                        <span class="composer-unit-meta">Available: {poolAvailable}</span>
+                    </div>
+                    <div class="composer-counter composer-counter--compact">
+                        <button class="composer-hud-btn" onclick={() => poolDice = Math.max(0, poolDice - 1)}>
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <h1 class="counter-value counter-value--sm">{poolDice}</h1>
+                        <button class="composer-hud-btn" onclick={() => poolDice = Math.min(poolAvailable, poolDice + 1)}>
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
-        {:else}
-            <div class="roll-composer-pool-hint">
-                <span class="pool-hint-text">← click a pool to add dice</span>
+        {:else if !isDefaulting}
+            <div class="attribute-card composer-unit composer-unit--hint">
+                <div class="attribute-card-shadow"></div>
+                <div class="attribute-card-outline">
+                    <div class="attribute-card-displayarea"></div>
+                    <p class="pool-hint-text">← click a pool to add dice</p>
+                </div>
             </div>
         {/if}
 
-        <div class="roll-composer-karma">
-            <span>Karma <span class="pool-available">({karmaBalance})</span></span>
-            <button class="composer-hud-btn" onclick={() => karmaDice = Math.max(0, karmaDice - 1)}>
-                <i class="fa-solid fa-minus"></i>
-            </button>
-            <span class="pool-value">{karmaDice}</span>
-            <button class="composer-hud-btn" onclick={() => karmaDice = Math.min(karmaCap, karmaDice + 1)}>
-                <i class="fa-solid fa-plus"></i>
-            </button>
-            {#if karmaCost > 0}<span class="karma-cost">({karmaCost} karma)</span>{/if}
-        </div>
+        <!-- Karma -->
+        {#if !isDefaulting}
+            <div class="attribute-card composer-unit">
+                <div class="attribute-card-shadow"></div>
+                <div class="attribute-card-outline">
+                    <div class="attribute-card-displayarea"></div>
+                    <div class="composer-unit-row">
+                        <h3 class="no-margin">Karma</h3>
+                        <span class="composer-unit-meta">Pool: {karmaBalance} · Cost: {karmaCost}</span>
+                    </div>
+                    <div class="composer-counter composer-counter--compact">
+                        <button class="composer-hud-btn" onclick={() => karmaDice = Math.max(0, karmaDice - 1)}>
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <h1 class="counter-value counter-value--sm">{karmaDice}</h1>
+                        <button class="composer-hud-btn" onclick={() => karmaDice = Math.min(karmaCap, karmaDice + 1)}>
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {/if}
 
-        <button class="sr3e-response-button-primary" onclick={onConfirm} disabled={!canSubmit}>
-            Roll
+        <button class="composer-hud-btn composer-hud-btn--add" onclick={onConfirm} disabled={!canSubmit}>
+            <span>Roll</span>
         </button>
     </div>
 </div>

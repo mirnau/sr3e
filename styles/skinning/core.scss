@@ -45,6 +45,16 @@
       border: none;
    }
 
+   .no-margin { margin: 0; }
+
+   button {
+      transition: transform 0.15s ease;
+      will-change: transform;
+
+      &:hover:not(:disabled)  { transform: scale(1.02); }
+      &:active:not(:disabled) { transform: scale(0.99); }
+   }
+
    // Window header framing
    header.window-header {
       position: relative;
