@@ -72,6 +72,7 @@
             transparent 100%
         );
         background-size: 200% 200%;
+        background-repeat: no-repeat;
         animation: pool-sheen 2s linear infinite;
         pointer-events: none;
         z-index: 0;
