@@ -6,21 +6,21 @@
     100% { box-shadow: 0 0 0 1px rgba(180, 180, 220, 0.2); }
 }
 
+@keyframes pool-sheen {
+    0%   { background-position: -100% -100%; }
+    100% { background-position: 100% 100%; }
+}
+
 .pool-pick-me {
-    animation: pool-pick-me 2.5s ease-in-out infinite;
-    border-color: rgba(180, 180, 220, 0.4) !important;
     cursor: pointer;
 }
 
-.pool-active {
-    box-shadow: 0 0 0 2px #ffd700, 0 0 10px rgba(255, 215, 0, 0.45) !important;
-    border-color: #ffd700 !important;
-}
+.pool-active {}
 
 // Injection slot — sibling of window-header, absolutely positioned left of the window-app.
 .roll-composer-position {
     position: absolute;
-    top: 0;
+    top: -0.5rem;
     right: calc(100% + 0.5rem);
     width: 260px;
     pointer-events: none;
@@ -57,6 +57,24 @@
 
         &:hover  { transform: scale(1.02); }
         &:active { transform: scale(0.99); }
+    }
+
+    &--pool-active .attribute-card-outline::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(
+            135deg,
+            transparent 0%,
+            transparent 45%,
+            rgba(0, 255, 200, 0.25) 50%,
+            transparent 55%,
+            transparent 100%
+        );
+        background-size: 200% 200%;
+        animation: pool-sheen 2s linear infinite;
+        pointer-events: none;
+        z-index: 0;
     }
 
     &--hint .attribute-card-outline {

@@ -60,10 +60,26 @@
    left: 1px;
    width: calc(100% - 2px);
    height: calc(100% - 2px);
-   background: rgb(17, 17, 17);
+   background: repeating-linear-gradient(
+      45deg,
+      #312c3f 1px,
+      #27242c 1px,
+      #2c2c2e 2px,
+      #1e1a25 3px
+   );
    box-shadow: inset 0 0 30px darkslategrey;
    pointer-events: none;
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
+     &::before {
+     content: "";
+     position: absolute;
+     inset: 0;
+     
+     background: url('../../textures/Metal056B_1K-JPG_Color.jpg') center / 2000px 2000px;
+     opacity: 1;
+     mix-blend-mode: multiply;
+     pointer-events: none;
+  }
 }
 
 .sheet-card-outline>*+* {

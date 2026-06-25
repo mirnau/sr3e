@@ -8,15 +8,22 @@ import type { Snippet } from "svelte";
 interface Props {
    label: string;
    children?: Snippet;
+   onclick?: (e: MouseEvent) => void;
 }
 
-let { label, children }: Props = $props();
+let { label, children, onclick }: Props = $props();
 </script>
 
 <div class="stat-card-wrapper">
    <div class="attribute-card">
       <div class="attribute-card-shadow"></div>
-      <div class="attribute-card-outline">
+      <div
+         class="attribute-card-outline{onclick ? ' rollable' : ''}"
+         role={onclick ? 'button' : undefined}
+         tabindex={onclick ? 0 : undefined}
+         {onclick}
+         onkeydown={onclick ? (e) => (e.key === 'Enter' || e.key === ' ') && onclick(new MouseEvent('click')) : undefined}
+      >
          <div class="attribute-card-displayarea"></div>
          <h4 class="attribute-label">{label}</h4>
          <div class="attribute-value-row">

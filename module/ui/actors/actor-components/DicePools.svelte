@@ -140,68 +140,28 @@ $effect(() => {
 
 <h1>{localize(localization.dicePools)}</h1>
 <div class="stat-card-grid">
-    <StatCard label={localize(localization?.combat)}>
-        <span
-            class={poolClass("combat")}
-            role="button"
-            tabindex="0"
-            onclick={(e) => onPoolCardClick(e, "combat", localize(localization?.combat), combatAvail)}
-            onkeydown={(e) => e.key === "Enter" && onPoolCardClick(new MouseEvent("click"), "combat", localize(localization?.combat), combatAvail)}
-        >
-            {combatAvail}
-        </span>
+    <StatCard label={localize(localization?.combat)} onclick={(e) => onPoolCardClick(e, "combat", localize(localization?.combat), combatAvail)}>
+        <span class={poolClass("combat")}>{combatAvail}</span>
     </StatCard>
 
     {#if hasRiggerInterface}
-        <StatCard label={localize(localization?.control)}>
-            <span
-                class={poolClass("control")}
-                role="button"
-                tabindex="0"
-                onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}
-                onkeydown={(e) => e.key === "Enter" && onPoolCardClick(new MouseEvent("click"), "control", localize(localization?.control), controlAvail)}
-            >
-                {controlAvail}
-            </span>
+        <StatCard label={localize(localization?.control)} onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}>
+            <span class={poolClass("control")}>{controlAvail}</span>
         </StatCard>
     {/if}
 
     {#if hasMatrixInterface}
-        <StatCard label={localize(localization?.hacking)}>
-            <span
-                class={poolClass("hacking")}
-                role="button"
-                tabindex="0"
-                onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}
-                onkeydown={(e) => e.key === "Enter" && onPoolCardClick(new MouseEvent("click"), "hacking", localize(localization?.hacking), hackingAvail)}
-            >
-                {hackingAvail}
-            </span>
+        <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
+            <span class={poolClass("hacking")}>{hackingAvail}</span>
         </StatCard>
     {/if}
 
     {#if isAwakened}
-        <StatCard label={localize(localization?.astral)}>
-            <span
-                class={poolClass("astral")}
-                role="button"
-                tabindex="0"
-                onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}
-                onkeydown={(e) => e.key === "Enter" && onPoolCardClick(new MouseEvent("click"), "astral", localize(localization?.astral), astralAvail)}
-            >
-                {astralAvail}
-            </span>
+        <StatCard label={localize(localization?.astral)} onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}>
+            <span class={poolClass("astral")}>{astralAvail}</span>
         </StatCard>
-        <StatCard label={localize(localization?.spell)}>
-            <span
-                class={poolClass("spell")}
-                role="button"
-                tabindex="0"
-                onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}
-                onkeydown={(e) => e.key === "Enter" && onPoolCardClick(new MouseEvent("click"), "spell", localize(localization?.spell), spellAvail)}
-            >
-                {spellAvail}
-            </span>
+        <StatCard label={localize(localization?.spell)} onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}>
+            <span class={poolClass("spell")}>{spellAvail}</span>
         </StatCard>
     {/if}
 </div>

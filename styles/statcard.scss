@@ -124,6 +124,54 @@
 	text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
 }
 
+.attribute-card-outline:has(.pool-active) {
+	cursor: pointer;
+	transition: transform 0.2s ease-out;
+	will-change: transform;
+
+	&:hover  { transform: scale(1.05); }
+	&:active { transform: scale(0.97); }
+
+	.attribute-card-displayarea {
+		background:
+			linear-gradient(
+				135deg,
+				transparent 0%,
+				transparent 45%,
+				rgba(0, 255, 200, 0.2) 50%,
+				transparent 55%,
+				transparent 100%
+			),
+			rgb(17, 17, 17);
+		background-size: 200% 200%, auto;
+		animation: pool-sheen 2s linear infinite;
+	}
+}
+
+.attribute-card-outline:has(.pool-pick-me) {
+	cursor: pointer;
+	transition: transform 0.2s ease-out;
+	will-change: transform;
+
+	&:hover  { transform: scale(1.05); }
+	&:active { transform: scale(0.97); }
+
+	.attribute-card-displayarea {
+		background:
+			linear-gradient(
+				135deg,
+				transparent 0%,
+				transparent 45%,
+				rgba(0, 255, 200, 0.08) 50%,
+				transparent 55%,
+				transparent 100%
+			),
+			rgb(17, 17, 17);
+		background-size: 200% 200%, auto;
+		animation: pool-sheen 2s linear infinite;
+	}
+}
+
 .attribute-card-outline.rollable {
 	cursor: pointer;
 	transition: transform 0.2s ease-out;

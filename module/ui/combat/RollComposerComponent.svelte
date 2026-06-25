@@ -180,7 +180,7 @@ onDestroy(() => {
                     <span class="composer-unit-meta">Total: {modifiersTotal > 0 ? `+${modifiersTotal}` : modifiersTotal}</span>
                 </div>
                 <button class="composer-hud-btn composer-hud-btn--add" onclick={addMod}>
-                    <i class="fa-solid fa-plus"></i> modifier
+                    <span>Add</span>
                 </button>
                 {#each modifiers as mod (mod.id ?? mod.name)}
                     <div class="mod-row">
@@ -204,7 +204,7 @@ onDestroy(() => {
 
         <!-- Dice Pool -->
         {#if !isDefaulting && composerState.selectedPoolKey}
-            <div class="attribute-card composer-unit">
+            <div class="attribute-card composer-unit composer-unit--pool-active">
                 <div class="attribute-card-shadow"></div>
                 <div class="attribute-card-outline">
                     <div class="attribute-card-displayarea"></div>
