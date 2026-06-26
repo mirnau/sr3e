@@ -4,7 +4,7 @@ type CustomTokenSchema = {
   texture: StringField;
 };
 
-export default class CustomTokenModel extends foundry.abstract.TypeDataModel<CustomTokenSchema, BaseItem> {
+export default class CustomTokenModel extends foundry.abstract.DataModel<CustomTokenSchema> {
   static defineSchema(): CustomTokenSchema {
     return {
       width: new NumberField({

@@ -1,4 +1,4 @@
-export default class RollDataModel extends foundry.abstract.TypeDataModel<RollDataSchema, BaseItem> {
+export default class RollDataModel extends foundry.abstract.DataModel<RollDataSchema> {
   static defineSchema(): RollDataSchema {
     return {
       targetNumber: new SchemaField({

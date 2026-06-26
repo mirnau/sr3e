@@ -1,5 +1,5 @@
 
-export default class RangeBandModel extends foundry.abstract.TypeDataModel<RangeBandSchema, BaseItem> {
+export default class RangeBandModel extends foundry.abstract.DataModel<RangeBandSchema> {
   static defineSchema(): RangeBandSchema {
     return {
       short: new NumberField({

@@ -3,7 +3,7 @@ type PortabilitySchema = {
   weight: NumberField;
 };
 
-export default class PortabilityModel extends foundry.abstract.TypeDataModel<PortabilitySchema, BaseItem> {
+export default class PortabilityModel extends foundry.abstract.DataModel<PortabilitySchema> {
   static defineSchema(): PortabilitySchema {
     return {
       conceal: new NumberField({
