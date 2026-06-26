@@ -28,7 +28,7 @@ export default class CommodityModel extends foundry.abstract.DataModel<Commodity
       legality: new SchemaField({
         status: new StringField({
           required: true,
-          initial: "0",
+          initial: "",
         }),
         permit: new StringField({
           required: true,
