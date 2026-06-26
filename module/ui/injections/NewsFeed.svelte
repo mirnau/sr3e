@@ -87,23 +87,22 @@
 
    function step(now: number) {
       if (!lastTick) lastTick = now;
-      const dt = Math.min((now - lastTick) / 1000, 0.1);
+      // Cap at one frame: skip catch-up after GC pauses/dropped frames rather than lurching.
+      const dt = Math.min((now - lastTick) / 1000, 1 / 60);
       lastTick = now;
 
-      const firstWidth = carts[0]?.width ?? 0;
-
       offset -= SCROLL_SPEED * dt;
-      if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
 
+      const firstWidth = carts[0]?.width ?? 0;
       if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
-         const correction = firstWidth + GAP_PX;
-         offset += correction;
-         if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
+         offset += firstWidth + GAP_PX;
          removeFirstCart();
          addCart(nextHeadline());
       }
 
       if (carts.length < 3) addCart(nextHeadline());
+
+      if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
 
       if (running) rafId = requestAnimationFrame(step);
    }
