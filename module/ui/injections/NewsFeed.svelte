@@ -85,7 +85,7 @@
             { transform: `translateX(${tickerW}px)` },
             { transform: `translateX(-${contentW}px)` },
          ],
-         { duration, easing: "linear", fill: "forwards" },
+         { duration, easing: "linear", fill: "none" },
       );
 
       anim.onfinish = () => {
@@ -131,8 +131,19 @@
       });
       if (ticker) resizeObserver.observe(ticker);
 
+      const restartIfFinished = () => {
+         if (!isOn) return;
+         if (!anim || anim.playState === "finished" || anim.playState === "idle") {
+            const next = pendingPool ?? activePool;
+            pendingPool = null;
+            runPass(next.length ? next : FALLBACK);
+         } else if (anim.playState === "paused") {
+            anim.play();
+         }
+      };
+
       const onVisibilityChange = () => {
-         if (!document.hidden && anim && isOn) anim.play();
+         if (!document.hidden) restartIfFinished();
       };
 
       precacheWidths(FALLBACK);
@@ -140,12 +151,14 @@
 
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
+      window.addEventListener("focus", restartIfFinished);
       document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
          anim?.cancel();
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
+         window.removeEventListener("focus", restartIfFinished);
          document.removeEventListener("visibilitychange", onVisibilityChange);
          resizeObserver.disconnect();
       };
