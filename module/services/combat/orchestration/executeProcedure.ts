@@ -22,6 +22,7 @@ export type ExecuteProcedureOptions = {
     targets?: Array<{ id?: string; scene?: { id?: string }; actor?: { id: string; system: Record<string, unknown>; items?: unknown } }>;
     fullDefenseOverride?: boolean;
     rollState?: RollState;
+    poolKey?: string;
 };
 
 export async function executeProcedure(
@@ -51,7 +52,7 @@ export async function executeProcedure(
         if (isContested) {
             await executeContestedFlow(setup, state, roll, actor, opts.targets ?? []);
         } else {
-            await executeSimpleFlow(setup, state, roll, actor);
+            await executeSimpleFlow(setup, state, roll, actor, { poolKey: opts.poolKey });
         }
 
         return { succeeded: true };

@@ -78,8 +78,9 @@ function onClose(): void {
 async function onConfirm(): Promise<void> {
     if (!setup || !canSubmit) return;
 
+    const currentSetup = setup;
     const finalState: RollState = {
-        dice: setup.rollState.dice,
+        dice: currentSetup.rollState.dice,
         poolDice,
         karmaDice,
         targetNumber,
@@ -94,20 +95,22 @@ async function onConfirm(): Promise<void> {
     composerState.selectedPoolKey = null;
     setup = null;
 
+    const updates: Record<string, unknown> = {};
     if (poolKey && usedPool > 0) {
         const pool = actor.system?.dicePools?.[poolKey];
-        if (pool) {
-            await actor.update?.({ [`system.dicePools.${poolKey}.spent`]: (pool.spent ?? 0) + usedPool });
-        }
+        if (pool) updates[`system.dicePools.${poolKey}.spent`] = (pool.spent ?? 0) + usedPool;
     }
     if (usedKarma > 0) {
-        await actor.update?.({ "system.karma.karmaPool.value": Math.max(0, karmaBalance - usedKarma) });
+        updates["system.karma.karmaPool.value"] = Math.max(0, karmaBalance - usedKarma);
+    }
+    if (Object.keys(updates).length > 0) {
+        await actor.update?.(updates, { render: false });
     }
 
     const targets = typeof game !== "undefined"
         ? Array.from((game.user as any)?.targets ?? [])
         : [];
-    await executeProcedure(setup!, actor, { targets: targets as never[], rollState: finalState });
+    await executeProcedure(currentSetup, actor, { targets: targets as never[], rollState: finalState, poolKey: poolKey ?? undefined });
 }
 
 function addMod(): void {
@@ -159,7 +162,7 @@ onDestroy(() => {
                 <h3 class="no-margin">Target Number</h3>
                 <p class="composer-unit-meta composer-unit-meta--center">{difficulty} · Final: {finalTN}</p>
                 <div class="composer-counter">
-                    <button class="composer-hud-btn" onclick={() => targetNumber--} aria-label="Decrease TN">
+                    <button class="composer-hud-btn" onclick={() => targetNumber = Math.max(2, targetNumber - 1)} aria-label="Decrease TN">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <h1 class="counter-value">{targetNumber}</h1>

@@ -14,6 +14,7 @@ export function buildRollSnapshot(
     roll: SR3ERoll,
     setup: ProcedureSetup,
     state: RollState,
+    poolKey?: string,
 ): RollSnapshot {
     const tn = computeFinalTN(state, 2);
 
@@ -26,6 +27,7 @@ export function buildRollSnapshot(
             baseDice: state.dice,
             poolDice: state.poolDice,
             karmaDice: state.karmaDice,
+            poolKey,
             type: procedureType(setup.kind),
         },
         meta: {

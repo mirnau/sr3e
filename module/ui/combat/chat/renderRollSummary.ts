@@ -1,20 +1,21 @@
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 
-type DieTerm = { results?: { result: number; active?: boolean }[] };
+type DieResult = { result: number; active?: boolean; exploded?: boolean };
+type DieTerm = { results?: DieResult[] };
 
-function dieResults(terms: unknown[]): number[] {
+function dieResults(terms: unknown[]): DieResult[] {
     return (terms as DieTerm[])
         .flatMap(t => t.results ?? [])
-        .filter(r => r.active !== false)
-        .map(r => r.result);
+        .filter(r => r.active !== false);
 }
 
 function poolLine(opts: Record<string, unknown>): string {
     const base = Number(opts.baseDice ?? 0);
     const pool = Number(opts.poolDice ?? 0);
     const karma = Number(opts.karmaDice ?? 0);
+    const poolKey = opts.poolKey as string | undefined;
     const parts = [`${base} base`];
-    if (pool > 0) parts.push(`${pool} pool`);
+    if (pool > 0) parts.push(`${pool} pool${poolKey ? ` (${poolKey})` : ""}`);
     if (karma > 0) parts.push(`${karma} karma`);
     return `${base + pool + karma} dice (${parts.join(" + ")})`;
 }
@@ -33,10 +34,16 @@ function tnLine(opts: Record<string, unknown>): string {
 export function renderRollSummary(actor: { name: string }, roll: RollSnapshot): string {
     const tn = roll.options.targetNumber != null ? Number(roll.options.targetNumber) : null;
     const results = dieResults(roll.terms);
-    const successes = tn !== null ? results.filter(r => r >= tn).length : null;
+    const successes = tn !== null ? results.filter(r => r.result >= tn).length : null;
 
     const diceHtml = results.length > 0
-        ? results.map(r => `<span class="sr3e-die${tn !== null && r >= tn ? " sr3e-success" : ""}">${r}</span>`).join(" ")
+        ? results.map(({ result, exploded }) => {
+            let cls = "sr3e-die";
+            if (tn !== null && result >= tn) cls += " sr3e-success";
+            else if (result === 1) cls += " sr3e-botch";
+            const mark = exploded ? `<i class="fa-solid fa-explosion sr3e-exploded"></i>` : "";
+            return `<span class="${cls}">${result}${mark}</span>`;
+        }).join(" ")
         : "<span class=\"sr3e-die\">—</span>";
 
     const successLine = successes !== null

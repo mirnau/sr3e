@@ -89,8 +89,14 @@ body.game .chat-message .sr3e-roll-dice {
 }
 
 body.game .chat-message .sr3e-die {
-   min-width: 1.75rem;
-   padding: 0.2rem 0.35rem;
+   position: relative;
+   width: 2.1rem;
+   height: 2.1rem;
+   padding: 0;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   flex-shrink: 0;
    text-align: center;
    color: #fff;
    background: rgba(0, 0, 0, 0.25);
@@ -103,6 +109,22 @@ body.game .chat-message .sr3e-die.sr3e-success,
 body.game .chat-message .sr3e-roll-successes {
    color: var(--chat-highlight-color);
    text-shadow: 0 0 6px rgba(0, 255, 200, 0.5);
+}
+
+body.game .chat-message .sr3e-die.sr3e-botch {
+   color: #ff4c4c;
+   text-shadow: 0 0 6px rgba(255, 76, 76, 0.5);
+   border-color: rgba(255, 76, 76, 0.4);
+}
+
+body.game .chat-message .sr3e-exploded {
+   position: absolute;
+   top: -0.45em;
+   right: -0.45em;
+   font-size: 0.6em;
+   opacity: 0.9;
+   line-height: 1;
+   pointer-events: none;
 }
 
 body.game .chat-message button {
