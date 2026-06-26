@@ -9,6 +9,7 @@
       path,
       type = "text",
       options = [],
+      placeholder,
       onUpdate,
    }: {
       item?: SR3EItem;
@@ -18,6 +19,7 @@
       path?: string;
       type?: "text" | "number" | "checkbox" | "select";
       options?: Array<{ value: any; label: string }>;
+      placeholder?: string;
       onUpdate?: (value: any) => void;
    } = $props();
 
@@ -62,7 +64,7 @@
             selected={value == null || value === ""}
             hidden
          >
-            {game.i18n.localize("sr3e.placeholders.selectanoption")}
+            {placeholder ?? game.i18n.localize("sr3e.placeholders.selectanoption")}
          </option>
          {#each options as option}
             <option value={option.value} selected={value === option.value}>

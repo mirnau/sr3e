@@ -23,6 +23,7 @@ const legalityEntries = [
     {
         key: "status",   label: localize(CONFIG.SR3E.COMMODITY.legalstatus),              value: commodity.legality?.status,
         path: "system.commodity.legality", type: "select" as const, options: kvOptions(CONFIG.SR3E.LEGAL_STATUSES),
+        placeholder: localize("sr3e.placeholders.selectlegalstatus"),
     },
     {
         key: "permit",   label: localize(CONFIG.SR3E.COMMODITY.legalpermit),              value: commodity.legality?.permit,
