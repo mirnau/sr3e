@@ -163,6 +163,9 @@
       "running": "Running",
       "walking": "Walking"
     },
+    "placeholders": {
+      "selectanoption": "Select an Option"
+    },
     "portability": {
       "concealability": "Conceal",
       "portability": "Portability",
