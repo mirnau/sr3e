@@ -65,6 +65,13 @@
 					padding: 0;
 				}
 			}
+
+			&:has(select) .title-container {
+				justify-content: flex-start;
+				padding-left: 0.25rem;
+
+				h4 { width: 100%; }
+			}
 		}
 	}
 }
