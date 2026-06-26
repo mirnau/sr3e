@@ -14,7 +14,8 @@ export const typekeys = Object.freeze({
   broadcaster: "broadcaster",
   storytellerscreen: "storytellerscreen",
   metatype: "metatype",
-  skill: "skill"
+  skill: "skill",
+  weapon: "weapon",
 } as const);
 
 export const flags = Object.freeze({

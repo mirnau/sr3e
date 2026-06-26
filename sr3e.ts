@@ -12,6 +12,8 @@ import { getNewsService } from "./module/services/news-service/NewsService.svelt
 import MetatypeModel from "./module/models/items/MetatypeModel";
 import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
 import SkillSheet from "./module/sheets/items/SkillSheet";
+import WeaponModel from "./module/models/items/WeaponModel";
+import WeaponSheet from "./module/sheets/items/WeaponSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -137,8 +139,17 @@ async function registerHooks(): Promise<void> {
             type: typekeys.skill,
             model: SkillModel,
             sheet: SkillSheet,
-         }
-      ] satisfies SR3EDocumentRegistration[]
+         },
+         {
+            docClass: Item,
+            type: typekeys.weapon,
+            model: WeaponModel,
+            sheet: WeaponSheet,
+         },
+      ] satisfies SR3EDocumentRegistration[]);
+
+      CONFIG.Item.typeLabels = Object.fromEntries(
+         Object.entries(CONFIG.SR3E.ITEM_TYPES).map(([key, token]) => [key, token as string])
       );
 
       console.log("SR3E | CONFIG.SR3E initialized, localize() ready");

@@ -3,6 +3,25 @@
     "GMSCREEN": {
       "storytellerscreen": "Storyteller's Screen"
     },
+    "ammunitionClass": {
+      "assaultCannon": "Assault Cannons",
+      "assaultRifle": "Assault Rifles",
+      "bow": "Bows",
+      "crossbow": "Crossbows",
+      "grenadeLauncher": "Grenade Launchers",
+      "heavyPistol": "Heavy Pistols",
+      "hmg": "Heavy Machine Guns",
+      "holdout": "Hold-Out Pistols",
+      "lightPistol": "Light Pistols",
+      "lmg": "Light Machine Guns",
+      "missileLauncher": "Missile Launchers",
+      "mmg": "Medium Machine Guns",
+      "shotgun": "Shotguns",
+      "smg": "Submachine Guns",
+      "sniperRifle": "Sniper Rifles",
+      "sportingRifle": "Sporting Rifles",
+      "taser": "Tasers"
+    },
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",
@@ -10,7 +29,7 @@
       "essence": "Essence",
       "initiative": "Initiative",
       "intelligence": "Intelligence",
-      "isBurnedOut": "IsBurnedOut",
+      "isBurnedOut": "Burned Out",
       "limits": "Limits",
       "magic": "Magic",
       "quickness": "Quickness",
@@ -21,11 +40,21 @@
     "character": {
       "attributes": "Attributes",
       "creation": "Creation",
-      "dicepools": "Dicepools",
+      "dicepools": "Dice Pools",
       "health": "Health",
       "karma": "Karma",
       "movement": "Movement",
       "profile": "Profile"
+    },
+    "commodity": {
+      "commodity": "Commodity Profile",
+      "cost": "Cost",
+      "days": "Days",
+      "isBroken": "Broken",
+      "legalenforcementpriority": "Enforcement Priority",
+      "legalpermit": "Permit Requirement",
+      "legalstatus": "Legal Status",
+      "streetIndex": "Street Index"
     },
     "common": {
       "average": "Average",
@@ -34,47 +63,89 @@
       "min": "Min"
     },
     "creation": {
-      "activePoints": "ActivePoints",
-      "attributePoints": "AttributePoints",
-      "knowledgePoints": "KnowledgePoints",
-      "languagePoints": "LanguagePoints"
+      "activePoints": "Active Points",
+      "attributePoints": "Attribute Points",
+      "knowledgePoints": "Knowledge Points",
+      "languagePoints": "Language Points"
+    },
+    "damageType": {
+      "d": "Deadly",
+      "dStun": "Deadly (Stun)",
+      "l": "Light",
+      "lStun": "Light (Stun)",
+      "m": "Moderate",
+      "mStun": "Moderate (Stun)",
+      "s": "Serious",
+      "sStun": "Serious (Stun)"
     },
     "dicePools": {
       "astral": "Astral",
       "combat": "Combat",
       "control": "Control",
-      "dicePools": "DicePools",
+      "dicePools": "Dice Pools",
       "hacking": "Hacking",
       "spell": "Spell"
     },
     "health": {
       "deadly": "Deadly",
       "health": "Health",
-      "isAlive": "IsAlive",
+      "isAlive": "Alive",
       "light": "Light",
       "medium": "Medium",
-      "miraculousSurvival": "MiraculousSurvival",
+      "miraculousSurvival": "Miraculous Survival",
       "overflow": "Overflow",
-      "penalty": "Penalty",
+      "penalty": "Wound Penalty",
       "physical": "Physical",
       "revive": "Revive",
-      "reviveConfirm": "ReviveConfirm",
+      "reviveConfirm": "Confirm Revive",
       "serious": "Serious",
       "stun": "Stun"
     },
+    "itemTypes": {
+      "ammunition": "Ammunition",
+      "focus": "Focus",
+      "gadget": "Gadget",
+      "magic": "Magic",
+      "metatype": "Metatype",
+      "skill": "Skill",
+      "spell": "Spell",
+      "techinterface": "Tech Interface",
+      "transaction": "Transaction",
+      "weapon": "Weapon",
+      "wearable": "Wearable"
+    },
     "karma": {
-      "advancementratio": "Advancementratio",
-      "goodKarma": "GoodKarma",
+      "advancementratio": "Advancement Ratio",
+      "goodKarma": "Good Karma",
       "karma": "Karma",
-      "karmaPool": "KarmaPool",
-      "karmaPoolCeiling": "KarmaPoolCeiling",
-      "lifetimeKarma": "LifetimeKarma",
-      "pendingKarmaReward": "PendingKarmaReward",
-      "readyForCommit": "ReadyForCommit",
-      "spentKarma": "SpentKarma"
+      "karmaPool": "Karma Pool",
+      "karmaPoolCeiling": "Karma Pool Ceiling",
+      "lifetimeKarma": "Lifetime Karma",
+      "pendingKarmaReward": "Pending Karma Reward",
+      "readyForCommit": "Ready to Commit",
+      "spentKarma": "Spent Karma"
+    },
+    "legalpermit": {
+      "1": "Permit Level 1",
+      "2": "Permit Level 2",
+      "3": "Permit Level 3",
+      "4": "Permit Level 4",
+      "N": "No Permit Allowed"
+    },
+    "legalpriority": {
+      "1": "Priority 1",
+      "2": "Priority 2",
+      "3": "Priority 3",
+      "4": "Priority 4",
+      "X": "Extreme Priority"
+    },
+    "legalstatus": {
+      "I": "Illegal",
+      "L": "Legal",
+      "R": "Restricted"
     },
     "metatype": {
-      "agerange": "Agerange",
+      "agerange": "Playable Age Range",
       "height": "Height",
       "metatype": "Metatype",
       "priority": "Priority",
@@ -83,23 +154,35 @@
     "modal": {
       "confirm": "Confirm",
       "decline": "Decline",
-      "deleteskill": "Deleteskill",
-      "deleteskilltitle": "Deleteskilltitle"
+      "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
+      "deleteskilltitle": "Delete Skill?"
     },
     "movement": {
       "movement": "Movement",
-      "runSpeedModifier": "RunSpeedModifier",
+      "runSpeedModifier": "Running Modifier",
       "running": "Running",
       "walking": "Walking"
     },
+    "portability": {
+      "concealability": "Conceal",
+      "portability": "Portability",
+      "weight": "Weight"
+    },
     "profile": {
-      "age": "Age of Empires!",
+      "age": "Age",
       "height": "Height",
-      "isDetailsOpen": "IsDetailsOpen",
-      "metaType": "MetaType",
+      "isDetailsOpen": "Details Open",
+      "metaType": "Metatype",
       "names": "Names",
       "quote": "Quote",
       "weight": "Weight"
+    },
+    "reloadMechanism": {
+      "b": "Break-Action",
+      "belt": "Belt-Fed",
+      "c": "Clip",
+      "cy": "Cylinder",
+      "m": "Internal Magazine"
     },
     "skill": {
       "active": "Active",
@@ -116,6 +199,32 @@
       "specializations": "Specializations",
       "specialize": "Specialize",
       "value": "Value"
+    },
+    "weapon": {
+      "ammunitionClass": "Ammunition Class",
+      "damage": "Damage",
+      "damageType": "Damage Type",
+      "mode": "Mode",
+      "range": "Range",
+      "rangeband": "Range Band",
+      "rangebandextreme": "Extreme Range",
+      "rangebandlong": "Long Range",
+      "rangebandmedium": "Medium Range",
+      "rangebandshort": "Short Range",
+      "recoilCompensation": "Recoil Compensation",
+      "reloadMechanism": "Reload Mechanism",
+      "weapon": "Weapon",
+      "weaponStats": "Weapon Stats"
+    },
+    "weaponMode": {
+      "blade": "Blade",
+      "blunt": "Blunt",
+      "burst": "Burst-Fire",
+      "energy": "Energy",
+      "explosive": "Explosive",
+      "fullauto": "Full-Automatic",
+      "manual": "Manual",
+      "semiauto": "Semi-Automatic"
     }
   }
 }

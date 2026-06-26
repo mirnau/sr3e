@@ -3,6 +3,11 @@ import { CHARACTER_KEYS, GMSCREEN_KEYS } from "./config/ActorConfig";
 import { METATYPE_KEYS } from "./config/MetaTypeConfig";
 import { COMMON_KEYS, MODAL_KEYS } from "./config/CommonConfig";
 import { SKILL_KEYS } from "./config/SkillConfig";
+import {
+  WEAPON_KEYS, COMMODITY_KEYS, PORTABILITY_KEYS,
+  WEAPON_MODE_KEYS, RELOAD_MECHANISM_KEYS, AMMO_CLASS_KEYS, DAMAGE_TYPE_KEYS,
+  LEGAL_STATUS_KEYS, LEGAL_PERMIT_KEYS, LEGAL_PRIORITY_KEYS, ITEM_TYPE_KEYS,
+} from "./config/WeaponConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -30,10 +35,21 @@ export const sr3e = {
   KARMA: createCategory("karma", KARMA_KEYS),
   MOVEMENT: createCategory("movement", MOVEMENT_KEYS),
   PROFILE: createCategory("profile", PROFILE_KEYS),
-  METATYPE:createCategory("metatype", METATYPE_KEYS),
-  SKILL:createCategory("skill", SKILL_KEYS),
-  MODAL:createCategory("modal", MODAL_KEYS),
-  GMSCREEN:createCategory("GMSCREEN", GMSCREEN_KEYS)
+  METATYPE: createCategory("metatype", METATYPE_KEYS),
+  SKILL: createCategory("skill", SKILL_KEYS),
+  MODAL: createCategory("modal", MODAL_KEYS),
+  GMSCREEN: createCategory("GMSCREEN", GMSCREEN_KEYS),
+  WEAPON: createCategory("weapon", WEAPON_KEYS),
+  COMMODITY: createCategory("commodity", COMMODITY_KEYS),
+  PORTABILITY: createCategory("portability", PORTABILITY_KEYS),
+  WEAPON_MODES: createCategory("weaponMode", WEAPON_MODE_KEYS),
+  RELOAD_MECHANISMS: createCategory("reloadMechanism", RELOAD_MECHANISM_KEYS),
+  AMMO_CLASSES: createCategory("ammunitionClass", AMMO_CLASS_KEYS),
+  DAMAGE_TYPES: createCategory("damageType", DAMAGE_TYPE_KEYS),
+  LEGAL_STATUSES: createCategory("legalstatus", LEGAL_STATUS_KEYS),
+  LEGAL_PERMITS: createCategory("legalpermit", LEGAL_PERMIT_KEYS),
+  LEGAL_PRIORITIES: createCategory("legalpriority", LEGAL_PRIORITY_KEYS),
+  ITEM_TYPES: createCategory("itemTypes", ITEM_TYPE_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;
