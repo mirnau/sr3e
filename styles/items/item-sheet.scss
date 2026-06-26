@@ -70,7 +70,10 @@
 				justify-content: flex-start;
 				padding-left: 0.25rem;
 
-				h4 { width: 100%; }
+				h4 {
+					width: 100%;
+					text-align: left;
+				}
 			}
 		}
 	}
