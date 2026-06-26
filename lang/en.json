@@ -3,6 +3,12 @@
     "GMSCREEN": {
       "storytellerscreen": "Storyteller's Screen"
     },
+    "actorTypes": {
+      "broadcaster": "Broadcaster",
+      "character": "Character",
+      "mechanical": "Mechanical",
+      "storytellerscreen": "Storyteller's Screen"
+    },
     "ammunitionClass": {
       "assaultCannon": "Assault Cannons",
       "assaultRifle": "Assault Rifles",

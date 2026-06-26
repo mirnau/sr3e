@@ -1,5 +1,5 @@
 import { ATTRIBUTES_KEYS, CREATION_KEYS, DICE_POOLS_KEYS, HEALTH_KEYS, KARMA_KEYS, MOVEMENT_KEYS, PROFILE_KEYS } from "./config/AttributeComponentsConfig";
-import { CHARACTER_KEYS, GMSCREEN_KEYS } from "./config/ActorConfig";
+import { CHARACTER_KEYS, GMSCREEN_KEYS, ACTOR_TYPE_KEYS } from "./config/ActorConfig";
 import { METATYPE_KEYS } from "./config/MetaTypeConfig";
 import { COMMON_KEYS, MODAL_KEYS } from "./config/CommonConfig";
 import { SKILL_KEYS } from "./config/SkillConfig";
@@ -50,6 +50,7 @@ export const sr3e = {
   LEGAL_PERMITS: createCategory("legalpermit", LEGAL_PERMIT_KEYS),
   LEGAL_PRIORITIES: createCategory("legalpriority", LEGAL_PRIORITY_KEYS),
   ITEM_TYPES: createCategory("itemTypes", ITEM_TYPE_KEYS),
+  ACTOR_TYPES: createCategory("actorTypes", ACTOR_TYPE_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

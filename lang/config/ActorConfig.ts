@@ -6,8 +6,15 @@ export const CHARACTER_KEYS = [
   "creation",
   "karma",
   "health",
-  ] as const;
+] as const;
 
 export const GMSCREEN_KEYS = [
-  "storytellerscreen"
+  "storytellerscreen",
+] as const;
+
+export const ACTOR_TYPE_KEYS = [
+  "character",
+  "storytellerscreen",
+  "broadcaster",
+  "mechanical",
 ] as const;

@@ -151,6 +151,9 @@ async function registerHooks(): Promise<void> {
       CONFIG.Item.typeLabels = Object.fromEntries(
          Object.entries(CONFIG.SR3E.ITEM_TYPES).map(([key, token]) => [key, token as string])
       );
+      CONFIG.Actor.typeLabels = Object.fromEntries(
+         Object.entries(CONFIG.SR3E.ACTOR_TYPES).map(([key, token]) => [key, token as string])
+      );
 
       console.log("SR3E | CONFIG.SR3E initialized, localize() ready");
    });
