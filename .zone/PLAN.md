@@ -10,8 +10,9 @@
 [x] MUST: Tier 4 — orchestration → .zone/techspecs/TECHSPEC-combat-tier-4-orchestration.md
 [x] MUST: SR3E dice accumulation engine → .zone/techspecs/TECHSPEC-dice-accumulation-engine.md
 [x] MUST: Tier 5a — simple rolls (click-to-roll on skills, attributes, pools)
-[~] MUST: Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
-[ ] MUST: Tier 5b.2 — roll composer styling
+[x] MUST: Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
+[x] MUST: Tier 5b.2 — roll composer styling
+[~] MUST: Weapons item — migrate from old_project (sister folder)
 [ ] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
 [ ] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
 [ ] SHOULD: Clickable dice in chat for karma re-rolls

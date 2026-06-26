@@ -109,9 +109,11 @@ The gadget system exists in the old JS project and is pending migration. Referen
 
 **Simple rolls vs. advanced rolls:**
 
-- **Simple (open) rolls** — `openRoll: true` in `ProcedureSetup`. These have **no target number**. The dice are rolled and summed or interpreted contextually (e.g. initiative). There is no concept of individual die success or failure, and no "Roll failed" outcome. The only failure mode is a **Disastrous failure** (Rule of One): all dice show 1. All dice on a simple roll are re-rollable with Karma Pool.
+- **Simple (open) rolls** — `openTest: true` in `ProcedureSetup`. These have **no target number**. Examples: dice pool rolls, open tests. There is no concept of individual die success or failure, and no "Roll failed" outcome. The only failure mode is a **Disastrous failure** (Rule of One): all dice show 1. All dice on a simple roll are re-rollable with Karma Pool. Rendered by `renderSimpleRollSummary`.
 
-- **Advanced (TN) rolls** — `openRoll: false`. These have a target number (minimum 2). A die **succeeds** if its result ≥ TN. The roll **fails** if zero dice succeed. A **Disastrous failure** occurs if every die shows 1. Only failed (non-succeeding) dice are re-rollable with Karma Pool.
+- **Advanced (TN) rolls** — `openTest` absent or false. These have a target number (minimum 2). A die **succeeds** if its result ≥ TN. The roll **fails** if zero dice succeed. A **Disastrous failure** occurs if every die shows 1. Only failed (non-succeeding) dice are re-rollable with Karma Pool. Rendered by `renderAdvancedRollSummary`.
+
+Note: `openRoll: true` is a separate flag controlling the Foundry dice formula (`Nd6x` vs `Nd6x{TN}`). All SR3E tests use `openRoll: true` — it is not the discriminator for TN semantics.
 
 This distinction must be preserved in chat message rendering: do not display TN, success count, or "Roll failed" for simple rolls.
 

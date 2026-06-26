@@ -1,8 +1,8 @@
 ## Active Feature
-Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
+Weapons item — migrate from old_project (sister folder) → .zone/techspecs/TECHSPEC-weapons-item-migration.md
 
 ## Current Issue
-#130 — DicePoolStat model with spent field
+none — all issues closed, pending manual test in Foundry
 
 ## Blockers
 none
