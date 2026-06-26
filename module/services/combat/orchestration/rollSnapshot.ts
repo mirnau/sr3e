@@ -10,20 +10,10 @@ function procedureType(kind: string): "skill" | "attribute" | "item" {
     return "item";
 }
 
-export function buildRollSnapshot(
-    roll: SR3ERoll,
-    setup: ProcedureSetup,
-    state: RollState,
-    poolKey?: string,
-): RollSnapshot {
-    const tn = setup.openRoll ? null : computeFinalTN(state, 2);
-
+function baseSnapshot(roll: SR3ERoll, setup: ProcedureSetup, state: RollState, poolKey?: string) {
     return {
         terms: roll.terms,
         options: {
-            targetNumber: tn,
-            tnBase: state.targetNumber,
-            tnMods: state.modifiers,
             baseDice: state.dice,
             poolDice: state.poolDice,
             karmaDice: state.karmaDice,
@@ -33,6 +23,34 @@ export function buildRollSnapshot(
         meta: {
             flavor: setup.title,
             procedureKind: setup.kind,
+        },
+    };
+}
+
+export function buildSimpleRollSnapshot(
+    roll: SR3ERoll,
+    setup: ProcedureSetup,
+    state: RollState,
+    poolKey?: string,
+): RollSnapshot {
+    const base = baseSnapshot(roll, setup, state, poolKey);
+    return { ...base, options: { ...base.options, targetNumber: null } };
+}
+
+export function buildRollSnapshot(
+    roll: SR3ERoll,
+    setup: ProcedureSetup,
+    state: RollState,
+    poolKey?: string,
+): RollSnapshot {
+    const base = baseSnapshot(roll, setup, state, poolKey);
+    return {
+        ...base,
+        options: {
+            ...base.options,
+            targetNumber: computeFinalTN(state, 2),
+            tnBase: state.targetNumber,
+            tnMods: state.modifiers,
         },
     };
 }

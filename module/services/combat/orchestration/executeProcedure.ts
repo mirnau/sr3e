@@ -2,6 +2,7 @@ import { acquireLock, releaseLock } from "../engine/procedureLock";
 import { computeFinalTN, computePoolDice } from "../diceFormula";
 import { SR3ERoll } from "./SR3ERoll";
 import { executeSimpleFlow } from "./simpleFlow";
+import { executeAdvancedFlow } from "./advancedFlow";
 import { executeContestedFlow } from "./contestedFlow";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
 import type { RollState } from "../diceFormula";
@@ -23,6 +24,7 @@ export type ExecuteProcedureOptions = {
     fullDefenseOverride?: boolean;
     rollState?: RollState;
     poolKey?: string;
+    advanced?: boolean;
 };
 
 export async function executeProcedure(
@@ -51,6 +53,8 @@ export async function executeProcedure(
 
         if (isContested) {
             await executeContestedFlow(setup, state, roll, actor, opts.targets ?? []);
+        } else if (opts.advanced && !setup.openTest) {
+            await executeAdvancedFlow(setup, state, roll, actor, { poolKey: opts.poolKey });
         } else {
             await executeSimpleFlow(setup, state, roll, actor, { poolKey: opts.poolKey });
         }

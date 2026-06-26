@@ -1,8 +1,13 @@
-import { renderRollSummaryFromResults, type DieEntry } from "../../../ui/combat/chat/renderRollSummary";
+import {
+    renderSimpleRollSummary,
+    renderAdvancedRollSummary,
+    type DieEntry,
+} from "../../../ui/combat/chat/renderRollSummary";
 
 export type RerollFlag = {
     actorId: string;
     actorName: string;
+    pipeline: "simple" | "advanced";
     options: Record<string, unknown>;
     meta: { flavor: string; procedureKind: string };
     results: DieEntry[];
@@ -39,11 +44,11 @@ export async function handleDieReroll(
     );
 
     const newFlag: RerollFlag = { ...flag, results: newResults };
-    const newContent = renderRollSummaryFromResults(
-        { name: flag.actorName },
-        { options: flag.options, meta: flag.meta },
-        newResults,
-    );
+    const rollCore = { options: flag.options, meta: flag.meta };
+    const actorRef = { name: flag.actorName };
+    const newContent = flag.pipeline === "simple"
+        ? renderSimpleRollSummary(actorRef, rollCore, newResults)
+        : renderAdvancedRollSummary(actorRef, rollCore, newResults);
 
     await message.update({ content: newContent, "flags.sr3e.reroll": newFlag });
 }

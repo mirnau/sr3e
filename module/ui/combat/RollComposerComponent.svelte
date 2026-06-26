@@ -110,7 +110,7 @@ async function onConfirm(): Promise<void> {
     const targets = typeof game !== "undefined"
         ? Array.from((game.user as any)?.targets ?? [])
         : [];
-    await executeProcedure(currentSetup, actor, { targets: targets as never[], rollState: finalState, poolKey: poolKey ?? undefined });
+    await executeProcedure(currentSetup, actor, { targets: targets as never[], rollState: finalState, poolKey: poolKey ?? undefined, advanced: true });
 }
 
 function addMod(): void {
@@ -147,13 +147,16 @@ onDestroy(() => {
                         <button class="composer-btn-close" onclick={onClose} title="Close">✕</button>
                     </div>
                 </div>
+                {#if !setup.openTest}
                 <select bind:value={isDefaulting} class="roll-composer-type-select">
                     <option value={false}>Regular roll</option>
                     <option value={true}>Defaulting</option>
                 </select>
+                {/if}
             </div>
         </div>
 
+        {#if !setup.openTest}
         <!-- Target Number -->
         <div class="attribute-card composer-unit">
             <div class="attribute-card-shadow"></div>
@@ -204,6 +207,7 @@ onDestroy(() => {
                 {/each}
             </div>
         </div>
+        {/if}
 
         <!-- Dice Pool -->
         {#if !isDefaulting && composerState.selectedPoolKey}
