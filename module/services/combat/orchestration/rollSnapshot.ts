@@ -16,7 +16,7 @@ export function buildRollSnapshot(
     state: RollState,
     poolKey?: string,
 ): RollSnapshot {
-    const tn = computeFinalTN(state, 2);
+    const tn = setup.openRoll ? null : computeFinalTN(state, 2);
 
     return {
         terms: roll.terms,

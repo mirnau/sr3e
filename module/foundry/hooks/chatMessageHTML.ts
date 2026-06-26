@@ -3,6 +3,7 @@ import {
     handleResistanceClick,
     type ResistanceCtx,
 } from "../../services/combat/orchestration/resistanceHandler";
+import { handleDieReroll, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
 
 type ChatMessageLike = {
     flags?: {
@@ -32,6 +33,16 @@ export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElemen
     if (resistance) {
         html.querySelector(".sr3e-resist-damage-button")?.addEventListener("click", () => {
             handleResistanceClick(resistance);
+        });
+    }
+
+    const reroll = sr3eFlags.reroll as RerollFlag | undefined;
+    if (reroll) {
+        html.querySelectorAll<HTMLElement>(".sr3e-rerollable").forEach(die => {
+            die.addEventListener("click", () => {
+                const idx = parseInt(die.dataset.dieIndex ?? "-1");
+                if (idx >= 0) handleDieReroll(message as unknown as { update: (d: Record<string, unknown>) => Promise<unknown> }, idx, reroll);
+            });
         });
     }
 }

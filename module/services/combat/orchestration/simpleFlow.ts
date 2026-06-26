@@ -1,5 +1,6 @@
 import { buildRollSnapshot } from "./rollSnapshot";
-import { renderRollSummary } from "../../../ui/combat/chat/renderRollSummary";
+import { extractDieResults, renderRollSummaryFromResults } from "../../../ui/combat/chat/renderRollSummary";
+import type { RerollFlag } from "./rerollHandler";
 import type { SR3ERoll } from "./SR3ERoll";
 import type { RollState } from "../diceFormula";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
@@ -16,11 +17,25 @@ export async function executeSimpleFlow(
     if (!setup.selfPublish) return;
 
     const snapshot = buildRollSnapshot(roll, setup, state, opts.poolKey);
-    const html = renderRollSummary(actor as { name: string }, snapshot);
+    const results = extractDieResults(roll.terms);
+    const html = renderRollSummaryFromResults(actor as { name: string }, snapshot, results);
+
+    const actorId = (actor as any)?.id as string | undefined;
+    const reroll: RerollFlag | undefined = actorId ? {
+        actorId,
+        actorName: (actor as any)?.name as string ?? "",
+        options: snapshot.options,
+        meta: snapshot.meta,
+        results,
+    } : undefined;
 
     const speaker = typeof ChatMessage !== "undefined"
         ? (ChatMessage as any).getSpeaker?.({ actor }) ?? {}
         : {};
 
-    await (ChatMessage as any).create?.({ content: html, speaker });
+    await (ChatMessage as any).create?.({
+        content: html,
+        speaker,
+        flags: reroll ? { sr3e: { reroll } } : undefined,
+    });
 }

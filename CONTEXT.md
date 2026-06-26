@@ -105,6 +105,16 @@ The gadget system exists in the old JS project and is pending migration. Referen
 
 **Known design tension:** using a read-write store for `.mod` risks an infinite update loop when AEs apply (AE applies → store writes → triggers update → AE applies again). The old project worked around this by using a read-only store for `.mod`, which broke reactive updates. The new TS `GetSimpleStatROStore` uses `GetRWStore` for `.mod` with a 50ms mute window — whether this fully resolves the loop under AE application is unverified.
 
+## SR3E Roll Rules
+
+**Simple rolls vs. advanced rolls:**
+
+- **Simple (open) rolls** — `openRoll: true` in `ProcedureSetup`. These have **no target number**. The dice are rolled and summed or interpreted contextually (e.g. initiative). There is no concept of individual die success or failure, and no "Roll failed" outcome. The only failure mode is a **Disastrous failure** (Rule of One): all dice show 1. All dice on a simple roll are re-rollable with Karma Pool.
+
+- **Advanced (TN) rolls** — `openRoll: false`. These have a target number (minimum 2). A die **succeeds** if its result ≥ TN. The roll **fails** if zero dice succeed. A **Disastrous failure** occurs if every die shows 1. Only failed (non-succeeding) dice are re-rollable with Karma Pool.
+
+This distinction must be preserved in chat message rendering: do not display TN, success count, or "Roll failed" for simple rolls.
+
 ## Load-Bearing Decisions
 
 Detailed records live in `docs/adr/`.
