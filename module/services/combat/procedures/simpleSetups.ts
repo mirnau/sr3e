@@ -9,6 +9,7 @@ export type ProcedureSetup = {
     lockPriority: "simple" | "advanced";
     selfPublish: boolean;
     openRoll?: boolean;
+    openTest?: boolean;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;
     commitFn: (roll: unknown, actor: unknown) => Promise<void>;
@@ -118,6 +119,7 @@ export function buildDicePoolSetup(
         lockPriority: "simple",
         selfPublish: true,
         openRoll: true,
+        openTest: true,
         defenseHint: null,
         exportFn: () => ({
             familyKey: "pool",
