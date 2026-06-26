@@ -142,10 +142,25 @@
          }
       };
 
-      const onBlur = () => { if (isOn) anim?.pause(); };
+      let blurTimer: ReturnType<typeof setTimeout> | null = null;
+
+      const onBlur = () => {
+         blurTimer = setTimeout(() => {
+            if (!document.hasFocus() && isOn) anim?.pause();
+         }, 150);
+      };
+
+      const onFocus = () => {
+         if (blurTimer) { clearTimeout(blurTimer); blurTimer = null; }
+         restartIfFinished();
+      };
 
       const onVisibilityChange = () => {
-         if (!document.hidden) restartIfFinished();
+         if (document.hidden) {
+            if (isOn) anim?.pause();
+         } else {
+            restartIfFinished();
+         }
       };
 
       precacheWidths(FALLBACK);
@@ -153,16 +168,17 @@
 
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
-      window.addEventListener("focus", restartIfFinished);
       window.addEventListener("blur", onBlur);
+      window.addEventListener("focus", onFocus);
       document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
          anim?.cancel();
+         if (blurTimer) clearTimeout(blurTimer);
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
-         window.removeEventListener("focus", restartIfFinished);
          window.removeEventListener("blur", onBlur);
+         window.removeEventListener("focus", onFocus);
          document.removeEventListener("visibilitychange", onVisibilityChange);
          resizeObserver.disconnect();
       };
