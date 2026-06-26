@@ -22,26 +22,18 @@
    let ticker: HTMLDivElement | undefined;
    let inner: HTMLDivElement | undefined;
    let measureRail: HTMLDivElement | undefined;
-   let headlinePool: string[] = [];
-   let nextIndex = 0;
 
-   type Cart = { el: HTMLSpanElement; width: number };
-   let carts: Cart[] = [];
-
-   let offset = 0;
-   let rafId: number | null = null;
-   let running = false;
-   let lastTick = 0;
+   let activePool: string[] = [];
+   let pendingPool: string[] | null = null;
+   let anim: Animation | null = null;
 
    const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
    const widthCache = new Map<string, number>();
 
-   // Batch-measures all uncached texts in the hidden rail (outside rAF — no frame timing impact).
    function precacheWidths(texts: string[]): void {
       if (!measureRail) return;
       const uncached = texts.filter(t => !widthCache.has(t));
       if (uncached.length === 0) return;
-
       const spans = uncached.map(text => {
          const el = document.createElement("span");
          el.className = "marquee-item";
@@ -49,85 +41,72 @@
          measureRail!.appendChild(el);
          return { text, el };
       });
-      for (const { text, el } of spans) {
-         widthCache.set(text, el.getBoundingClientRect().width);
-      }
-      for (const { el } of spans) {
-         measureRail!.removeChild(el);
-      }
+      for (const { text, el } of spans) widthCache.set(text, el.getBoundingClientRect().width);
+      for (const { el } of spans) measureRail!.removeChild(el);
    }
 
-   function nextHeadline(): string {
-      const pool = headlinePool.length ? headlinePool : FALLBACK;
-      const text: string = pool[nextIndex % pool.length] as string;
-      nextIndex = (nextIndex + 1) % pool.length;
-      return text;
+   function totalContentWidth(pool: string[]): number {
+      return pool.reduce((sum, t) => sum + (widthCache.get(t) ?? 0), 0)
+         + GAP_PX * Math.max(0, pool.length - 1);
    }
 
-   function addCart(text: string) {
+   function buildContent(pool: string[]): void {
       if (!inner) return;
-      const el = document.createElement("span");
-      el.className = "marquee-item";
-      el.textContent = text;
-      inner.appendChild(el);
-      const width = widthCache.get(text) ?? el.getBoundingClientRect().width;
-      carts.push({ el, width });
-   }
-
-   function removeFirstCart() {
-      const first = carts.shift();
-      if (first) inner?.removeChild(first.el);
-   }
-
-   function seedTrain() {
-      const initialOffset = ticker?.clientWidth ?? 400;
-      offset = initialOffset;
-      for (let i = 0; i < 3; i++) addCart(nextHeadline());
-   }
-
-   function step(now: number) {
-      if (!lastTick) lastTick = now;
-      // Cap at one frame: skip catch-up after GC pauses/dropped frames rather than lurching.
-      const dt = Math.min((now - lastTick) / 1000, 1 / 60);
-      lastTick = now;
-
-      offset -= SCROLL_SPEED * dt;
-
-      const firstWidth = carts[0]?.width ?? 0;
-      if (firstWidth > 0 && offset + firstWidth < -GAP_PX) {
-         offset += firstWidth + GAP_PX;
-         removeFirstCart();
-         addCart(nextHeadline());
+      const existing = inner.children;
+      for (let i = 0; i < pool.length; i++) {
+         if (i < existing.length) {
+            (existing[i] as HTMLElement).textContent = pool[i]!;
+         } else {
+            const el = document.createElement("span");
+            el.className = "marquee-item";
+            el.textContent = pool[i]!;
+            inner.appendChild(el);
+         }
       }
-
-      if (carts.length < 3) addCart(nextHeadline());
-
-      if (inner) inner.style.transform = `translate3d(${offset}px, 0, 0)`;
-
-      if (running) rafId = requestAnimationFrame(step);
+      while (inner.children.length > pool.length) inner.removeChild(inner.lastChild!);
    }
 
-   function startLoop() {
-      if (rafId) cancelAnimationFrame(rafId);
-      running = true;
-      lastTick = 0;
-      rafId = requestAnimationFrame(step);
-   }
+   function runPass(pool: string[]): void {
+      if (!inner || !ticker) return;
+      const tickerW = ticker.clientWidth;
+      const contentW = totalContentWidth(pool);
+      const duration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
 
-   function stopLoop() {
-      running = false;
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = null;
+      // Pin off-screen right before cancelling so fill doesn't snap element away.
+      inner.style.transform = `translateX(${tickerW}px)`;
+      anim?.cancel();
+
+      // Rebuild content while off-screen — no visible texture invalidation.
+      buildContent(pool);
+      activePool = pool;
+
+      anim = inner.animate(
+         [
+            { transform: `translateX(${tickerW}px)` },
+            { transform: `translateX(-${contentW}px)` },
+         ],
+         { duration, easing: "linear", fill: "forwards" },
+      );
+
+      anim.onfinish = () => {
+         const next = pendingPool ?? activePool;
+         pendingPool = null;
+         runPass(next);
+      };
+
+      if (!isOn) anim.pause();
    }
 
    function applyFrame(frame: DisplayFrame) {
       if (!frame || !Array.isArray(frame.buffer)) return;
       if (frame.buffer.length === 0) return;
-      headlinePool = frame.buffer.map((m) =>
+      const pool = frame.buffer.map((m) =>
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
-      nextIndex = 0;
-      precacheWidths(headlinePool);
+      (window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 0)))(() => {
+         precacheWidths(pool);
+         pendingPool = pool;
+      });
    }
 
    function handleKeydown(event: KeyboardEvent) {
@@ -138,8 +117,8 @@
    }
 
    $effect(() => {
-      if (!inner) return;
-      inner.style.visibility = isOn ? "visible" : "hidden";
+      if (!anim) return;
+      isOn ? anim.play() : anim.pause();
    });
 
    onMount(() => {
@@ -147,26 +126,28 @@
 
       const resizeObserver = new ResizeObserver(() => {
          if (ticker) service.reportTickerWidth(ticker.clientWidth);
+         // Queue a fresh pass so next loop picks up the new tickerW.
+         pendingPool = activePool.length ? activePool : FALLBACK;
       });
       if (ticker) resizeObserver.observe(ticker);
 
-      const onVisibilityChange = () => { if (!document.hidden) lastTick = 0; };
+      const onVisibilityChange = () => {
+         if (!document.hidden && anim && isOn) anim.play();
+      };
 
       precacheWidths(FALLBACK);
-      seedTrain();
-      startLoop();
+      runPass(FALLBACK);
 
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
       document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
+         anim?.cancel();
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
          document.removeEventListener("visibilitychange", onVisibilityChange);
          resizeObserver.disconnect();
-         stopLoop();
-         carts = [];
       };
    });
 </script>

@@ -60,6 +60,7 @@
           border-radius: 2px;
           z-index: 5;
           animation: emitter-glow 2s ease-in-out infinite;
+          will-change: filter;
         }
 
         // Right emitter housing - Vaporwave purple/magenta
@@ -88,6 +89,7 @@
           z-index: 5;
           animation: emitter-glow 2s ease-in-out infinite;
           animation-delay: 1s;
+          will-change: filter;
         }
 
         .marquee-outer {
