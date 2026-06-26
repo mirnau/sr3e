@@ -21,6 +21,7 @@
    let isOn = $state(true);
    let ticker: HTMLDivElement | undefined;
    let inner: HTMLDivElement | undefined;
+   let measureRail: HTMLDivElement | undefined;
    let headlinePool: string[] = [];
    let nextIndex = 0;
 
@@ -33,6 +34,28 @@
    let lastTick = 0;
 
    const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
+   const widthCache = new Map<string, number>();
+
+   // Batch-measures all uncached texts in the hidden rail (outside rAF — no frame timing impact).
+   function precacheWidths(texts: string[]): void {
+      if (!measureRail) return;
+      const uncached = texts.filter(t => !widthCache.has(t));
+      if (uncached.length === 0) return;
+
+      const spans = uncached.map(text => {
+         const el = document.createElement("span");
+         el.className = "marquee-item";
+         el.textContent = text;
+         measureRail!.appendChild(el);
+         return { text, el };
+      });
+      for (const { text, el } of spans) {
+         widthCache.set(text, el.getBoundingClientRect().width);
+      }
+      for (const { el } of spans) {
+         measureRail!.removeChild(el);
+      }
+   }
 
    function nextHeadline(): string {
       const pool = headlinePool.length ? headlinePool : FALLBACK;
@@ -47,8 +70,8 @@
       el.className = "marquee-item";
       el.textContent = text;
       inner.appendChild(el);
-      // offsetWidth read immediately after append: forced layout, but only once per cart lifecycle
-      carts.push({ el, width: el.offsetWidth });
+      const width = widthCache.get(text) ?? el.getBoundingClientRect().width;
+      carts.push({ el, width });
    }
 
    function removeFirstCart() {
@@ -105,6 +128,7 @@
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
       nextIndex = 0;
+      precacheWidths(headlinePool);
    }
 
    function handleKeydown(event: KeyboardEvent) {
@@ -129,6 +153,7 @@
 
       const onVisibilityChange = () => { if (!document.hidden) lastTick = 0; };
 
+      precacheWidths(FALLBACK);
       seedTrain();
       startLoop();
 
@@ -154,6 +179,12 @@
          bind:this={inner}
          role="status"
          style={`column-gap: ${GAP_PX}px;`}
+      ></div>
+      <div
+         class="marquee-inner"
+         bind:this={measureRail}
+         aria-hidden="true"
+         style="visibility:hidden;position:absolute;pointer-events:none;"
       ></div>
    </div>
 </div>
