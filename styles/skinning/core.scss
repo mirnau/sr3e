@@ -107,6 +107,7 @@
    // Window header framing
    header.window-header {
       position: relative;
+      line-height: 0;
       background: rgb(174, 224, 224);
       color: var(--text-color);
       @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
