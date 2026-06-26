@@ -142,6 +142,8 @@
          }
       };
 
+      const onBlur = () => { if (isOn) anim?.pause(); };
+
       const onVisibilityChange = () => {
          if (!document.hidden) restartIfFinished();
       };
@@ -152,6 +154,7 @@
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
       window.addEventListener("focus", restartIfFinished);
+      window.addEventListener("blur", onBlur);
       document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
@@ -159,6 +162,7 @@
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
          window.removeEventListener("focus", restartIfFinished);
+         window.removeEventListener("blur", onBlur);
          document.removeEventListener("visibilitychange", onVisibilityChange);
          resizeObserver.disconnect();
       };
