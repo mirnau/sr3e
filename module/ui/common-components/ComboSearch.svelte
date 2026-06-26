@@ -3,7 +3,7 @@ import { tick, onMount, onDestroy } from "svelte";
 
 type Option = { value: string; label: string };
 
-const {
+let {
     options = [] as Option[],
     value = $bindable(""),
     placeholder = "Search...",
