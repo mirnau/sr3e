@@ -139,115 +139,120 @@
 </script>
 
 {#if actor && preparedNewsStore && rollingNewsStore && isBroadcastingStore}
-   <SheetCard>
-      <div class="broadcaster-info">
-         <div class="broadcaster-image">
-            <img src={actor.img} alt={actor.name} title={actor.name} />
-         </div>
-         <div class="broadcaster-control">
-            <div class="editable-actor-name">
-               <h1
-                  class="no-margin"
-                  contenteditable="true"
-                  onblur={(e) => commitName(e)}
-                  onkeydown={(e) => {
-                     if (e.key === "Enter") {
-                        e.preventDefault();
-                        e.currentTarget.blur();
-                     }
-                  }}
-               >
-                  {actor.name}
-               </h1>
+   <div class="broadcaster-layout">
+      <SheetCard span={1}>
+         <div class="broadcaster-info">
+            <div class="broadcaster-image">
+               <img src={actor.img} alt={actor.name} title={actor.name} />
             </div>
-            <div class="broadcast-toggle">
-               <p>Broadcasting:</p>
+            <div class="broadcaster-control">
+               <div class="editable-actor-name">
+                  <h1
+                     class="no-margin"
+                     contenteditable="true"
+                     onblur={(e) => commitName(e)}
+                     onkeydown={(e) => {
+                        if (e.key === "Enter") {
+                           e.preventDefault();
+                           e.currentTarget.blur();
+                        }
+                     }}
+                  >
+                     {actor.name}
+                  </h1>
+               </div>
+               <div class="broadcast-toggle">
+                  <label class="inline-checkbox">
+                     <input
+                        type="checkbox"
+                        id="broadcasting-toggle"
+                        bind:checked={$isBroadcastingStore}
+                     />
+                     Broadcasting
+                  </label>
+               </div>
+            </div>
+         </div>
+      </SheetCard>
+
+      <SheetCard span={2}>
+         <div class="news-input">
+            <div class="input-frame">
                <input
-                  type="checkbox"
-                  id="broadcasting-toggle"
-                  bind:checked={$isBroadcastingStore}
-                  class="toggle-input"
+                  type="text"
+                  bind:value={headlineInput}
+                  placeholder={isEditing ? "Edit headline" : "Write a headline"}
                />
             </div>
+            <div class="buttons-horizontal-distribution">
+               <button
+                  type="button"
+                  title={isEditing ? "Update Headline" : "Add Headline"}
+                  aria-label={isEditing ? "Update Headline" : "Add Headline"}
+                  onclick={addHeadline}
+               >
+                  <i class="fas {isEditing ? 'fa-save' : 'fa-plus'}"></i>
+               </button>
+               <button
+                  type="button"
+                  title="Delete Headline"
+                  aria-label="Delete Headline"
+                  onclick={deleteHeadlines}
+               >
+                  <i class="fas fa-trash-can"></i>
+               </button>
+            </div>
          </div>
-      </div>
-   </SheetCard>
+      </SheetCard>
 
-   <SheetCard>
-      <div class="news-input">
-         <input
-            type="text"
-            bind:value={headlineInput}
-            placeholder={isEditing ? "Edit headline" : "Write a headline"}
-         />
+      <SheetCard span={3}>
+         <div class="list-box">
+            <h3>Prepared Headlines</h3>
+            <div class="select-frame">
+               <select
+                  size="5"
+                  multiple
+                  bind:value={selectedPrepared}
+                  onchange={updateSelectedHeadline}
+               >
+                  {#each $preparedNewsStore as headline, i}
+                     <option value={i}>{headline}</option>
+                  {/each}
+               </select>
+            </div>
+         </div>
+
          <div class="buttons-horizontal-distribution">
             <button
                type="button"
-               class="link-button"
-               title={isEditing ? "Update Headline" : "Add Headline"}
-               aria-label={isEditing ? "Update Headline" : "Add Headline"}
-               onclick={addHeadline}
+               title="Move to Rolling News"
+               aria-label="Move to Rolling News"
+               onclick={moveToRolling}
             >
-               <i class="fas {isEditing ? 'fa-save' : 'fa-plus'}"></i>
+               <i class="fas fa-arrow-down"></i>
             </button>
             <button
                type="button"
-               class="link-button"
-               title="Delete Headline"
-               aria-label="Delete Headline"
-               onclick={deleteHeadlines}
+               title="Move to Prepared News"
+               aria-label="Move to Prepared News"
+               onclick={moveToPrepared}
             >
-               <i class="fas fa-trash-can"></i>
+               <i class="fas fa-arrow-up"></i>
             </button>
          </div>
-      </div>
-   </SheetCard>
 
-   <SheetCard>
-      <div class="list-box">
-         <h3>Prepared Headlines</h3>
-         <select
-            size="5"
-            multiple
-            bind:value={selectedPrepared}
-            onchange={updateSelectedHeadline}
-         >
-            {#each $preparedNewsStore as headline, i}
-               <option value={i}>{headline}</option>
-            {/each}
-         </select>
-      </div>
-
-      <div class="buttons-horizontal-distribution">
-         <button
-            type="button"
-            class="link-button"
-            title="Move to Rolling News"
-            aria-label="Move to Rolling News"
-            onclick={moveToRolling}
-         >
-            <i class="fas fa-arrow-down"></i>
-         </button>
-         <button
-            type="button"
-            class="link-button"
-            title="Move to Prepared News"
-            aria-label="Move to Prepared News"
-            onclick={moveToPrepared}
-         >
-            <i class="fas fa-arrow-up"></i>
-         </button>
-      </div>
-
-      <div class="list-box">
-         <h3>Rolling Headlines</h3>
-         <select size="5" multiple bind:value={selectedRolling}>
-            {#each $rollingNewsStore as headline, i}
-               <option value={i}>{headline}</option>
-            {/each}
-         </select>
-      </div>
-   </SheetCard>
+         <div class="list-box">
+            <h3>Rolling Headlines</h3>
+            <div class="select-frame">
+               <select size="5" multiple bind:value={selectedRolling}>
+                  {#each $rollingNewsStore as headline, i}
+                     <option value={i}>{headline}</option>
+                  {/each}
+               </select>
+            </div>
+         </div>
+      </SheetCard>
+   </div>
 
    {#if actor.system?.description}
       <SheetCard>
