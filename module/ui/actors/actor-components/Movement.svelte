@@ -4,6 +4,7 @@
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import StatCard from "./StatCard.svelte";
+   import Foldout from "./Foldout.svelte";
 
    let { actor: _actor }: { actor: Actor } = $props();
    const actor = untrack(() => _actor);
@@ -53,12 +54,13 @@
    });
 </script>
 
-<h1>{localize(localization.movement)}</h1>
-<div class="stat-card-grid">
-   <StatCard label={localize(localization?.walking)}>
-      <span class="attribute-value">{$walking ?? 0}</span>
-   </StatCard>
-   <StatCard label={localize(localization?.running)}>
-      <span class="attribute-value">{$running ?? 0}</span>
-   </StatCard>
-</div>
+<Foldout label={localize(localization.movement)}>
+   <div class="stat-card-grid">
+      <StatCard label={localize(localization?.walking)}>
+         <span class="attribute-value">{$walking ?? 0}</span>
+      </StatCard>
+      <StatCard label={localize(localization?.running)}>
+         <span class="attribute-value">{$running ?? 0}</span>
+      </StatCard>
+   </div>
+</Foldout>

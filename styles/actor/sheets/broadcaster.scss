@@ -206,6 +206,19 @@
 	margin: 0.5rem;
 }
 
+.section-foldout {
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	user-select: none;
+
+	i {
+		font-size: 0.8em;
+		opacity: 0.7;
+	}
+}
+
 .dossier-img {
 	display: block;
 	width: 100%;

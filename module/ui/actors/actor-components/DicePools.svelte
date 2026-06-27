@@ -8,6 +8,7 @@ import StatCard from "./StatCard.svelte";
 import { buildDicePoolSetup } from "../../../services/combat/procedures/simpleSetups";
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 import { getComposerState, openComposer } from "../../../services/combat/procedures/composerService.svelte";
+import Foldout from "./Foldout.svelte";
 
 const p = $props<{ actor: SR3EActor }>();
 const actor = untrack(() => p.actor);
@@ -138,30 +139,31 @@ $effect(() => {
 });
 </script>
 
-<h1>{localize(localization.dicePools)}</h1>
-<div class="stat-card-grid">
-    <StatCard label={localize(localization?.combat)} onclick={(e) => onPoolCardClick(e, "combat", localize(localization?.combat), combatAvail)}>
-        <span class={poolClass("combat")}>{combatAvail}</span>
-    </StatCard>
+<Foldout label={localize(localization.dicePools)}>
+    <div class="stat-card-grid">
+        <StatCard label={localize(localization?.combat)} onclick={(e) => onPoolCardClick(e, "combat", localize(localization?.combat), combatAvail)}>
+            <span class={poolClass("combat")}>{combatAvail}</span>
+        </StatCard>
 
-    {#if hasRiggerInterface}
-        <StatCard label={localize(localization?.control)} onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}>
-            <span class={poolClass("control")}>{controlAvail}</span>
-        </StatCard>
-    {/if}
+        {#if hasRiggerInterface}
+            <StatCard label={localize(localization?.control)} onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}>
+                <span class={poolClass("control")}>{controlAvail}</span>
+            </StatCard>
+        {/if}
 
-    {#if hasMatrixInterface}
-        <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
-            <span class={poolClass("hacking")}>{hackingAvail}</span>
-        </StatCard>
-    {/if}
+        {#if hasMatrixInterface}
+            <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
+                <span class={poolClass("hacking")}>{hackingAvail}</span>
+            </StatCard>
+        {/if}
 
-    {#if isAwakened}
-        <StatCard label={localize(localization?.astral)} onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}>
-            <span class={poolClass("astral")}>{astralAvail}</span>
-        </StatCard>
-        <StatCard label={localize(localization?.spell)} onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}>
-            <span class={poolClass("spell")}>{spellAvail}</span>
-        </StatCard>
-    {/if}
-</div>
+        {#if isAwakened}
+            <StatCard label={localize(localization?.astral)} onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}>
+                <span class={poolClass("astral")}>{astralAvail}</span>
+            </StatCard>
+            <StatCard label={localize(localization?.spell)} onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}>
+                <span class={poolClass("spell")}>{spellAvail}</span>
+            </StatCard>
+        {/if}
+    </div>
+</Foldout>

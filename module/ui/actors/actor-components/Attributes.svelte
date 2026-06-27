@@ -5,6 +5,7 @@ import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import type SR3EActor from "../../../documents/SR3EActor";
 import AttributeCard from "./AttributeCard.svelte";
+import Foldout from "./Foldout.svelte";
 
 let { actor: _actor }: { actor: SR3EActor } = $props();
    const actor = untrack(() => _actor);
@@ -38,21 +39,22 @@ $effect(() => {
 
 </script>
 
-<h1>{localize(localization?.attributes)}</h1>
-<div class="attribute-grid">
-   {#each attributeKeys as key}
-      <AttributeCard
-         {actor}
-         attributeKey={key}
-         label={localize(localization[key as keyof typeof localization])}
-      />
-   {/each}
+<Foldout label={localize(localization?.attributes)}>
+   <div class="attribute-grid">
+      {#each attributeKeys as key}
+         <AttributeCard
+            {actor}
+            attributeKey={key}
+            label={localize(localization[key as keyof typeof localization])}
+         />
+      {/each}
 
-   {#if isAwakened}
-      <AttributeCard
-         {actor}
-         attributeKey="magic"
-         label={localize(localization?.magic)}
-      />
-   {/if}
-</div>
+      {#if isAwakened}
+         <AttributeCard
+            {actor}
+            attributeKey="magic"
+            label={localize(localization?.magic)}
+         />
+      {/if}
+   </div>
+</Foldout>

@@ -7,6 +7,7 @@ import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { KarmaPoolBurnService } from "../../../services/karma/KarmaPoolBurnService";
 import StatCard from "./StatCard.svelte";
+import Foldout from "./Foldout.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
    const actor = untrack(() => _actor);
@@ -48,15 +49,16 @@ onDestroy(() => storeManager.Unsubscribe(actor));
 </script>
 
 {#if actor}
-   <h1>{localize(localization.karma)}</h1>
-   <div class="stat-card-grid">
-<StatCard label={localize(localization.karmaPool)} onclick={($karmaPoolValue ?? 0) > 0 ? () => { void handleBurnKarmaPool(); } : undefined}>
-         <span class="attribute-value">{$karmaPool ?? 0}</span>
-      </StatCard>
-<StatCard label={localize(localization.goodKarma)}>
-         <span class="attribute-value">{$goodKarmaDisplay ?? 0}</span>
-      </StatCard>
-   </div>
+   <Foldout label={localize(localization.karma)}>
+      <div class="stat-card-grid">
+         <StatCard label={localize(localization.karmaPool)} onclick={($karmaPoolValue ?? 0) > 0 ? () => { void handleBurnKarmaPool(); } : undefined}>
+            <span class="attribute-value">{$karmaPool ?? 0}</span>
+         </StatCard>
+         <StatCard label={localize(localization.goodKarma)}>
+            <span class="attribute-value">{$goodKarmaDisplay ?? 0}</span>
+         </StatCard>
+      </div>
+   </Foldout>
 {:else}
    <p>Provide an actor to initialize Karma.</p>
 {/if}

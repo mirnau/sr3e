@@ -5,6 +5,7 @@ import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import SkillsActive from "./skills/SkillsActive.svelte";
 import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
+import Foldout from "./Foldout.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
    const actor = untrack(() => _actor);
@@ -50,37 +51,38 @@ const languageSkills = $derived(
 
 </script>
 
-<h1>Skills</h1>
-<div class="skills-component">
-   <div class="skills-register">
-      <button
-         type="button"
-         class="skills-register-tab"
-         class:active={activeTab === "active"}
-         onclick={() => (activeTab = "active")}
-      ><span>Active</span></button>
-      <button
-         type="button"
-         class="skills-register-tab"
-         class:active={activeTab === "knowledge"}
-         onclick={() => (activeTab = "knowledge")}
-      ><span>Knowledge</span></button>
-      <button
-         type="button"
-         class="skills-register-tab"
-         class:active={activeTab === "language"}
-         onclick={() => (activeTab = "language")}
-      ><span>Language</span></button>
-   </div>
-   <div class="skills-content">
-      <div class="skills-content-inner">
-         {#if activeTab === "active"}
-            <SkillsActive {actor} skills={activeSkills} />
-         {:else if activeTab === "knowledge"}
-            <SkillsKnowledge {actor} skills={knowledgeSkills} />
-         {:else}
-            <SkillsLanguage {actor} skills={languageSkills} />
-         {/if}
+<Foldout label="Skills">
+   <div class="skills-component">
+      <div class="skills-register">
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "active"}
+            onclick={() => (activeTab = "active")}
+         ><span>Active</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "knowledge"}
+            onclick={() => (activeTab = "knowledge")}
+         ><span>Knowledge</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "language"}
+            onclick={() => (activeTab = "language")}
+         ><span>Language</span></button>
+      </div>
+      <div class="skills-content">
+         <div class="skills-content-inner">
+            {#if activeTab === "active"}
+               <SkillsActive {actor} skills={activeSkills} />
+            {:else if activeTab === "knowledge"}
+               <SkillsKnowledge {actor} skills={knowledgeSkills} />
+            {:else}
+               <SkillsLanguage {actor} skills={languageSkills} />
+            {/if}
+         </div>
       </div>
    </div>
-</div>
+</Foldout>
