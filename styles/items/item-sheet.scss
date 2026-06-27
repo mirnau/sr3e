@@ -108,8 +108,9 @@
 	input[type="number"] {
 		flex-shrink: 0;
 		width: 3rem;
-		margin-bottom: 0;
+		margin: 0;
 		font-size: 1rem;
+		line-height: 0;
 		text-align: center;
 		border: 1px solid var(--highlight-color-primary);
 		background: var(--background-color);
@@ -144,7 +145,6 @@
 
 	&.single-column {
 		grid-template-columns: 100%;
-		margin-bottom: 0.25rem;
 	}
 
 	&.two-column {
