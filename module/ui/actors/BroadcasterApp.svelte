@@ -162,7 +162,7 @@
                   </h1>
                </div>
                <div class="broadcast-toggle">
-                  <label class="inline-checkbox">
+                  <label class="broadcast-toggle-label">
                      <input
                         type="checkbox"
                         id="broadcasting-toggle"
