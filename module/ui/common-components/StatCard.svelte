@@ -43,7 +43,7 @@
    }
 </script>
 
-<div class="stat-card">
+<div class="stat-card stat-field-card">
    <div class="stat-card-background"></div>
    <div class="title-container">
       <h4 class="no-margin uppercase">{label}</h4>
