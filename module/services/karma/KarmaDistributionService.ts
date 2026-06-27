@@ -24,6 +24,7 @@ export class KarmaDistributionService {
                 lifetimeKarma: number;
                 pendingKarmaReward: number;
                 spentKarma: number;
+                karmaPoolCeiling: number;
             };
         };
 
@@ -40,15 +41,18 @@ export class KarmaDistributionService {
         const spent: number = system.karma.spentKarma;
 
         const newLifetime = currentLifetime + pending;
-        // Karma pool ceiling = karma-earned pool points (excludes the 1 free starting point)
-        const newCeiling = Math.floor(newLifetime * factor);
-        const newGoodKarma = newLifetime - spent - newCeiling;
-        // Pool value = 1 (free starting point) + ceiling (earned from karma)
-        const newPoolValue = 1 + newCeiling;
+        const derivedCeiling = Math.floor(newLifetime * factor);
+        const ceilingGain = derivedCeiling - Math.floor(currentLifetime * factor);
+        // Preserve burns: stored ceiling may be lower than derived due to permanent burns
+        const newStoredCeiling = system.karma.karmaPoolCeiling + ceilingGain;
+        // goodKarma uses derived (burn-unaware) ceiling so burns don't inflate goodKarma
+        const newGoodKarma = newLifetime - spent - derivedCeiling;
+        // Pool refreshes to stored (burn-aware) ceiling + 1 free starting point
+        const newPoolValue = 1 + newStoredCeiling;
 
         await actor.update({
             "system.karma.lifetimeKarma": newLifetime,
-            "system.karma.karmaPoolCeiling": newCeiling,
+            "system.karma.karmaPoolCeiling": newStoredCeiling,
             "system.karma.goodKarma": newGoodKarma,
             "system.karma.karmaPool.value": newPoolValue,
             "system.karma.pendingKarmaReward": 0,

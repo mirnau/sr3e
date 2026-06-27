@@ -56,6 +56,9 @@ export const KARMA_KEYS = [
   "lifetimeKarma",
   "spentKarma",
   "advancementratio",
+  "burnKarmaPool",
+  "burnKarmaPoolChat",
+  "burnKarmaPoolConfirm",
 ] as const;
 
 export const MOVEMENT_KEYS = [

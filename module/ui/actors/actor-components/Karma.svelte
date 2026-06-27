@@ -5,6 +5,7 @@ import type { Readable } from "svelte/store";
 import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import { KarmaPoolBurnService } from "../../../services/karma/KarmaPoolBurnService";
 import StatCard from "./StatCard.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
@@ -12,10 +13,12 @@ let { actor: _actor }: { actor: Actor } = $props();
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
 const localization = $derived(CONFIG.SR3E.KARMA);
+const modal = $derived(CONFIG.SR3E.MODAL);
 
 storeManager.Subscribe(actor);
 
 const karmaPool = storeManager.GetSimpleStatROStore(actor, "karma.karmaPool");
+const karmaPoolValue = storeManager.GetRWStore<number>(actor, "karma.karmaPool.value");
 const goodKarmaStore = storeManager.GetRWStore<number>(actor, "karma.goodKarma");
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
 const shoppingKarmaSession = storeManager.GetShallowStore<any>(actor, "shoppingKarmaSession", { active: false, stagedSpent: 0, attrSnapshot: {} });
@@ -31,13 +34,23 @@ const goodKarmaDisplay: Readable<number> = derived(
    }
 );
 
+async function handleBurnKarmaPool() {
+   const confirmed = await foundry.applications.api.DialogV2.confirm({
+      window: { title: localize(localization?.burnKarmaPool) },
+      content: `<p>${localize(localization?.burnKarmaPoolConfirm)}</p>`,
+      yes: { label: localize(modal?.confirm) },
+      no: { label: localize(modal?.decline) },
+   });
+   if (confirmed) KarmaPoolBurnService.Instance().burn(actor);
+}
+
 onDestroy(() => storeManager.Unsubscribe(actor));
 </script>
 
 {#if actor}
    <h1>{localize(localization.karma)}</h1>
    <div class="stat-card-grid">
-<StatCard label={localize(localization.karma)}>
+<StatCard label={localize(localization.karmaPool)} onclick={($karmaPoolValue ?? 0) > 0 ? () => { void handleBurnKarmaPool(); } : undefined}>
          <span class="attribute-value">{$karmaPool ?? 0}</span>
       </StatCard>
 <StatCard label={localize(localization.goodKarma)}>

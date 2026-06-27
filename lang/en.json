@@ -122,6 +122,9 @@
     },
     "karma": {
       "advancementratio": "Advancement Ratio",
+      "burnKarmaPool": "Burn Karma",
+      "burnKarmaPoolChat": "{name} burned 1 Karma.",
+      "burnKarmaPoolConfirm": "Burn 1 Karma? (Permanent)",
       "goodKarma": "Good Karma",
       "karma": "Karma",
       "karmaPool": "Karma Pool",
