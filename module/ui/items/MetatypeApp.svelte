@@ -215,7 +215,7 @@ import { localize } from "../../services/utilities";
 {#if agerange}
       <ItemSheetComponent>
          <h3 class="staticlayout">{localize(traits.agerange)}</h3>
-         <div class="stat-grid">
+         <div class="stat-grid two-column">
             {#each agerange as entry}
                <StatCard {...entry} />
             {/each}
@@ -225,7 +225,7 @@ import { localize } from "../../services/utilities";
 {#if height}
       <ItemSheetComponent>
          <h3 class="staticlayout">{localize(traits.height)}</h3>
-         <div class="stat-grid">
+         <div class="stat-grid two-column">
             {#each height as entry}
                <StatCard {...entry} />
             {/each}
@@ -235,7 +235,7 @@ import { localize } from "../../services/utilities";
 {#if weight}
       <ItemSheetComponent>
          <h3 class="staticlayout">{localize(traits.weight)}</h3>
-         <div class="stat-grid">
+         <div class="stat-grid two-column">
             {#each weight as entry}
                <StatCard {...entry} />
             {/each}
@@ -244,7 +244,7 @@ import { localize } from "../../services/utilities";
    {/if}
 <ItemSheetComponent>
       <h3 class="staticlayout">{localize(attributes.limits)}</h3>
-      <div class="stat-grid">
+      <div class="stat-grid two-column">
          {#each attributeLimits as entry}
             <StatCard {...entry} />
          {/each}
