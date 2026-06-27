@@ -34,7 +34,7 @@ export class NewsService {
 	readonly registry = new BroadcastRegistry(NewsConfig.MAX_VISIBLE);
 	readonly activeBroadcasters = this.registry.activeBroadcasters;
 	readonly allFeeds = this.registry.allFeeds;
-	readonly currentDisplayFrame: Writable<DisplayFrame> = writable({ buffer: [], timestamp: 0 });
+	readonly currentDisplayFrame: Writable<DisplayFrame> = writable({ buffer: NewsConfig.DEFAULT_MESSAGES, timestamp: 0 });
 
 	#initialized = false;
 	#hookIds: { name: string; id: number }[] = [];
@@ -219,6 +219,6 @@ export const stopBroadcast = (actorName: string): void => {
 };
 
 export const currentDisplayFrame: Readable<DisplayFrame> = readable<DisplayFrame>(
-	{ buffer: [] as NewsMessage[], timestamp: 0 },
+	{ buffer: NewsConfig.DEFAULT_MESSAGES, timestamp: 0 },
 	(set) => getNewsService().currentDisplayFrame.subscribe(set)
 );

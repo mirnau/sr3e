@@ -15,40 +15,17 @@
    }
 
    const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
-   const GAP_PX = NewsConfig.GAP_PX;
    const service = getNewsService();
 
-   let isOn = $state(true);
+   let isOn = $state(false);
    let ticker: HTMLDivElement | undefined;
    let inner: HTMLDivElement | undefined;
-   let measureRail: HTMLDivElement | undefined;
 
    let activePool: string[] = [];
    let pendingPool: string[] | null = null;
    let anim: Animation | null = null;
-
-   const FALLBACK = ["System: Please stand by.", "Waiting for broadcast...", "No active news sources."];
-   const widthCache = new Map<string, number>();
-
-   function precacheWidths(texts: string[]): void {
-      if (!measureRail) return;
-      const uncached = texts.filter(t => !widthCache.has(t));
-      if (uncached.length === 0) return;
-      const spans = uncached.map(text => {
-         const el = document.createElement("span");
-         el.className = "marquee-item";
-         el.textContent = text;
-         measureRail!.appendChild(el);
-         return { text, el };
-      });
-      for (const { text, el } of spans) widthCache.set(text, el.getBoundingClientRect().width);
-      for (const { el } of spans) measureRail!.removeChild(el);
-   }
-
-   function totalContentWidth(pool: string[]): number {
-      return pool.reduce((sum, t) => sum + (widthCache.get(t) ?? 0), 0)
-         + GAP_PX * Math.max(0, pool.length - 1);
-   }
+   let retryRafId: number | null = null;
+   let pendingRetryPool: string[] | null = null;
 
    function buildContent(pool: string[]): void {
       if (!inner) return;
@@ -67,46 +44,72 @@
    }
 
    function runPass(pool: string[]): void {
-      if (!inner || !ticker) return;
+      if (!inner || !ticker || pool.length === 0) return;
       const tickerW = ticker.clientWidth;
-      const contentW = totalContentWidth(pool);
-      const duration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
 
-      // Pin off-screen right before cancelling so fill doesn't snap element away.
+      // Window not yet laid out — defer until next frame to avoid zero-duration cycle
+      if (tickerW === 0) {
+         pendingRetryPool = pool;
+         if (retryRafId === null) {
+            retryRafId = requestAnimationFrame(() => {
+               retryRafId = null;
+               const toRun = pendingRetryPool;
+               pendingRetryPool = null;
+               if (toRun) runPass(toRun);
+            });
+         }
+         return;
+      }
+
+      if (retryRafId !== null) {
+         cancelAnimationFrame(retryRafId);
+         retryRafId = null;
+         pendingRetryPool = null;
+      }
+
+      // Move off-screen right before cancelling fill so no visible snap
       inner.style.transform = `translateX(${tickerW}px)`;
       anim?.cancel();
 
-      // Rebuild content while off-screen — no visible texture invalidation.
+      // Build content first, then read scrollWidth — one layout flush vs N getBoundingClientRect calls.
+      // scrollWidth gives actual flex rendered width including column-gap, no manual gap arithmetic needed.
       buildContent(pool);
       activePool = pool;
+      const contentW = inner.scrollWidth;
+      const duration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
 
-      anim = inner.animate(
+      const thisAnim = (anim = inner.animate(
          [
             { transform: `translateX(${tickerW}px)` },
             { transform: `translateX(-${contentW}px)` },
          ],
-         { duration, easing: "linear", fill: "none" },
-      );
+         { duration, easing: "linear", fill: "forwards" },
+      ));
 
-      anim.onfinish = () => {
+      // .finished resolves as a microtask — fires before the next rendered frame,
+      // eliminating the blank-ticker gap that onfinish (macrotask) produces
+      thisAnim.finished.then(() => {
+         if (anim !== thisAnim) return;
          const next = pendingPool ?? activePool;
          pendingPool = null;
          runPass(next);
-      };
-
-      if (!isOn) anim.pause();
+      }).catch(() => {});
    }
 
    function applyFrame(frame: DisplayFrame) {
-      if (!frame || !Array.isArray(frame.buffer)) return;
-      if (frame.buffer.length === 0) return;
+      if (!frame || !Array.isArray(frame.buffer) || frame.buffer.length === 0) return;
       const pool = frame.buffer.map((m) =>
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
-      (window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 0)))(() => {
-         precacheWidths(pool);
+      if (!isOn) {
          pendingPool = pool;
-      });
+         return;
+      }
+      if (!anim || anim.playState === "finished" || anim.playState === "idle") {
+         runPass(pool);
+      } else {
+         pendingPool = pool;
+      }
    }
 
    function handleKeydown(event: KeyboardEvent) {
@@ -117,8 +120,16 @@
    }
 
    $effect(() => {
-      if (!anim) return;
-      isOn ? anim.play() : anim.pause();
+      if (isOn) {
+         if (!anim || anim.playState === "idle" || anim.playState === "finished") {
+            const pool = pendingPool ?? (activePool.length ? activePool : null);
+            if (pool) { pendingPool = null; runPass(pool); }
+         }
+      } else {
+         anim?.cancel();
+         anim = null;
+         if (inner) inner.style.transform = `translateX(${ticker?.clientWidth ?? 9999}px)`;
+      }
    });
 
    onMount(() => {
@@ -126,17 +137,18 @@
 
       const resizeObserver = new ResizeObserver(() => {
          if (ticker) service.reportTickerWidth(ticker.clientWidth);
-         // Queue a fresh pass so next loop picks up the new tickerW.
-         pendingPool = activePool.length ? activePool : FALLBACK;
+         if (activePool.length) pendingPool = activePool;
       });
       if (ticker) resizeObserver.observe(ticker);
 
       const restartIfFinished = () => {
          if (!isOn) return;
          if (!anim || anim.playState === "finished" || anim.playState === "idle") {
-            const next = pendingPool ?? activePool;
-            pendingPool = null;
-            runPass(next.length ? next : FALLBACK);
+            if (activePool.length) {
+               const next = pendingPool ?? activePool;
+               pendingPool = null;
+               runPass(next);
+            }
          } else if (anim.playState === "paused") {
             anim.play();
          }
@@ -163,9 +175,6 @@
          }
       };
 
-      precacheWidths(FALLBACK);
-      runPass(FALLBACK);
-
       const unsubscribe = currentDisplayFrame.subscribe(applyFrame);
       window.addEventListener("keydown", handleKeydown);
       window.addEventListener("blur", onBlur);
@@ -174,6 +183,7 @@
 
       return () => {
          anim?.cancel();
+         if (retryRafId !== null) { cancelAnimationFrame(retryRafId); retryRafId = null; }
          if (blurTimer) clearTimeout(blurTimer);
          unsubscribe();
          window.removeEventListener("keydown", handleKeydown);
@@ -191,13 +201,7 @@
          class="marquee-inner"
          bind:this={inner}
          role="status"
-         style={`column-gap: ${GAP_PX}px;`}
-      ></div>
-      <div
-         class="marquee-inner"
-         bind:this={measureRail}
-         aria-hidden="true"
-         style="visibility:hidden;position:absolute;pointer-events:none;"
+         style={`column-gap: ${NewsConfig.GAP_PX}px;`}
       ></div>
    </div>
 </div>

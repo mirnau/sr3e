@@ -59,7 +59,7 @@ export class FrameScheduler {
 	#scheduleNextFrame(): void {
 		if (!this.#controllerId) return;
 
-		const buffer = this.registry.getFeedBuffer(10);
+		const buffer = this.registry.getFeedBuffer();
 
 		if (buffer.length === 0) {
 			this.#nextTick = setTimeout(() => this.#scheduleNextFrame(), 1000);
@@ -80,6 +80,6 @@ export class FrameScheduler {
 			controllerId: this.#controllerId,
 		});
 
-		this.#nextTick = setTimeout(() => this.#scheduleNextFrame(), duration || NewsConfig.DEFAULT_MS);
+		this.#nextTick = setTimeout(() => this.#scheduleNextFrame(), duration * 0.7 || NewsConfig.DEFAULT_MS);
 	}
 }

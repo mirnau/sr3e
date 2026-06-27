@@ -1,4 +1,4 @@
-import { mount } from "svelte";
+import { mount, unmount } from "svelte";
 import CharacterSheetApp from "../../ui/actors/CharacterSheetApp.svelte";
 import NeonName from "../../ui/injections/NeonName.svelte";
 import NewsFeed from "../../ui/injections/NewsFeed.svelte";
@@ -78,7 +78,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 target: neonSlot,
                 props: { actor: this.document },
             });
-            this.apps.push(this.#neon);
         }
     }
 
@@ -105,7 +104,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
             this.#newsFeed = mount(NewsFeed, {
                 target: newsFeedSlot,
             });
-            this.apps.push(this.#newsFeed);
         }
     }
 
@@ -126,7 +124,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 target: shoppingCartSlot,
                 props: { actor: this.document as Actor },
             });
-            this.apps.push(this.#shoppingCart);
         }
     }
 
@@ -147,7 +144,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 target: slot,
                 props: { actor, actorId: actor.id! },
             });
-            this.apps.push(this.#composer);
         }
     }
 
@@ -171,7 +167,6 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 target: creationManagerSlot,
                 props: { actor: this.document as Actor },
             });
-            this.apps.push(this.#creationManager);
         }
     }
 
@@ -189,9 +184,13 @@ export default class CharacterActorSheet extends SR3EActorBase {
     }
 
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
-        // Cancel any staged attribute karma session (reverts attrs to snapshot, no GK debit)
         KarmaSpendingService.Instance().cancelAttrSession(this.document as Actor);
         this._unmountAllApps();
+        if (this.#neon) { unmount(this.#neon); this.#neon = undefined; }
+        if (this.#newsFeed) { unmount(this.#newsFeed); this.#newsFeed = undefined; }
+        if (this.#shoppingCart) { unmount(this.#shoppingCart); this.#shoppingCart = undefined; }
+        if (this.#composer) { unmount(this.#composer); this.#composer = undefined; }
+        if (this.#creationManager) { unmount(this.#creationManager); this.#creationManager = undefined; }
         super._tearDown(options);
     }
 

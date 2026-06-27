@@ -51,25 +51,31 @@ export class BroadcastRegistry {
 		});
 	}
 
-	getFeedBuffer(minLength = 10): NewsMessage[] {
+	getFeedBuffer(): NewsMessage[] {
 		const broadcasters = get(this.activeBroadcasters);
+
+		if (broadcasters.size === 0) {
+			return [...NewsConfig.DEFAULT_MESSAGES];
+		}
+
+		const batchSize = Math.min(this.#totalHeadlineCount(), NewsConfig.MAX_BATCH_SIZE);
 		const batch: NewsMessage[] = [];
 
-		for (let i = 0; i < minLength; i++) {
+		for (let i = 0; i < batchSize; i++) {
 			const next = this.#pumpNextHeadline();
 			if (!next) break;
 			batch.push(next);
 		}
 
-		if (batch.length === 0 && broadcasters.size === 0) {
-			for (let i = 0; i < minLength; i++) {
-				batch.push(NewsConfig.DEFAULT_MESSAGES[i % NewsConfig.DEFAULT_MESSAGES.length] as NewsMessage);
-			}
-		}
-
 		this.#feedBuffer = batch.slice(0, this.maxVisible);
 		this.#publishFeed();
 		return batch;
+	}
+
+	#totalHeadlineCount(): number {
+		let total = 0;
+		get(this.activeBroadcasters).forEach(headlines => total += headlines.length);
+		return total;
 	}
 
 	#pumpNextHeadline(): NewsMessage | null {
