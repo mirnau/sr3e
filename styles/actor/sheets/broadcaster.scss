@@ -1,3 +1,5 @@
+@use "../../mixins.scss" as *;
+
 .broadcaster-info {
 	display: flex;
 	flex-direction: row;
@@ -184,14 +186,13 @@
 	display: flex;
 	flex-direction: column;
 	position: relative;
+	margin-top: 0;
 }
 
 .dossier-img-btn {
 	display: block;
 	position: relative;
-	padding: 0;
 	border: none;
-	background: none;
 	cursor: pointer;
 	width: 100%;
 
@@ -202,10 +203,12 @@
 
 .details-foldout {
 	position: relative;
+	margin: 0.5rem;
 }
 
 .dossier-img {
 	display: block;
 	width: 100%;
+	margin: 0;
 	transition: filter 0.2s ease;
 }
