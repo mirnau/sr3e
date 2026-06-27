@@ -113,16 +113,14 @@ const rangeBandEntries = [
                     disabled={!skillOptions.length}
                     onselect={onSkillSelect}
                 />
-                <div class="stat-grid single-column">
-                    <StatCard
-                        {item}
-                        key="isDefaulting"
-                        label={localize("sr3e.common.isdefaulting")}
-                        value={system.isDefaulting}
-                        path="system"
+                <label class="inline-checkbox">
+                    <input
                         type="checkbox"
+                        checked={system.isDefaulting}
+                        onchange={(e) => item.update({ "system.isDefaulting": (e.target as HTMLInputElement).checked }, { render: false })}
                     />
-                </div>
+                    {localize("sr3e.common.isdefaulting")}
+                </label>
             </div>
         {/if}
     </ItemSheetComponent>
