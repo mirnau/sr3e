@@ -91,7 +91,8 @@ const rangeBandEntries = [
 <ItemSheetWrapper csslayout="double">
     <ItemSheetComponent>
         <Image entity={item} />
-        <div class="stat-grid single-column">
+        <div class="large-input-wrapper">
+            <div class="large-input-background"></div>
             <input
                 class="large"
                 name="name"
