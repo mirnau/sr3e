@@ -159,6 +159,20 @@ header.window-header h1.window-title {
    margin: 0;
 }
 
+div.application.sr3e {
+   background: transparent;
+   backdrop-filter: none;
+   filter: none;
+   box-shadow: none;
+
+   .window-content {
+      background: transparent;
+      backdrop-filter: none;
+      filter: none;
+      box-shadow: none;
+   }
+}
+
 // ── Global image framing ──────────────────────────────────────────────────────
 // Outside @layer so it wins over Foundry's unlayered img rules.
 // Two-layer trick: wrapper = highlight-color fill + clip-path,

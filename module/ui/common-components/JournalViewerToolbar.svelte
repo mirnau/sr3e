@@ -1,6 +1,6 @@
 <script lang="ts">
-   import JournalSearchModal from "../dialogs/JournalSearchModal.svelte";
-   import { mount, unmount, untrack } from "svelte";
+   import { untrack } from "svelte";
+   import JournalSearchApp from "../../sheets/JournalSearchApp";
    import { openJournalSheet, type JournalOption } from "./journalViewerContent";
 
    const {
@@ -26,27 +26,23 @@
 
    function handleSearch() {
       const originalJournalId = journalId;
-      const modal = mount(JournalSearchModal, {
-         target: document.body,
-         props: {
-            config,
-            onselect: (result: JournalOption) => {
-               journalId = result.value;
-               onJournalContentPreviewed?.(result);
-            },
-            onclose: (result: JournalOption | null) => {
-               unmount(modal);
-               if (result) {
-                  journalId = result.value;
-                  onJournalContentSelected?.(result);
-                  return;
-               }
-
-               journalId = originalJournalId;
-               onJournalContentSelectionCancelled?.();
-            },
+      new JournalSearchApp({
+         config,
+         onPreview: (result: JournalOption) => {
+            journalId = result.value;
+            onJournalContentPreviewed?.(result);
          },
-      });
+         onClose: (result: JournalOption | null) => {
+            if (result) {
+               journalId = result.value;
+               onJournalContentSelected?.(result);
+               return;
+            }
+
+            journalId = originalJournalId;
+            onJournalContentSelectionCancelled?.();
+         },
+      }).render(true);
    }
 </script>
 

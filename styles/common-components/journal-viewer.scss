@@ -136,112 +136,68 @@
 	}
 }
 
-// Modal Popup
-.popup {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100vw;
-	height: 100vh;
+form.application.sheet.sr3e.journal-search {
+	background: none;
+	overflow: visible;
+
+	section.window-content {
+		overflow: visible;
+		padding: 0.5rem;
+	}
+}
+
+.journal-search-panel {
+	min-width: 22rem;
+}
+
+.journal-search-controls {
 	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 999;
-	overflow: visible;
-	background: rgba(0, 0, 0, 0.5);
-	backdrop-filter: blur(3px);
+	flex-direction: column;
+	gap: 0.5rem;
 }
 
-.popup-container {
-	position: relative;
-	background: var(--accent-color);
-	max-width: 50vw;
-	min-width: 400px;
-	padding: 1rem;
-	z-index: 1000;
-	overflow: visible;
-	@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
+.journal-search-input {
+	display: block;
 
-	&::before {
-		content: "";
-		position: absolute;
-		inset: 1px;
-		z-index: -1;
-		background: var(--background-color);
-		box-shadow: inset 0 0 30px #1d282c;
-		@include clipped-corners(0.5rem, 0.5rem, 0.75rem, 0.5rem);
-	}
+	input {
+		width: 100%;
+		padding: 0.75rem;
+		font-size: 1rem;
+		background: rgba(0, 0, 0, 0.4);
+		color: var(--text-color);
+		border: 1px solid rgba(75, 208, 255, 0.35);
+		transition: border-color 0.2s ease;
+		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
 
-	.input-group {
-		position: relative;
-
-		input {
-			width: 100%;
-			padding: 0.75rem;
-			font-size: 1rem;
-			background: rgba(0, 0, 0, 0.4);
-			color: var(--text-color);
-			border: 1px solid rgba(75, 208, 255, 0.35);
-			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
-			transition: border-color 0.2s ease;
-
-			&:focus {
-				outline: none;
-				border-color: var(--highlight-color-primary);
-				box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
-			}
-		}
-	}
-
-	.buttons {
-		margin-top: 1rem;
-		display: flex;
-		gap: 0.5rem;
-		justify-content: flex-end;
-
-		button {
-			padding: 0.5rem 1.5rem;
-			font-size: 1rem;
-			background: rgba(42, 42, 42, 0.8);
-			color: var(--text-color);
-			border: 1px solid rgba(75, 208, 255, 0.35);
-			cursor: pointer;
-			transition: all 0.2s ease;
-			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
-
-			&:hover:not(:disabled) {
-				background: rgba(58, 58, 58, 0.9);
-				border-color: var(--highlight-color-primary);
-				box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
-			}
-
-			&:active:not(:disabled) {
-				transform: scale(0.95);
-			}
-
-			&:disabled {
-				opacity: 0.5;
-				cursor: not-allowed;
-			}
+		&:focus {
+			outline: none;
+			border-color: var(--highlight-color-primary);
+			box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
 		}
 	}
 }
 
-// Dropdown List
-.dropdown-list.floating {
-	position: fixed;
+.journal-search-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: flex-end;
+
+	button {
+		width: auto;
+	}
+}
+
+.journal-search-results {
 	background: var(--background-color);
 	border: 1px solid rgba(75, 208, 255, 0.35);
-	border-top: none;
-	max-height: 300px;
+	max-height: 18rem;
 	overflow-y: auto;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 	padding: 0;
 	list-style: none;
 	backdrop-filter: blur(5px);
 	margin: 0;
-	z-index: 1001;
-	@include clipped-corners(0rem, 0rem, 0.5rem, 0.5rem);
+	@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
 
 	.dropdown-item {
 		padding: 0;
@@ -286,7 +242,7 @@
 
 // Custom scrollbar for journal content and dropdowns
 .preview.journal-content,
-.dropdown-list.floating {
+.journal-search-results {
 	&::-webkit-scrollbar {
 		width: 8px;
 	}
