@@ -231,6 +231,21 @@
       "specialize": "Specialize",
       "value": "Value"
     },
+    "transaction": {
+      "amount": "Amount",
+      "creditor": "Creditor",
+      "creditstick": "Credit Stick",
+      "interestpermonth": "Interest / Month",
+      "recurrent": "Recurrent",
+      "transaction": "Transaction",
+      "type": "Type"
+    },
+    "transactionType": {
+      "asset": "Asset",
+      "debt": "Debt",
+      "expense": "Expense",
+      "income": "Income"
+    },
     "weapon": {
       "ammunitionClass": "Ammunition Class",
       "damage": "Damage",
