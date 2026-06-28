@@ -175,6 +175,10 @@
 		padding: 0.15rem 0.25rem;
 		text-align: center;
 		color: inherit;
+	}
+
+	select {
+		min-width: 100%;
 
 		&:focus,
 		&:focus-visible {

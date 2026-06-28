@@ -8,6 +8,7 @@ import StatCard from "../common-components/StatCard.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
 import LabeledDropdown from "./LabeledDropdown.svelte";
 import LabeledTextInput from "./LabeledTextInput.svelte";
+import LabeledBoolean from "./LabeledBoolean.svelte";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
@@ -89,7 +90,7 @@ function onTraditionChange(val: string) {
     </ItemSheetComponent>
 
     <ItemSheetComponent>
-        <StatCard {item} key="canAstrallyProject" label={localize(CONFIG.SR3E.MAGIC.canAstrallyProject)} value={magicianData.canAstrallyProject} path="system.magicianData" type="checkbox" disabled={!canProject} />
+        <LabeledBoolean {item} key="canAstrallyProject" label={localize(CONFIG.SR3E.MAGIC.canAstrallyProject)} value={magicianData.canAstrallyProject} path="system.magicianData" disabled={!canProject} />
     </ItemSheetComponent>
 
     <ItemSheetComponent>
