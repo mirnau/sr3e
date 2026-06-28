@@ -12,6 +12,7 @@
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { StoreManager } from "../../../utilities/StoreManager.svelte";
    import { KarmaDistributionService } from "../../../services/karma/KarmaDistributionService";
+   import Switch from "../../common-components/Switch.svelte";
 
    let {
       actor: _actor,
@@ -80,5 +81,5 @@
    <td>
       <button type="button" class="karma-refresh-btn" onclick={refreshKarmaPool} title="Restore karma pool to ceiling">↺</button>
    </td>
-   <td><input type="checkbox" class="sr3e-checkbox" bind:checked={$readyForCommit} /></td>
+   <td><Switch bind:checked={$readyForCommit} ariaLabel="Ready for commit" /></td>
 </tr>

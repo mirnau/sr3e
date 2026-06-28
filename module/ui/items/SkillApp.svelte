@@ -1,9 +1,10 @@
 <script lang="ts">
    import { untrack } from "svelte";
-import { localize } from "../../services/utilities";
+   import { localize } from "../../services/utilities";
    import Image from "../common-components/Image.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
+   import StatCard from "../common-components/StatCard.svelte";
    import JournalViewer from "../common-components/JournalViewer.svelte";
 
    let { item: _item }: { item: Item } = $props();
@@ -15,6 +16,7 @@ import { localize } from "../../services/utilities";
    };
 
    let skillType = $state<"active" | "knowledge" | "language">(system.skillType);
+   let name = $state(item.name as string);
 
    const attributeKeys = ["body", "quickness", "strength", "charisma", "intelligence", "willpower", "reaction"];
    const dicePoolKeys = ["astral", "combat", "hacking", "control", "spell"];
@@ -44,50 +46,47 @@ import { localize } from "../../services/utilities";
 <ItemSheetWrapper csslayout="single">
    <ItemSheetComponent>
       <Image entity={item} />
+      <div class="large-input-wrapper">
+         <div class="large-input-background"></div>
+         <input
+            class="large"
+            name="name"
+            type="text"
+            value={name}
+            onchange={(e) => item.update({ name: (e.target as HTMLInputElement).value })}
+         />
+      </div>
+
       <div class="stat-grid single-column">
-<div class="stat-card">
-            <input
-               class="large"
-               name="name"
-               type="text"
-               value={item.name}
-               onchange={(e) => item.update({ name: (e.target as HTMLInputElement).value })}
+         <StatCard
+            {item}
+            key="skillType"
+            label={localize(CONFIG.SR3E.SKILL?.skill)}
+            value={skillType}
+            type="select"
+            options={typeOptions}
+            onUpdate={(val) => updateSkillType(val as "active" | "knowledge" | "language")}
+         />
+         {#if skillType === "active"}
+            <StatCard
+               {item}
+               key="linkedAttribute"
+               label={localize(CONFIG.SR3E.SKILL?.linkedAttribute)}
+               value={system.activeSkill.linkedAttribute}
+               path="system.activeSkill"
+               type="select"
+               options={attributeOptions}
+               placeholder={localize(CONFIG.SR3E.SKILL?.linkedAttribute)}
             />
-         </div>
-<div class="stat-card">
-            <select value={skillType} onchange={(e) => updateSkillType((e.target as HTMLSelectElement).value as "active" | "knowledge" | "language")}>
-               {#each typeOptions as opt}
-                  <option value={opt.value}>{opt.label}</option>
-               {/each}
-            </select>
-         </div>
-{#if skillType === "active"}
-            <div class="stat-card">
-               <select
-                  value={system.activeSkill.linkedAttribute}
-                  onchange={(e) => item.update({ "system.activeSkill.linkedAttribute": (e.target as HTMLSelectElement).value })}
-               >
-                  <option disabled value="">
-                     {localize(CONFIG.SR3E.SKILL?.linkedAttribute)}
-                  </option>
-                  {#each attributeOptions as opt}
-                     <option value={opt.value}>{opt.label}</option>
-                  {/each}
-               </select>
-            </div>
-<div class="stat-card">
-               <select
-                  value={system.activeSkill.associatedDicePool}
-                  onchange={(e) => item.update({ "system.activeSkill.associatedDicePool": (e.target as HTMLSelectElement).value })}
-               >
-                  <option value="">
-                     {localize(CONFIG.SR3E.DICE_POOLS?.associateselect)}
-                  </option>
-                  {#each dicePoolOptions as opt}
-                     <option value={opt.value}>{opt.label}</option>
-                  {/each}
-               </select>
-            </div>
+            <StatCard
+               {item}
+               key="associatedDicePool"
+               label={localize(CONFIG.SR3E.DICE_POOLS?.dicePools)}
+               value={system.activeSkill.associatedDicePool}
+               path="system.activeSkill"
+               type="select"
+               options={dicePoolOptions}
+            />
          {/if}
       </div>
    </ItemSheetComponent>
