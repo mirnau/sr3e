@@ -63,6 +63,15 @@
 	}
 }
 
+// sheetcard.scss's broad input rule (0,3,1) overrides .input-frame's transparent design.
+// Match its specificity here — broadcaster.scss loads after, so this wins the tie.
+.broadcaster-layout .news-input .input-frame input {
+	border: none;
+	background: transparent;
+	border-radius: 0;
+	padding: 0.25rem 0.5rem;
+}
+
 .input-frame {
 	position: relative;
 	background: var(--highlight-color-primary);
