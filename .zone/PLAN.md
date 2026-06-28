@@ -12,7 +12,11 @@
 [x] MUST: Tier 5a — simple rolls (click-to-roll on skills, attributes, pools)
 [x] MUST: Tier 5b — advanced rolls (roll composer wiring + data model) → .zone/techspecs/TECHSPEC-combat-tier-5b-advanced-rolls.md
 [x] MUST: Tier 5b.2 — roll composer styling
-[~] MUST: Weapons item — migrate from old_project (sister folder)
+[x] MUST: Weapons item — migrate from old_project (sister folder)
+[~] MUST: Ammunition item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
+[ ] MUST: Wearable item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
+[ ] MUST: Transaction item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
+[ ] MUST: Magic items — complete half-done port from old_project (Svelte app + sheet + data model, WeaponApp style)
 [ ] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
 [ ] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
 [ ] SHOULD: Clickable dice in chat for karma re-rolls

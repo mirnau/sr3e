@@ -1,5 +1,5 @@
 ## Active Feature
-Weapons item — migrate from old_project (sister folder) → .zone/techspecs/TECHSPEC-weapons-item-migration.md
+Ammunition item — port from old_project → .zone/techspecs/TECHSPEC-ammunition-item.md
 
 ## Current Issue
 none — all issues closed, pending manual test in Foundry

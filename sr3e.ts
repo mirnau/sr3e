@@ -14,6 +14,8 @@ import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
 import SkillSheet from "./module/sheets/items/SkillSheet";
 import WeaponModel from "./module/models/items/WeaponModel";
 import WeaponSheet from "./module/sheets/items/WeaponSheet";
+import AmmunitionModel from "./module/models/items/AmmunitionModel";
+import AmmunitionSheet from "./module/sheets/items/AmmunitionSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -145,6 +147,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.weapon,
             model: WeaponModel,
             sheet: WeaponSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.ammunition,
+            model: AmmunitionModel,
+            sheet: AmmunitionSheet,
          },
       ] satisfies SR3EDocumentRegistration[]);
 

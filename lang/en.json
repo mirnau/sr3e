@@ -9,6 +9,13 @@
       "mechanical": "Mechanical",
       "storytellerscreen": "Storyteller's Screen"
     },
+    "ammunition": {
+      "ammunition": "Ammunition",
+      "class": "Weapon Class",
+      "maxcapacity": "Max Capacity",
+      "rounds": "Rounds",
+      "type": "Ammunition Type"
+    },
     "ammunitionClass": {
       "assaultCannon": "Assault Cannons",
       "assaultRifle": "Assault Rifles",
@@ -27,6 +34,17 @@
       "sniperRifle": "Sniper Rifles",
       "sportingRifle": "Sporting Rifles",
       "taser": "Tasers"
+    },
+    "ammunitionType": {
+      "apds": "APDS",
+      "capsule": "Capsule",
+      "explosive": "Explosive",
+      "flechette": "Flechette",
+      "gel": "Gel",
+      "incendiary": "Incendiary",
+      "regular": "Regular",
+      "tracer": "Tracer",
+      "tracker": "Tracker"
     },
     "attributes": {
       "attributes": "Attributes",

@@ -8,6 +8,7 @@ import {
   WEAPON_MODE_KEYS, RELOAD_MECHANISM_KEYS, AMMO_CLASS_KEYS, DAMAGE_TYPE_KEYS,
   LEGAL_STATUS_KEYS, LEGAL_PERMIT_KEYS, LEGAL_PRIORITY_KEYS, ITEM_TYPE_KEYS,
 } from "./config/WeaponConfig";
+import { AMMUNITION_KEYS, AMMO_TYPE_KEYS } from "./config/AmmunitionConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -51,6 +52,8 @@ export const sr3e = {
   LEGAL_PRIORITIES: createCategory("legalpriority", LEGAL_PRIORITY_KEYS),
   ITEM_TYPES: createCategory("itemTypes", ITEM_TYPE_KEYS),
   ACTOR_TYPES: createCategory("actorTypes", ACTOR_TYPE_KEYS),
+  AMMUNITION: createCategory("ammunition", AMMUNITION_KEYS),
+  AMMO_TYPES: createCategory("ammunitionType", AMMO_TYPE_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

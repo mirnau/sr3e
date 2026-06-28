@@ -16,6 +16,7 @@ export const typekeys = Object.freeze({
   metatype: "metatype",
   skill: "skill",
   weapon: "weapon",
+  ammunition: "ammunition",
 } as const);
 
 export const flags = Object.freeze({
