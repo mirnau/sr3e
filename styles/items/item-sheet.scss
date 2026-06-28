@@ -160,13 +160,25 @@
 // skinning/select.scss sets .sr3e select { background: #1b1f24; border: none } at (0,1,1).
 // Scope deeper to (0,3,1) so the wrapper's fake outline shows through.
 .sr3e .stat-field-card .select-wrapper {
-	select {
+	select,
+	input[type="text"] {
 		background: transparent;
 		border: none;
 		box-shadow: none;
 		width: 100%;
 		padding: 0.15rem 0.25rem;
 		text-align: center;
+		color: inherit;
+
+		&:focus,
+		&:focus-visible {
+			outline-color: var(--highlight-color-primary);
+		}
+	}
+
+	select option {
+		background-color: #071510;
+		color: var(--highlight-color-primary);
 	}
 }
 
