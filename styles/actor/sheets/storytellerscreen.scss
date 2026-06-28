@@ -98,6 +98,7 @@
 		color: var(--h1-color);
 		text-shadow: var(--h1-bloom);
 		appearance: textfield;
+		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 
 		&::-webkit-inner-spin-button,
 		&::-webkit-outer-spin-button {
