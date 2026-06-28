@@ -202,11 +202,11 @@
 }
 
 .weapon .stat-field-card input[type="number"] {
+	font-family: "VT323", "VT323-Local", monospace;
 	font-size: 1.2rem;
-	font-weight: bold;
-	line-height: 1;
-	color: #fff;
-	text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
+	line-height: 1rem;
+	color: var(--h1-color);
+	text-shadow: var(--h1-bloom);
 }
 
 // Name input — skill-card border trick: outer wrapper = highlight fill, inner layer = dark fill inset 1px
