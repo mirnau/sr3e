@@ -4,7 +4,8 @@ import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-import StatCard from "../common-components/StatCard.svelte";
+import LabeledNumberInput from "./LabeledNumberInput.svelte";
+import LabeledBoolean from "./LabeledBoolean.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
@@ -34,11 +35,11 @@ let name = $state(item.name as string);
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.WEARABLE.wearable)}</h3>
         <div class="stat-grid two-column">
-            <StatCard {item} key="ballistic" label={localize(CONFIG.SR3E.WEARABLE.ballistic)} value={system.ballistic} path="system" type="number" />
-            <StatCard {item} key="impact"    label={localize(CONFIG.SR3E.WEARABLE.impact)}    value={system.impact}    path="system" type="number" />
+            <LabeledNumberInput {item} key="ballistic" label={localize(CONFIG.SR3E.WEARABLE.ballistic)} value={system.ballistic} path="system" />
+            <LabeledNumberInput {item} key="impact"    label={localize(CONFIG.SR3E.WEARABLE.impact)}    value={system.impact}    path="system" />
         </div>
         <div class="stat-grid single-column">
-            <StatCard {item} key="canLayer" label={localize(CONFIG.SR3E.WEARABLE.canlayer)} value={system.canLayer} path="system" type="checkbox" />
+            <LabeledBoolean {item} key="canLayer" label={localize(CONFIG.SR3E.WEARABLE.canlayer)} value={system.canLayer} path="system" />
         </div>
     </ItemSheetComponent>
 

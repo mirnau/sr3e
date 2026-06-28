@@ -4,7 +4,9 @@ import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-import StatCard from "../common-components/StatCard.svelte";
+import LabeledDropdown from "./LabeledDropdown.svelte";
+import LabeledNumberInput from "./LabeledNumberInput.svelte";
+import LabeledBoolean from "./LabeledBoolean.svelte";
 import FuzzyFinder from "../common-components/FuzzyFinder.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
 
@@ -78,7 +80,7 @@ $effect(() => {
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.TRANSACTION.transaction)}</h3>
         <div class="stat-grid single-column">
-            <div class="stat-card stat-field-card">
+            <div class="stat-card stat-field-card labeled-field-card">
                 <div class="stat-card-background"></div>
                 <div class="title-container">
                     <h4 class="no-margin uppercase">{localize(CONFIG.SR3E.TRANSACTION.amount)}</h4>
@@ -92,12 +94,12 @@ $effect(() => {
                     onkeydown={onAmountKeydown}
                 />
             </div>
-            <StatCard {item} key="type" label={localize(CONFIG.SR3E.TRANSACTION.type)} value={system.type} path="system" type="select" options={kvOptions(CONFIG.SR3E.TRANSACTION_TYPES)} />
-            <StatCard {item} key="interestPerMonth" label={localize(CONFIG.SR3E.TRANSACTION.interestpermonth)} value={system.interestPerMonth} path="system" type="number" />
+            <LabeledDropdown    {item} key="type"            label={localize(CONFIG.SR3E.TRANSACTION.type)}            value={system.type}            path="system" options={kvOptions(CONFIG.SR3E.TRANSACTION_TYPES)} />
+            <LabeledNumberInput {item} key="interestPerMonth" label={localize(CONFIG.SR3E.TRANSACTION.interestpermonth)} value={system.interestPerMonth} path="system" />
         </div>
         <div class="stat-grid two-column">
-            <StatCard {item} key="recurrent"    label={localize(CONFIG.SR3E.TRANSACTION.recurrent)}   value={system.recurrent}    path="system" type="checkbox" />
-            <StatCard {item} key="isCreditStick" label={localize(CONFIG.SR3E.TRANSACTION.creditstick)} value={system.isCreditStick} path="system" type="checkbox" />
+            <LabeledBoolean {item} key="recurrent"    label={localize(CONFIG.SR3E.TRANSACTION.recurrent)}   value={system.recurrent}    path="system" />
+            <LabeledBoolean {item} key="isCreditStick" label={localize(CONFIG.SR3E.TRANSACTION.creditstick)} value={system.isCreditStick} path="system" />
         </div>
     </ItemSheetComponent>
 

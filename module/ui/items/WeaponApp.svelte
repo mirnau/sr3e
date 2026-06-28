@@ -4,7 +4,8 @@ import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-import StatCard from "../common-components/StatCard.svelte";
+import LabeledDropdown from "./LabeledDropdown.svelte";
+import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import ComboSearch from "../common-components/ComboSearch.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
@@ -74,18 +75,6 @@ onDestroy(() => {
     }
 });
 
-const weaponEntries = [
-    { key: "damage",     label: localize(CONFIG.SR3E.WEAPON.damage),             value: system.damage,     path: "system", type: "number" as const },
-    { key: "range",      label: localize(CONFIG.SR3E.WEAPON.range),              value: system.range,      path: "system", type: "number" as const },
-    { key: "recoilComp", label: localize(CONFIG.SR3E.WEAPON.recoilCompensation), value: system.recoilComp, path: "system", type: "number" as const },
-];
-
-const rangeBandEntries = [
-    { key: "rangeBand.short",   label: localize(CONFIG.SR3E.WEAPON.rangebandshort),   value: system.rangeBand?.short,   path: "system", type: "number" as const },
-    { key: "rangeBand.medium",  label: localize(CONFIG.SR3E.WEAPON.rangebandmedium),  value: system.rangeBand?.medium,  path: "system", type: "number" as const },
-    { key: "rangeBand.long",    label: localize(CONFIG.SR3E.WEAPON.rangebandlong),    value: system.rangeBand?.long,    path: "system", type: "number" as const },
-    { key: "rangeBand.extreme", label: localize(CONFIG.SR3E.WEAPON.rangebandextreme), value: system.rangeBand?.extreme, path: "system", type: "number" as const },
-];
 </script>
 
 <ItemSheetWrapper csslayout="double">
@@ -135,24 +124,25 @@ const rangeBandEntries = [
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.WEAPON.weaponStats)}</h3>
         <div class="stat-grid single-column">
-            <StatCard {item} key="mode"           label={localize(CONFIG.SR3E.WEAPON.mode)}           value={system.mode}           path="system" type="select" options={kvOptions(CONFIG.SR3E.WEAPON_MODES)} />
-            <StatCard {item} key="damageType"      label={localize(CONFIG.SR3E.WEAPON.damageType)}     value={system.damageType}     path="system" type="select" options={kvOptions(CONFIG.SR3E.DAMAGE_TYPES)} />
-            <StatCard {item} key="ammunitionClass" label={localize(CONFIG.SR3E.WEAPON.ammunitionClass)} value={system.ammunitionClass} path="system" type="select" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
-            <StatCard {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)} value={system.reloadMechanism} path="system" type="select" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
+            <LabeledDropdown {item} key="mode"           label={localize(CONFIG.SR3E.WEAPON.mode)}           value={system.mode}            path="system" options={kvOptions(CONFIG.SR3E.WEAPON_MODES)} />
+            <LabeledDropdown {item} key="damageType"     label={localize(CONFIG.SR3E.WEAPON.damageType)}     value={system.damageType}      path="system" options={kvOptions(CONFIG.SR3E.DAMAGE_TYPES)} />
+            <LabeledDropdown {item} key="ammunitionClass" label={localize(CONFIG.SR3E.WEAPON.ammunitionClass)} value={system.ammunitionClass} path="system" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
+            <LabeledDropdown {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)} value={system.reloadMechanism} path="system" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
         </div>
         <div class="stat-grid two-column">
-            {#each weaponEntries as entry}
-                <StatCard {item} {...entry} />
-            {/each}
+            <LabeledNumberInput {item} key="damage"     label={localize(CONFIG.SR3E.WEAPON.damage)}             value={system.damage}     path="system" />
+            <LabeledNumberInput {item} key="range"      label={localize(CONFIG.SR3E.WEAPON.range)}              value={system.range}      path="system" />
+            <LabeledNumberInput {item} key="recoilComp" label={localize(CONFIG.SR3E.WEAPON.recoilCompensation)} value={system.recoilComp} path="system" />
         </div>
     </ItemSheetComponent>
 
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.WEAPON.rangeband)}</h3>
         <div class="stat-grid two-column">
-            {#each rangeBandEntries as entry}
-                <StatCard {item} {...entry} />
-            {/each}
+            <LabeledNumberInput {item} key="rangeBand.short"   label={localize(CONFIG.SR3E.WEAPON.rangebandshort)}   value={system.rangeBand?.short}   path="system" />
+            <LabeledNumberInput {item} key="rangeBand.medium"  label={localize(CONFIG.SR3E.WEAPON.rangebandmedium)}  value={system.rangeBand?.medium}  path="system" />
+            <LabeledNumberInput {item} key="rangeBand.long"    label={localize(CONFIG.SR3E.WEAPON.rangebandlong)}    value={system.rangeBand?.long}    path="system" />
+            <LabeledNumberInput {item} key="rangeBand.extreme" label={localize(CONFIG.SR3E.WEAPON.rangebandextreme)} value={system.rangeBand?.extreme} path="system" />
         </div>
     </ItemSheetComponent>
 

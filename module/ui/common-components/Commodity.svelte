@@ -1,7 +1,7 @@
 <script lang="ts">
 import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
-import StatCard from "./StatCard.svelte";
+import LabeledDropdown from "../items/LabeledDropdown.svelte";
 import LabeledNumberInput from "../items/LabeledNumberInput.svelte";
 import LabeledBoolean from "../items/LabeledBoolean.svelte";
 import ItemSheetComponent from "./ItemSheetComponent.svelte";
@@ -13,23 +13,6 @@ const commodity = (item.system as any).commodity;
 function kvOptions(map: Record<string, string>) {
     return Object.entries(map).map(([value, token]) => ({ value, label: localize(token) }));
 }
-
-
-const legalityEntries = [
-    {
-        key: "status",   label: localize(CONFIG.SR3E.COMMODITY.legalstatus),              value: commodity.legality?.status,
-        path: "system.commodity.legality", type: "select" as const, options: kvOptions(CONFIG.SR3E.LEGAL_STATUSES),
-        placeholder: localize("sr3e.placeholders.selectlegalstatus"),
-    },
-    {
-        key: "permit",   label: localize(CONFIG.SR3E.COMMODITY.legalpermit),              value: commodity.legality?.permit,
-        path: "system.commodity.legality", type: "select" as const, options: kvOptions(CONFIG.SR3E.LEGAL_PERMITS),
-    },
-    {
-        key: "priority", label: localize(CONFIG.SR3E.COMMODITY.legalenforcementpriority), value: commodity.legality?.priority,
-        path: "system.commodity.legality", type: "select" as const, options: kvOptions(CONFIG.SR3E.LEGAL_PRIORITIES),
-    },
-];
 </script>
 
 <ItemSheetComponent>
@@ -41,8 +24,8 @@ const legalityEntries = [
         <LabeledBoolean {item} key="isBroken" label={localize(CONFIG.SR3E.COMMODITY.isBroken)} value={commodity.isBroken} path="system.commodity" />
     </div>
     <div class="stat-grid single-column">
-        {#each legalityEntries as entry}
-            <StatCard {item} {...entry} />
-        {/each}
+        <LabeledDropdown {item} key="status"   label={localize(CONFIG.SR3E.COMMODITY.legalstatus)}              value={commodity.legality?.status}   path="system.commodity.legality" options={kvOptions(CONFIG.SR3E.LEGAL_STATUSES)} />
+        <LabeledDropdown {item} key="permit"   label={localize(CONFIG.SR3E.COMMODITY.legalpermit)}              value={commodity.legality?.permit}   path="system.commodity.legality" options={kvOptions(CONFIG.SR3E.LEGAL_PERMITS)} />
+        <LabeledDropdown {item} key="priority" label={localize(CONFIG.SR3E.COMMODITY.legalenforcementpriority)} value={commodity.legality?.priority} path="system.commodity.legality" options={kvOptions(CONFIG.SR3E.LEGAL_PRIORITIES)} />
     </div>
 </ItemSheetComponent>

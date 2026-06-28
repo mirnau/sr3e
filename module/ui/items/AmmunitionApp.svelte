@@ -4,7 +4,7 @@ import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-import StatCard from "../common-components/StatCard.svelte";
+import LabeledDropdown from "./LabeledDropdown.svelte";
 import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
@@ -39,9 +39,9 @@ function kvOptions(map: Record<string, string>) {
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.AMMUNITION.ammunition)}</h3>
         <div class="stat-grid single-column">
-            <StatCard {item} key="class"           label={localize(CONFIG.SR3E.AMMUNITION.class)}           value={system.class}           path="system" type="select" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
-            <StatCard {item} key="type"            label={localize(CONFIG.SR3E.AMMUNITION.type)}            value={system.type}            path="system" type="select" options={kvOptions(CONFIG.SR3E.AMMO_TYPES)} />
-            <StatCard {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)}     value={system.reloadMechanism} path="system" type="select" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
+            <LabeledDropdown {item} key="class"           label={localize(CONFIG.SR3E.AMMUNITION.class)}       value={system.class}           path="system" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
+            <LabeledDropdown {item} key="type"            label={localize(CONFIG.SR3E.AMMUNITION.type)}        value={system.type}            path="system" options={kvOptions(CONFIG.SR3E.AMMO_TYPES)} />
+            <LabeledDropdown {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)} value={system.reloadMechanism} path="system" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
         </div>
         <div class="stat-grid two-column">
             <LabeledNumberInput {item} key="rounds"      label={localize(CONFIG.SR3E.AMMUNITION.rounds)}      value={system.rounds}      path="system" />
