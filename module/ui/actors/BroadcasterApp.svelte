@@ -7,6 +7,7 @@
    import SheetCard from "../common-components/SheetCard.svelte";
    import StoreManager from "../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../utilities/IStoreManager";
+   import { openFilePicker } from "../../services/utilities";
 
    let { actor: _actor } = $props<{
       actor: Actor;
@@ -142,7 +143,10 @@
    <div class="broadcaster-layout">
       <SheetCard span={1}>
          <div class="broadcaster-info">
-            <div class="broadcaster-image">
+            <div class="broadcaster-image dossier-img-btn" role="button" tabindex="0" title="Click to change image"
+               onclick={() => openFilePicker(actor)}
+               onkeydown={(e) => e.key === "Enter" && openFilePicker(actor)}
+            >
                <img src={actor.img} alt={actor.name} title={actor.name} />
             </div>
             <div class="broadcast-control">
