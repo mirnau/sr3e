@@ -17,6 +17,7 @@ export const typekeys = Object.freeze({
   skill: "skill",
   weapon: "weapon",
   ammunition: "ammunition",
+  wearable: "wearable",
 } as const);
 
 export const flags = Object.freeze({

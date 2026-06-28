@@ -256,6 +256,12 @@
       "fullauto": "Full-Automatic",
       "manual": "Manual",
       "semiauto": "Semi-Automatic"
+    },
+    "wearable": {
+      "ballistic": "Ballistic",
+      "canlayer": "Can Layer",
+      "impact": "Impact",
+      "wearable": "Wearable"
     }
   }
 }

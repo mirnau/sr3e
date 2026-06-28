@@ -9,6 +9,7 @@ import {
   LEGAL_STATUS_KEYS, LEGAL_PERMIT_KEYS, LEGAL_PRIORITY_KEYS, ITEM_TYPE_KEYS,
 } from "./config/WeaponConfig";
 import { AMMUNITION_KEYS, AMMO_TYPE_KEYS } from "./config/AmmunitionConfig";
+import { WEARABLE_KEYS } from "./config/WearableConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -54,6 +55,7 @@ export const sr3e = {
   ACTOR_TYPES: createCategory("actorTypes", ACTOR_TYPE_KEYS),
   AMMUNITION: createCategory("ammunition", AMMUNITION_KEYS),
   AMMO_TYPES: createCategory("ammunitionType", AMMO_TYPE_KEYS),
+  WEARABLE: createCategory("wearable", WEARABLE_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;
