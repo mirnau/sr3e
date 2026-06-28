@@ -35,12 +35,9 @@
 
 <div class="karma-manager">
    <div class="karma-manager__toolbar">
-      <input
-         type="text"
-         bind:value={delimiter}
-         placeholder="Search characters..."
-         class="karma-manager__search"
-      />
+      <div class="karma-input-frame karma-manager__search">
+         <input type="text" bind:value={delimiter} placeholder="Search characters..." />
+      </div>
       <button type="button" onclick={selectAll}>Select All</button>
       <button type="button" onclick={deselectAll}>Deselect All</button>
       <button type="button" onclick={commitSelected} disabled={!anyReady}>

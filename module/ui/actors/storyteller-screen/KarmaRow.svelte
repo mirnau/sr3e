@@ -73,7 +73,7 @@
 <tr>
    <td><img class="portrait" src={actor.img} alt={actor.name} /></td>
    <td>{actor.name}</td>
-   <td><input type="number" bind:value={$pendingKarmaReward} min="0" /></td>
+   <td><div class="karma-input-frame karma-manager__points"><input type="number" bind:value={$pendingKarmaReward} min="0" /></div></td>
    <td>{$goodKarma}</td>
    <td>{$karmaPoolValue} / {$karmaPoolCeiling}</td>
    <td>{$lifetimeKarma}</td>
