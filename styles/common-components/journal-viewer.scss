@@ -157,24 +157,21 @@ form.application.sheet.sr3e.journal-search {
 }
 
 .journal-search-input {
-	display: block;
+	display: flex;
+	z-index: 0;
+	line-height: 0;
 
 	input {
-		width: 100%;
-		padding: 0.75rem;
-		font-size: 1rem;
-		background: rgba(0, 0, 0, 0.4);
-		color: var(--text-color);
-		border: 1px solid rgba(75, 208, 255, 0.35);
-		transition: border-color 0.2s ease;
-		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
-
-		&:focus {
-			outline: none;
-			border-color: var(--highlight-color-primary);
-			box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
-		}
+		flex: 1;
 	}
+}
+
+.journal-search-panel .sheet-card-outline .journal-search-input input {
+	border: none;
+	background: transparent;
+	border-radius: 0;
+	margin: 0;
+	padding: 0.15rem 0.5rem;
 }
 
 .journal-search-actions {

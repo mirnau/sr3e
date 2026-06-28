@@ -80,7 +80,7 @@
 <div class="journal-search-panel">
    <ItemSheetComponent>
       <div class="journal-search-controls">
-         <label class="journal-search-input">
+         <label class="journal-search-input input-frame">
             <input
                bind:this={inputEl}
                type="text"
