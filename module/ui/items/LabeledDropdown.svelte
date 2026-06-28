@@ -36,14 +36,17 @@ function onChange(e: Event) {
     <div class="title-container">
         <h4 class="no-margin uppercase">{label}</h4>
     </div>
-    <select value={value ?? ""} onchange={onChange} {disabled}>
-        <option value="" disabled selected={value == null || value === ""} hidden>
-            {game.i18n.localize("sr3e.placeholders.selectanoption")}
-        </option>
-        {#each options as option}
-            <option value={option.value} selected={value === option.value}>
-                {option.label}
+    <div class="select-wrapper">
+        <div class="select-background"></div>
+        <select value={value ?? ""} onchange={onChange} {disabled}>
+            <option value="" disabled selected={value == null || value === ""} hidden>
+                {game.i18n.localize("sr3e.placeholders.selectanoption")}
             </option>
-        {/each}
-    </select>
+            {#each options as option}
+                <option value={option.value} selected={value === option.value}>
+                    {option.label}
+                </option>
+            {/each}
+        </select>
+    </div>
 </div>
