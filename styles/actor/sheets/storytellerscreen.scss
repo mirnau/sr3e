@@ -184,6 +184,11 @@
 
 	&__points {
 		width: 60px;
+		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+
+		&::before {
+			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+		}
 	}
 
 	&__table {
