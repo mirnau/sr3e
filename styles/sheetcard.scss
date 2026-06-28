@@ -82,11 +82,11 @@
   }
 }
 
-.sheet-card-outline>*+* {
+.sheet-card-outline > *:not(.sheet-card-displayarea) + *:not(.sheet-card-displayarea) {
    margin-top: 0.6rem;
 }
 
-.sheet-card-outline :is(input, textarea, select) {
+.sheet-card-outline :is(input:not([type="checkbox"]):not([type="radio"]), textarea, select) {
    width: 100%;
    border-radius: 6px;
    border: 1px solid rgba(75, 208, 255, 0.35);
