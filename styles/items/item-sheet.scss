@@ -255,7 +255,8 @@
 }
 
 .weapon .image-mask,
-.skill .image-mask {
+.skill .image-mask,
+.magic .image-mask {
 	@include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
 
 	img {
