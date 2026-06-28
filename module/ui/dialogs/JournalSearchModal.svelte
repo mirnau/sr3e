@@ -1,14 +1,16 @@
 <script lang="ts">
    import { localize } from "../../services/utilities";
+   import { journalPageValue, type JournalOption } from "../common-components/journalViewerContent";
 
-   type JournalOption = {
-      value: string;
-      type: "entry" | "page";
-      label: string;
-   };
-
-   let { config, onclose }: { config: any; onclose?: (result: JournalOption | null) => void } =
-      $props();
+   let {
+      config,
+      onclose,
+      onselect,
+   }: {
+      config: any;
+      onclose?: (result: JournalOption | null) => void;
+      onselect?: (result: JournalOption) => void;
+   } = $props();
 
    let visible = $state(true);
    let search = $state("");
@@ -19,18 +21,21 @@
    let dropdownStyle = $state("");
 
    $effect(() => {
-      const journals = game.journal.contents;
-      options = journals.flatMap((entry) => {
+      options = game.journal.contents.flatMap((entry) => {
          const items: JournalOption[] = [
-            { value: entry.id, type: "entry", label: entry.name },
+            { value: entry.id, type: "entry", label: entry.name, entryId: entry.id },
          ];
+
          for (const page of entry.pages?.contents ?? []) {
             items.push({
-               value: page.id,
+               value: journalPageValue(entry.id, page.id),
                type: "page",
-               label: `${entry.name} › ${page.name}`,
+               label: `${entry.name} > ${page.name}`,
+               entryId: entry.id,
+               pageId: page.id,
             });
          }
+
          return items;
       });
    });
@@ -60,6 +65,7 @@
       selected = option;
       search = option.label;
       showDropdown = false;
+      onselect?.(option);
    }
 
    function ok() {

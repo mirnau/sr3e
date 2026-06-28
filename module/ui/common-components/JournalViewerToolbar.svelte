@@ -1,19 +1,18 @@
 <script lang="ts">
    import JournalSearchModal from "../dialogs/JournalSearchModal.svelte";
    import { mount, unmount, untrack } from "svelte";
-
-   type JournalOption = {
-      value: string;
-      type: "entry" | "page";
-      label: string;
-   };
+   import { openJournalSheet, type JournalOption } from "./journalViewerContent";
 
    const {
       onJournalContentSelected,
+      onJournalContentPreviewed,
+      onJournalContentSelectionCancelled,
       config = {},
       id: _id = null,
    }: {
       onJournalContentSelected?: (result: JournalOption) => void;
+      onJournalContentPreviewed?: (result: JournalOption) => void;
+      onJournalContentSelectionCancelled?: () => void;
       config?: any;
       id?: string | null;
    } = $props();
@@ -22,22 +21,29 @@
    let journalId = $state(id ?? null);
 
    function handleOpen() {
-      if (!journalId) return;
-      const entry = game.journal.get(journalId);
-      entry?.sheet?.render(true);
+      openJournalSheet(journalId);
    }
 
    function handleSearch() {
+      const originalJournalId = journalId;
       const modal = mount(JournalSearchModal, {
          target: document.body,
          props: {
             config,
+            onselect: (result: JournalOption) => {
+               journalId = result.value;
+               onJournalContentPreviewed?.(result);
+            },
             onclose: (result: JournalOption | null) => {
                unmount(modal);
                if (result) {
                   journalId = result.value;
                   onJournalContentSelected?.(result);
+                  return;
                }
+
+               journalId = originalJournalId;
+               onJournalContentSelectionCancelled?.();
             },
          },
       });

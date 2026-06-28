@@ -14,6 +14,7 @@ type WeaponSchema = {
   recoilComp: NumberField;
   reloadMechanism: StringField;
   linkedSkillId: StringField;
+  journalId: StringField;
   ammoId: StringField;
   isDefaulting: BooleanField;
   rangeBand: EmbeddedDataField<typeof RangeBandModel>;
@@ -64,6 +65,10 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSc
         initial: "",
       }),
       linkedSkillId: new StringField({
+        required: true,
+        initial: "",
+      }),
+      journalId: new StringField({
         required: true,
         initial: "",
       }),
