@@ -135,6 +135,13 @@
       "serious": "Serious",
       "stun": "Stun"
     },
+    "inventory": {
+      "effects": "Active Effects",
+      "equipped": "Equipped",
+      "favourites": "Favourites",
+      "garage": "Garage",
+      "inventory": "Inventory"
+    },
     "itemTypes": {
       "ammunition": "Ammunition",
       "focus": "Focus",

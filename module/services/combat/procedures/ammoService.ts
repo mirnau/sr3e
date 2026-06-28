@@ -57,6 +57,15 @@ export async function consume(
     }
 }
 
+export async function reloadWeapon(
+    actor: Actor,
+    weapon: { system: Record<string, unknown>; update?: (data: Record<string, unknown>) => Promise<unknown> },
+): Promise<void> {
+    const candidates = findCompatibleAmmo(actor, weapon);
+    if (!candidates.length) return;
+    await weapon.update?.({ "system.ammoId": candidates[0].id });
+}
+
 export function ammoDirectives(ammo: Item): Directive[] {
     const as = ammo.system as AmmoSystem;
     const directives: Directive[] = [];

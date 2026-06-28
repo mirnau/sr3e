@@ -16,8 +16,8 @@
 [x] MUST: Ammunition item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
 [x] MUST: Wearable item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
 [x] MUST: Transaction item — port from old_project (Svelte app + sheet + data model, WeaponApp style)
-[~] MUST: Magic items — complete half-done port from old_project (Svelte app + sheet + data model, WeaponApp style)
-[ ] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
+[x] MUST: Magic items — complete half-done port from old_project (Svelte app + sheet + data model, WeaponApp style)
+[~] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
 [ ] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
 [ ] SHOULD: Clickable dice in chat for karma re-rolls
 [ ] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md

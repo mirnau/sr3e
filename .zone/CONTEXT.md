@@ -1,8 +1,8 @@
 ## Active Feature
-Magic items — complete half-done port from old_project → .zone/techspecs/TECHSPEC-magic-items.md
+Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
 
 ## Current Issue
-none (no TECHSPEC created — feature was straightforward port, no grill needed)
+All issues closed (#143–#146). Ready for manual testing in Foundry.
 
 ## Blockers
 none
