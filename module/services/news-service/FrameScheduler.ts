@@ -80,6 +80,6 @@ export class FrameScheduler {
 			controllerId: this.#controllerId,
 		});
 
-		this.#nextTick = setTimeout(() => this.#scheduleNextFrame(), duration * 0.7 || NewsConfig.DEFAULT_MS);
+		this.#nextTick = setTimeout(() => this.#scheduleNextFrame(), duration || NewsConfig.DEFAULT_MS);
 	}
 }

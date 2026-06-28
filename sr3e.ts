@@ -20,6 +20,8 @@ import WearableModel from "./module/models/items/WearableModel";
 import WearableSheet from "./module/sheets/items/WearableSheet";
 import TransactionModel from "./module/models/items/TransactionModel";
 import TransactionSheet from "./module/sheets/items/TransactionSheet";
+import MagicModel from "./module/models/items/MagicModel";
+import MagicSheet from "./module/sheets/items/MagicSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -169,6 +171,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.transaction,
             model: TransactionModel,
             sheet: TransactionSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.magic,
+            model: MagicModel,
+            sheet: MagicSheet,
          },
       ] satisfies SR3EDocumentRegistration[]);
 

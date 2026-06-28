@@ -46,6 +46,16 @@
       "tracer": "Tracer",
       "tracker": "Tracker"
     },
+    "archetypes": {
+      "adept": "Adept",
+      "magician": "Magician"
+    },
+    "aspects": {
+      "conjurer": "Conjurer",
+      "custom": "Custom",
+      "elementalist": "Elementalist",
+      "sorcerer": "Sorcerer"
+    },
     "attributes": {
       "attributes": "Attributes",
       "body": "Body",
@@ -171,6 +181,24 @@
       "L": "Legal",
       "R": "Restricted"
     },
+    "magic": {
+      "archetype": "Archetype",
+      "aspect": "Aspect",
+      "canAstrallyProject": "Can Astrally Project",
+      "drainResistanceAttribute": "Drain Resistance",
+      "magician": "Magician",
+      "magicianType": "Mage Type",
+      "powerPoints": "Power Points",
+      "priority": "Priority",
+      "shamannote": "Shamanic Totem",
+      "spellPoints": "Spell Points",
+      "totem": "Totem",
+      "tradition": "Tradition"
+    },
+    "magicianTypes": {
+      "aspectedmage": "Aspected Mage",
+      "fullmage": "Full Mage"
+    },
     "metatype": {
       "agerange": "Playable Age Range",
       "height": "Height",
@@ -215,6 +243,11 @@
       "cy": "Cylinder",
       "m": "Internal Magazine"
     },
+    "resistanceAttributes": {
+      "charisma": "Charisma",
+      "intelligence": "Intelligence",
+      "willpower": "Willpower"
+    },
     "skill": {
       "active": "Active",
       "addlingo": "Add Lingo",
@@ -230,6 +263,11 @@
       "specializations": "Specializations",
       "specialize": "Specialize",
       "value": "Value"
+    },
+    "traditions": {
+      "hermetic": "Hermetic",
+      "other": "Other",
+      "shamanic": "Shamanic"
     },
     "transaction": {
       "amount": "Amount",

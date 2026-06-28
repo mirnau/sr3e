@@ -11,6 +11,7 @@ import {
 import { AMMUNITION_KEYS, AMMO_TYPE_KEYS } from "./config/AmmunitionConfig";
 import { WEARABLE_KEYS } from "./config/WearableConfig";
 import { TRANSACTION_KEYS, TRANSACTION_TYPE_KEYS } from "./config/TransactionConfig";
+import { MAGIC_KEYS, ARCHETYPE_KEYS, MAGICIAN_TYPE_KEYS, ASPECT_KEYS, RESISTANCE_ATTRIBUTE_KEYS, TRADITION_KEYS } from "./config/MagicConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -59,6 +60,12 @@ export const sr3e = {
   WEARABLE: createCategory("wearable", WEARABLE_KEYS),
   TRANSACTION: createCategory("transaction", TRANSACTION_KEYS),
   TRANSACTION_TYPES: createCategory("transactionType", TRANSACTION_TYPE_KEYS),
+  MAGIC: createCategory("magic", MAGIC_KEYS),
+  ARCHETYPES: createCategory("archetypes", ARCHETYPE_KEYS),
+  MAGICIAN_TYPES: createCategory("magicianTypes", MAGICIAN_TYPE_KEYS),
+  ASPECTS: createCategory("aspects", ASPECT_KEYS),
+  RESISTANCE_ATTRIBUTES: createCategory("resistanceAttributes", RESISTANCE_ATTRIBUTE_KEYS),
+  TRADITIONS: createCategory("traditions", TRADITION_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

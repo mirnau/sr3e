@@ -117,8 +117,8 @@ export class MagicRepository {
 					priority: "A",
 				},
 				magicianData: {
-					magicianType: "Full",
-					tradition: "Bear",
+					magicianType: "fullmage",
+					tradition: "shamanic",
 					drainResistanceAttribute: "Charisma",
 					aspect: "",
 					canAstrallyProject: true,

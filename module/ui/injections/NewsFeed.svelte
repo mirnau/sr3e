@@ -14,6 +14,12 @@
       duration?: number;
    }
 
+   interface RenderFrame {
+      pool: string[];
+      timestamp?: number;
+      duration?: number;
+   }
+
    const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
    const service = getNewsService();
 
@@ -22,10 +28,11 @@
    let inner: HTMLDivElement | undefined;
 
    let activePool: string[] = [];
-   let pendingPool: string[] | null = null;
+   let activeFrame: RenderFrame | null = null;
+   let pendingFrame: RenderFrame | null = null;
    let anim: Animation | null = null;
    let retryRafId: number | null = null;
-   let pendingRetryPool: string[] | null = null;
+   let pendingRetryFrame: RenderFrame | null = null;
 
    function buildContent(pool: string[]): void {
       if (!inner) return;
@@ -43,18 +50,19 @@
       while (inner.children.length > pool.length) inner.removeChild(inner.lastChild!);
    }
 
-   function runPass(pool: string[]): void {
+   function runPass(frame: RenderFrame): void {
+      const pool = frame.pool;
       if (!inner || !ticker || pool.length === 0) return;
       const tickerW = ticker.clientWidth;
 
       // Window not yet laid out — defer until next frame to avoid zero-duration cycle
       if (tickerW === 0) {
-         pendingRetryPool = pool;
+         pendingRetryFrame = frame;
          if (retryRafId === null) {
             retryRafId = requestAnimationFrame(() => {
                retryRafId = null;
-               const toRun = pendingRetryPool;
-               pendingRetryPool = null;
+               const toRun = pendingRetryFrame;
+               pendingRetryFrame = null;
                if (toRun) runPass(toRun);
             });
          }
@@ -64,7 +72,7 @@
       if (retryRafId !== null) {
          cancelAnimationFrame(retryRafId);
          retryRafId = null;
-         pendingRetryPool = null;
+         pendingRetryFrame = null;
       }
 
       // Move off-screen right before cancelling fill so no visible snap
@@ -75,8 +83,12 @@
       // scrollWidth gives actual flex rendered width including column-gap, no manual gap arithmetic needed.
       buildContent(pool);
       activePool = pool;
+      activeFrame = frame;
       const contentW = inner.scrollWidth;
-      const duration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
+      const measuredDuration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
+      const duration = frame.duration && frame.duration > 0 ? frame.duration : measuredDuration;
+      const elapsed = frame.timestamp ? Math.max(0, Date.now() - frame.timestamp) : 0;
+      const phaseOffset = duration > 0 ? elapsed % duration : 0;
 
       const thisAnim = (anim = inner.animate(
          [
@@ -85,14 +97,15 @@
          ],
          { duration, easing: "linear", fill: "forwards" },
       ));
+      thisAnim.currentTime = phaseOffset;
 
       // .finished resolves as a microtask — fires before the next rendered frame,
       // eliminating the blank-ticker gap that onfinish (macrotask) produces
       thisAnim.finished.then(() => {
          if (anim !== thisAnim) return;
-         const next = pendingPool ?? activePool;
-         pendingPool = null;
-         runPass(next);
+         const next = pendingFrame ?? activeFrame;
+         pendingFrame = null;
+         if (next) runPass(next);
       }).catch(() => {});
    }
 
@@ -101,14 +114,15 @@
       const pool = frame.buffer.map((m) =>
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
+      const renderFrame = { pool, timestamp: frame.timestamp, duration: frame.duration };
       if (!isOn) {
-         pendingPool = pool;
+         pendingFrame = renderFrame;
          return;
       }
       if (!anim || anim.playState === "finished" || anim.playState === "idle") {
-         runPass(pool);
+         runPass(renderFrame);
       } else {
-         pendingPool = pool;
+         pendingFrame = renderFrame;
       }
    }
 
@@ -122,8 +136,8 @@
    $effect(() => {
       if (isOn) {
          if (!anim || anim.playState === "idle" || anim.playState === "finished") {
-            const pool = pendingPool ?? (activePool.length ? activePool : null);
-            if (pool) { pendingPool = null; runPass(pool); }
+            const frame = pendingFrame ?? activeFrame ?? (activePool.length ? { pool: activePool } : null);
+            if (frame) { pendingFrame = null; runPass(frame); }
          }
       } else {
          anim?.cancel();
@@ -137,16 +151,16 @@
 
       const resizeObserver = new ResizeObserver(() => {
          if (ticker) service.reportTickerWidth(ticker.clientWidth);
-         if (activePool.length) pendingPool = activePool;
+         if (activeFrame) pendingFrame = activeFrame;
       });
       if (ticker) resizeObserver.observe(ticker);
 
       const restartIfFinished = () => {
          if (!isOn) return;
          if (!anim || anim.playState === "finished" || anim.playState === "idle") {
-            if (activePool.length) {
-               const next = pendingPool ?? activePool;
-               pendingPool = null;
+            if (activeFrame || activePool.length) {
+               const next = pendingFrame ?? activeFrame ?? { pool: activePool };
+               pendingFrame = null;
                runPass(next);
             }
          } else if (anim.playState === "paused") {

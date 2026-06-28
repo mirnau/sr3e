@@ -12,6 +12,7 @@
       options = [],
       placeholder,
       onUpdate,
+      disabled = false,
    }: {
       item?: SR3EItem;
       key: string;
@@ -22,6 +23,7 @@
       options?: Array<{ value: any; label: string }>;
       placeholder?: string;
       onUpdate?: (value: any) => void;
+      disabled?: boolean;
    } = $props();
 
    function update(e: Event) {
@@ -44,7 +46,7 @@
    }
 </script>
 
-<div class="stat-card stat-field-card">
+<div class="stat-card stat-field-card" class:inactive={disabled}>
    <div class="stat-card-background"></div>
    <div class="title-container">
       <h4 class="no-margin uppercase">{label}</h4>
@@ -55,9 +57,10 @@
          bind:checked={value}
          ariaLabel={label}
          onChange={update}
+         {disabled}
       />
    {:else if type === "select"}
-      <select value={value ?? ""} onchange={update}>
+      <select value={value ?? ""} onchange={update} {disabled}>
          <option
             value=""
             disabled
@@ -78,6 +81,7 @@
          step={type === "number" ? "any" : undefined}
          {value}
          onchange={update}
+         {disabled}
       />
    {/if}
 </div>

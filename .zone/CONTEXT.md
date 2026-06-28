@@ -1,8 +1,8 @@
 ## Active Feature
-Ammunition item — port from old_project → .zone/techspecs/TECHSPEC-ammunition-item.md
+Magic items — complete half-done port from old_project → .zone/techspecs/TECHSPEC-magic-items.md
 
 ## Current Issue
-none — all issues closed, pending manual test in Foundry
+none (no TECHSPEC created — feature was straightforward port, no grill needed)
 
 ## Blockers
 none

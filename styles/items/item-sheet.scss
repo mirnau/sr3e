@@ -39,7 +39,8 @@
 				width: 100%;
 				display: flex;
 				justify-content: center;
-				margin-top: 0.25rem;
+				margin: 0;
+				padding: 0;
 
 				h4 {
 					width: 80%;
@@ -85,13 +86,14 @@
 		display: flex;
 		align-items: center;
 		justify-content: flex-start;
-		margin-top: 0;
+		margin: 0;
 		padding-left: 0.25rem;
 
 		h4 {
 			width: 100%;
 			text-align: left;
-			font-size: 0.65rem;
+			font-size: 0.75rem;
+			line-height: 1;
 			text-transform: uppercase;
 			letter-spacing: 0.08em;
 			color: var(--highlight-color-primary);
@@ -134,13 +136,30 @@
 
 	select {
 		flex-shrink: 0;
-		width: 55%;
+		width: 50%;
+		max-width: 50%;
 		padding: 0.15rem 0.25rem;
+		text-align: center;
 		border: 1px solid var(--highlight-color-primary);
 		background: var(--background-color);
 		box-shadow: inset 0 0 8px var(--highlight-color-primary);
 		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
 	}
+}
+
+// .sr3e select { width: 100% } in skinning/select.scss has the same specificity (0,1,1) and wins by
+// cascade order. Scope under .sr3e to reach (0,2,1) and beat it without !important.
+.sr3e .stat-field-card {
+	select {
+		width: 50%;
+		max-width: 50%;
+	}
+}
+
+// Greyed-out state for fields that are structurally present but not applicable given the current selection
+.stat-field-card.inactive {
+	opacity: 0.3;
+	pointer-events: none;
 }
 
 // Override sheetcard.scss's broad width:100% rule (specificity 0,3,1) which otherwise swamps stat-field-card fields.

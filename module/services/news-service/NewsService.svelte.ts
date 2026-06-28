@@ -4,7 +4,6 @@ import { BroadcastRegistry } from "./BroadcastRegistry";
 import { ControllerCoordinator } from "./ControllerCoordinator";
 import { FrameScheduler } from "./FrameScheduler";
 import { DurationEstimator } from "./DurationEstimator";
-import { NewsMessage } from "./NewsMessage";
 import { DisplayFrame } from "./DisplayFrame";
 import { BroadcasterActor } from "./BroadcasterActor";
 import { NewsSocket } from "./NewsSocket";
