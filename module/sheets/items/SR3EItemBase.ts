@@ -19,10 +19,19 @@ export class SR3EItemBase extends foundry.applications.sheets.ItemSheetV2 {
         this.apps = [];
     }
 
+    async close(options?: DeepPartial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
+        this._hideSheet();
+        return super.close(options);
+    }
+
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
-        if (this.element) this.element.style.visibility = "hidden";
+        this._hideSheet();
         this._unmountAllApps();
         super._tearDown(options);
+    }
+
+    protected _hideSheet(): void {
+        if (this.element) this.element.style.visibility = "hidden";
     }
 
     protected _onSubmit(_: Event): void {
