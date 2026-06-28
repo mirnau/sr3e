@@ -20,6 +20,7 @@ export class SR3EItemBase extends foundry.applications.sheets.ItemSheetV2 {
     }
 
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
+        if (this.element) this.element.style.visibility = "hidden";
         this._unmountAllApps();
         super._tearDown(options);
     }
