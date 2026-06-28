@@ -193,6 +193,14 @@
 	}
 }
 
+.weapon .image-mask {
+	@include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
+
+	img {
+		@include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
+	}
+}
+
 // Name input — skill-card border trick: outer wrapper = highlight fill, inner layer = dark fill inset 1px
 .large-input-wrapper {
 	position: relative;
