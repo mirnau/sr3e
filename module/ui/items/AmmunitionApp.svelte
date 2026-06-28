@@ -5,6 +5,7 @@ import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
 import StatCard from "../common-components/StatCard.svelte";
+import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
@@ -43,8 +44,8 @@ function kvOptions(map: Record<string, string>) {
             <StatCard {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)}     value={system.reloadMechanism} path="system" type="select" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
         </div>
         <div class="stat-grid two-column">
-            <StatCard {item} key="rounds"      label={localize(CONFIG.SR3E.AMMUNITION.rounds)}      value={system.rounds}      path="system" type="number" />
-            <StatCard {item} key="maxCapacity" label={localize(CONFIG.SR3E.AMMUNITION.maxcapacity)} value={system.maxCapacity} path="system" type="number" />
+            <LabeledNumberInput {item} key="rounds"      label={localize(CONFIG.SR3E.AMMUNITION.rounds)}      value={system.rounds}      path="system" />
+            <LabeledNumberInput {item} key="maxCapacity" label={localize(CONFIG.SR3E.AMMUNITION.maxcapacity)} value={system.maxCapacity} path="system" />
         </div>
     </ItemSheetComponent>
 

@@ -2,6 +2,7 @@
 import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import StatCard from "./StatCard.svelte";
+import LabeledNumberInput from "../items/LabeledNumberInput.svelte";
 import ItemSheetComponent from "./ItemSheetComponent.svelte";
 
 const p = $props<{ item: Item }>();
@@ -12,11 +13,8 @@ function kvOptions(map: Record<string, string>) {
     return Object.entries(map).map(([value, token]) => ({ value, label: localize(token) }));
 }
 
-const entries = [
-    { key: "days",        label: localize(CONFIG.SR3E.COMMODITY.days),        value: commodity.days,        path: "system.commodity", type: "number"   as const },
-    { key: "cost",        label: localize(CONFIG.SR3E.COMMODITY.cost),        value: commodity.cost,        path: "system.commodity", type: "number"   as const },
-    { key: "streetIndex", label: localize(CONFIG.SR3E.COMMODITY.streetIndex), value: commodity.streetIndex, path: "system.commodity", type: "number"   as const },
-    { key: "isBroken",    label: localize(CONFIG.SR3E.COMMODITY.isBroken),    value: commodity.isBroken,    path: "system.commodity", type: "checkbox" as const },
+const checkboxEntries = [
+    { key: "isBroken", label: localize(CONFIG.SR3E.COMMODITY.isBroken), value: commodity.isBroken, path: "system.commodity", type: "checkbox" as const },
 ];
 
 const legalityEntries = [
@@ -39,7 +37,10 @@ const legalityEntries = [
 <ItemSheetComponent>
     <h3>{localize(CONFIG.SR3E.COMMODITY.commodity)}</h3>
     <div class="stat-grid two-column">
-        {#each entries as entry}
+        <LabeledNumberInput {item} key="days"        label={localize(CONFIG.SR3E.COMMODITY.days)}        value={commodity.days}        path="system.commodity" />
+        <LabeledNumberInput {item} key="cost"        label={localize(CONFIG.SR3E.COMMODITY.cost)}        value={commodity.cost}        path="system.commodity" />
+        <LabeledNumberInput {item} key="streetIndex" label={localize(CONFIG.SR3E.COMMODITY.streetIndex)} value={commodity.streetIndex} path="system.commodity" />
+        {#each checkboxEntries as entry}
             <StatCard {item} {...entry} />
         {/each}
     </div>
