@@ -145,7 +145,7 @@
             <div class="broadcaster-image">
                <img src={actor.img} alt={actor.name} title={actor.name} />
             </div>
-            <div class="broadcaster-control">
+            <div class="broadcast-control">
                <div class="editable-actor-name">
                   <h1
                      class="no-margin"
@@ -165,6 +165,7 @@
                   <label class="broadcast-toggle-label">
                      <input
                         type="checkbox"
+                        class="sr3e-checkbox"
                         id="broadcasting-toggle"
                         bind:checked={$isBroadcastingStore}
                      />

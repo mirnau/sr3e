@@ -155,11 +155,51 @@
 
    }
 
-   img {
-      @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
-   }
 }
 
 header.window-header h1.window-title {
    margin: 0;
+}
+
+// ── Global image framing ──────────────────────────────────────────────────────
+// Outside @layer so it wins over Foundry's unlayered img rules.
+// Two-layer trick: wrapper = highlight-color fill + clip-path,
+// img = same clip-path inset 1px via padding → teal strip follows every edge
+// including diagonal polygon cuts.
+
+img {
+   border: none;
+   border-radius: 0;
+   vertical-align: middle;
+   @include clipped-corners(0.25rem, 0.25rem, 0.4rem, 0.25rem);
+}
+
+.image-mask,
+.dossier-img-btn,
+.broadcaster-image {
+   background: var(--highlight-color-primary);
+   padding: 1px;
+   @include clipped-corners(0.25rem, 0.25rem, 0.4rem, 0.25rem);
+
+   img {
+      display: block;
+      @include clipped-corners(0.25rem, 0.25rem, 0.4rem, 0.25rem);
+   }
+}
+
+// Hero image wrappers — larger corner cuts
+.image-mask {
+   @include clipped-corners(0.65rem, 0.65rem, 1.1rem, 0.65rem);
+
+   img {
+      @include clipped-corners(0.65rem, 0.65rem, 1.1rem, 0.65rem);
+   }
+}
+
+.dossier-img-btn {
+   @include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
+
+   img {
+      @include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
+   }
 }

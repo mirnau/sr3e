@@ -42,9 +42,9 @@ function buildSkillOptions() {
             case "language":  specializations = sys.languageSkill?.specializations ?? [];  break;
         }
 
-        for (let i = 0; i < specializations.length; i++) {
-            result.push({ value: `${skill.id}::${i}`, label: `${baseLabel} — ${specializations[i].name}` });
-        }
+        specializations.forEach((spec, i) => {
+            result.push({ value: `${skill.id}::${i}`, label: `${baseLabel} — ${spec.name}` });
+        });
     }
 
     skillOptions = result;
@@ -114,14 +114,20 @@ const rangeBandEntries = [
                     disabled={!skillOptions.length}
                     onselect={onSkillSelect}
                 />
-                <label class="inline-checkbox">
-                    <input
-                        type="checkbox"
-                        checked={system.isDefaulting}
-                        onchange={(e) => item.update({ "system.isDefaulting": (e.target as HTMLInputElement).checked }, { render: false })}
-                    />
-                    {localize("sr3e.common.isdefaulting")}
-                </label>
+                <div class="broadcast-control">
+                    <div class="broadcast-toggle">
+                        <label class="broadcast-toggle-label">
+                            <input
+                                type="checkbox"
+                                class="sr3e-checkbox"
+                                id="defaulting-toggle"
+                                checked={system.isDefaulting}
+                                onchange={(e) => item.update({ "system.isDefaulting": (e.target as HTMLInputElement).checked }, { render: false })}
+                            />
+                            {localize("sr3e.common.isdefaulting")}
+                        </label>
+                    </div>
+                </div>
             </div>
         {/if}
     </ItemSheetComponent>

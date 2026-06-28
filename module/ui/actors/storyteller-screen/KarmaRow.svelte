@@ -80,5 +80,5 @@
    <td>
       <button type="button" class="karma-refresh-btn" onclick={refreshKarmaPool} title="Restore karma pool to ceiling">↺</button>
    </td>
-   <td><input type="checkbox" bind:checked={$readyForCommit} /></td>
+   <td><input type="checkbox" class="sr3e-checkbox" bind:checked={$readyForCommit} /></td>
 </tr>

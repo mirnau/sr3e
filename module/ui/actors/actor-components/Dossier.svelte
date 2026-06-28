@@ -88,7 +88,7 @@ const profile = $derived(config.PROFILE);
 
    {#if $isDetailsOpenStore}
       <div in:slide={{ duration: 100, easing: cubicInOut }} out:slide={{ duration: 50, easing: cubicInOut }}>
-         <div>
+         <div class="input-frame">
             <input
                type="text"
                id="actor-name"

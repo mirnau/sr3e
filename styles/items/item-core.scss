@@ -163,12 +163,8 @@
             gap: 0.4rem;
         }
 
-        // Image cropped with uniform 0.25rem clipped corners
         .image-mask {
-            @include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
-
             img {
-                border-radius: 0;
                 width: 100%;
                 object-fit: cover;
             }

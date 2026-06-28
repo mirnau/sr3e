@@ -1,6 +1,7 @@
 @use "./sheetcard.scss";
 @use "./statcard.scss";
 @use "./items/item-sheet.scss";
+@use "./common-components/toggle.scss";
 @use "./common-components/journal-viewer.scss";
 @use "./actor/components/health.scss";
 @use "./actor/components/skills.scss";
@@ -25,4 +26,3 @@ form.application.sheet.sr3e.character {
 header.window-header {
     backdrop-filter: blur(8px);
 }
-

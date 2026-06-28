@@ -1,6 +1,7 @@
 export async function openFilePicker(document: Actor | Item): Promise<string> {
 	return new Promise((resolve) => {
-		const picker = new FilePicker();
+		const FP = foundry.applications.apps.FilePicker.implementation;
+		const picker = new FP();
 		picker.type = "image";
 		picker.callback = (path: string) => {
 			// @ts-ignore - img exists on Actor and Item at runtime

@@ -18,32 +18,40 @@
 	}
 
 	.sr3e-toolbar-button {
-		padding: 0.5rem 0.75rem;
-		font-size: 1rem;
-		background: rgba(42, 42, 42, 0.8);
+		position: relative;
+		min-width: 2rem;
+		height: 2rem;
+		padding: 0 0.6rem;
+		background: var(--highlight-color-primary);
+		border: none;
 		color: var(--text-color);
-		border: 1px solid rgba(75, 208, 255, 0.35);
 		cursor: pointer;
-		transition: all 0.2s ease;
-		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
-
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		font-size: 0.9rem;
+		transition: transform 0.15s ease;
+		@include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
 
-		&:hover {
-			background: rgba(58, 58, 58, 0.9);
-			border-color: var(--highlight-color-primary);
-			box-shadow: 0 0 8px rgba(65, 233, 202, 0.3);
-		}
-
-		&:active {
-			transform: scale(0.95);
+		&::after {
+			content: "";
+			position: absolute;
+			inset: 1px;
+			z-index: 0;
+			background: var(--background-color);
+			box-shadow: inset 0 0 8px var(--highlight-color-primary);
+			pointer-events: none;
+			@include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
 		}
 
 		i {
+			position: relative;
+			z-index: 1;
 			pointer-events: none;
 		}
+
+		&:hover  { transform: scale(1.05); }
+		&:active { transform: scale(0.97); }
 	}
 }
 
