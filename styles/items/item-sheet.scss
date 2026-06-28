@@ -201,6 +201,14 @@
 	}
 }
 
+.weapon .stat-field-card input[type="number"] {
+	font-size: 1.2rem;
+	font-weight: bold;
+	line-height: 1;
+	color: #fff;
+	text-shadow: 0 0 8px rgba(0, 255, 200, 0.5);
+}
+
 // Name input — skill-card border trick: outer wrapper = highlight fill, inner layer = dark fill inset 1px
 .large-input-wrapper {
 	position: relative;
