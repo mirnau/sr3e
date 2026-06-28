@@ -3,6 +3,7 @@ import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import StatCard from "./StatCard.svelte";
 import LabeledNumberInput from "../items/LabeledNumberInput.svelte";
+import LabeledBoolean from "../items/LabeledBoolean.svelte";
 import ItemSheetComponent from "./ItemSheetComponent.svelte";
 
 const p = $props<{ item: Item }>();
@@ -13,9 +14,6 @@ function kvOptions(map: Record<string, string>) {
     return Object.entries(map).map(([value, token]) => ({ value, label: localize(token) }));
 }
 
-const checkboxEntries = [
-    { key: "isBroken", label: localize(CONFIG.SR3E.COMMODITY.isBroken), value: commodity.isBroken, path: "system.commodity", type: "checkbox" as const },
-];
 
 const legalityEntries = [
     {
@@ -40,9 +38,7 @@ const legalityEntries = [
         <LabeledNumberInput {item} key="days"        label={localize(CONFIG.SR3E.COMMODITY.days)}        value={commodity.days}        path="system.commodity" />
         <LabeledNumberInput {item} key="cost"        label={localize(CONFIG.SR3E.COMMODITY.cost)}        value={commodity.cost}        path="system.commodity" />
         <LabeledNumberInput {item} key="streetIndex" label={localize(CONFIG.SR3E.COMMODITY.streetIndex)} value={commodity.streetIndex} path="system.commodity" />
-        {#each checkboxEntries as entry}
-            <StatCard {item} {...entry} />
-        {/each}
+        <LabeledBoolean {item} key="isBroken" label={localize(CONFIG.SR3E.COMMODITY.isBroken)} value={commodity.isBroken} path="system.commodity" />
     </div>
     <div class="stat-grid single-column">
         {#each legalityEntries as entry}

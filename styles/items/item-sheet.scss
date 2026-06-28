@@ -188,6 +188,10 @@
 	}
 }
 
+.stat-field-card.labeled-boolean {
+	min-height: 2.3rem;
+}
+
 // Greyed-out state for fields that are structurally present but not applicable given the current selection
 .stat-field-card.inactive {
 	opacity: 0.3;
