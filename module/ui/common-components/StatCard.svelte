@@ -1,5 +1,6 @@
 <script lang="ts">
    import SR3EItem from "../../documents/SR3EItem";
+   import Switch from "./Switch.svelte";
 
    let {
       item,
@@ -50,11 +51,10 @@
    </div>
 
    {#if type === "checkbox"}
-      <input
-         type="checkbox"
-         checked={value}
-         onchange={update}
-         aria-label={label}
+      <Switch
+         bind:checked={value}
+         ariaLabel={label}
+         onChange={update}
       />
    {:else if type === "select"}
       <select value={value ?? ""} onchange={update}>

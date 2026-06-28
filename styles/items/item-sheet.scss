@@ -126,6 +126,12 @@
 		--checkbox-checked-color: var(--text-color);
 	}
 
+	.switch {
+		flex-shrink: 0;
+		width: 2rem;
+		height: 1rem;
+	}
+
 	select {
 		flex-shrink: 0;
 		width: 55%;
