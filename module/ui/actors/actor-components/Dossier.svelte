@@ -144,19 +144,21 @@ const profile = $derived(config.PROFILE);
 
       <div class="flavor-edit-block last-flavor-edit-block">
          <h4>{localize(profile.quote)}</h4>
-         <div
-            class="editable-field quote"
-            role="presentation"
-            contenteditable="true"
-            onblur={updateQuote}
-            onkeypress={(e) => {
-               if (e.key === "Enter") {
-                  e.preventDefault();
-                  e.currentTarget.blur();
-               }
-            }}
-         >
-            {actor.system?.profile?.quote || ""}
+         <div class="input-frame">
+            <div
+               class="editable-field quote"
+               role="presentation"
+               contenteditable="true"
+               onblur={updateQuote}
+               onkeypress={(e) => {
+                  if (e.key === "Enter") {
+                     e.preventDefault();
+                     e.currentTarget.blur();
+                  }
+               }}
+            >
+               {actor.system?.profile?.quote || ""}
+            </div>
          </div>
       </div>
    {/if}
