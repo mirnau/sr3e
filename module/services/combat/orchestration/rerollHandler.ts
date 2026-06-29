@@ -1,3 +1,4 @@
+import { SR3ERoll } from "./SR3ERoll";
 import {
     renderSimpleRollSummary,
     renderAdvancedRollSummary,
@@ -30,14 +31,19 @@ export async function handleDieReroll(
     const karmaBalance: number = actor.system?.karma?.karmaPool?.value ?? 0;
     if (karmaBalance <= 0) return;
 
-    const roll = new (Roll as any)("1d6");
-    await roll.evaluate();
-    const newResult: number = roll.total;
+    const tn = typeof flag.options.targetNumber === "number" ? flag.options.targetNumber : null;
+    const sr3eRoll = tn !== null
+        ? await SR3ERoll.build(1, tn).evaluate()
+        : await SR3ERoll.buildOpen(1).evaluate();
 
-    await (game as any).dice3d?.showForRoll?.(roll, (game as any).user, true);
+    const dieResult = (sr3eRoll.terms[0] as any)?.results?.[0];
+    const newResult: number = dieResult?.total ?? dieResult?.result ?? 1;
+    const isExploded: boolean = dieResult?.exploded ?? false;
+
+    await (game as any).dice3d?.showForRoll?.(sr3eRoll.foundryRoll, (game as any).user, true);
 
     const newResults = flag.results.map((entry, i) =>
-        i === dieIndex ? { result: newResult, exploded: false, rerolled: true } : entry,
+        i === dieIndex ? { result: newResult, exploded: isExploded, rerolled: true } : entry,
     );
 
     await actor.update?.(
