@@ -141,9 +141,6 @@
 
 <div class="asset-category-container static-full-width">
    <div class="asset-masonry-background-layer"></div>
-   <div class="asset-container-header">
-      {localize(CONFIG.SR3E.INVENTORY.inventory)}
-   </div>
    <div bind:this={gridContainer} class="asset-masonry-grid">
       <div class="asset-grid-sizer"></div>
       <div class="asset-gutter-sizer"></div>

@@ -238,7 +238,7 @@
                width: calc(100% - 2px);
                height: calc(100% - 2px);
                background: var(--background-color);
-               box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+               box-shadow: inset 0 0 20px var(--highlight-color-primary);
                pointer-events: none;
                @include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
             }
