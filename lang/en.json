@@ -157,8 +157,8 @@
     },
     "karma": {
       "advancementratio": "Advancement Ratio",
-      "burnKarmaPool": "Burn Karma",
-      "burnKarmaPoolChat": "{name} burned 1 Karma.",
+      "burnKarmaPool": "Burn",
+      "burnKarmaPoolChat": "{name} burned 1 Karma Pool point (permanent).",
       "burnKarmaPoolConfirm": "Burn 1 Karma? (Permanent)",
       "goodKarma": "Good Karma",
       "karma": "Karma",
@@ -167,7 +167,11 @@
       "lifetimeKarma": "Lifetime Karma",
       "pendingKarmaReward": "Pending Karma Reward",
       "readyForCommit": "Ready to Commit",
-      "spentKarma": "Spent Karma"
+      "spendKarmaPool": "Spend",
+      "spendKarmaPoolChat": "{name} spent 1 Karma Pool point.",
+      "spentKarma": "Spent Karma",
+      "useKarmaPool": "Use Karma Pool",
+      "useKarmaPoolConfirm": "Spend (temporary) or Burn (permanent) 1 Karma Pool point?"
     },
     "legalpermit": {
       "1": "Permit Level 1",
@@ -214,6 +218,7 @@
       "weight": "Weight"
     },
     "modal": {
+      "cancel": "Cancel",
       "confirm": "Confirm",
       "decline": "Decline",
       "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",

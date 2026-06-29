@@ -15,16 +15,22 @@ export class KarmaPoolBurnService {
         return get(StoreManager.Instance.GetRWStore<number>(actor, "karma.karmaPool.value")) > 0;
     }
 
+    spend(actor: Actor): void {
+        const poolStore = StoreManager.Instance.GetRWStore<number>(actor, "karma.karmaPool.value");
+        poolStore.set(get(poolStore) - 1);
+        void this.#postChat(actor, CONFIG.SR3E.KARMA.spendKarmaPoolChat);
+    }
+
     burn(actor: Actor): void {
         const poolStore = StoreManager.Instance.GetRWStore<number>(actor, "karma.karmaPool.value");
         const ceilingStore = StoreManager.Instance.GetRWStore<number>(actor, "karma.karmaPoolCeiling");
         poolStore.set(get(poolStore) - 1);
         ceilingStore.set(get(ceilingStore) - 1);
-        void this.#postChat(actor);
+        void this.#postChat(actor, CONFIG.SR3E.KARMA.burnKarmaPoolChat);
     }
 
-    async #postChat(actor: Actor): Promise<void> {
-        const content = game.i18n.format(CONFIG.SR3E.KARMA.burnKarmaPoolChat, { name: (actor as any).name ?? "" });
+    async #postChat(actor: Actor, messageKey: string): Promise<void> {
+        const content = game.i18n.format(messageKey, { name: (actor as any).name ?? "" });
         const speaker = (ChatMessage as any).getSpeaker?.({ actor }) ?? {};
         await (ChatMessage as any).create?.({ content, speaker });
     }

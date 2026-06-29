@@ -35,14 +35,19 @@ const goodKarmaDisplay: Readable<number> = derived(
    }
 );
 
-async function handleBurnKarmaPool() {
-   const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize(localization?.burnKarmaPool) },
-      content: `<p>${localize(localization?.burnKarmaPoolConfirm)}</p>`,
-      yes: { label: localize(modal?.confirm) },
-      no: { label: localize(modal?.decline) },
+async function handleUseKarmaPool() {
+   const result = await (foundry.applications.api.DialogV2 as any).wait({
+      window: { title: localize(localization?.useKarmaPool) },
+      content: `<p>${localize(localization?.useKarmaPoolConfirm)}</p>`,
+      buttons: [
+         { action: "spend", label: localize(localization?.spendKarmaPool), default: true },
+         { action: "burn", label: localize(localization?.burnKarmaPool) },
+         { action: "cancel", label: localize(modal?.cancel) },
+      ],
+      rejectClose: false,
    });
-   if (confirmed) KarmaPoolBurnService.Instance().burn(actor);
+   if (result === "spend") KarmaPoolBurnService.Instance().spend(actor);
+   else if (result === "burn") KarmaPoolBurnService.Instance().burn(actor);
 }
 
 onDestroy(() => storeManager.Unsubscribe(actor));
@@ -51,7 +56,7 @@ onDestroy(() => storeManager.Unsubscribe(actor));
 {#if actor}
    <Foldout label={localize(localization.karma)}>
       <div class="stat-card-grid">
-         <StatCard label={localize(localization.karmaPool)} onclick={($karmaPoolValue ?? 0) > 0 ? () => { void handleBurnKarmaPool(); } : undefined}>
+         <StatCard label={localize(localization.karmaPool)} onclick={($karmaPoolValue ?? 0) > 0 ? () => { void handleUseKarmaPool(); } : undefined}>
             <span class="attribute-value">{$karmaPool ?? 0}</span>
          </StatCard>
          <StatCard label={localize(localization.goodKarma)}>

@@ -8,6 +8,7 @@ export const COMMON_KEYS = [
 export const MODAL_KEYS = [
   "confirm",
   "decline",
+  "cancel",
   "deleteskill",
   "deleteskilltitle"
 ] as const;
