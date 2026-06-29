@@ -34,6 +34,8 @@ export async function handleDieReroll(
     await roll.evaluate();
     const newResult: number = roll.total;
 
+    await (game as any).dice3d?.showForRoll?.(roll, (game as any).user, true);
+
     const newResults = flag.results.map((entry, i) =>
         i === dieIndex ? { result: newResult, exploded: false, rerolled: true } : entry,
     );
