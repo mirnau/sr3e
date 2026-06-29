@@ -1,17 +1,19 @@
 <script lang="ts">
 import { onDestroy, untrack } from "svelte";
+import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import Foldout from "./Foldout.svelte";
 import SkillsActive from "./skills/SkillsActive.svelte";
 import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
-import Foldout from "./Foldout.svelte";
+import Inventory from "./inventory/Inventory.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
    const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-let activeTab = $state<"active" | "knowledge" | "language">("active");
+let activeTab = $state<"active" | "knowledge" | "language" | "inventory" | "garage" | "effects">("active");
 
 storeManager.Subscribe(actor);
 onDestroy(() => storeManager.Unsubscribe(actor));
@@ -72,6 +74,24 @@ const languageSkills = $derived(
             class:active={activeTab === "language"}
             onclick={() => (activeTab = "language")}
          ><span>Language</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "inventory"}
+            onclick={() => (activeTab = "inventory")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.inventory)}</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "garage"}
+            onclick={() => (activeTab = "garage")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.garage)}</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={activeTab === "effects"}
+            onclick={() => (activeTab = "effects")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.effects)}</span></button>
       </div>
       <div class="skills-content">
          <div class="skills-content-inner">
@@ -79,8 +99,14 @@ const languageSkills = $derived(
                <SkillsActive {actor} skills={activeSkills} />
             {:else if activeTab === "knowledge"}
                <SkillsKnowledge {actor} skills={knowledgeSkills} />
-            {:else}
+            {:else if activeTab === "language"}
                <SkillsLanguage {actor} skills={languageSkills} />
+            {:else if activeTab === "inventory"}
+               <Inventory {actor} />
+            {:else if activeTab === "garage"}
+               <p>{localize(CONFIG.SR3E.INVENTORY.garage)}</p>
+            {:else}
+               <p>{localize(CONFIG.SR3E.INVENTORY.effects)}</p>
             {/if}
          </div>
       </div>
