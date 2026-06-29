@@ -295,6 +295,8 @@
       "ammunitionClass": "Ammunition Class",
       "damage": "Damage",
       "damageType": "Damage Type",
+      "isDefaulting": "Defaulting On Roll",
+      "linkedskill": "Linked Skill",
       "mode": "Mode",
       "range": "Range",
       "rangeband": "Range Band",

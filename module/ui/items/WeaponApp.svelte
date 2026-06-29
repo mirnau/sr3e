@@ -4,9 +4,9 @@ import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
+import LabeledBoolean from "./LabeledBoolean.svelte";
 import LabeledDropdown from "./LabeledDropdown.svelte";
 import LabeledNumberInput from "./LabeledNumberInput.svelte";
-import ComboSearch from "../common-components/ComboSearch.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
@@ -16,7 +16,6 @@ const item = untrack(() => p.item);
 const system = item.system as Record<string, any>;
 
 let name = $state(item.name as string);
-let comboSearchValue = $state<string>(system.linkedSkillId ?? "");
 let skillOptions = $state<{ value: string; label: string }[]>([]);
 
 function kvOptions(map: Record<string, string>) {
@@ -49,11 +48,6 @@ function buildSkillOptions() {
     }
 
     skillOptions = result;
-}
-
-function onSkillSelect(value: string) {
-    comboSearchValue = value;
-    item.update({ "system.linkedSkillId": value }, { render: false } as any);
 }
 
 onMount(() => {
@@ -92,32 +86,22 @@ onDestroy(() => {
         </div>
 
         {#if (item as any).parent}
-            <div class="stat-card">
-                <div class="stat-card-background"></div>
-                <h3>Skill for resolving rolls</h3>
-                <ComboSearch
-                    bind:value={comboSearchValue}
-                    options={skillOptions}
-                    placeholder="Select linked skill..."
-                    nomatchplaceholder="No matching skill"
-                    disabled={!skillOptions.length}
-                    onselect={onSkillSelect}
-                />
-                <div class="broadcast-control">
-                    <div class="broadcast-toggle">
-                        <label class="broadcast-toggle-label">
-                            <input
-                                type="checkbox"
-                                class="sr3e-checkbox"
-                                id="defaulting-toggle"
-                                checked={system.isDefaulting}
-                                onchange={(e) => item.update({ "system.isDefaulting": (e.target as HTMLInputElement).checked }, { render: false })}
-                            />
-                            {localize("sr3e.common.isdefaulting")}
-                        </label>
-                    </div>
-                </div>
-            </div>
+            <LabeledDropdown
+                {item}
+                key="linkedSkillId"
+                label={localize(CONFIG.SR3E.WEAPON.linkedskill)}
+                value={system.linkedSkillId ?? ""}
+                path="system"
+                options={skillOptions}
+                disabled={!skillOptions.length}
+            />
+            <LabeledBoolean
+                {item}
+                key="isDefaulting"
+                label={localize(CONFIG.SR3E.WEAPON.isDefaulting)}
+                value={system.isDefaulting ?? false}
+                path="system"
+            />
         {/if}
     </ItemSheetComponent>
 
