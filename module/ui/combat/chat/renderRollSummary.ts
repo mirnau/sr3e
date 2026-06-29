@@ -1,6 +1,6 @@
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 
-export type DieEntry = { result: number; exploded?: boolean; rerolled?: boolean };
+export type DieEntry = { result: number; exploded?: boolean; rerolled?: boolean; bought?: boolean };
 
 type DieTerm = { results?: { result: number; total?: number; active?: boolean; exploded?: boolean }[] };
 
@@ -47,6 +47,9 @@ function tnLine(opts: Record<string, unknown>): string {
 }
 
 function dieSpan(entry: DieEntry, index: number, rerollable: boolean, success: boolean): string {
+    if (entry.bought) {
+        return `<span class="sr3e-die sr3e-bought" data-die-index="${index}" title="Bought success (Karma Pool burned)"><i class="fa-solid fa-coins"></i></span>`;
+    }
     let cls = "sr3e-die";
     if (success) cls += " sr3e-success";
     else if (entry.result === 1) cls += " sr3e-botch";
@@ -92,13 +95,13 @@ export function renderAdvancedRollSummary(
     results: DieEntry[],
 ): string {
     const tn = roll.options.targetNumber != null ? Number(roll.options.targetNumber) : null;
-    const successes = tn !== null ? results.filter(r => r.result >= tn).length : null;
+    const successes = tn !== null ? results.filter(r => r.bought || r.result >= tn).length : null;
     const isDisastrous = results.length > 0 && results.every(r => r.result === 1);
 
     const diceHtml = results.length > 0
         ? results.map((e, i) => {
-            const success = tn !== null && e.result >= tn;
-            return dieSpan(e, i, !e.rerolled && !success, success);
+            const success = tn !== null && !e.bought && e.result >= tn;
+            return dieSpan(e, i, !e.bought && !success, success);
         }).join(" ")
         : emptyDice();
 

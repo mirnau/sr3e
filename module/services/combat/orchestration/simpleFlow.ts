@@ -29,6 +29,7 @@ export async function executeSimpleFlow(
         options: snapshot.options,
         meta: snapshot.meta,
         results,
+        rerollCount: 0,
     } : undefined;
 
     const speaker = typeof ChatMessage !== "undefined"

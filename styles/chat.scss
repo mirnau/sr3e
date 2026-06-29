@@ -103,6 +103,8 @@ body.game .chat-message .sr3e-die {
    border: 1px solid rgba(75, 208, 255, 0.35);
    border-radius: 6px;
    box-shadow: inset 0 0 8px darkslategrey;
+   pointer-events: all;
+   cursor: pointer;
 }
 
 body.game .chat-message .sr3e-die.sr3e-success,
@@ -111,13 +113,25 @@ body.game .chat-message .sr3e-roll-successes {
    text-shadow: 0 0 6px rgba(0, 255, 200, 0.5);
 }
 
+// Failures — amber border signals "these will be re-rolled if you click"
 body.game .chat-message .sr3e-die.sr3e-rerollable {
-   cursor: pointer;
    border-color: rgba(255, 200, 60, 0.5);
 
    &:hover {
       border-color: rgba(255, 200, 60, 1);
       box-shadow: inset 0 0 8px darkslategrey, 0 0 6px rgba(255, 200, 60, 0.4);
+   }
+}
+
+// Bought successes — gold coin icon, permanent KP spend
+body.game .chat-message .sr3e-die.sr3e-bought {
+   color: #f0c040;
+   border-color: rgba(240, 192, 64, 0.6);
+   text-shadow: 0 0 6px rgba(240, 192, 64, 0.5);
+
+   &:hover {
+      border-color: rgba(240, 192, 64, 1);
+      box-shadow: inset 0 0 8px darkslategrey, 0 0 6px rgba(240, 192, 64, 0.4);
    }
 }
 
@@ -151,14 +165,40 @@ body.game .chat-message .sr3e-roll-failure {
 }
 
 body.game .chat-message button {
-   color: var(--chat-text-color);
-   background: rgba(0, 0, 0, 0.25);
-   border: 1px solid rgba(75, 208, 255, 0.35);
-   border-radius: 6px;
-   transition: border-color 150ms ease, box-shadow 150ms ease;
+   pointer-events: all;
 }
 
-body.game .chat-message button:hover {
-   border-color: var(--chat-highlight-color);
-   box-shadow: 0 0 10px rgba(0, 255, 200, 0.35);
+// SR3E action buttons — clipped-corner neon style matching the sheet design.
+// drop-shadow applies after clip-path, sidestepping z-index stacking issues.
+body.game .chat-message :is(.sr3e-responder-button, .sr3e-resist-damage-button) {
+   padding: 0.25rem 0.75rem;
+   background: rgba(17, 17, 17, 0.95);
+   border: none;
+   color: var(--highlight-color-primary);
+   cursor: pointer;
+   font-size: 0.8rem;
+   letter-spacing: 0.04em;
+   @include clipped-corners(0.3rem, 0.3rem, 0.5rem, 0.3rem);
+   filter: drop-shadow(0 0 1px var(--highlight-color-primary)) drop-shadow(0 0 3px rgba(65, 233, 202, 0.4));
+   transition: filter 0.15s ease;
+
+   &:hover {
+      filter: drop-shadow(0 0 1px var(--highlight-color-primary)) drop-shadow(0 0 6px rgba(65, 233, 202, 0.7));
+   }
+
+   &:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      filter: none;
+   }
+}
+
+// Decline / cancel buttons use the accent pink
+body.game .chat-message .sr3e-responder-decline {
+   color: var(--accent-color-primary);
+   filter: drop-shadow(0 0 1px var(--accent-color-primary)) drop-shadow(0 0 3px rgba(248, 36, 160, 0.4));
+
+   &:hover {
+      filter: drop-shadow(0 0 1px var(--accent-color-primary)) drop-shadow(0 0 6px rgba(248, 36, 160, 0.7));
+   }
 }

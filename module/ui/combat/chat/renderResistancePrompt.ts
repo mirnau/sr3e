@@ -17,11 +17,12 @@ export function renderResistancePrompt(
 ): string {
     const level = STEP_LABELS[prep.stagedStepBeforeResist] ?? prep.stagedStepBeforeResist.toUpperCase();
     const track = prep.trackKey === "stun" ? "Stun" : "Physical";
+    const boxes = prep.boxesIfUnresisted;
 
     return `<div class="sr3e-resistance-prompt">
-  <div class="sr3e-resistance-header">${defender.name} — Resist ${level} ${track}</div>
+  <div class="sr3e-resistance-header">${defender.name} — ${boxes} ${level} ${track}</div>
   <div class="sr3e-resistance-source">from ${weaponName}</div>
   <div class="sr3e-resistance-tn">${tnBreakdown(prep)}</div>
-  <button class="sr3e-resist-damage-button">Roll Resistance</button>
+  <button class="sr3e-resist-damage-button"><span>Roll Resistance</span></button>
 </div>`;
 }
