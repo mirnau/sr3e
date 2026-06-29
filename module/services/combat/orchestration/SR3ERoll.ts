@@ -1,6 +1,6 @@
 import type { RollSnapshot } from "../engine/types";
 
-type DieResult = { result: number; active?: boolean };
+type DieResult = { result: number; total?: number; active?: boolean };
 type DieTerm = { results?: DieResult[] };
 type FoundryRoll = {
     evaluate: () => Promise<unknown>;
@@ -45,6 +45,10 @@ export class SR3ERoll {
         return this._terms;
     }
 
+    get foundryRoll(): FoundryRoll | null {
+        return this._foundryRoll;
+    }
+
     private activeResults(): DieResult[] {
         return this._terms.flatMap(t => t.results ?? []).filter(r => r.active !== false);
     }
@@ -52,13 +56,13 @@ export class SR3ERoll {
     countSuccesses(): number | null {
         if (this.tn === null) return null;
         const tn = this.tn;
-        return this.activeResults().filter(r => r.result >= tn).length;
+        return this.activeResults().filter(r => (r.total ?? r.result) >= tn).length;
     }
 
     isGlitch(): boolean {
         if (this.tn === null) return false;
         const results = this.activeResults();
-        return results.length > 0 && results.every(r => r.result === 1);
+        return results.length > 0 && results.every(r => (r.total ?? r.result) === 1);
     }
 
     toSnapshot(): RollSnapshot {

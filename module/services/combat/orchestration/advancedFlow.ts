@@ -38,6 +38,7 @@ export async function executeAdvancedFlow(
     await (ChatMessage as any).create?.({
         content: html,
         speaker,
+        rolls: roll.foundryRoll ? [roll.foundryRoll] : undefined,
         flags: reroll ? { sr3e: { reroll } } : undefined,
     });
 }

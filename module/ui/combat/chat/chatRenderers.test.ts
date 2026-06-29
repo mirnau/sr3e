@@ -26,7 +26,7 @@ describe("renderRollSummary", () => {
     it("marks successes with sr3e-success class", () => {
         const html = renderRollSummary(actor, snap([5, 3, 6], 4));
         expect(html).toContain('class="sr3e-die sr3e-success"');
-        expect(html).toContain('class="sr3e-die"');
+        expect(html).toContain('class="sr3e-die sr3e-rerollable"');
     });
     it("shows success count", () => {
         const html = renderRollSummary(actor, snap([5, 6, 2], 4));

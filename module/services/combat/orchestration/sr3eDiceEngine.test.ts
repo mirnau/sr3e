@@ -16,37 +16,37 @@ describe("accumulate", () => {
     it("non-6 first roll never explodes", () => {
         mockRoll(3);
         const [r] = engine.accumulate(1, 4);
-        expect(r).toEqual({ result: 3, active: true, exploded: false });
+        expect(r).toEqual({ result: 3, total: 3, active: true, exploded: false });
     });
 
     it("cap=Infinity: 6→6→3 accumulates to 15, exploded=true", () => {
         mockRoll(6, 6, 3);
         const [r] = engine.accumulate(1, Infinity);
-        expect(r).toEqual({ result: 15, active: true, exploded: true });
+        expect(r).toEqual({ result: 3, total: 15, active: true, exploded: true });
     });
 
     it("cap=4: first roll=6, total=6≥4 → stops immediately, exploded=false", () => {
         mockRoll(6);
         const [r] = engine.accumulate(1, 4);
-        expect(r).toEqual({ result: 6, active: true, exploded: false });
+        expect(r).toEqual({ result: 6, total: 6, active: true, exploded: false });
     });
 
     it("cap=8: 6→6 = 12, stops when total≥cap on second roll, exploded=true", () => {
         mockRoll(6, 6, 3);
         const [r] = engine.accumulate(1, 8);
-        expect(r).toEqual({ result: 12, active: true, exploded: true });
+        expect(r).toEqual({ result: 6, total: 12, active: true, exploded: true });
     });
 
     it("cap=8: 6→1 = 7 < 8, stops (non-6), exploded=true", () => {
         mockRoll(6, 1);
         const [r] = engine.accumulate(1, 8);
-        expect(r).toEqual({ result: 7, active: true, exploded: true });
+        expect(r).toEqual({ result: 1, total: 7, active: true, exploded: true });
     });
 
     it("cap=Infinity: single 6 chains once then stops on non-6", () => {
         mockRoll(6, 4);
         const [r] = engine.accumulate(1, Infinity);
-        expect(r).toEqual({ result: 10, active: true, exploded: true });
+        expect(r).toEqual({ result: 4, total: 10, active: true, exploded: true });
     });
 
     it("returns one result per die in pool", () => {

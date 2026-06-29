@@ -45,12 +45,15 @@ describe("executeSimpleFlow", () => {
         await executeSimpleFlow(setup(false), setup(false).rollState, roll, {});
         expect(spy).not.toHaveBeenCalled();
     });
-    it("roll.toMessage called with flavor when selfPublish true", async () => {
-        (globalThis as Record<string, unknown>).ChatMessage = { getSpeaker: vi.fn().mockReturnValue({}) };
+    it("ChatMessage.create called with rolls array when selfPublish true", async () => {
+        const createFn = vi.fn().mockResolvedValue(undefined);
+        (globalThis as Record<string, unknown>).ChatMessage = {
+            getSpeaker: vi.fn().mockReturnValue({}),
+            create: createFn,
+        };
         const roll = await makeRoll();
-        const spy = vi.spyOn(roll, "toMessage").mockResolvedValue(undefined);
         await executeSimpleFlow(setup(true), setup(true).rollState, roll, {});
-        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ flavor: "Skill Roll" }));
+        expect(createFn).toHaveBeenCalledWith(expect.objectContaining({ rolls: expect.any(Array) }));
         delete (globalThis as Record<string, unknown>).ChatMessage;
     });
 });

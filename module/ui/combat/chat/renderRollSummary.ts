@@ -2,7 +2,7 @@ import type { RollSnapshot } from "../../../services/combat/engine/types";
 
 export type DieEntry = { result: number; exploded?: boolean; rerolled?: boolean };
 
-type DieTerm = { results?: { result: number; active?: boolean; exploded?: boolean }[] };
+type DieTerm = { results?: { result: number; total?: number; active?: boolean; exploded?: boolean }[] };
 
 type SnapshotCore = {
     options: Record<string, unknown>;
@@ -15,7 +15,7 @@ export function extractDieResults(terms: unknown[]): DieEntry[] {
     return (terms as DieTerm[])
         .flatMap(t => t.results ?? [])
         .filter(r => r.active !== false)
-        .map(r => ({ result: r.result, exploded: r.exploded }));
+        .map(r => ({ result: r.total ?? r.result, exploded: r.exploded }));
 }
 
 // ── Shared primitives ────────────────────────────────────────────────────────
