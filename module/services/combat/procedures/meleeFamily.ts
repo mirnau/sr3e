@@ -1,5 +1,6 @@
 import { buildDamagePacket } from "../damagePacket";
 import { buildResistance } from "../resistanceEngine";
+import { totalNumber } from "../../../models/common/modifiableNumber";
 import type { DamagePacket } from "../damagePacket";
 import type { ResistanceBuild } from "../resistanceEngine";
 
@@ -8,7 +9,7 @@ type AttackerSystem = {
 };
 
 type WeaponSystem = {
-    damage?: number;
+    damage?: unknown;
     damageType?: string;
     levelDelta?: number;
 };
@@ -27,7 +28,7 @@ export function planStrike(
     const ws = weapon.system as WeaponSystem;
 
     const str = as.attributes?.strength?.total ?? as.attributes?.strength?.value ?? 0;
-    const bonus = ws.damage ?? 0;
+    const bonus = totalNumber(ws.damage, 0);
     const power = str + bonus;
 
     const calledShotDelta = situational.calledShot ? (situational.calledShotStages ?? 1) : 0;

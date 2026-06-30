@@ -2,16 +2,18 @@ import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 import RangeBandModel from "./item-components/RangeBand";
 import RollDataModel from "./item-components/RollData";
+import { modifiableNumber } from "../common/modifiableNumber";
+import ModifiableNumberModel from "./item-components/ModifiableNumber";
 
 type WeaponSchema = {
   mode: StringField;
   ammunitionClass: StringField;
-  damage: NumberField;
+  damage: EmbeddedDataField<typeof ModifiableNumberModel>;
   damageType: StringField;
   shotsPerRound: NumberField;
   reach: NumberField;
-  range: NumberField;
-  recoilComp: NumberField;
+  range: EmbeddedDataField<typeof ModifiableNumberModel>;
+  recoilComp: EmbeddedDataField<typeof ModifiableNumberModel>;
   reloadMechanism: StringField;
   linkedSkillId: StringField;
   journalId: StringField;
@@ -24,6 +26,13 @@ type WeaponSchema = {
 };
 
 export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSchema, BaseItem> {
+  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
+    source.damage = modifiableNumber(source.damage);
+    source.range = modifiableNumber(source.range);
+    source.recoilComp = modifiableNumber(source.recoilComp);
+    return (foundry.abstract.TypeDataModel as any).migrateData.call(this, source);
+  }
+
   static defineSchema(): WeaponSchema {
     return {
       mode: new StringField({
@@ -34,10 +43,7 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSc
         required: true,
         initial: "",
       }),
-      damage: new NumberField({
-        required: true,
-        initial: 0,
-      }),
+      damage: new EmbeddedDataField(ModifiableNumberModel),
       damageType: new StringField({
         required: true,
         initial: "",
@@ -51,15 +57,8 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSc
         initial: 0,
         min: 0,
       }),
-      range: new NumberField({
-        required: true,
-        initial: 0,
-        integer: true,
-      }),
-      recoilComp: new NumberField({
-        required: true,
-        initial: 0.0,
-      }),
+      range: new EmbeddedDataField(ModifiableNumberModel),
+      recoilComp: new EmbeddedDataField(ModifiableNumberModel),
       reloadMechanism: new StringField({
         required: true,
         initial: "",

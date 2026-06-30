@@ -5,16 +5,13 @@ import ItemSheetComponent from "../../common-components/ItemSheetComponent.svelt
 import ItemSheetWrapper from "../../common-components/ItemSheetWrapper.svelte";
 import Switch from "../../common-components/Switch.svelte";
 import ActiveEffectsEditor from "../../../foundry/applications/ActiveEffectsEditor";
+import { gadgetTargetFromEffect, gadgetTargetLabel } from "../../../services/gadgets/gadgetTargets";
 
 const p = $props<{ document: Item | Actor; activeEffects: ActiveEffect[]; sheet: unknown }>();
 const doc = untrack(() => p.document);
 
 const gadgetName = (p.activeEffects[0] as any)?.flags?.sr3e?.gadget?.name ?? "Gadget";
-const gadgetType = (p.activeEffects[0] as any)?.flags?.sr3e?.gadget?.gadgetType ?? "—";
-
-function labelForType(type: string): string {
-    return localize(CONFIG.SR3E.GADGET_TYPES[type as keyof typeof CONFIG.SR3E.GADGET_TYPES] ?? type);
-}
+const targetItemType = gadgetTargetFromEffect(p.activeEffects[0]) ?? "—";
 
 function durationLabel(ae: ActiveEffect): string {
     const d = (ae as any).duration;
@@ -33,7 +30,7 @@ function openEditor(ae: ActiveEffect) {
         <h3>{gadgetName}</h3>
         <div class="stat-grid two-column">
             <div class="stat-card"><h4>{localize(CONFIG.SR3E.GADGET.type)}:</h4>
-                <span>{labelForType(gadgetType)}</span></div>
+                <span>{gadgetTargetLabel(targetItemType)}</span></div>
         </div>
     </ItemSheetComponent>
 

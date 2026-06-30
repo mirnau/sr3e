@@ -1,17 +1,38 @@
 <script lang="ts">
 import { localize } from "../../services/utilities";
 import ComboSearch from "./ComboSearch.svelte";
+import type { GadgetChangeType, GadgetPropertyOption } from "../../services/gadgets/gadgetTargets";
 
-type Change = { key: string; mode: number; value: string; priority: number };
-type Option = { value: string; label: string };
+type Change = { key: string; type: string; value: string; priority: number };
+
+const changeTypeOptions: { value: GadgetChangeType; label: string }[] = [
+    { value: "add", label: "ADD" },
+    { value: "subtract", label: "SUBTRACT" },
+    { value: "override", label: "OVERRIDE" },
+];
 
 const p = $props<{
     change: Change;
     index: number;
-    propertyOptions: Option[];
+    propertyOptions: GadgetPropertyOption[];
     onUpdate: (index: number, field: string, value: unknown) => void;
     onDelete: (index: number) => void;
 }>();
+
+const selectedProperty = $derived(p.propertyOptions.find(option => option.value === p.change.key));
+const visibleChangeTypeOptions = $derived(
+    selectedProperty
+        ? changeTypeOptions.filter(option => selectedProperty.changeTypes.includes(option.value))
+        : changeTypeOptions
+);
+
+function selectProperty(value: string) {
+    p.onUpdate(p.index, "key", value);
+    const property = p.propertyOptions.find(option => option.value === value);
+    if (property && !property.changeTypes.includes(p.change.type as GadgetChangeType)) {
+        p.onUpdate(p.index, "type", property.changeTypes[0]);
+    }
+}
 </script>
 
 <tr class="effect-change-row">
@@ -22,14 +43,14 @@ const p = $props<{
             css="effect-change-search"
             placeholder={localize(CONFIG.SR3E.EFFECTS.selectProperty)}
             nomatchplaceholder={localize(CONFIG.SR3E.EFFECTS.noMatch)}
-            onselect={(v) => p.onUpdate(p.index, "key", v)}
+            onselect={selectProperty}
         />
     </td>
     <td class="effect-change-cell effect-change-cell--mode">
         <div class="effect-change-frame effect-change-frame--select">
-            <select value={p.change.mode} onchange={(e) => p.onUpdate(p.index, "mode", parseInt((e.target as HTMLSelectElement).value))}>
-                {#each Object.entries(CONST.ACTIVE_EFFECT_MODES).filter(([label]) => label !== "CUSTOM" && label !== "MULTIPLY") as [label, val]}
-                    <option value={val}>{label}</option>
+            <select value={p.change.type} onchange={(e) => p.onUpdate(p.index, "type", (e.target as HTMLSelectElement).value)}>
+                {#each visibleChangeTypeOptions as option}
+                    <option value={option.value}>{option.label}</option>
                 {/each}
             </select>
         </div>

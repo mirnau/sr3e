@@ -1,3 +1,4 @@
+import { totalNumber } from "../../models/common/modifiableNumber";
 import type { Modifier } from "./modifierList";
 
 type PhaseKey = string; // "${round}:${pass}:${actorId}"
@@ -8,12 +9,13 @@ const oocMap = new Map<string, OOCEntry[]>();
 
 const OOC_WINDOW_MS = 3000;
 
-type FireMode = "ss" | "sa" | "bf" | "fa";
+type FireMode = "manual" | "semiauto" | "burst" | "fullauto" | "energy";
 type WeaponCategory = "heavy" | "shotgun" | "mounted" | "standard";
 
 type WeaponSystem = {
-    fireMode?: FireMode;
+    mode?: string;
     category?: WeaponCategory;
+    recoilComp?: unknown;
 };
 
 type CombatData = { active?: boolean; round?: number; pass?: number };
@@ -72,7 +74,7 @@ function recoilMultiplier(weapon: { system: Record<string, unknown> }, fireMode:
     const ws = weapon.system as WeaponSystem;
     if (ws.category === "mounted") return 0.5;
     if (ws.category === "heavy") return 2;
-    if (ws.category === "shotgun" && fireMode === "bf") return 2;
+    if (ws.category === "shotgun" && fireMode === "burst") return 2;
     return 1;
 }
 
@@ -82,22 +84,29 @@ export function recoilModifier(
     declaredRounds: number,
 ): Modifier | null {
     const ws = weapon.system as WeaponSystem;
-    const mode = ws.fireMode ?? "ss";
+    const mode = (ws.mode ?? "manual") as FireMode;
     const priorShots = inCombat() ? getPhaseShots(actorId) : getOOCShots(actorId);
     const mult = recoilMultiplier(weapon, mode);
 
     let rawPenalty = 0;
 
     switch (mode) {
-        case "ss": rawPenalty = 0; break;
-        case "sa": rawPenalty = priorShots >= 1 ? 1 : 0; break;
-        case "bf":
-            rawPenalty = declaredRounds === 2 ? 2 : priorShots + 3; break;
-        case "fa":
-            rawPenalty = priorShots; break;
+        case "manual":
+        case "energy":
+            rawPenalty = 0;
+            break;
+        case "semiauto":
+            rawPenalty = priorShots >= 1 ? 1 : 0;
+            break;
+        case "burst":
+            rawPenalty = declaredRounds === 2 ? 2 : priorShots + 3;
+            break;
+        case "fullauto":
+            rawPenalty = priorShots;
+            break;
     }
 
-    const penalty = Math.floor(rawPenalty * mult);
+    const penalty = Math.max(0, Math.floor(rawPenalty * mult) - totalNumber(ws.recoilComp, 0));
     if (penalty === 0) return null;
     return { name: "recoil", value: penalty };
 }

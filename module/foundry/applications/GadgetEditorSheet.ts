@@ -1,10 +1,11 @@
 import { mount, unmount } from "svelte";
 import WeaponModApp from "../../ui/items/gadgets/WeaponModApp.svelte";
+import { gadgetTargetFromEffect } from "../../services/gadgets/gadgetTargets";
 
 type SvelteApp = Record<string, unknown>;
 
 const TYPE_MAP: Record<string, unknown> = {
-    weaponmod: WeaponModApp,
+    weapon: WeaponModApp,
 };
 
 export default class GadgetEditorSheet extends foundry.applications.api.ApplicationV2 {
@@ -31,8 +32,8 @@ export default class GadgetEditorSheet extends foundry.applications.api.Applicat
 
     protected _replaceHTML(_result: unknown, windowContent: HTMLElement): void {
         if (this.#app) { unmount(this.#app); this.#app = undefined; }
-        const gadgetType = (this.#effects[0] as any).flags?.sr3e?.gadget?.gadgetType as string;
-        const SvelteComponent = (TYPE_MAP[gadgetType] ?? WeaponModApp) as Parameters<typeof mount>[0];
+        const targetItemType = this.#effects[0] ? gadgetTargetFromEffect(this.#effects[0]) ?? "weapon" : "weapon";
+        const SvelteComponent = (TYPE_MAP[targetItemType] ?? WeaponModApp) as Parameters<typeof mount>[0];
         this.#app = mount(SvelteComponent, {
             target: windowContent,
             props: { document: this.#document, activeEffects: this.#effects, sheet: this },

@@ -1,3 +1,4 @@
+import { totalNumber } from "../../models/common/modifiableNumber";
 import type { DamageStep } from "./damageMath";
 
 export type RangeBand = "short" | "medium" | "long" | "extreme";
@@ -27,6 +28,7 @@ export type DamagePacket = {
 
 type WeaponSystem = {
     power?: number;
+    damage?: unknown;
     damageType?: string;
     levelDelta?: number;
 };
@@ -38,7 +40,7 @@ export function buildDamagePacket(
     _rangeBand?: RangeBand | null,
 ): DamagePacket {
     const ws = weapon.system as WeaponSystem;
-    let power = (ws.power ?? 0) + plan.powerDelta;
+    let power = (ws.power ?? totalNumber(ws.damage, 0)) + plan.powerDelta;
     let damageType = (ws.damageType ?? "m") as string;
     let levelDelta = (ws.levelDelta ?? 0) + plan.levelDelta;
     let attackTNAdd = plan.attackerTNMod;

@@ -42,7 +42,7 @@ $effect(() => {
     const filtered =
         searchTerm.trim() === ""
             ? options
-            : options.filter((o) => o.label.toLowerCase().includes(searchTerm.toLowerCase()));
+            : options.filter((o) => matchesSearch(o, searchTerm));
 
     filteredOptions = isOpen ? filtered : filtered;
     if (isOpen) {
@@ -56,6 +56,12 @@ function openDropdown() {
     isOpen = true;
     searchTerm = "";
     updateDropdown();
+}
+
+function matchesSearch(option: Option, term: string): boolean {
+    const query = term.toLowerCase();
+    return option.label.toLowerCase().includes(query)
+        || option.value.toLowerCase().includes(query);
 }
 
 function closeDropdown() {
@@ -124,6 +130,7 @@ function updateDropdown() {
         const list = document.createElement("div");
         list.style.position = "relative";
         list.style.maxHeight = maxHeight;
+        list.style.overflowY = "auto";
         list.setAttribute("role", "listbox");
 
         if (filteredOptions.length) {

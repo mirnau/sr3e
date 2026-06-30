@@ -9,16 +9,15 @@ import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import ActiveEffectsViewer from "../common-components/ActiveEffectsViewer.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
+import { gadgetTargetOptions, normalizeGadgetTargetItemType } from "../../services/gadgets/gadgetTargets";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
 const system = item.system as Record<string, any>;
 
 let name = $state(item.name as string);
-
-function kvOptions(map: Record<string, string>) {
-    return Object.entries(map).map(([value, token]) => ({ value, label: localize(token) }));
-}
+const typeOptions = gadgetTargetOptions();
+const gadgetType = normalizeGadgetTargetItemType(system.type);
 </script>
 
 <ItemSheetWrapper csslayout="triple">
@@ -35,7 +34,7 @@ function kvOptions(map: Record<string, string>) {
             />
         </div>
         <div class="stat-grid single-column">
-            <LabeledDropdown {item} key="type" label={localize(CONFIG.SR3E.GADGET.type)} value={system.type} path="system" options={kvOptions(CONFIG.SR3E.GADGET_TYPES)} />
+            <LabeledDropdown {item} key="type" label={localize(CONFIG.SR3E.GADGET.type)} value={gadgetType} path="system" options={typeOptions} />
         </div>
     </ItemSheetComponent>
 

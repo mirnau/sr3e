@@ -1,3 +1,4 @@
+import { totalNumber } from "../../models/common/modifiableNumber";
 import type { Modifier } from "./modifierList";
 
 export type RangeBand = "short" | "medium" | "long" | "extreme";
@@ -16,20 +17,22 @@ export const BASE_TN: Record<RangeBand, number> = {
 const BAND_ORDER: RangeBand[] = ["short", "medium", "long", "extreme"];
 
 type WeaponRanges = {
-    short?: number;
-    medium?: number;
-    long?: number;
-    extreme?: number;
+    rangeBand?: Partial<Record<RangeBand, unknown>>;
+    short?: unknown;
+    medium?: unknown;
+    long?: unknown;
+    extreme?: unknown;
     minimumRange?: number;
 };
 
 type MeasureFn = (from: { x: number; y: number }, to: { x: number; y: number }) => { distance: number };
 
 function bandForDistance(ranges: WeaponRanges, distance: number): RangeBand | null {
-    if (distance <= (ranges.short ?? 0)) return "short";
-    if (distance <= (ranges.medium ?? 0)) return "medium";
-    if (distance <= (ranges.long ?? 0)) return "long";
-    if (distance <= (ranges.extreme ?? 0)) return "extreme";
+    const source = ranges.rangeBand ?? ranges;
+    if (distance <= totalNumber(source.short, 0)) return "short";
+    if (distance <= totalNumber(source.medium, 0)) return "medium";
+    if (distance <= totalNumber(source.long, 0)) return "long";
+    if (distance <= totalNumber(source.extreme, 0)) return "extreme";
     return null;
 }
 

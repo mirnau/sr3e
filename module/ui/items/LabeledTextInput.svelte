@@ -31,7 +31,7 @@ function onChange(e: Event) {
 }
 </script>
 
-<div class="stat-card stat-field-card labeled-field-card" class:inactive={disabled}>
+<div class="stat-card stat-field-card labeled-field-card labeled-text-input" class:inactive={disabled}>
     <div class="stat-card-background"></div>
     <div class="title-container">
         <h4 class="no-margin uppercase">{label}</h4>

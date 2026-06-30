@@ -7,10 +7,11 @@ import LabeledTextInput from "../items/LabeledTextInput.svelte";
 import LabeledDropdown from "../items/LabeledDropdown.svelte";
 import LabeledBoolean from "../items/LabeledBoolean.svelte";
 import LabeledNumberInput from "../items/LabeledNumberInput.svelte";
+import { activeEffectPropertyOptions } from "./activeEffectPropertyOptions";
+import type { GadgetPropertyOption } from "../../services/gadgets/gadgetTargets";
 
-type Change = { key: string; mode: number; value: string; priority: number };
+type Change = { key: string; type: string; value: string; priority: number };
 type Option = { value: string; label: string };
-
 const p = $props<{ document: Item | Actor; activeEffect: ActiveEffect }>();
 const doc = untrack(() => p.document);
 const effect = untrack(() => p.activeEffect) as any;
@@ -22,8 +23,8 @@ let target = $state((effect.flags?.sr3e?.target as string) ?? "self");
 let disabled = $state(!!effect.disabled);
 let durationUnits = $state((rawDuration.units ?? rawDuration.type ?? "none") as string);
 let durationValue = $state(Math.round((rawDuration.value as number) ?? 0));
-let changes = $state<Change[]>([...(effect.changes ?? [])]);
-let propertyOptions = $state<Option[]>([]);
+let changes = $state<Change[]>(normalizeChanges(effect.toObject?.().changes ?? effect.changes ?? []));
+let propertyOptions = $state<GadgetPropertyOption[]>([]);
 
 const targetOptions: Option[] = [
     { value: "self", label: "self" },
@@ -39,14 +40,21 @@ onMount(() => enumeratePaths());
 onDestroy(() => { void commit(); });
 
 function enumeratePaths() {
-    const isCharacter = target === "character";
-    const source = isCharacter
-        ? foundry.utils.flattenObject({ system: (new (CONFIG.Actor.dataModels["character"] as any)({})).toObject?.() ?? {} })
-        : foundry.utils.flattenObject({ system: doc.toObject?.()?.system ?? {} });
-    propertyOptions = Object.keys(source)
-        .filter(k => k.endsWith(".mod"))
-        .map(k => ({ value: k, label: k }))
-        .sort((a, b) => a.label.localeCompare(b.label));
+    propertyOptions = activeEffectPropertyOptions({ document: doc, activeEffect: effect, target });
+}
+
+function normalizeChanges(rawChanges: Record<string, unknown>[]): Change[] {
+    return rawChanges.map((change) => ({
+        key: String(change.key ?? ""),
+        type: normalizeChangeType(change.type),
+        value: String(change.value ?? ""),
+        priority: Number(change.priority ?? 0),
+    }));
+}
+
+function normalizeChangeType(type: unknown): string {
+    if (type === "add" || type === "subtract" || type === "override") return type;
+    return "add";
 }
 
 async function commit() {
@@ -54,10 +62,15 @@ async function commit() {
         name,
         disabled,
         transfer: target === "character",
-        duration: { units: durationUnits, value: Math.round(durationValue) },
+        duration: durationForCommit(),
         changes: [...changes],
         flags: { ...effect.flags, sr3e: { ...effect.flags?.sr3e, target } },
     }, { render: false });
+}
+
+function durationForCommit(): Record<string, unknown> {
+    if (durationUnits === "none") return {};
+    return { units: durationUnits, value: Math.round(durationValue) };
 }
 
 function onTargetChange(val: string) {
@@ -70,7 +83,7 @@ function updateChange(index: number, field: string, value: unknown) {
     changes = changes.map((c, i) => i === index ? { ...c, [field]: value } : c);
 }
 
-function addChange() { changes = [...changes, { key: "", mode: 2, value: "", priority: 0 }]; }
+function addChange() { changes = [...changes, { key: "", type: "add", value: "", priority: 0 }]; }
 function deleteChange(index: number) { changes = changes.filter((_, i) => i !== index); }
 </script>
 
@@ -78,7 +91,6 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.EFFECTS.effectscomposer)}</h3>
         <div class="stat-grid single-column">
-
             <LabeledTextInput
                 key="name"
                 label={localize(CONFIG.SR3E.EFFECTS.name)}
@@ -114,10 +126,9 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
                     key="durationValue"
                     label={localize(CONFIG.SR3E.EFFECTS.value)}
                     value={durationValue}
-                    onUpdate={(val) => { durationValue = val; void commit(); }}
-                />
+                onUpdate={(val) => { durationValue = val; void commit(); }}
+            />
             {/if}
-
         </div>
     </ItemSheetComponent>
 

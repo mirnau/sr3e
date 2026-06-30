@@ -2,6 +2,8 @@
 import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import Switch from "./Switch.svelte";
+import GadgetEditorSheet from "../../foundry/applications/GadgetEditorSheet";
+import { normalizeGadgetTargetItemType } from "../../services/gadgets/gadgetTargets";
 
 const p = $props<{
     document: Item | Actor;
@@ -34,8 +36,7 @@ async function onDelete() {
     p.onHandleEffectTriggerUI();
 }
 
-async function onEdit() {
-    const { default: GadgetEditorSheet } = await import("../../foundry/applications/GadgetEditorSheet");
+function onEdit() {
     sheetInstance = new GadgetEditorSheet(doc, p.activeEffects);
     (sheetInstance as any).render(true);
 }
@@ -43,6 +44,7 @@ async function onEdit() {
 async function onDetach() {
     const actor = (doc as any).parent as Actor;
     const gadgetFlags = (primary as any).flags?.sr3e?.gadget ?? {};
+    const targetItemType = normalizeGadgetTargetItemType(gadgetFlags.targetItemType ?? gadgetFlags.gadgetType);
     const clonedEffects = p.activeEffects.map(ae => ({
         ...((ae as any).toObject()), _id: foundry.utils.randomID(),
     }));
@@ -50,7 +52,7 @@ async function onDetach() {
         name: gadgetFlags.name ?? "Gadget",
         img: gadgetFlags.img ?? "icons/svg/mystery-man.svg",
         type: "gadget",
-        system: { type: gadgetFlags.gadgetType ?? "", commodity: gadgetFlags.commodity ?? {} },
+        system: { type: targetItemType, commodity: gadgetFlags.commodity ?? {} },
         effects: clonedEffects,
     }], { render: false });
     if (!created) return;

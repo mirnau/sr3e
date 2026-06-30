@@ -216,6 +216,10 @@
 	}
 }
 
+.sheet-card-outline .stat-grid .stat-field-card.labeled-text-input input[type="text"] {
+	width: 100%;
+}
+
 // Stat grid
 .stat-grid {
 	display: inline-grid;

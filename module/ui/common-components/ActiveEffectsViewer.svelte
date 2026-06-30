@@ -45,7 +45,7 @@ async function addEffect() {
         origin: (doc as any).uuid,
         disabled: false,
         transfer: true,
-        duration: { units: "none", value: 0 },
+        duration: {},
         changes: [],
         flags: { sr3e: { source: "manual" } },
     }], { render: false });

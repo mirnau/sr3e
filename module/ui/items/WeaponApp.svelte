@@ -11,6 +11,7 @@ import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
 import GadgetViewer from "../common-components/GadgetViewer.svelte";
+import { baseNumber } from "../../models/common/modifiableNumber";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
@@ -115,19 +116,19 @@ onDestroy(() => {
             <LabeledDropdown {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)} value={system.reloadMechanism} path="system" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
         </div>
         <div class="stat-grid two-column">
-            <LabeledNumberInput {item} key="damage"     label={localize(CONFIG.SR3E.WEAPON.damage)}             value={system.damage}     path="system" />
-            <LabeledNumberInput {item} key="range"      label={localize(CONFIG.SR3E.WEAPON.range)}              value={system.range}      path="system" />
-            <LabeledNumberInput {item} key="recoilComp" label={localize(CONFIG.SR3E.WEAPON.recoilCompensation)} value={system.recoilComp} path="system" />
+            <LabeledNumberInput {item} key="damage.value"     label={localize(CONFIG.SR3E.WEAPON.damage)}             value={baseNumber(system.damage)}     path="system" />
+            <LabeledNumberInput {item} key="range.value"      label={localize(CONFIG.SR3E.WEAPON.range)}              value={baseNumber(system.range)}      path="system" />
+            <LabeledNumberInput {item} key="recoilComp.value" label={localize(CONFIG.SR3E.WEAPON.recoilCompensation)} value={baseNumber(system.recoilComp)} path="system" />
         </div>
     </ItemSheetComponent>
 
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.WEAPON.rangeband)}</h3>
         <div class="stat-grid two-column">
-            <LabeledNumberInput {item} key="rangeBand.short"   label={localize(CONFIG.SR3E.WEAPON.rangebandshort)}   value={system.rangeBand?.short}   path="system" />
-            <LabeledNumberInput {item} key="rangeBand.medium"  label={localize(CONFIG.SR3E.WEAPON.rangebandmedium)}  value={system.rangeBand?.medium}  path="system" />
-            <LabeledNumberInput {item} key="rangeBand.long"    label={localize(CONFIG.SR3E.WEAPON.rangebandlong)}    value={system.rangeBand?.long}    path="system" />
-            <LabeledNumberInput {item} key="rangeBand.extreme" label={localize(CONFIG.SR3E.WEAPON.rangebandextreme)} value={system.rangeBand?.extreme} path="system" />
+            <LabeledNumberInput {item} key="rangeBand.short.value"   label={localize(CONFIG.SR3E.WEAPON.rangebandshort)}   value={baseNumber(system.rangeBand?.short)}   path="system" />
+            <LabeledNumberInput {item} key="rangeBand.medium.value"  label={localize(CONFIG.SR3E.WEAPON.rangebandmedium)}  value={baseNumber(system.rangeBand?.medium)}  path="system" />
+            <LabeledNumberInput {item} key="rangeBand.long.value"    label={localize(CONFIG.SR3E.WEAPON.rangebandlong)}    value={baseNumber(system.rangeBand?.long)}    path="system" />
+            <LabeledNumberInput {item} key="rangeBand.extreme.value" label={localize(CONFIG.SR3E.WEAPON.rangebandextreme)} value={baseNumber(system.rangeBand?.extreme)} path="system" />
         </div>
     </ItemSheetComponent>
 
