@@ -8,6 +8,7 @@ import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
 import StorytellerScreenSheet from "./module/sheets/actors/StorytellerScreenSheet";
 import SR3EActor from "./module/documents/SR3EActor";
 import SR3EItem from "./module/documents/SR3EItem";
+import SR3ECombat from "./module/documents/SR3ECombat";
 import { getNewsService } from "./module/services/news-service/NewsService.svelte";
 import MetatypeModel from "./module/models/items/MetatypeModel";
 import MetatypeSheet from "./module/sheets/items/MetatypeSheet";
@@ -22,6 +23,8 @@ import TransactionModel from "./module/models/items/TransactionModel";
 import TransactionSheet from "./module/sheets/items/TransactionSheet";
 import MagicModel from "./module/models/items/MagicModel";
 import MagicSheet from "./module/sheets/items/MagicSheet";
+import GadgetModel from "./module/models/items/GadgetModel";
+import GadgetItemSheet from "./module/sheets/items/GadgetItemSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -57,6 +60,7 @@ function configure(): void {
 
    SR3EActor.Register();
    SR3EItem.Register();
+   SR3ECombat.Register();
 }
 
 function registerDocumentTypes(registrations: SR3EDocumentRegistration[]): void {
@@ -178,6 +182,12 @@ async function registerHooks(): Promise<void> {
             model: MagicModel,
             sheet: MagicSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.gadget,
+            model: GadgetModel,
+            sheet: GadgetItemSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -203,6 +213,15 @@ async function registerHooks(): Promise<void> {
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    console.log("SR3E | preCreateActor hook registered");
+
+   // New scenes default to 1 meter per square (SR3E uses metric distances).
+   // GMs can override per-scene as needed.
+   Hooks.on("preCreateScene", (_scene: unknown, data: Record<string, unknown>) => {
+      if (data.grid == null) data.grid = {};
+      const grid = data.grid as Record<string, unknown>;
+      if (grid.distance == null) grid.distance = 1;
+      if (grid.units == null) grid.units = "m";
+   });
 }
 
 // Execute in correct order

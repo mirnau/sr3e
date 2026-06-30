@@ -120,6 +120,31 @@
       "hacking": "Hacking",
       "spell": "Spell"
     },
+    "effects": {
+      "actions": "Actions",
+      "addChange": "AddChange",
+      "attributeKey": "AttributeKey",
+      "changeMode": "ChangeMode",
+      "changesHeader": "ChangesHeader",
+      "disabled": "Disabled",
+      "durationType": "DurationType",
+      "effectscomposer": "Effectscomposer",
+      "enabled": "Enabled",
+      "name": "Name",
+      "noMatch": "NoMatch",
+      "permanent": "Permanent",
+      "priority": "Priority",
+      "selectProperty": "SelectProperty",
+      "target": "Target",
+      "value": "Value"
+    },
+    "gadget": {
+      "gadget": "Gadget",
+      "type": "Type"
+    },
+    "gadgetTypes": {
+      "weaponmod": "Weaponmod"
+    },
     "health": {
       "deadly": "Deadly",
       "health": "Health",
@@ -329,6 +354,31 @@
       "canlayer": "Can Layer",
       "impact": "Impact",
       "wearable": "Wearable"
+    },
+    "gadget": {
+      "gadget": "Gadget",
+      "type": "Type"
+    },
+    "gadgetTypes": {
+      "weaponmod": "Weapon Modification"
+    },
+    "effects": {
+      "name": "Name",
+      "durationType": "Duration",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "actions": "Actions",
+      "effectscomposer": "Effect Composer",
+      "changesHeader": "Changes",
+      "addChange": "Add Change",
+      "attributeKey": "Attribute",
+      "changeMode": "Mode",
+      "value": "Value",
+      "priority": "Priority",
+      "target": "Target",
+      "permanent": "Permanent",
+      "selectProperty": "Select property…",
+      "noMatch": "No match"
     }
   }
 }

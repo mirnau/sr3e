@@ -20,6 +20,7 @@ export const typekeys = Object.freeze({
   wearable: "wearable",
   transaction: "transaction",
   magic: "magic",
+  gadget: "gadget",
 } as const);
 
 export const flags = Object.freeze({
