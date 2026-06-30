@@ -7,8 +7,7 @@ import Dossier from "./actor-components/Dossier.svelte";
 import Health from "./actor-components/Health.svelte";
 import Karma from "./actor-components/Karma.svelte";
 import Movement from "./actor-components/Movement.svelte";
-import Skills from "./actor-components/Skills.svelte";
-import ActiveEffectsViewer from "../common-components/ActiveEffectsViewer.svelte";
+import Register from "./actor-components/Register.svelte";
 import type SR3EActor from "../../documents/SR3EActor";
 
 const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
@@ -31,12 +30,9 @@ const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
         <Karma {actor} />
     </SheetCard>
     <SheetCard span="dynamic">
-        <Skills {actor} />
+        <Register {actor} />
     </SheetCard>
     <SheetCard span={2}>
         <Health {actor} />
-    </SheetCard>
-    <SheetCard span={2}>
-        <ActiveEffectsViewer document={actor} />
     </SheetCard>
 </PackeryGrid>
