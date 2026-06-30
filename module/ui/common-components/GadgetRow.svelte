@@ -13,6 +13,8 @@ const doc = untrack(() => p.document);
 const primary = untrack(() => p.activeEffects[0]);
 if (!primary) throw new Error("GadgetRow: no primary effect");
 
+const canDetach = (doc as any).isEmbedded && (doc as any).parent instanceof Actor;
+
 let sheetInstance: unknown = null;
 let enabled = $state(!!(primary as any).flags?.sr3e?.gadget?.isEnabled ?? true);
 
@@ -37,6 +39,27 @@ async function onEdit() {
     sheetInstance = new GadgetEditorSheet(doc, p.activeEffects);
     (sheetInstance as any).render(true);
 }
+
+async function onDetach() {
+    const actor = (doc as any).parent as Actor;
+    const gadgetFlags = (primary as any).flags?.sr3e?.gadget ?? {};
+    const clonedEffects = p.activeEffects.map(ae => ({
+        ...((ae as any).toObject()), _id: foundry.utils.randomID(),
+    }));
+    const [created] = await (actor as any).createEmbeddedDocuments("Item", [{
+        name: gadgetFlags.name ?? "Gadget",
+        img: gadgetFlags.img ?? "icons/svg/mystery-man.svg",
+        type: "gadget",
+        system: { type: gadgetFlags.gadgetType ?? "", commodity: gadgetFlags.commodity ?? {} },
+        effects: clonedEffects,
+    }], { render: false });
+    if (!created) return;
+    (sheetInstance as any)?.close?.();
+    sheetInstance = null;
+    const ids = p.activeEffects.map(ae => ae.id!);
+    await (doc as any).deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
+    p.onHandleEffectTriggerUI();
+}
 </script>
 
 <tr>
@@ -48,6 +71,7 @@ async function onEdit() {
     <td>
         <div class="cell-content">
             <div class="buttons-horizontal-distribution square">
+                {#if canDetach}<button type="button" class="fas fa-eject" onclick={onDetach}></button>{/if}
                 <button type="button" class="fas fa-edit" onclick={onEdit}></button>
                 <button type="button" class="fas fa-trash-can" onclick={onDelete}></button>
             </div>

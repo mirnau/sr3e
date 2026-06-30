@@ -10,6 +10,7 @@ import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
+import GadgetViewer from "../common-components/GadgetViewer.svelte";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
@@ -130,6 +131,7 @@ onDestroy(() => {
         </div>
     </ItemSheetComponent>
 
+    <GadgetViewer document={item} />
     <Commodity {item} />
     <Portability {item} />
     <JournalViewer document={item} />
