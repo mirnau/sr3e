@@ -33,7 +33,7 @@ async function onDelete() {
 }
 
 async function onEdit() {
-    const { default: GadgetEditorSheet } = await import("./GadgetEditorSheet");
+    const { default: GadgetEditorSheet } = await import("../../foundry/applications/GadgetEditorSheet");
     sheetInstance = new GadgetEditorSheet(doc, p.activeEffects);
     (sheetInstance as any).render(true);
 }
