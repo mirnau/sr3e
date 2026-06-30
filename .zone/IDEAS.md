@@ -21,7 +21,7 @@ Old system had `SR3Edie.js` — custom Foundry Die that disables native `x` expl
 
 **Design freedom**: implement as a pure TS accumulation loop wired as the default evaluator inside `SR3ERoll.evaluate()`. No Foundry subclass required — the injectable evaluator pattern already supports this cleanly. Register a lightweight Foundry Die shim only if the visual chat renderer needs it.
 
-## Overflow damage rules
+## [in-plan] Overflow damage rules
 
 SR3E Condition Monitor overflow mechanics — not yet planned.
 
@@ -49,7 +49,7 @@ SR3E Condition Monitor overflow mechanics — not yet planned.
 
 Scope: requires new overflow track on actor (separate from the existing 10-box Physical), bleed-out timer tied to Combat Turn hooks, stabilization test flows. Non-trivial; plan separately.
 
-## First Aid item (Trauma Patch / Medkit)
+## [in-plan] First Aid item (Trauma Patch / Medkit)
 
 Special item that enables stabilization tests for characters in Physical overflow.
 

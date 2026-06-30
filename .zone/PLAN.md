@@ -19,9 +19,11 @@
 [x] MUST: Magic items — complete half-done port from old_project (Svelte app + sheet + data model, WeaponApp style)
 [x] MUST: Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
 [x] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
-[~] MUST: Weapon charging mechanic
-[ ] SHOULD: Clickable dice in chat for karma re-rolls
-[ ] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
+[x] MUST: Weapon charging mechanic
+[x] SHOULD: Clickable dice in chat for karma re-rolls
+[~] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
+[ ] MUST: Overflow damage rules (stun→physical conversion, bleeding out, death threshold)
+[ ] MUST: First Aid items (trauma patch, medkit — depends on overflow)
 [ ] COULD: Magic system (SpellApp, drain, foci, astral)
 [ ] COULD: Chat / socket challenge–response flows
 [ ] COULD: Vehicle economy and transactions

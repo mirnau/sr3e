@@ -1,8 +1,8 @@
 ## Active Feature
-Weapon charging mechanic → .zone/techspecs/TECHSPEC-weapon-charging-mechanic.md
+Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
 
 ## Current Issue
-#151 — Rename AmmunitionModel.class → ammunitionClass and fix ammo service field mismatch
+#153 — GadgetModel + item registration
 
 ## Blockers
 none
