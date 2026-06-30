@@ -1,8 +1,8 @@
 ## Active Feature
-Inventory / AssetManager → .zone/techspecs/TECHSPEC-inventory-assetmanager.md
+Weapon charging mechanic → .zone/techspecs/TECHSPEC-weapon-charging-mechanic.md
 
 ## Current Issue
-All issues closed (#143–#146). Ready for manual testing in Foundry.
+#151 — Rename AmmunitionModel.class → ammunitionClass and fix ammo service field mismatch
 
 ## Blockers
 none

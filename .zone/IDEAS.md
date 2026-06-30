@@ -21,6 +21,43 @@ Old system had `SR3Edie.js` — custom Foundry Die that disables native `x` expl
 
 **Design freedom**: implement as a pure TS accumulation loop wired as the default evaluator inside `SR3ERoll.evaluate()`. No Foundry subclass required — the injectable evaluator pattern already supports this cleanly. Register a lightweight Foundry Die shim only if the visual chat renderer needs it.
 
+## Overflow damage rules
+
+SR3E Condition Monitor overflow mechanics — not yet planned.
+
+**Stun overflow → Physical:**
+- Stun track full (10 boxes) → excess Stun converts 1:1 into Physical boxes.
+- Character falls unconscious immediately; stays unconscious until Stun healed below Deadly.
+- Black IC mental damage follows same overflow path.
+
+**Physical overflow → Death:**
+- Physical track full (10 boxes) → overflow tracked separately.
+- Safe overflow capacity = Body Rating boxes. Exceed that → instant death.
+- While in overflow: character "bleeding out" — takes 1 box additional damage every (Body Rating) Combat Turns.
+- If bleeding-out boxes push total past Body Rating → death.
+
+**Stabilization options:**
+- Biotech First Aid: TN 10 test. Success stops bleed-out.
+- Self-stabilization: Body (10) test if first aid fails.
+- Trauma patch: Body (4 + modifiers) test.
+- Stabilize spell: Force ≥ current overflow damage.
+- Hand of God (optional): burn entire Karma Pool + Good Karma; once per lifetime.
+
+**Optional — Deadlier Over-Damage:**
+- Trigger: attack Power > Body × 1.5.
+- Every 2 extra successes past Deadly staging → +1 overflow box.
+
+Scope: requires new overflow track on actor (separate from the existing 10-box Physical), bleed-out timer tied to Combat Turn hooks, stabilization test flows. Non-trivial; plan separately.
+
+## First Aid item (Trauma Patch / Medkit)
+
+Special item that enables stabilization tests for characters in Physical overflow.
+
+**Trauma patch:** consumable item; applying it lets the patient attempt Body (4 + modifiers) test to stabilize bleed-out. One-shot use — decrement quantity on use.
+**Medkit / Biotech kit:** enables the Biotech TN 10 stabilization test (possibly already covered by skill roll, but item could gate the option or provide dice pool bonus).
+
+Scope: new item type or sub-type of existing consumable; activation triggers a stabilization roll flow; probably integrates with overflow rules above. Stub until overflow is specced.
+
 ## [in-plan] Clickable dice in chat for karma re-rolls
 
 After a roll, individual dice in the chat message should be clickable buttons. Pressing one re-rolls that specific die, deducts karma appropriately (incremental cost per re-roll), and updates the chat message in-place with the new result. Deferred: post-roll karma, separate UI surface from the composer.

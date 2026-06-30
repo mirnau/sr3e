@@ -3,8 +3,10 @@ import { getAttachedAmmo, findCompatibleAmmo, consume, ammoDirectives } from "./
 
 const ammoItem = (id: string, rounds: number, ammoClass = "pistol", type = "standard", equipped = true) => ({
     id,
+    name: `ammo-${id}`,
     type: "ammunition",
-    system: { rounds, maxCapacity: 15, type, ammunitionClass: ammoClass, isEquipped: equipped },
+    system: { rounds, maxCapacity: 15, type, ammunitionClass: ammoClass },
+    getFlag: (scope: string, key: string) => scope === "sr3e" && key === "isEquipped" ? equipped : undefined,
     update: vi.fn().mockResolvedValue(undefined),
 });
 

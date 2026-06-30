@@ -5,16 +5,16 @@ type AmmoSystem = {
     maxCapacity?: number;
     type?: string;
     ammunitionClass?: string;
-    isEquipped?: boolean;
     effectDirectives?: Directive[];
 };
 
 type WeaponSystem = {
     ammoId?: string;
     ammunitionClass?: string;
+    reloadMechanism?: string;
 };
 
-type Item = { id: string; type: string; system: Record<string, unknown> };
+type Item = { id: string; name?: string; type: string; system: Record<string, unknown>; getFlag?: (scope: string, key: string) => unknown };
 type Actor = { items: { get: (id: string) => Item | undefined; contents?: Item[] } };
 
 export function getAttachedAmmo(actor: Actor, weapon: { system: Record<string, unknown> }): Item | null {
@@ -32,7 +32,9 @@ export function findCompatibleAmmo(actor: Actor, weapon: { system: Record<string
     return items.filter(i => {
         if (i.type !== "ammunition") return false;
         const as = i.system as AmmoSystem;
-        return as.ammunitionClass === ws.ammunitionClass && as.isEquipped && (as.rounds ?? 0) > 0;
+        const isEquipped = !!i.getFlag?.("sr3e", "isEquipped");
+        const mechOk = !ws.reloadMechanism || !as.reloadMechanism || as.reloadMechanism === ws.reloadMechanism;
+        return as.ammunitionClass === ws.ammunitionClass && mechOk && isEquipped && (as.rounds ?? 0) > 0;
     });
 }
 
@@ -59,11 +61,24 @@ export async function consume(
 
 export async function reloadWeapon(
     actor: Actor,
-    weapon: { system: Record<string, unknown>; update?: (data: Record<string, unknown>) => Promise<unknown> },
+    weapon: { name?: string; system: Record<string, unknown>; update?: (data: Record<string, unknown>) => Promise<unknown> },
 ): Promise<void> {
     const candidates = findCompatibleAmmo(actor, weapon);
-    if (!candidates.length) return;
-    await weapon.update?.({ "system.ammoId": candidates[0].id });
+    const options = candidates.map(c => {
+        const as = c.system as AmmoSystem;
+        return `<option value="${c.id}">${c.name} — ${as.rounds ?? 0}/${as.maxCapacity ?? 0} rounds</option>`;
+    }).join("");
+    const content = `<select name="ammoId"><option value="__UNLOADED__">— Unloaded —</option>${options}</select><p class="hint">Ammo must be equipped to appear here.</p>`;
+
+    const chosen = await (foundry.applications.api.DialogV2 as any).prompt({
+        window: { title: `Reload: ${weapon.name ?? "Weapon"}` },
+        content,
+        ok: { callback: (_e: Event, btn: HTMLElement) => (btn as any).form.elements.namedItem("ammoId").value },
+        rejectClose: false,
+    }) as string | null;
+
+    if (!chosen) return;
+    await weapon.update?.({ "system.ammoId": chosen === "__UNLOADED__" ? "" : chosen });
 }
 
 export function ammoDirectives(ammo: Item): Directive[] {

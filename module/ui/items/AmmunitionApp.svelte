@@ -39,7 +39,7 @@ function kvOptions(map: Record<string, string>) {
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.AMMUNITION.ammunition)}</h3>
         <div class="stat-grid single-column">
-            <LabeledDropdown {item} key="class"           label={localize(CONFIG.SR3E.AMMUNITION.class)}       value={system.class}           path="system" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
+            <LabeledDropdown {item} key="ammunitionClass"  label={localize(CONFIG.SR3E.AMMUNITION.class)}       value={system.ammunitionClass} path="system" options={kvOptions(CONFIG.SR3E.AMMO_CLASSES)} />
             <LabeledDropdown {item} key="type"            label={localize(CONFIG.SR3E.AMMUNITION.type)}        value={system.type}            path="system" options={kvOptions(CONFIG.SR3E.AMMO_TYPES)} />
             <LabeledDropdown {item} key="reloadMechanism" label={localize(CONFIG.SR3E.WEAPON.reloadMechanism)} value={system.reloadMechanism} path="system" options={kvOptions(CONFIG.SR3E.RELOAD_MECHANISMS)} />
         </div>

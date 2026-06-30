@@ -2,9 +2,14 @@ import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 
 export default class AmmunitionModel extends foundry.abstract.TypeDataModel<AmmunitionSchema, BaseItem> {
+  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
+    if (!source.ammunitionClass && source.class) source.ammunitionClass = source.class;
+    return super.migrateData(source);
+  }
+
   static defineSchema(): AmmunitionSchema {
     return {
-      class: new StringField({
+      ammunitionClass: new StringField({
         required: true,
         initial: "",
       }),
@@ -33,7 +38,7 @@ export default class AmmunitionModel extends foundry.abstract.TypeDataModel<Ammu
 }
 
 type AmmunitionSchema = {
-  class: StringField;
+  ammunitionClass: StringField;
   type: StringField;
   reloadMechanism: StringField;
   rounds: NumberField;
