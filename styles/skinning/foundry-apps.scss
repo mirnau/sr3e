@@ -1,0 +1,164 @@
+@use "../mixins.scss" as *;
+
+// Skins Foundry-native ApplicationV2 windows to match the chummer-dark theme.
+// Scoped to .application:not(.sr3e) so sr3e sheets are unaffected.
+
+@layer sr3e.foundry-apps {
+
+    .application:not(.sr3e) {
+
+        .window-content {
+            background: #1e2124;
+            color: var(--text-color);
+            padding: 0.75rem;
+            overflow-y: auto;
+        }
+
+        // ── Form groups ──────────────────────────────────────────────────────
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.25rem 0.5rem;
+            margin-bottom: 0.35rem;
+
+            > label {
+                flex: 0 0 40%;
+                color: var(--highlight-color-secondary);
+                font-size: 0.8rem;
+            }
+
+            .form-fields {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+            }
+
+            p.hint {
+                flex-basis: 100%;
+                font-size: 0.7rem;
+                color: color-mix(in srgb, var(--highlight-color-primary) 45%, transparent);
+                margin: 0;
+            }
+        }
+
+        // ── Inputs ───────────────────────────────────────────────────────────
+        input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]) {
+            background: #12151a;
+            color: var(--text-color);
+            padding: 0.2rem 0.4rem;
+            font-size: 0.8rem;
+            width: 100%;
+            box-shadow: inset 0 0 5px rgba(65, 233, 202, 0.12);
+            @include clipped-corners(0.2rem, 0.2rem, 0.3rem, 0.2rem);
+
+            &:focus {
+                outline: 1px solid var(--highlight-color-primary);
+                box-shadow: inset 0 0 8px rgba(65, 233, 202, 0.25);
+            }
+        }
+
+        input[type="range"] {
+            accent-color: var(--highlight-color-primary);
+            width: 100%;
+        }
+
+        input[type="color"] {
+            background: transparent;
+            height: 1.5rem;
+            width: 2.5rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        // ── Selects ──────────────────────────────────────────────────────────
+        select {
+            appearance: none;
+            background: #12151a;
+            color: var(--text-color);
+            padding: 0.2rem 0.4rem;
+            font-size: 0.8rem;
+            width: 100%;
+            box-shadow: inset 0 0 5px rgba(65, 233, 202, 0.12);
+            @include clipped-corners(0.2rem, 0.2rem, 0.3rem, 0.2rem);
+
+            option, optgroup {
+                background: #12151a;
+                color: var(--text-color);
+            }
+        }
+
+        // ── Textarea ─────────────────────────────────────────────────────────
+        textarea {
+            background: #12151a;
+            color: var(--text-color);
+            padding: 0.3rem 0.4rem;
+            font-size: 0.8rem;
+            width: 100%;
+            resize: vertical;
+            box-shadow: inset 0 0 5px rgba(65, 233, 202, 0.12);
+
+            &:focus {
+                outline: 1px solid var(--highlight-color-primary);
+            }
+        }
+
+        // ── Tabs ─────────────────────────────────────────────────────────────
+        nav.tabs {
+            display: flex;
+            gap: 0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.25rem 0.5rem 0;
+            border-bottom: 1px solid rgba(65, 233, 202, 0.3);
+
+            .item {
+                color: color-mix(in srgb, var(--highlight-color-primary) 50%, transparent);
+                padding: 0.25rem 0.75rem;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                cursor: pointer;
+                border-bottom: 2px solid transparent;
+                margin-bottom: -1px;
+
+                &.active {
+                    color: var(--highlight-color-primary);
+                    border-bottom-color: var(--highlight-color-primary);
+                }
+
+                &:hover:not(.active) {
+                    color: var(--highlight-color-tertiary);
+                }
+            }
+        }
+
+        // ── Fieldsets ────────────────────────────────────────────────────────
+        fieldset {
+            border: 1px solid rgba(65, 233, 202, 0.15) !important;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+
+            legend {
+                color: var(--highlight-color-secondary);
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                padding: 0 0.25rem;
+            }
+        }
+
+        // ── Footer ───────────────────────────────────────────────────────────
+        .form-footer {
+            background: rgba(0, 0, 0, 0.45);
+            padding: 0.5rem 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        // ── Notes / prose ────────────────────────────────────────────────────
+        .notes, p:not(.hint) {
+            color: color-mix(in srgb, var(--highlight-color-primary) 65%, transparent);
+            font-size: 0.8rem;
+        }
+    }
+}

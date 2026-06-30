@@ -4,7 +4,7 @@
     position: relative;
     z-index: 0;
     overflow: hidden;
-    min-height: 7rem;
+    min-height: 0;
     background: var(--highlight-color-primary);
     padding: 1px;
     @include clipped-corners(0.427rem, 0.427rem, 0.75rem, 0.427rem);
