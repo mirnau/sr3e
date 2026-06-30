@@ -43,7 +43,7 @@ function kvOptions(map: Record<string, string>) {
     <Portability {item} />
 
     <ItemSheetComponent spanTwo={true}>
-        <h3>{localize(CONFIG.SR3E.EFFECTS.effectscomposer)}</h3>
+        <h3>{localize(CONFIG.SR3E.EFFECTS.effectview)}</h3>
         <ActiveEffectsViewer document={item} isSlim={true} />
     </ItemSheetComponent>
 

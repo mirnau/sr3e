@@ -38,7 +38,7 @@ function openEditor(ae: ActiveEffect) {
     </ItemSheetComponent>
 
     <ItemSheetComponent>
-        <h3>{localize(CONFIG.SR3E.EFFECTS.effectscomposer)}</h3>
+        <h3>{localize(CONFIG.SR3E.EFFECTS.effectview)}</h3>
         <table>
             <thead>
                 <tr>

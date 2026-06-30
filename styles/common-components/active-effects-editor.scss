@@ -16,4 +16,133 @@
         gap: var(--component-grid-gap);
         align-items: start;
     }
+
+    .effect-change-add {
+        margin-bottom: 0.35rem;
+    }
+
+    .effect-changes-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.35rem;
+    }
+
+    .effect-changes-table th {
+        padding: 0 0.25rem 0.2rem;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--highlight-color-primary);
+        text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+    }
+
+    .effect-change-cell {
+        padding: 0.15rem 0.2rem;
+        vertical-align: middle;
+    }
+
+    .effect-change-cell--attribute {
+        width: 44%;
+    }
+
+    .effect-change-cell--mode {
+        width: 18%;
+    }
+
+    .effect-change-cell--value {
+        width: 24%;
+    }
+
+    .effect-change-cell--priority {
+        width: 7%;
+    }
+
+    .effect-change-cell--actions {
+        width: 2.4rem;
+        text-align: center;
+    }
+
+    .combobox-container {
+        width: 100%;
+    }
+
+    .effect-change-frame,
+    .combobox-wrapper.effect-change-search {
+        position: relative;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 2rem;
+        background: var(--highlight-color-primary);
+        @include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+
+        &::before {
+            content: "";
+            position: absolute;
+            z-index: 0;
+            top: 1px;
+            left: 1px;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
+            background: var(--background-color);
+            box-shadow: inset 0 0 10px var(--highlight-color-primary);
+            pointer-events: none;
+            @include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+        }
+    }
+
+    .effect-change-frame input,
+    .effect-change-frame select,
+    .combobox-input.effect-change-search {
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+        width: 100%;
+        height: 2rem;
+        margin: 0;
+        padding: 0.25rem 0.5rem;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        color: var(--text-color);
+    }
+
+    .effect-change-frame--number input {
+        text-align: center;
+    }
+
+    .combobox-wrapper.effect-change-search .combobox-icon {
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+        right: 0.45rem;
+        transform: translateY(-50%);
+        color: var(--highlight-color-primary);
+    }
+
+    .combobox-dropdown {
+        background: var(--background-color);
+        border: 1px solid var(--highlight-color-primary);
+        box-shadow: 0 0 12px rgba(0, 255, 200, 0.35), inset 0 0 10px var(--highlight-color-primary);
+        @include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+    }
+
+    .combobox-option {
+        padding: 0.25rem 0.5rem;
+        color: var(--text-color);
+        cursor: pointer;
+    }
+
+    .combobox-option.highlighted,
+    .combobox-option.selected {
+        background: var(--highlight-color-primary);
+        color: var(--background-color);
+    }
+
+    .effect-change-delete {
+        width: 2rem;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0;
+    }
 }

@@ -122,19 +122,20 @@
     },
     "effects": {
       "actions": "Actions",
-      "addChange": "AddChange",
-      "attributeKey": "AttributeKey",
-      "changeMode": "ChangeMode",
-      "changesHeader": "ChangesHeader",
+      "addChange": "Add Change",
+      "attributeKey": "Attribute",
+      "changeMode": "Mode",
+      "changesHeader": "Changes",
       "disabled": "Disabled",
-      "durationType": "DurationType",
-      "effectscomposer": "Effectscomposer",
+      "durationType": "Duration",
+      "effectscomposer": "Effect Composer",
+      "effectview": "Effect View",
       "enabled": "Enabled",
       "name": "Name",
-      "noMatch": "NoMatch",
+      "noMatch": "No match",
       "permanent": "Permanent",
       "priority": "Priority",
-      "selectProperty": "SelectProperty",
+      "selectProperty": "Select property…",
       "target": "Target",
       "value": "Value"
     },
@@ -143,7 +144,7 @@
       "type": "Type"
     },
     "gadgetTypes": {
-      "weaponmod": "Weaponmod"
+      "weaponmod": "Weapon Modification"
     },
     "health": {
       "deadly": "Deadly",
@@ -354,31 +355,6 @@
       "canlayer": "Can Layer",
       "impact": "Impact",
       "wearable": "Wearable"
-    },
-    "gadget": {
-      "gadget": "Gadget",
-      "type": "Type"
-    },
-    "gadgetTypes": {
-      "weaponmod": "Weapon Modification"
-    },
-    "effects": {
-      "name": "Name",
-      "durationType": "Duration",
-      "enabled": "Enabled",
-      "disabled": "Disabled",
-      "actions": "Actions",
-      "effectscomposer": "Effect Composer",
-      "changesHeader": "Changes",
-      "addChange": "Add Change",
-      "attributeKey": "Attribute",
-      "changeMode": "Mode",
-      "value": "Value",
-      "priority": "Priority",
-      "target": "Target",
-      "permanent": "Permanent",
-      "selectProperty": "Select property…",
-      "noMatch": "No match"
     }
   }
 }

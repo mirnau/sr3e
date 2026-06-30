@@ -123,8 +123,8 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
 
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.EFFECTS.changesHeader)}</h3>
-        <button type="button" onclick={addChange}>{localize(CONFIG.SR3E.EFFECTS.addChange)}</button>
-        <table>
+        <button type="button" class="effect-change-add" onclick={addChange}>{localize(CONFIG.SR3E.EFFECTS.addChange)}</button>
+        <table class="effect-changes-table">
             <thead>
                 <tr>
                     <th>{localize(CONFIG.SR3E.EFFECTS.attributeKey)}</th>
