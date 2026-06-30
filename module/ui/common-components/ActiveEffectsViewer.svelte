@@ -2,6 +2,7 @@
 import { onMount, onDestroy } from "svelte";
 import { localize } from "../../services/utilities";
 import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
+import ActiveEffectsEditor from "../../foundry/applications/ActiveEffectsEditor";
 
 type AEDoc = Item | Actor;
 type EffectData = { activeEffect: ActiveEffect; sourceDocument: AEDoc; canDelete: boolean };
@@ -44,14 +45,13 @@ async function addEffect() {
         origin: (doc as any).uuid,
         disabled: false,
         transfer: true,
-        duration: { type: "none" },
+        duration: { units: "none", value: 0 },
         changes: [],
         flags: { sr3e: { source: "manual" } },
     }], { render: false });
 }
 
-async function editEffect(effectData: EffectData) {
-    const { default: ActiveEffectsEditor } = await import("../../foundry/applications/ActiveEffectsEditor");
+function editEffect(effectData: EffectData) {
     ActiveEffectsEditor.launch(effectData.sourceDocument, effectData.activeEffect);
 }
 

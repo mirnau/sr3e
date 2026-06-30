@@ -1,0 +1,19 @@
+@use "../mixins.scss" as *;
+
+.application.active-effects-editor {
+    background: transparent;
+    backdrop-filter: blur(6px);
+    overflow: visible;
+
+    .window-content {
+        overflow: visible;
+    }
+
+    // 4-column grid: col 1 = settings panel, cols 2-4 = changes table
+    .effects-editor {
+        display: grid;
+        grid-template-columns: var(--component-width) calc(var(--component-width) * 3 + var(--component-grid-gap) * 2);
+        gap: var(--component-grid-gap);
+        align-items: start;
+    }
+}

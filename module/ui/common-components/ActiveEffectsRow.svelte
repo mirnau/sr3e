@@ -25,10 +25,11 @@ async function onToggleEnabled(e: Event) {
 }
 
 function formatDuration(duration: Record<string, unknown>): string {
-    if (!duration || duration.type === "none") return localize(CONFIG.SR3E.EFFECTS.permanent);
-    const value = (duration[duration.type as string] as number) ?? 0;
+    const units = (duration?.units ?? duration?.type) as string | undefined;
+    if (!units || units === "none") return localize(CONFIG.SR3E.EFFECTS.permanent);
+    const value = (duration[units] as number) ?? 0;
     const map: Record<string, string> = { rounds: `${value}r`, turns: `${value}t`, seconds: `${value}s`, minutes: `${value}m`, hours: `${value}h`, days: `${value}d` };
-    return map[duration.type as string] ?? "?";
+    return map[units] ?? "?";
 }
 </script>
 
