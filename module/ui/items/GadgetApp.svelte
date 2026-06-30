@@ -21,7 +21,7 @@ function kvOptions(map: Record<string, string>) {
 }
 </script>
 
-<ItemSheetWrapper csslayout="single">
+<ItemSheetWrapper csslayout="triple">
     <ItemSheetComponent>
         <Image entity={item} />
         <div class="large-input-wrapper">
@@ -42,7 +42,8 @@ function kvOptions(map: Record<string, string>) {
     <Commodity {item} />
     <Portability {item} />
 
-    <ItemSheetComponent>
+    <ItemSheetComponent spanTwo={true}>
+        <h3>{localize(CONFIG.SR3E.EFFECTS.effectscomposer)}</h3>
         <ActiveEffectsViewer document={item} isSlim={true} />
     </ItemSheetComponent>
 

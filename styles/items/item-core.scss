@@ -214,5 +214,30 @@ form.application.sheet.staticlayout {
             width: max-content;
             max-width: calc(var(--component-width) * 2 + var(--component-grid-gap));
         }
+
+        // Triple column layout — CSS Grid so span-two works
+        .sr3e-waterfall--triple {
+            display: grid;
+            grid-template-columns: repeat(3, var(--component-width));
+            gap: var(--component-grid-gap);
+            width: max-content;
+            align-items: start;
+
+            > * {
+                display: block;
+                break-inside: unset;
+                width: 100%;
+                vertical-align: unset;
+            }
+        }
+
+        .item-sheet-component.span-all {
+            display: block;
+            column-span: all;
+        }
+
+        .sr3e-waterfall--triple .item-sheet-component.span-two {
+            grid-column: span 2;
+        }
     }
 }

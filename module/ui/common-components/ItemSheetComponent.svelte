@@ -1,8 +1,8 @@
 <script lang="ts">
-   let { children }: { children?: any } = $props();
+   let { children, spanAll = false, spanTwo = false }: { children?: any; spanAll?: boolean; spanTwo?: boolean } = $props();
 </script>
 
-<div class="item-sheet-component">
+<div class="item-sheet-component" class:span-all={spanAll} class:span-two={spanTwo}>
    <div class="sheet-card-component">
       <div class="sheet-card-shadow"></div>
       <div class="sheet-card-outline">
