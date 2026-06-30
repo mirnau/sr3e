@@ -9,6 +9,12 @@ import LabeledBoolean from "../items/LabeledBoolean.svelte";
 import LabeledNumberInput from "../items/LabeledNumberInput.svelte";
 import { activeEffectPropertyOptions } from "./activeEffectPropertyOptions";
 import type { GadgetPropertyOption } from "../../services/gadgets/gadgetTargets";
+import {
+    durationOptions,
+    durationTypeFrom,
+    durationUpdateForCommit,
+    durationValueFrom,
+} from "./activeEffectDurationUpdate";
 
 type Change = { key: string; type: string; value: string; priority: number };
 type Option = { value: string; label: string };
@@ -17,12 +23,13 @@ const doc = untrack(() => p.document);
 const effect = untrack(() => p.activeEffect) as any;
 
 const rawDuration = effect.duration ?? {};
+const initialDurationType = durationTypeFrom(rawDuration);
 
 let name = $state(effect.name as string);
 let target = $state((effect.flags?.sr3e?.target as string) ?? "self");
-let disabled = $state(!!effect.disabled);
-let durationUnits = $state((rawDuration.units ?? rawDuration.type ?? "none") as string);
-let durationValue = $state(Math.round((rawDuration.value as number) ?? 0));
+let enabled = $state(!effect.disabled);
+let durationUnits = $state(initialDurationType);
+let durationValue = $state(durationValueFrom(rawDuration, initialDurationType));
 let changes = $state<Change[]>(normalizeChanges(effect.toObject?.().changes ?? effect.changes ?? []));
 let propertyOptions = $state<GadgetPropertyOption[]>([]);
 
@@ -33,7 +40,7 @@ const targetOptions: Option[] = [
 
 const durationTypeOptions = $derived<Option[]>([
     { value: "none", label: localize(CONFIG.SR3E.EFFECTS.permanent) },
-    ...["turns", "rounds", "seconds", "minutes", "hours", "days"].map(t => ({ value: t, label: t })),
+    ...durationOptions().map(t => ({ value: t, label: t })),
 ]);
 
 onMount(() => enumeratePaths());
@@ -60,17 +67,12 @@ function normalizeChangeType(type: unknown): string {
 async function commit() {
     await effect.update({
         name,
-        disabled,
+        disabled: !enabled,
         transfer: target === "character",
-        duration: durationForCommit(),
         changes: [...changes],
         flags: { ...effect.flags, sr3e: { ...effect.flags?.sr3e, target } },
+        ...durationUpdateForCommit(durationUnits, durationValue),
     }, { render: false });
-}
-
-function durationForCommit(): Record<string, unknown> {
-    if (durationUnits === "none") return {};
-    return { units: durationUnits, value: Math.round(durationValue) };
 }
 
 function onTargetChange(val: string) {
@@ -95,6 +97,7 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
                 key="name"
                 label={localize(CONFIG.SR3E.EFFECTS.name)}
                 value={name}
+                updateOnInput={true}
                 onUpdate={(val) => { name = val; void commit(); }}
             />
 
@@ -107,10 +110,10 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
             />
 
             <LabeledBoolean
-                key="disabled"
-                label={localize(CONFIG.SR3E.EFFECTS.disabled)}
-                value={disabled}
-                onUpdate={(val) => { disabled = val; void commit(); }}
+                key="enabled"
+                label={localize(CONFIG.SR3E.EFFECTS.enabled)}
+                value={enabled}
+                onUpdate={(val) => { enabled = val; void commit(); }}
             />
 
             <LabeledDropdown
@@ -118,7 +121,7 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
                 label={localize(CONFIG.SR3E.EFFECTS.durationType)}
                 value={durationUnits}
                 options={durationTypeOptions}
-                onUpdate={(val) => { durationUnits = val; void commit(); }}
+                onUpdate={(val) => { durationUnits = val; if (val !== "none" && durationValue === 0) durationValue = 1; void commit(); }}
             />
 
             {#if durationUnits !== "none"}
@@ -126,8 +129,8 @@ function deleteChange(index: number) { changes = changes.filter((_, i) => i !== 
                     key="durationValue"
                     label={localize(CONFIG.SR3E.EFFECTS.value)}
                     value={durationValue}
-                onUpdate={(val) => { durationValue = val; void commit(); }}
-            />
+                    onUpdate={(val) => { durationValue = val; void commit(); }}
+                />
             {/if}
         </div>
     </ItemSheetComponent>
