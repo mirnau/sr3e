@@ -1,0 +1,144 @@
+@use "../mixins.scss" as *;
+
+.sr3e .gadget-drop-zone {
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+    min-height: 7rem;
+    background: var(--highlight-color-primary);
+    padding: 1px;
+    @include clipped-corners(0.427rem, 0.427rem, 0.75rem, 0.427rem);
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        z-index: -1;
+        background:
+            linear-gradient(rgba(0, 255, 200, 0.06), rgba(0, 255, 200, 0)),
+            var(--background-color);
+        box-shadow: inset 0 0 16px var(--highlight-color-primary);
+        pointer-events: none;
+        @include clipped-corners(0.427rem, 0.427rem, 0.75rem, 0.427rem);
+    }
+
+    .gadget-slot-table {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+        background: transparent;
+    }
+
+    .gadget-slot-header,
+    .gadget-slot-row {
+        display: grid;
+        grid-template-columns: 2.7rem minmax(0, 1fr) 4rem max-content;
+        align-items: center;
+        justify-items: center;
+        gap: 0;
+    }
+
+    .gadget-slot-header {
+        justify-items: start;
+        background: transparent;
+        color: var(--highlight-color-primary);
+        font-size: 0.65rem;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+    }
+
+    .gadget-slot-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0.25rem;
+    }
+
+    .gadget-slot-header > *,
+    .gadget-slot-row > * {
+        padding: 0.25rem 0.35rem;
+        background: transparent;
+    }
+
+    .gadget-slot-row {
+        position: relative;
+        overflow: hidden;
+        background: var(--highlight-color-primary);
+        @include clipped-corners(0.35rem, 0.35rem, 0.5rem, 0.35rem);
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            z-index: 0;
+            background: var(--background-color);
+            box-shadow: inset 0 0 8px rgba(65, 233, 202, 0.18);
+            pointer-events: none;
+            @include clipped-corners(0.35rem, 0.35rem, 0.5rem, 0.35rem);
+        }
+
+        > * {
+            position: relative;
+            z-index: 1;
+        }
+    }
+
+    .cell-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 1.7rem;
+    }
+
+    .gadget-image-frame {
+        display: block;
+        width: 2rem;
+        height: 2rem;
+        padding: 1px;
+        background: var(--highlight-color-primary);
+        @include clipped-corners(0.2rem, 0.2rem, 0.35rem, 0.2rem);
+    }
+
+    .gadget-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        @include clipped-corners(0.2rem, 0.2rem, 0.35rem, 0.2rem, 1px);
+    }
+
+    .buttons-horizontal-distribution.square {
+        margin-bottom: 0;
+    }
+
+    .drag-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 255, 200, 0.12);
+        box-shadow: inset 0 0 24px var(--highlight-color-primary);
+        pointer-events: none;
+        @include clipped-corners(0.427rem, 0.427rem, 0.75rem, 0.427rem);
+    }
+
+    .drop-indicator {
+        background: var(--highlight-color-primary);
+        color: var(--background-color);
+        font-size: 0.7rem;
+        font-weight: 700;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.45rem 0.7rem;
+        box-shadow: 0 0 14px rgba(0, 255, 200, 0.65);
+        @include clipped-corners(0.25rem, 0.25rem, 0.45rem, 0.25rem);
+    }
+}

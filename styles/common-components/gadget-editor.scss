@@ -1,0 +1,32 @@
+@use "../mixins.scss" as *;
+
+.application.gadget-editor {
+    .gadget-editor-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .gadget-editor-image-frame {
+        display: block;
+        width: 4rem;
+        height: 4rem;
+        flex-shrink: 0;
+        padding: 1px;
+        background: var(--highlight-color-primary);
+        @include clipped-corners(0.35rem, 0.35rem, 0.55rem, 0.35rem);
+    }
+
+    .gadget-editor-image-frame img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        @include clipped-corners(0.35rem, 0.35rem, 0.55rem, 0.35rem, 1px);
+    }
+
+    .gadget-editor-header > div {
+        flex: 1;
+        min-width: 0;
+    }
+}
