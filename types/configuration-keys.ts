@@ -20,6 +20,8 @@ export const typekeys = Object.freeze({
   wearable: "wearable",
   transaction: "transaction",
   magic: "magic",
+  spell: "spell",
+  focus: "focus",
   gadget: "gadget",
 } as const);
 

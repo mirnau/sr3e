@@ -7,6 +7,8 @@ import FilterToggle from "./FilterToggle.svelte";
 import WeaponComponent from "./components/WeaponComponent.svelte";
 import AmmunitionComponent from "./components/AmmunitionComponent.svelte";
 import WearableComponent from "./components/WearableComponent.svelte";
+import SpellComponent from "./components/SpellComponent.svelte";
+import FocusComponent from "./components/FocusComponent.svelte";
 
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto"]);
 
@@ -92,6 +94,10 @@ async function onTrashClick() {
                     <AmmunitionComponent {item} />
                 {:else if item.type === "wearable"}
                     <WearableComponent {item} />
+                {:else if item.type === "spell"}
+                    <SpellComponent {item} />
+                {:else if item.type === "focus"}
+                    <FocusComponent {item} />
                 {/if}
             </div>
         </div>

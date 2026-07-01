@@ -43,9 +43,10 @@
          $isCharacterCreation
       ) {
          (async () => {
-            const confirmed = await Dialog.confirm({
-               title: "Finish Character Creation?",
+            const confirmed = await foundry.applications.api.DialogV2.confirm({
+               window: { title: "Finish Character Creation?" },
                content: "<p>You have spent all your skill points.</p><p>Finish character creation?</p>",
+               rejectClose: false,
             });
 
             if (confirmed) {

@@ -9,6 +9,14 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
         required: true,
         initial: "",
       }),
+      manipulationSubtype: new StringField({
+        required: true,
+        initial: "",
+      }),
+      range: new StringField({
+        required: true,
+        initial: "los",
+      }),
       duration: new SchemaField({
         type: new StringField({
           required: true,
@@ -26,7 +34,11 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
         integer: true,
       }),
       targeting: new SchemaField({
-        opponentsAttribute: new StringField({
+        kind: new StringField({
+          required: true,
+          initial: "attribute",
+        }),
+        attribute: new StringField({
           required: true,
           initial: "",
         }),
@@ -36,9 +48,37 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
           integer: true,
         }),
       }),
-      drain: new NumberField({
-        required: true,
-        initial: 0,
+      resistance: new SchemaField({
+        attribute: new StringField({
+          required: true,
+          initial: "",
+        }),
+      }),
+      drain: new SchemaField({
+        powerModifier: new NumberField({
+          required: true,
+          initial: 0,
+          integer: true,
+        }),
+        damageLevel: new StringField({
+          required: true,
+          initial: "m",
+        }),
+        damageLevelModifier: new NumberField({
+          required: true,
+          initial: 0,
+          integer: true,
+        }),
+      }),
+      limits: new SchemaField({
+        fetish: new BooleanField({
+          required: true,
+          initial: false,
+        }),
+        exclusive: new BooleanField({
+          required: true,
+          initial: false,
+        }),
       }),
     };
   }
@@ -47,14 +87,28 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
 type SpellSchema = {
   type: StringField;
   category: StringField;
+  manipulationSubtype: StringField;
+  range: StringField;
   duration: SchemaField<{
     type: StringField;
     rounds: NumberField;
   }>;
   learnedForce: NumberField;
   targeting: SchemaField<{
-    opponentsAttribute: StringField;
+    kind: StringField;
+    attribute: StringField;
     staticTargetNumber: NumberField;
   }>;
-  drain: NumberField;
+  resistance: SchemaField<{
+    attribute: StringField;
+  }>;
+  drain: SchemaField<{
+    powerModifier: NumberField;
+    damageLevel: StringField;
+    damageLevelModifier: NumberField;
+  }>;
+  limits: SchemaField<{
+    fetish: BooleanField;
+    exclusive: BooleanField;
+  }>;
 };

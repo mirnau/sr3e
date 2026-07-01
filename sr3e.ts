@@ -23,6 +23,10 @@ import TransactionModel from "./module/models/items/TransactionModel";
 import TransactionSheet from "./module/sheets/items/TransactionSheet";
 import MagicModel from "./module/models/items/MagicModel";
 import MagicSheet from "./module/sheets/items/MagicSheet";
+import SpellModel from "./module/models/items/SpellModel";
+import SpellSheet from "./module/sheets/items/SpellSheet";
+import FocusModel from "./module/models/items/FocusModel";
+import FocusSheet from "./module/sheets/items/FocusSheet";
 import GadgetModel from "./module/models/items/GadgetModel";
 import GadgetItemSheet from "./module/sheets/items/GadgetItemSheet";
 import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
@@ -181,6 +185,18 @@ async function registerHooks(): Promise<void> {
             type: typekeys.magic,
             model: MagicModel,
             sheet: MagicSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.spell,
+            model: SpellModel,
+            sheet: SpellSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.focus,
+            model: FocusModel,
+            sheet: FocusSheet,
          },
          {
             docClass: Item,

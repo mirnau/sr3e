@@ -29,6 +29,7 @@
    const isWornStore       = storeManager.GetFlagStore<boolean>(actor, "isWorn",       false);
    const isGadgetStore     = storeManager.GetFlagStore<boolean>(actor, "isGadget",     false);
    const isTechStore       = storeManager.GetFlagStore<boolean>(actor, "isTech",       false);
+   const isMagicStore      = storeManager.GetFlagStore<boolean>(actor, "isMagic",      false);
 
    let isFavorite   = $state($isFavoriteStore);
    let isEquipped   = $state($isEquippedStore);
@@ -37,6 +38,7 @@
    let isWorn       = $state($isWornStore);
    let isGadget     = $state($isGadgetStore);
    let isTech       = $state($isTechStore);
+   let isMagic      = $state($isMagicStore);
 
    $effect(() => {
       isFavorite   = $isFavoriteStore;
@@ -46,6 +48,7 @@
       isWorn       = $isWornStore;
       isGadget     = $isGadgetStore;
       isTech       = $isTechStore;
+      isMagic      = $isMagicStore;
    });
 
    $effect(() => {
@@ -56,9 +59,10 @@
       isWornStore.set(isWorn);
       isGadgetStore.set(isGadget);
       isTechStore.set(isTech);
+      isMagicStore.set(isMagic);
    });
 
-   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface"];
+   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "spell", "focus"];
 
    function rebuildAllItems() {
       allItems = [...((actor as any).items ?? [])].filter((i: any) => INVENTORY_TYPES.includes(i.type));
@@ -84,9 +88,10 @@
             (isWeapon && item.type === "weapon") ||
             (isWorn && item.type === "wearable") ||
             (isGadget && item.type === "gadget") ||
-            (isTech && item.type === "techinterface");
+            (isTech && item.type === "techinterface") ||
+            (isMagic && (item.type === "spell" || item.type === "focus"));
 
-         const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget || isTech;
+         const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget || isTech || isMagic;
          const passesTypeFilter = hasTypeFilter ? typeMatches : true;
 
          const itemFlags = item.flags?.sr3e || {};
@@ -137,6 +142,7 @@
       label={localize(CONFIG.SR3E.ITEM_TYPES.techinterface)}
       svgName="router-svgrepo-com.svg"
    />
+   <FilterToggle bind:checked={isMagic} label={localize(CONFIG.SR3E.ITEM_TYPES.magic)} svgName="crystal-cluster-svgrepo-com.svg" />
 </div>
 
 <div class="asset-category-container static-full-width">

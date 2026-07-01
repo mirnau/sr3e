@@ -11,7 +11,12 @@ import {
 import { AMMUNITION_KEYS, AMMO_TYPE_KEYS } from "./config/AmmunitionConfig";
 import { WEARABLE_KEYS } from "./config/WearableConfig";
 import { TRANSACTION_KEYS, TRANSACTION_TYPE_KEYS } from "./config/TransactionConfig";
-import { MAGIC_KEYS, ARCHETYPE_KEYS, MAGICIAN_TYPE_KEYS, ASPECT_KEYS, RESISTANCE_ATTRIBUTE_KEYS, TRADITION_KEYS } from "./config/MagicConfig";
+import {
+  MAGIC_KEYS, SPELL_KEYS, FOCUS_KEYS, ARCHETYPE_KEYS, MAGICIAN_TYPE_KEYS, ASPECT_KEYS,
+  RESISTANCE_ATTRIBUTE_KEYS, TRADITION_KEYS, SPELL_TYPE_KEYS, SPELL_CATEGORY_KEYS,
+  SPELL_DURATION_KEYS, SPELL_RANGE_KEYS, SPELL_TARGETING_KEYS, SPELL_DRAIN_LEVEL_KEYS,
+  FOCUS_TYPE_KEYS,
+} from "./config/MagicConfig";
 import { INVENTORY_KEYS } from "./config/InventoryConfig";
 import { GADGET_KEYS, GADGET_TYPE_KEYS, EFFECTS_KEYS } from "./config/GadgetConfig";
 
@@ -63,11 +68,20 @@ export const sr3e = {
   TRANSACTION: createCategory("transaction", TRANSACTION_KEYS),
   TRANSACTION_TYPES: createCategory("transactionType", TRANSACTION_TYPE_KEYS),
   MAGIC: createCategory("magic", MAGIC_KEYS),
+  SPELL: createCategory("spell", SPELL_KEYS),
+  FOCUS: createCategory("focus", FOCUS_KEYS),
   ARCHETYPES: createCategory("archetypes", ARCHETYPE_KEYS),
   MAGICIAN_TYPES: createCategory("magicianTypes", MAGICIAN_TYPE_KEYS),
   ASPECTS: createCategory("aspects", ASPECT_KEYS),
   RESISTANCE_ATTRIBUTES: createCategory("resistanceAttributes", RESISTANCE_ATTRIBUTE_KEYS),
   TRADITIONS: createCategory("traditions", TRADITION_KEYS),
+  SPELL_TYPES: createCategory("spellTypes", SPELL_TYPE_KEYS),
+  SPELL_CATEGORIES: createCategory("spellCategories", SPELL_CATEGORY_KEYS),
+  SPELL_DURATIONS: createCategory("spellDurations", SPELL_DURATION_KEYS),
+  SPELL_RANGES: createCategory("spellRanges", SPELL_RANGE_KEYS),
+  SPELL_TARGETING: createCategory("spellTargeting", SPELL_TARGETING_KEYS),
+  SPELL_DRAIN_LEVELS: createCategory("spellDrainLevels", SPELL_DRAIN_LEVEL_KEYS),
+  FOCUS_TYPES: createCategory("focusTypes", FOCUS_TYPE_KEYS),
   INVENTORY: createCategory("inventory", INVENTORY_KEYS),
   GADGET: createCategory("gadget", GADGET_KEYS),
   GADGET_TYPES: createCategory("gadgetTypes", GADGET_TYPE_KEYS),

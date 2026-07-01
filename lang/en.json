@@ -139,6 +139,27 @@
       "target": "Target",
       "value": "Value"
     },
+    "focus": {
+      "active": "Active",
+      "bonded": "Bonded",
+      "category": "Spell Category",
+      "focus": "Focus",
+      "force": "Force",
+      "reach": "Weapon Reach",
+      "spell": "Specific Spell",
+      "spentDice": "Spent Dice",
+      "spiritType": "Spirit Type",
+      "type": "Type"
+    },
+    "focusTypes": {
+      "expendableSpell": "Expendable Spell Focus",
+      "power": "Power Focus",
+      "specificSpell": "Specific Spell Focus",
+      "spellCategory": "Spell Category Focus",
+      "spirit": "Spirit Focus",
+      "sustaining": "Sustaining Focus",
+      "weapon": "Weapon Focus"
+    },
     "gadget": {
       "gadget": "Gadget",
       "type": "Type"
@@ -301,6 +322,56 @@
       "specializations": "Specializations",
       "specialize": "Specialize",
       "value": "Value"
+    },
+    "spell": {
+      "category": "Category",
+      "drainDamageLevel": "Drain Level",
+      "drainDamageLevelModifier": "Drain Level Modifier",
+      "drainPowerModifier": "Drain Power Modifier",
+      "duration": "Duration",
+      "exclusiveLimited": "Exclusive-Limited",
+      "fetishLimited": "Fetish-Limited",
+      "learnedForce": "Learned Force",
+      "manipulationSubtype": "Manipulation Subtype",
+      "range": "Range",
+      "resistanceAttribute": "Resistance Attribute",
+      "rounds": "Rounds",
+      "spell": "Spell",
+      "staticTargetNumber": "Static Target Number",
+      "targetAttribute": "Target Attribute",
+      "targeting": "Targeting",
+      "type": "Type"
+    },
+    "spellCategories": {
+      "combat": "Combat",
+      "detection": "Detection",
+      "health": "Health",
+      "illusion": "Illusion",
+      "manipulation": "Manipulation"
+    },
+    "spellDrainLevels": {
+      "d": "Deadly",
+      "l": "Light",
+      "m": "Moderate",
+      "s": "Serious"
+    },
+    "spellDurations": {
+      "instant": "Instant",
+      "permanent": "Permanent",
+      "sustained": "Sustained"
+    },
+    "spellRanges": {
+      "los": "Line of Sight",
+      "touch": "Touch"
+    },
+    "spellTargeting": {
+      "attribute": "Attribute",
+      "objectResistance": "Object Resistance",
+      "static": "Static"
+    },
+    "spellTypes": {
+      "mana": "Mana",
+      "physical": "Physical"
     },
     "traditions": {
       "hermetic": "Hermetic",

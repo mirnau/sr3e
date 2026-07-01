@@ -55,6 +55,7 @@ const spellAvail = $derived(Math.max(0, $spellValueMod - $spellSpent));
 
 let hasMatrixInterface = $state(false);
 let hasRiggerInterface = $state(false);
+let focusPools = $state<{ id: string; name: string; available: number }[]>([]);
 
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
 const attributePreview = storeManager.GetShallowStore<any>(actor, "shoppingAttributePreview", { active: false, values: {} });
@@ -65,7 +66,44 @@ const isAwakened = $derived(
     !actor.system?.attributes?.magic?.isBurnedOut,
 );
 
-onDestroy(() => storeManager.Unsubscribe(actor));
+onDestroy(() => {
+    Hooks.off("createItem", createHookId);
+    Hooks.off("updateItem", updateHookId);
+    Hooks.off("deleteItem", deleteHookId);
+    storeManager.Unsubscribe(actor);
+});
+
+function isUsableFocus(item: any): boolean {
+    return item?.type === "focus" &&
+        Boolean(item.system?.bonded) &&
+        Boolean(item.system?.active) &&
+        Boolean(item.getFlag?.("sr3e", "isEquipped"));
+}
+
+function rebuildFocusPools() {
+    focusPools = [...((actor as any).items ?? [])]
+        .filter(isUsableFocus)
+        .map((item: any) => {
+            const force = Number(item.system?.force ?? 0);
+            const spent = Number(item.system?.dice?.spent ?? 0);
+            return {
+                id: item.id as string,
+                name: item.name as string,
+                available: Math.max(0, force - spent),
+            };
+        });
+}
+
+rebuildFocusPools();
+
+const onItemChange = (item: any) => {
+    if (item.parent?.id !== (actor as any).id) return;
+    rebuildFocusPools();
+};
+
+const createHookId = Hooks.on("createItem", onItemChange);
+const updateHookId = Hooks.on("updateItem", onItemChange);
+const deleteHookId = Hooks.on("deleteItem", onItemChange);
 
 function selectPool(key: string, available: number): void {
     if (composerState.selectedPoolKey === key) {
@@ -165,5 +203,11 @@ $effect(() => {
                 <span class={poolClass("spell")}>{spellAvail}</span>
             </StatCard>
         {/if}
+
+        {#each focusPools as focusPool (focusPool.id)}
+            <StatCard label={focusPool.name}>
+                <span class="attribute-value button">{focusPool.available}</span>
+            </StatCard>
+        {/each}
     </div>
 </Foldout>
