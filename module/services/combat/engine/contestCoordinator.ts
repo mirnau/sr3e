@@ -28,7 +28,7 @@ export function startContest(
     targetActor: SR3EActor,
     targetToken: { id?: string; scene?: { id?: string } } | null,
     initiatorRoll: RollSnapshot,
-): string {
+): { contestId: string; stub: ContestStub } {
     const contestId = `contest:${Date.now()}:${Math.random().toString(36).slice(2)}`;
     const a = targetActor as unknown as { id: string };
 
@@ -70,7 +70,7 @@ export function startContest(
             .emit("system.sr3e", { type: "contestStub", stub });
     }
 
-    return contestId;
+    return { contestId, stub };
 }
 
 export function registerContestStub(stub: ContestStub): ContestRecord {

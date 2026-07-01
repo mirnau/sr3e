@@ -8,6 +8,8 @@ import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import LabeledBoolean from "./LabeledBoolean.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
+import ActiveEffectsViewer from "../common-components/ActiveEffectsViewer.svelte";
+import GadgetViewer from "../common-components/GadgetViewer.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
 
 const p = $props<{ item: Item }>();
@@ -41,6 +43,16 @@ let name = $state(item.name as string);
         <div class="stat-grid single-column">
             <LabeledBoolean {item} key="canLayer" label={localize(CONFIG.SR3E.WEARABLE.canlayer)} value={system.canLayer} path="system" />
         </div>
+    </ItemSheetComponent>
+
+    <ItemSheetComponent>
+        <h3>Gadget Attach Slot</h3>
+        <GadgetViewer document={item} />
+    </ItemSheetComponent>
+
+    <ItemSheetComponent>
+        <h3>{localize(CONFIG.SR3E.EFFECTS.effectview)}</h3>
+        <ActiveEffectsViewer document={item} isSlim={true} />
     </ItemSheetComponent>
 
     <Commodity {item} />

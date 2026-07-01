@@ -165,7 +165,9 @@
       "type": "Type"
     },
     "gadgetTypes": {
-      "weapon": "Weapon"
+      "fetish": "Fetish",
+      "weapon": "Weapon",
+      "wearable": "Wearable"
     },
     "health": {
       "deadly": "Deadly",
@@ -194,6 +196,7 @@
       "focus": "Focus",
       "gadget": "Gadget",
       "magic": "Magic",
+      "medical": "Medical",
       "metatype": "Metatype",
       "skill": "Skill",
       "spell": "Spell",
@@ -212,6 +215,7 @@
       "karmaPool": "Karma Pool",
       "karmaPoolCeiling": "Karma Pool Ceiling",
       "lifetimeKarma": "Lifetime Karma",
+      "miraculousSurvivalChat": "MiraculousSurvivalChat",
       "pendingKarmaReward": "Pending Karma Reward",
       "readyForCommit": "Ready to Commit",
       "spendKarmaPool": "Spend",
@@ -256,6 +260,13 @@
     "magicianTypes": {
       "aspectedmage": "Aspected Mage",
       "fullmage": "Full Mage"
+    },
+    "medical": {
+      "depleted": "Depleted",
+      "medical": "Medical Supplies",
+      "medicalDepletedChat": "{name}'s medical supplies are depleted.",
+      "reusable": "Reusable",
+      "supplied": "Supplied"
     },
     "metatype": {
       "agerange": "Playable Age Range",
@@ -335,10 +346,11 @@
       "drainPowerModifier": "Drain Power Modifier",
       "duration": "Duration",
       "elementalRules": "Elemental Rules",
-      "exclusiveLimited": "Exclusive-Limited",
-      "fetishLimited": "Fetish-Limited",
+      "exclusiveCast": "Exclusive Cast",
+      "fetishMissing": "Fetish Missing",
+      "fetishReady": "Fetish Ready",
+      "fetishes": "Fetishes",
       "learnedForce": "Learned Force",
-      "limitations": "Limitations",
       "manipulationSubtype": "Manipulation Subtype",
       "range": "Range",
       "resistanceAttribute": "Resistance Attribute",

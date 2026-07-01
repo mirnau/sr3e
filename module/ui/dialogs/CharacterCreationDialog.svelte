@@ -7,6 +7,7 @@
    import { untrack } from "svelte";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
+   import LabeledDropdown from "../items/LabeledDropdown.svelte";
 
    const { actorName: _actorName, onSubmit, onCancel } = $props<{
       actorName: string;
@@ -150,120 +151,169 @@
                alt={metatypeName}
             />
          </div>
-         <input
-            id="character-name"
-            class="large"
-            type="text"
-            bind:value={characterName}
-            placeholder="Enter character name"
-         />
-      </ItemSheetComponent>
-      <ItemSheetComponent>
-         <div class="creation-stats">
-            <div>Age: {characterAge} ({currentPhase()})</div>
+         <div class="large-input-wrapper">
+            <div class="large-input-background"></div>
             <input
-               type="range"
-               min={ageMin}
-               max={ageMax}
-               step="1"
-               bind:value={characterAge}
-            />
-
-            <div>Height: {characterHeight} cm</div>
-            <input
-               type="range"
-               min={(metatypeItem?.system as any)?.physical?.height?.min ?? 0}
-               max={(metatypeItem?.system as any)?.physical?.height?.max ?? 200}
-               step="1"
-               bind:value={characterHeight}
-            />
-
-            <div>Weight: {characterWeight} kg</div>
-            <input
-               type="range"
-               min={(metatypeItem?.system as any)?.physical?.weight?.min ?? 0}
-               max={(metatypeItem?.system as any)?.physical?.weight?.max ?? 200}
-               step="1"
-               bind:value={characterWeight}
+               class="large"
+               type="text"
+               bind:value={characterName}
+               placeholder="Enter character name"
             />
          </div>
       </ItemSheetComponent>
       <ItemSheetComponent>
-         <div class="creation-grid">
-            <div class="creation-dropdwn">
-               <h3>Metatype</h3>
-               <select bind:value={selectedMetatype}>
-                  <option value="" disabled selected hidden>Choose an option</option>
-                  {#each metatypeOptions as meta}
-                     <option value={meta.foundryitemid}>
-                        {meta.priority}: {meta.name}
-                     </option>
-                  {/each}
-               </select>
+         <div class="stat-grid single-column">
+            <div class="stat-card stat-field-card labeled-slider">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Age: {characterAge} ({currentPhase()})</h4>
+               </div>
+               <div class="slider-wrapper">
+                  <div class="slider-track"></div>
+                  <input
+                     type="range"
+                     min={ageMin}
+                     max={ageMax}
+                     step="1"
+                     bind:value={characterAge}
+                  />
+               </div>
             </div>
 
-            <div class="creation-dropdwn">
-               <h3>Magic Tradition</h3>
-               <select bind:value={selectedMagic}>
-                  <option value="" disabled selected hidden>Choose an option</option>
-                  {#each magicOptions as magic}
-                     <option
-                        value={magic.foundryitemid}
-                        disabled={usedPriorities.includes(magic.priority) &&
-                           magic.foundryitemid !== selectedMagic}
-                     >
-                        {magic.priority}: {magic.name}
-                     </option>
-                  {/each}
-               </select>
+            <div class="stat-card stat-field-card labeled-slider">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Height: {characterHeight} cm</h4>
+               </div>
+               <div class="slider-wrapper">
+                  <div class="slider-track"></div>
+                  <input
+                     type="range"
+                     min={(metatypeItem?.system as any)?.physical?.height?.min ?? 0}
+                     max={(metatypeItem?.system as any)?.physical?.height?.max ?? 200}
+                     step="1"
+                     bind:value={characterHeight}
+                  />
+               </div>
             </div>
 
-            <div class="creation-dropdwn">
-               <h3>Attribute Points</h3>
-               <select bind:value={selectedAttribute}>
-                  <option value="" disabled selected hidden>Choose an option</option>
-                  {#each PRIORITY_TABLES.attributes as attr}
-                     <option
-                        value={attr.priority}
-                        disabled={usedPriorities.includes(attr.priority) &&
-                           attr.priority !== selectedAttribute}
-                     >
-                        {attr.priority}: {attr.points}
-                     </option>
-                  {/each}
-               </select>
+            <div class="stat-card stat-field-card labeled-slider">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Weight: {characterWeight} kg</h4>
+               </div>
+               <div class="slider-wrapper">
+                  <div class="slider-track"></div>
+                  <input
+                     type="range"
+                     min={(metatypeItem?.system as any)?.physical?.weight?.min ?? 0}
+                     max={(metatypeItem?.system as any)?.physical?.weight?.max ?? 200}
+                     step="1"
+                     bind:value={characterWeight}
+                  />
+               </div>
+            </div>
+         </div>
+      </ItemSheetComponent>
+      <ItemSheetComponent>
+         <div class="stat-grid single-column">
+            <LabeledDropdown
+               key="metatype"
+               label="Metatype"
+               value={selectedMetatype}
+               options={metatypeOptions.map((meta) => ({
+                  value: meta.foundryitemid,
+                  label: `${meta.priority}: ${meta.name}`,
+               }))}
+               onUpdate={(val) => (selectedMetatype = val)}
+            />
+
+            <div class="stat-card stat-field-card labeled-field-card">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Magic Tradition</h4>
+               </div>
+               <div class="select-wrapper">
+                  <div class="select-background"></div>
+                  <select bind:value={selectedMagic}>
+                     <option value="" disabled selected hidden>Choose an option</option>
+                     {#each magicOptions as magic}
+                        <option
+                           value={magic.foundryitemid}
+                           disabled={usedPriorities.includes(magic.priority) &&
+                              magic.foundryitemid !== selectedMagic}
+                        >
+                           {magic.priority}: {magic.name}
+                        </option>
+                     {/each}
+                  </select>
+               </div>
             </div>
 
-            <div class="creation-dropdwn">
-               <h3>Skill Points</h3>
-               <select bind:value={selectedSkill}>
-                  <option value="" disabled selected hidden>Choose an option</option>
-                  {#each PRIORITY_TABLES.skills as skill}
-                     <option
-                        value={skill.priority}
-                        disabled={usedPriorities.includes(skill.priority) &&
-                           skill.priority !== selectedSkill}
-                     >
-                        {skill.priority}: {skill.points}
-                     </option>
-                  {/each}
-               </select>
+            <div class="stat-card stat-field-card labeled-field-card">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Attribute Points</h4>
+               </div>
+               <div class="select-wrapper">
+                  <div class="select-background"></div>
+                  <select bind:value={selectedAttribute}>
+                     <option value="" disabled selected hidden>Choose an option</option>
+                     {#each PRIORITY_TABLES.attributes as attr}
+                        <option
+                           value={attr.priority}
+                           disabled={usedPriorities.includes(attr.priority) &&
+                              attr.priority !== selectedAttribute}
+                        >
+                           {attr.priority}: {attr.points}
+                        </option>
+                     {/each}
+                  </select>
+               </div>
             </div>
 
-            <div class="creation-dropdwn">
-               <h3>Resources</h3>
-               <select bind:value={selectedResource}>
-                  <option value="" disabled selected hidden>Choose an option</option>
-                  {#each PRIORITY_TABLES.resources as resource}
-                     <option
-                        value={resource.priority}
-                        disabled={usedPriorities.includes(resource.priority) &&
-                           resource.priority !== selectedResource}
-                     >
-                        {resource.priority}: {resource.points}
-                     </option>
-                  {/each}
-               </select>
+            <div class="stat-card stat-field-card labeled-field-card">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Skill Points</h4>
+               </div>
+               <div class="select-wrapper">
+                  <div class="select-background"></div>
+                  <select bind:value={selectedSkill}>
+                     <option value="" disabled selected hidden>Choose an option</option>
+                     {#each PRIORITY_TABLES.skills as skill}
+                        <option
+                           value={skill.priority}
+                           disabled={usedPriorities.includes(skill.priority) &&
+                              skill.priority !== selectedSkill}
+                        >
+                           {skill.priority}: {skill.points}
+                        </option>
+                     {/each}
+                  </select>
+               </div>
+            </div>
+
+            <div class="stat-card stat-field-card labeled-field-card">
+               <div class="stat-card-background"></div>
+               <div class="title-container">
+                  <h4 class="no-margin uppercase">Resources</h4>
+               </div>
+               <div class="select-wrapper">
+                  <div class="select-background"></div>
+                  <select bind:value={selectedResource}>
+                     <option value="" disabled selected hidden>Choose an option</option>
+                     {#each PRIORITY_TABLES.resources as resource}
+                        <option
+                           value={resource.priority}
+                           disabled={usedPriorities.includes(resource.priority) &&
+                              resource.priority !== selectedResource}
+                        >
+                           {resource.priority}: {resource.points}
+                        </option>
+                     {/each}
+                  </select>
+               </div>
             </div>
          </div>
       </ItemSheetComponent>
@@ -284,7 +334,7 @@
                Cancel
             </button>
 
-            <button type="submit" disabled={!canCreate}>
+            <button type="submit" class="submit" disabled={!canCreate}>
                <i class="fas fa-check"></i>
                Create Character
             </button>

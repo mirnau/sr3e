@@ -62,7 +62,7 @@
       isMagicStore.set(isMagic);
    });
 
-   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "focus"];
+   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "medical", "focus"];
 
    function rebuildAllItems() {
       allItems = [...((actor as any).items ?? [])].filter((i: any) => INVENTORY_TYPES.includes(i.type));

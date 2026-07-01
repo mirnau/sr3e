@@ -14,7 +14,7 @@ export function upsertMod(mods: Modifier[], mod: Modifier): Modifier[] {
 }
 
 export function removeMod(mods: Modifier[], id: string): Modifier[] {
-    return mods.filter(m => m.id !== id);
+    return mods.filter(m => (m.id ?? m.name) !== id);
 }
 
 export function sumMods(mods: Modifier[]): number {

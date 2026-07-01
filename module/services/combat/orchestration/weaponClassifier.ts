@@ -1,15 +1,15 @@
-type FireMode = "ss" | "sa" | "bf" | "fa";
+export type WeaponMode = "manual" | "semiauto" | "burst" | "fullauto" | "energy" | "blade" | "blunt" | "explosive";
 
-type WeaponSystem = {
-    ammoId?: string;
-    fireMode?: FireMode;
-    ammunitionClass?: string;
-};
+const FIREARM_MODES = new Set<WeaponMode>(["manual", "semiauto", "burst", "fullauto", "energy"]);
+const MELEE_MODES = new Set<WeaponMode>(["blade", "blunt"]);
+
+type WeaponSystem = { mode?: string; ammoId?: string };
 
 export type WeaponClass = {
     isFirearm: boolean;
     isMelee: boolean;
-    mode: string;
+    isExplosive: boolean;
+    mode: WeaponMode | "";
     ammoAvailable: number | null;
     declaredRounds: number;
 };
@@ -19,20 +19,21 @@ export function classifyWeapon(
     ammoAvailable: number | null = null,
 ): WeaponClass {
     const ws = weapon.system as WeaponSystem;
-    const mode = ws.fireMode ?? "ss";
+    const mode = (ws.mode ?? "") as WeaponMode | "";
 
-    const isFirearm = !!(ws.ammoId || ws.ammunitionClass || ws.fireMode);
-    const isMelee = !isFirearm;
+    const isFirearm = FIREARM_MODES.has(mode as WeaponMode);
+    const isMelee = MELEE_MODES.has(mode as WeaponMode);
+    const isExplosive = mode === "explosive";
 
     let declaredRounds = 1;
     if (isFirearm) {
-        if (mode === "bf") {
+        if (mode === "burst") {
             declaredRounds = Math.min(3, ammoAvailable ?? 3);
-        } else if (mode === "fa") {
+        } else if (mode === "fullauto") {
             const available = ammoAvailable ?? 6;
             declaredRounds = Math.min(Math.max(3, available), 10);
         }
     }
 
-    return { isFirearm, isMelee, mode, ammoAvailable, declaredRounds };
+    return { isFirearm, isMelee, isExplosive, mode, ammoAvailable, declaredRounds };
 }

@@ -4,6 +4,7 @@ import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { ElectroCardiogramService } from "../../../services/health/ElectroCardiogramService";
+import { KarmaPoolBurnService } from "../../../services/karma/KarmaPoolBurnService";
 import type SR3EActor from "../../../documents/SR3EActor";
 import StatCard from "./StatCard.svelte";
 
@@ -16,8 +17,8 @@ const stun = storeManager.GetRWStore<number>(actor, "health.stun.value");
 const physical = storeManager.GetRWStore<number>(actor, "health.physical.value");
 const penalty = storeManager.GetRWStore<number>(actor, "health.penalty.value");
 const overflow = storeManager.GetRWStore<number>(actor, "health.overflow.value");
+const body = storeManager.GetRWStore<number>(actor, "attributes.body.value");
 const miraculousSurvival = storeManager.GetFlagStore<boolean>(actor, "miraculousSurvival", false);
-const isAlive = storeManager.GetRWStore<boolean>(actor, "health.isAlive");
 
 let ecgCanvas = $state<HTMLCanvasElement | null>(null);
 let ecgPointCanvas = $state<HTMLCanvasElement | null>(null);
@@ -26,6 +27,7 @@ let ecgService = $state<ElectroCardiogramService | null>(null);
 
 const stunBoxes = $derived(Array.from({ length: 10 }, (_, i) => i < $stun));
 const physicalBoxes = $derived(Array.from({ length: 10 }, (_, i) => i < $physical));
+const isDead = $derived($overflow > $body);
 
 const localization = $derived(CONFIG.SR3E.HEALTH);
 const severityLabels = ["light", "medium", "serious", "deadly"];
@@ -43,7 +45,7 @@ $effect(() => {
 $effect(() => {
    if (!ecgService) return;
 
-   if (!$isAlive) {
+   if (isDead) {
       ecgService.flatline();
    } else {
       ecgService.resume();
@@ -82,19 +84,10 @@ function decrementOverflow() {
    overflow.set(Math.max($overflow - 1, 0));
 }
 
-async function revive() {
-   const confirmed = await foundry.applications.api.DialogV2.confirm({
-      window: { title: localize(localization?.miraculousSurvival) },
-      content: `<p>${localize(localization?.reviveConfirm)}</p>`,
-      yes: { label: localize(localization?.revive) },
-      no: { label: "Cancel" }
-   });
-
-   if (confirmed) {
-      overflow.set(0);
-      isAlive.set(true);
-      miraculousSurvival.set(true);
-   }
+function revive() {
+   KarmaPoolBurnService.Instance().burnAll(actor);
+   overflow.set(0);
+   miraculousSurvival.set(true);
 }
 
 function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
@@ -117,13 +110,13 @@ function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
    <div class="condition-monitor">
       <div class="condition-meter">
          <i
-            class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}`}
+            class={`fa-solid fa-heart-circle-bolt miraculous-survival-icon${$miraculousSurvival ? " used" : ""}${isDead && !$miraculousSurvival ? " active" : ""}`}
             role="button"
-            tabindex={$miraculousSurvival ? -1 : 0}
-            aria-label="Revive"
-            aria-disabled={$miraculousSurvival}
-            onclick={!$miraculousSurvival ? revive : undefined}
-            onkeydown={!$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
+            tabindex={isDead && !$miraculousSurvival ? 0 : -1}
+            aria-label={localize(localization?.miraculousSurvival)}
+            aria-disabled={!isDead || $miraculousSurvival}
+            onclick={isDead && !$miraculousSurvival ? revive : undefined}
+            onkeydown={isDead && !$miraculousSurvival ? (e) => handleButtonKeypress(e, revive) : undefined}
          ></i>
 <div class="stun-damage">
             <h3 class="no-margin checkbox-label">{localize(localization?.stun)}</h3>
@@ -198,7 +191,7 @@ function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
             <span class="attribute-value">{$penalty}</span>
          </StatCard>
          <StatCard label={localize(localization?.overflow)}>
-            <span class="attribute-value">{$overflow}</span>
+            <span class="attribute-value">{$overflow > 0 ? `${$overflow} / ${$body}` : 0}</span>
          </StatCard>
       </div>
    </div>

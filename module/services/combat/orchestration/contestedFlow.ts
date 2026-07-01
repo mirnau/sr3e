@@ -1,7 +1,10 @@
 import { startContest, waitForResponse, computeNetSuccesses } from "../engine/contestCoordinator";
+import { handleContestStub } from "./defenderFlow";
 import { serializeProcedure } from "../engine/procedureSerializer";
 import { buildRollSnapshot } from "./rollSnapshot";
 import { promptResistance } from "./resistanceFlow";
+import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
+import { boxesForLevel } from "../damageMath";
 import type { SR3ERoll } from "./SR3ERoll";
 import type { RollState } from "../diceFormula";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
@@ -43,7 +46,7 @@ export async function executeContestedFlow(
         const targetActor = target.actor ?? null;
         if (!targetActor) continue;
 
-        const contestId = startContest(
+        const { contestId, stub } = startContest(
             serialized,
             exportCtx,
             setup.defenseHint ?? { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "Reaction" },
@@ -52,21 +55,45 @@ export async function executeContestedFlow(
             initiatorRoll,
         );
 
+        void handleContestStub(stub);
+
         const defenderRoll = await waitForResponse(contestId);
 
-        const netSuccesses = isAborted(defenderRoll)
-            ? roll.countSuccesses()
-            : computeNetSuccesses(initiatorRoll, defenderRoll);
+        if (isAborted(defenderRoll)) {
+            // Cancellation chat already posted by handleDefenderChoice
+            continue;
+        }
+
+        const netSuccesses = computeNetSuccesses(initiatorRoll, defenderRoll);
+
+        const initiatorName = (actor as unknown as { name?: string }).name ?? "Attacker";
+        const targetName = (targetActor as unknown as { name?: string }).name ?? "Defender";
+        const outcomeHtml = renderContestOutcome({
+            initiator: { name: initiatorName },
+            target: { name: targetName },
+            weaponName: exportCtx.weaponName,
+            initiatorRoll,
+            targetRoll: defenderRoll,
+            netSuccesses,
+        });
+        if (typeof ChatMessage !== "undefined") {
+            await (ChatMessage as any).create?.({
+                content: outcomeHtml,
+                speaker: (ChatMessage as any).getSpeaker?.({ actor }),
+            });
+        }
 
         if (netSuccesses > 0 && exportCtx.damage) {
+            const stagedStep = "m" as const;
             const resistPrep: ResistancePrep = {
                 familyKey: exportCtx.familyKey,
                 weaponId: exportCtx.weaponId,
                 weaponName: exportCtx.weaponName,
                 tnBase: exportCtx.tnBase,
                 tnMods: exportCtx.tnMods,
-                stagedStepBeforeResist: "m",
+                stagedStepBeforeResist: stagedStep,
                 trackKey: "physical",
+                boxesIfUnresisted: boxesForLevel(stagedStep),
             };
             await resistFn(resistPrep, targetActor as never);
         }

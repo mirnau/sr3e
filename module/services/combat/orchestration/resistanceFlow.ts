@@ -2,6 +2,7 @@ import { SR3ERoll } from "./SR3ERoll";
 import { buildResistance, resolveResistance } from "../resistanceEngine";
 import { resolveControllingUser } from "../engine/contestCoordinator";
 import { renderResistancePrompt } from "../../../ui/combat/chat/renderResistancePrompt";
+import { renderResistanceOutcome } from "../../../ui/combat/chat/renderResistanceOutcome";
 import type { ResistancePrep } from "../engine/types";
 import type { RollState } from "../diceFormula";
 import type { ResistanceBuild } from "../resistanceEngine";
@@ -95,12 +96,25 @@ export async function executeResistanceRoll(
 
     const outcome = resolveResistance(build, bodySuccesses);
 
+    const track = prep.trackKey as "stun" | "physical";
+    const currentBoxes = getTrackValue(defender, track);
+    const overflowBoxes = outcome.applied
+        ? Math.max(0, currentBoxes + outcome.boxes - TRACK_MAX)
+        : 0;
+
     if (outcome.applied && outcome.boxes > 0) {
-        await applyDamageBoxes(defender, prep.trackKey as "stun" | "physical", outcome.boxes);
+        await applyDamageBoxes(defender, track, outcome.boxes);
     }
 
     if (typeof Hooks !== "undefined") {
         Hooks.callAll("actorSystemRecalculated", defender);
+    }
+
+    const outcomeHtml = renderResistanceOutcome(
+        outcome, prep, defender.name ?? "Defender", bodySuccesses, tn, overflowBoxes,
+    );
+    if (typeof ChatMessage !== "undefined") {
+        await (ChatMessage as any).create?.({ content: outcomeHtml });
     }
 }
 

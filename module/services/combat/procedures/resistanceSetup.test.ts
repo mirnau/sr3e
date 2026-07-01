@@ -10,6 +10,7 @@ const prep = (tnBase = 6, tnMods: { name: string; value: number }[] = []): Resis
     tnMods,
     stagedStepBeforeResist: "m",
     trackKey: "physical",
+    boxesIfUnresisted: 4,
 });
 
 const defender = (body = 4, currentBoxes = 0) => ({

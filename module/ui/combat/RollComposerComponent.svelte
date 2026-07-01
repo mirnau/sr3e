@@ -49,14 +49,21 @@ $effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
 
 export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
-    targetNumber = 4;
-    modifiers = [];
+    targetNumber = newSetup.rollState.targetNumber;
+    modifiers = [...(newSetup.rollState.modifiers ?? [])];
     poolDice = 0;
     karmaDice = 0;
     isDefaulting = false;
     composerState.isOpen = true;
-    composerState.selectedPoolKey = null;
-    composerState.poolAvailable = 0;
+
+    if (newSetup.initialPoolKey) {
+        const pool = (actor.system as any)?.dicePools?.[newSetup.initialPoolKey];
+        composerState.selectedPoolKey = newSetup.initialPoolKey;
+        composerState.poolAvailable = Math.max(0, (pool?.value ?? 0) - (pool?.spent ?? 0));
+    } else {
+        composerState.selectedPoolKey = null;
+        composerState.poolAvailable = 0;
+    }
 }
 
 function onReset(): void {

@@ -4,30 +4,52 @@ import { classifyWeapon } from "./weaponClassifier";
 const weapon = (overrides: Record<string, unknown> = {}) => ({ system: overrides });
 
 describe("classifyWeapon", () => {
-    it("ammoId present → firearm", () => {
-        expect(classifyWeapon(weapon({ ammoId: "a1" })).isFirearm).toBe(true);
+    it("semiauto mode → firearm", () => {
+        expect(classifyWeapon(weapon({ mode: "semiauto" })).isFirearm).toBe(true);
     });
-    it("fireMode present → firearm", () => {
-        expect(classifyWeapon(weapon({ fireMode: "sa" })).isFirearm).toBe(true);
+    it("manual mode → firearm", () => {
+        expect(classifyWeapon(weapon({ mode: "manual" })).isFirearm).toBe(true);
     });
-    it("no firearm signals → melee", () => {
-        const r = classifyWeapon(weapon({ damage: 2 }));
+    it("energy mode → firearm", () => {
+        expect(classifyWeapon(weapon({ mode: "energy" })).isFirearm).toBe(true);
+    });
+    it("blade mode → melee", () => {
+        const r = classifyWeapon(weapon({ mode: "blade" }));
+        expect(r.isMelee).toBe(true);
+        expect(r.isFirearm).toBe(false);
+        expect(r.isExplosive).toBe(false);
+    });
+    it("blunt mode → melee", () => {
+        const r = classifyWeapon(weapon({ mode: "blunt" }));
         expect(r.isMelee).toBe(true);
         expect(r.isFirearm).toBe(false);
     });
-    it("SS/SA → declaredRounds=1", () => {
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "sa" })).declaredRounds).toBe(1);
+    it("explosive mode → isExplosive", () => {
+        const r = classifyWeapon(weapon({ mode: "explosive" }));
+        expect(r.isExplosive).toBe(true);
+        expect(r.isFirearm).toBe(false);
+        expect(r.isMelee).toBe(false);
     });
-    it("BF → min(3, ammoAvailable)", () => {
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "bf" }), 2).declaredRounds).toBe(2);
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "bf" }), 10).declaredRounds).toBe(3);
+    it("empty mode → not firearm, not melee, not explosive", () => {
+        const r = classifyWeapon(weapon({}));
+        expect(r.isFirearm).toBe(false);
+        expect(r.isMelee).toBe(false);
+        expect(r.isExplosive).toBe(false);
     });
-    it("BF → defaults to 3 when ammo null", () => {
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "bf" }), null).declaredRounds).toBe(3);
+    it("manual/semiauto → declaredRounds=1", () => {
+        expect(classifyWeapon(weapon({ mode: "semiauto" })).declaredRounds).toBe(1);
+        expect(classifyWeapon(weapon({ mode: "manual" })).declaredRounds).toBe(1);
     });
-    it("FA → clamp(max(3, available), 3, 10)", () => {
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "fa" }), 1).declaredRounds).toBe(3);
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "fa" }), 7).declaredRounds).toBe(7);
-        expect(classifyWeapon(weapon({ ammoId: "a1", fireMode: "fa" }), 15).declaredRounds).toBe(10);
+    it("burst → min(3, ammoAvailable)", () => {
+        expect(classifyWeapon(weapon({ mode: "burst" }), 2).declaredRounds).toBe(2);
+        expect(classifyWeapon(weapon({ mode: "burst" }), 10).declaredRounds).toBe(3);
+    });
+    it("burst → defaults to 3 when ammo null", () => {
+        expect(classifyWeapon(weapon({ mode: "burst" }), null).declaredRounds).toBe(3);
+    });
+    it("fullauto → clamp(max(3, available), 3, 10)", () => {
+        expect(classifyWeapon(weapon({ mode: "fullauto" }), 1).declaredRounds).toBe(3);
+        expect(classifyWeapon(weapon({ mode: "fullauto" }), 7).declaredRounds).toBe(7);
+        expect(classifyWeapon(weapon({ mode: "fullauto" }), 15).declaredRounds).toBe(10);
     });
 });

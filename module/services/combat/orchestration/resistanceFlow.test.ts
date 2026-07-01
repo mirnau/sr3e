@@ -4,7 +4,7 @@ import type { ResistancePrep } from "../engine/types";
 
 const prep = (tnBase = 4): ResistancePrep => ({
     familyKey: "firearm", weaponId: null, weaponName: "Predator",
-    tnBase, tnMods: [], stagedStepBeforeResist: "m", trackKey: "physical",
+    tnBase, tnMods: [], stagedStepBeforeResist: "m", trackKey: "physical", boxesIfUnresisted: 4,
 });
 
 const defender = (body = 4, physValue = 0, stunValue = 0, overflow = 0) => ({

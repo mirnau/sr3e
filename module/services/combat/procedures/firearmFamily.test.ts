@@ -4,8 +4,8 @@ import { resetRecoil, bumpOOCShots } from "../recoilTracker";
 
 beforeEach(() => resetRecoil("test"));
 
-const weapon = (fireMode = "sa", power = 9, ammoId = "a1") => ({
-    system: { fireMode, power, damageType: "m", ammoId, ranges: {} },
+const weapon = (mode = "semiauto", power = 9, ammoId = "a1") => ({
+    system: { mode, power, damageType: "m", ammoId, ranges: {} },
     update: vi.fn().mockResolvedValue(undefined),
 });
 
@@ -25,17 +25,17 @@ const actor = (id = "test") => ({
 });
 
 describe("planFire", () => {
-    it("no recoil on first SA shot", () => {
+    it("no recoil on first semiauto shot", () => {
         const p = planFire("test", weapon(), { declaredRounds: 1 });
         expect(p.attackerTNMod).toBe(0);
     });
-    it("recoil on second SA shot", () => {
+    it("recoil on second semiauto shot", () => {
         bumpOOCShots("test", 1);
         const p = planFire("test", weapon(), { declaredRounds: 1 });
         expect(p.attackerTNMod).toBe(1);
     });
     it("caps rounds to ammoAvailable", () => {
-        const p = planFire("test", weapon("fa"), { declaredRounds: 10, ammoAvailable: 3 });
+        const p = planFire("test", weapon("fullauto"), { declaredRounds: 10, ammoAvailable: 3 });
         expect(p.roundsFired).toBe(3);
     });
 });
@@ -63,10 +63,10 @@ describe("onFirearmAttackResolved", () => {
     it("bumps OOC shots when not in combat", async () => {
         const a = actor();
         const w = weapon();
-        const plan = { mode: "sa", roundsFired: 3, attackerTNMod: 0, powerDelta: 0, levelDelta: 0, notes: [] };
+        const plan = { mode: "semiauto", roundsFired: 3, attackerTNMod: 0, powerDelta: 0, levelDelta: 0, notes: [] };
         await onFirearmAttackResolved(a as never, w as never, plan);
         // recoil tracker bumped — next planFire sees prior shots
-        const p = planFire("test", weapon("bf"), { declaredRounds: 3 });
-        expect(p.attackerTNMod).toBe(6); // priorShots=3, BF: 3+3=6
+        const p = planFire("test", weapon("burst"), { declaredRounds: 3 });
+        expect(p.attackerTNMod).toBe(6); // priorShots=3, burst: 3+3=6
     });
 });

@@ -23,6 +23,7 @@ export const typekeys = Object.freeze({
   spell: "spell",
   focus: "focus",
   gadget: "gadget",
+  medical: "medical",
 } as const);
 
 export const flags = Object.freeze({

@@ -21,7 +21,7 @@ Old system had `SR3Edie.js` — custom Foundry Die that disables native `x` expl
 
 **Design freedom**: implement as a pure TS accumulation loop wired as the default evaluator inside `SR3ERoll.evaluate()`. No Foundry subclass required — the injectable evaluator pattern already supports this cleanly. Register a lightweight Foundry Die shim only if the visual chat renderer needs it.
 
-## [in-plan] Overflow damage rules
+## [done] Overflow damage rules
 
 SR3E Condition Monitor overflow mechanics — not yet planned.
 

@@ -27,6 +27,7 @@
    ]);
 
    let pendingLockModal = $state(false);
+   let lockModalOpen = false;
 
    function hasOpenSkillEditors(): boolean {
       return Object.values(ui.windows as unknown as Record<string, { id?: string }>).some(
@@ -35,18 +36,25 @@
    }
 
    async function showLockModal(): Promise<void> {
-      const confirmed = await foundry.applications.api.DialogV2.confirm({
-         window: { title: "Complete Attribute Assignment?" },
-         content:
-            "<p>You have spent all your attribute points.</p><p>Lock attributes and proceed to skill assignment?</p>",
-         rejectClose: false,
-      });
+      if (lockModalOpen) return;
+      lockModalOpen = true;
 
-      if (confirmed) {
-         const finalInt = $intelligenceStore;
-         $knowledgePoints = finalInt * 5;
-         $languagePoints = Math.floor(finalInt * 1.5);
-         await attributeLocked.update(() => true);
+      try {
+         const confirmed = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Complete Attribute Assignment?" },
+            content:
+               "<p>You have spent all your attribute points.</p><p>Lock attributes and proceed to skill assignment?</p>",
+            rejectClose: false,
+         });
+
+         if (confirmed) {
+            const finalInt = $intelligenceStore;
+            $knowledgePoints = finalInt * 5;
+            $languagePoints = Math.floor(finalInt * 1.5);
+            await attributeLocked.update(() => true);
+         }
+      } finally {
+         lockModalOpen = false;
       }
    }
    $effect(() => {

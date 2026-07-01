@@ -9,6 +9,7 @@ let {
     path,
     placeholder,
     onUpdate,
+    updateOnInput = false,
     disabled = false,
 }: {
     item?: SR3EItem;
@@ -18,16 +19,25 @@ let {
     path?: string;
     placeholder?: string;
     onUpdate?: (val: string) => void;
+    updateOnInput?: boolean;
     disabled?: boolean;
 } = $props();
 
-function onChange(e: Event) {
+function update(e: Event) {
     const val = (e.target as HTMLInputElement).value;
     if (onUpdate) {
         onUpdate(val);
     } else if (item && path) {
         (item as any).update({ [`${path}.${key}`]: val }, { render: false });
     }
+}
+
+function onInput(e: Event) {
+    if (updateOnInput) update(e);
+}
+
+function onChange(e: Event) {
+    if (!updateOnInput) update(e);
 }
 </script>
 
@@ -38,6 +48,6 @@ function onChange(e: Event) {
     </div>
     <div class="select-wrapper">
         <div class="select-background"></div>
-        <input type="text" value={value ?? ""} onchange={onChange} {placeholder} {disabled} />
+        <input type="text" value={value ?? ""} oninput={onInput} onchange={onChange} {placeholder} {disabled} />
     </div>
 </div>

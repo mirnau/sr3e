@@ -21,6 +21,10 @@ Actor health fields are `system.health.stun.value`, `system.health.physical.valu
 ### SR3ERoll.countSuccesses() returns null for open rolls — never coerce to 0
 When `SR3ERoll.buildOpen(pool)` is used (no TN), `countSuccesses()` returns `null`. This is intentional: open roll results are raw accumulated totals; GM interprets. Do not default-null to 0 at the SR3ERoll level. The only valid `?? 0` coercion is in `resistanceFlow.ts`, where body resistance always has a TN and open rolls never reach that path.
 
+### GadgetRow.enabled is $derived, not $state — do not revert to untrack snapshot
+
+`enabled` in `GadgetRow.svelte` is `$derived(!!(p.activeEffects[0] as any)?.flags?.sr3e?.gadget?.isEnabled)`. It must track `p.activeEffects[0]` reactively. `ae.update({ render: false })` updates the in-memory document without triggering a sheet re-render, so a one-time `$state` snapshot (via `untrack`) would show stale state until the sheet is fully remounted. The `$derived` re-evaluates whenever `GadgetViewer.refresh()` pushes new `activeEffects` props down. Reverting to `$state` breaks toggle persistence within a session.
+
 ## ADR Index
 - [0001-sr3eroll-injectable-evaluator](adr/0001-sr3eroll-injectable-evaluator.md) — SUPERSEDED: SR3ERoll injectable evaluator (replaced by ADR-0005)
 - [0002-dice-formula-always-d6x6](adr/0002-dice-formula-always-d6x6.md) — SUPERSEDED: d6x6 formula (replaced by ADR-0006)
@@ -29,3 +33,4 @@ When `SR3ERoll.buildOpen(pool)` is used (no TN), `countSuccesses()` returns `nul
 - [0005-globalthis-roll-mock](adr/0005-globalthis-roll-mock.md) — Tests mock globalThis.Roll; injectable evaluator and fromTerms removed from production
 - [0006-dice-formula-cap-equals-tn](adr/0006-dice-formula-cap-equals-tn.md) — buildFormula cap=TN; three formula types (combat, infinite, initiative)
 - [0007-count-successes-null-for-open-rolls](adr/0007-count-successes-null-for-open-rolls.md) — countSuccesses() returns null for open rolls; isGlitch() always false without TN
+- [0008-gadget-storage-active-effects](adr/0008-gadget-storage-active-effects.md) — Gadgets stored as ActiveEffect docs with flags.sr3e.gadget.*; no embedded item-in-item

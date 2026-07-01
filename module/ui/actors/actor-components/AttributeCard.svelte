@@ -8,6 +8,10 @@ import type SR3EActor from "../../../documents/SR3EActor";
 import { buildAttributeSetup } from "../../../services/combat/procedures/simpleSetups";
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
+import { claimPendingResponse } from "../../../services/combat/engine/responseInterceptor";
+import { deliverResponse } from "../../../services/combat/engine/contestCoordinator";
+import type { RollSnapshot } from "../../../services/combat/engine/types";
+import type { ProcedureSetup } from "../../../services/combat/procedures/simpleSetups";
 
 interface Props {
    actor: SR3EActor;
@@ -80,7 +84,15 @@ function increaseAttribute(): void {
 function onRollClick(e: MouseEvent): void {
     if ($isCharacterCreation || $isShoppingState || !canRoll) return;
     const setup = buildAttributeSetup(actor, attributeKey, label);
-    if (e.shiftKey) {
+    const actorId = (actor as unknown as { id?: string }).id ?? "";
+    const pendingContest = claimPendingResponse(actorId);
+    if (pendingContest) {
+        const responseSetup: ProcedureSetup = { ...setup, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { deliverResponse(pendingContest, roll as RollSnapshot); } };
+        openComposer(responseSetup, actor);
+        return;
+    }
+    const hasTargets = (game.user?.targets?.size ?? 0) > 0;
+    if (e.shiftKey || hasTargets) {
         openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);

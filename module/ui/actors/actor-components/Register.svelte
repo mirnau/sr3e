@@ -8,49 +8,65 @@ import SkillsActive from "./skills/SkillsActive.svelte";
 import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
 import Inventory from "./inventory/Inventory.svelte";
+import Grimoire from "./Grimoire.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
 const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-let activeTab = $state<"active" | "knowledge" | "language" | "inventory" | "garage" | "effects" | "ratsrace">("active");
+let activeTab = $state<"active" | "knowledge" | "language" | "grimoire" | "inventory" | "garage" | "effects" | "ratsrace">("active");
+const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
 
 storeManager.Subscribe(actor);
-onDestroy(() => storeManager.Unsubscribe(actor));
+onDestroy(() => {
+   Hooks.off("createItem", createHookId);
+   Hooks.off("updateItem", updateHookId);
+   Hooks.off("deleteItem", deleteHookId);
+   storeManager.Unsubscribe(actor);
+});
 
-const activeSkills = $derived(
-   [...(actor.items ?? [])]
-      .filter((item: Record<string, unknown>) => {
-         const sys = item.system as Record<string, unknown>;
-         return item.type === "skill" && sys?.skillType === "active";
-      })
+let skillItems = $state<any[]>([]);
+let spellItems = $state<Item[]>([]);
+
+function rebuildRegisterItems() {
+   skillItems = [...((actor as any).items ?? [])].filter((item: Record<string, unknown>) => item.type === "skill");
+   spellItems = [...((actor as any).items ?? [])]
+      .filter((item: Item) => item.type === "spell")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+}
+
+rebuildRegisterItems();
+
+const onItemChange = (item: any) => {
+   if (item.parent?.id !== (actor as any).id) return;
+   rebuildRegisterItems();
+};
+
+const createHookId = Hooks.on("createItem", onItemChange);
+const updateHookId = Hooks.on("updateItem", onItemChange);
+const deleteHookId = Hooks.on("deleteItem", onItemChange);
+
+function bySkillType(skillType: string) {
+   return skillItems
+      .filter((item: Record<string, unknown>) => (item.system as Record<string, unknown>)?.skillType === skillType)
       .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
          (a.name as string).localeCompare(b.name as string)
-      )
+      );
+}
+
+const activeSkills = $derived(bySkillType("active"));
+const knowledgeSkills = $derived(bySkillType("knowledge"));
+const languageSkills = $derived(bySkillType("language"));
+const isAwakened = $derived(
+   $magic > 0 &&
+   actor.items.some((item: any) => item.type === "magic") &&
+   !actor.system?.attributes?.magic?.isBurnedOut,
 );
 
-const knowledgeSkills = $derived(
-   [...(actor.items ?? [])]
-      .filter((item: Record<string, unknown>) => {
-         const sys = item.system as Record<string, unknown>;
-         return item.type === "skill" && sys?.skillType === "knowledge";
-      })
-      .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
-         (a.name as string).localeCompare(b.name as string)
-      )
-);
-
-const languageSkills = $derived(
-   [...(actor.items ?? [])]
-      .filter((item: Record<string, unknown>) => {
-         const sys = item.system as Record<string, unknown>;
-         return item.type === "skill" && sys?.skillType === "language";
-      })
-      .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
-         (a.name as string).localeCompare(b.name as string)
-      )
-);
+$effect(() => {
+   if (!isAwakened && activeTab === "grimoire") activeTab = "active";
+});
 </script>
 
 <Foldout label="Register">
@@ -74,6 +90,14 @@ const languageSkills = $derived(
             class:active={activeTab === "language"}
             onclick={() => (activeTab = "language")}
          ><span>Language</span></button>
+         {#if isAwakened}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={activeTab === "grimoire"}
+               onclick={() => (activeTab = "grimoire")}
+            ><span>Grimoire</span></button>
+         {/if}
          <button
             type="button"
             class="skills-register-tab"
@@ -107,6 +131,8 @@ const languageSkills = $derived(
                <SkillsKnowledge {actor} skills={knowledgeSkills} />
             {:else if activeTab === "language"}
                <SkillsLanguage {actor} skills={languageSkills} />
+            {:else if activeTab === "grimoire" && isAwakened}
+               <Grimoire {actor} spells={spellItems} />
             {:else if activeTab === "inventory"}
                <Inventory {actor} />
             {:else if activeTab === "garage"}

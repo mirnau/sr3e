@@ -37,6 +37,7 @@ export type ResistancePrep = {
     tnMods: Modifier[];
     stagedStepBeforeResist: DamageStep;
     trackKey: DamageTrack;
+    boxesIfUnresisted: number;
 };
 
 export type DefenseHint = {

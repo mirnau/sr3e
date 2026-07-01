@@ -325,8 +325,16 @@
 	left: 0;
 	font-size: 1.25rem;
 	color: var(--health-highlight-color-primary);
-	text-shadow: 0 0 8px var(--health-highlight-color-primary);
-	cursor: pointer;
+	text-shadow: none;
+	opacity: 0.35;
+	cursor: default;
+
+	&.active {
+		color: var(--accent-color);
+		text-shadow: 0 0 8px var(--accent-color);
+		opacity: 1;
+		cursor: pointer;
+	}
 
 	&.used {
 		color: var(--health-text-color);

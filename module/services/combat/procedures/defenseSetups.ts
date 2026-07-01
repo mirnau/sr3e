@@ -1,20 +1,27 @@
-import { deliverResponse } from "../engine/contestCoordinator";
+import { deliverResponse, getContest } from "../engine/contestCoordinator";
 import type { ProcedureSetup } from "./simpleSetups";
-import type { RollSnapshot } from "../engine/types";
+import type { RollSnapshot, ContestExport } from "../engine/types";
 
 type AttributeMap = Record<string, { value?: number; total?: number }>;
 type ActorSystem = { attributes?: AttributeMap };
 type Defender = { system: Record<string, unknown> };
 
-function reactionDice(defender: Defender): number {
-    const attrs = (defender.system as ActorSystem).attributes ?? {};
-    const r = attrs.reaction;
-    return r?.total ?? r?.value ?? 0;
+// SR3E p.113: +1 TN per 3 rounds fired from burst or full-auto fire.
+function dodgeTNMod(exportCtx: ContestExport | undefined): number {
+    const rounds = exportCtx?.plan?.roundsFired ?? 1;
+    return Math.floor(rounds / 3);
 }
 
 export function buildDodgeSetup(defender: Defender, contestId: string): ProcedureSetup {
-    const dice = reactionDice(defender);
-    const rollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: 4, modifiers: [] };
+    const record = getContest(contestId);
+    const tnMod = dodgeTNMod(record?.exportCtx);
+    const targetNumber = 4 + tnMod;
+
+    const modifiers = tnMod > 0
+        ? [{ id: "rounds-fired", name: `Rounds fired (+${tnMod})`, value: tnMod }]
+        : [];
+
+    const rollState = { dice: 0, poolDice: 0, karmaDice: 0, targetNumber, modifiers };
 
     return {
         kind: "dodge",
@@ -23,14 +30,15 @@ export function buildDodgeSetup(defender: Defender, contestId: string): Procedur
         lockPriority: "simple",
         selfPublish: false,
         defenseHint: null,
+        initialPoolKey: "combat",
         exportFn: () => ({
             familyKey: "dodge",
             weaponId: null,
             weaponName: "",
             plan: null,
             damage: null,
-            tnBase: 4,
-            tnMods: [],
+            tnBase: targetNumber,
+            tnMods: modifiers,
             next: { kind: "", ui: {}, args: {} },
         }),
         commitFn: async (roll: unknown) => {

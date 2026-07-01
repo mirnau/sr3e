@@ -37,12 +37,10 @@ export default class CharacterActorSheet extends SR3EActorBase {
     }
 
     protected _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {
-        // Clean up existing apps before mounting new ones
-        this._unmountAllApps();
+        if (this.#app) return;
 
         const form = this.form as HTMLFormElement;
 
-        // Mount main character sheet app
         this.#app = mount(CharacterSheetApp, {
             target: windowContent,
             props: {
@@ -57,17 +55,15 @@ export default class CharacterActorSheet extends SR3EActorBase {
         this._injectNewsFeed(header);
         this._injectShoppingCart(header);
         this._injectRollComposer(form, header);
-
-        // Inject creation manager into main content
         this._injectCreationManager(windowContent);
     }
 
     _injectNeonName(header: Element | null) {
         if (!header?.parentElement) return;
 
-        let neonSlot = header.previousElementSibling;
+        let neonSlot = header.parentElement.querySelector(".neon-name-position");
 
-        if (!neonSlot || !neonSlot.classList.contains("neon-name-position")) {
+        if (!neonSlot) {
             neonSlot = document.createElement("div");
             neonSlot.classList.add("neon-name-position");
             header.parentElement.insertBefore(neonSlot, header);
@@ -147,16 +143,13 @@ export default class CharacterActorSheet extends SR3EActorBase {
         }
     }
 
-    _injectCreationManager(content: Element | null) {
-        if (!content) return;
-
+    _injectCreationManager(_content: Element | null) {
         const header = this.element.querySelector("header.window-header");
         if (!header?.parentElement) return;
 
-        // Creation manager needs to be positioned relative to header for sidebar positioning
-        let creationManagerSlot = header.previousElementSibling;
+        let creationManagerSlot = header.parentElement.querySelector(".points-position");
 
-        if (!creationManagerSlot || !creationManagerSlot.classList.contains("points-position")) {
+        if (!creationManagerSlot) {
             creationManagerSlot = document.createElement("div");
             creationManagerSlot.classList.add("points-position");
             header.parentElement.insertBefore(creationManagerSlot, header);
@@ -186,6 +179,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
     protected _tearDown(options: DeepPartial<RenderOptions>): void {
         KarmaSpendingService.Instance().cancelAttrSession(this.document as Actor);
         this._unmountAllApps();
+        this.#app = undefined;
         if (this.#neon) { unmount(this.#neon); this.#neon = undefined; }
         if (this.#newsFeed) { unmount(this.#newsFeed); this.#newsFeed = undefined; }
         if (this.#shoppingCart) { unmount(this.#shoppingCart); this.#shoppingCart = undefined; }

@@ -16,7 +16,7 @@ const actor = (str = 4) => ({
 });
 
 const weapon = (linkedSkillId = "s1", isDefaulting = false) => ({
-    system: { linkedSkillId, isDefaulting, difficulty: 4, fireMode: "sa", power: 9, damageType: "m", ammoId: "am1", ranges: {} },
+    system: { linkedSkillId, isDefaulting, mode: "semiauto", power: 9, damageType: "m", ammoId: "am1", ranges: {} },
     update: vi.fn(),
 });
 

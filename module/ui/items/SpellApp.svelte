@@ -2,6 +2,7 @@
 import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import Image from "../common-components/Image.svelte";
+import GadgetViewer from "../common-components/GadgetViewer.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
@@ -62,7 +63,7 @@ function onManipulationSubtypeChange(val: string) {
 }
 </script>
 
-<ItemSheetWrapper csslayout="triple">
+<ItemSheetWrapper csslayout="double">
     <ItemSheetComponent>
         <Image entity={item} />
         <div class="large-input-wrapper">
@@ -85,6 +86,7 @@ function onManipulationSubtypeChange(val: string) {
         <LabeledDropdown {item} key="range" label={localize(CONFIG.SR3E.SPELL.range)} value={system.range ?? ""} path="system" options={kvOptions(CONFIG.SR3E.SPELL_RANGES)} />
         <LabeledDropdown {item} key="type" label={localize(CONFIG.SR3E.SPELL.duration)} value={durationType ?? ""} options={kvOptions(CONFIG.SR3E.SPELL_DURATIONS)} onUpdate={(val) => { durationType = val; updateSystem("system.duration.type", val); }} />
         <LabeledNumberInput {item} key="rounds" label={localize(CONFIG.SR3E.SPELL.rounds)} value={system.duration?.rounds ?? 0} path="system.duration" disabled={durationType !== "sustained"} />
+        <LabeledBoolean {item} key="exclusive" label={localize(CONFIG.SR3E.SPELL.exclusiveCast)} value={Boolean(system.limits?.exclusive)} path="system.limits" />
     </ItemSheetComponent>
 
     <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.targetingRules)}>
@@ -113,9 +115,8 @@ function onManipulationSubtypeChange(val: string) {
         <LabeledNumberInput {item} key="damageLevelModifier" label={localize(CONFIG.SR3E.SPELL.drainDamageLevelModifier)} value={system.drain?.damageLevelModifier ?? 0} path="system.drain" />
     </ItemSheetComponent>
 
-    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.limitations)}>
-        <LabeledBoolean {item} key="fetish" label={localize(CONFIG.SR3E.SPELL.fetishLimited)} value={Boolean(system.limits?.fetish)} path="system.limits" />
-        <LabeledBoolean {item} key="exclusive" label={localize(CONFIG.SR3E.SPELL.exclusiveLimited)} value={Boolean(system.limits?.exclusive)} path="system.limits" />
+    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.fetishes)}>
+        <GadgetViewer document={item} isSlim={true} />
     </ItemSheetComponent>
 
     <JournalViewer document={item} />

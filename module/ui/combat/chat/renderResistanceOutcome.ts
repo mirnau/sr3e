@@ -11,6 +11,7 @@ function stepLabel(step: string | null): string {
 export function renderResistanceOutcome(
     outcome: ResistanceResult,
     prep: ResistancePrep,
+    defenderName: string,
     bodySuccesses: number,
     tn: number,
     overflowBoxes = 0,
@@ -20,8 +21,8 @@ export function renderResistanceOutcome(
     const track = prep.trackKey === "stun" ? "Stun" : "Physical";
 
     const resultLine = outcome.applied
-        ? `${outcome.boxes} box${outcome.boxes !== 1 ? "es" : ""} to ${track}`
-        : "Damage staged off — no boxes applied";
+        ? `${defenderName} takes ${outcome.boxes} box${outcome.boxes !== 1 ? "es" : ""} of ${after} ${track} damage`
+        : `${defenderName} takes no damage`;
 
     const overflowLine = overflowBoxes > 0
         ? `<div class="sr3e-overflow">Overflow: ${overflowBoxes} box${overflowBoxes !== 1 ? "es" : ""} to Physical</div>`

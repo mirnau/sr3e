@@ -49,8 +49,8 @@
       const knowledgePoints = service.getRemainingSkillPoints(actor, "knowledge");
       const languagePoints = service.getRemainingSkillPoints(actor, "language");
 
-      return (await Dialog.confirm({
-         title: "Finish Character Creation?",
+      return foundry.applications.api.DialogV2.confirm({
+         window: { title: "Finish Character Creation?" },
          content: `
             <p>You have unspent creation points:</p>
             <ul>
@@ -61,7 +61,7 @@
             </ul>
             <p>These will be discarded. Are you sure?</p>
          `,
-      })) ?? false;
+      });
    }
 </script>
 

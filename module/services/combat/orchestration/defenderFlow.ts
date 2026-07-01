@@ -1,6 +1,7 @@
 import { registerContestStub, expireContest, getContest } from "../engine/contestCoordinator";
 import { buildDodgeSetup, buildMeleeDefenseSetup } from "../procedures/defenseSetups";
 import { openComposer } from "../procedures/composerService";
+import { registerPendingResponse } from "../engine/responseInterceptor";
 import { renderDefenderPrompt } from "../../../ui/combat/chat/renderDefenderPrompt";
 import type { ContestStub, DefenseHint } from "../engine/types";
 import type { MeleeDefenseBasis, MeleeDefenseMode } from "../procedures/defenseSetups";
@@ -44,6 +45,13 @@ function currentUserIsGM(): boolean {
     return !!(game.user as unknown as { isGM?: boolean }).isGM;
 }
 
+type SheetLike = { rendered?: boolean; render?: (force: boolean) => void };
+
+function ensureSheetOpen(actor: ActorLike): void {
+    const sheet = (actor as unknown as { sheet?: SheetLike }).sheet;
+    if (sheet && !sheet.rendered) sheet.render?.(true);
+}
+
 type ChatMessageStatic = { create: (data: Record<string, unknown>) => Promise<unknown> };
 
 async function sendDefenderPrompt(stub: ContestStub): Promise<void> {
@@ -74,13 +82,25 @@ export async function handleContestStub(stub: ContestStub): Promise<void> {
         return;
     }
 
-    registerContestStub(stub);
+    if (!getContest(stub.contestId)) {
+        registerContestStub(stub);
+    }
+
     await sendDefenderPrompt(stub);
+}
+
+async function postContestCancelled(defenderName: string): Promise<void> {
+    if (typeof ChatMessage !== "undefined") {
+        await (ChatMessage as any).create?.({ content: `<p><strong>${defenderName}</strong> declined the contest.</p>` });
+    }
 }
 
 export function handleDefenderChoice(contestId: string, key: string | null | undefined): void {
     if (!key || key === "no") {
+        const record = getContest(contestId);
+        const name = (record?.target as unknown as { name?: string })?.name ?? "Defender";
         expireContest(contestId);
+        void postContestCancelled(name);
         return;
     }
 
@@ -92,12 +112,20 @@ export function handleDefenderChoice(contestId: string, key: string | null | und
 
     const defender = record.target as unknown as ActorLike;
 
+    if (key === "accept") {
+        registerPendingResponse((defender as unknown as { id: string }).id, contestId);
+        ensureSheetOpen(defender);
+        return;
+    }
+
     if (key === "dodge") {
         openComposer(buildDodgeSetup(defender, contestId) as never, defender);
+        ensureSheetOpen(defender);
         return;
     }
 
     const basis = resolveMeleeBasis(defender, record.defenseHint);
     const mode: MeleeDefenseMode = key === "full" ? "full" : "standard";
     openComposer(buildMeleeDefenseSetup(defender, basis, mode, contestId) as never, defender);
+    ensureSheetOpen(defender);
 }

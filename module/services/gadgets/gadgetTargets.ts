@@ -1,4 +1,5 @@
 import { localize } from "../utilities";
+import { spellProperties } from "./spellGadgetProperties";
 
 export type GadgetPropertyKind = "stat-mod" | "override";
 export type GadgetChangeType = "add" | "subtract" | "override";
@@ -26,11 +27,26 @@ const GADGET_TARGETS: Record<string, GadgetTargetDefinition> = {
         label: () => localize(CONFIG.SR3E.ITEM_TYPES.weapon),
         properties: weaponProperties,
     },
+    wearable: {
+        itemType: "wearable",
+        label: () => localize(CONFIG.SR3E.ITEM_TYPES.wearable),
+        properties: wearableProperties,
+    },
+    fetish: {
+        itemType: "spell",
+        label: () => localize(CONFIG.SR3E.GADGET_TYPES.fetish),
+        properties: spellProperties,
+    },
+    medical: {
+        itemType: "medical",
+        label: () => localize(CONFIG.SR3E.ITEM_TYPES.medical),
+        properties: medicalProperties,
+    },
 };
 
 export function gadgetTargetOptions(): { value: string; label: string }[] {
-    return Object.values(GADGET_TARGETS).map(target => ({
-        value: target.itemType,
+    return Object.entries(GADGET_TARGETS).map(([key, target]) => ({
+        value: key,
         label: target.label(),
     }));
 }
@@ -41,13 +57,11 @@ export function normalizeGadgetTargetItemType(raw: unknown): string {
 }
 
 export function knownGadgetTargetItemType(raw: unknown): string | undefined {
-    const target = normalizeGadgetTargetItemType(raw);
-    return GADGET_TARGETS[target] ? target : undefined;
+    return gadgetTargetDefinition(raw)?.itemType;
 }
 
 export function gadgetTargetLabel(raw: unknown): string {
-    const target = knownGadgetTargetItemType(raw);
-    const definition = target ? GADGET_TARGETS[target] : undefined;
+    const definition = gadgetTargetDefinition(raw);
     return definition ? definition.label() : String(raw ?? "");
 }
 
@@ -63,9 +77,13 @@ export function gadgetTargetFromEffect(effect: ActiveEffect): string | undefined
 }
 
 export function gadgetTargetProperties(raw: unknown): GadgetPropertyOption[] {
-    const target = knownGadgetTargetItemType(raw);
-    const definition = target ? GADGET_TARGETS[target] : undefined;
+    const definition = gadgetTargetDefinition(raw);
     return definition ? definition.properties() : [];
+}
+
+function gadgetTargetDefinition(raw: unknown): GadgetTargetDefinition | undefined {
+    const target = normalizeGadgetTargetItemType(raw);
+    return GADGET_TARGETS[target] ?? Object.values(GADGET_TARGETS).find(definition => definition.itemType === target);
 }
 
 function stat(path: string, label: string): GadgetPropertyOption {
@@ -90,6 +108,37 @@ function weaponProperties(): GadgetPropertyOption[] {
         stat("system.rangeBand.long.mod", rangeBandLabel(CONFIG.SR3E.WEAPON.rangebandlong)),
         stat("system.rangeBand.extreme.mod", rangeBandLabel(CONFIG.SR3E.WEAPON.rangebandextreme)),
         stat("system.roll.targetNumber.mod", "Target Number"),
+    ];
+}
+
+function wearableProperties(): GadgetPropertyOption[] {
+    return [
+        stat("system.ballistic", localize(CONFIG.SR3E.WEARABLE.ballistic)),
+        stat("system.impact", localize(CONFIG.SR3E.WEARABLE.impact)),
+        override("system.canLayer", localize(CONFIG.SR3E.WEARABLE.canlayer)),
+    ];
+}
+
+function medicalProperties(): GadgetPropertyOption[] {
+    return [
+        stat("system.health.stun.value",    localize(CONFIG.SR3E.HEALTH.stun)),
+        stat("system.health.physical.value", localize(CONFIG.SR3E.HEALTH.physical)),
+        stat("system.health.overflow.value", localize(CONFIG.SR3E.HEALTH.overflow)),
+        stat("system.health.penalty.value",  localize(CONFIG.SR3E.HEALTH.penalty)),
+        stat("system.attributes.body.mod",          localize(CONFIG.SR3E.ATTRIBUTES.body)),
+        stat("system.attributes.quickness.mod",     localize(CONFIG.SR3E.ATTRIBUTES.quickness)),
+        stat("system.attributes.strength.mod",      localize(CONFIG.SR3E.ATTRIBUTES.strength)),
+        stat("system.attributes.charisma.mod",      localize(CONFIG.SR3E.ATTRIBUTES.charisma)),
+        stat("system.attributes.intelligence.mod",  localize(CONFIG.SR3E.ATTRIBUTES.intelligence)),
+        stat("system.attributes.willpower.mod",     localize(CONFIG.SR3E.ATTRIBUTES.willpower)),
+        stat("system.attributes.reaction.mod",      localize(CONFIG.SR3E.ATTRIBUTES.reaction)),
+        stat("system.movement.walking.mod",  localize(CONFIG.SR3E.MOVEMENT.walking)),
+        stat("system.movement.running.mod",  localize(CONFIG.SR3E.MOVEMENT.running)),
+        stat("system.dicePools.combat.mod",  localize(CONFIG.SR3E.DICE_POOLS.combat)),
+        stat("system.dicePools.astral.mod",  localize(CONFIG.SR3E.DICE_POOLS.astral)),
+        stat("system.dicePools.hacking.mod", localize(CONFIG.SR3E.DICE_POOLS.hacking)),
+        stat("system.dicePools.control.mod", localize(CONFIG.SR3E.DICE_POOLS.control)),
+        stat("system.dicePools.spell.mod",   localize(CONFIG.SR3E.DICE_POOLS.spell)),
     ];
 }
 

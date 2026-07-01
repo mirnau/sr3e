@@ -3,7 +3,7 @@ import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import Switch from "./Switch.svelte";
 import GadgetEditorSheet from "../../foundry/applications/GadgetEditorSheet";
-import { normalizeGadgetTargetItemType } from "../../services/gadgets/gadgetTargets";
+import { knownGadgetTargetItemType } from "../../services/gadgets/gadgetTargets";
 
 const p = $props<{
     document: Item | Actor;
@@ -37,7 +37,16 @@ function onEdit() {
 
 async function onDetach() {
     const actor = (doc as any).parent as Actor;
-    const targetItemType = normalizeGadgetTargetItemType(gadgetFlags.targetItemType ?? gadgetFlags.gadgetType);
+    const sourceGadgetType = String(gadgetFlags.gadgetType ?? gadgetFlags.targetItemType ?? "");
+    const targetItemType = knownGadgetTargetItemType(sourceGadgetType) ?? String(gadgetFlags.targetItemType ?? "");
+    if (sourceGadgetType === "fetish") {
+        (sheetInstance as any)?.close?.();
+        sheetInstance = null;
+        const ids = p.activeEffects.map(ae => ae.id!);
+        await (doc as any).deleteEmbeddedDocuments("ActiveEffect", ids, { render: false });
+        p.onHandleEffectTriggerUI();
+        return;
+    }
     const clonedEffects = p.activeEffects.map(ae => ({
         ...((ae as any).toObject()), _id: foundry.utils.randomID(),
     }));

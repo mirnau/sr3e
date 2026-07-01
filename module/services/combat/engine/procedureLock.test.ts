@@ -6,35 +6,53 @@ import {
 beforeEach(() => _resetForTest());
 
 describe("acquireLock", () => {
-    it("acquires when unlocked", () => expect(acquireLock("a")).toBeTruthy());
-    it("blocks same priority", () => { acquireLock("a"); expect(acquireLock("b")).toBeNull(); });
-    it("blocks lower priority", () => { acquireLock("a", "advanced"); expect(acquireLock("b", "simple")).toBeNull(); });
-    it("advanced can preempt simple", () => {
-        acquireLock("a", "simple");
-        expect(acquireLock("b", "advanced")).toBeTruthy();
+    it("acquires when unlocked", () => expect(acquireLock("actor1:firearm")).toBeTruthy());
+
+    it("blocks same actor at same priority", () => {
+        acquireLock("actor1:firearm");
+        expect(acquireLock("actor1:dodge")).toBeNull();
     });
-    it("advanced cannot preempt advanced", () => {
-        acquireLock("a", "advanced");
-        expect(acquireLock("b", "advanced")).toBeNull();
+
+    it("blocks same actor at lower priority", () => {
+        acquireLock("actor1:firearm", "advanced");
+        expect(acquireLock("actor1:dodge", "simple")).toBeNull();
+    });
+
+    it("advanced can preempt simple for same actor", () => {
+        acquireLock("actor1:simple-skill", "simple");
+        expect(acquireLock("actor1:firearm", "advanced")).toBeTruthy();
+    });
+
+    it("advanced cannot preempt advanced for same actor", () => {
+        acquireLock("actor1:firearm", "advanced");
+        expect(acquireLock("actor1:dodge", "advanced")).toBeNull();
+    });
+
+    it("different actors are never blocked by each other", () => {
+        acquireLock("actor1:firearm", "advanced");
+        expect(acquireLock("actor2:dodge", "simple")).toBeTruthy();
     });
 });
 
 describe("releaseLock", () => {
-    it("releases by ownerKey", () => { acquireLock("a"); expect(releaseLock("a")).toBe(true); });
-    it("releases by id", () => { const id = acquireLock("a")!; expect(releaseLock(id)).toBe(true); });
-    it("returns false when unlocked", () => expect(releaseLock("x")).toBe(false));
-    it("releases, then re-acquirable", () => {
-        acquireLock("a"); releaseLock("a");
-        expect(acquireLock("b")).toBeTruthy();
+    it("releases by ownerKey", () => { acquireLock("actor1:firearm"); expect(releaseLock("actor1:firearm")).toBe(true); });
+    it("releases by id", () => { const id = acquireLock("actor1:firearm")!; expect(releaseLock(id)).toBe(true); });
+    it("returns false when unlocked", () => expect(releaseLock("actor1:firearm")).toBe(false));
+    it("releases, then same actor can re-acquire", () => {
+        acquireLock("actor1:firearm"); releaseLock("actor1:firearm");
+        expect(acquireLock("actor1:dodge")).toBeTruthy();
     });
 });
 
 describe("assertLock", () => {
-    it("returns id on success", () => expect(assertLock("a")).toBeTruthy());
-    it("returns false when blocked", () => { acquireLock("a"); expect(assertLock("b")).toBe(false); });
+    it("returns id on success", () => expect(assertLock("actor1:firearm")).toBeTruthy());
+    it("returns false when same actor blocked", () => {
+        acquireLock("actor1:firearm");
+        expect(assertLock("actor1:dodge")).toBe(false);
+    });
 });
 
 describe("isLocked / currentOwner", () => {
     it("unlocked state", () => { expect(isLocked()).toBe(false); expect(currentOwner()).toBeNull(); });
-    it("locked state", () => { acquireLock("x"); expect(isLocked()).toBe(true); expect(currentOwner()).toBe("x"); });
+    it("locked state", () => { acquireLock("actor1:firearm"); expect(isLocked()).toBe(true); expect(currentOwner()).toBe("actor1:firearm"); });
 });

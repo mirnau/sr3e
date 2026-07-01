@@ -6,6 +6,10 @@ import SkillEditorApp from "../../../../sheets/items/SkillEditorApp";
 import { buildSkillSetup } from "../../../../services/combat/procedures/simpleSetups";
 import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../../services/combat/orchestration/executeProcedure";
+import { claimPendingResponse } from "../../../../services/combat/engine/responseInterceptor";
+import { deliverResponse } from "../../../../services/combat/engine/contestCoordinator";
+import type { RollSnapshot } from "../../../../services/combat/engine/types";
+import type { ProcedureSetup } from "../../../../services/combat/procedures/simpleSetups";
 
 interface Props {
    actor: Actor;
@@ -43,10 +47,21 @@ onDestroy(() => {
 function openSkillEditor(): void {
    SkillEditorApp.launch(actor, item, category);
 }
+function asResponseSetup(base: ProcedureSetup, contestId: string): ProcedureSetup {
+    return { ...base, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { deliverResponse(contestId, roll as RollSnapshot); } };
+}
+
 function rollSkill(e: MouseEvent | KeyboardEvent): void {
     e.preventDefault();
     const setup = buildSkillSetup(actor, item.id, null, item.name ?? undefined);
-    if ((e as MouseEvent).shiftKey) {
+    const actorId = (actor as unknown as { id?: string }).id ?? "";
+    const pendingContest = claimPendingResponse(actorId);
+    if (pendingContest) {
+        openComposer(asResponseSetup(setup, pendingContest), actor);
+        return;
+    }
+    const hasTargets = (game.user?.targets?.size ?? 0) > 0;
+    if ((e as MouseEvent).shiftKey || hasTargets) {
         openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);
@@ -58,7 +73,14 @@ function rollSpec(e: MouseEvent | KeyboardEvent, specIndex: number): void {
     const spec = $specializationsStore[specIndex];
     if (!spec) return;
     const setup = buildSkillSetup(actor, item.id, specIndex, `${item.name ?? ""} (${spec.name})`);
-    if ((e as MouseEvent).shiftKey) {
+    const actorId = (actor as unknown as { id?: string }).id ?? "";
+    const pendingContest = claimPendingResponse(actorId);
+    if (pendingContest) {
+        openComposer(asResponseSetup(setup, pendingContest), actor);
+        return;
+    }
+    const hasTargets = (game.user?.targets?.size ?? 0) > 0;
+    if ((e as MouseEvent).shiftKey || hasTargets) {
         openComposer(setup, actor);
     } else {
         void executeProcedure(setup, actor as never);

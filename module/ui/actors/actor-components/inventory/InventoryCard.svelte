@@ -3,14 +3,18 @@ import { onDestroy, untrack } from "svelte";
 import { StoreManager } from "../../../../utilities/StoreManager.svelte";
 import { localize } from "../../../../services/utilities";
 import { reloadWeapon } from "../../../../services/combat/procedures/ammoService";
+import { buildWeaponAttack } from "../../../../services/combat/procedures/weaponAttack";
+import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import FilterToggle from "./FilterToggle.svelte";
 import WeaponComponent from "./components/WeaponComponent.svelte";
 import AmmunitionComponent from "./components/AmmunitionComponent.svelte";
 import WearableComponent from "./components/WearableComponent.svelte";
+import MedicalComponent from "./components/MedicalComponent.svelte";
 import SpellComponent from "./components/SpellComponent.svelte";
 import FocusComponent from "./components/FocusComponent.svelte";
 
-const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto"]);
+const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
+const MELEE_MODES = new Set(["blade", "blunt"]);
 
 const p = $props<{ actor: Actor; item: Item }>();
 const actor = untrack(() => p.actor);
@@ -19,13 +23,30 @@ const sys = item.system as Record<string, any>;
 const storeManager = StoreManager.Instance;
 
 storeManager.Subscribe(item);
-onDestroy(() => storeManager.Unsubscribe(item));
+onDestroy(() => {
+    storeManager.Unsubscribe(item);
+    if (typeof Hooks !== "undefined") {
+        Hooks.off("targetToken", targetHookId);
+    }
+});
 
 const isFavoriteStore = storeManager.GetFlagStore<boolean>(item, "isFavorite", false);
 const isEquippedStore = storeManager.GetFlagStore<boolean>(item, "isEquipped", false);
 const linkedSkillIdStore = storeManager.GetRWStore<string>(item, "linkedSkillId");
 
 const isFirearm = $derived(item.type === "weapon" && FIREARM_MODES.has(sys.mode ?? ""));
+
+let targetCount = $state(typeof game !== "undefined" ? ((game.user as any)?.targets?.size ?? 0) : 0);
+
+const isRollEnabled = $derived(item.type === "weapon" && targetCount === 1);
+const rollDisabledReason = $derived(
+    item.type !== "weapon" ? "" :
+    targetCount !== 1 ? "Select exactly one target" : ""
+);
+
+const targetHookId = (typeof Hooks !== "undefined")
+    ? Hooks.on("targetToken", () => { targetCount = typeof game !== "undefined" ? ((game.user as any)?.targets?.size ?? 0) : 0; })
+    : -1;
 
 const linkedSkillName = $derived.by(() => {
     const raw = $linkedSkillIdStore ?? "";
@@ -61,6 +82,12 @@ async function onTrashClick() {
     if (!confirmed) return;
     await (actor as any).deleteEmbeddedDocuments("Item", [(item as any).id]);
 }
+
+function onRollClick() {
+    if (!isRollEnabled) return;
+    const setup = buildWeaponAttack(actor as never, item as never);
+    openComposer(setup, actor);
+}
 </script>
 
 <!-- svelte-ignore a11y_unknown_aria_attribute -->
@@ -94,6 +121,8 @@ async function onTrashClick() {
                     <AmmunitionComponent {item} />
                 {:else if item.type === "wearable"}
                     <WearableComponent {item} />
+                {:else if item.type === "medical"}
+                    <MedicalComponent {item} />
                 {:else if item.type === "spell"}
                     <SpellComponent {item} />
                 {:else if item.type === "focus"}
@@ -107,7 +136,9 @@ async function onTrashClick() {
                 type="button"
                 class="sr3e-toolbar-button fa-solid fa-dice"
                 aria-label="Roll"
-                disabled
+                title={rollDisabledReason}
+                disabled={!isRollEnabled}
+                onclick={onRollClick}
             ></button>
 
             <button
@@ -137,6 +168,8 @@ async function onTrashClick() {
 
     <div class="asset-toggles">
         <FilterToggle bind:checked={$isFavoriteStore} svgName="star-svgrepo-com.svg" />
-        <FilterToggle bind:checked={$isEquippedStore} svgName="backpack-svgrepo-com.svg" />
+        {#if item.type !== "spell"}
+            <FilterToggle bind:checked={$isEquippedStore} svgName="backpack-svgrepo-com.svg" />
+        {/if}
     </div>
 </div>

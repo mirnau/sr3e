@@ -49,13 +49,15 @@ export function buildMeleeSetup(
     }
 
     const rollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: baseTN, modifiers: mods };
+    const skillName = (resolved?.skill as unknown as { name?: string })?.name ?? "Melee Attack";
+    const title = resolved?.specName ?? skillName;
     const as = actor.system as ActorSystem;
     const str = as.attributes?.strength?.total ?? as.attributes?.strength?.value ?? 0;
     const damagePacketSnapshot = planStrike(actor, weapon, opts.situational);
 
     return {
         kind: "melee",
-        title: "Melee Attack",
+        title,
         rollState,
         lockPriority: "advanced",
         selfPublish: true,
@@ -63,7 +65,7 @@ export function buildMeleeSetup(
         exportFn: () => ({
             familyKey: "melee",
             weaponId: null,
-            weaponName: (weapon.system as Record<string, unknown>).name as string ?? "",
+            weaponName: (weapon as unknown as { name?: string }).name ?? "",
             plan: { roundsFired: 1, attackerTNMod: 0, powerDelta: str, levelDelta: 0, notes: [] },
             damage: damagePacketSnapshot,
             tnBase: baseTN,

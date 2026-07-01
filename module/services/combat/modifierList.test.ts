@@ -33,6 +33,15 @@ describe("removeMod", () => {
         expect(result).toHaveLength(1);
         expect(result[0]!.name).toBe("b");
     });
+    it("removes by name when modifier has no id", () => {
+        const result = removeMod([mod("out-of-range", 999), mod("b", 2, { id: "y" })], "out-of-range");
+        expect(result).toHaveLength(1);
+        expect(result[0]!.name).toBe("b");
+    });
+    it("does not remove when neither id nor name matches", () => {
+        const result = removeMod([mod("a", 1), mod("b", 2)], "x");
+        expect(result).toHaveLength(2);
+    });
 });
 
 describe("sumMods", () => {

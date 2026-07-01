@@ -21,10 +21,14 @@
 [x] MUST: Tier 5c — combat panel integration (deferred: requires inventory/asset manager)
 [x] MUST: Weapon charging mechanic
 [x] SHOULD: Clickable dice in chat for karma re-rolls
-[~] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
-[ ] MUST: Overflow damage rules (stun→physical conversion, bleeding out, death threshold)
-[ ] MUST: First Aid items (trauma patch, medkit — depends on overflow)
-[ ] COULD: Magic system (SpellApp, drain, foci, astral)
+[x] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
+[x] MUST: Overflow damage rules (stun→physical conversion, bleeding out, death threshold)
+[x] MUST: First Aid items (trauma patch, medkit — depends on overflow)
+[x] COULD: Magic Level 1 — spell/focus item substrate -> .zone/techspecs/TECHSPEC-magic-system.md
+[ ] COULD: Magic Level 2 — focus activation infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
+[ ] COULD: Magic Level 3 — spellcasting infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
+[ ] COULD: Magic Level 4 — drain chat flow -> .zone/techspecs/TECHSPEC-magic-system.md
+[ ] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
 [ ] COULD: Chat / socket challenge–response flows
 [ ] COULD: Vehicle economy and transactions
 [ ] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md

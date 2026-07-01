@@ -1,25 +1,29 @@
 <script lang="ts">
-import { onMount, onDestroy } from "svelte";
+import { onMount, onDestroy, untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
 import ActiveEffectsEditor from "../../foundry/applications/ActiveEffectsEditor";
+import { activeEffectViewModel, type ActiveEffectViewModel } from "./activeEffectViewModel";
 
 type AEDoc = Item | Actor;
-type EffectData = { activeEffect: ActiveEffect; sourceDocument: AEDoc; canDelete: boolean };
 
 const p = $props<{ document: AEDoc; isSlim?: boolean }>();
-const doc = p.document;
+const doc = untrack(() => p.document);
 
-let ownEffects = $state<ActiveEffect[]>([]);
-let transferredEffects = $state<EffectData[]>([]);
+let ownEffects = $state<ActiveEffectViewModel[]>([]);
+let transferredEffects = $state<ActiveEffectViewModel[]>([]);
 
 const isActor = doc instanceof Actor;
 
 function refresh() {
-    ownEffects = (doc as any).effects.contents.filter((e: any) => !e.flags?.sr3e?.gadget);
+    ownEffects = (doc as any).effects.contents
+        .filter((e: any) => !e.flags?.sr3e?.gadget)
+        .map((ae: ActiveEffect) => activeEffectViewModel(ae, doc, true));
     if (isActor) {
         transferredEffects = (doc as any).items.contents.flatMap((item: any) =>
-            item.effects.contents.map((ae: any) => ({ activeEffect: ae, sourceDocument: item, canDelete: false }))
+            item.effects.contents
+                .filter((e: any) => !e.flags?.sr3e?.gadget)
+                .map((ae: ActiveEffect) => activeEffectViewModel(ae, item, false))
         );
     }
 }
@@ -27,9 +31,16 @@ function refresh() {
 let cleanupHooks: (() => void)[] = [];
 
 onMount(() => {
-    const relevant = (e: any) => e?.parent?.id === (doc as any).id || (isActor && e?.parent?.parent?.id === (doc as any).id);
+    const docUuid = (doc as any).uuid as string | undefined;
+    const relevantEffect = (e: any) => e?.parent?.uuid === docUuid || (isActor && e?.parent?.parent?.uuid === docUuid);
+    const relevantItem = (item: any) => isActor && item?.parent?.uuid === docUuid;
     for (const type of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
-        const handler = (e: any) => relevant(e) && refresh();
+        const handler = (e: any) => relevantEffect(e) && refresh();
+        Hooks.on(type, handler);
+        cleanupHooks.push(() => Hooks.off(type, handler));
+    }
+    for (const type of ["createItem", "updateItem", "deleteItem"]) {
+        const handler = (item: any) => relevantItem(item) && refresh();
         Hooks.on(type, handler);
         cleanupHooks.push(() => Hooks.off(type, handler));
     }
@@ -51,15 +62,15 @@ async function addEffect() {
     }], { render: false });
 }
 
-function editEffect(effectData: EffectData) {
+function editEffect(effectData: ActiveEffectViewModel) {
     ActiveEffectsEditor.launch(effectData.sourceDocument, effectData.activeEffect);
 }
 
-async function deleteEffect(effectData: EffectData) {
+async function deleteEffect(effectData: ActiveEffectViewModel) {
     await (effectData.sourceDocument as any).deleteEmbeddedDocuments("ActiveEffect", [effectData.activeEffect.id], { render: false });
 }
 
-function canDelete(effectData: EffectData): boolean {
+function canDelete(effectData: ActiveEffectViewModel): boolean {
     return effectData.canDelete;
 }
 </script>
@@ -68,7 +79,7 @@ function canDelete(effectData: EffectData): boolean {
     <table class:slim={p.isSlim}>
         <thead>
             <tr>
-                <th><button type="button" class="fas fa-plus" onclick={addEffect}></button></th>
+                <th><button type="button" class="fas fa-plus" aria-label="Add effect" onclick={addEffect}></button></th>
                 <th><div class="cell-content">{localize(CONFIG.SR3E.EFFECTS.name)}</div></th>
                 <th><div class="cell-content">{localize(CONFIG.SR3E.EFFECTS.durationType)}</div></th>
                 <th><div class="cell-content">{localize(CONFIG.SR3E.EFFECTS.enabled)}</div></th>
@@ -76,9 +87,9 @@ function canDelete(effectData: EffectData): boolean {
             </tr>
         </thead>
         <tbody>
-            {#each ownEffects as ae (ae.id)}
+            {#each ownEffects as effectData (effectData.id)}
                 <ActiveEffectsRow
-                    effectData={{ activeEffect: ae, sourceDocument: doc, canDelete: true }}
+                    {effectData}
                     onEdit={editEffect}
                     onDelete={deleteEffect}
                     {canDelete}

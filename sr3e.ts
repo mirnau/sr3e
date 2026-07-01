@@ -29,11 +29,14 @@ import FocusModel from "./module/models/items/FocusModel";
 import FocusSheet from "./module/sheets/items/FocusSheet";
 import GadgetModel from "./module/models/items/GadgetModel";
 import GadgetItemSheet from "./module/sheets/items/GadgetItemSheet";
-import { preCreateCharacterActor } from "./module/foundry/hooks/displayCharacterCreationDialog";
+import MedicalModel from "./module/models/items/MedicalModel";
+import MedicalSheet from "./module/sheets/items/MedicalSheet";
+import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
 import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook } from "./module/services/combat/orchestration/socketHandlers";
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
+import { registerMedicalTokenDropHook } from "./module/services/medical/applyMedical";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -204,6 +207,12 @@ async function registerHooks(): Promise<void> {
             model: GadgetModel,
             sheet: GadgetItemSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.medical,
+            model: MedicalModel,
+            sheet: MedicalSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -226,8 +235,10 @@ async function registerHooks(): Promise<void> {
    });
 
    registerChatMessageHTMLHook();
+   registerMedicalTokenDropHook();
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
+   patchActorCreateDialog();
    console.log("SR3E | preCreateActor hook registered");
 
    // New scenes default to 1 meter per square (SR3E uses metric distances).

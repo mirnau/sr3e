@@ -85,10 +85,6 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
         }),
       }),
       limits: new SchemaField({
-        fetish: new BooleanField({
-          required: true,
-          initial: false,
-        }),
         exclusive: new BooleanField({
           required: true,
           initial: false,
@@ -124,7 +120,6 @@ type SpellSchema = {
     damageLevelModifier: NumberField;
   }>;
   limits: SchemaField<{
-    fetish: BooleanField;
     exclusive: BooleanField;
   }>;
 };

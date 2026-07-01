@@ -6,13 +6,13 @@ export const MAGIC_KEYS = [
 
 export const SPELL_KEYS = [
   "spell", "casting", "targetingRules", "elementalRules",
-  "thresholdRules", "drain", "limitations",
+  "thresholdRules", "drain",
   "type", "category", "manipulationSubtype", "duration", "rounds",
   "learnedForce", "range", "targeting", "targetAttribute", "staticTargetNumber",
   "resistanceAttribute", "thresholdMode", "thresholdAttribute", "thresholdDivisor",
   "thresholdValue", "attackTargetNumber", "canDodge", "armorMultiplier",
   "drainPowerModifier", "drainDamageLevel", "drainDamageLevelModifier",
-  "fetishLimited", "exclusiveLimited",
+  "fetishes", "fetishReady", "fetishMissing", "exclusiveCast",
 ] as const;
 
 export const FOCUS_KEYS = [

@@ -29,8 +29,16 @@ export function clearComposerState(actorId: string): void {
 // open the composer on a specific actor's sheet without going through Svelte context.
 const registry = new Map<string, (setup: ProcedureSetup) => void>();
 
+// Setups queued before the actor's sheet has mounted — consumed on registerComposerForActor.
+const deferredSetups = new Map<string, ProcedureSetup>();
+
 export function registerComposerForActor(actorId: string, openFn: (setup: ProcedureSetup) => void): void {
     registry.set(actorId, openFn);
+    const deferred = deferredSetups.get(actorId);
+    if (deferred) {
+        deferredSetups.delete(actorId);
+        openFn(deferred);
+    }
 }
 
 export function unregisterComposerForActor(actorId: string): void {
@@ -39,5 +47,11 @@ export function unregisterComposerForActor(actorId: string): void {
 
 export function openComposer(setup: ProcedureSetup, actor: unknown): void {
     const id = (actor as any)?.id as string | undefined;
-    if (id) registry.get(id)?.(setup);
+    if (!id) return;
+    const openFn = registry.get(id);
+    if (openFn) {
+        openFn(setup);
+    } else {
+        deferredSetups.set(id, setup);
+    }
 }

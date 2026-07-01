@@ -3,7 +3,7 @@ import { onDestroy, untrack } from "svelte";
 import { StoreManager } from "../../../../../utilities/StoreManager.svelte";
 import { localize } from "../../../../../services/utilities";
 
-const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto"]);
+const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 
 const p = $props<{ item: Item; hasAmmo?: boolean; isFirearm?: boolean }>();
 const item = untrack(() => p.item);

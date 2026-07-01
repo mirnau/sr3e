@@ -17,9 +17,11 @@ function snap(results: number[], tn: number | null = 4, overrides: Record<string
 const actor = { name: "Deckard" };
 const target = { name: "Ganger" };
 
+const BOX_MAP: Record<string, number> = { l: 2, m: 4, s: 6, d: 10 };
 const prep = (tnBase = 4, stage = "m", track = "physical"): ResistancePrep => ({
     familyKey: "firearm", weaponId: null, weaponName: "Predator",
     tnBase, tnMods: [], stagedStepBeforeResist: stage as never, trackKey: track as never,
+    boxesIfUnresisted: BOX_MAP[stage] ?? 4,
 });
 
 describe("renderRollSummary", () => {
@@ -106,19 +108,22 @@ describe("renderResistanceOutcome", () => {
     const outcome = { applied: true, finalStep: "l" as never, trackKey: "physical" as never, boxes: 1, notes: [] };
 
     it("shows successes vs TN", () => {
-        expect(renderResistanceOutcome(outcome, prep(), 2, 4)).toContain("2 successes vs TN 4");
+        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 2, 4)).toContain("2 successes vs TN 4");
     });
     it("shows staging arrow", () => {
-        expect(renderResistanceOutcome(outcome, prep(4, "m"), 2, 4)).toContain("Moderate → Light");
+        expect(renderResistanceOutcome(outcome, prep(4, "m"), "Ganger", 2, 4)).toContain("Moderate → Light");
     });
-    it("staged off when applied=false", () => {
+    it("shows takes-no-damage when staged off", () => {
         const o = { ...outcome, applied: false, finalStep: null, boxes: 0 };
-        expect(renderResistanceOutcome(o, prep(), 4, 4)).toContain("staged off");
+        expect(renderResistanceOutcome(o, prep(), "Ganger", 4, 4)).toContain("takes no damage");
+    });
+    it("shows damage taken with defender name", () => {
+        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 2, 4)).toContain("Ganger takes 1 box");
     });
     it("shows overflow when non-zero", () => {
-        expect(renderResistanceOutcome(outcome, prep(), 0, 4, 2)).toContain("Overflow: 2 boxes");
+        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 0, 4, 2)).toContain("Overflow: 2 boxes");
     });
     it("no overflow line when zero", () => {
-        expect(renderResistanceOutcome(outcome, prep(), 0, 4, 0)).not.toContain("Overflow");
+        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 0, 4, 0)).not.toContain("Overflow");
     });
 });

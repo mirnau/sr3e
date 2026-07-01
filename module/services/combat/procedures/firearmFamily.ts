@@ -7,15 +7,14 @@ import type { DamagePacket, AttackPlan } from "../damagePacket";
 import type { ResistanceBuild } from "../resistanceEngine";
 import type { RangeBand } from "../rangeService";
 
-type FireMode = "ss" | "sa" | "bf" | "fa";
+type FireMode = "manual" | "semiauto" | "burst" | "fullauto" | "energy";
 
 type WeaponSystem = {
     power?: number;
     damageType?: string;
     levelDelta?: number;
-    fireMode?: FireMode;
+    mode?: string;
     ammoId?: string;
-    difficulty?: number;
 };
 
 type ActorId = { id: string };
@@ -41,7 +40,7 @@ export function planFire(
     opts: PlanOpts = {},
 ): FirearmPlan {
     const ws = weapon.system as WeaponSystem;
-    const mode = ws.fireMode ?? "ss";
+    const mode = (ws.mode ?? "semiauto") as FireMode;
     const declaredRounds = opts.declaredRounds ?? 1;
     const ammoAvailable = opts.ammoAvailable ?? null;
 

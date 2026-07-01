@@ -1,8 +1,8 @@
 ## Active Feature
-Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
+Magic Level 2 — focus activation infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
 
 ## Current Issue
-#153 — GadgetModel + item registration
+Ready: slice focus activation implementation issues
 
 ## Blockers
 none

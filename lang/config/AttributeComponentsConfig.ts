@@ -63,6 +63,7 @@ export const KARMA_KEYS = [
   "burnKarmaPool",
   "burnKarmaPoolChat",
   "burnKarmaPoolConfirm",
+  "miraculousSurvivalChat",
 ] as const;
 
 export const MOVEMENT_KEYS = [

@@ -29,6 +29,14 @@ export class KarmaPoolBurnService {
         void this.#postChat(actor, CONFIG.SR3E.KARMA.burnKarmaPoolChat);
     }
 
+    burnAll(actor: Actor): void {
+        const poolStore = StoreManager.Instance.GetRWStore<number>(actor, "karma.karmaPool.value");
+        const goodKarmaStore = StoreManager.Instance.GetRWStore<number>(actor, "karma.goodKarma");
+        poolStore.set(0);
+        goodKarmaStore.set(0);
+        void this.#postChat(actor, CONFIG.SR3E.KARMA.miraculousSurvivalChat);
+    }
+
     async #postChat(actor: Actor, messageKey: string): Promise<void> {
         const content = game.i18n.format(messageKey, { name: (actor as any).name ?? "" });
         const speaker = (ChatMessage as any).getSpeaker?.({ actor }) ?? {};

@@ -132,7 +132,10 @@ onDestroy(() => {
         </div>
     </ItemSheetComponent>
 
-    <GadgetViewer document={item} />
+    <ItemSheetComponent>
+        <h3>Gadget Attach Slot</h3>
+        <GadgetViewer document={item} />
+    </ItemSheetComponent>
     <Commodity {item} />
     <Portability {item} />
     <JournalViewer document={item} />

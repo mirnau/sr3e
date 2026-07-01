@@ -10,6 +10,7 @@ export type ProcedureSetup = {
     selfPublish: boolean;
     openRoll?: boolean;
     openTest?: boolean;
+    initialPoolKey?: string;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;
     commitFn: (roll: unknown, actor: unknown) => Promise<void>;
@@ -48,9 +49,10 @@ export function buildSkillSetup(
 
     const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: tn, modifiers: mods };
 
+    const skillTitle = title ?? (resolved?.skill.system as Record<string, unknown>)?.name as string ?? "Skill Roll";
     return {
         kind: "skill",
-        title: title ?? (resolved?.skill.system as Record<string, unknown>)?.name as string ?? "Skill Roll",
+        title: skillTitle,
         rollState,
         lockPriority: "simple",
         selfPublish: true,
@@ -59,7 +61,7 @@ export function buildSkillSetup(
         exportFn: () => ({
             familyKey: "skill",
             weaponId: null,
-            weaponName: "",
+            weaponName: skillTitle,
             plan: null,
             damage: null,
             tnBase: tn,
@@ -81,9 +83,10 @@ export function buildAttributeSetup(
 
     const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: 4, modifiers: [] };
 
+    const attrTitle = title ?? attributeKey;
     return {
         kind: "attribute",
-        title: title ?? attributeKey,
+        title: attrTitle,
         rollState,
         lockPriority: "simple",
         selfPublish: true,
@@ -92,7 +95,7 @@ export function buildAttributeSetup(
         exportFn: () => ({
             familyKey: "attribute",
             weaponId: null,
-            weaponName: "",
+            weaponName: attrTitle,
             plan: null,
             damage: null,
             tnBase: 4,

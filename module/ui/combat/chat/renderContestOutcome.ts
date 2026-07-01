@@ -21,8 +21,11 @@ function winnerLine(ctx: ContestRenderCtx): string {
 }
 
 export function renderContestOutcome(ctx: ContestRenderCtx): string {
+    const header = ctx.weaponName
+        ? `${ctx.initiator.name} vs ${ctx.target.name} — ${ctx.weaponName}`
+        : `${ctx.initiator.name} vs ${ctx.target.name}`;
     return `<div class="sr3e-contest-outcome">
-  <div class="sr3e-contest-header">${ctx.initiator.name} vs ${ctx.target.name} — ${ctx.weaponName}</div>
+  <div class="sr3e-contest-header">${header}</div>
   ${renderRollSummary(ctx.initiator, ctx.initiatorRoll)}
   ${renderRollSummary(ctx.target, ctx.targetRoll)}
   ${winnerLine(ctx)}

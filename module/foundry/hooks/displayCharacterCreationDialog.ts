@@ -19,6 +19,29 @@ interface PendingCreation {
 const pendingCreations = new Map<string, PendingCreation>();
 
 /**
+ * Foundry's native "Create Actor" dialog awaits Actor.create() and then calls
+ * `document.sheet.render()` on the result. Our preCreateActor hook blocks that
+ * creation (returns false) so it can show CharacterCreationApp first, which
+ * leaves `document` undefined and makes Foundry's own dialog throw. The actor
+ * is still created correctly afterward through showCharacterCreationDialog, so
+ * this is a known, harmless crash in Foundry's callback that we only need to swallow.
+ */
+export function patchActorCreateDialog(): void {
+	const originalCreateDialog = Actor.createDialog;
+
+	Actor.createDialog = async function (this: unknown, ...args: unknown[]) {
+		try {
+			return await (originalCreateDialog as (...a: unknown[]) => Promise<unknown>).apply(this, args);
+		} catch (error) {
+			if (error instanceof TypeError && /sheet/.test(error.message)) {
+				return null;
+			}
+			throw error;
+		}
+	} as typeof Actor.createDialog;
+}
+
+/**
  * PreCreateActor hook - intercepts character creation to show dialog FIRST
  */
 export function preCreateCharacterActor(
