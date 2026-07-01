@@ -62,7 +62,7 @@
       isMagicStore.set(isMagic);
    });
 
-   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "spell", "focus"];
+   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "focus"];
 
    function rebuildAllItems() {
       allItems = [...((actor as any).items ?? [])].filter((i: any) => INVENTORY_TYPES.includes(i.type));
@@ -89,7 +89,7 @@
             (isWorn && item.type === "wearable") ||
             (isGadget && item.type === "gadget") ||
             (isTech && item.type === "techinterface") ||
-            (isMagic && (item.type === "spell" || item.type === "focus"));
+            (isMagic && item.type === "focus");
 
          const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget || isTech || isMagic;
          const passesTypeFilter = hasTypeFilter ? typeMatches : true;

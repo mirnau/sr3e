@@ -324,14 +324,21 @@
       "value": "Value"
     },
     "spell": {
+      "armorMultiplier": "Armor Multiplier",
+      "attackTargetNumber": "Attack Target Number",
+      "canDodge": "Can Dodge",
+      "casting": "Casting",
       "category": "Category",
+      "drain": "Drain",
       "drainDamageLevel": "Drain Level",
       "drainDamageLevelModifier": "Drain Level Modifier",
       "drainPowerModifier": "Drain Power Modifier",
       "duration": "Duration",
+      "elementalRules": "Elemental Rules",
       "exclusiveLimited": "Exclusive-Limited",
       "fetishLimited": "Fetish-Limited",
       "learnedForce": "Learned Force",
+      "limitations": "Limitations",
       "manipulationSubtype": "Manipulation Subtype",
       "range": "Range",
       "resistanceAttribute": "Resistance Attribute",
@@ -340,6 +347,12 @@
       "staticTargetNumber": "Static Target Number",
       "targetAttribute": "Target Attribute",
       "targeting": "Targeting",
+      "targetingRules": "Targeting Rules",
+      "thresholdAttribute": "Threshold Attribute",
+      "thresholdDivisor": "Threshold Divisor",
+      "thresholdMode": "Threshold Mode",
+      "thresholdRules": "Threshold Rules",
+      "thresholdValue": "Threshold Value",
       "type": "Type"
     },
     "spellCategories": {
@@ -360,6 +373,12 @@
       "permanent": "Permanent",
       "sustained": "Sustained"
     },
+    "spellManipulationSubtypes": {
+      "control": "Control",
+      "elemental": "Elemental",
+      "telekinetic": "Telekinetic",
+      "transformation": "Transformation"
+    },
     "spellRanges": {
       "los": "Line of Sight",
       "touch": "Touch"
@@ -367,6 +386,11 @@
     "spellTargeting": {
       "attribute": "Attribute",
       "objectResistance": "Object Resistance",
+      "static": "Static"
+    },
+    "spellThresholdModes": {
+      "halfAttribute": "Half Attribute",
+      "none": "None",
       "static": "Static"
     },
     "spellTypes": {

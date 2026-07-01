@@ -1,3 +1,13 @@
+import { SPELL_MANIPULATION_SUBTYPE_KEYS } from "../../../lang/config/MagicConfig";
+import {
+  defineElementalAttackSchema,
+  defineThresholdSchema,
+  type SpellElementalAttackFields,
+  type SpellThresholdFields,
+} from "./item-components/SpellRuleFields";
+
+const SPELL_MANIPULATION_SUBTYPE_CHOICES = ["", ...SPELL_MANIPULATION_SUBTYPE_KEYS];
+
 export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSchema, BaseItem> {
   static defineSchema(): SpellSchema {
     return {
@@ -12,6 +22,8 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
       manipulationSubtype: new StringField({
         required: true,
         initial: "",
+        blank: true,
+        choices: SPELL_MANIPULATION_SUBTYPE_CHOICES,
       }),
       range: new StringField({
         required: true,
@@ -54,6 +66,8 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
           initial: "",
         }),
       }),
+      threshold: defineThresholdSchema(),
+      elementalAttack: defineElementalAttackSchema(),
       drain: new SchemaField({
         powerModifier: new NumberField({
           required: true,
@@ -102,6 +116,8 @@ type SpellSchema = {
   resistance: SchemaField<{
     attribute: StringField;
   }>;
+  threshold: SchemaField<SpellThresholdFields>;
+  elementalAttack: SchemaField<SpellElementalAttackFields>;
   drain: SchemaField<{
     powerModifier: NumberField;
     damageLevel: StringField;
