@@ -191,7 +191,7 @@ export class ElectroCardiogramService {
 	 * Resume normal ECG animation.
 	 */
 	resume(): void {
-		this.ecgAnimator.start();
+		this.ecgAnimator.resume();
 	}
 
 	/**

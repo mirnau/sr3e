@@ -53,6 +53,8 @@ export class CardiogramAnimationService {
 	private phase: number = 0;
 	private freq: number;
 	private amp: number;
+	private targetAmp: number;
+	private isFlatlined: boolean = false;
 	private lineWidth: number;
 
 	private _isAnimating: boolean = false;
@@ -85,6 +87,7 @@ export class CardiogramAnimationService {
 
 		this.freq = freq;
 		this.amp = amp;
+		this.targetAmp = amp;
 		this.lineWidth = lineWidth;
 
 		this.bottomColor = bottomColor;
@@ -109,35 +112,23 @@ export class CardiogramAnimationService {
 		}
 	}
 
+	/**
+	 * Let the trace decay into a flatline instead of cutting to one.
+	 * The scrolling loop keeps running so any in-flight heartbeat
+	 * scrolls off naturally while the amplitude ramps down to zero.
+	 */
 	flatline(): void {
-		this.stop();
+		this.isFlatlined = true;
+		if (!this._isAnimating) this.start();
+	}
 
-		this.lineCtx.clearRect(0, 0, this.width, this.height);
-		this.pointCtx.clearRect(0, 0, this.width, this.height);
-
-		const centerY = this.height / 2;
-		const xStart = 0;
-		const xEnd = this.width;
-
-		// Draw flat line
-		this.lineCtx.beginPath();
-		this.lineCtx.moveTo(xStart, centerY);
-		this.lineCtx.lineTo(xEnd, centerY);
-		this.lineCtx.strokeStyle = this.bottomColor;
-		this.lineCtx.lineWidth = this.lineWidth;
-		this.lineCtx.stroke();
-
-		// Draw point at end
-		const radius = 4;
-		const x = this.width - 10;
-
-		this.pointCtx.beginPath();
-		this.pointCtx.arc(x, centerY, radius, 0, 2 * Math.PI);
-		this.pointCtx.fillStyle = this.topColor;
-		this.pointCtx.shadowBlur = 5;
-		this.pointCtx.shadowColor = this.topColor;
-		this.pointCtx.fill();
-		this.pointCtx.shadowBlur = 0;
+	/**
+	 * Ramp the amplitude back up from the flatline, resuming a beat
+	 * seamlessly from wherever the trace currently sits.
+	 */
+	resume(): void {
+		this.isFlatlined = false;
+		if (!this._isAnimating) this.start();
 	}
 
 	setFrequency(freq: number): void {
@@ -145,7 +136,7 @@ export class CardiogramAnimationService {
 	}
 
 	setAmplitude(amp: number): void {
-		this.amp = amp;
+		this.targetAmp = amp;
 	}
 
 	setTopColor(color: string): void {
@@ -173,6 +164,9 @@ export class CardiogramAnimationService {
 	private _drawEcg(): void {
 		if (this.width <= 0 || this.height <= 0) return;
 
+		const effectiveTargetAmp = this.isFlatlined ? 0 : this.targetAmp;
+		this.amp += (effectiveTargetAmp - this.amp) * 0.05;
+
 		const offsetX = 10;
 		const offsetY = 10;
 		const radius = 4;
@@ -194,8 +188,9 @@ export class CardiogramAnimationService {
 
 		// Gradient stroke based on wave height
 		const prevHeartY = this.prevHeartY!;
-		const t1 = Math.min(1, Math.abs(prevHeartY) / this.amp);
-		const t2 = Math.min(1, Math.abs(heartY) / this.amp);
+		const safeAmp = Math.max(this.amp, 0.0001);
+		const t1 = Math.min(1, Math.abs(prevHeartY) / safeAmp);
+		const t2 = Math.min(1, Math.abs(heartY) / safeAmp);
 
 		const gradient = this.lineCtx.createLinearGradient(x - 1, this.prevY, x, y);
 		gradient.addColorStop(0, lerpColor(this.bottomColor, this.topColor, t1));
