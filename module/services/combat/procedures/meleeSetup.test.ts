@@ -40,4 +40,7 @@ describe("buildMeleeSetup", () => {
         expect(ui).toHaveProperty("standard");
         expect(ui).toHaveProperty("full");
     });
+    it("exposes the linked skill's attribute for composer-driven defaulting", () => {
+        expect(buildMeleeSetup(actor() as never, weapon()).defaultingAttributeKey).toBe("quickness");
+    });
 });

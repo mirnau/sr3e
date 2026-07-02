@@ -49,4 +49,12 @@ describe("buildFirearmSetup", () => {
         expect(exp.next.kind).toBe("dodge");
         expect(exp.familyKey).toBe("firearm");
     });
+    it("exposes the linked skill's attribute for composer-driven defaulting", () => {
+        const s = buildFirearmSetup(actor() as never, weapon());
+        expect(s.defaultingAttributeKey).toBe("agility");
+    });
+    it("defaultingAttributeKey is null when the linked skill can't be resolved", () => {
+        const s = buildFirearmSetup(actor() as never, weapon("missing-skill"));
+        expect(s.defaultingAttributeKey).toBeNull();
+    });
 });

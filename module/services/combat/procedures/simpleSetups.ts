@@ -14,6 +14,10 @@ export type ProcedureSetup = {
     poolOptions?: PoolOption[];
     forceControl?: ForceControl;
     damageLevelControl?: DamageLevelControl;
+    // The linked skill's attribute key, for the composer to compute
+    // skill-to-attribute defaulting reactively when the player selects
+    // Defaulting — null/absent when the roll has no defaultable linked skill.
+    defaultingAttributeKey?: string | null;
     extraOptions?: Record<string, unknown>;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;

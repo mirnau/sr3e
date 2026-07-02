@@ -2,6 +2,7 @@
 import { onDestroy, onMount, untrack } from "svelte";
 import { writable } from "svelte/store";
 import { sumMods, upsertMod, removeMod } from "../../services/combat/modifierList";
+import { computeDefaulting } from "../../services/combat/defaultingRules";
 import { difficultyLabel } from "../../services/combat/procedures/composerHelpers";
 import {
     getComposerState,
@@ -32,7 +33,12 @@ const composerState = getComposerState(actorId);
 
 let setup: ProcedureSetup | null = $state(null);
 let targetNumber = $state(4);
-let modifiers: Modifier[] = $state([]);
+// User-editable modifiers only (add/remove/adjust). The auto-computed
+// defaulting modifier is layered on top via the `modifiers` derived below —
+// it must never live in this array, since defaultingResult itself reads
+// baseModifiers (for the pre-default TN >= 8 guard) and writing the
+// defaulting mod back into the same array it depends on would loop.
+let baseModifiers: Modifier[] = $state([]);
 let poolDice = $state(0);
 let focusDice = $state(0);
 let karmaDice = $state(0);
@@ -40,16 +46,41 @@ let isDefaulting = $state(false);
 let selectedForce = $state(1);
 let selectedDamageLevel = $state("m");
 
+const DEFAULTING_MOD_ID = "defaulting-attribute";
+
+const defaultingResult = $derived.by(() => {
+    if (!isDefaulting || !setup) return null;
+    const attrKey = setup.defaultingAttributeKey ?? null;
+    if (!attrKey) return null;
+    return computeDefaulting(null, null, attrKey, actor, targetNumber, baseModifiers);
+});
+
+const defaultingMod = $derived.by<Modifier | null>(() => {
+    if (!defaultingResult || defaultingResult.mode === "none") return null;
+    const base = defaultingResult.mods[0];
+    if (!base) return null;
+    return { id: DEFAULTING_MOD_ID, name: base.name, value: base.value, poolCap: base.poolCap, forbidPool: base.forbidPool };
+});
+
+const modifiers = $derived<Modifier[]>([
+    ...baseModifiers,
+    ...(defaultingMod ? [defaultingMod] : []),
+]);
+
 const modifiersTotal = $derived(sumMods(modifiers));
 const finalTN = $derived(Math.max(2, targetNumber + modifiersTotal));
 const difficulty = $derived(difficultyLabel(finalTN));
 const canSubmit = $derived(finalTN >= 2 && !!setup);
+const effectiveDice = $derived(
+    defaultingResult && defaultingResult.mode !== "none" ? defaultingResult.dice : (setup?.rollState.dice ?? 0)
+);
+const poolForbidden = $derived(!!defaultingMod?.forbidPool);
 const karmaCost = $derived(Math.round(0.5 * karmaDice * (karmaDice + 1)));
 const karmaBalance = $derived($karmaPoolStore ?? 0);
 const maxAffordable = $derived(
     karmaBalance > 0 ? Math.floor((-1 + Math.sqrt(1 + 8 * karmaBalance)) * 0.5) : 0
 );
-const karmaCap = $derived(Math.min(maxAffordable, setup?.rollState.dice ?? 0));
+const karmaCap = $derived(Math.min(maxAffordable, effectiveDice));
 const poolAvailable = $derived(composerState.poolAvailable);
 const focusAvailable = $derived(composerState.focusAvailable);
 const forceControl = $derived(setup?.forceControl ?? null);
@@ -61,6 +92,7 @@ const selectedFocusLabel = $derived(
 );
 
 $effect(() => { if (poolDice > poolAvailable) poolDice = Math.max(0, poolAvailable); });
+$effect(() => { if (poolForbidden && poolDice > 0) poolDice = 0; });
 $effect(() => { if (focusDice > focusAvailable) focusDice = Math.max(0, focusAvailable); });
 $effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
 
@@ -68,7 +100,7 @@ export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
     targetNumber = newSetup.rollState.targetNumber;
     const woundPenalty = Number((actor.system as any)?.health?.penalty?.value ?? 0);
-    modifiers = [
+    baseModifiers = [
         ...(newSetup.rollState.modifiers ?? []),
         ...(woundPenalty > 0 ? [{ id: "wound-penalty", name: "Wound Penalty", value: woundPenalty }] : []),
     ];
@@ -99,7 +131,7 @@ export function open(newSetup: ProcedureSetup): void {
 
 function onReset(): void {
     targetNumber = 4;
-    modifiers = [];
+    baseModifiers = [];
     poolDice = 0;
     focusDice = 0;
     karmaDice = 0;
@@ -124,7 +156,7 @@ async function onConfirm(): Promise<void> {
 
     const currentSetup = withSelectedSpellOptions(setup, selectedForce, selectedDamageLevel);
     const finalState: RollState = {
-        dice: currentSetup.rollState.dice,
+        dice: effectiveDice,
         poolDice,
         focusDice,
         focusKey: composerState.selectedFocusKey ?? undefined,
@@ -189,11 +221,11 @@ function withSelectedSpellOptions(base: ProcedureSetup, force: number, damageLev
 }
 
 function addMod(): void {
-    modifiers = upsertMod(modifiers, { id: `manual-${Date.now()}`, name: "modifier", value: 0 });
+    baseModifiers = upsertMod(baseModifiers, { id: `manual-${Date.now()}`, name: "modifier", value: 0 });
 }
 
 function removeModById(id: string): void {
-    modifiers = removeMod(modifiers, id);
+    baseModifiers = removeMod(baseModifiers, id);
 }
 
 onMount(() => registerComposerForActor(actorId, open));
@@ -301,20 +333,23 @@ onDestroy(() => {
                     <span>Add</span>
                 </button>
                 {#each modifiers as mod (mod.id ?? mod.name)}
+                    {@const isAuto = mod.id === DEFAULTING_MOD_ID}
                     <div class="mod-row">
-                        <input class="mod-name" bind:value={mod.name} />
+                        <input class="mod-name" bind:value={mod.name} readonly={isAuto} disabled={isAuto} />
                         <div class="composer-counter composer-counter--compact">
-                            <button class="composer-hud-btn" onclick={() => { mod.value--; modifiers = [...modifiers]; }}>
+                            <button class="composer-hud-btn" onclick={() => mod.value--} disabled={isAuto}>
                                 <i class="fa-solid fa-minus"></i>
                             </button>
                             <h1 class="counter-value counter-value--sm">{mod.value}</h1>
-                            <button class="composer-hud-btn" onclick={() => { mod.value++; modifiers = [...modifiers]; }}>
+                            <button class="composer-hud-btn" onclick={() => mod.value++} disabled={isAuto}>
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
-                        <button class="composer-hud-btn composer-hud-btn--danger" onclick={() => removeModById(mod.id ?? mod.name)} aria-label="Remove">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
+                        {#if !isAuto}
+                            <button class="composer-hud-btn composer-hud-btn--danger" onclick={() => removeModById(mod.id ?? mod.name)} aria-label="Remove">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        {/if}
                     </div>
                 {/each}
             </div>

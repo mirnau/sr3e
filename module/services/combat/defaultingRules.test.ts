@@ -30,11 +30,12 @@ describe("computeDefaulting", () => {
         expect(r.mods[0]?.poolCap).toBe(2); // floor(4/2)
     });
 
-    it("specialization defaulting", () => {
+    it("specialization defaulting — rolls the specialization's own rating, pool capped by the base skill's", () => {
         const r = computeDefaulting(skill(4, false, [6]), 0, null, actor(), 4, []);
         expect(r.mode).toBe("specialization");
+        expect(r.dice).toBe(6); // the specialization's own rating, not the base skill's (4)
         expect(r.mods[0]?.value).toBe(3);
-        expect(r.mods[0]?.poolCap).toBe(2);
+        expect(r.mods[0]?.poolCap).toBe(2); // floor(base skill rating 4 / 2)
     });
 
     it("noDefault guard → none", () => {

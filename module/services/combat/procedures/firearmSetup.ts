@@ -1,6 +1,5 @@
 import { beginAttack, onFirearmAttackResolved } from "./firearmFamily";
 import { resolveLinkedSkill } from "./resolveLinkedSkill";
-import { computeDefaulting } from "../defaultingRules";
 import { recoilModifier } from "../recoilTracker";
 import { rangeModifier, resolveRange } from "../rangeService";
 import type { ProcedureSetup } from "./simpleSetups";
@@ -45,20 +44,10 @@ export function buildFirearmSetup(
     const ws = weapon.system as WeaponSystem;
     const linkedSkillId = ws.linkedSkillId ?? "";
     const resolved = resolveLinkedSkill(actor, linkedSkillId);
-
-    const isDefaulting = ws.isDefaulting ?? false;
     const baseTN = 4;
 
-    let dice = resolved?.dice ?? 0;
+    const dice = resolved?.dice ?? 0;
     const mods: Modifier[] = [];
-
-    if (isDefaulting && resolved) {
-        const defaulting = computeDefaulting(resolved.skill, resolved.specIndex, resolved.linkedAttribute, actor, baseTN, []);
-        if (defaulting.mode !== "none") {
-            dice = defaulting.dice;
-            mods.push(...defaulting.mods);
-        }
-    }
 
     const declaredRounds = opts.declaredRounds ?? 1;
     const recoilMod = recoilModifier(actor.id, weapon, declaredRounds);
@@ -88,6 +77,7 @@ export function buildFirearmSetup(
         rollState,
         lockPriority: "advanced",
         selfPublish: true,
+        defaultingAttributeKey: resolved?.linkedAttribute ?? null,
         defenseHint: { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "Reaction" },
         exportFn: () => {
             const { plan, damage } = beginAttack(actor as never, weapon, { ...opts, resolveAmmo: undefined });

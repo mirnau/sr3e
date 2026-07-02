@@ -1,6 +1,5 @@
 import { planStrike } from "./meleeFamily";
 import { resolveLinkedSkill } from "./resolveLinkedSkill";
-import { computeDefaulting } from "../defaultingRules";
 import type { ProcedureSetup } from "./simpleSetups";
 import type { Modifier } from "../modifierList";
 
@@ -34,19 +33,10 @@ export function buildMeleeSetup(
     const ws = weapon.system as WeaponSystem;
     const linkedSkillId = ws.linkedSkillId ?? "";
     const resolved = resolveLinkedSkill(actor, linkedSkillId);
-    const isDefaulting = ws.isDefaulting ?? false;
     const baseTN = ws.difficulty ?? 4;
 
-    let dice = resolved?.dice ?? 0;
+    const dice = resolved?.dice ?? 0;
     const mods: Modifier[] = [];
-
-    if (isDefaulting && resolved) {
-        const defaulting = computeDefaulting(resolved.skill, resolved.specIndex, resolved.linkedAttribute, actor, baseTN, []);
-        if (defaulting.mode !== "none") {
-            dice = defaulting.dice;
-            mods.push(...defaulting.mods);
-        }
-    }
 
     const rollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: baseTN, modifiers: mods };
     const skillName = (resolved?.skill as unknown as { name?: string })?.name ?? "Melee Attack";
@@ -61,6 +51,7 @@ export function buildMeleeSetup(
         rollState,
         lockPriority: "advanced",
         selfPublish: true,
+        defaultingAttributeKey: resolved?.linkedAttribute ?? null,
         defenseHint: { type: "skill", key: "melee", tnMod: 0, tnLabel: "Melee Combat" },
         exportFn: () => ({
             familyKey: "melee",

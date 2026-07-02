@@ -55,10 +55,11 @@ export function computeDefaulting(
 
     if (specIndex !== null && ws.specializations?.[specIndex] !== undefined) {
         const baseRating = ws.value ?? 0;
+        const specRating = ws.specializations[specIndex].value ?? 0;
         const cap = Math.floor(baseRating / 2);
         return {
             mode: "specialization",
-            dice: baseRating,
+            dice: specRating,
             mods: [
                 { name: "defaulting-spec", value: 3, poolCap: cap },
             ],
