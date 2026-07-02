@@ -4,7 +4,7 @@ import {
     type ResistanceCtx,
 } from "../../services/combat/orchestration/resistanceHandler";
 import { handleKarmaPoolReroll, handleKarmaBuySuccess, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
-import { handleContestReroll, handleContestBuy, type ContestOutcomeFlag, type ContestSide } from "../../services/combat/orchestration/contestRerollHandler";
+import { handleContestReroll, handleContestBuy, handleContestDone, type ContestOutcomeFlag, type ContestSide } from "../../services/combat/orchestration/contestRerollHandler";
 import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFlag } from "../../services/spells/drainRerollHandler";
 import { requestMessageUpdate } from "../../services/combat/orchestration/messageRelay";
 import { withDiePending } from "./diePendingState";
@@ -107,7 +107,7 @@ function registerDieClickDelegation(): void {
         if (contestOutcome) {
             const sideEl = die.closest<HTMLElement>("[data-side]");
             const side = sideEl?.dataset.side as ContestSide | undefined;
-            if (!side) return;
+            if (!side || contestOutcome[side].done) return;
             withDiePending(sideEl, () => isBuy ? handleContestBuy(messageId, contestOutcome, side) : handleContestReroll(messageId, contestOutcome, side));
             return;
         }
@@ -117,6 +117,26 @@ function registerDieClickDelegation(): void {
             const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
             withDiePending(group, () => isBuy ? handleDrainBuy(messageId, drainOutcome) : handleDrainReroll(messageId, drainOutcome));
         }
+    });
+}
+
+function registerContestDoneDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const btn = (event.target as HTMLElement).closest<HTMLElement>("[data-contest-done]");
+        if (!btn) return;
+        const msgEl = btn.closest<HTMLElement>(".chat-message");
+        const messageId = msgEl?.dataset?.messageId;
+        if (!messageId) return;
+
+        const message = getLiveMessage(messageId);
+        const contestOutcome = message?.flags?.sr3e?.contestOutcome as ContestOutcomeFlag | undefined;
+        if (!message || !contestOutcome || message.flags?.sr3e?.consumed) return;
+
+        const sideEl = btn.closest<HTMLElement>("[data-side]");
+        const side = sideEl?.dataset.side as ContestSide | undefined;
+        if (!side) return;
+
+        withDiePending(sideEl, () => handleContestDone(messageId, contestOutcome, side));
     });
 }
 
@@ -150,4 +170,5 @@ export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): v
     registerResistanceButtonDelegation();
     registerDieClickDelegation();
     registerDrainDoneDelegation();
+    registerContestDoneDelegation();
 }

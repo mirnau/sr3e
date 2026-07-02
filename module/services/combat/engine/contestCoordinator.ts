@@ -18,6 +18,7 @@ export type ContestRecord = {
 
 const activeContests = new Map<string, ContestRecord>();
 const pendingResponses = new Map<string, (data: RollSnapshot) => void>();
+const pendingBothDone = new Map<string, (finalFlag: unknown) => void>();
 
 const ABORT_SENTINEL = "__aborted" as const;
 
@@ -126,6 +127,44 @@ export function submitContestResponse(contestId: string, rollData: RollSnapshot)
     }
 }
 
+// Blocks executeContestedFlow after posting the joint message until both
+// sides have clicked Done, so the outcome (and whatever damage/next-step
+// follows from it) is computed from the FINAL negotiated results, not the
+// initial roll — a reroll that flips who has net successes must actually
+// change what happens next. Resolves with the final flag itself (carried in
+// the signal, see signalContestBothDone) rather than having the waiting
+// client re-read game.messages, which would race against Foundry's own
+// document-update broadcast finishing.
+export function waitForBothDone(contestId: string): Promise<unknown> {
+    return new Promise((resolve) => {
+        pendingBothDone.set(contestId, resolve);
+    });
+}
+
+// Local-only resolve — used by the socket handler on receipt, so it never
+// re-broadcasts what it just received (that would loop forever).
+export function resolveBothDone(contestId: string, finalFlag: unknown): void {
+    const resolve = pendingBothDone.get(contestId);
+    if (resolve) {
+        pendingBothDone.delete(contestId);
+        resolve(finalFlag);
+    }
+}
+
+// The click that completes "both done" can land on either participant's
+// client, but the pending promise from waitForBothDone only exists on
+// whichever client is blocked inside executeContestedFlow (the initiator's).
+// Resolve locally (covers the same-client case) AND relay over the socket
+// so the initiator's client receives it regardless of which side triggered it.
+export function signalContestBothDone(contestId: string, finalFlag: unknown): void {
+    resolveBothDone(contestId, finalFlag);
+
+    if (typeof game !== "undefined" && (game as unknown as Record<string, unknown>).socket) {
+        ((game as unknown as Record<string, unknown>).socket as { emit: (event: string, data: unknown) => void })
+            .emit("system.sr3e", { type: "contestBothDone", contestId, finalFlag });
+    }
+}
+
 export function expireContest(contestId: string): void {
     const record = activeContests.get(contestId);
     if (record) record.phase = "cancelled";
@@ -177,4 +216,5 @@ export function resolveControllingUser(actor: SR3EActor): (FoundryUser & Record<
 export function _resetForTest(): void {
     activeContests.clear();
     pendingResponses.clear();
+    pendingBothDone.clear();
 }

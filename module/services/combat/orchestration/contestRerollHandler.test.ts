@@ -9,12 +9,14 @@ function side(overrides: Record<string, unknown> = {}) {
         meta: { flavor: "Attack", procedureKind: "firearm" },
         results: [{ result: 6 }, { result: 2 }],
         rerollCount: 0,
+        done: false,
         ...overrides,
     };
 }
 
 function flag(overrides: Partial<ContestOutcomeFlag> = {}): ContestOutcomeFlag {
     return {
+        contestId: "contest:test",
         weaponName: "Predator",
         exportCtx: { familyKey: "firearm", weaponId: null, weaponName: "Predator", plan: null, damage: null, tnBase: 4, tnMods: [], next: { kind: "", ui: {}, args: {} } },
         initiator: side({ actorId: "initiator1", actorName: "Attacker" }),

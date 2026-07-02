@@ -12,12 +12,18 @@ export type ContestRenderCtx = {
     // for success-counting only and don't carry those flags through their terms.
     initiatorResults?: DieEntry[];
     targetResults?: DieEntry[];
+    initiatorDone?: boolean;
+    targetDone?: boolean;
     netSuccesses: number;
     extraHtml?: string;
 };
 
-function renderSide(actor: { name: string }, roll: RollSnapshot, results?: DieEntry[]): string {
-    return renderAdvancedRollSummary(actor, roll, results ?? extractDieResults(roll.terms));
+function renderSide(actor: { name: string }, roll: RollSnapshot, results: DieEntry[] | undefined, done: boolean): string {
+    const dice = renderAdvancedRollSummary(actor, roll, results ?? extractDieResults(roll.terms));
+    const button = done
+        ? `<button type="button" class="sr3e-contest-done sr3e-contest-done--committed" disabled>✓ Done</button>`
+        : `<button type="button" class="sr3e-contest-done" data-contest-done>Done</button>`;
+    return `${dice}${button}`;
 }
 
 function winnerLine(ctx: ContestRenderCtx): string {
@@ -36,8 +42,8 @@ export function renderContestOutcome(ctx: ContestRenderCtx): string {
         : `${ctx.initiator.name} vs ${ctx.target.name}`;
     return `<div class="sr3e-contest-outcome">
   <div class="sr3e-contest-header">${header}</div>
-  <div class="sr3e-contest-side" data-side="initiator">${renderSide(ctx.initiator, ctx.initiatorRoll, ctx.initiatorResults)}</div>
-  <div class="sr3e-contest-side" data-side="target">${renderSide(ctx.target, ctx.targetRoll, ctx.targetResults)}</div>
+  <div class="sr3e-contest-side" data-side="initiator">${renderSide(ctx.initiator, ctx.initiatorRoll, ctx.initiatorResults, !!ctx.initiatorDone)}</div>
+  <div class="sr3e-contest-side" data-side="target">${renderSide(ctx.target, ctx.targetRoll, ctx.targetResults, !!ctx.targetDone)}</div>
   ${winnerLine(ctx)}
   ${ctx.extraHtml ?? ""}
 </div>`;

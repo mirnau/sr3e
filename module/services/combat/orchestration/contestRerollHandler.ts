@@ -1,4 +1,4 @@
-import { computeNetSuccesses, resolveControllingUser } from "../engine/contestCoordinator";
+import { computeNetSuccesses, resolveControllingUser, signalContestBothDone } from "../engine/contestCoordinator";
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
 import { spellDamageStaging, renderSpellDamageStaging } from "../../spells/spellCombat";
 import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
@@ -16,9 +16,11 @@ export type ContestSideData = {
     meta: { flavor: string; procedureKind: string };
     results: DieEntry[];
     rerollCount: number;
+    done: boolean;
 };
 
 export type ContestOutcomeFlag = {
+    contestId: string;
     weaponName: string;
     exportCtx: ContestExport;
     initiator: ContestSideData;
@@ -36,12 +38,20 @@ function toRollSnapshot(side: ContestSideData): RollSnapshot {
 }
 
 export function canActOnContestSide(side: ContestSideData): boolean {
+    if (side.done) return false;
     if (typeof game === "undefined" || !game.user) return false;
     if ((game.user as unknown as { isGM?: boolean }).isGM) return true;
 
     const actor = getKarmaActor(side.actorId) as never;
     const controller = actor ? resolveControllingUser(actor) : null;
     return controller?.id === (game.user as unknown as { id?: string }).id;
+}
+
+// The message's FINAL negotiated net successes — computed the same way
+// rerenderContestMessage does, for use once both sides are done and the
+// caller needs to know who actually won after any reroll/buy.
+export function computeFinalNetSuccesses(flag: ContestOutcomeFlag): number {
+    return computeNetSuccesses(toRollSnapshot(flag.initiator), toRollSnapshot(flag.target));
 }
 
 export function rerenderContestMessage(flag: ContestOutcomeFlag): string {
@@ -57,6 +67,8 @@ export function rerenderContestMessage(flag: ContestOutcomeFlag): string {
         targetRoll,
         initiatorResults: flag.initiator.results,
         targetResults: flag.target.results,
+        initiatorDone: flag.initiator.done,
+        targetDone: flag.target.done,
         netSuccesses: computeNetSuccesses(initiatorRoll, targetRoll),
         extraHtml: renderSpellDamageStaging(staging),
     });
@@ -79,6 +91,58 @@ export function applyContestSideDelta(
         const newFlag: ContestOutcomeFlag = { ...base, [delta.side]: newSide };
         return { data: { content: rerenderContestMessage(newFlag), "flags.sr3e.contestOutcome": newFlag } };
     });
+}
+
+// Marks one side done. Once both sides are done, disables the whole card
+// (reusing the existing `consumed` auto-disable) and signals whichever
+// client is blocked inside executeContestedFlow's waitForBothDone, carrying
+// the final flag so that client never needs to re-read game.messages itself
+// (which would race against Foundry's own document-update broadcast).
+// The signal is fired only after the write actually completes — signalling
+// from inside the merge callback would fire before the update() call even
+// starts, well before it's visible to any other client.
+export async function applyContestDone(
+    messageId: string,
+    side: ContestSide,
+    fallback: ContestOutcomeFlag,
+): Promise<void> {
+    const state: { flag: ContestOutcomeFlag | null } = { flag: null };
+
+    await mergeMessageFlagAsGM<ContestOutcomeFlag>(messageId, "contestOutcome", (current) => {
+        const base = current ?? fallback;
+        const newSide: ContestSideData = { ...base[side], done: true };
+        const newFlag: ContestOutcomeFlag = { ...base, [side]: newSide };
+        const bothDone = newFlag.initiator.done && newFlag.target.done;
+
+        const data: Record<string, unknown> = {
+            content: rerenderContestMessage(newFlag),
+            "flags.sr3e.contestOutcome": newFlag,
+        };
+        if (bothDone) {
+            data["flags.sr3e.consumed"] = true;
+            state.flag = newFlag;
+        }
+        return { data };
+    });
+
+    if (state.flag) signalContestBothDone(state.flag.contestId, state.flag);
+}
+
+function requestContestDoneUpdate(messageId: string, side: ContestSide, fallback: ContestOutcomeFlag): Promise<void> {
+    if (typeof game === "undefined") return Promise.resolve();
+
+    if ((game.user as unknown as { isGM?: boolean } | undefined)?.isGM) {
+        return applyContestDone(messageId, side, fallback);
+    }
+
+    (game.socket as unknown as { emit: (event: string, data: unknown) => void } | undefined)
+        ?.emit("system.sr3e", { type: "contestDone", messageId, side, fallback });
+    return Promise.resolve();
+}
+
+export async function handleContestDone(messageId: string, flag: ContestOutcomeFlag, side: ContestSide): Promise<void> {
+    if (!canActOnContestSide(flag[side])) return;
+    await requestContestDoneUpdate(messageId, side, flag);
 }
 
 function applyKarmaUpdate(actor: KarmaActor, actorId: string, karmaUpdate: Record<string, unknown>): Promise<void> {

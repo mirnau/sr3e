@@ -1,4 +1,4 @@
-import { startContest, waitForResponse, computeNetSuccesses } from "../engine/contestCoordinator";
+import { startContest, waitForResponse, waitForBothDone, computeNetSuccesses } from "../engine/contestCoordinator";
 import { handleContestStub } from "./defenderFlow";
 import { serializeProcedure } from "../engine/procedureSerializer";
 import { buildRollSnapshot } from "./rollSnapshot";
@@ -7,7 +7,7 @@ import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutco
 import { extractDieResults } from "../../../ui/combat/chat/renderRollSummary";
 import { boxesForLevel } from "../damageMath";
 import { renderSpellDamageStaging, spellDamageStaging } from "../../spells/spellCombat";
-import type { ContestOutcomeFlag } from "./contestRerollHandler";
+import { computeFinalNetSuccesses, type ContestOutcomeFlag } from "./contestRerollHandler";
 import type { SR3ERoll } from "./SR3ERoll";
 import type { RollState } from "../diceFormula";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
@@ -83,6 +83,7 @@ export async function executeContestedFlow(
         });
         if (typeof ChatMessage !== "undefined") {
             const contestOutcomeFlag: ContestOutcomeFlag = {
+                contestId,
                 weaponName: exportCtx.weaponName,
                 exportCtx,
                 initiator: {
@@ -92,6 +93,7 @@ export async function executeContestedFlow(
                     meta: initiatorRoll.meta,
                     results: extractDieResults(initiatorRoll.terms),
                     rerollCount: 0,
+                    done: false,
                 },
                 target: {
                     actorId: (targetActor as unknown as { id: string }).id,
@@ -100,6 +102,7 @@ export async function executeContestedFlow(
                     meta: defenderRoll.meta,
                     results: extractDieResults(defenderRoll.terms),
                     rerollCount: 0,
+                    done: false,
                 },
             };
 
@@ -108,21 +111,29 @@ export async function executeContestedFlow(
                 speaker: (ChatMessage as any).getSpeaker?.({ actor }),
                 flags: { sr3e: { contestOutcome: contestOutcomeFlag } },
             });
-        }
 
-        if (netSuccesses > 0 && exportCtx.damage) {
-            const stagedStep = "m" as const;
-            const resistPrep: ResistancePrep = {
-                familyKey: exportCtx.familyKey,
-                weaponId: exportCtx.weaponId,
-                weaponName: exportCtx.weaponName,
-                tnBase: exportCtx.tnBase,
-                tnMods: exportCtx.tnMods,
-                stagedStepBeforeResist: stagedStep,
-                trackKey: "physical",
-                boxesIfUnresisted: boxesForLevel(stagedStep),
-            };
-            await resistFn(resistPrep, targetActor as never);
+            // Wait for both sides to click Done (they may reroll/buy in the
+            // meantime, changing who actually has net successes) before
+            // deciding whether damage/resistance follows — a race between
+            // posting this message and immediately resolving it defeats the
+            // entire point of making rerolls interactive.
+            const finalFlag = await waitForBothDone(contestId) as ContestOutcomeFlag;
+            const finalNetSuccesses = computeFinalNetSuccesses(finalFlag);
+
+            if (finalNetSuccesses > 0 && exportCtx.damage) {
+                const stagedStep = "m" as const;
+                const resistPrep: ResistancePrep = {
+                    familyKey: exportCtx.familyKey,
+                    weaponId: exportCtx.weaponId,
+                    weaponName: exportCtx.weaponName,
+                    tnBase: exportCtx.tnBase,
+                    tnMods: exportCtx.tnMods,
+                    stagedStepBeforeResist: stagedStep,
+                    trackKey: "physical",
+                    boxesIfUnresisted: boxesForLevel(stagedStep),
+                };
+                await resistFn(resistPrep, targetActor as never);
+            }
         }
     }
 

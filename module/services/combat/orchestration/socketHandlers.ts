@@ -1,7 +1,7 @@
-import { deliverResponse, abortContest } from "../engine/contestCoordinator";
+import { deliverResponse, abortContest, resolveBothDone } from "../engine/contestCoordinator";
 import { handleContestStub } from "./defenderFlow";
 import { updateMessageAsGM } from "./messageRelay";
-import { applyContestSideDelta, type ContestOutcomeFlag, type ContestSideDelta } from "./contestRerollHandler";
+import { applyContestSideDelta, applyContestDone, type ContestOutcomeFlag, type ContestSide, type ContestSideDelta } from "./contestRerollHandler";
 import { applyDrainDelta, type DrainOutcomeFlag, type DrainDelta } from "../../spells/drainRerollHandler";
 import type { ContestStub, RollSnapshot } from "../engine/types";
 
@@ -14,6 +14,8 @@ type SocketPayload =
     | { type: "contestAbort"; contestId: string; reason: string }
     | { type: "updateChatMessage"; messageId: string; data: Record<string, unknown> }
     | { type: "contestSideUpdate"; messageId: string; delta: ContestSideDelta; fallback: ContestOutcomeFlag }
+    | { type: "contestDone"; messageId: string; side: ContestSide; fallback: ContestOutcomeFlag }
+    | { type: "contestBothDone"; contestId: string; finalFlag: ContestOutcomeFlag }
     | { type: "drainUpdate"; messageId: string; delta: DrainDelta; fallback: DrainOutcomeFlag };
 
 export function registerSocketHandlers(): void {
@@ -32,6 +34,10 @@ export function registerSocketHandlers(): void {
                 void updateMessageAsGM(p.messageId, p.data);
             } else if (p.type === "contestSideUpdate") {
                 void applyContestSideDelta(p.messageId, p.delta, p.fallback);
+            } else if (p.type === "contestDone") {
+                void applyContestDone(p.messageId, p.side, p.fallback);
+            } else if (p.type === "contestBothDone") {
+                resolveBothDone(p.contestId, p.finalFlag);
             } else if (p.type === "drainUpdate") {
                 void applyDrainDelta(p.messageId, p.delta, p.fallback);
             }

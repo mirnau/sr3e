@@ -169,6 +169,16 @@ body.game .chat-message .sr3e-drain-done {
    width: 100%;
 }
 
+body.game .chat-message .sr3e-contest-done {
+   margin-top: 0.4rem;
+   width: 100%;
+
+   &--committed {
+      opacity: 0.6;
+      color: var(--chat-highlight-color);
+   }
+}
+
 body.game .chat-message .sr3e-exploded {
    position: absolute;
    top: -0.45em;

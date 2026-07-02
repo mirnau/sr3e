@@ -128,3 +128,72 @@ describe("die click delegation — works regardless of which DOM copy renders it
         }));
     });
 });
+
+describe("contest Done button delegation", () => {
+    afterEach(() => {
+        delete (globalThis as Record<string, unknown>).game;
+        document.body.innerHTML = "";
+    });
+
+    function renderContestSide(): void {
+        document.body.innerHTML = `
+            <li class="chat-message" data-message-id="msg1">
+                <div class="sr3e-contest-side" data-side="initiator">
+                    <button data-contest-done>Done</button>
+                </div>
+            </li>
+        `;
+    }
+
+    it("marks the clicked side done and, once both sides are done, disables the whole card", async () => {
+        const messageUpdate = vi.fn().mockResolvedValue(undefined);
+        const contestOutcome = {
+            contestId: "contest:test",
+            weaponName: "Predator",
+            exportCtx: { familyKey: "firearm", weaponId: null, weaponName: "Predator", plan: null, damage: null, tnBase: 4, tnMods: [], next: { kind: "", ui: {}, args: {} } },
+            initiator: { actorId: "initiator1", actorName: "Attacker", options: { targetNumber: 4 }, meta: { flavor: "", procedureKind: "firearm" }, results: [{ result: 6 }], rerollCount: 0, done: false },
+            target: { actorId: "target1", actorName: "Defender", options: { targetNumber: 4 }, meta: { flavor: "", procedureKind: "firearm" }, results: [{ result: 2 }], rerollCount: 0, done: true },
+        };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            actors: { get: () => undefined },
+            messages: { get: (id: string) => (id === "msg1" ? { flags: { sr3e: { contestOutcome } }, update: messageUpdate } : undefined) },
+        };
+
+        renderContestSide();
+        registerChatMessageHTMLHook({ on: () => {} });
+        document.querySelector<HTMLElement>("[data-contest-done]")?.click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(messageUpdate).toHaveBeenCalledWith(expect.objectContaining({
+            "flags.sr3e.consumed": true,
+            "flags.sr3e.contestOutcome": expect.objectContaining({
+                initiator: expect.objectContaining({ done: true }),
+                target: expect.objectContaining({ done: true }),
+            }),
+        }));
+    });
+
+    it("does nothing when the side is already marked done", async () => {
+        const messageUpdate = vi.fn().mockResolvedValue(undefined);
+        const contestOutcome = {
+            contestId: "contest:test",
+            weaponName: "Predator",
+            exportCtx: { familyKey: "firearm", weaponId: null, weaponName: "Predator", plan: null, damage: null, tnBase: 4, tnMods: [], next: { kind: "", ui: {}, args: {} } },
+            initiator: { actorId: "initiator1", actorName: "Attacker", options: { targetNumber: 4 }, meta: { flavor: "", procedureKind: "firearm" }, results: [{ result: 6 }], rerollCount: 0, done: true },
+            target: { actorId: "target1", actorName: "Defender", options: { targetNumber: 4 }, meta: { flavor: "", procedureKind: "firearm" }, results: [{ result: 2 }], rerollCount: 0, done: false },
+        };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            actors: { get: () => undefined },
+            messages: { get: (id: string) => (id === "msg1" ? { flags: { sr3e: { contestOutcome } }, update: messageUpdate } : undefined) },
+        };
+
+        renderContestSide();
+        registerChatMessageHTMLHook({ on: () => {} });
+        document.querySelector<HTMLElement>("[data-contest-done]")?.click();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(messageUpdate).not.toHaveBeenCalled();
+    });
+});
