@@ -1,4 +1,4 @@
-import { SPELL_MANIPULATION_SUBTYPE_KEYS } from "../../../lang/config/MagicConfig";
+import { SPELL_EFFECT_ALGORITHM_KEYS, SPELL_MANIPULATION_SUBTYPE_KEYS } from "../../../lang/config/MagicConfig";
 import {
   defineElementalAttackSchema,
   defineThresholdSchema,
@@ -7,6 +7,7 @@ import {
 } from "./item-components/SpellRuleFields";
 
 const SPELL_MANIPULATION_SUBTYPE_CHOICES = ["", ...SPELL_MANIPULATION_SUBTYPE_KEYS];
+const SPELL_EFFECT_ALGORITHM_CHOICES = ["", ...SPELL_EFFECT_ALGORITHM_KEYS];
 
 export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSchema, BaseItem> {
   static defineSchema(): SpellSchema {
@@ -90,6 +91,23 @@ export default class SpellModel extends foundry.abstract.TypeDataModel<SpellSche
           initial: false,
         }),
       }),
+      effect: new SchemaField({
+        algorithm: new StringField({
+          required: true,
+          initial: "",
+          blank: true,
+          choices: SPELL_EFFECT_ALGORITHM_CHOICES,
+        }),
+        targetPath: new StringField({
+          required: true,
+          initial: "",
+          blank: true,
+        }),
+        scope: new StringField({
+          required: true,
+          initial: "caster",
+        }),
+      }),
     };
   }
 }
@@ -121,5 +139,10 @@ type SpellSchema = {
   }>;
   limits: SchemaField<{
     exclusive: BooleanField;
+  }>;
+  effect: SchemaField<{
+    algorithm: StringField;
+    targetPath: StringField;
+    scope: StringField;
   }>;
 };

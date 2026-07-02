@@ -46,9 +46,20 @@ describe("buildRollSnapshot", () => {
         expect(buildRollSnapshot(roll, setup("firearm"), state()).options.type).toBe("item");
     });
     it("dice breakdown present", () => {
-        const snap = buildRollSnapshot(roll, setup(), state({ dice: 3, poolDice: 1, karmaDice: 0 }));
+        const snap = buildRollSnapshot(roll, setup(), state({ dice: 3, poolDice: 1, focusDice: 2, focusKey: "focus:f1", focusLabel: "Power Focus", karmaDice: 0 }));
         expect(snap.options.baseDice).toBe(3);
         expect(snap.options.poolDice).toBe(1);
+        expect(snap.options.focusDice).toBe(2);
+        expect(snap.options.focusKey).toBe("focus:f1");
+        expect(snap.options.focusLabel).toBe("Power Focus");
         expect(snap.options.karmaDice).toBe(0);
+    });
+    it("includes procedure extra options", () => {
+        const snap = buildRollSnapshot(roll, { ...setup(), extraOptions: { spell: { name: "Manabolt" } } }, state());
+        expect(snap.options.spell).toEqual({ name: "Manabolt" });
+    });
+    it("keeps selected spell force in extra options", () => {
+        const snap = buildRollSnapshot(roll, { ...setup(), extraOptions: { spell: { name: "Levitate", force: 3, learnedForce: 5 } } }, state());
+        expect(snap.options.spell).toEqual({ name: "Levitate", force: 3, learnedForce: 5 });
     });
 });

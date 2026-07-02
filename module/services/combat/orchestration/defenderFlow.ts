@@ -1,5 +1,5 @@
 import { registerContestStub, expireContest, getContest } from "../engine/contestCoordinator";
-import { buildDodgeSetup, buildMeleeDefenseSetup } from "../procedures/defenseSetups";
+import { buildDodgeSetup, buildMeleeDefenseSetup, buildSpellResistanceSetup } from "../procedures/defenseSetups";
 import { openComposer } from "../procedures/composerService";
 import { registerPendingResponse } from "../engine/responseInterceptor";
 import { renderDefenderPrompt } from "../../../ui/combat/chat/renderDefenderPrompt";
@@ -120,6 +120,12 @@ export function handleDefenderChoice(contestId: string, key: string | null | und
 
     if (key === "dodge") {
         openComposer(buildDodgeSetup(defender, contestId) as never, defender);
+        ensureSheetOpen(defender);
+        return;
+    }
+
+    if (key === "spell-resistance") {
+        openComposer(buildSpellResistanceSetup(defender, contestId) as never, defender);
         ensureSheetOpen(defender);
         return;
     }

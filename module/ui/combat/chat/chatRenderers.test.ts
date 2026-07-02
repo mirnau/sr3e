@@ -3,6 +3,7 @@ import { renderRollSummary } from "./renderRollSummary";
 import { renderContestOutcome } from "./renderContestOutcome";
 import { renderResistancePrompt } from "./renderResistancePrompt";
 import { renderResistanceOutcome } from "./renderResistanceOutcome";
+import { renderDefenderPrompt } from "./renderDefenderPrompt";
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 import type { ResistancePrep } from "../../../services/combat/engine/types";
 
@@ -50,6 +51,13 @@ describe("renderRollSummary", () => {
         expect(html).toContain("2 pool");
         expect(html).toContain("1 karma");
     });
+    it("shows additive focus dice in pool breakdown", () => {
+        const html = renderRollSummary(actor, snap([5], 4, { baseDice: 3, poolDice: 2, focusDice: 1, focusKey: "focus:f1", focusLabel: "Power Focus", karmaDice: 1 }));
+        expect(html).toContain("7 dice");
+        expect(html).toContain("2 pool");
+        expect(html).toContain("1 focus (Power Focus)");
+        expect(html).toContain("1 karma");
+    });
     it("shows actor name and flavor", () => {
         const html = renderRollSummary(actor, snap([5], 4));
         expect(html).toContain("Deckard");
@@ -60,6 +68,28 @@ describe("renderRollSummary", () => {
         const html = renderRollSummary(actor, roll);
         expect(html).toContain("recoil");
         expect(html).toContain("TN 6");
+    });
+    it("shows generic spellcasting metadata", () => {
+        const html = renderRollSummary(actor, snap([5], 4, {
+            spell: {
+                force: 5,
+                type: "mana",
+                category: "combat",
+                exclusive: true,
+                fetishLimited: true,
+                targeting: { kind: "attribute", targetAttribute: "body", resistanceAttribute: "willpower" },
+            },
+        }));
+        expect(html).toContain("Force 5");
+        expect(html).toContain("TN: body; resists: willpower");
+        expect(html).toContain("exclusive");
+        expect(html).toContain("fetish");
+    });
+    it("shows a computed effect tag when present", () => {
+        const html = renderRollSummary(actor, snap([5], 4, {
+            spell: { force: 5, type: "mana", category: "illusion", effectTag: "TN Modifier: 3" },
+        }));
+        expect(html).toContain("TN Modifier: 3");
     });
 });
 
@@ -81,6 +111,14 @@ describe("renderContestOutcome", () => {
     it("tie line", () => {
         const html = renderContestOutcome({ initiator: actor, target, weaponName: "Predator", initiatorRoll: snap([5], 4), targetRoll: snap([5], 4), netSuccesses: 0 });
         expect(html).toContain("Tie");
+    });
+});
+
+describe("renderDefenderPrompt", () => {
+    it("shows spell resistance action for spell contests", () => {
+        const html = renderDefenderPrompt("c1", "Ganger", "Mage", "Manabolt", "spell-resistance");
+        expect(html).toContain("Mage casts Manabolt at you");
+        expect(html).toContain('data-responder="spell-resistance"');
     });
 });
 

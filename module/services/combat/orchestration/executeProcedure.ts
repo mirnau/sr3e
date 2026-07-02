@@ -4,6 +4,8 @@ import { SR3ERoll } from "./SR3ERoll";
 import { executeSimpleFlow } from "./simpleFlow";
 import { executeAdvancedFlow } from "./advancedFlow";
 import { executeContestedFlow } from "./contestedFlow";
+import { openComposer } from "../procedures/composerService";
+import { buildSpellDrainSetup, isSpellcastingSetup } from "../../spells/spellDrain";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
 import type { RollState } from "../diceFormula";
 
@@ -16,7 +18,7 @@ function getFullDefenseFlag(actor: { id: string }): boolean {
 }
 
 function computePool(state: RollState): number {
-    return state.dice + computePoolDice(state, state.poolDice) + state.karmaDice;
+    return state.dice + computePoolDice(state, state.poolDice) + (state.focusDice ?? 0) + state.karmaDice;
 }
 
 export type ExecuteProcedureOptions = {
@@ -57,6 +59,10 @@ export async function executeProcedure(
             await executeAdvancedFlow(setup, state, roll, actor, { poolKey: opts.poolKey });
         } else {
             await executeSimpleFlow(setup, state, roll, actor, { poolKey: opts.poolKey });
+        }
+
+        if (isSpellcastingSetup(setup)) {
+            openComposer(buildSpellDrainSetup(actor as never, setup.extraOptions!.spell as never), actor);
         }
 
         return { succeeded: true };

@@ -96,3 +96,38 @@ export function buildMeleeDefenseSetup(
         },
     };
 }
+
+export function buildSpellResistanceSetup(defender: Defender, contestId: string): ProcedureSetup {
+    const record = getContest(contestId);
+    const hint = record?.defenseHint ?? { type: "attribute" as const, key: "willpower", tnLabel: "Willpower", tnMod: 0 };
+    const attrs = (defender.system as ActorSystem).attributes ?? {};
+    const attr = attrs[hint.key];
+    const dice = Math.max(1, attr?.total ?? attr?.value ?? 1);
+    const force = Number(record?.exportCtx.next.args.force ?? 4);
+    const targetNumber = Math.max(2, force + (hint.tnMod ?? 0));
+    const modifiers = hint.tnMod
+        ? [{ id: "spell-resistance", name: hint.tnLabel, value: hint.tnMod }]
+        : [];
+
+    return {
+        kind: "spell-resistance",
+        title: `Resist ${record?.exportCtx.weaponName ?? "Spell"}`,
+        rollState: { dice, poolDice: 0, karmaDice: 0, targetNumber, modifiers },
+        lockPriority: "advanced",
+        selfPublish: false,
+        defenseHint: null,
+        exportFn: () => ({
+            familyKey: "spell-resistance",
+            weaponId: null,
+            weaponName: record?.exportCtx.weaponName ?? "Spell",
+            plan: null,
+            damage: null,
+            tnBase: targetNumber,
+            tnMods: modifiers,
+            next: { kind: "", ui: {}, args: {} },
+        }),
+        commitFn: async (roll: unknown) => {
+            deliverResponse(contestId, roll as RollSnapshot);
+        },
+    };
+}

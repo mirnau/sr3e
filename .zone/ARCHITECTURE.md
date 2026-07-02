@@ -25,6 +25,10 @@ When `SR3ERoll.buildOpen(pool)` is used (no TN), `countSuccesses()` returns `nul
 
 `enabled` in `GadgetRow.svelte` is `$derived(!!(p.activeEffects[0] as any)?.flags?.sr3e?.gadget?.isEnabled)`. It must track `p.activeEffects[0]` reactively. `ae.update({ render: false })` updates the in-memory document without triggering a sheet re-render, so a one-time `$state` snapshot (via `untrack`) would show stale state until the sheet is fully remounted. The `$derived` re-evaluates whenever `GadgetViewer.refresh()` pushes new `activeEffects` props down. Reverting to `$state` breaks toggle persistence within a session.
 
+### Spell fetish limitation is derived from attached fetish gadgets
+
+Spells are grimoire entries only; do not also render them as inventory assets. A spell is fetish-limited when it has an attached gadget of type `fetish`; do not reintroduce a separate fetish-limited boolean on the spell model. A fetish-limited spell is rollable only when the source fetish gadget remains in inventory and is carried/equipped. Exclusive casting is a casting property, not a limitation boolean.
+
 ## ADR Index
 - [0001-sr3eroll-injectable-evaluator](adr/0001-sr3eroll-injectable-evaluator.md) — SUPERSEDED: SR3ERoll injectable evaluator (replaced by ADR-0005)
 - [0002-dice-formula-always-d6x6](adr/0002-dice-formula-always-d6x6.md) — SUPERSEDED: d6x6 formula (replaced by ADR-0006)

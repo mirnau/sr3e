@@ -345,6 +345,10 @@
       "drainDamageLevelModifier": "Drain Level Modifier",
       "drainPowerModifier": "Drain Power Modifier",
       "duration": "Duration",
+      "effectAlgorithm": "Effect Algorithm",
+      "effectRules": "Effect",
+      "effectScope": "Effect Scope",
+      "effectTargetPath": "Effect Target Stat",
       "elementalRules": "Elemental Rules",
       "exclusiveCast": "Exclusive Cast",
       "fetishMissing": "Fetish Missing",
@@ -384,6 +388,21 @@
       "instant": "Instant",
       "permanent": "Permanent",
       "sustained": "Sustained"
+    },
+    "spellEffectAlgorithms": {
+      "attributeModPerTwo": "Attribute Mod (1 per 2 successes, capped by Force)",
+      "barrierStep": "Barrier Rating (Force + step per 2 successes)",
+      "detectionRange": "Detection Range (Force x Magic)",
+      "levitateSpeed": "Levitate Speed (Magic x successes, capped by Force)",
+      "magicFingers": "Magic Fingers (successes, capped by Force)",
+      "permanentTimeDivisor": "Permanent Casting Time (base time / successes)",
+      "tnPerSuccess": "Target Number per Success (capped by Force)",
+      "tnPerSuccessCapped8": "Target Number per Success (capped by 8 and Force)",
+      "tnPerTwoSuccesses": "Target Number per 2 Successes (capped by Force)"
+    },
+    "spellEffectScopes": {
+      "caster": "Caster",
+      "target": "Target"
     },
     "spellManipulationSubtypes": {
       "control": "Control",

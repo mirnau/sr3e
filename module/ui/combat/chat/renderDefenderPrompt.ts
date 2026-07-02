@@ -7,9 +7,12 @@ export function renderDefenderPrompt(
 ): string {
     const isGeneric = nextKind === "skill-response" || nextKind === "attribute-response";
     const isDodge = nextKind === "dodge";
+    const isSpellResistance = nextKind === "spell-resistance";
 
     const sourceLabel = isGeneric
         ? `${attackerName} challenges you${weaponName ? ` with ${weaponName}` : ""}`
+        : isSpellResistance
+            ? `${attackerName} casts ${weaponName || "a spell"} at you`
         : `${attackerName} attacks with ${weaponName || "weapon"}`;
 
     let buttons: string;
@@ -18,6 +21,9 @@ export function renderDefenderPrompt(
   <button class="sr3e-responder-button sr3e-responder-decline" data-responder="no"><span>Cancel</span></button>`;
     } else if (isDodge) {
         buttons = `<button class="sr3e-responder-button" data-responder="dodge"><span>Dodge</span></button>
+  <button class="sr3e-responder-button sr3e-responder-decline" data-responder="no"><span>Cancel</span></button>`;
+    } else if (isSpellResistance) {
+        buttons = `<button class="sr3e-responder-button" data-responder="spell-resistance"><span>Resist Spell</span></button>
   <button class="sr3e-responder-button sr3e-responder-decline" data-responder="no"><span>Cancel</span></button>`;
     } else {
         buttons = `<button class="sr3e-responder-button" data-responder="standard"><span>Standard Defense</span></button>

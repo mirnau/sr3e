@@ -24,7 +24,7 @@ const reaction = storeManager.GetSimpleStatROStore(actor, "attributes.reaction")
 
 const isAwakened = $derived(
    actor.items.some((item: any) => item.type === "magic") &&
-      !actor.system?.attributes?.magic?.isBurnedOut
+      !actor.system?.attributes?.isBurnedOut
 );
 
 onDestroy(() => storeManager.Unsubscribe(actor));

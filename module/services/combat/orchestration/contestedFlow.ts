@@ -5,6 +5,7 @@ import { buildRollSnapshot } from "./rollSnapshot";
 import { promptResistance } from "./resistanceFlow";
 import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
 import { boxesForLevel } from "../damageMath";
+import { renderSpellDamageStaging, spellDamageStaging } from "../../spells/spellCombat";
 import type { SR3ERoll } from "./SR3ERoll";
 import type { RollState } from "../diceFormula";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
@@ -68,6 +69,7 @@ export async function executeContestedFlow(
 
         const initiatorName = (actor as unknown as { name?: string }).name ?? "Attacker";
         const targetName = (targetActor as unknown as { name?: string }).name ?? "Defender";
+        const staging = spellDamageStaging(exportCtx, initiatorRoll, defenderRoll);
         const outcomeHtml = renderContestOutcome({
             initiator: { name: initiatorName },
             target: { name: targetName },
@@ -75,6 +77,7 @@ export async function executeContestedFlow(
             initiatorRoll,
             targetRoll: defenderRoll,
             netSuccesses,
+            extraHtml: renderSpellDamageStaging(staging),
         });
         if (typeof ChatMessage !== "undefined") {
             await (ChatMessage as any).create?.({

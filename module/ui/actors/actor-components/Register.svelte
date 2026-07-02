@@ -10,14 +10,13 @@ import SkillsLanguage from "./skills/SkillsLanguage.svelte";
 import Inventory from "./inventory/Inventory.svelte";
 import Grimoire from "./Grimoire.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
+import RatsRace from "./rats-race/RatsRace.svelte";
 
 let { actor: _actor }: { actor: Actor } = $props();
 const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
-
 let activeTab = $state<"active" | "knowledge" | "language" | "grimoire" | "inventory" | "garage" | "effects" | "ratsrace">("active");
 const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
-
 storeManager.Subscribe(actor);
 onDestroy(() => {
    Hooks.off("createItem", createHookId);
@@ -28,16 +27,19 @@ onDestroy(() => {
 
 let skillItems = $state<any[]>([]);
 let spellItems = $state<Item[]>([]);
+let transactionItems = $state<Item[]>([]);
 
 function rebuildRegisterItems() {
-   skillItems = [...((actor as any).items ?? [])].filter((item: Record<string, unknown>) => item.type === "skill");
-   spellItems = [...((actor as any).items ?? [])]
+   const items = [...((actor as any).items ?? [])];
+   skillItems = items.filter((item: Record<string, unknown>) => item.type === "skill");
+   spellItems = items
       .filter((item: Item) => item.type === "spell")
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   transactionItems = items
+      .filter((item: Item) => item.type === "transaction")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
 }
-
 rebuildRegisterItems();
-
 const onItemChange = (item: any) => {
    if (item.parent?.id !== (actor as any).id) return;
    rebuildRegisterItems();
@@ -46,7 +48,6 @@ const onItemChange = (item: any) => {
 const createHookId = Hooks.on("createItem", onItemChange);
 const updateHookId = Hooks.on("updateItem", onItemChange);
 const deleteHookId = Hooks.on("deleteItem", onItemChange);
-
 function bySkillType(skillType: string) {
    return skillItems
       .filter((item: Record<string, unknown>) => (item.system as Record<string, unknown>)?.skillType === skillType)
@@ -61,7 +62,7 @@ const languageSkills = $derived(bySkillType("language"));
 const isAwakened = $derived(
    $magic > 0 &&
    actor.items.some((item: any) => item.type === "magic") &&
-   !actor.system?.attributes?.magic?.isBurnedOut,
+   !actor.system?.attributes?.isBurnedOut,
 );
 
 $effect(() => {
@@ -140,7 +141,7 @@ $effect(() => {
             {:else if activeTab === "effects"}
                <ActiveEffectsViewer document={actor} />
             {:else if activeTab === "ratsrace"}
-               <p>Rat's Race</p>
+               <RatsRace transactions={transactionItems} />
             {/if}
          </div>
       </div>

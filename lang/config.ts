@@ -17,6 +17,7 @@ import {
   SPELL_MANIPULATION_SUBTYPE_KEYS,
   SPELL_DURATION_KEYS, SPELL_RANGE_KEYS, SPELL_TARGETING_KEYS,
   SPELL_THRESHOLD_MODE_KEYS, SPELL_DRAIN_LEVEL_KEYS, FOCUS_TYPE_KEYS,
+  SPELL_EFFECT_ALGORITHM_KEYS, SPELL_EFFECT_SCOPE_KEYS,
 } from "./config/MagicConfig";
 import { INVENTORY_KEYS } from "./config/InventoryConfig";
 import { GADGET_KEYS, GADGET_TYPE_KEYS, EFFECTS_KEYS } from "./config/GadgetConfig";
@@ -86,6 +87,8 @@ export const sr3e = {
   SPELL_THRESHOLD_MODES: createCategory("spellThresholdModes", SPELL_THRESHOLD_MODE_KEYS),
   SPELL_DRAIN_LEVELS: createCategory("spellDrainLevels", SPELL_DRAIN_LEVEL_KEYS),
   FOCUS_TYPES: createCategory("focusTypes", FOCUS_TYPE_KEYS),
+  SPELL_EFFECT_ALGORITHMS: createCategory("spellEffectAlgorithms", SPELL_EFFECT_ALGORITHM_KEYS),
+  SPELL_EFFECT_SCOPES: createCategory("spellEffectScopes", SPELL_EFFECT_SCOPE_KEYS),
   INVENTORY: createCategory("inventory", INVENTORY_KEYS),
   GADGET: createCategory("gadget", GADGET_KEYS),
   GADGET_TYPES: createCategory("gadgetTypes", GADGET_TYPE_KEYS),

@@ -220,6 +220,18 @@
 	width: 100%;
 }
 
+.sheet-card-outline .stat-grid .stat-field-card.labeled-currency-input {
+	.currency-wrapper {
+		width: 50%;
+		max-width: 50%;
+	}
+
+	input[type="text"] {
+		width: 100%;
+		text-align: right;
+	}
+}
+
 // Stat grid
 .stat-grid {
 	display: inline-grid;

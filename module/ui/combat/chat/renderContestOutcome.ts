@@ -8,6 +8,7 @@ export type ContestRenderCtx = {
     initiatorRoll: RollSnapshot;
     targetRoll: RollSnapshot;
     netSuccesses: number;
+    extraHtml?: string;
 };
 
 function winnerLine(ctx: ContestRenderCtx): string {
@@ -29,5 +30,6 @@ export function renderContestOutcome(ctx: ContestRenderCtx): string {
   ${renderRollSummary(ctx.initiator, ctx.initiatorRoll)}
   ${renderRollSummary(ctx.target, ctx.targetRoll)}
   ${winnerLine(ctx)}
+  ${ctx.extraHtml ?? ""}
 </div>`;
 }

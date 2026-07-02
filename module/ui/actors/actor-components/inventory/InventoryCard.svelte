@@ -4,6 +4,7 @@ import { StoreManager } from "../../../../utilities/StoreManager.svelte";
 import { localize } from "../../../../services/utilities";
 import { reloadWeapon } from "../../../../services/combat/procedures/ammoService";
 import { buildWeaponAttack } from "../../../../services/combat/procedures/weaponAttack";
+import { buildSpellcastingSetup, canStartSpellcasting } from "../../../../services/combat/procedures/spellcastingSetup";
 import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import FilterToggle from "./FilterToggle.svelte";
 import WeaponComponent from "./components/WeaponComponent.svelte";
@@ -12,6 +13,7 @@ import WearableComponent from "./components/WearableComponent.svelte";
 import MedicalComponent from "./components/MedicalComponent.svelte";
 import SpellComponent from "./components/SpellComponent.svelte";
 import FocusComponent from "./components/FocusComponent.svelte";
+import GadgetComponent from "./components/GadgetComponent.svelte";
 
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 const MELEE_MODES = new Set(["blade", "blunt"]);
@@ -33,15 +35,22 @@ onDestroy(() => {
 const isFavoriteStore = storeManager.GetFlagStore<boolean>(item, "isFavorite", false);
 const isEquippedStore = storeManager.GetFlagStore<boolean>(item, "isEquipped", false);
 const linkedSkillIdStore = storeManager.GetRWStore<string>(item, "linkedSkillId");
+const nameStore = storeManager.GetRWStore<string>(item, "name");
 
 const isFirearm = $derived(item.type === "weapon" && FIREARM_MODES.has(sys.mode ?? ""));
+const isSpell = $derived(item.type === "spell");
+const canCastSpell = $derived(item.type === "spell" && canStartSpellcasting(item as never));
 
 let targetCount = $state(typeof game !== "undefined" ? ((game.user as any)?.targets?.size ?? 0) : 0);
 
-const isRollEnabled = $derived(item.type === "weapon" && targetCount === 1);
+const isRollEnabled = $derived(
+    (item.type === "weapon" && targetCount === 1) ||
+    canCastSpell
+);
 const rollDisabledReason = $derived(
-    item.type !== "weapon" ? "" :
-    targetCount !== 1 ? "Select exactly one target" : ""
+    item.type === "weapon" && targetCount !== 1 ? "Select exactly one target" :
+    item.type === "spell" && !canCastSpell ? "Ready fetish required" :
+    ""
 );
 
 const targetHookId = (typeof Hooks !== "undefined")
@@ -75,7 +84,7 @@ async function onReloadClick() {
 async function onTrashClick() {
     const confirmed = await (foundry.applications.api.DialogV2 as any).confirm({
         window: { title: localize("sr3e.modal.deleteskilltitle") },
-        content: `<p><strong>${item.name}</strong></p>`,
+        content: `<p><strong>${$nameStore}</strong></p>`,
         yes: { icon: "fa-solid fa-trash-can" },
         defaultYes: false,
     });
@@ -85,6 +94,10 @@ async function onTrashClick() {
 
 function onRollClick() {
     if (!isRollEnabled) return;
+    if (isSpell) {
+        openComposer(buildSpellcastingSetup(actor as never, item as never), actor);
+        return;
+    }
     const setup = buildWeaponAttack(actor as never, item as never);
     openComposer(setup, actor);
 }
@@ -101,13 +114,13 @@ function onRollClick() {
 >
     <div class="asset-background-layer"></div>
     <div class="image-mask">
-        <img src={(item as any).img} role="presentation" alt={item.name ?? ""} />
+        <img src={(item as any).img} role="presentation" alt={$nameStore ?? ""} />
     </div>
 
     <div class="asset-card-column">
         <div class="asset-card-row">
             <div class="asset-card-column">
-                <h3 class="no-margin uppercase">{item.name}</h3>
+                <h3 class="no-margin uppercase">{$nameStore}</h3>
 
                 {#if linkedSkillName}
                     <h3 class="no-margin uppercase">
@@ -127,6 +140,8 @@ function onRollClick() {
                     <SpellComponent {item} />
                 {:else if item.type === "focus"}
                     <FocusComponent {item} />
+                {:else if item.type === "gadget"}
+                    <GadgetComponent {item} />
                 {/if}
             </div>
         </div>

@@ -6,13 +6,14 @@ export const MAGIC_KEYS = [
 
 export const SPELL_KEYS = [
   "spell", "casting", "targetingRules", "elementalRules",
-  "thresholdRules", "drain",
+  "thresholdRules", "drain", "effectRules",
   "type", "category", "manipulationSubtype", "duration", "rounds",
   "learnedForce", "range", "targeting", "targetAttribute", "staticTargetNumber",
   "resistanceAttribute", "thresholdMode", "thresholdAttribute", "thresholdDivisor",
   "thresholdValue", "attackTargetNumber", "canDodge", "armorMultiplier",
   "drainPowerModifier", "drainDamageLevel", "drainDamageLevelModifier",
   "fetishes", "fetishReady", "fetishMissing", "exclusiveCast",
+  "effectAlgorithm", "effectTargetPath", "effectScope",
 ] as const;
 
 export const FOCUS_KEYS = [
@@ -37,3 +38,8 @@ export const FOCUS_TYPE_KEYS = [
   "expendableSpell", "specificSpell", "spellCategory", "spirit",
   "power", "sustaining", "weapon",
 ] as const;
+export const SPELL_EFFECT_ALGORITHM_KEYS = [
+  "attributeModPerTwo", "tnPerSuccess", "tnPerSuccessCapped8", "tnPerTwoSuccesses",
+  "barrierStep", "levitateSpeed", "magicFingers", "detectionRange", "permanentTimeDivisor",
+] as const;
+export const SPELL_EFFECT_SCOPE_KEYS = ["caster", "target"] as const;

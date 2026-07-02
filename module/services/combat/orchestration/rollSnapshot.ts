@@ -16,9 +16,13 @@ function baseSnapshot(roll: SR3ERoll, setup: ProcedureSetup, state: RollState, p
         options: {
             baseDice: state.dice,
             poolDice: state.poolDice,
+            focusDice: state.focusDice ?? 0,
+            focusKey: state.focusKey,
+            focusLabel: state.focusLabel,
             karmaDice: state.karmaDice,
             poolKey,
             type: procedureType(setup.kind),
+            ...(setup.extraOptions ?? {}),
         },
         meta: {
             flavor: setup.title,

@@ -19,7 +19,7 @@ Required source imports:
 | Spellcasting procedure | Dice source, spell pool use, target numbers, opposed/static tests, success effects | Partial: combat action timing in `.rules/raw/100.md`, `.rules/raw/102.md`, `.rules/raw/104.md`, `.rules/raw/107.md`, and `.rules/raw/181.md`; preparation/targeting in `.rules/raw/181.md`; LOS/barriers in `.rules/raw/104.md`; Sorcery Test in `.rules/raw/182.md`; TN modifiers/spell defense in `.rules/raw/107.md` and `.rules/raw/183.md`; resistance/effect in `.rules/raw/183.md`; non-combat timing in `.rules/raw/39.md`; Spell Pool refresh in `.rules/raw/180.md` |
 | Drain procedure | Drain target number, drain level, resistance dice, stun vs physical, staging | Partial: general Drain and Drain Code structure in `.rules/raw/162.md`; limited spell Drain modifiers in `.rules/raw/180.md`; sorcery Drain in `.rules/raw/183.md`; conjuring Drain in `.rules/raw/187.md`; Drain Level rules and examples in `.rules/raw/191.md` and `.rules/raw/194.md`; full spell catalog still missing |
 | Spell fetishes | Fetish-limited spell requirement, attunement, physical contact, replacement, notice modifier, cost/legal source | Imported from `.rules/raw/161.md`, `.rules/raw/180.md`, and `.rules/raw/305.md` |
-| Sustained spells | Duration, sustaining penalties, ending conditions, interaction with damage/overflow | Partial: duration taxonomy and +2 sustaining TN penalty in `.rules/raw/178.md`; sustaining foci in `.rules/raw/189.md` and `.rules/raw/191.md`; +2 TN per sustained spell in `.rules/raw/107.md`; +2 Drain Power for new magic in `.rules/raw/162.md`; drop timing in `.rules/raw/106.md`; ending conditions still missing |
+| Sustained spells | Duration, sustaining penalties, ending conditions, interaction with damage/overflow | Partial: duration taxonomy, +2 sustaining TN penalty, and Sorcery-skill simultaneous-sustain cap in `.rules/raw/178.md`; sustaining foci in `.rules/raw/189.md` and `.rules/raw/191.md`; +2 TN per sustained spell in `.rules/raw/107.md`; +2 Drain Power for new magic in `.rules/raw/162.md`; drop timing in `.rules/raw/106.md`; effect magnitude formulas in `.rules/raw/181.md` (area radius), `192.md` (detection range), `193.md`/`194.md` (attribute mod, permanent time divisor), `195.md`/`196.md` (Confusion/Silence), `197.md`/`198.md` (Levitate, Magic Fingers, Shadow, Barrier, Ice Sheet); ending conditions (caster incapacitation/death) still missing |
 | Foci | Focus types, ratings, bonding/activation, dice or TN effects, limits, deactivation | Imported from `.rules/raw/54.md`, `.rules/raw/60.md`, `.rules/raw/106.md`, `.rules/raw/189.md`, `.rules/raw/190.md`, and `.rules/raw/191.md` |
 | Astral | Astral perception/projection eligibility, astral combat hooks, astral pool use | Partial: active foci astral properties in `.rules/raw/189.md` and `.rules/raw/190.md`; focus tracking in `.rules/raw/191.md` |
 | Spirits/conjuring | Summoning/banishing/binding scope decision, drain/resistance interaction | Partial: conjuring Drain in `.rules/raw/187.md`; spirit/power focus interactions in `.rules/raw/189.md` |
@@ -143,6 +143,41 @@ Runtime invariants:
 - Expendable spell foci are deleted on use; do not store a persistent consumed flag.
 - RAW limits active foci, not total bonded foci. If we want "bonded foci <= Intelligence" instead, record it as a house rule before implementation.
 
+### Sustained spell effect magnitude: algorithm dispatch, not formula strings
+
+Sustained and health/illusion/manipulation/detection spells scale their effect off Sorcery Test successes and Force using a small closed set of formulas (SR3 pp.178, 181, 192-198). A free-text formula field would require players to write expressions; instead each spell picks a named **effect algorithm** from a dropdown, mirroring the existing `spellDamageStaging` dispatch-by-category pattern in `spellCombat.ts`.
+
+**`SpellModel` additions:**
+
+| Field | Purpose |
+|---|---|
+| `effect.algorithm` | One of the enum keys below, or `""` for spells with no computed magnitude (combat/detection spells use existing damage staging / range display instead) |
+| `effect.targetPath` | Actor-relative update path the computed magnitude is applied to (e.g. `system.attributes.reaction.mod`), only meaningful for actor-scoped algorithms |
+| `effect.scope` | `caster` or `target` — who the computed ActiveEffect attaches to |
+
+**Algorithm catalog** (`module/services/spells/spellEffectMagnitude.ts`, pure functions, one per key, inputs `{ force, successes, magic }`):
+
+| Key | Formula | Cap | Source |
+|---|---|---|---|
+| `attributeModPerTwo` | `floor(successes / 2)` | Force | p.193-194 |
+| `tnPerSuccess` | `successes` | Force | p.195 (Confusion) |
+| `tnPerSuccessCapped8` | `min(successes, 8, Force)` | 8 and Force | p.198 (Shadow) |
+| `tnPerTwoSuccesses` | `floor(successes / 2)` | Force | p.198 (Ice Sheet) |
+| `barrierStep` | `Force + floor((successes - 1) / 2)`, 0 if successes < 1 | none beyond formula | p.198 |
+| `levitateSpeed` | `magic * min(successes, Force)` | Force applied to successes term | p.197 |
+| `magicFingers` | `min(successes, Force)` | Force | p.197 |
+| `detectionRange` | `force * magic` | none (uses Force directly, not successes) | p.192 |
+| `permanentTimeDivisor` | `baseTimeTurns / max(1, successes)` | none | p.194, p.178 |
+
+**Actor-effect auto-application is scoped to `attributeModPerTwo` only in this pass.** It is the sole algorithm with an unambiguous single-actor target and an existing numeric stat path (`system.attributes.*.mod`, `system.dicePools.*.mod`) to write into. The remaining eight algorithms compute a magnitude and post it to the spellcasting chat card for the GM/table to apply manually, because they target things this system does not yet model as addressable entities: perception-category-scoped TN mods (Confusion/Silence/Shadow), a zone or wall (Barrier/Ice Sheet), a per-action movement rate (Levitate), an unowned telekinetic manipulator (Magic Fingers), or a pre-cast time budget rather than a persistent effect (permanentTimeDivisor, detectionRange). Widening auto-application beyond `attributeModPerTwo` requires those addressable-entity systems to exist first — out of scope here per the existing "no astral map/scene layer" WON'T.
+
+**Data flow for `attributeModPerTwo` spells:**
+1. Spellcasting roll resolves; `spellDamageStaging`-equivalent success count is already available from the contest.
+2. On sustained-spell commit (`spellcastingSetup.ts`), if `effect.algorithm === "attributeModPerTwo"` and `effect.targetPath` is set, compute magnitude via `spellEffectMagnitude.attributeModPerTwo({ force, successes, magic })`.
+3. Create one ActiveEffect via `createEmbeddedDocuments` on the actor at `effect.scope` (caster or resolved target actor) with a single change at `effect.targetPath`, value = computed magnitude, flagged `flags.sr3e.sustainedSpellId = <sustained entry id>`.
+4. Extend `SustainedSpell` (`sustainedSpells.ts`) with `appliedEffectUuid: string | null` so `dropSustainedSpell` can delete the matching ActiveEffect when the entry is removed.
+5. All other algorithms: compute magnitude, include it in the existing spellcasting chat summary text (`renderRollSummary`-family), no ActiveEffect created.
+
 ### Drain is chat-driven
 
 Spellcasting should always produce a chat card with a mandatory Drain prompt. This mirrors existing damage resistance: chat card flags hold enough context, `renderChatMessageHTML` wires the button, handler consumes the card, then executes the follow-up roll.
@@ -190,9 +225,14 @@ This makes Drain hard to forget and keeps post-roll work attached to the origina
 
 ### Level 5: Sustaining and Advanced Magic Hooks
 
-- Track sustained spells, +2 sustaining TN penalty, +2 Drain Power for new magic, and drop timing.
-- Add sustaining focus custody for sustained spells.
+- Track sustained spells, +2 sustaining TN penalty, +2 Drain Power for new magic, and drop timing. **Done** — `module/services/spells/sustainedSpells.ts`, wired into `spellcastingSetup.ts` and `spellDrain.ts`.
+- Add sustaining focus custody for sustained spells. **Done** — `sustainSpellInFocus`, Force-capacity checked, excluded from caster's own TN/Drain penalty.
+- Add `effect.algorithm` / `effect.targetPath` / `effect.scope` to `SpellModel`; add dropdown UI on `SpellApp.svelte`.
+- Add `module/services/spells/spellEffectMagnitude.ts` with the nine pure algorithm functions (see Architecture Decisions). **Done** — GH #184, 16 tests.
+- SpellModel `effect.{algorithm,targetPath,scope}` fields + SpellApp picker UI. **Done** — GH #185.
+- Wire `attributeModPerTwo` to auto-create/remove a tagged ActiveEffect on sustain/drop; all other algorithms compute-and-post to chat only. **Done** — GH #186 (auto-effect, `spellEffectApplication.ts`), #187 (chat tag for the other eight algorithms, `renderRollSummary.ts` spellLine).
 - Defer astral/conjuring/spirit mechanics beyond foci and Drain unless promoted into later PLAN items.
+- Defer turn/round lifecycle hooks (auto-drop on caster incapacitation/death, free-action drop timing gate) to a follow-up pass — not yet scoped.
 
 ---
 
@@ -219,6 +259,9 @@ This makes Drain hard to forget and keeps post-roll work attached to the origina
 
 **Level 5: Sustaining and Advanced Magic Hooks**
 - Implement sustained spell state, sustaining penalties, and sustaining focus custody.
+- Implement the nine-algorithm effect magnitude catalog as pure, independently tested functions.
+- Auto-apply `attributeModPerTwo` as a tagged ActiveEffect on sustain, removed on drop.
+- Post computed magnitude to chat for the remaining eight algorithms (no auto ActiveEffect).
 - Keep astral/conjuring as later promoted work unless required by focus/drain interactions.
 
 ### SHOULD
@@ -255,6 +298,8 @@ This makes Drain hard to forget and keeps post-roll work attached to the origina
 | `module/ui/items/SpellApp.svelte` | Add spell editor app |
 | `module/ui/items/FocusApp.svelte` | Add focus editor app |
 | `module/services/combat/procedures/*` | Add spellcasting/drain setups using existing procedure patterns |
+| `module/services/spells/sustainedSpells.ts` | Sustained spell tracking, TN/Drain penalties, focus custody, tagged ActiveEffect cleanup on drop |
+| `module/services/spells/spellEffectMagnitude.ts` | Nine-algorithm effect magnitude catalog |
 | `module/services/combat/orchestration/*` | Add spellcasting/drain orchestration only where reusable flows do not fit |
 | `module/ui/combat/chat/*` | Add spell/drain chat renderers |
 | `lang/en.json` | Add labels/messages |

@@ -9,6 +9,7 @@ import JournalViewer from "../common-components/JournalViewer.svelte";
 import LabeledBoolean from "./LabeledBoolean.svelte";
 import LabeledDropdown from "./LabeledDropdown.svelte";
 import LabeledNumberInput from "./LabeledNumberInput.svelte";
+import { gadgetTargetProperties } from "../../services/gadgets/gadgetTargets";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
@@ -20,6 +21,8 @@ let durationType = $state(system.duration?.type as string);
 let manipulationSubtype = $state(system.manipulationSubtype as string);
 let targetingKind = $state(system.targeting?.kind as string);
 let thresholdMode = $state(system.threshold?.mode as string);
+
+const effectTargetPathOptions = gadgetTargetProperties("medical").map(prop => ({ value: prop.value, label: prop.label }));
 
 const isManipulation = $derived(category === "manipulation");
 const isControlManipulation = $derived(isManipulation && manipulationSubtype === "control");
@@ -113,6 +116,12 @@ function onManipulationSubtypeChange(val: string) {
         <LabeledNumberInput {item} key="powerModifier" label={localize(CONFIG.SR3E.SPELL.drainPowerModifier)} value={system.drain?.powerModifier ?? 0} path="system.drain" />
         <LabeledDropdown {item} key="damageLevel" label={localize(CONFIG.SR3E.SPELL.drainDamageLevel)} value={system.drain?.damageLevel ?? ""} path="system.drain" options={kvOptions(CONFIG.SR3E.SPELL_DRAIN_LEVELS)} />
         <LabeledNumberInput {item} key="damageLevelModifier" label={localize(CONFIG.SR3E.SPELL.drainDamageLevelModifier)} value={system.drain?.damageLevelModifier ?? 0} path="system.drain" />
+    </ItemSheetComponent>
+
+    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.effectRules)}>
+        <LabeledDropdown {item} key="algorithm" label={localize(CONFIG.SR3E.SPELL.effectAlgorithm)} value={system.effect?.algorithm ?? ""} path="system.effect" options={kvOptions(CONFIG.SR3E.SPELL_EFFECT_ALGORITHMS)} />
+        <LabeledDropdown {item} key="targetPath" label={localize(CONFIG.SR3E.SPELL.effectTargetPath)} value={system.effect?.targetPath ?? ""} path="system.effect" options={effectTargetPathOptions} />
+        <LabeledDropdown {item} key="scope" label={localize(CONFIG.SR3E.SPELL.effectScope)} value={system.effect?.scope ?? "caster"} path="system.effect" options={kvOptions(CONFIG.SR3E.SPELL_EFFECT_SCOPES)} />
     </ItemSheetComponent>
 
     <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.fetishes)}>

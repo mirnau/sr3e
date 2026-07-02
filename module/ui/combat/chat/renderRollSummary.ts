@@ -27,12 +27,16 @@ function actorLine(actor: { name: string }, meta: { flavor: string }): string {
 function poolLine(opts: Record<string, unknown>): string {
     const base = Number(opts.baseDice ?? 0);
     const pool = Number(opts.poolDice ?? 0);
+    const focus = Number(opts.focusDice ?? 0);
     const karma = Number(opts.karmaDice ?? 0);
     const poolKey = opts.poolKey as string | undefined;
+    const focusKey = opts.focusKey as string | undefined;
+    const focusLabel = opts.focusLabel as string | undefined;
     const parts = [`${base} base`];
     if (pool > 0) parts.push(`${pool} pool${poolKey ? ` (${poolKey})` : ""}`);
+    if (focus > 0) parts.push(`${focus} focus${focusLabel || focusKey ? ` (${focusLabel ?? focusKey})` : ""}`);
     if (karma > 0) parts.push(`${karma} karma`);
-    return `${base + pool + karma} dice (${parts.join(" + ")})`;
+    return `${base + pool + focus + karma} dice (${parts.join(" + ")})`;
 }
 
 function tnLine(opts: Record<string, unknown>): string {
@@ -44,6 +48,35 @@ function tnLine(opts: Record<string, unknown>): string {
         ? ` (base ${base}, mods: ${mods.map(m => `${m.name} ${m.value >= 0 ? "+" : ""}${m.value}`).join(", ")})`
         : "";
     return `TN ${final}${base !== final ? modStr : ""}`;
+}
+
+function spellLine(opts: Record<string, unknown>): string {
+    const spell = opts.spell as Record<string, unknown> | undefined;
+    if (!spell) return "";
+    const target = spell.targeting as Record<string, unknown> | undefined;
+    const tags = [
+        `Force ${spell.force ?? "?"}`,
+        spell.type,
+        spell.category,
+        targetLabel(target),
+        spell.exclusive ? "exclusive" : "",
+        spell.fetishLimited ? "fetish" : "",
+        spell.effectTag ?? "",
+    ].filter(Boolean);
+    return `<div class="sr3e-roll-spell">${tags.join(" · ")}</div>`;
+}
+
+function targetLabel(target?: Record<string, unknown>): string {
+    if (!target) return "";
+    if (target.kind === "attribute") {
+        const tnSource = target.targetAttribute ?? "attribute";
+        const resist = target.resistanceAttribute ?? tnSource;
+        return `TN: ${tnSource}; resists: ${resist}`;
+    }
+    if (target.kind === "objectResistance") return `object resistance TN ${target.targetNumber ?? "?"}`;
+    if (target.kind === "static") return `static TN ${target.targetNumber ?? "?"}`;
+    if (target.kind === "elemental") return `elemental TN ${target.targetNumber ?? "?"}`;
+    return String(target.kind ?? "");
 }
 
 function dieSpan(entry: DieEntry, index: number, rerollable: boolean, success: boolean): string {
@@ -118,6 +151,7 @@ export function renderAdvancedRollSummary(
     return `<div class="sr3e-roll-summary">
   ${actorLine(actor, roll.meta)}
   <div class="sr3e-roll-tn">${tnLine(roll.options)}</div>
+  ${spellLine(roll.options)}
   <div class="sr3e-roll-pool">${poolLine(roll.options)}</div>
   <div class="sr3e-roll-dice">${diceHtml}</div>
   ${successLine}

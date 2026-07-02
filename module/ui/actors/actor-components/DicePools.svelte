@@ -63,7 +63,7 @@ const attributePreview = storeManager.GetShallowStore<any>(actor, "shoppingAttri
 const isAwakened = $derived(
     $magic > 0 &&
     actor.items.some((item: any) => item.type === "magic") &&
-    !actor.system?.attributes?.magic?.isBurnedOut,
+    !actor.system?.attributes?.isBurnedOut,
 );
 
 onDestroy(() => {
@@ -115,6 +115,16 @@ function selectPool(key: string, available: number): void {
     }
 }
 
+function selectFocus(key: string, available: number): void {
+    if (composerState.selectedFocusKey === key) {
+        composerState.selectedFocusKey = null;
+        composerState.focusAvailable = 0;
+    } else {
+        composerState.selectedFocusKey = key;
+        composerState.focusAvailable = available;
+    }
+}
+
 function onPoolCardClick(e: MouseEvent, poolKey: string, title: string, available: number): void {
     if (composerState?.isOpen) {
         selectPool(poolKey, available);
@@ -132,6 +142,22 @@ function poolClass(key: string): string {
     if (!composerState?.isOpen) return "attribute-value button";
     if (composerState.selectedPoolKey === key) return "attribute-value button pool-active";
     return "attribute-value button pool-pick-me";
+}
+
+function focusClass(key: string): string {
+    if (!composerState?.isOpen) return "attribute-value";
+    const allowed = composerState.focusOptions.some(option => option.key === key);
+    if (!allowed) return "attribute-value";
+    if (composerState.selectedFocusKey === key) return "attribute-value button pool-active";
+    return "attribute-value button pool-pick-me";
+}
+
+function onFocusCardClick(focusPool: { id: string; available: number }): void {
+    if (!composerState?.isOpen) return;
+    const key = `focus:${focusPool.id}`;
+    const allowed = composerState.focusOptions.some(option => option.key === key);
+    if (!allowed) return;
+    selectFocus(key, focusPool.available);
 }
 
 $effect(() => {
@@ -205,8 +231,8 @@ $effect(() => {
         {/if}
 
         {#each focusPools as focusPool (focusPool.id)}
-            <StatCard label={focusPool.name}>
-                <span class="attribute-value button">{focusPool.available}</span>
+            <StatCard label={focusPool.name} onclick={composerState?.isOpen ? () => onFocusCardClick(focusPool) : undefined}>
+                <span class={focusClass(`focus:${focusPool.id}`)}>{focusPool.available}</span>
             </StatCard>
         {/each}
     </div>

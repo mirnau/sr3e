@@ -49,18 +49,27 @@ SR3E Condition Monitor overflow mechanics — not yet planned.
 
 Scope: requires new overflow track on actor (separate from the existing 10-box Physical), bleed-out timer tied to Combat Turn hooks, stabilization test flows. Non-trivial; plan separately.
 
-## [in-plan] First Aid item (Trauma Patch / Medkit)
-
-Special item that enables stabilization tests for characters in Physical overflow.
-
-**Trauma patch:** consumable item; applying it lets the patient attempt Body (4 + modifiers) test to stabilize bleed-out. One-shot use — decrement quantity on use.
-**Medkit / Biotech kit:** enables the Biotech TN 10 stabilization test (possibly already covered by skill roll, but item could gate the option or provide dice pool bonus).
-
-Scope: new item type or sub-type of existing consumable; activation triggers a stabilization roll flow; probably integrates with overflow rules above. Stub until overflow is specced.
-
-## [in-plan] Clickable dice in chat for karma re-rolls
+## [deferred] Clickable dice in chat for karma re-rolls
 
 After a roll, individual dice in the chat message should be clickable buttons. Pressing one re-rolls that specific die, deducts karma appropriately (incremental cost per re-roll), and updates the chat message in-place with the new result. Deferred: post-roll karma, separate UI surface from the composer.
+
+New implementations not working correctly; circle back later, not now.
+
+## [deferred] Spell sustaining modifiers
+
+Spell Drain currently supports the base Drain roll. Sustaining modifiers may add +2 to Drain Power for each currently sustained spell. Keep this as a reminder only; the system is for ease of use, not complete automation, and this may be handled manually if that stays cleaner.
+
+## [deferred] Elemental manipulation full defense and armor resolution
+
+Elemental Manipulations are treated like ranged attacks, can be dodged, and use half Impact armor for resistance. Current spell infrastructure covers the main casting/resistance spine; full ranged-defense and armor automation can wait unless it becomes ergonomically necessary.
+
+## [deferred] Direct spell damage application
+
+Combat spell staging is shown in the flow, but direct target health application should remain optional until spell damage track semantics are explicit enough to avoid false automation. Honorary/manual resolution may be preferable for many spells.
+
+## [deferred] Chat-card Drain prompt
+
+Drain currently opens as the follow-up composer after spellcasting and posts its own chat outcome. The stricter chat-driven variant would post a spellcast card with a `Roll Drain` button and consume that button when resolved. Keep this only if table use shows the automatic follow-up composer is not enough.
 
 ## [done] Open test defaulting rule
 Old code had this commented out mid-implementation. The rule modifies defaulting TN penalty into a pool subtraction (instead of TN add) for open tests. Source unclear — needs SR3E rulebook verification before implementing. Stub left in `defaultingRules.ts` with TODO. Do not guess. → Tracked in TECHSPEC-combat-architecture-decisions.md line 142.

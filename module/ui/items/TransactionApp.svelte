@@ -5,6 +5,7 @@ import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
 import LabeledDropdown from "./LabeledDropdown.svelte";
+import LabeledCurrencyInput from "./LabeledCurrencyInput.svelte";
 import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import LabeledBoolean from "./LabeledBoolean.svelte";
 import FuzzyFinder from "../common-components/FuzzyFinder.svelte";
@@ -15,43 +16,11 @@ const item = untrack(() => p.item);
 const system = item.system as Record<string, any>;
 
 let name = $state(item.name as string);
-let formattedAmount = $state(formatAmount(system.amount));
 let creditorId = $state<string>(system.creditorId ?? "");
 let creditorOptions = $state<{ value: string; label: string }[]>([]);
 
 function kvOptions(map: Record<string, string>) {
     return Object.entries(map).map(([value, token]) => ({ value, label: localize(token) }));
-}
-
-function formatAmount(num: number): string {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " ¥";
-}
-
-function onAmountInput(e: Event) {
-    const raw = (e.target as HTMLInputElement).value.replace(/[^\d]/g, "");
-    const parsed = parseInt(raw, 10) || 0;
-    (e.target as HTMLInputElement).value = formatAmount(parsed);
-}
-
-function onAmountBlur(e: Event) {
-    const raw = (e.target as HTMLInputElement).value.replace(/[^\d]/g, "");
-    const parsed = parseInt(raw, 10) || 0;
-    formattedAmount = formatAmount(parsed);
-    item.update({ "system.amount": parsed }, { render: false } as any);
-}
-
-function onAmountFocus(e: Event) {
-    (e.target as HTMLInputElement).select();
-}
-
-function onAmountKeydown(e: KeyboardEvent) {
-    const allowed = [8, 9, 13, 27, 46];
-    if (allowed.includes(e.keyCode)) return;
-    if (e.ctrlKey && [65, 67, 86, 88].includes(e.keyCode)) return;
-    if (e.keyCode >= 35 && e.keyCode <= 39) return;
-    if ((e.shiftKey || e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
-        e.preventDefault();
-    }
 }
 
 $effect(() => {
@@ -80,20 +49,7 @@ $effect(() => {
     <ItemSheetComponent>
         <h3>{localize(CONFIG.SR3E.TRANSACTION.transaction)}</h3>
         <div class="stat-grid single-column">
-            <div class="stat-card stat-field-card labeled-field-card">
-                <div class="stat-card-background"></div>
-                <div class="title-container">
-                    <h4 class="no-margin uppercase">{localize(CONFIG.SR3E.TRANSACTION.amount)}</h4>
-                </div>
-                <input
-                    type="text"
-                    value={formattedAmount}
-                    oninput={onAmountInput}
-                    onblur={onAmountBlur}
-                    onfocus={onAmountFocus}
-                    onkeydown={onAmountKeydown}
-                />
-            </div>
+            <LabeledCurrencyInput {item} key="amount" label={localize(CONFIG.SR3E.TRANSACTION.amount)} value={system.amount} path="system" />
             <LabeledDropdown    {item} key="type"            label={localize(CONFIG.SR3E.TRANSACTION.type)}            value={system.type}            path="system" options={kvOptions(CONFIG.SR3E.TRANSACTION_TYPES)} />
             <LabeledNumberInput {item} key="interestPerMonth" label={localize(CONFIG.SR3E.TRANSACTION.interestpermonth)} value={system.interestPerMonth} path="system" />
         </div>

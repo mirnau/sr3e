@@ -15,3 +15,4 @@ const force = $derived(Number(sys.force ?? 0));
 <h4 class="no-margin uppercase">
     {localize(CONFIG.SR3E.FOCUS.force)}: {force}
 </h4>
+<h4 class="no-margin uppercase">¥ {sys.commodity?.cost ?? 0}</h4>

@@ -11,9 +11,32 @@ export type ProcedureSetup = {
     openRoll?: boolean;
     openTest?: boolean;
     initialPoolKey?: string;
+    poolOptions?: PoolOption[];
+    forceControl?: ForceControl;
+    damageLevelControl?: DamageLevelControl;
+    extraOptions?: Record<string, unknown>;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;
     commitFn: (roll: unknown, actor: unknown) => Promise<void>;
+};
+
+export type ForceControl = {
+    value: number;
+    min: number;
+    max: number;
+};
+
+export type DamageLevelControl = {
+    value: string;
+    options: Array<{ value: string; label: string }>;
+};
+
+export type PoolOption = {
+    key: string;
+    label: string;
+    available: number;
+    source: "actor" | "item";
+    itemId?: string;
 };
 
 type SkillItem = { id: string; type: string; system: Record<string, unknown> };

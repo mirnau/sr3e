@@ -1,0 +1,96 @@
+@use "../../mixins.scss" as *;
+
+.rats-race-panel {
+   display: flex;
+   flex-direction: column;
+   gap: 0.5rem;
+   color: rgba(232, 243, 255, 0.88);
+}
+
+.rats-race-summary {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+   gap: 0.35rem;
+
+   div {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      padding: 0.45rem 0.55rem;
+      background: var(--highlight-color-primary);
+      @include clipped-corners(0.4rem, 0.4rem, 0.65rem, 0.4rem);
+
+      &::before {
+         content: "";
+         position: absolute;
+         inset: 1px;
+         z-index: 0;
+         background: var(--background-color);
+         box-shadow: inset 0 0 16px var(--highlight-color-primary);
+         pointer-events: none;
+         @include clipped-corners(0.35rem, 0.35rem, 0.6rem, 0.35rem);
+      }
+   }
+
+   span,
+   strong {
+      position: relative;
+      z-index: 1;
+   }
+
+   span {
+      color: rgba(0, 255, 200, 0.7);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+   }
+
+   strong {
+      font-size: 0.9rem;
+      text-align: right;
+   }
+}
+
+.rats-race-table {
+   width: 100%;
+   border-collapse: collapse;
+   font-size: 0.72rem;
+
+   th,
+   td {
+      padding: 0.3rem 0.4rem;
+      border-bottom: 1px solid rgba(0, 255, 200, 0.16);
+      text-align: right;
+      white-space: nowrap;
+   }
+
+   th:first-child,
+   td:first-child {
+      text-align: left;
+      white-space: normal;
+   }
+
+   th {
+      color: rgba(0, 255, 200, 0.72);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+   }
+
+   tbody tr {
+      cursor: default;
+
+      &:hover {
+         background: rgba(0, 255, 200, 0.08);
+      }
+   }
+}
+
+.negative {
+   color: #ff6b7a;
+}
+
+.rats-race-empty {
+   color: rgba(232, 243, 255, 0.35);
+   font-style: italic;
+   text-align: center !important;
+}

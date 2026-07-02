@@ -8,7 +8,7 @@ afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
 
 const actor = (id = "def1") => ({
     id, name: "Defender",
-    system: { attributes: { reaction: { value: 4, total: 4 } } },
+    system: { attributes: { reaction: { value: 4, total: 4 }, willpower: { value: 5, total: 5 } } },
     items: { contents: [], get: () => undefined },
 });
 
@@ -77,6 +77,14 @@ describe("handleContestStub", () => {
         expect(html).toContain('data-responder="standard"');
         expect(html).toContain('data-responder="full"');
     });
+
+    it("embeds spell resistance button in chat message HTML for spell stubs", async () => {
+        const create = mockGame(true);
+        await handleContestStub(makeStub("spell-resistance"));
+        const html = ((create.mock.calls[0] as Array<Record<string, unknown>>)[0] as Record<string, unknown>).content as string;
+        expect(html).toContain('data-responder="spell-resistance"');
+        expect(html).toContain("Resist Spell");
+    });
 });
 
 describe("handleDefenderChoice", () => {
@@ -129,5 +137,26 @@ describe("handleDefenderChoice", () => {
         await handleContestStub(makeStub("melee-defense"));
         handleDefenderChoice("c1", "standard");
         expect(openFn.mock.calls[0][0].kind).toBe("melee-defense");
+    });
+
+    it("opens composer with spell-resistance setup", async () => {
+        const openFn = vi.fn();
+        const { registerComposer } = await import("../procedures/composerService");
+        registerComposer(openFn);
+
+        (globalThis as Record<string, unknown>).game = {
+            actors: { get: (id: string) => id === "def1" ? actor() : undefined },
+            user: { id: "gm1", isGM: true },
+        };
+        (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
+
+        const stub = makeStub("spell-resistance");
+        stub.exportCtx.next.args = { force: 6 };
+        stub.defenseHint = { type: "attribute", key: "willpower", tnMod: 0, tnLabel: "Willpower" };
+        await handleContestStub(stub);
+        handleDefenderChoice("c1", "spell-resistance");
+        expect(openFn.mock.calls[0][0].kind).toBe("spell-resistance");
+        expect(openFn.mock.calls[0][0].rollState.dice).toBe(5);
+        expect(openFn.mock.calls[0][0].rollState.targetNumber).toBe(6);
     });
 });

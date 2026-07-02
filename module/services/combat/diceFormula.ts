@@ -4,6 +4,9 @@ import type { Modifier } from "./modifierList";
 export type RollState = {
     dice: number;
     poolDice: number;
+    focusDice?: number;
+    focusKey?: string;
+    focusLabel?: string;
     karmaDice: number;
     targetNumber: number;
     modifiers: Modifier[];
@@ -20,7 +23,7 @@ export function computeFinalTN(state: RollState, floor?: number): number {
 }
 
 function totalPool(state: RollState): number {
-    return state.dice + computePoolDice(state, state.poolDice) + state.karmaDice;
+    return state.dice + computePoolDice(state, state.poolDice) + (state.focusDice ?? 0) + state.karmaDice;
 }
 
 export function buildFormula(state: RollState): string {

@@ -1,5 +1,6 @@
 <script lang="ts">
 import { onDestroy, onMount, untrack } from "svelte";
+import { writable } from "svelte/store";
 import { sumMods, upsertMod, removeMod } from "../../services/combat/modifierList";
 import { difficultyLabel } from "../../services/combat/procedures/composerHelpers";
 import {
@@ -9,19 +10,23 @@ import {
     unregisterComposerForActor,
 } from "../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../services/combat/orchestration/executeProcedure";
+import { spendProcedureFocus, spendProcedurePool } from "../../services/combat/procedures/poolSpend";
 import type { IStoreManager } from "../../utilities/IStoreManager";
 import { StoreManager } from "../../utilities/StoreManager.svelte";
 import type { ProcedureSetup } from "../../services/combat/procedures/simpleSetups";
 import type { RollState, Modifier } from "../../services/combat/engine/types";
 
-const p = $props<{ actor: unknown; actorId: string }>();
-const actor = untrack(() => p.actor) as any;
-const actorId = untrack(() => p.actorId);
+const p = $props<{ actor?: unknown; actorId?: string }>();
+const hasActorProp = untrack(() => !!p.actor);
+const actor = untrack(() => p.actor) as any ?? { uuid: "sr3e-roll-composer-test", id: "sr3e-roll-composer-test", system: { karma: { karmaPool: { value: 0 } } } };
+const actorId = untrack(() => p.actorId ?? actor.id ?? "sr3e-roll-composer-test");
 
 const storeManager = StoreManager.Instance as IStoreManager;
-storeManager.Subscribe(actor);
+if (hasActorProp) storeManager.Subscribe(actor);
 
-const karmaPoolStore = storeManager.GetRWStore<number>(actor, "karma.karmaPool.value");
+const karmaPoolStore = hasActorProp
+    ? storeManager.GetRWStore<number>(actor, "karma.karmaPool.value")
+    : writable(0);
 
 const composerState = getComposerState(actorId);
 
@@ -29,8 +34,11 @@ let setup: ProcedureSetup | null = $state(null);
 let targetNumber = $state(4);
 let modifiers: Modifier[] = $state([]);
 let poolDice = $state(0);
+let focusDice = $state(0);
 let karmaDice = $state(0);
 let isDefaulting = $state(false);
+let selectedForce = $state(1);
+let selectedDamageLevel = $state("m");
 
 const modifiersTotal = $derived(sumMods(modifiers));
 const finalTN = $derived(Math.max(2, targetNumber + modifiersTotal));
@@ -43,8 +51,17 @@ const maxAffordable = $derived(
 );
 const karmaCap = $derived(Math.min(maxAffordable, setup?.rollState.dice ?? 0));
 const poolAvailable = $derived(composerState.poolAvailable);
+const focusAvailable = $derived(composerState.focusAvailable);
+const forceControl = $derived(setup?.forceControl ?? null);
+const forceMin = $derived(forceControl?.min ?? 1);
+const forceMax = $derived(forceControl?.max ?? 1);
+const damageLevelControl = $derived(setup?.damageLevelControl ?? null);
+const selectedFocusLabel = $derived(
+    composerState.focusOptions.find(option => option.key === composerState.selectedFocusKey)?.label ?? composerState.selectedFocusKey
+);
 
 $effect(() => { if (poolDice > poolAvailable) poolDice = Math.max(0, poolAvailable); });
+$effect(() => { if (focusDice > focusAvailable) focusDice = Math.max(0, focusAvailable); });
 $effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
 
 export function open(newSetup: ProcedureSetup): void {
@@ -52,9 +69,19 @@ export function open(newSetup: ProcedureSetup): void {
     targetNumber = newSetup.rollState.targetNumber;
     modifiers = [...(newSetup.rollState.modifiers ?? [])];
     poolDice = 0;
+    focusDice = 0;
     karmaDice = 0;
+    selectedForce = newSetup.forceControl?.value ?? 1;
+    selectedDamageLevel = newSetup.damageLevelControl?.value ?? "m";
     isDefaulting = false;
     composerState.isOpen = true;
+    composerState.selectedFocusKey = null;
+    composerState.focusAvailable = 0;
+    composerState.focusOptions = (newSetup.poolOptions ?? []).map(option => ({
+        key: option.key,
+        label: option.label,
+        available: option.available,
+    }));
 
     if (newSetup.initialPoolKey) {
         const pool = (actor.system as any)?.dicePools?.[newSetup.initialPoolKey];
@@ -70,43 +97,53 @@ function onReset(): void {
     targetNumber = 4;
     modifiers = [];
     poolDice = 0;
+    focusDice = 0;
     karmaDice = 0;
+    selectedForce = setup?.forceControl?.value ?? 1;
+    selectedDamageLevel = setup?.damageLevelControl?.value ?? "m";
     isDefaulting = false;
     composerState.selectedPoolKey = null;
     composerState.poolAvailable = 0;
+    composerState.selectedFocusKey = null;
+    composerState.focusAvailable = 0;
 }
 
 function onClose(): void {
     composerState.isOpen = false;
     composerState.selectedPoolKey = null;
+    composerState.selectedFocusKey = null;
     setup = null;
 }
 
 async function onConfirm(): Promise<void> {
     if (!setup || !canSubmit) return;
 
-    const currentSetup = setup;
+    const currentSetup = withSelectedSpellOptions(setup, selectedForce, selectedDamageLevel);
     const finalState: RollState = {
         dice: currentSetup.rollState.dice,
         poolDice,
+        focusDice,
+        focusKey: composerState.selectedFocusKey ?? undefined,
+        focusLabel: selectedFocusLabel ?? undefined,
         karmaDice,
         targetNumber,
         modifiers,
     };
 
     const poolKey = composerState.selectedPoolKey;
+    const focusKey = composerState.selectedFocusKey;
     const usedPool = poolDice;
+    const usedFocus = focusDice;
     const usedKarma = karmaCost;
 
     composerState.isOpen = false;
     composerState.selectedPoolKey = null;
+    composerState.selectedFocusKey = null;
     setup = null;
 
     const updates: Record<string, unknown> = {};
-    if (poolKey && usedPool > 0) {
-        const pool = actor.system?.dicePools?.[poolKey];
-        if (pool) updates[`system.dicePools.${poolKey}.spent`] = (pool.spent ?? 0) + usedPool;
-    }
+    Object.assign(updates, await spendProcedurePool(actor, poolKey, usedPool));
+    await spendProcedureFocus(actor, focusKey, usedFocus);
     if (usedKarma > 0) {
         updates["system.karma.karmaPool.value"] = Math.max(0, karmaBalance - usedKarma);
     }
@@ -118,6 +155,33 @@ async function onConfirm(): Promise<void> {
         ? Array.from((game.user as any)?.targets ?? [])
         : [];
     await executeProcedure(currentSetup, actor, { targets: targets as never[], rollState: finalState, poolKey: poolKey ?? undefined, advanced: true });
+}
+
+function withSelectedSpellOptions(base: ProcedureSetup, force: number, damageLevel: string): ProcedureSetup {
+    if (!base.extraOptions?.spell) return base;
+    const bounded = base.forceControl
+        ? Math.min(Math.max(force, base.forceControl.min), base.forceControl.max)
+        : force;
+    const level = base.damageLevelControl ? damageLevel : (base.extraOptions.spell as Record<string, unknown>).damageLevel;
+    return {
+        ...base,
+        forceControl: base.forceControl ? { ...base.forceControl, value: bounded } : undefined,
+        damageLevelControl: base.damageLevelControl ? { ...base.damageLevelControl, value: String(level) } : undefined,
+        extraOptions: {
+            ...base.extraOptions,
+            spell: { ...(base.extraOptions.spell as Record<string, unknown>), force: bounded, damageLevel: level },
+        },
+        exportFn: () => {
+            const ctx = base.exportFn();
+            return {
+                ...ctx,
+                next: {
+                    ...ctx.next,
+                    args: { ...ctx.next.args, force: bounded, damageLevel: level },
+                },
+            };
+        },
+    };
 }
 
 function addMod(): void {
@@ -132,7 +196,7 @@ onMount(() => registerComposerForActor(actorId, open));
 onDestroy(() => {
     unregisterComposerForActor(actorId);
     clearComposerState(actorId);
-    storeManager.Unsubscribe(actor);
+    if (hasActorProp) storeManager.Unsubscribe(actor);
 });
 </script>
 
@@ -164,6 +228,43 @@ onDestroy(() => {
         </div>
 
         {#if !setup.openTest}
+        {#if forceControl}
+        <!-- Spell Force -->
+        <div class="attribute-card composer-unit">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <h3 class="no-margin">Force</h3>
+                <p class="composer-unit-meta composer-unit-meta--center">Max: {forceMax}</p>
+                <div class="composer-counter">
+                    <button class="composer-hud-btn" onclick={() => selectedForce = Math.max(forceMin, selectedForce - 1)} aria-label="Decrease Force">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <h1 class="counter-value">{selectedForce}</h1>
+                    <button class="composer-hud-btn" onclick={() => selectedForce = Math.min(forceMax, selectedForce + 1)} aria-label="Increase Force">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {/if}
+
+        {#if damageLevelControl}
+        <!-- Spell Damage Level -->
+        <div class="attribute-card composer-unit">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <h3 class="no-margin">Damage Level</h3>
+                <select bind:value={selectedDamageLevel} class="roll-composer-type-select">
+                    {#each damageLevelControl.options as option (option.value)}
+                        <option value={option.value}>{option.label}</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
+        {/if}
+
         <!-- Target Number -->
         <div class="attribute-card composer-unit">
             <div class="attribute-card-shadow"></div>
@@ -237,12 +338,34 @@ onDestroy(() => {
                     </div>
                 </div>
             </div>
-        {:else if !isDefaulting}
+        {:else if !isDefaulting && !composerState.selectedFocusKey}
             <div class="attribute-card composer-unit composer-unit--hint">
                 <div class="attribute-card-shadow"></div>
                 <div class="attribute-card-outline">
                     <div class="attribute-card-displayarea"></div>
                     <p class="pool-hint-text">← click a pool to add dice</p>
+                </div>
+            </div>
+        {/if}
+
+        {#if !isDefaulting && composerState.selectedFocusKey}
+            <div class="attribute-card composer-unit composer-unit--pool-active">
+                <div class="attribute-card-shadow"></div>
+                <div class="attribute-card-outline">
+                    <div class="attribute-card-displayarea"></div>
+                    <div class="composer-unit-row">
+                        <h3 class="no-margin">{selectedFocusLabel}</h3>
+                        <span class="composer-unit-meta">Available: {focusAvailable}</span>
+                    </div>
+                    <div class="composer-counter composer-counter--compact">
+                        <button class="composer-hud-btn" onclick={() => focusDice = Math.max(0, focusDice - 1)}>
+                            <i class="fa-solid fa-minus"></i>
+                        </button>
+                        <h1 class="counter-value counter-value--sm">{focusDice}</h1>
+                        <button class="composer-hud-btn" onclick={() => focusDice = Math.min(focusAvailable, focusDice + 1)}>
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         {/if}
