@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { handleContestStub, handleDefenderChoice } from "./defenderFlow";
 import { _resetForTest, waitForResponse, startContest } from "../engine/contestCoordinator";
+import { claimPendingResponse, _resetForTest as _resetResponseInterceptor } from "../engine/responseInterceptor";
 import type { ContestStub } from "../engine/types";
 
-beforeEach(() => _resetForTest());
+beforeEach(() => { _resetForTest(); _resetResponseInterceptor(); });
 afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
 
 const actor = (id = "def1") => ({
@@ -208,5 +209,83 @@ describe("handleDefenderChoice", () => {
         await handleContestStub(makeStub("dodge"));
         handleDefenderChoice("c1", "dodge");
         expect(openFn).not.toHaveBeenCalled();
+    });
+
+    // Challenges (attribute-response / skill-response): Accept should open a
+    // composer pre-filled with the SAME attribute/skill the initiator used,
+    // wired to submit as this contest's response.
+    describe("challenge 'accept'", () => {
+        function setGame(defenderActor: Record<string, unknown>) {
+            (globalThis as Record<string, unknown>).game = {
+                actors: { get: (id: string) => id === "def1" ? defenderActor : undefined },
+                user: { id: "gm1", isGM: true },
+                users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
+            };
+            (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
+        }
+
+        it("pre-fills and opens the composer with the initiator's attribute", async () => {
+            const openFn = vi.fn();
+            const { registerComposer } = await import("../procedures/composerService");
+            registerComposer(openFn);
+            setGame(actor());
+
+            const stub = makeStub("attribute-response");
+            stub.exportCtx.next.args = { attributeKey: "reaction" };
+            await handleContestStub(stub);
+            handleDefenderChoice("c1", "accept");
+
+            expect(openFn).toHaveBeenCalledOnce();
+            const setup = openFn.mock.calls[0][0];
+            expect(setup.kind).toBe("attribute");
+            expect(setup.rollState.dice).toBe(4); // defender's own reaction total
+            expect(setup.selfPublish).toBe(false);
+            expect(setup.defenseHint).toBeNull();
+
+            // Auto-opening claims the pending response — it's already handled.
+            expect(claimPendingResponse("def1")).toBeNull();
+        });
+
+        it("pre-fills with the SAME base skill by name, resolved against the defender's own skill item id", async () => {
+            const openFn = vi.fn();
+            const { registerComposer } = await import("../procedures/composerService");
+            registerComposer(openFn);
+            const defenderWithSkill = {
+                ...actor(),
+                items: {
+                    contents: [{ id: "def-firearms", name: "Firearms", type: "skill", system: { skillType: "active", activeSkill: { value: 5, linkedAttribute: "agility", specializations: [] } } }],
+                    get: () => undefined,
+                },
+            };
+            setGame(defenderWithSkill);
+
+            const stub = makeStub("skill-response");
+            stub.exportCtx.next.args = { skillId: "att-firearms", skillName: "Firearms" };
+            await handleContestStub(stub);
+            handleDefenderChoice("c1", "accept");
+
+            expect(openFn).toHaveBeenCalledOnce();
+            const setup = openFn.mock.calls[0][0];
+            expect(setup.kind).toBe("skill");
+            expect(setup.rollState.dice).toBe(5);
+            expect(claimPendingResponse("def1")).toBeNull();
+        });
+
+        it("falls back to a pending manual response when the defender has no matching skill", async () => {
+            const openFn = vi.fn();
+            const { registerComposer } = await import("../procedures/composerService");
+            registerComposer(openFn);
+            setGame(actor()); // no skill items at all
+
+            const stub = makeStub("skill-response");
+            stub.exportCtx.next.args = { skillId: "att-firearms", skillName: "Firearms" };
+            await handleContestStub(stub);
+            handleDefenderChoice("c1", "accept");
+
+            expect(openFn).not.toHaveBeenCalled();
+            // Left registered so the player can still respond manually via
+            // their own sheet (AttributeCard/SkillCard's claimPendingResponse).
+            expect(claimPendingResponse("def1")).toBe("c1");
+        });
     });
 });

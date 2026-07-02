@@ -89,14 +89,14 @@ export function buildSkillSetup(
 
     const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: tn, modifiers: mods };
 
-    const skillTitle = title ?? (resolved?.skill.system as Record<string, unknown>)?.name as string ?? "Skill Roll";
+    const baseSkillName = resolved?.skill.name ?? undefined;
+    const skillTitle = title ?? baseSkillName ?? "Skill Roll";
     return {
         kind: "skill",
         title: skillTitle,
         rollState,
         lockPriority: "simple",
         selfPublish: true,
-        openRoll: true,
         defenseHint: { type: "skill", key: skillId, tnMod: 0, tnLabel: "Skill" },
         exportFn: () => ({
             familyKey: "skill",
@@ -106,7 +106,11 @@ export function buildSkillSetup(
             damage: null,
             tnBase: tn,
             tnMods: [],
-            next: { kind: "skill-response", ui: { label: "Respond" }, args: { skillId } },
+            // skillName carries the BASE skill's own display name (not the
+            // specialization-qualified title) — a challenge's defender is a
+            // different actor with their own skill item ids, so the only way
+            // to find "the same skill" on their sheet is by name.
+            next: { kind: "skill-response", ui: { label: "Respond" }, args: { skillId, skillName: baseSkillName } },
         }),
         commitFn: async () => {},
     };
@@ -130,7 +134,6 @@ export function buildAttributeSetup(
         rollState,
         lockPriority: "simple",
         selfPublish: true,
-        openRoll: true,
         defenseHint: { type: "attribute", key: attributeKey, tnMod: 0, tnLabel: attributeKey },
         exportFn: () => ({
             familyKey: "attribute",

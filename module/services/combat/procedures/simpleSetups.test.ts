@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { buildSkillSetup, buildAttributeSetup } from "./simpleSetups";
 
-const skill = (id: string, value: number, specs: Array<{ value?: number; name?: string }> = [], attr = "agility") => ({
-    id, type: "skill",
+const skill = (id: string, value: number, specs: Array<{ value?: number; name?: string }> = [], attr = "agility", name?: string) => ({
+    id, name, type: "skill",
     system: { skillType: "active", activeSkill: { value, linkedAttribute: attr, specializations: specs } },
 });
 
@@ -46,6 +46,28 @@ describe("buildSkillSetup", () => {
         const s = buildSkillSetup(actor([skill("s1", 4)]), "s1");
         await expect(s.commitFn(null, null)).resolves.toBeUndefined();
     });
+
+    // Challenges rely on a real TN roll (compare successes vs TN) — an open
+    // roll (no TN) can't be net-successed against an opponent's roll.
+    it("is a TN roll, not an open roll — required for challenge contests to count successes", () => {
+        const s = buildSkillSetup(actor([skill("s1", 4)]), "s1");
+        expect(s.openRoll).toBeUndefined();
+        expect(s.rollState.targetNumber).toBeGreaterThan(0);
+    });
+
+    // The defender in a skill challenge is a different actor with different
+    // skill item ids — only the base skill's own name survives across actors.
+    it("carries the base skill's name in next.args, not the specialization-qualified title", () => {
+        const s = buildSkillSetup(actor([skill("s1", 4, [{ name: "Pistols", value: 6 }], "agility", "Firearms")]), "s1", 0, "Firearms (Pistols)");
+        const ctx = s.exportFn();
+        expect(ctx.next.args.skillId).toBe("s1");
+        expect(ctx.next.args.skillName).toBe("Firearms");
+    });
+
+    it("sets a skill defenseHint so a target selection triggers a contest", () => {
+        const s = buildSkillSetup(actor([skill("s1", 4)]), "s1");
+        expect(s.defenseHint).toEqual({ type: "skill", key: "s1", tnMod: 0, tnLabel: "Skill" });
+    });
 });
 
 describe("buildAttributeSetup", () => {
@@ -62,5 +84,15 @@ describe("buildAttributeSetup", () => {
     });
     it("lockPriority simple", () => {
         expect(buildAttributeSetup(actor([]), "reaction").lockPriority).toBe("simple");
+    });
+
+    it("is a TN roll, not an open roll — required for challenge contests to count successes", () => {
+        expect(buildAttributeSetup(actor([]), "strength").openRoll).toBeUndefined();
+    });
+
+    it("sets an attribute defenseHint so a target selection triggers a contest", () => {
+        const s = buildAttributeSetup(actor([]), "strength");
+        expect(s.defenseHint).toEqual({ type: "attribute", key: "strength", tnMod: 0, tnLabel: "strength" });
+        expect(s.exportFn().next).toEqual({ kind: "attribute-response", ui: { label: "Respond" }, args: { attributeKey: "strength" } });
     });
 });

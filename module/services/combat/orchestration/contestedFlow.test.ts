@@ -176,4 +176,32 @@ describe("executeContestedFlow", () => {
         await runPromise;
         expect(resistFn).toHaveBeenCalledOnce();
     });
+
+    // A challenge (attribute-response / skill-response, e.g. two characters
+    // competing at the same skill) never has a damage packet — most
+    // successes just wins, no resistance/damage step follows regardless of
+    // how decisively either side wins.
+    it("challenge roll (damage: null) never triggers promptResistanceFn, even on a decisive win", async () => {
+        const resistFn = vi.fn().mockResolvedValue(undefined);
+        const ctx = exportCtx();
+        ctx.damage = null;
+        ctx.next = { kind: "attribute-response", ui: {}, args: { attributeKey: "strength" } };
+
+        const s: ProcedureSetup = { ...setup(), exportFn: () => ctx };
+        const target = makeTarget();
+
+        const runPromise = executeContestedFlow(s, s.rollState, roll, actor(), [target], { promptResistanceFn: resistFn });
+        await new Promise(r => setTimeout(r, 0));
+
+        const emitCalls = ((game as Record<string, unknown>).socket as { emit: ReturnType<typeof vi.fn> }).emit.mock.calls;
+        if (emitCalls.length > 0) {
+            const { stub } = emitCalls[0][1] as { stub: { contestId: string } };
+            deliverResponse(stub.contestId, { terms: [{ results: [{ result: 1, active: true }] }], options: { targetNumber: 4 }, meta: { flavor: "", procedureKind: "attribute-response" } });
+        }
+        await new Promise(r => setTimeout(r, 0));
+
+        completeContest();
+        await runPromise;
+        expect(resistFn).not.toHaveBeenCalled();
+    });
 });

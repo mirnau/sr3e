@@ -1,9 +1,10 @@
-import { registerContestStub, expireContest, getContest, resolveControllingUser, canCurrentUserActFor } from "../engine/contestCoordinator";
+import { registerContestStub, expireContest, getContest, resolveControllingUser, canCurrentUserActFor, submitContestResponse } from "../engine/contestCoordinator";
 import { buildDodgeSetup, buildMeleeDefenseSetup, buildSpellResistanceSetup } from "../procedures/defenseSetups";
+import { buildAttributeSetup, buildSkillSetup, type ProcedureSetup } from "../procedures/simpleSetups";
 import { openComposer } from "../procedures/composerService";
-import { registerPendingResponse } from "../engine/responseInterceptor";
+import { registerPendingResponse, claimPendingResponse } from "../engine/responseInterceptor";
 import { renderDefenderPrompt } from "../../../ui/combat/chat/renderDefenderPrompt";
-import type { ContestStub, DefenseHint } from "../engine/types";
+import type { ContestStub, DefenseHint, RollSnapshot } from "../engine/types";
 import type { MeleeDefenseBasis, MeleeDefenseMode } from "../procedures/defenseSetups";
 
 type AttributeMap = Record<string, { value?: number; total?: number }>;
@@ -38,6 +39,59 @@ function resolveMeleeBasis(actor: ActorLike, hint: DefenseHint): MeleeDefenseBas
 
     const dice = (skill?.system as { value?: number } | undefined)?.value ?? 0;
     return { type: "skill", key: hint.key, name: hint.tnLabel, dice, id: skill?.id };
+}
+
+// A challenge's defender is a different actor with different skill item
+// ids, so the initiator's skillId won't resolve on their sheet — fall back
+// to matching by the base skill's own name (carried in next.args.skillName).
+function resolveSkillIdOnActor(actor: ActorLike, skillId: string | undefined, skillName: string | undefined): string | undefined {
+    const items = (actor.items?.contents ?? []) as Array<{ id: string; type: string; name?: string }>;
+    const byId = skillId ? items.find(i => i.type === "skill" && i.id === skillId) : undefined;
+    if (byId) return byId.id;
+    return skillName ? items.find(i => i.type === "skill" && i.name === skillName)?.id : undefined;
+}
+
+// Rewires a setup built for INITIATING a roll into one that submits its
+// result as this contest's response instead — same override AttributeCard/
+// SkillCard apply client-side when a player manually claims a pending
+// response, reused here so "Accept" can open the composer automatically.
+function asResponseSetup(setup: ProcedureSetup, contestId: string): ProcedureSetup {
+    return {
+        ...setup,
+        selfPublish: false,
+        defenseHint: null,
+        commitFn: async (roll: unknown) => {
+            submitContestResponse(contestId, roll as RollSnapshot);
+        },
+    };
+}
+
+// Attribute and skill challenges (next.kind "attribute-response" /
+// "skill-response") pre-fill the defender's composer with the SAME
+// attribute/skill the initiator used, opened immediately on Accept — the
+// player is still free to close it and roll something else entirely via
+// their own sheet instead (registerPendingResponse stays live for exactly
+// that override path; see AttributeCard.svelte/SkillCard.svelte).
+function tryOpenPrefilledResponseComposer(record: NonNullable<ReturnType<typeof getContest>>, defender: ActorLike, contestId: string): boolean {
+    const next = record.exportCtx.next;
+
+    if (next.kind === "attribute-response") {
+        const attributeKey = next.args.attributeKey as string | undefined;
+        if (!attributeKey) return false;
+        const setup = buildAttributeSetup(defender as never, attributeKey);
+        openComposer(asResponseSetup(setup, contestId) as never, defender);
+        return true;
+    }
+
+    if (next.kind === "skill-response") {
+        const skillId = resolveSkillIdOnActor(defender, next.args.skillId as string | undefined, next.args.skillName as string | undefined);
+        if (!skillId) return false;
+        const setup = buildSkillSetup(defender as never, skillId);
+        openComposer(asResponseSetup(setup, contestId) as never, defender);
+        return true;
+    }
+
+    return false;
 }
 
 function currentUserIsGM(): boolean {
@@ -120,7 +174,11 @@ export function handleDefenderChoice(contestId: string, key: string | null | und
     const defender = record.target as unknown as ActorLike;
 
     if (key === "accept") {
-        registerPendingResponse((defender as unknown as { id: string }).id, contestId);
+        const defenderId = (defender as unknown as { id: string }).id;
+        registerPendingResponse(defenderId, contestId);
+        if (tryOpenPrefilledResponseComposer(record, defender, contestId)) {
+            claimPendingResponse(defenderId);
+        }
         ensureSheetOpen(defender);
         return;
     }
