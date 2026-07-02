@@ -20,10 +20,10 @@ describe("buildSkillSetup", () => {
         const s = buildSkillSetup(a, "s1");
         expect(s.rollState.dice).toBe(4);
     });
-    it("TN from linked attribute", () => {
-        const a = actor([skill("s1", 4, [], "reaction")]);
+    it("TN is a flat 4, regardless of the linked attribute's rating — symmetric for challenges", () => {
+        const a = actor([skill("s1", 4, [], "reaction")], { reaction: { value: 6, total: 6 } });
         const s = buildSkillSetup(a, "s1");
-        expect(s.rollState.targetNumber).toBe(4); // reaction total=4
+        expect(s.rollState.targetNumber).toBe(4);
     });
     it("lockPriority is simple", () => {
         expect(buildSkillSetup(actor([skill("s1", 4)]), "s1").lockPriority).toBe("simple");

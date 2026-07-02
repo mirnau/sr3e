@@ -64,12 +64,6 @@ type ActorWithItems = {
 
 type AttributeMap = Record<string, { value?: number; total?: number }>;
 
-function attributeTN(actor: ActorWithItems, attrKey: string): number {
-    const attrs = (actor.system as { attributes?: AttributeMap }).attributes ?? {};
-    const attr = attrs[attrKey];
-    return attr?.total ?? attr?.value ?? 4;
-}
-
 export function buildSkillSetup(
     actor: ActorWithItems,
     skillId: string,
@@ -80,7 +74,12 @@ export function buildSkillSetup(
     const resolved = resolveLinkedSkill(actor, linkedSkillId);
 
     const dice = resolved?.dice ?? 0;
-    const tn = resolved?.linkedAttribute ? attributeTN(actor, resolved.linkedAttribute) : 4;
+    // Flat, symmetric TN — matches buildAttributeSetup. A skill challenge
+    // shouldn't be measured against each side's own linked-attribute
+    // rating, since the two sides would then be rolling against different
+    // TNs entirely; this is also used for plain (non-challenge) skill
+    // clicks, which have no separate code path to special-case.
+    const tn = 4;
 
     const mods: Modifier[] = [];
     if (specIndex != null && resolved && !resolved.specHasOwnValue) {
