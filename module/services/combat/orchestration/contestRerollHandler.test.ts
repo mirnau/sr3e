@@ -214,4 +214,19 @@ describe("rerenderContestMessage", () => {
         expect(html).toContain('data-side="initiator"');
         expect(html).toContain('data-side="target"');
     });
+
+    // Regression: a defender reroll that pulls ahead of the initiator must
+    // render as a defender WIN, not a tie — computeNetSuccesses clamps at
+    // zero, which previously made every defender win look identical to a
+    // real tie once passed through to the renderer.
+    it("shows the defender as winner, with the real margin, after a reroll that overtakes the initiator", () => {
+        const afterReroll = flag({
+            initiator: side({ actorId: "initiator1", actorName: "Attacker", results: [{ result: 6 }, { result: 2 }] }), // 1 success
+            target: side({ actorId: "target1", actorName: "Defender", results: [{ result: 6 }, { result: 5 }, { result: 4 }] }), // 3 successes
+        });
+
+        const html = rerenderContestMessage(afterReroll);
+        expect(html).toContain("Defender wins — 2 net successes");
+        expect(html).not.toContain("Tie");
+    });
 });

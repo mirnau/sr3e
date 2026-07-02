@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
     waitForResponse, deliverResponse, expireContest,
-    countSuccesses, computeNetSuccesses, submitContestResponse, _resetForTest,
+    countSuccesses, computeNetSuccesses, computeSignedNetSuccesses, submitContestResponse, _resetForTest,
     canCurrentUserActFor, isActorLockedForCurrentUser,
 } from "./contestCoordinator";
 import type { RollSnapshot } from "./types";
@@ -25,6 +25,12 @@ describe("countSuccesses", () => {
 describe("computeNetSuccesses", () => {
     it("attacker wins by 2", () => expect(computeNetSuccesses(roll([5, 6, 6, 3], 5), roll([5, 2], 5))).toBe(2));
     it("clamped at zero when defender wins", () => expect(computeNetSuccesses(roll([3], 5), roll([5, 6], 5))).toBe(0));
+});
+
+describe("computeSignedNetSuccesses", () => {
+    it("positive when the initiator wins", () => expect(computeSignedNetSuccesses(roll([5, 6, 6, 3], 5), roll([5, 2], 5))).toBe(2));
+    it("negative when the target wins, by the actual margin (not clamped)", () => expect(computeSignedNetSuccesses(roll([3], 5), roll([5, 6], 5))).toBe(-2));
+    it("zero on a genuine tie", () => expect(computeSignedNetSuccesses(roll([5, 6], 5), roll([6, 5], 5))).toBe(0));
 });
 
 describe("waitForResponse / deliverResponse", () => {

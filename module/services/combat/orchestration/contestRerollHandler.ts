@@ -1,4 +1,4 @@
-import { computeNetSuccesses, canCurrentUserActFor, signalContestBothDone } from "../engine/contestCoordinator";
+import { computeNetSuccesses, computeSignedNetSuccesses, canCurrentUserActFor, signalContestBothDone } from "../engine/contestCoordinator";
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
 import { spellDamageStaging, renderSpellDamageStaging } from "../../spells/spellCombat";
 import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
@@ -68,7 +68,10 @@ export function rerenderContestMessage(flag: ContestOutcomeFlag): string {
         targetResults: flag.target.results,
         initiatorDone: flag.initiator.done,
         targetDone: flag.target.done,
-        netSuccesses: computeNetSuccesses(initiatorRoll, targetRoll),
+        // Signed for display — whoever actually won gets reported as the
+        // winner, not clamped into looking like a tie. computeFinalNetSuccesses
+        // (clamped) is still what gates damage, unaffected by this.
+        netSuccesses: computeSignedNetSuccesses(initiatorRoll, targetRoll),
         extraHtml: renderSpellDamageStaging(staging),
     });
 }

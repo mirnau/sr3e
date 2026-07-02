@@ -190,8 +190,19 @@ export function countSuccesses(rollData: RollSnapshot): number {
         .length;
 }
 
+// Clamped at zero: a defender win of ANY margin means "no damage", full
+// stop — this is what gates resistance/damage in contestedFlow.ts and must
+// never go negative there.
 export function computeNetSuccesses(initiatorRoll: RollSnapshot, targetRoll: RollSnapshot): number {
     return Math.max(0, countSuccesses(initiatorRoll) - countSuccesses(targetRoll));
+}
+
+// Unclamped: positive when the initiator wins, negative when the target
+// wins, by however many successes. Display-only — winnerLine uses this to
+// report "X wins — N net successes" for whichever side actually won,
+// instead of every target win reading as a tie.
+export function computeSignedNetSuccesses(initiatorRoll: RollSnapshot, targetRoll: RollSnapshot): number {
+    return countSuccesses(initiatorRoll) - countSuccesses(targetRoll);
 }
 
 type FoundryUser = { id: string; active?: boolean; isGM?: boolean; character?: { id: string } };

@@ -1,4 +1,4 @@
-import { startContest, waitForResponse, waitForBothDone, computeNetSuccesses } from "../engine/contestCoordinator";
+import { startContest, waitForResponse, waitForBothDone, computeSignedNetSuccesses } from "../engine/contestCoordinator";
 import { handleContestStub } from "./defenderFlow";
 import { serializeProcedure } from "../engine/procedureSerializer";
 import { buildRollSnapshot } from "./rollSnapshot";
@@ -67,7 +67,9 @@ export async function executeContestedFlow(
             continue;
         }
 
-        const netSuccesses = computeNetSuccesses(initiatorRoll, defenderRoll);
+        // Signed for display (winnerLine reports whoever actually won); the
+        // damage gate below uses the clamped, final-negotiated value instead.
+        const netSuccesses = computeSignedNetSuccesses(initiatorRoll, defenderRoll);
 
         const initiatorName = (actor as unknown as { name?: string }).name ?? "Attacker";
         const targetName = (targetActor as unknown as { name?: string }).name ?? "Defender";
