@@ -35,7 +35,7 @@ onDestroy(() => {
 const isFavoriteStore = storeManager.GetFlagStore<boolean>(item, "isFavorite", false);
 const isEquippedStore = storeManager.GetFlagStore<boolean>(item, "isEquipped", false);
 const linkedSkillIdStore = storeManager.GetRWStore<string>(item, "linkedSkillId");
-const nameStore = storeManager.GetRWStore<string>(item, "name");
+const nameStore = storeManager.GetRWStore<string>(item, "name", true);
 
 const isFirearm = $derived(item.type === "weapon" && FIREARM_MODES.has(sys.mode ?? ""));
 const isSpell = $derived(item.type === "spell");

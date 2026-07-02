@@ -1,6 +1,7 @@
 import { SR3ERoll } from "./SR3ERoll";
 import { buildResistance, resolveResistance } from "../resistanceEngine";
 import { resolveControllingUser } from "../engine/contestCoordinator";
+import { applyDamageBoxes, getTrackValue } from "../damageApplication";
 import { renderResistancePrompt } from "../../../ui/combat/chat/renderResistancePrompt";
 import { renderResistanceOutcome } from "../../../ui/combat/chat/renderResistanceOutcome";
 import type { ResistancePrep } from "../engine/types";
@@ -17,55 +18,9 @@ type Defender = {
     update?: (data: Record<string, unknown>) => Promise<unknown>;
 };
 
-type HealthSystem = {
-    stun?: { value?: number };
-    physical?: { value?: number };
-    overflow?: { value?: number };
-};
-
-function getTrackValue(defender: Defender, track: "stun" | "physical"): number {
-    const h = (defender.system as { health?: HealthSystem }).health ?? {};
-    return h[track]?.value ?? 0;
-}
-
-function getOverflow(defender: Defender): number {
-    const h = (defender.system as { health?: HealthSystem }).health ?? {};
-    return h.overflow?.value ?? 0;
-}
-
 function bodyRating(defender: Defender): number {
     const attrs = (defender.system as { attributes?: Record<string, { value?: number; total?: number }> }).attributes ?? {};
     return attrs.body?.total ?? attrs.body?.value ?? 1;
-}
-
-async function applyDamageBoxes(
-    defender: Defender,
-    track: "stun" | "physical",
-    boxes: number,
-): Promise<void> {
-    if (boxes <= 0) return;
-
-    const current = getTrackValue(defender, track);
-    const newValue = Math.min(current + boxes, TRACK_MAX);
-    const overflow = Math.max(0, current + boxes - TRACK_MAX);
-
-    const updates: Record<string, unknown> = { [`system.health.${track}.value`]: newValue };
-
-    if (overflow > 0) {
-        if (track === "stun") {
-            const physCurrent = getTrackValue(defender, "physical");
-            const newPhys = Math.min(physCurrent + overflow, TRACK_MAX);
-            const physOverflow = Math.max(0, physCurrent + overflow - TRACK_MAX);
-            updates["system.health.physical.value"] = newPhys;
-            if (physOverflow > 0) {
-                updates["system.health.overflow.value"] = getOverflow(defender) + physOverflow;
-            }
-        } else {
-            updates["system.health.overflow.value"] = getOverflow(defender) + overflow;
-        }
-    }
-
-    await defender.update?.(updates);
 }
 
 export async function executeResistanceRoll(
@@ -103,7 +58,7 @@ export async function executeResistanceRoll(
         : 0;
 
     if (outcome.applied && outcome.boxes > 0) {
-        await applyDamageBoxes(defender, track, outcome.boxes);
+        await applyDamageBoxes(defender, defender.id ?? "", track, outcome.boxes);
     }
 
     if (typeof Hooks !== "undefined") {

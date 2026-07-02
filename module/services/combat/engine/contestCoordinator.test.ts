@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
     waitForResponse, deliverResponse, expireContest,
-    countSuccesses, computeNetSuccesses, _resetForTest,
+    countSuccesses, computeNetSuccesses, submitContestResponse, _resetForTest,
 } from "./contestCoordinator";
 import type { RollSnapshot } from "./types";
 
@@ -40,6 +40,31 @@ describe("waitForResponse / deliverResponse", () => {
         await p;
         // second deliver does not reject
         expect(() => deliverResponse("c2", roll([5], 4))).not.toThrow();
+    });
+});
+
+describe("submitContestResponse", () => {
+    afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
+
+    it("resolves the local pending promise (same-client case)", async () => {
+        const promise = waitForResponse("c3");
+        const r = roll([6], 4);
+        submitContestResponse("c3", r);
+        expect(await promise).toBe(r);
+    });
+
+    it("relays the response over the socket for other clients", () => {
+        const emit = vi.fn();
+        (globalThis as Record<string, unknown>).game = { socket: { emit } };
+        const r = roll([6], 4);
+
+        submitContestResponse("c4", r);
+
+        expect(emit).toHaveBeenCalledWith("system.sr3e", { type: "contestResponse", contestId: "c4", roll: r });
+    });
+
+    it("does not throw when no socket is available", () => {
+        expect(() => submitContestResponse("c5", roll([6], 4))).not.toThrow();
     });
 });
 

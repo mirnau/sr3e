@@ -1,4 +1,4 @@
-import { renderRollSummary } from "./renderRollSummary";
+import { renderAdvancedRollSummary, extractDieResults, type DieEntry } from "./renderRollSummary";
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 
 export type ContestRenderCtx = {
@@ -7,9 +7,18 @@ export type ContestRenderCtx = {
     weaponName: string;
     initiatorRoll: RollSnapshot;
     targetRoll: RollSnapshot;
+    // Pass the original DieEntry[] (bought/rerolled flags intact) when re-rendering
+    // after a buy/reroll — the roll snapshots above are reconstructed synthetically
+    // for success-counting only and don't carry those flags through their terms.
+    initiatorResults?: DieEntry[];
+    targetResults?: DieEntry[];
     netSuccesses: number;
     extraHtml?: string;
 };
+
+function renderSide(actor: { name: string }, roll: RollSnapshot, results?: DieEntry[]): string {
+    return renderAdvancedRollSummary(actor, roll, results ?? extractDieResults(roll.terms));
+}
 
 function winnerLine(ctx: ContestRenderCtx): string {
     if (ctx.netSuccesses > 0) {
@@ -27,8 +36,8 @@ export function renderContestOutcome(ctx: ContestRenderCtx): string {
         : `${ctx.initiator.name} vs ${ctx.target.name}`;
     return `<div class="sr3e-contest-outcome">
   <div class="sr3e-contest-header">${header}</div>
-  ${renderRollSummary(ctx.initiator, ctx.initiatorRoll)}
-  ${renderRollSummary(ctx.target, ctx.targetRoll)}
+  <div class="sr3e-contest-side" data-side="initiator">${renderSide(ctx.initiator, ctx.initiatorRoll, ctx.initiatorResults)}</div>
+  <div class="sr3e-contest-side" data-side="target">${renderSide(ctx.target, ctx.targetRoll, ctx.targetResults)}</div>
   ${winnerLine(ctx)}
   ${ctx.extraHtml ?? ""}
 </div>`;

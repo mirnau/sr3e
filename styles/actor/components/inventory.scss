@@ -81,6 +81,35 @@
 // Inventory / filter container box
 // =========================================================
 
+.grimoire-component {
+   --highlight-color-primary: var(--accent-color-tertiary);
+   --text-color: var(--health-text-color);
+
+   .grimoire-category::before,
+   .grimoire-spell-card-container .asset-background-layer,
+   .toggle-card .stat-card-background {
+      background: var(--health-background-color);
+   }
+
+   .grimoire-spell-card-container {
+      .asset-card h3,
+      .asset-card h4 {
+         color: var(--accent-color-tertiary);
+         text-shadow: 0 0 6px var(--accent-color-tertiary);
+      }
+
+      .image-mask {
+         background: var(--accent-color-tertiary);
+         filter: drop-shadow(0 0 2px var(--accent-color-tertiary));
+      }
+
+      .sr3e-toolbar-button {
+         color: var(--accent-color-tertiary);
+         text-shadow: 0 0 6px var(--accent-color-tertiary);
+      }
+   }
+}
+
 .asset-category-container {
    display: flex;
    flex-direction: row;

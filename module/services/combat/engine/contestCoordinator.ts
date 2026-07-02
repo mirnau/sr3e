@@ -113,6 +113,19 @@ export function deliverResponse(contestId: string, rollData: RollSnapshot): void
     }
 }
 
+// Defender-side roll submission: resolves the response locally (covers the
+// same-client case, e.g. a GM controlling both sides) AND relays it over the
+// socket so the initiator's client — which holds the actual pending promise
+// when attacker and defender are on separate clients — receives it too.
+export function submitContestResponse(contestId: string, rollData: RollSnapshot): void {
+    deliverResponse(contestId, rollData);
+
+    if (typeof game !== "undefined" && (game as unknown as Record<string, unknown>).socket) {
+        ((game as unknown as Record<string, unknown>).socket as { emit: (event: string, data: unknown) => void })
+            .emit("system.sr3e", { type: "contestResponse", contestId, roll: rollData });
+    }
+}
+
 export function expireContest(contestId: string): void {
     const record = activeContests.get(contestId);
     if (record) record.phase = "cancelled";

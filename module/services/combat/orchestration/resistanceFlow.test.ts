@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { executeResistanceRoll } from "./resistanceFlow";
+import { executeResistanceRoll, promptResistance } from "./resistanceFlow";
 import type { ResistancePrep } from "../engine/types";
 
 const prep = (tnBase = 4): ResistancePrep => ({
@@ -59,5 +59,27 @@ describe("executeResistanceRoll", () => {
         if (call && call["system.health.physical.value"] === 10) {
             expect(call["system.health.overflow.value"]).toBeGreaterThan(0);
         }
+    });
+});
+
+describe("promptResistance", () => {
+    afterEach(() => { delete (globalThis as Record<string, unknown>).game; delete (globalThis as Record<string, unknown>).ChatMessage; });
+
+    it("whispers the controlling player", async () => {
+        const create = vi.fn().mockResolvedValue(undefined);
+        (globalThis as Record<string, unknown>).game = {
+            socket: { emit: vi.fn() },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+        };
+        (globalThis as Record<string, unknown>).ChatMessage = { create };
+
+        const d = { ...defender(4, 0), id: "def1", name: "Defender", ownership: { player1: 3 } };
+        await promptResistance(prep(6), d as never);
+
+        const [call] = create.mock.calls;
+        expect((call[0] as Record<string, unknown>).whisper).toEqual(["player1"]);
     });
 });

@@ -66,7 +66,7 @@ function onManipulationSubtypeChange(val: string) {
 }
 </script>
 
-<ItemSheetWrapper csslayout="double">
+<ItemSheetWrapper csslayout="triple-flow">
     <ItemSheetComponent>
         <Image entity={item} />
         <div class="large-input-wrapper">
@@ -97,9 +97,6 @@ function onManipulationSubtypeChange(val: string) {
         <LabeledDropdown {item} key="attribute" label={localize(CONFIG.SR3E.SPELL.targetAttribute)} value={system.targeting?.attribute ?? ""} path="system.targeting" options={kvOptions(CONFIG.SR3E.ATTRIBUTES)} disabled={!usesGenericTargeting || targetingKind !== "attribute"} />
         <LabeledNumberInput {item} key="staticTargetNumber" label={localize(CONFIG.SR3E.SPELL.staticTargetNumber)} value={system.targeting?.staticTargetNumber ?? 0} path="system.targeting" disabled={!usesGenericTargeting || targetingKind !== "static"} />
         <LabeledDropdown {item} key="attribute" label={localize(CONFIG.SR3E.SPELL.resistanceAttribute)} value={system.resistance?.attribute ?? ""} path="system.resistance" options={kvOptions(CONFIG.SR3E.ATTRIBUTES)} disabled={!usesResistanceAttribute} />
-    </ItemSheetComponent>
-
-    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.elementalRules)}>
         <LabeledNumberInput {item} key="targetNumber" label={localize(CONFIG.SR3E.SPELL.attackTargetNumber)} value={system.elementalAttack?.targetNumber ?? 4} path="system.elementalAttack" disabled={!isElementalManipulation} />
         <LabeledBoolean {item} key="canDodge" label={localize(CONFIG.SR3E.SPELL.canDodge)} value={Boolean(system.elementalAttack?.canDodge ?? true)} path="system.elementalAttack" disabled={!isElementalManipulation} />
         <LabeledNumberInput {item} key="armorMultiplier" label={localize(CONFIG.SR3E.SPELL.armorMultiplier)} value={system.elementalAttack?.armorMultiplier ?? 0.5} path="system.elementalAttack" disabled={!isElementalManipulation} />
@@ -112,13 +109,10 @@ function onManipulationSubtypeChange(val: string) {
         <LabeledNumberInput {item} key="value" label={localize(CONFIG.SR3E.SPELL.thresholdValue)} value={system.threshold?.value ?? 0} path="system.threshold" disabled={!usesThreshold || thresholdMode !== "static"} />
     </ItemSheetComponent>
 
-    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.drain)}>
+    <ItemSheetComponent title={`${localize(CONFIG.SR3E.SPELL.drain)} / ${localize(CONFIG.SR3E.SPELL.effectRules)}`}>
         <LabeledNumberInput {item} key="powerModifier" label={localize(CONFIG.SR3E.SPELL.drainPowerModifier)} value={system.drain?.powerModifier ?? 0} path="system.drain" />
         <LabeledDropdown {item} key="damageLevel" label={localize(CONFIG.SR3E.SPELL.drainDamageLevel)} value={system.drain?.damageLevel ?? ""} path="system.drain" options={kvOptions(CONFIG.SR3E.SPELL_DRAIN_LEVELS)} />
         <LabeledNumberInput {item} key="damageLevelModifier" label={localize(CONFIG.SR3E.SPELL.drainDamageLevelModifier)} value={system.drain?.damageLevelModifier ?? 0} path="system.drain" />
-    </ItemSheetComponent>
-
-    <ItemSheetComponent title={localize(CONFIG.SR3E.SPELL.effectRules)}>
         <LabeledDropdown {item} key="algorithm" label={localize(CONFIG.SR3E.SPELL.effectAlgorithm)} value={system.effect?.algorithm ?? ""} path="system.effect" options={kvOptions(CONFIG.SR3E.SPELL_EFFECT_ALGORITHMS)} />
         <LabeledDropdown {item} key="targetPath" label={localize(CONFIG.SR3E.SPELL.effectTargetPath)} value={system.effect?.targetPath ?? ""} path="system.effect" options={effectTargetPathOptions} />
         <LabeledDropdown {item} key="scope" label={localize(CONFIG.SR3E.SPELL.effectScope)} value={system.effect?.scope ?? "caster"} path="system.effect" options={kvOptions(CONFIG.SR3E.SPELL_EFFECT_SCOPES)} />

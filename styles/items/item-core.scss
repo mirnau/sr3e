@@ -219,6 +219,7 @@ form.application.sheet.staticlayout {
         .sr3e-waterfall--triple {
             display: grid;
             grid-template-columns: repeat(3, var(--component-width));
+            grid-auto-flow: dense;
             gap: var(--component-grid-gap);
             width: max-content;
             align-items: start;
@@ -229,6 +230,15 @@ form.application.sheet.staticlayout {
                 width: 100%;
                 vertical-align: unset;
             }
+        }
+
+        // Triple column masonry layout — true reflow packing, no span-two support
+        .sr3e-waterfall--triple-flow {
+            column-count: 3;
+            column-width: var(--component-width);
+            column-gap: var(--component-grid-gap);
+            width: max-content;
+            max-width: calc(var(--component-width) * 3 + var(--component-grid-gap) * 2);
         }
 
         .item-sheet-component.span-all {

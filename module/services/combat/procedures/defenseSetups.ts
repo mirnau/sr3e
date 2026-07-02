@@ -1,4 +1,4 @@
-import { deliverResponse, getContest } from "../engine/contestCoordinator";
+import { getContest, submitContestResponse } from "../engine/contestCoordinator";
 import type { ProcedureSetup } from "./simpleSetups";
 import type { RollSnapshot, ContestExport } from "../engine/types";
 
@@ -42,7 +42,7 @@ export function buildDodgeSetup(defender: Defender, contestId: string): Procedur
             next: { kind: "", ui: {}, args: {} },
         }),
         commitFn: async (roll: unknown) => {
-            deliverResponse(contestId, roll as RollSnapshot);
+            submitContestResponse(contestId, roll as RollSnapshot);
         },
     };
 }
@@ -92,7 +92,7 @@ export function buildMeleeDefenseSetup(
             next: { kind: "", ui: {}, args: {} },
         }),
         commitFn: async (roll: unknown) => {
-            deliverResponse(contestId, roll as RollSnapshot);
+            submitContestResponse(contestId, roll as RollSnapshot);
         },
     };
 }
@@ -127,7 +127,7 @@ export function buildSpellResistanceSetup(defender: Defender, contestId: string)
             next: { kind: "", ui: {}, args: {} },
         }),
         commitFn: async (roll: unknown) => {
-            deliverResponse(contestId, roll as RollSnapshot);
+            submitContestResponse(contestId, roll as RollSnapshot);
         },
     };
 }

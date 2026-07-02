@@ -141,6 +141,34 @@ body.game .chat-message .sr3e-die.sr3e-botch {
    border-color: rgba(255, 76, 76, 0.4);
 }
 
+// Pending — a reroll/buy request for this roll is in flight; blocks re-clicking
+// so a slow response doesn't tempt (and cost) a second click.
+body.game .chat-message .sr3e-die-pending {
+   opacity: 0.4;
+   cursor: wait;
+   pointer-events: none;
+   animation: sr3e-die-pending-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes sr3e-die-pending-pulse {
+   0%, 100% { opacity: 0.4; }
+   50% { opacity: 0.75; }
+}
+
+// Consumed — the negotiation on this message is closed (e.g. Done was
+// clicked); dice are spans, not buttons, so the generic disabled-button
+// styling doesn't reach them — dim and disable pointer events explicitly.
+body.game .chat-message[data-sr3e-consumed] .sr3e-die {
+   opacity: 0.45;
+   cursor: default;
+   pointer-events: none;
+}
+
+body.game .chat-message .sr3e-drain-done {
+   margin-top: 0.5rem;
+   width: 100%;
+}
+
 body.game .chat-message .sr3e-exploded {
    position: absolute;
    top: -0.45em;

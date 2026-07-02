@@ -1,7 +1,10 @@
-import { countSuccesses } from "../combat/engine/contestCoordinator";
-import { boxesForLevel, stageStep, type DamageStep, type DamageTrack } from "../combat/damageMath";
+import { captureHealthBaseline } from "../combat/damageApplication";
+import { stageStep, type DamageStep, type DamageTrack } from "../combat/damageMath";
+import { computeDrainOutcome, rerenderDrainMessage, type DrainOutcomeFlag, type MagicLossCheck } from "./drainRerollHandler";
 import type { ProcedureSetup } from "../combat/procedures/simpleSetups";
 import type { RollSnapshot } from "../combat/engine/types";
+import type { DieEntry } from "../../ui/combat/chat/renderRollSummary";
+import { extractDieResults } from "../../ui/combat/chat/renderRollSummary";
 import { sustainingDrainPower } from "./sustainedSpells";
 
 type ActorLike = {
@@ -19,14 +22,6 @@ type SpellMeta = {
     name?: string;
     damageLevel?: string;
     drain?: { powerModifier?: number; damageLevelModifier?: number };
-};
-
-type MagicLossCheck = {
-    rollTotal: number;
-    previousMagic: number;
-    newMagic: number;
-    lostMagic: boolean;
-    burnedOut: boolean;
 };
 
 export function buildSpellDrainSetup(actor: ActorLike, spell: SpellMeta): ProcedureSetup {
@@ -48,7 +43,7 @@ export function buildSpellDrainSetup(actor: ActorLike, spell: SpellMeta): Proced
             modifiers: [{ id: "spell-pool-limit", name: "Spell Pool <= Sorcery", value: 0, poolCap: sorcery }],
         },
         lockPriority: "advanced",
-        selfPublish: true,
+        selfPublish: false,
         initialPoolKey: "spell",
         defenseHint: null,
         extraOptions: {
@@ -65,7 +60,7 @@ export function buildSpellDrainSetup(actor: ActorLike, spell: SpellMeta): Proced
             next: { kind: "none", ui: {}, args: {} },
         }),
         commitFn: async (roll: unknown) => {
-            await applyDrain(actor, roll as RollSnapshot, drainPower, level, track);
+            await applyDrain(actor, roll as RollSnapshot, drainPower, level, track, spell.name ?? "Spell");
         },
     };
 }
@@ -74,20 +69,40 @@ export function isSpellcastingSetup(setup: ProcedureSetup): boolean {
     return setup.kind === "spellcasting" && !!setup.extraOptions?.spell;
 }
 
-async function applyDrain(actor: ActorLike, roll: RollSnapshot, tn: number, level: DamageStep, track: DamageTrack): Promise<void> {
-    const successes = countSuccesses({ ...roll, options: { ...roll.options, targetNumber: tn } });
-    const final = stageStep(level, -Math.floor(successes / 2));
-    if (!final) {
-        await postDrainOutcome(actor, successes, tn, "No Drain");
-        return;
-    }
-    const boxes = boxesForLevel(final);
-    const current = Number(actor.system?.health?.[track]?.value ?? 0);
-    await actor.update?.({ [`system.health.${track}.value`]: current + boxes });
-    const magicLoss = track === "physical" && final === "d"
-        ? await rollMagicLossCheck(actor)
-        : null;
-    await postDrainOutcome(actor, successes, tn, `${label(final)} ${track}`, magicLoss);
+async function applyDrain(
+    actor: ActorLike,
+    roll: RollSnapshot,
+    tn: number,
+    baseLevel: DamageStep,
+    track: DamageTrack,
+    spellName: string,
+): Promise<void> {
+    const baseline = captureHealthBaseline(actor as never);
+    const results: DieEntry[] = extractDieResults(roll.terms);
+
+    const flag: DrainOutcomeFlag = {
+        actorId: actor.id ?? "",
+        actorName: actor.name ?? "Caster",
+        spellName,
+        tn,
+        baseLevel,
+        track,
+        baseline,
+        options: roll.options,
+        meta: roll.meta,
+        results,
+        rerollCount: 0,
+        magicLoss: null,
+    };
+
+    const { final } = computeDrainOutcome(flag);
+    flag.magicLoss = track === "physical" && final === "d" ? await rollMagicLossCheck(actor) : null;
+
+    if (typeof ChatMessage === "undefined") return;
+    await (ChatMessage as any).create?.({
+        content: rerenderDrainMessage(flag),
+        flags: { sr3e: { drainOutcome: flag } },
+    });
 }
 
 async function rollMagicLossCheck(actor: ActorLike): Promise<MagicLossCheck | null> {
@@ -114,14 +129,6 @@ async function roll2d6(): Promise<number> {
     await roll.evaluate();
     return Number(roll.total ?? roll.terms?.flatMap((t: { results?: Array<{ result?: number; total?: number }> }) => t.results ?? [])
         .reduce((sum: number, die: { result?: number; total?: number }) => sum + Number(die.total ?? die.result ?? 0), 0));
-}
-
-async function postDrainOutcome(actor: ActorLike, successes: number, tn: number, result: string, magicLoss?: MagicLossCheck | null): Promise<void> {
-    if (typeof ChatMessage === "undefined") return;
-    const magicLossText = magicLoss ? magicLossSummary(magicLoss) : "";
-    await (ChatMessage as any).create?.({
-        content: `<div class="sr3e-drain-outcome"><strong>${actor.name ?? "Caster"}</strong> Drain: ${successes} success${successes === 1 ? "" : "es"} vs TN ${tn}. ${result}.${magicLossText}</div>`,
-    });
 }
 
 function drainTrack(actor: ActorLike, force: number): DamageTrack {
@@ -153,15 +160,4 @@ function applyLevelModifier(level: DamageStep, modifier: number): DamageStep {
 function damageStep(value: unknown): DamageStep | null {
     const step = String(value ?? "").toLowerCase() as DamageStep;
     return ["l", "m", "s", "d"].includes(step) ? step : null;
-}
-
-function label(step: DamageStep): string {
-    return ({ l: "Light", m: "Moderate", s: "Serious", d: "Deadly" } as Record<DamageStep, string>)[step];
-}
-
-function magicLossSummary(check: MagicLossCheck): string {
-    const outcome = check.lostMagic
-        ? ` Magic reduced to ${check.newMagic}.${check.burnedOut ? " Burnout: Magic reached 0." : ""}`
-        : " No Magic loss.";
-    return ` Magic loss check: 2D6=${check.rollTotal} vs Magic ${check.previousMagic}.${outcome}`;
 }

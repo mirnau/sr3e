@@ -9,7 +9,7 @@ import { buildAttributeSetup } from "../../../services/combat/procedures/simpleS
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 import { claimPendingResponse } from "../../../services/combat/engine/responseInterceptor";
-import { deliverResponse } from "../../../services/combat/engine/contestCoordinator";
+import { submitContestResponse } from "../../../services/combat/engine/contestCoordinator";
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 import type { ProcedureSetup } from "../../../services/combat/procedures/simpleSetups";
 
@@ -87,7 +87,7 @@ function onRollClick(e: MouseEvent): void {
     const actorId = (actor as unknown as { id?: string }).id ?? "";
     const pendingContest = claimPendingResponse(actorId);
     if (pendingContest) {
-        const responseSetup: ProcedureSetup = { ...setup, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { deliverResponse(pendingContest, roll as RollSnapshot); } };
+        const responseSetup: ProcedureSetup = { ...setup, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { submitContestResponse(pendingContest, roll as RollSnapshot); } };
         openComposer(responseSetup, actor);
         return;
     }

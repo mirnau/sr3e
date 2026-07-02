@@ -28,11 +28,12 @@ function makeStub(nextKind = "dodge"): ContestStub {
     };
 }
 
-function mockGame(isGM = false) {
+function mockGame(isGM = false, defenderActor: Record<string, unknown> = actor(), users: Array<Record<string, unknown>> = [{ id: "gm1", isGM: true, active: true }]) {
     const createFn = vi.fn().mockResolvedValue(undefined);
     (globalThis as Record<string, unknown>).game = {
-        actors: { get: (id: string) => id === "def1" ? actor() : id === "att1" ? { id: "att1", name: "Attacker" } : undefined },
+        actors: { get: (id: string) => id === "def1" ? defenderActor : id === "att1" ? { id: "att1", name: "Attacker" } : undefined },
         user: { id: "gm1", isGM },
+        users: new Map(users.map(u => [u.id as string, u])),
     };
     (globalThis as Record<string, unknown>).ChatMessage = { create: createFn };
     return createFn;
@@ -85,6 +86,29 @@ describe("handleContestStub", () => {
         expect(html).toContain('data-responder="spell-resistance"');
         expect(html).toContain("Resist Spell");
     });
+
+    it("whispers the target's controlling player, not the GM triggering the roll", async () => {
+        const ownedDefender = { ...actor(), ownership: { player1: 3 } };
+        const create = mockGame(true, ownedDefender, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: true },
+        ]);
+
+        await handleContestStub(makeStub("dodge"));
+
+        const [call] = create.mock.calls;
+        expect((call[0] as Record<string, unknown>).whisper).toEqual(["player1"]);
+    });
+
+    it("falls back to whispering the GM when no distinct player controls the target", async () => {
+        const create = mockGame(true);
+
+        await handleContestStub(makeStub("dodge"));
+
+        const [call] = create.mock.calls;
+        expect((call[0] as Record<string, unknown>).whisper).toEqual(["gm1"]);
+    });
+
 });
 
 describe("handleDefenderChoice", () => {

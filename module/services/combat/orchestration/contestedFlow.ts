@@ -4,8 +4,10 @@ import { serializeProcedure } from "../engine/procedureSerializer";
 import { buildRollSnapshot } from "./rollSnapshot";
 import { promptResistance } from "./resistanceFlow";
 import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
+import { extractDieResults } from "../../../ui/combat/chat/renderRollSummary";
 import { boxesForLevel } from "../damageMath";
 import { renderSpellDamageStaging, spellDamageStaging } from "../../spells/spellCombat";
+import type { ContestOutcomeFlag } from "./contestRerollHandler";
 import type { SR3ERoll } from "./SR3ERoll";
 import type { RollState } from "../diceFormula";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
@@ -80,9 +82,31 @@ export async function executeContestedFlow(
             extraHtml: renderSpellDamageStaging(staging),
         });
         if (typeof ChatMessage !== "undefined") {
+            const contestOutcomeFlag: ContestOutcomeFlag = {
+                weaponName: exportCtx.weaponName,
+                exportCtx,
+                initiator: {
+                    actorId: (actor as unknown as { id: string }).id,
+                    actorName: initiatorName,
+                    options: initiatorRoll.options,
+                    meta: initiatorRoll.meta,
+                    results: extractDieResults(initiatorRoll.terms),
+                    rerollCount: 0,
+                },
+                target: {
+                    actorId: (targetActor as unknown as { id: string }).id,
+                    actorName: targetName,
+                    options: defenderRoll.options,
+                    meta: defenderRoll.meta,
+                    results: extractDieResults(defenderRoll.terms),
+                    rerollCount: 0,
+                },
+            };
+
             await (ChatMessage as any).create?.({
                 content: outcomeHtml,
                 speaker: (ChatMessage as any).getSpeaker?.({ actor }),
+                flags: { sr3e: { contestOutcome: contestOutcomeFlag } },
             });
         }
 

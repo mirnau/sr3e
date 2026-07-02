@@ -1,6 +1,13 @@
 export type DamageStep = "l" | "m" | "s" | "d";
 export type DamageTrack = "physical" | "stun";
 
+export const DAMAGE_STEP_LABELS: Record<DamageStep, string> = {
+    l: "Light",
+    m: "Moderate",
+    s: "Serious",
+    d: "Deadly",
+};
+
 const STEP_ORDER: DamageStep[] = ["l", "m", "s", "d"];
 
 export function boxesForLevel(step: DamageStep): number {

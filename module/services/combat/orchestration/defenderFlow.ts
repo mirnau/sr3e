@@ -1,4 +1,4 @@
-import { registerContestStub, expireContest, getContest } from "../engine/contestCoordinator";
+import { registerContestStub, expireContest, getContest, resolveControllingUser } from "../engine/contestCoordinator";
 import { buildDodgeSetup, buildMeleeDefenseSetup, buildSpellResistanceSetup } from "../procedures/defenseSetups";
 import { openComposer } from "../procedures/composerService";
 import { registerPendingResponse } from "../engine/responseInterceptor";
@@ -54,8 +54,11 @@ function ensureSheetOpen(actor: ActorLike): void {
 
 type ChatMessageStatic = { create: (data: Record<string, unknown>) => Promise<unknown> };
 
-async function sendDefenderPrompt(stub: ContestStub): Promise<void> {
+async function sendDefenderPrompt(stub: ContestStub, defender: ActorLike): Promise<void> {
     if (!currentUserIsGM()) return;
+
+    const controller = resolveControllingUser(defender as never);
+    if (!controller) return;
 
     const attackerName = resolveActorName(stub.initiator.actorId);
     const html = renderDefenderPrompt(
@@ -66,10 +69,9 @@ async function sendDefenderPrompt(stub: ContestStub): Promise<void> {
         stub.exportCtx.next.kind,
     );
 
-    const userId = (game.user as unknown as { id: string }).id;
     await (ChatMessage as unknown as ChatMessageStatic).create({
         content: html,
-        whisper: [userId],
+        whisper: [controller.id as string],
         flags: { sr3e: { opposed: stub.contestId } },
     });
 }
@@ -86,7 +88,7 @@ export async function handleContestStub(stub: ContestStub): Promise<void> {
         registerContestStub(stub);
     }
 
-    await sendDefenderPrompt(stub);
+    await sendDefenderPrompt(stub, defender);
 }
 
 async function postContestCancelled(defenderName: string): Promise<void> {

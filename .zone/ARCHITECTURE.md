@@ -29,6 +29,10 @@ When `SR3ERoll.buildOpen(pool)` is used (no TN), `countSuccesses()` returns `nul
 
 Spells are grimoire entries only; do not also render them as inventory assets. A spell is fetish-limited when it has an attached gadget of type `fetish`; do not reintroduce a separate fetish-limited boolean on the spell model. A fetish-limited spell is rollable only when the source fetish gadget remains in inventory and is carried/equipped. Exclusive casting is a casting property, not a limitation boolean.
 
+### PC tokens must stay linked (`actorLink: true`) — unlinked edits silently diverge and never reach chat-driven flows
+
+An unlinked token gets its own synthetic actor (`token.delta`) with a genuinely separate Items collection, cloned from the canonical actor at token-creation time and then diverging independently. Editing a PC's sheet via an unlinked token (adding/editing spells, attributes, anything) writes only to that per-token copy — `game.actors.get(id)` and every chat-driven flow (rolls, drain, contests) read the canonical actor and never see those edits, and there is no reconciliation back. This produced real symptoms in live testing: duplicate spell items with divergent data (e.g. two copies of the same spell with different drain levels), and a stray +6 drain modifier traced to data that only existed on the token's synthetic actor. Re-linking (remove token, confirm `actorLink: true`, re-add) resets the token to the canonical actor's real data and resolves it, but any edits made while unlinked are lost, not merged. This is not a bug in this codebase to guard against — it's inherent to Foundry's linked/unlinked actor model — but mid-combat sheet editing on a PC token should never be treated as a supported workflow, since Foundry gives no visible warning when a token silently isn't linked.
+
 ## ADR Index
 - [0001-sr3eroll-injectable-evaluator](adr/0001-sr3eroll-injectable-evaluator.md) — SUPERSEDED: SR3ERoll injectable evaluator (replaced by ADR-0005)
 - [0002-dice-formula-always-d6x6](adr/0002-dice-formula-always-d6x6.md) — SUPERSEDED: d6x6 formula (replaced by ADR-0006)

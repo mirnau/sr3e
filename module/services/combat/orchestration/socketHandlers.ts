@@ -1,5 +1,8 @@
 import { deliverResponse, abortContest } from "../engine/contestCoordinator";
 import { handleContestStub } from "./defenderFlow";
+import { updateMessageAsGM } from "./messageRelay";
+import { applyContestSideDelta, type ContestOutcomeFlag, type ContestSideDelta } from "./contestRerollHandler";
+import { applyDrainDelta, type DrainOutcomeFlag, type DrainDelta } from "../../spells/drainRerollHandler";
 import type { ContestStub, RollSnapshot } from "../engine/types";
 
 const FULL_DEFENSE_FLAG = "fullDefenseActive";
@@ -8,7 +11,10 @@ const SOCKET_EVENT = "system.sr3e";
 type SocketPayload =
     | { type: "contestStub"; stub: ContestStub }
     | { type: "contestResponse"; contestId: string; roll: RollSnapshot }
-    | { type: "contestAbort"; contestId: string; reason: string };
+    | { type: "contestAbort"; contestId: string; reason: string }
+    | { type: "updateChatMessage"; messageId: string; data: Record<string, unknown> }
+    | { type: "contestSideUpdate"; messageId: string; delta: ContestSideDelta; fallback: ContestOutcomeFlag }
+    | { type: "drainUpdate"; messageId: string; delta: DrainDelta; fallback: DrainOutcomeFlag };
 
 export function registerSocketHandlers(): void {
     if (typeof game === "undefined" || !game.socket) return;
@@ -22,6 +28,12 @@ export function registerSocketHandlers(): void {
                 deliverResponse(p.contestId, p.roll);
             } else if (p.type === "contestAbort") {
                 abortContest(p.contestId, p.reason);
+            } else if (p.type === "updateChatMessage") {
+                void updateMessageAsGM(p.messageId, p.data);
+            } else if (p.type === "contestSideUpdate") {
+                void applyContestSideDelta(p.messageId, p.delta, p.fallback);
+            } else if (p.type === "drainUpdate") {
+                void applyDrainDelta(p.messageId, p.delta, p.fallback);
             }
         });
 }

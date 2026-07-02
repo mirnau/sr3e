@@ -106,11 +106,17 @@ export class StoreManager implements IStoreManager {
     const docType = document.documentName;
     const hooks: Array<{ event: string; id: number }> = [];
 
-    // Hook for document updates
+    // Matched by .id, not .uuid: a sheet opened via a token on the canvas can
+    // receive an actor reference whose .uuid is scene/token-scoped
+    // (Scene.X.Token.Y.Actor.Z), while Foundry's updateActor/actorSystemRecalculated
+    // hooks always fire with the canonical actor document (.uuid === "Actor.Z").
+    // Matching on .uuid there silently never matches, so external writes never
+    // reach this document's stores even though they land in the database fine.
+    // .id is the same in both cases since it's the document's own _id.
     const updateEvent = `update${docType}`;
     const updateHookId = Hooks.on(updateEvent, (doc: any, changes: any) => {
-      if (doc.uuid !== docId) return;
-      this.#handleDocumentUpdate(document, changes);
+      if (doc.id !== document.id) return;
+      this.#handleDocumentUpdate(document, changes, doc);
     });
     hooks.push({ event: updateEvent, id: updateHookId });
 
@@ -118,8 +124,8 @@ export class StoreManager implements IStoreManager {
     if (docType === "Actor") {
       const recalcEvent = "actorSystemRecalculated";
       const recalcHookId = Hooks.on(recalcEvent, (doc: any) => {
-        if (doc.uuid !== docId) return;
-        this.#handleDocumentUpdate(document, {});
+        if (doc.id !== document.id) return;
+        this.#handleDocumentUpdate(document, {}, doc);
       });
       hooks.push({ event: recalcEvent, id: recalcHookId });
     }
@@ -129,10 +135,20 @@ export class StoreManager implements IStoreManager {
 
   /**
    * Handles document update events from Foundry
-   * @param document - The document being updated
+   * @param document - The originally-subscribed document reference. Its
+   *   .uuid is used for store-key matching (stable, since GetRWStore/etc
+   *   registered keys against this same reference).
    * @param _changes - The changes object from Foundry's update hook (unused but kept for hook signature)
+   * @param freshDoc - The document instance Foundry's hook actually fired
+   *   with. Live testing showed this can be a DIFFERENT object instance than
+   *   `document` even when they represent the same logical actor (e.g. a
+   *   sheet opened via a token vs. a write issued through
+   *   game.actors.get(id)) — reading values off the stale `document`
+   *   reference silently showed pre-update data even though the fresh one,
+   *   and the database, were already correct. Values are always read from
+   *   `freshDoc`; only key-matching uses `document`.
    */
-  #handleDocumentUpdate(document: FoundryDocument, _changes: object): void {
+  #handleDocumentUpdate(document: FoundryDocument, _changes: object, freshDoc: FoundryDocument = document): void {
     const docId = document.uuid;
 
     // Update all read-write stores for this document
@@ -141,7 +157,7 @@ export class StoreManager implements IStoreManager {
       if (this.#mutedPaths.has(key)) continue;
 
       const path = key.substring(docId.length + 1);
-      const value = this.#getValueAtPath(document, path);
+      const value = this.#getValueAtPath(freshDoc, path);
       if (value !== undefined) {
         store.set(this.#cloneIfNeeded(value));
       }
@@ -152,7 +168,7 @@ export class StoreManager implements IStoreManager {
       if (!key.startsWith(`${docId}:`)) continue;
 
       const path = key.substring(docId.length + 1);
-      const value = this.#getValueAtPath(document, path);
+      const value = this.#getValueAtPath(freshDoc, path);
       if (value !== undefined) {
         store.set(this.#cloneIfNeeded(value));
       }
@@ -163,7 +179,7 @@ export class StoreManager implements IStoreManager {
       if (!key.startsWith(`${docId}:`)) continue;
 
       const flagName = key.substring(docId.length + 1);
-      const value = document.getFlag("sr3e", flagName);
+      const value = freshDoc.getFlag("sr3e", flagName);
       if (value !== undefined) {
         store.set(value);
       }

@@ -45,6 +45,33 @@ describe("registerSocketHandlers", () => {
         const roll = await promise;
         expect(roll.meta.procedureKind).toBe("__aborted");
     });
+
+    it("updateChatMessage applies the update when the receiving client is GM", async () => {
+        const update = vi.fn().mockResolvedValue(undefined);
+        (game as Record<string, unknown>).user = { id: "gm1", isGM: true };
+        (game as Record<string, unknown>).messages = { get: (id: string) => (id === "msg1" ? { update } : undefined) };
+        const socketOn = (game as Record<string, unknown> & { socket: { on: ReturnType<typeof vi.fn> } }).socket.on as ReturnType<typeof vi.fn>;
+        registerSocketHandlers();
+
+        const handler = socketOn.mock.calls[0][1] as (p: unknown) => void;
+        handler({ type: "updateChatMessage", messageId: "msg1", data: { "flags.sr3e.consumed": true } });
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(update).toHaveBeenCalledWith({ "flags.sr3e.consumed": true });
+    });
+
+    it("updateChatMessage does nothing when the receiving client is not GM", async () => {
+        const update = vi.fn();
+        (game as Record<string, unknown>).user = { id: "u1", isGM: false };
+        (game as Record<string, unknown>).messages = { get: (id: string) => (id === "msg1" ? { update } : undefined) };
+        const socketOn = (game as Record<string, unknown> & { socket: { on: ReturnType<typeof vi.fn> } }).socket.on as ReturnType<typeof vi.fn>;
+        registerSocketHandlers();
+
+        const handler = socketOn.mock.calls[0][1] as (p: unknown) => void;
+        handler({ type: "updateChatMessage", messageId: "msg1", data: {} });
+
+        expect(update).not.toHaveBeenCalled();
+    });
 });
 
 describe("registerCombatTurnHook", () => {

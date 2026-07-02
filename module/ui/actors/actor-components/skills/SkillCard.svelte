@@ -7,7 +7,7 @@ import { buildSkillSetup } from "../../../../services/combat/procedures/simpleSe
 import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../../services/combat/orchestration/executeProcedure";
 import { claimPendingResponse } from "../../../../services/combat/engine/responseInterceptor";
-import { deliverResponse } from "../../../../services/combat/engine/contestCoordinator";
+import { submitContestResponse } from "../../../../services/combat/engine/contestCoordinator";
 import type { RollSnapshot } from "../../../../services/combat/engine/types";
 import type { ProcedureSetup } from "../../../../services/combat/procedures/simpleSetups";
 
@@ -48,7 +48,7 @@ function openSkillEditor(): void {
    SkillEditorApp.launch(actor, item, category);
 }
 function asResponseSetup(base: ProcedureSetup, contestId: string): ProcedureSetup {
-    return { ...base, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { deliverResponse(contestId, roll as RollSnapshot); } };
+    return { ...base, selfPublish: false, defenseHint: null, commitFn: async (roll: unknown) => { submitContestResponse(contestId, roll as RollSnapshot); } };
 }
 
 function rollSkill(e: MouseEvent | KeyboardEvent): void {

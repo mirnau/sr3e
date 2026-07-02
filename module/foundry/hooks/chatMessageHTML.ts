@@ -4,12 +4,14 @@ import {
     type ResistanceCtx,
 } from "../../services/combat/orchestration/resistanceHandler";
 import { handleKarmaPoolReroll, handleKarmaBuySuccess, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
+import { handleContestReroll, handleContestBuy, type ContestOutcomeFlag, type ContestSide } from "../../services/combat/orchestration/contestRerollHandler";
+import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFlag } from "../../services/spells/drainRerollHandler";
+import { requestMessageUpdate } from "../../services/combat/orchestration/messageRelay";
+import { withDiePending } from "./diePendingState";
 
 type ChatMessageLike = {
-    flags?: {
-        sr3e?: Record<string, unknown>;
-    };
-    setFlag?: (scope: string, key: string, value: unknown) => Promise<unknown>;
+    flags?: { sr3e?: Record<string, unknown> };
+    update?: (data: Record<string, unknown>) => Promise<unknown>;
 };
 
 type HookRegistrar = {
@@ -27,17 +29,28 @@ function disableAllButtons(html: HTMLElement): void {
     html.querySelectorAll<HTMLButtonElement>("button").forEach(b => { b.disabled = true; });
 }
 
-// Persists consumed state so renderChatMessageHTML re-disables on every re-render.
 function persistConsumedToMessage(promptEl: HTMLElement): void {
     const msgEl = promptEl.closest<HTMLElement>(".chat-message");
     const messageId = msgEl?.dataset?.messageId;
     if (!messageId) return;
-    (globalThis as Record<string, unknown> & { game?: { messages?: { get: (id: string) => ChatMessageLike | undefined } } })
-        .game?.messages?.get(messageId)?.setFlag?.("sr3e", "consumed", true);
+    requestMessageUpdate(messageId, { "flags.sr3e.consumed": true });
 }
 
-// Document-level delegation handles [data-responder] clicks in both the chat log
-// and Foundry's whisper notification popups (which don't fire renderChatMessageHTML).
+function getLiveMessage(messageId: string): ChatMessageLike | undefined {
+    return (globalThis as Record<string, unknown> & { game?: { messages?: { get: (id: string) => ChatMessageLike | undefined } } })
+        .game?.messages?.get(messageId);
+}
+
+// All interactive wiring below uses document-level click delegation, reading
+// the message's CURRENT flags fresh at click time via game.messages.get()
+// instead of attaching per-element listeners bound to render-time closures.
+// This is required, not just convenient: renderChatMessageHTML does not fire
+// for every DOM instance a message appears in — e.g. Foundry's roll/chat
+// notification popups render their own copy without it — so per-element
+// listeners silently never attach there, while the main chat log's copy
+// works fine. Delegation on `document` fires regardless of which surface the
+// click lands on, and as a bonus is immune to stale-closure data too.
+
 function registerResponderDelegation(): void {
     document.addEventListener("click", (event) => {
         const button = (event.target as HTMLElement).closest<HTMLElement>("[data-responder]");
@@ -52,42 +65,89 @@ function registerResponderDelegation(): void {
     });
 }
 
+function registerResistanceButtonDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const btn = (event.target as HTMLElement).closest<HTMLElement>(".sr3e-resist-damage-button");
+        if (!btn) return;
+        const card = btn.closest<HTMLElement>(".sr3e-resistance-prompt") ?? btn;
+        if (!consumeCard(card)) return;
+
+        const messageId = card.closest<HTMLElement>(".chat-message")?.dataset?.messageId;
+        if (!messageId) return;
+        requestMessageUpdate(messageId, { "flags.sr3e.consumed": true });
+
+        const resistance = getLiveMessage(messageId)?.flags?.sr3e?.damageResistance as ResistanceCtx | undefined;
+        if (resistance) handleResistanceClick(resistance);
+    });
+}
+
+function registerDieClickDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const die = (event.target as HTMLElement).closest<HTMLElement>(".sr3e-die");
+        if (!die) return;
+        const msgEl = die.closest<HTMLElement>(".chat-message");
+        const messageId = msgEl?.dataset?.messageId;
+        if (!messageId) return;
+
+        const message = getLiveMessage(messageId);
+        const sr3eFlags = message?.flags?.sr3e;
+        if (!message || !sr3eFlags || sr3eFlags.consumed) return;
+
+        const isBuy = (event as MouseEvent).shiftKey;
+
+        const reroll = sr3eFlags.reroll as RerollFlag | undefined;
+        if (reroll) {
+            const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
+            withDiePending(group, () => isBuy ? handleKarmaBuySuccess(message as { update: (d: Record<string, unknown>) => Promise<unknown> }, reroll)
+                : handleKarmaPoolReroll(message as { update: (d: Record<string, unknown>) => Promise<unknown> }, reroll));
+            return;
+        }
+
+        const contestOutcome = sr3eFlags.contestOutcome as ContestOutcomeFlag | undefined;
+        if (contestOutcome) {
+            const sideEl = die.closest<HTMLElement>("[data-side]");
+            const side = sideEl?.dataset.side as ContestSide | undefined;
+            if (!side) return;
+            withDiePending(sideEl, () => isBuy ? handleContestBuy(messageId, contestOutcome, side) : handleContestReroll(messageId, contestOutcome, side));
+            return;
+        }
+
+        const drainOutcome = sr3eFlags.drainOutcome as DrainOutcomeFlag | undefined;
+        if (drainOutcome) {
+            const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
+            withDiePending(group, () => isBuy ? handleDrainBuy(messageId, drainOutcome) : handleDrainReroll(messageId, drainOutcome));
+        }
+    });
+}
+
+function registerDrainDoneDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const btn = (event.target as HTMLElement).closest<HTMLElement>("[data-drain-done]");
+        if (!btn) return;
+        const msgEl = btn.closest<HTMLElement>(".chat-message");
+        const messageId = msgEl?.dataset?.messageId;
+        if (!messageId) return;
+
+        const drainOutcome = getLiveMessage(messageId)?.flags?.sr3e?.drainOutcome as DrainOutcomeFlag | undefined;
+        if (!drainOutcome) return;
+        if (!msgEl || !consumeCard(msgEl)) return;
+
+        persistConsumedToMessage(msgEl);
+        void handleDrainDone(drainOutcome);
+    });
+}
+
 export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElement): void {
-    const sr3eFlags = message.flags?.sr3e;
-    if (!sr3eFlags) return;
-
-    if (sr3eFlags.consumed) {
+    if (message.flags?.sr3e?.consumed) {
         disableAllButtons(html);
-        return;
-    }
-
-    const resistance = sr3eFlags.damageResistance as ResistanceCtx | undefined;
-    if (resistance) {
-        const btn = html.querySelector<HTMLButtonElement>(".sr3e-resist-damage-button");
-        btn?.addEventListener("click", () => {
-            const card = btn.closest<HTMLElement>(".sr3e-resistance-prompt") ?? html;
-            if (!consumeCard(card)) return;
-            message.setFlag?.("sr3e", "consumed", true);
-            handleResistanceClick(resistance);
-        });
-    }
-
-    const reroll = sr3eFlags.reroll as RerollFlag | undefined;
-    if (reroll) {
-        const msg = message as unknown as { update: (d: Record<string, unknown>) => Promise<unknown> };
-        html.querySelectorAll<HTMLElement>(".sr3e-die").forEach(die => {
-            die.addEventListener("click", (event) => {
-                if ((event as MouseEvent).shiftKey) {
-                    handleKarmaBuySuccess(msg, reroll);
-                } else {
-                    handleKarmaPoolReroll(msg, reroll);
-                }
-            });
-        });
+        html.dataset.sr3eConsumed = "true";
     }
 }
 
 export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): void {
     registrar.on("renderChatMessageHTML", handleChatMessageHTML);
     registerResponderDelegation();
+    registerResistanceButtonDelegation();
+    registerDieClickDelegation();
+    registerDrainDoneDelegation();
 }

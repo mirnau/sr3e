@@ -1,13 +1,6 @@
 import { countSuccesses } from "../combat/engine/contestCoordinator";
-import { stageStep, type DamageStep } from "../combat/damageMath";
+import { DAMAGE_STEP_LABELS, stageStep, type DamageStep } from "../combat/damageMath";
 import type { ContestExport, RollSnapshot } from "../combat/engine/types";
-
-const LEVEL_LABELS: Record<DamageStep, string> = {
-    l: "Light",
-    m: "Moderate",
-    s: "Serious",
-    d: "Deadly",
-};
 
 export type SpellDamageStaging = {
     base: DamageStep;
@@ -47,8 +40,8 @@ export function spellDamageStaging(
 
 export function renderSpellDamageStaging(staging: SpellDamageStaging | null): string {
     if (!staging) return "";
-    const base = LEVEL_LABELS[staging.base];
-    const final = staging.final ? LEVEL_LABELS[staging.final] : "No Damage";
+    const base = DAMAGE_STEP_LABELS[staging.base];
+    const final = staging.final ? DAMAGE_STEP_LABELS[staging.final] : "No Damage";
     const method = staging.kind === "combat"
         ? "caster net successes"
         : "caster successes vs damage resistance successes";
