@@ -1,10 +1,10 @@
-type SkillSubSchema = {
+export type SkillSubSchema = {
     value?: number;
     linkedAttribute?: string;
     specializations?: Array<{ value?: number; name?: string }>;
 };
 
-type SkillSystem = {
+export type SkillSystem = {
     skillType?: string;
     activeSkill?: SkillSubSchema;
     knowledgeSkill?: SkillSubSchema;
@@ -32,7 +32,7 @@ export function parseLinkedSkillId(id: string): { skillId: string; specIndex: nu
     return { skillId: id.slice(0, sep), specIndex: isNaN(specIndex) ? null : specIndex };
 }
 
-function resolveSubSchema(system: SkillSystem): SkillSubSchema {
+export function resolveSubSchema(system: SkillSystem): SkillSubSchema {
     const subKey = `${system.skillType ?? "active"}Skill` as keyof SkillSystem;
     return (system[subKey] as SkillSubSchema | undefined) ?? {};
 }

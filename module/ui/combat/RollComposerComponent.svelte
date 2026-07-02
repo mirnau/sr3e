@@ -95,7 +95,12 @@ const modifiers = $derived<Modifier[]>([
 const modifiersTotal = $derived(sumMods(modifiers));
 const finalTN = $derived(Math.max(2, targetNumber + modifiersTotal));
 const difficulty = $derived(difficultyLabel(finalTN));
-const canSubmit = $derived(finalTN >= 2 && !!setup);
+// Defaulting was requested but SR3E p.85's TN>=8-before-defaulting guard
+// blocked it (computeDefaulting returned mode "none") — rolling now would
+// silently use the linked skill's own (0) rating with no defaulting bonus
+// at all, which is never what the player intended by selecting Defaulting.
+const defaultingBlocked = $derived(isDefaulting && defaultingResult?.mode === "none");
+const canSubmit = $derived(finalTN >= 2 && !!setup && !defaultingBlocked);
 const effectiveDice = $derived(
     defaultingResult && defaultingResult.mode !== "none" ? defaultingResult.dice : (setup?.rollState.dice ?? 0)
 );
@@ -372,6 +377,11 @@ onDestroy(() => {
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
+                {#if defaultingBlocked}
+                    <p class="composer-unit-meta composer-unit-meta--center composer-unit-meta--warning">
+                        Can't default: TN is 8 or higher before the defaulting modifier (SR3E p.85)
+                    </p>
+                {/if}
             </div>
         </div>
 

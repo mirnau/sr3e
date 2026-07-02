@@ -1,5 +1,6 @@
 import type { Modifier } from "./modifierList";
 import { sumMods } from "./modifierList";
+import { resolveSubSchema, type SkillSystem } from "./procedures/resolveLinkedSkill";
 
 export type DefaultingMode = "attribute" | "skill" | "specialization" | "none";
 
@@ -9,20 +10,17 @@ export type DefaultingResult = {
     mods: Modifier[];
 };
 
-type SkillSystem = {
-    noDefault?: boolean;
-    value?: number;
-    specializations?: Array<{ value?: number }>;
-};
-
 type ActorSystem = {
-    attributes?: Record<string, { value?: number; modifier?: number }>;
+    attributes?: Record<string, { value?: number; total?: number }>;
 };
 
+// Matches the attr?.total ?? attr?.value pattern used everywhere else
+// attribute ratings are read (e.g. simpleSetups.ts, spellDrain.ts) — .total
+// is the derived value+mod sum; there is no separate .modifier field.
 function attributeRating(actor: { system: Record<string, unknown> }, key: string): number {
     const attrs = (actor.system as ActorSystem).attributes ?? {};
     const attr = attrs[key];
-    return (attr?.value ?? 0) + (attr?.modifier ?? 0);
+    return attr?.total ?? attr?.value ?? 0;
 }
 
 export function computeDefaulting(
@@ -50,12 +48,14 @@ export function computeDefaulting(
         };
     }
 
-    const ws = skill.system as SkillSystem;
-    if (ws.noDefault) return none;
+    // Skill ratings live nested under activeSkill/knowledgeSkill/languageSkill
+    // depending on skillType, not as a flat .value on the item's system —
+    // resolveSubSchema is the one place that navigates this correctly.
+    const ss = resolveSubSchema(skill.system as SkillSystem);
 
-    if (specIndex !== null && ws.specializations?.[specIndex] !== undefined) {
-        const baseRating = ws.value ?? 0;
-        const specRating = ws.specializations[specIndex].value ?? 0;
+    if (specIndex !== null && ss.specializations?.[specIndex] !== undefined) {
+        const baseRating = ss.value ?? 0;
+        const specRating = ss.specializations[specIndex].value ?? 0;
         const cap = Math.floor(baseRating / 2);
         return {
             mode: "specialization",
@@ -66,7 +66,7 @@ export function computeDefaulting(
         };
     }
 
-    const rating = ws.value ?? 0;
+    const rating = ss.value ?? 0;
     const cap = Math.floor(rating / 2);
     return {
         mode: "skill",
