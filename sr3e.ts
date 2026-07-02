@@ -37,6 +37,7 @@ import SR3Edie from "./module/foundry/documents/SR3Edie";
 import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook } from "./module/services/combat/orchestration/socketHandlers";
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
 import { registerMedicalTokenDropHook } from "./module/services/medical/applyMedical";
+import { registerWindowFocusDimHook } from "./module/foundry/hooks/windowFocusDim";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -230,6 +231,7 @@ async function registerHooks(): Promise<void> {
       registerSocketHandlers();
       registerCombatTurnHook();
       registerPoolRefreshHook();
+      registerWindowFocusDimHook();
 
       console.log("SR3E | Ready");
    });

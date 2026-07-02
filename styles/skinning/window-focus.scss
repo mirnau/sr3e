@@ -1,0 +1,13 @@
+// Dims background ApplicationV2 windows so the last-focused window reads
+// as active. Toggled by module/foundry/hooks/windowFocusDim.ts via the
+// .sr3e-window-unfocused class — no blur, since users still need to read
+// stats on the background sheet.
+
+.application {
+    filter: saturate(1) blur(0);
+    transition: filter 1.5s ease-out;
+
+    &.sr3e-window-unfocused {
+        filter: saturate(0.2) blur(4px);
+    }
+}

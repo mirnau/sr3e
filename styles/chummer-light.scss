@@ -9,6 +9,7 @@
 @use "./items/metatype.scss";
 @use "./common-components/gadget-editor.scss";
 @use "./skinning/scrollbar.scss";
+@use "./skinning/window-focus.scss";
 
 :root {
   color-scheme: light;
