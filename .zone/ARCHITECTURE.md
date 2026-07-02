@@ -38,3 +38,4 @@ Spells are grimoire entries only; do not also render them as inventory assets. A
 - [0006-dice-formula-cap-equals-tn](adr/0006-dice-formula-cap-equals-tn.md) — buildFormula cap=TN; three formula types (combat, infinite, initiative)
 - [0007-count-successes-null-for-open-rolls](adr/0007-count-successes-null-for-open-rolls.md) — countSuccesses() returns null for open rolls; isGlitch() always false without TN
 - [0008-gadget-storage-active-effects](adr/0008-gadget-storage-active-effects.md) — Gadgets stored as ActiveEffect docs with flags.sr3e.gadget.*; no embedded item-in-item
+- [0009-sustained-spell-drop-via-native-effect-deletion](adr/0009-sustained-spell-drop-via-native-effect-deletion.md) — Sustained-spell drop rides native ActiveEffect deletion + deleteActiveEffect sync hook instead of dedicated drop UI

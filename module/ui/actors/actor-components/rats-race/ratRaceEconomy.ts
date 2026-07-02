@@ -22,6 +22,7 @@ export type EconomyTotals = {
 export function transactionRows(items: Array<Record<string, any>>): TransactionRow[] {
    return items
       .map(toTransactionRow)
+      .filter(row => !(row.isCreditStick && row.amount === 0))
       .sort((a, b) => typeRank(a.type) - typeRank(b.type) || a.name.localeCompare(b.name));
 }
 

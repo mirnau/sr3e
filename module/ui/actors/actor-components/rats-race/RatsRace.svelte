@@ -1,11 +1,34 @@
 <script lang="ts">
+   import { onMount, untrack } from "svelte";
    import { localize } from "../../../../services/utilities";
+   import { TimeService } from "../../../../services/time/TimeService";
+   import { currentPeriod, daysUntilMonthEnd } from "../../../../services/economy/period";
+   import { availableCreditSticks, isSubscriptionDue, paySubscription, spawnMissedPaymentDebt } from "../../../../services/economy/subscriptionPayment";
+   import { payDebt } from "../../../../services/economy/debtPayment";
+   import { deleteTransaction } from "../../../../services/economy/transactionDeletion";
    import { economyTotals, formatNuyen, transactionRows } from "./ratRaceEconomy";
+   import CreditStickPicker from "./CreditStickPicker.svelte";
 
-   const p = $props<{ transactions: Item[] }>();
+   const p = $props<{ actor: Actor; transactions: Item[] }>();
+   const actor = untrack(() => p.actor);
+
+   let worldDate = $state(TimeService.Instance().getDate());
+
+   onMount(() => {
+      const hookId = Hooks.on("updateWorldTime", () => {
+         worldDate = TimeService.Instance().getDate();
+      });
+      return () => { Hooks.off("updateWorldTime", hookId); };
+   });
+
+   const period = $derived(currentPeriod(worldDate));
+   const daysLeft = $derived(daysUntilMonthEnd(worldDate));
 
    const rows = $derived(transactionRows(p.transactions as any[]));
    const totals = $derived(economyTotals(rows));
+   const sticks = $derived(availableCreditSticks(p.transactions as any[]) as unknown as Item[]);
+
+   let payingRowId = $state<string | null>(null);
 
    function typeLabel(type: string): string {
       const key = CONFIG.SR3E.TRANSACTION_TYPES[type as keyof typeof CONFIG.SR3E.TRANSACTION_TYPES];
@@ -13,11 +36,66 @@
    }
 
    function openTransaction(id: string) {
-      p.transactions.find((item) => item.id === id)?.sheet?.render(true);
+      p.transactions.find((item: Item) => item.id === id)?.sheet?.render(true);
+   }
+
+   function findTransaction(id: string) {
+      return p.transactions.find((item: Item) => item.id === id);
+   }
+
+   async function confirmSubscriptionPayment(rowId: string, stick: Item) {
+      const transaction = findTransaction(rowId);
+      if (!transaction) return;
+
+      const result = await paySubscription(transaction as any, stick as any, period);
+      if (!result.ok) await spawnMissedPaymentDebt(actor as any, transaction as any, period);
+      payingRowId = null;
+   }
+
+   async function confirmDebtPayment(rowId: string, stick: Item) {
+      const debt = findTransaction(rowId);
+      if (!debt) return;
+
+      await payDebt(debt as any, stick as any);
+      payingRowId = null;
+   }
+
+   const dueRowIds = $derived(new Set(
+      (p.transactions as any[])
+         .filter((item) => isSubscriptionDue(item, period))
+         .map((item) => String(item.id)),
+   ));
+
+   function isSubscriptionRow(row: { type: string; recurrent: boolean }): boolean {
+      return row.type === "expense" && row.recurrent;
+   }
+
+   function isDebtRow(row: { type: string }): boolean {
+      return row.type === "debt";
+   }
+
+   async function handleDelete(rowId: string) {
+      const transaction = findTransaction(rowId);
+      if (!transaction) return;
+
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: { title: localize(CONFIG.SR3E.MODAL.deletetransactiontitle) },
+         content: localize(CONFIG.SR3E.MODAL.deletetransaction),
+         yes: { label: localize(CONFIG.SR3E.MODAL.confirm), default: true },
+         no: { label: localize(CONFIG.SR3E.MODAL.decline) },
+         modal: true,
+         rejectClose: true,
+      });
+      if (confirmed) await deleteTransaction(actor, transaction as any);
    }
 </script>
 
 <div class="rats-race-panel">
+   <div class="rats-race-clock">
+      <span>{worldDate.toLocaleDateString()}</span>
+      <span>{daysLeft} day{daysLeft === 1 ? "" : "s"} until bills are due</span>
+   </div>
+
    <div class="rats-race-summary">
       <div>
          <span>Net Worth</span>
@@ -39,22 +117,66 @@
             <th>{localize(CONFIG.SR3E.TRANSACTION.recurrent)}</th>
             <th>{localize(CONFIG.SR3E.TRANSACTION.creditstick)}</th>
             <th>Net</th>
+            <th></th>
+            <th></th>
          </tr>
       </thead>
       <tbody>
          {#each rows as row (row.id)}
-            <tr ondblclick={() => openTransaction(row.id)}>
-               <td>{row.name}</td>
+            <tr class:negative-row={isSubscriptionRow(row) && dueRowIds.has(row.id)}>
+               <td>
+                  <button type="button" onclick={() => openTransaction(row.id)}>
+                     {row.name}
+                  </button>
+               </td>
                <td>{typeLabel(row.type)}</td>
                <td>{formatNuyen(row.amount)}</td>
                <td>{row.interestPerMonth}%</td>
                <td>{row.recurrent ? "Yes" : "No"}</td>
                <td>{row.isCreditStick ? "Yes" : "No"}</td>
                <td class:negative={row.signedAmount < 0}>{formatNuyen(row.signedAmount)}</td>
+               <td class="rats-race-actions">
+                  {#if isSubscriptionRow(row)}
+                     {#if payingRowId === row.id}
+                        <CreditStickPicker
+                           {sticks}
+                           onconfirm={(stick) => confirmSubscriptionPayment(row.id, stick)}
+                           oncancel={() => (payingRowId = null)}
+                        />
+                     {:else}
+                        <button
+                           type="button"
+                           disabled={!dueRowIds.has(row.id)}
+                           onclick={() => (payingRowId = row.id)}
+                        >
+                           {dueRowIds.has(row.id) ? "Pay" : "Paid"}
+                        </button>
+                     {/if}
+                  {:else if isDebtRow(row)}
+                     {#if payingRowId === row.id}
+                        <CreditStickPicker
+                           {sticks}
+                           onconfirm={(stick) => confirmDebtPayment(row.id, stick)}
+                           oncancel={() => (payingRowId = null)}
+                        />
+                     {:else}
+                        <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
+                     {/if}
+                  {/if}
+               </td>
+               <td class="rats-race-actions">
+                  <span
+                     class="rats-race-delete-icon"
+                     role="button"
+                     tabindex="0"
+                     onclick={() => handleDelete(row.id)}
+                     onkeydown={(e) => (e.key === "Enter" || e.key === " ") && handleDelete(row.id)}
+                  >✕</span>
+               </td>
             </tr>
          {:else}
             <tr>
-               <td colspan="7" class="rats-race-empty">No transactions</td>
+               <td colspan="9" class="rats-race-empty">No transactions</td>
             </tr>
          {/each}
       </tbody>

@@ -32,6 +32,18 @@ export default class TransactionModel extends foundry.abstract.TypeDataModel<
         required: true,
         initial: "",
       }),
+      paidThroughPeriod: new StringField({
+        required: false,
+        initial: "",
+      }),
+      lastMissedPeriod: new StringField({
+        required: false,
+        initial: "",
+      }),
+      lastInterestPeriod: new StringField({
+        required: false,
+        initial: "",
+      }),
     };
   }
 }
@@ -44,4 +56,7 @@ type TransactionSchema = {
   creditorId: StringField;
   interestPerMonth: NumberField;
   journalId: StringField;
+  paidThroughPeriod: StringField;
+  lastMissedPeriod: StringField;
+  lastInterestPeriod: StringField;
 };

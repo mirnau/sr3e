@@ -38,6 +38,8 @@ import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
 import { registerMedicalTokenDropHook } from "./module/services/medical/applyMedical";
 import { registerWindowFocusDimHook } from "./module/foundry/hooks/windowFocusDim";
+import { registerSustainedSpellCleanupHook } from "./module/services/spells/sustainedSpells";
+import { registerDebtInterestHook } from "./module/services/economy/debtInterest";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -232,6 +234,8 @@ async function registerHooks(): Promise<void> {
       registerCombatTurnHook();
       registerPoolRefreshHook();
       registerWindowFocusDimHook();
+      registerSustainedSpellCleanupHook();
+      registerDebtInterestHook();
 
       console.log("SR3E | Ready");
    });

@@ -280,7 +280,9 @@
       "confirm": "Confirm",
       "decline": "Decline",
       "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
-      "deleteskilltitle": "Delete Skill?"
+      "deleteskilltitle": "Delete Skill?",
+      "deletetransaction": "You are about to delete this. Your GM will be informed.",
+      "deletetransactiontitle": "Delete Transaction?"
     },
     "movement": {
       "movement": "Movement",
@@ -437,6 +439,7 @@
       "amount": "Amount",
       "creditor": "Creditor",
       "creditstick": "Credit Stick",
+      "deletedChat": "{actorName} deleted the transaction \"{name}\" ({amount}).",
       "interestpermonth": "Interest / Month",
       "recurrent": "Recurrent",
       "transaction": "Transaction",

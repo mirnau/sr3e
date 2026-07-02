@@ -141,7 +141,7 @@ $effect(() => {
             {:else if activeTab === "effects"}
                <ActiveEffectsViewer document={actor} />
             {:else if activeTab === "ratsrace"}
-               <RatsRace transactions={transactionItems} />
+               <RatsRace {actor} transactions={transactionItems} />
             {/if}
          </div>
       </div>

@@ -71,5 +71,9 @@ Combat spell staging is shown in the flow, but direct target health application 
 
 Drain currently opens as the follow-up composer after spellcasting and posts its own chat outcome. The stricter chat-driven variant would post a spellcast card with a `Roll Drain` button and consume that button when resolved. Keep this only if table use shows the automatic follow-up composer is not enough.
 
+## [deferred] Auto-drop sustained spells on caster incapacitation/death
+
+Turn/round lifecycle hooks to auto-drop a caster's sustained spells when they go unconscious or die, plus a free-action drop-timing gate. Not yet scoped; sustained-spell drop is otherwise honorary via the native Effects tab (ADR-0009). Revisit if table play shows manual bookkeeping isn't enough.
+
 ## [done] Open test defaulting rule
 Old code had this commented out mid-implementation. The rule modifies defaulting TN penalty into a pool subtraction (instead of TN add) for open tests. Source unclear — needs SR3E rulebook verification before implementing. Stub left in `defaultingRules.ts` with TODO. Do not guess. → Tracked in TECHSPEC-combat-architecture-decisions.md line 142.

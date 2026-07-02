@@ -5,6 +5,7 @@ import {
     canSustainInFocus,
     dropSustainedSpell,
     listSustainedSpells,
+    registerSustainedSpellCleanupHook,
     sustainSpellInFocus,
     sustainingDrainPower,
     sustainingTnPenalty,
@@ -108,5 +109,48 @@ describe("sustained spell effect attachment", () => {
 
         expect(deleteFn).toHaveBeenCalled();
         expect(listSustainedSpells(a)).toEqual([]);
+    });
+});
+
+describe("sustained spell cleanup on native ActiveEffect deletion", () => {
+    afterEach(() => {
+        delete (globalThis as Record<string, unknown>).Hooks;
+        delete (globalThis as Record<string, unknown>).game;
+    });
+
+    it("removes the flag entry when its tagged ActiveEffect is deleted outside dropSustainedSpell", async () => {
+        const a = actor();
+        const entry = await addSustainedSpell(a, { spellId: "s1", spellName: "Armor", force: 4, sustainingFocusId: null });
+
+        let deleteHandler: ((effect: unknown) => Promise<void>) | undefined;
+        (globalThis as Record<string, unknown>).Hooks = {
+            on: vi.fn((event: string, handler: (effect: unknown) => Promise<void>) => {
+                if (event === "deleteActiveEffect") deleteHandler = handler;
+            }),
+        };
+        (globalThis as Record<string, unknown>).game = { actors: [a] };
+
+        registerSustainedSpellCleanupHook();
+        await deleteHandler?.({ flags: { sr3e: { sustainedSpellId: entry.id } } });
+
+        expect(listSustainedSpells(a)).toEqual([]);
+    });
+
+    it("ignores ActiveEffect deletions unrelated to sustained spells", async () => {
+        const a = actor();
+        const entry = await addSustainedSpell(a, { spellId: "s1", spellName: "Armor", force: 4, sustainingFocusId: null });
+
+        let deleteHandler: ((effect: unknown) => Promise<void>) | undefined;
+        (globalThis as Record<string, unknown>).Hooks = {
+            on: vi.fn((event: string, handler: (effect: unknown) => Promise<void>) => {
+                if (event === "deleteActiveEffect") deleteHandler = handler;
+            }),
+        };
+        (globalThis as Record<string, unknown>).game = { actors: [a] };
+
+        registerSustainedSpellCleanupHook();
+        await deleteHandler?.({ flags: {} });
+
+        expect(listSustainedSpells(a)).toEqual([entry]);
     });
 });

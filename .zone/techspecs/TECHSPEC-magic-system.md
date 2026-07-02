@@ -233,6 +233,7 @@ This makes Drain hard to forget and keeps post-roll work attached to the origina
 - Wire `attributeModPerTwo` to auto-create/remove a tagged ActiveEffect on sustain/drop; all other algorithms compute-and-post to chat only. **Done** — GH #186 (auto-effect, `spellEffectApplication.ts`), #187 (chat tag for the other eight algorithms, `renderRollSummary.ts` spellLine).
 - Defer astral/conjuring/spirit mechanics beyond foci and Drain unless promoted into later PLAN items.
 - Defer turn/round lifecycle hooks (auto-drop on caster incapacitation/death, free-action drop timing gate) to a follow-up pass — not yet scoped.
+- Dropping is honorary: sustained-spell effects are real Foundry `ActiveEffect`s, so players already drop them via the native Effects tab. **Done** — `registerSustainedSpellCleanupHook` in `sustainedSpells.ts`, wired at `ready` in `sr3e.ts`, listens for `deleteActiveEffect` and strips the matching `sustainedSpells` flag entry regardless of deletion path, so the +2 TN/Drain penalty never outlives the effect. No dedicated drop-button UI was added — not needed since the native path is now correct.
 
 ---
 

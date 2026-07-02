@@ -31,7 +31,7 @@ $effect(() => {
 });
 </script>
 
-<ItemSheetWrapper csslayout="single">
+<ItemSheetWrapper csslayout="double">
     <ItemSheetComponent>
         <Image entity={item} />
         <div class="large-input-wrapper">

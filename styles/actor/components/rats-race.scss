@@ -7,6 +7,13 @@
    color: rgba(232, 243, 255, 0.88);
 }
 
+.rats-race-clock {
+   display: flex;
+   justify-content: space-between;
+   font-size: 0.68rem;
+   color: rgba(232, 243, 255, 0.6);
+}
+
 .rats-race-summary {
    display: grid;
    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
@@ -89,8 +96,39 @@
    color: #ff6b7a;
 }
 
+.negative-row {
+   background: rgba(255, 107, 122, 0.1);
+}
+
 .rats-race-empty {
    color: rgba(232, 243, 255, 0.35);
    font-style: italic;
    text-align: center !important;
+}
+
+.rats-race-actions {
+   text-align: right;
+}
+
+.credit-stick-picker {
+   display: flex;
+   align-items: center;
+   gap: 0.3rem;
+   justify-content: flex-end;
+}
+
+.credit-stick-picker-empty {
+   color: rgba(232, 243, 255, 0.5);
+   font-style: italic;
+}
+
+.rats-race-delete-icon {
+   display: inline-block;
+   padding: 0 0.2rem;
+   color: rgba(255, 107, 122, 0.7);
+   cursor: pointer;
+
+   &:hover {
+      color: #ff6b7a;
+   }
 }

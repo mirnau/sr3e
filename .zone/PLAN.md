@@ -24,12 +24,13 @@
 [x] SHOULD: Gadget system + item sheets → .zone/techspecs/TECHSPEC-gadget-system.md
 [x] MUST: Overflow damage rules (stun→physical conversion, bleeding out, death threshold)
 [x] MUST: First Aid items (trauma patch, medkit — depends on overflow)
+[~] MUST: Economy and transactions (general, not vehicle-specific) -> .zone/techspecs/TECHSPEC-economy-and-transactions.md
 [x] COULD: Magic Level 1 — spell/focus item substrate -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 2 — focus activation infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 3 — spellcasting infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 4 — drain chat flow -> .zone/techspecs/TECHSPEC-magic-system.md
-[~] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
+[x] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
 [ ] COULD: Chat / socket challenge–response flows
-[ ] COULD: Vehicle economy and transactions
+[ ] COULD: Vehicle economy
 [ ] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md
 

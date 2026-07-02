@@ -104,3 +104,19 @@ export async function sustainSpellInFocus(
 function randomId(): string {
     return typeof foundry !== "undefined" ? foundry.utils.randomID() : Math.random().toString(36).slice(2);
 }
+
+export function registerSustainedSpellCleanupHook(): void {
+    Hooks.on("deleteActiveEffect", async (effect: { flags?: { sr3e?: { sustainedSpellId?: string } } }) => {
+        const sustainedSpellId = effect?.flags?.sr3e?.sustainedSpellId;
+        if (!sustainedSpellId) return;
+
+        const owner = (game as { actors?: Iterable<ActorLike> }).actors as ActorLike[] | undefined;
+        const caster = [...(owner ?? [])].find(actor =>
+            listSustainedSpells(actor).some(entry => entry.id === sustainedSpellId)
+        );
+        if (!caster) return;
+
+        const remaining = listSustainedSpells(caster).filter(entry => entry.id !== sustainedSpellId);
+        await caster.setFlag?.(FLAG_SCOPE, FLAG_KEY, remaining);
+    });
+}
