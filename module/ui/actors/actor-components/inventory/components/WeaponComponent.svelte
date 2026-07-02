@@ -5,18 +5,22 @@ import { localize } from "../../../../../services/utilities";
 
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 
-const p = $props<{ item: Item; hasAmmo?: boolean; isFirearm?: boolean }>();
-const item = untrack(() => p.item);
-const sys = item.system as Record<string, any>;
+// hasAmmo is $bindable so the parent can gate the roll button on it — this
+// requires destructuring $props() directly (Svelte 5 constraint: $bindable
+// only works inside props destructuring), so `item` is untrack-snapshotted
+// here rather than via the usual `p` intermediary.
+let { item, hasAmmo = $bindable(true) }: { item: Item; hasAmmo?: boolean } = $props();
+const weapon = untrack(() => item);
+const sys = weapon.system as Record<string, any>;
 const storeManager = StoreManager.Instance;
 
-storeManager.Subscribe(item);
+storeManager.Subscribe(weapon);
 
-const ammoIdStore = storeManager.GetRWStore<string>(item, "ammoId");
+const ammoIdStore = storeManager.GetRWStore<string>(weapon, "ammoId");
 
 let ammoItem: Item | null = null;
-let roundsStore: ReturnType<typeof storeManager.GetRWStore<number>> | null = null;
-let maxCapacityStore: ReturnType<typeof storeManager.GetRWStore<number>> | null = null;
+let roundsStore = $state<ReturnType<typeof storeManager.GetRWStore<number>> | null>(null);
+let maxCapacityStore = $state<ReturnType<typeof storeManager.GetRWStore<number>> | null>(null);
 
 $effect(() => {
     const ammoId = $ammoIdStore;
@@ -27,7 +31,7 @@ $effect(() => {
         maxCapacityStore = null;
     }
     if (!ammoId) return;
-    const found = (item as any).parent?.items?.get(ammoId) as Item | undefined;
+    const found = (weapon as any).parent?.items?.get(ammoId) as Item | undefined;
     if (!found) return;
     ammoItem = found;
     storeManager.Subscribe(ammoItem);
@@ -37,7 +41,7 @@ $effect(() => {
 
 onDestroy(() => {
     if (ammoItem) storeManager.Unsubscribe(ammoItem);
-    storeManager.Unsubscribe(item);
+    storeManager.Unsubscribe(weapon);
 });
 
 const isFirearm = $derived(FIREARM_MODES.has(sys.mode ?? ""));
@@ -51,7 +55,9 @@ const clipText = $derived.by(() => {
     return `${r}/${m}`;
 });
 
-const hasAmmo = $derived(!isFirearm || (roundsStore !== null && $roundsStore > 0));
+$effect(() => {
+    hasAmmo = !isFirearm || (roundsStore !== null && ($roundsStore ?? 0) > 0);
+});
 </script>
 
 <h4 class="no-margin uppercase">¥ {sys.commodity?.cost ?? 0} — {sys.mode ?? ""}</h4>

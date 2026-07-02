@@ -42,12 +42,15 @@ const isSpell = $derived(item.type === "spell");
 const canCastSpell = $derived(item.type === "spell" && canStartSpellcasting(item as never));
 
 let targetCount = $state(typeof game !== "undefined" ? ((game.user as any)?.targets?.size ?? 0) : 0);
+let hasAmmo = $state(true);
 
 const isRollEnabled = $derived(
-    (item.type === "weapon" && targetCount === 1) ||
+    (item.type === "weapon" && targetCount === 1 && !!$linkedSkillIdStore && hasAmmo) ||
     canCastSpell
 );
 const rollDisabledReason = $derived(
+    item.type === "weapon" && !$linkedSkillIdStore ? "No skill selected" :
+    item.type === "weapon" && !hasAmmo ? "No ammo loaded" :
     item.type === "weapon" && targetCount !== 1 ? "Select exactly one target" :
     item.type === "spell" && !canCastSpell ? "Ready fetish required" :
     ""
@@ -129,7 +132,7 @@ function onRollClick() {
                 {/if}
 
                 {#if item.type === "weapon"}
-                    <WeaponComponent {item} />
+                    <WeaponComponent {item} bind:hasAmmo />
                 {:else if item.type === "ammunition"}
                     <AmmunitionComponent {item} />
                 {:else if item.type === "wearable"}
