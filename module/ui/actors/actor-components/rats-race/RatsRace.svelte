@@ -3,7 +3,7 @@
    import { localize } from "../../../../services/utilities";
    import { TimeService } from "../../../../services/time/TimeService";
    import { currentPeriod, daysUntilMonthEnd } from "../../../../services/economy/period";
-   import { availableCreditSticks, isSubscriptionDue, paySubscription, spawnMissedPaymentDebt } from "../../../../services/economy/subscriptionPayment";
+   import { availableCreditSticks, defaultOnSubscription, isSubscriptionDue, paySubscription } from "../../../../services/economy/subscriptionPayment";
    import { payDebt } from "../../../../services/economy/debtPayment";
    import { deleteTransaction } from "../../../../services/economy/transactionDeletion";
    import { economyTotals, formatNuyen, transactionRows } from "./ratRaceEconomy";
@@ -47,9 +47,23 @@
       const transaction = findTransaction(rowId);
       if (!transaction) return;
 
-      const result = await paySubscription(transaction as any, stick as any, period);
-      if (!result.ok) await spawnMissedPaymentDebt(actor as any, transaction as any, period);
+      await paySubscription(transaction as any, stick as any, period);
       payingRowId = null;
+   }
+
+   async function handleDefault(rowId: string) {
+      const transaction = findTransaction(rowId);
+      if (!transaction) return;
+
+      const confirmed = await foundry.applications.api.DialogV2.confirm({
+         window: { title: localize(CONFIG.SR3E.MODAL.defaultsubscriptiontitle) },
+         content: localize(CONFIG.SR3E.MODAL.defaultsubscription),
+         yes: { label: localize(CONFIG.SR3E.MODAL.confirm), default: true },
+         no: { label: localize(CONFIG.SR3E.MODAL.decline) },
+         modal: true,
+         rejectClose: true,
+      });
+      if (confirmed) await defaultOnSubscription(actor as any, transaction as any, period);
    }
 
    async function confirmDebtPayment(rowId: string, stick: Item) {
@@ -143,14 +157,11 @@
                            onconfirm={(stick) => confirmSubscriptionPayment(row.id, stick)}
                            oncancel={() => (payingRowId = null)}
                         />
+                     {:else if dueRowIds.has(row.id)}
+                        <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
+                        <button type="button" onclick={() => handleDefault(row.id)}>Default</button>
                      {:else}
-                        <button
-                           type="button"
-                           disabled={!dueRowIds.has(row.id)}
-                           onclick={() => (payingRowId = row.id)}
-                        >
-                           {dueRowIds.has(row.id) ? "Pay" : "Paid"}
-                        </button>
+                        <button type="button" disabled>Paid</button>
                      {/if}
                   {:else if isDebtRow(row)}
                      {#if payingRowId === row.id}

@@ -41,7 +41,7 @@ export async function paySubscription(
     return { ok: true };
 }
 
-export async function spawnMissedPaymentDebt(
+export async function defaultOnSubscription(
     actor: ActorLike,
     transaction: TransactionLike,
     period: string,
@@ -49,7 +49,7 @@ export async function spawnMissedPaymentDebt(
     if (transaction.system.lastMissedPeriod === period) return;
 
     await actor.createEmbeddedDocuments?.("Item", [{
-        name: `${transaction.name ?? "Subscription"} — Missed Payment (${period})`,
+        name: `${transaction.name ?? "Subscription"} — Defaulted Payment (${period})`,
         type: "transaction",
         system: {
             amount: transaction.system.amount,

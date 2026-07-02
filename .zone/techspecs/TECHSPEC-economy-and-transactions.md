@@ -26,15 +26,15 @@ New file `module/services/economy/period.ts`:
 - `monthsBetween(from: string, to: string): number` — elapsed whole months between two `"YYYY-MM"` periods (0 if equal or `from` is `""`).
 - `daysUntilMonthEnd(date: Date): number` — for the Rat's Race countdown display.
 
-**M3 — Subscription due/pay flow**
+**M3 — Subscription due/pay/default flow**
 
 New file `module/services/economy/subscriptionPayment.ts`:
-- `isSubscriptionDue(transaction, period): boolean` — `type === "expense" && recurrent && paidThroughPeriod !== period`.
+- `isSubscriptionDue(transaction, period): boolean` — `type === "expense" && recurrent && paidThroughPeriod !== period`. This is the sole "Access Denied" gate — the moment the in-game clock crosses into a new period, an unpaid subscription reads as denied regardless of whether the player currently has the funds to cover it. There is no separate "attempted and failed" state.
 - `availableCreditSticks(items): TransactionRow[]` — items where `isCreditStick && amount > 0`.
-- `paySubscription(actor, transaction, creditStickItem, period): Promise<{ ok: boolean }>` — if `creditStickItem.system.amount >= transaction.system.amount`: deduct cost from the stick's `amount`, set `transaction.paidThroughPeriod = period`, return `{ ok: true }`. Else return `{ ok: false }` (no mutation).
-- `spawnMissedPaymentDebt(actor, transaction, period): Promise<void>` — no-op if `lastMissedPeriod === period` (idempotency). Otherwise creates a new `Transaction` item: `type: "debt"`, `amount: transaction.system.amount`, `creditorId: transaction.system.creditorId ?? ""`, `interestPerMonth: transaction.system.interestPerMonth ?? 0`, `recurrent: false`, `isCreditStick: false`, name `"${transaction.name} — Missed Payment (${period})"`; then sets the original transaction's `lastMissedPeriod = period`.
+- `paySubscription(transaction, creditStickItem, period): Promise<{ ok: boolean }>` — if `creditStickItem.system.amount >= transaction.system.amount`: deduct cost from the stick's `amount`, set `transaction.paidThroughPeriod = period` (clears the denied state), return `{ ok: true }`. Else return `{ ok: false }` (no mutation, row stays denied — the player can retry with a different stick).
+- `defaultOnSubscription(actor, transaction, period): Promise<void>` — explicit player action (not an automatic side effect of a failed Pay). No-op if `lastMissedPeriod === period` (idempotency). Otherwise creates a new `Transaction` item: `type: "debt"`, `amount: transaction.system.amount`, `creditorId: transaction.system.creditorId ?? ""`, `interestPerMonth: transaction.system.interestPerMonth ?? 0`, `recurrent: false`, `isCreditStick: false`, name `"${transaction.name} — Defaulted Payment (${period})"`; then sets the original transaction's `lastMissedPeriod = period`. Does not clear `paidThroughPeriod` — the subscription remains denied for the rest of the period whether or not the player also defaults.
 
-The original subscription line is decoupled from any debt it spawns — it simply comes due again next period regardless of whether that debt was ever paid off. No mechanical link, no blocking.
+Pay and Default are two independent buttons shown together whenever a subscription is due — Pay attempts to restore service this period, Default explicitly converts the missed amount into a debt (behind a confirmation modal, since it has a lasting consequence). The original subscription line is decoupled from any debt it spawns — it simply comes due again next period regardless of whether that debt was ever paid off. No mechanical link, no blocking.
 
 **M4 — Debt paydown ("pay what you can")**
 
@@ -51,7 +51,7 @@ New file `module/services/economy/debtInterest.ts`:
 
 `RatsRace.svelte`:
 - Read-only game clock (date, from `TimeService.getDate()`, reactive on `updateWorldTime` — same pattern as `TimeManager.svelte`) plus "days until end of month" (M2's `daysUntilMonthEnd`) shown above the ledger table.
-- Recurring `expense` rows: a **Pay** button. Clicking opens a credit-stick picker (dropdown/small list of `availableCreditSticks`, player selects one explicitly — no auto-drain across multiple sticks). Confirming calls `paySubscription`; on `{ ok: false }`, call `spawnMissedPaymentDebt` and render the row in a warning/red "Access Denied" style for the remainder of the period (row is unpaid-for-current-period → warning style; this is a simplification — MUST scope does not distinguish "not yet attempted" from "attempted and failed," both render as due/warning until paid).
+- Recurring `expense` rows: while due, both a **Pay** and a **Default** button. Pay opens a credit-stick picker (dropdown/small list of `availableCreditSticks`, player selects one explicitly — no auto-drain across multiple sticks); confirming calls `paySubscription`. Default opens a confirmation modal ("You are about to default on this payment. It will become a debt.") and, on confirm, calls `defaultOnSubscription`. Once paid, the row shows a single disabled "Paid" button until next period. The row renders in a warning/red "Access Denied" style for the entire period it's unpaid, from the moment the period rolls over — independent of whether the player has attempted or can afford payment.
 - `debt` rows: a **Pay** button, always available (not period-gated). Opens the same credit-stick picker; confirming calls `payDebt`. No red/denied state for debts — they just persist and grow via M5 until paid down or a GM deletes the item outright (forgiveness — already supported by existing item deletion, no new code needed).
 - Credit-stick (`isCreditStick`) rows with `amount === 0` are filtered out of `transactionRows`/the ledger table (already achievable via a filter in `ratRaceEconomy.ts`), but the item is untouched in the actor's inventory so it can be topped up later by another transaction.
 
@@ -60,12 +60,6 @@ New file `module/services/economy/debtInterest.ts`:
 Scope change from the original "GM-only edit/delete" intention — this is a tabletop game running on an honor system, not an enforced ledger. Any row (asset/income/debt/expense/credit-stick alike) must be openable and deletable by whoever's playing the sheet:
 - Transaction name in the Rat's Race table becomes a clickable button (replacing/supplementing the current double-click) that opens the transaction's item sheet (`TransactionApp.svelte`), where it's already fully editable.
 - Add a trailing `✕` column on every row. Clicking it opens a confirmation modal: "You are about to delete this. Your GM will be informed." On confirm: delete the `Transaction` item and whisper the GM (reusing the `whisperDepletion`-style pattern from `applyMedical.ts` — `game.users` filtered to active GMs) naming the actor, transaction, and amount. No block, no permission gate beyond the whisper — the system does not attempt to prevent cheating, only to make it visible to the GM.
-
-### SHOULD
-
-**S1 — Distinguish "not yet due" from "overdue"**
-
-Render recurring expense rows neutrally until the current period actually starts, rather than warning-styling every unpaid row regardless of whether Pay has been attempted yet. Deferred from MUST because it needs an extra piece of state (or a due-date convention) beyond `paidThroughPeriod` alone.
 
 ### COULD
 
@@ -100,6 +94,7 @@ No new item types. Credit sticks remain a boolean flag (`isCreditStick`) on `Tra
 
 - Credit sticks are `Transaction` items flagged `isCreditStick`, not a new item type — deliberately kept simple.
 - Settlement is per-line (player picks what to pay and in what order), not a single bulk "Settle Payments" button — this is the point: it creates hard choices under scarcity.
-- A missed subscription payment auto-spawns a one-time debt; the debt is fully decoupled from the subscription afterward (subscription resets next period regardless; debt is paid down independently).
+- Defaulting is an explicit player action (a dedicated Default button + confirmation modal), not an automatic side effect of a failed Pay click — Pay simply fails silently and can be retried. The debt it spawns is fully decoupled from the subscription afterward (subscription resets next period regardless; debt is paid down independently).
+- "Access Denied" styling is purely period-based (`isSubscriptionDue`), not attempt-based — a subscription reads as denied the instant the clock crosses into a new unpaid period, whether or not the player has enough money or has even tried to pay yet.
 - Debt has no mechanical collection consequence beyond compounding interest — collection/violence/forgiveness is entirely GM narration, with forgiveness = GM deletes the debt item (already supported, no new code).
 - Multi-credit-stick payments require the player to pick exactly one stick; insufficient balance on that stick fails the payment even if another stick could have covered it.

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { availableCreditSticks, isSubscriptionDue, paySubscription, spawnMissedPaymentDebt } from "./subscriptionPayment";
+import { availableCreditSticks, defaultOnSubscription, isSubscriptionDue, paySubscription } from "./subscriptionPayment";
 
 function transaction(overrides: Record<string, unknown> = {}) {
     const system = {
@@ -76,17 +76,17 @@ describe("paySubscription", () => {
     });
 });
 
-describe("spawnMissedPaymentDebt", () => {
-    it("creates a debt transaction and flags the missed period", async () => {
+describe("defaultOnSubscription", () => {
+    it("creates a debt transaction and flags the defaulted period", async () => {
         const sub = transaction({ amount: 500, creditorId: "actor1", interestPerMonth: 5 });
         const createEmbeddedDocuments = vi.fn().mockResolvedValue([{}]);
         const actor = { createEmbeddedDocuments };
 
-        await spawnMissedPaymentDebt(actor, sub, "2077-03");
+        await defaultOnSubscription(actor, sub, "2077-03");
 
         expect(createEmbeddedDocuments).toHaveBeenCalledWith("Item", [
             expect.objectContaining({
-                name: "Lifestyle — Missed Payment (2077-03)",
+                name: "Lifestyle — Defaulted Payment (2077-03)",
                 type: "transaction",
                 system: expect.objectContaining({
                     amount: 500,
@@ -104,7 +104,7 @@ describe("spawnMissedPaymentDebt", () => {
         const createEmbeddedDocuments = vi.fn();
         const actor = { createEmbeddedDocuments };
 
-        await spawnMissedPaymentDebt(actor, sub, "2077-03");
+        await defaultOnSubscription(actor, sub, "2077-03");
 
         expect(createEmbeddedDocuments).not.toHaveBeenCalled();
     });

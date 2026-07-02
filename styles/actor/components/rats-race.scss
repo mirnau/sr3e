@@ -108,6 +108,10 @@
 
 .rats-race-actions {
    text-align: right;
+
+   button + button {
+      margin-left: 0.3rem;
+   }
 }
 
 .credit-stick-picker {

@@ -12,5 +12,7 @@ export const MODAL_KEYS = [
   "deleteskill",
   "deleteskilltitle",
   "deletetransaction",
-  "deletetransactiontitle"
+  "deletetransactiontitle",
+  "defaultsubscription",
+  "defaultsubscriptiontitle"
 ] as const;
