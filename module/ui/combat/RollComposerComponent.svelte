@@ -67,7 +67,11 @@ $effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
 export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
     targetNumber = newSetup.rollState.targetNumber;
-    modifiers = [...(newSetup.rollState.modifiers ?? [])];
+    const woundPenalty = Number((actor.system as any)?.health?.penalty?.value ?? 0);
+    modifiers = [
+        ...(newSetup.rollState.modifiers ?? []),
+        ...(woundPenalty > 0 ? [{ id: "wound-penalty", name: "Wound Penalty", value: woundPenalty }] : []),
+    ];
     poolDice = 0;
     focusDice = 0;
     karmaDice = 0;
@@ -370,8 +374,11 @@ onDestroy(() => {
             </div>
         {/if}
 
-        <!-- Karma -->
-        {#if !isDefaulting}
+        <!-- Karma dice double the character's base skill/attribute dice, so a
+             roll with no base dice (e.g. Dodge, which is Combat-Pool-only)
+             can never have any to add — hide the control instead of showing
+             a permanently-stuck-at-zero one. -->
+        {#if !isDefaulting && (setup?.rollState.dice ?? 0) > 0}
             <div class="attribute-card composer-unit">
                 <div class="attribute-card-shadow"></div>
                 <div class="attribute-card-outline">
