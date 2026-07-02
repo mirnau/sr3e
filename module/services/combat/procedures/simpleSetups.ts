@@ -18,6 +18,9 @@ export type ProcedureSetup = {
     // skill-to-attribute defaulting reactively when the player selects
     // Defaulting — null/absent when the roll has no defaultable linked skill.
     defaultingAttributeKey?: string | null;
+    // The linked skill's own id, excluded from the composer's
+    // defaulting-candidate picker (can't default a skill to itself).
+    defaultingExcludeSkillId?: string | null;
     extraOptions?: Record<string, unknown>;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;

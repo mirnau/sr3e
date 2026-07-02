@@ -78,6 +78,7 @@ export function buildFirearmSetup(
         lockPriority: "advanced",
         selfPublish: true,
         defaultingAttributeKey: resolved?.linkedAttribute ?? null,
+        defaultingExcludeSkillId: resolved?.skillId ?? null,
         defenseHint: { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "Reaction" },
         exportFn: () => {
             const { plan, damage } = beginAttack(actor as never, weapon, { ...opts, resolveAmmo: undefined });

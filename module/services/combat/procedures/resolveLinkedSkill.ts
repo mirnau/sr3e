@@ -11,7 +11,7 @@ type SkillSystem = {
     languageSkill?: SkillSubSchema;
 };
 
-type Item = { id: string; type: string; system: Record<string, unknown> };
+type Item = { id: string; name?: string; type: string; system: Record<string, unknown> };
 type Actor = { items: { get?: (id: string) => Item | undefined; contents?: Item[] } };
 
 export type LinkedSkillResolution = {
@@ -70,4 +70,41 @@ export function resolveLinkedSkill(
         specName,
         specHasOwnValue,
     };
+}
+
+// Candidates for the "defaulting to a related skill/specialization" picker
+// (SR3E p.84): every skill and specialization the actor owns that shares the
+// same linkedAttribute as the skill being defaulted from — the "group"
+// concept is honorary in this system (no formal skill-group model), left to
+// the player/GM to judge which options actually make sense.
+export type DefaultingCandidate = {
+    linkedSkillId: string; // skillId, or "skillId::specIndex" for a specialization
+    label: string;
+    rating: number;
+};
+
+export function listDefaultingCandidates(
+    actor: Actor,
+    linkedAttributeKey: string,
+    excludeSkillId: string | null,
+): DefaultingCandidate[] {
+    const skills = actor.items.contents ?? [];
+    const candidates: DefaultingCandidate[] = [];
+
+    for (const item of skills) {
+        if (item.type !== "skill" || item.id === excludeSkillId) continue;
+        const ss = resolveSubSchema(item.system as SkillSystem);
+        if (ss.linkedAttribute !== linkedAttributeKey) continue;
+
+        candidates.push({ linkedSkillId: item.id, label: item.name ?? "Skill", rating: ss.value ?? 0 });
+        (ss.specializations ?? []).forEach((spec, i) => {
+            candidates.push({
+                linkedSkillId: `${item.id}::${i}`,
+                label: `${item.name ?? "Skill"} — ${spec.name ?? "Specialization"}`,
+                rating: spec.value ?? ss.value ?? 0,
+            });
+        });
+    }
+
+    return candidates;
 }

@@ -3,6 +3,7 @@ import { onDestroy, onMount, untrack } from "svelte";
 import { writable } from "svelte/store";
 import { sumMods, upsertMod, removeMod } from "../../services/combat/modifierList";
 import { computeDefaulting } from "../../services/combat/defaultingRules";
+import { resolveLinkedSkill, listDefaultingCandidates, type DefaultingCandidate } from "../../services/combat/procedures/resolveLinkedSkill";
 import { difficultyLabel } from "../../services/combat/procedures/composerHelpers";
 import {
     getComposerState,
@@ -45,12 +46,31 @@ let karmaDice = $state(0);
 let isDefaulting = $state(false);
 let selectedForce = $state(1);
 let selectedDamageLevel = $state("m");
+// "" means default straight to the linked attribute; otherwise a
+// linkedSkillId-shaped value ("skillId" or "skillId::specIndex") picked
+// from defaultingCandidates.
+let selectedDefaultCandidateId = $state("");
 
 const DEFAULTING_MOD_ID = "defaulting-attribute";
+
+// The picker only makes sense once the linked skill itself has nothing to
+// offer (rating 0) — otherwise the player would just roll normally.
+const showDefaultingPicker = $derived(isDefaulting && (setup?.rollState.dice ?? 0) === 0);
+
+const defaultingCandidates = $derived.by<DefaultingCandidate[]>(() => {
+    if (!showDefaultingPicker || !setup?.defaultingAttributeKey) return [];
+    return listDefaultingCandidates(actor, setup.defaultingAttributeKey, setup.defaultingExcludeSkillId ?? null);
+});
 
 const defaultingResult = $derived.by(() => {
     if (!isDefaulting || !setup) return null;
     const attrKey = setup.defaultingAttributeKey ?? null;
+
+    if (selectedDefaultCandidateId) {
+        const resolved = resolveLinkedSkill(actor, selectedDefaultCandidateId);
+        if (resolved) return computeDefaulting(resolved.skill, resolved.specIndex, resolved.linkedAttribute, actor, targetNumber, baseModifiers);
+    }
+
     if (!attrKey) return null;
     return computeDefaulting(null, null, attrKey, actor, targetNumber, baseModifiers);
 });
@@ -81,7 +101,11 @@ const maxAffordable = $derived(
     karmaBalance > 0 ? Math.floor((-1 + Math.sqrt(1 + 8 * karmaBalance)) * 0.5) : 0
 );
 const karmaCap = $derived(Math.min(maxAffordable, effectiveDice));
-const poolAvailable = $derived(composerState.poolAvailable);
+const poolAvailable = $derived(
+    defaultingMod?.poolCap !== undefined
+        ? Math.min(composerState.poolAvailable, defaultingMod.poolCap)
+        : composerState.poolAvailable
+);
 const focusAvailable = $derived(composerState.focusAvailable);
 const forceControl = $derived(setup?.forceControl ?? null);
 const forceMin = $derived(forceControl?.min ?? 1);
@@ -95,6 +119,7 @@ $effect(() => { if (poolDice > poolAvailable) poolDice = Math.max(0, poolAvailab
 $effect(() => { if (poolForbidden && poolDice > 0) poolDice = 0; });
 $effect(() => { if (focusDice > focusAvailable) focusDice = Math.max(0, focusAvailable); });
 $effect(() => { if (karmaDice > karmaCap) karmaDice = Math.max(0, karmaCap); });
+$effect(() => { if (!showDefaultingPicker && selectedDefaultCandidateId) selectedDefaultCandidateId = ""; });
 
 export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
@@ -110,6 +135,7 @@ export function open(newSetup: ProcedureSetup): void {
     selectedForce = newSetup.forceControl?.value ?? 1;
     selectedDamageLevel = newSetup.damageLevelControl?.value ?? "m";
     isDefaulting = false;
+    selectedDefaultCandidateId = "";
     composerState.isOpen = true;
     composerState.selectedFocusKey = null;
     composerState.focusAvailable = 0;
@@ -138,6 +164,7 @@ function onReset(): void {
     selectedForce = setup?.forceControl?.value ?? 1;
     selectedDamageLevel = setup?.damageLevelControl?.value ?? "m";
     isDefaulting = false;
+    selectedDefaultCandidateId = "";
     composerState.selectedPoolKey = null;
     composerState.poolAvailable = 0;
     composerState.selectedFocusKey = null;
@@ -263,6 +290,26 @@ onDestroy(() => {
             </div>
         </div>
 
+        {#if showDefaultingPicker}
+        <!-- Defaulting target: pick a related skill/specialization sharing
+             the same linked attribute, or leave unset to default straight
+             to the attribute (SR3E p.84-85). Honor-system/GM-blessed —
+             nothing here enforces "same skill group" beyond the attribute match. -->
+        <div class="attribute-card composer-unit">
+            <div class="attribute-card-shadow"></div>
+            <div class="attribute-card-outline">
+                <div class="attribute-card-displayarea"></div>
+                <h3 class="no-margin">Default To</h3>
+                <select bind:value={selectedDefaultCandidateId} class="roll-composer-type-select">
+                    <option value="">Linked Attribute Only</option>
+                    {#each defaultingCandidates as candidate (candidate.linkedSkillId)}
+                        <option value={candidate.linkedSkillId}>{candidate.label} ({candidate.rating})</option>
+                    {/each}
+                </select>
+            </div>
+        </div>
+        {/if}
+
         {#if !setup.openTest}
         {#if forceControl}
         <!-- Spell Force -->
@@ -356,8 +403,11 @@ onDestroy(() => {
         </div>
         {/if}
 
-        <!-- Dice Pool -->
-        {#if !isDefaulting && composerState.selectedPoolKey}
+        <!-- Dice Pool: hidden only when defaulting fully forbids it
+             (skill-to-attribute); skill/specialization defaulting still
+             allows a pool, just capped lower (poolAvailable accounts for
+             this via defaultingMod.poolCap above). -->
+        {#if !poolForbidden && composerState.selectedPoolKey}
             <div class="attribute-card composer-unit composer-unit--pool-active">
                 <div class="attribute-card-shadow"></div>
                 <div class="attribute-card-outline">
