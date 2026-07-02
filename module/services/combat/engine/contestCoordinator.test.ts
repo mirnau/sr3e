@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
     waitForResponse, deliverResponse, expireContest,
     countSuccesses, computeNetSuccesses, submitContestResponse, _resetForTest,
-    canCurrentUserActFor, isActorLockedForCurrentGM,
+    canCurrentUserActFor, isActorLockedForCurrentUser,
 } from "./contestCoordinator";
 import type { RollSnapshot } from "./types";
 
@@ -88,13 +88,13 @@ function setGame(userId: string, isGM: boolean, users: Array<{ id: string; isGM:
 
 afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
 
-describe("canCurrentUserActFor / isActorLockedForCurrentGM", () => {
+describe("canCurrentUserActFor / isActorLockedForCurrentUser", () => {
     it("a GM may act when no active player controls the actor", () => {
         const actor = { id: "a1" };
         setGame("gm1", true, [{ id: "gm1", isGM: true, active: true }], { a1: actor });
 
         expect(canCurrentUserActFor(actor as never)).toBe(true);
-        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+        expect(isActorLockedForCurrentUser("a1")).toBe(false);
     });
 
     it("a GM may NOT act once an active player controls the actor", () => {
@@ -105,7 +105,7 @@ describe("canCurrentUserActFor / isActorLockedForCurrentGM", () => {
         ], { a1: actor });
 
         expect(canCurrentUserActFor(actor as never)).toBe(false);
-        expect(isActorLockedForCurrentGM("a1")).toBe(true);
+        expect(isActorLockedForCurrentUser("a1")).toBe(true);
     });
 
     it("a GM regains control once the player goes offline", () => {
@@ -116,10 +116,10 @@ describe("canCurrentUserActFor / isActorLockedForCurrentGM", () => {
         ], { a1: actor });
 
         expect(canCurrentUserActFor(actor as never)).toBe(true);
-        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+        expect(isActorLockedForCurrentUser("a1")).toBe(false);
     });
 
-    it("the controlling player may act; is never reported locked (lock is GM-only)", () => {
+    it("the controlling player may act and is never reported locked for themselves", () => {
         const actor = { id: "a1", ownership: { player1: 3 } };
         setGame("player1", false, [
             { id: "gm1", isGM: true, active: true },
@@ -127,7 +127,21 @@ describe("canCurrentUserActFor / isActorLockedForCurrentGM", () => {
         ], { a1: actor });
 
         expect(canCurrentUserActFor(actor as never)).toBe(true);
-        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+        expect(isActorLockedForCurrentUser("a1")).toBe(false);
+    });
+
+    // Locking is a per-viewer concern, not GM-only: a player looking at
+    // another player's controls sees a no-op the same as anyone else would.
+    it("locks the view for an unrelated player too, not just the GM", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        setGame("player2", false, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: true },
+            { id: "player2", isGM: false, active: true },
+        ], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(false);
+        expect(isActorLockedForCurrentUser("a1")).toBe(true);
     });
 
     it("an unrelated player may not act", () => {

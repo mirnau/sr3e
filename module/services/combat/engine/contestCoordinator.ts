@@ -227,21 +227,18 @@ export function canCurrentUserActFor(actor: SR3EActor | null): boolean {
     return controller?.id === (game.user as unknown as { id?: string }).id;
 }
 
-// Render-time check for chatMessageHTML's hook: is the CURRENT (GM) viewer
-// locked out of this actor's controls because an active, non-GM player
-// controls it? Only ever true for a GM — a non-GM viewer of another
-// player's controls is already excluded by canCurrentUserActFor at click
-// time, but isn't worth visually greying out (that's not this client's
-// mistake to make).
-export function isActorLockedForCurrentGM(actorId: string | null | undefined): boolean {
-    if (!actorId || typeof game === "undefined" || !game.user || !game.actors) return false;
-    if (!(game.user as unknown as { isGM?: boolean }).isGM) return false;
+// Render-time check for chatMessageHTML's hook: is the CURRENT viewer locked
+// out of this actor's controls? Applies to every viewer, not just the GM —
+// a player looking at another player's side of a contest (or at an NPC's
+// controls, which resolve to the GM) is just as much a no-op click as a GM
+// looking at a player's. The controlling user themselves always passes.
+export function isActorLockedForCurrentUser(actorId: string | null | undefined): boolean {
+    if (!actorId || typeof game === "undefined" || !game.actors) return false;
 
     const actor = game.actors.get(actorId) as unknown as SR3EActor | undefined;
     if (!actor) return false;
 
-    const controller = resolveControllingUser(actor);
-    return !!controller && !(controller as unknown as { isGM?: boolean }).isGM;
+    return !canCurrentUserActFor(actor);
 }
 
 export function _resetForTest(): void {

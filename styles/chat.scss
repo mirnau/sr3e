@@ -164,11 +164,11 @@ body.game .chat-message[data-sr3e-consumed] .sr3e-die {
    pointer-events: none;
 }
 
-// GM-only lockout — set per subtree by lockForGMIfNeeded when an active,
-// non-GM player controls the actor these controls belong to. Each client
-// computes this against its own game.user, so a player's own view of the
-// same message is never affected.
-[data-sr3e-gm-locked] {
+// Per-viewer lockout — set per subtree by lockForCurrentViewerIfNeeded
+// whenever the current client's user doesn't control the actor these
+// controls belong to. Each client computes this against its own game.user,
+// so the controlling user's own view of the same message is unaffected.
+[data-sr3e-locked] {
    .sr3e-die {
       opacity: 0.45;
       cursor: not-allowed;

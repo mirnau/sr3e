@@ -200,7 +200,7 @@ describe("contest Done button delegation", () => {
     });
 });
 
-describe("GM visual lockout on render", () => {
+describe("per-viewer visual lockout on render", () => {
     afterEach(() => {
         delete (globalThis as Record<string, unknown>).game;
         document.body.innerHTML = "";
@@ -251,14 +251,14 @@ describe("GM visual lockout on render", () => {
         const initiatorSide = document.querySelector<HTMLElement>('[data-side="initiator"]')!;
         const targetSide = document.querySelector<HTMLElement>('[data-side="target"]')!;
 
-        expect(initiatorSide.dataset.sr3eGmLocked).toBeUndefined();
+        expect(initiatorSide.dataset.sr3eLocked).toBeUndefined();
         expect(initiatorSide.querySelector("button")!.disabled).toBe(false);
 
-        expect(targetSide.dataset.sr3eGmLocked).toBe("true");
+        expect(targetSide.dataset.sr3eLocked).toBe("true");
         expect(targetSide.querySelector("button")!.disabled).toBe(true);
     });
 
-    it("does not lock anything for a non-GM viewer", () => {
+    it("does not lock the controlling player's own view of their side", () => {
         const targetActor = { id: "target1", ownership: { player1: 3 } };
         (globalThis as Record<string, unknown>).game = {
             user: { id: "player1", isGM: false },
@@ -271,7 +271,28 @@ describe("GM visual lockout on render", () => {
 
         fireRenderHook({ contestOutcome: { contestId: "c1", initiator: { actorId: "initiator1" }, target: { actorId: "target1" } } });
 
-        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eGmLocked).toBeUndefined();
+        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eLocked).toBeUndefined();
+    });
+
+    // Locking is per-viewer, not GM-only: a player looking at someone else's
+    // side should see the same no-op lock a GM would.
+    it("locks the view for an unrelated player, not just the GM", () => {
+        const targetActor = { id: "target1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "player2", isGM: false },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+                ["player2", { id: "player2", isGM: false, active: true }],
+            ]),
+            actors: { get: (id: string) => (id === "target1" ? targetActor : undefined) },
+        };
+
+        fireRenderHook({ contestOutcome: { contestId: "c1", initiator: { actorId: "initiator1" }, target: { actorId: "target1" } } });
+
+        const targetSide = document.querySelector<HTMLElement>('[data-side="target"]')!;
+        expect(targetSide.dataset.sr3eLocked).toBe("true");
+        expect(targetSide.querySelector("button")!.disabled).toBe(true);
     });
 
     it("does not lock when the controlling player is offline", () => {
@@ -287,6 +308,6 @@ describe("GM visual lockout on render", () => {
 
         fireRenderHook({ contestOutcome: { contestId: "c1", initiator: { actorId: "initiator1" }, target: { actorId: "target1" } } });
 
-        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eGmLocked).toBeUndefined();
+        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eLocked).toBeUndefined();
     });
 });
