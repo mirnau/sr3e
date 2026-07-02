@@ -11,8 +11,8 @@ const actor = (str = 4) => ({
     items: { get: (id: string) => id === "s1" ? skill("s1", 4) : undefined, contents: [skill("s1", 4)] },
 });
 
-const weapon = (linkedSkillId = "s1") => ({
-    system: { linkedSkillId, isDefaulting: false, difficulty: 4, damage: 2, damageType: "m" },
+const weapon = (linkedSkillId = "s1", isDefaulting = false) => ({
+    system: { linkedSkillId, isDefaulting, difficulty: 4, damage: 2, damageType: "m" },
 });
 
 describe("buildMeleeSetup", () => {
@@ -42,5 +42,17 @@ describe("buildMeleeSetup", () => {
     });
     it("exposes the linked skill's attribute for composer-driven defaulting", () => {
         expect(buildMeleeSetup(actor() as never, weapon()).defaultingAttributeKey).toBe("quickness");
+    });
+    it("excludes the linked skill from the defaulting picker when the weapon is not itself defaulting", () => {
+        const s = buildMeleeSetup(actor() as never, weapon("s1", false));
+        expect(s.defaultingExcludeSkillId).toBe("s1");
+        expect(s.itemDefaultsOnRoll).toBe(false);
+        expect(s.defaultingPreselectedSkillId).toBeNull();
+    });
+    it("pre-selects the linked skill instead of excluding it when the weapon itself defaults on roll", () => {
+        const s = buildMeleeSetup(actor() as never, weapon("s1", true));
+        expect(s.defaultingExcludeSkillId).toBeNull();
+        expect(s.itemDefaultsOnRoll).toBe(true);
+        expect(s.defaultingPreselectedSkillId).toBe("s1");
     });
 });

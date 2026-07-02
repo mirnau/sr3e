@@ -52,7 +52,9 @@ export function buildMeleeSetup(
         lockPriority: "advanced",
         selfPublish: true,
         defaultingAttributeKey: resolved?.linkedAttribute ?? null,
-        defaultingExcludeSkillId: resolved?.skillId ?? null,
+        defaultingExcludeSkillId: ws.isDefaulting ? null : (resolved?.skillId ?? null),
+        itemDefaultsOnRoll: ws.isDefaulting ?? false,
+        defaultingPreselectedSkillId: ws.isDefaulting ? (linkedSkillId || null) : null,
         defenseHint: { type: "skill", key: "melee", tnMod: 0, tnLabel: "Melee Combat" },
         exportFn: () => ({
             familyKey: "melee",

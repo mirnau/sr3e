@@ -57,4 +57,16 @@ describe("buildFirearmSetup", () => {
         const s = buildFirearmSetup(actor() as never, weapon("missing-skill"));
         expect(s.defaultingAttributeKey).toBeNull();
     });
+    it("excludes the linked skill from the defaulting picker when the weapon is not itself defaulting", () => {
+        const s = buildFirearmSetup(actor() as never, weapon("s1", false));
+        expect(s.defaultingExcludeSkillId).toBe("s1");
+        expect(s.itemDefaultsOnRoll).toBe(false);
+        expect(s.defaultingPreselectedSkillId).toBeNull();
+    });
+    it("pre-selects the linked skill instead of excluding it when the weapon itself defaults on roll", () => {
+        const s = buildFirearmSetup(actor() as never, weapon("s1", true));
+        expect(s.defaultingExcludeSkillId).toBeNull();
+        expect(s.itemDefaultsOnRoll).toBe(true);
+        expect(s.defaultingPreselectedSkillId).toBe("s1");
+    });
 });

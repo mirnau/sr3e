@@ -21,6 +21,16 @@ export type ProcedureSetup = {
     // The linked skill's own id, excluded from the composer's
     // defaulting-candidate picker (can't default a skill to itself).
     defaultingExcludeSkillId?: string | null;
+    // True when the item itself is configured to always be a defaulting
+    // action (weapon.system.isDefaulting) — e.g. wielding an Assault Rifle
+    // with the Guns skill because that's what linkedSkillId points at.
+    // Pre-selects Defaulting mode in the composer; the player can still
+    // override.
+    itemDefaultsOnRoll?: boolean;
+    // The item's own linkedSkillId ("skillId" or "skillId::specIndex"),
+    // pre-selected in the composer's defaulting-candidate picker when
+    // itemDefaultsOnRoll is true.
+    defaultingPreselectedSkillId?: string | null;
     extraOptions?: Record<string, unknown>;
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;

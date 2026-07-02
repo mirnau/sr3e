@@ -78,7 +78,12 @@ export function buildFirearmSetup(
         lockPriority: "advanced",
         selfPublish: true,
         defaultingAttributeKey: resolved?.linkedAttribute ?? null,
-        defaultingExcludeSkillId: resolved?.skillId ?? null,
+        // When the weapon itself defaults on roll, linkedSkillId already
+        // points AT the substitute skill (e.g. Guns for an Assault Rifle) —
+        // nothing to exclude, it's the pre-selected candidate instead.
+        defaultingExcludeSkillId: ws.isDefaulting ? null : (resolved?.skillId ?? null),
+        itemDefaultsOnRoll: ws.isDefaulting ?? false,
+        defaultingPreselectedSkillId: ws.isDefaulting ? (linkedSkillId || null) : null,
         defenseHint: { type: "attribute", key: "reaction", tnMod: 0, tnLabel: "Reaction" },
         exportFn: () => {
             const { plan, damage } = beginAttack(actor as never, weapon, { ...opts, resolveAmmo: undefined });
