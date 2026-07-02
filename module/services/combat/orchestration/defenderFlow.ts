@@ -1,4 +1,4 @@
-import { registerContestStub, expireContest, getContest, resolveControllingUser } from "../engine/contestCoordinator";
+import { registerContestStub, expireContest, getContest, resolveControllingUser, canCurrentUserActFor } from "../engine/contestCoordinator";
 import { buildDodgeSetup, buildMeleeDefenseSetup, buildSpellResistanceSetup } from "../procedures/defenseSetups";
 import { openComposer } from "../procedures/composerService";
 import { registerPendingResponse } from "../engine/responseInterceptor";
@@ -98,15 +98,20 @@ async function postContestCancelled(defenderName: string): Promise<void> {
 }
 
 export function handleDefenderChoice(contestId: string, key: string | null | undefined): void {
+    const record = getContest(contestId);
+
+    // A GM viewing this prompt (whispered to whoever resolveControllingUser
+    // picked) must not be able to answer on behalf of an actively-controlling
+    // player — same rule as reroll/buy/done everywhere else.
+    if (record && !canCurrentUserActFor(record.target)) return;
+
     if (!key || key === "no") {
-        const record = getContest(contestId);
         const name = (record?.target as unknown as { name?: string })?.name ?? "Defender";
         expireContest(contestId);
         void postContestCancelled(name);
         return;
     }
 
-    const record = getContest(contestId);
     if (!record) {
         expireContest(contestId);
         return;

@@ -76,13 +76,41 @@ describe("computeResistanceOutcome", () => {
 });
 
 describe("canActOnResistance", () => {
-    it("allows a GM regardless of ownership", () => {
-        setGame("gm1", true, null);
+    it("allows a GM when no active player controls the defender", () => {
+        setGame("gm1", true, { id: "def1" });
         expect(canActOnResistance(flag())).toBe(true);
     });
 
     it("allows the defender's controlling player", () => {
         setGame("player1", false, { id: "def1", ownership: { player1: 3 } });
+        expect(canActOnResistance(flag())).toBe(true);
+    });
+
+    // The actual point of this session's change: a GM must not be able to
+    // act on behalf of a player who is actively at the keyboard.
+    it("denies a GM when an active player controls the defender", () => {
+        const actor = { id: "def1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+            actors: { get: (id: string) => (id === "def1" ? actor : undefined) },
+        };
+        expect(canActOnResistance(flag())).toBe(false);
+    });
+
+    it("allows a GM when the controlling player is offline", () => {
+        const actor = { id: "def1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: false }],
+            ]),
+            actors: { get: (id: string) => (id === "def1" ? actor : undefined) },
+        };
         expect(canActOnResistance(flag())).toBe(true);
     });
 

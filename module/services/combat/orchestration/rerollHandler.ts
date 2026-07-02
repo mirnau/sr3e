@@ -1,4 +1,5 @@
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
+import { canCurrentUserActFor } from "../engine/contestCoordinator";
 import { serializeByKey } from "../../writeQueue";
 import {
     renderSimpleRollSummary,
@@ -43,6 +44,7 @@ export async function handleKarmaPoolReroll(
 
     const actor = getKarmaActor(flag.actorId);
     if (!actor) return;
+    if (!canCurrentUserActFor(actor as never)) return;
 
     const result = await karmaPoolReroll(actor, flag.results, tn, flag.rerollCount ?? 0);
     if (!result.ok) { notifyKarmaSpendDeclined(result.reason); return; }
@@ -63,6 +65,7 @@ export async function handleKarmaBuySuccess(
 
     const actor = getKarmaActor(flag.actorId);
     if (!actor) return;
+    if (!canCurrentUserActFor(actor as never)) return;
 
     const result = await karmaBuySuccess(actor, flag.results, tn);
     if (!result.ok) { notifyKarmaSpendDeclined(result.reason); return; }

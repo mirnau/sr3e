@@ -8,6 +8,7 @@ import { handleContestReroll, handleContestBuy, handleContestDone, type ContestO
 import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFlag } from "../../services/spells/drainRerollHandler";
 import { handleResistanceReroll, handleResistanceBuy, handleResistanceDone, type ResistanceOutcomeFlag } from "../../services/combat/orchestration/resistanceRerollHandler";
 import { requestMessageUpdate } from "../../services/combat/orchestration/messageRelay";
+import { getContest, isActorLockedForCurrentGM } from "../../services/combat/engine/contestCoordinator";
 import { withDiePending } from "./diePendingState";
 
 type ChatMessageLike = {
@@ -28,6 +29,63 @@ function consumeCard(container: HTMLElement): boolean {
 
 function disableAllButtons(html: HTMLElement): void {
     html.querySelectorAll<HTMLButtonElement>("button").forEach(b => { b.disabled = true; });
+}
+
+// Purely a GM-side view concern: disables this subtree's buttons and marks
+// it so CSS can grey out its dice, on the GM's OWN client only — every
+// client runs this hook independently against its own game.user, so a
+// player's view of the same message is untouched. The actual authorization
+// (canCurrentUserActFor, checked in every handler below) is what actually
+// prevents the action; this only prevents the GM from being tempted to try.
+function lockSubtreeForGM(el: HTMLElement): void {
+    el.dataset.sr3eGmLocked = "true";
+    el.title = "Locked — an active player controls this character";
+    el.querySelectorAll<HTMLButtonElement>("button").forEach(b => { b.disabled = true; });
+}
+
+function lockForGMIfNeeded(message: ChatMessageLike, html: HTMLElement): void {
+    const flags = message.flags?.sr3e;
+    if (!flags) return;
+
+    const contestOutcome = flags.contestOutcome as ContestOutcomeFlag | undefined;
+    if (contestOutcome) {
+        (["initiator", "target"] as const).forEach(side => {
+            if (!isActorLockedForCurrentGM(contestOutcome[side].actorId)) return;
+            const sideEl = html.querySelector<HTMLElement>(`[data-side="${side}"]`);
+            if (sideEl) lockSubtreeForGM(sideEl);
+        });
+        return;
+    }
+
+    const drainOutcome = flags.drainOutcome as DrainOutcomeFlag | undefined;
+    if (drainOutcome && isActorLockedForCurrentGM(drainOutcome.actorId)) {
+        lockSubtreeForGM(html);
+        return;
+    }
+
+    const resistanceOutcome = flags.resistanceOutcome as ResistanceOutcomeFlag | undefined;
+    if (resistanceOutcome && isActorLockedForCurrentGM(resistanceOutcome.actorId)) {
+        lockSubtreeForGM(html);
+        return;
+    }
+
+    const damageResistance = flags.damageResistance as ResistanceCtx | undefined;
+    if (damageResistance && isActorLockedForCurrentGM(damageResistance.defenderActorId)) {
+        lockSubtreeForGM(html);
+        return;
+    }
+
+    const reroll = flags.reroll as RerollFlag | undefined;
+    if (reroll && isActorLockedForCurrentGM(reroll.actorId)) {
+        lockSubtreeForGM(html);
+        return;
+    }
+
+    const opposedContestId = flags.opposed as string | undefined;
+    if (opposedContestId) {
+        const targetActorId = getContest(opposedContestId)?.target?.id;
+        if (isActorLockedForCurrentGM(targetActorId)) lockSubtreeForGM(html);
+    }
 }
 
 function persistConsumedToMessage(promptEl: HTMLElement): void {
@@ -187,6 +245,8 @@ export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElemen
         disableAllButtons(html);
         html.dataset.sr3eConsumed = "true";
     }
+
+    lockForGMIfNeeded(message, html);
 }
 
 export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): void {

@@ -111,6 +111,7 @@ describe("die click delegation — works regardless of which DOM copy renders it
         };
         (globalThis as Record<string, unknown>).game = {
             user: { id: "gm1", isGM: true },
+            users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
             actors: { get: (id: string) => (id === "initiator1" ? initiatorActor : undefined) },
             messages: { get: (id: string) => (id === "msg1" ? { flags: { sr3e: { contestOutcome } }, update: messageUpdate } : undefined) },
         };
@@ -156,7 +157,8 @@ describe("contest Done button delegation", () => {
         };
         (globalThis as Record<string, unknown>).game = {
             user: { id: "gm1", isGM: true },
-            actors: { get: () => undefined },
+            users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
+            actors: { get: (id: string) => (id === "initiator1" ? { id: "initiator1" } : undefined) },
             messages: { get: (id: string) => (id === "msg1" ? { flags: { sr3e: { contestOutcome } }, update: messageUpdate } : undefined) },
         };
 
@@ -195,5 +197,96 @@ describe("contest Done button delegation", () => {
         await new Promise(resolve => setTimeout(resolve, 0));
 
         expect(messageUpdate).not.toHaveBeenCalled();
+    });
+});
+
+describe("GM visual lockout on render", () => {
+    afterEach(() => {
+        delete (globalThis as Record<string, unknown>).game;
+        document.body.innerHTML = "";
+    });
+
+    function renderMessage(): HTMLElement {
+        document.body.innerHTML = `
+            <li class="chat-message" data-message-id="msg1">
+                <div class="sr3e-contest-side" data-side="initiator">
+                    <span class="sr3e-die">3</span>
+                    <button data-contest-done>Done</button>
+                </div>
+                <div class="sr3e-contest-side" data-side="target">
+                    <span class="sr3e-die">2</span>
+                    <button data-contest-done>Done</button>
+                </div>
+            </li>
+        `;
+        return document.querySelector<HTMLElement>(".chat-message")!;
+    }
+
+    function fireRenderHook(flags: Record<string, unknown>): void {
+        const on = vi.fn();
+        registerChatMessageHTMLHook({ on });
+        const handler = on.mock.calls[0]?.[1] as (message: unknown, html: HTMLElement) => void;
+        handler({ flags: { sr3e: flags } }, renderMessage());
+    }
+
+    it("locks only the side controlled by an active player, leaving the other side live", () => {
+        const initiatorActor = { id: "initiator1" }; // no active player -> GM is the fallback controller
+        const targetActor = { id: "target1", ownership: { player1: 3 } }; // active player controls this one
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+            actors: { get: (id: string) => (id === "initiator1" ? initiatorActor : id === "target1" ? targetActor : undefined) },
+        };
+
+        const contestOutcome = {
+            contestId: "c1",
+            initiator: { actorId: "initiator1" },
+            target: { actorId: "target1" },
+        };
+        fireRenderHook({ contestOutcome });
+
+        const initiatorSide = document.querySelector<HTMLElement>('[data-side="initiator"]')!;
+        const targetSide = document.querySelector<HTMLElement>('[data-side="target"]')!;
+
+        expect(initiatorSide.dataset.sr3eGmLocked).toBeUndefined();
+        expect(initiatorSide.querySelector("button")!.disabled).toBe(false);
+
+        expect(targetSide.dataset.sr3eGmLocked).toBe("true");
+        expect(targetSide.querySelector("button")!.disabled).toBe(true);
+    });
+
+    it("does not lock anything for a non-GM viewer", () => {
+        const targetActor = { id: "target1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "player1", isGM: false },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+            actors: { get: (id: string) => (id === "target1" ? targetActor : undefined) },
+        };
+
+        fireRenderHook({ contestOutcome: { contestId: "c1", initiator: { actorId: "initiator1" }, target: { actorId: "target1" } } });
+
+        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eGmLocked).toBeUndefined();
+    });
+
+    it("does not lock when the controlling player is offline", () => {
+        const targetActor = { id: "target1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: false }],
+            ]),
+            actors: { get: (id: string) => (id === "target1" ? targetActor : undefined) },
+        };
+
+        fireRenderHook({ contestOutcome: { contestId: "c1", initiator: { actorId: "initiator1" }, target: { actorId: "target1" } } });
+
+        expect(document.querySelector<HTMLElement>('[data-side="target"]')!.dataset.sr3eGmLocked).toBeUndefined();
     });
 });

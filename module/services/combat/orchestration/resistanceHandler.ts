@@ -1,5 +1,6 @@
 import { executeResistanceRoll } from "./resistanceFlow";
 import { openComposer } from "../procedures/composerService";
+import { canCurrentUserActFor } from "../engine/contestCoordinator";
 import type { ResistancePrep, RollSnapshot } from "../engine/types";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
 
@@ -54,5 +55,8 @@ export function handleResistanceClick(ctx: ResistanceCtx): void {
     if (typeof game === "undefined" || !game.actors) return;
     const defender = game.actors.get(ctx.defenderActorId) as DefenderLike | undefined;
     if (!defender) return;
+    // A GM viewing this (whispered) prompt must not roll on behalf of an
+    // actively-controlling player — same rule as reroll/buy/done.
+    if (!canCurrentUserActFor(defender as never)) return;
     openComposer(buildResistanceSetup(defender, ctx.prep) as never, defender);
 }

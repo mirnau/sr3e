@@ -213,6 +213,37 @@ export function resolveControllingUser(actor: SR3EActor): (FoundryUser & Record<
     return (gm ?? null) as (FoundryUser & Record<string, unknown>) | null;
 }
 
+// The single source of truth for "may the CURRENT client's user act as this
+// actor" — used both to gate the actual click handlers (reroll/buy/done,
+// defender choice, resistance roll) and, separately, to decide whether to
+// render a GM's own view of a message pre-disabled. Deliberately does NOT
+// special-case isGM: resolveControllingUser already falls back to the GM
+// when no active player controls the actor, so a GM viewing an actor with
+// no active player naturally passes this the same way a player would for
+// their own actor — and is naturally denied once a player is online.
+export function canCurrentUserActFor(actor: SR3EActor | null): boolean {
+    if (typeof game === "undefined" || !game.user || !actor) return false;
+    const controller = resolveControllingUser(actor);
+    return controller?.id === (game.user as unknown as { id?: string }).id;
+}
+
+// Render-time check for chatMessageHTML's hook: is the CURRENT (GM) viewer
+// locked out of this actor's controls because an active, non-GM player
+// controls it? Only ever true for a GM — a non-GM viewer of another
+// player's controls is already excluded by canCurrentUserActFor at click
+// time, but isn't worth visually greying out (that's not this client's
+// mistake to make).
+export function isActorLockedForCurrentGM(actorId: string | null | undefined): boolean {
+    if (!actorId || typeof game === "undefined" || !game.user || !game.actors) return false;
+    if (!(game.user as unknown as { isGM?: boolean }).isGM) return false;
+
+    const actor = game.actors.get(actorId) as unknown as SR3EActor | undefined;
+    if (!actor) return false;
+
+    const controller = resolveControllingUser(actor);
+    return !!controller && !(controller as unknown as { isGM?: boolean }).isGM;
+}
+
 export function _resetForTest(): void {
     activeContests.clear();
     pendingResponses.clear();

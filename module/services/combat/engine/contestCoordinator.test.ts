@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
     waitForResponse, deliverResponse, expireContest,
     countSuccesses, computeNetSuccesses, submitContestResponse, _resetForTest,
+    canCurrentUserActFor, isActorLockedForCurrentGM,
 } from "./contestCoordinator";
 import type { RollSnapshot } from "./types";
 
@@ -74,5 +75,69 @@ describe("expireContest", () => {
         expireContest("cx");
         const result = await p;
         expect(result.meta.procedureKind).toBe("__aborted");
+    });
+});
+
+function setGame(userId: string, isGM: boolean, users: Array<{ id: string; isGM: boolean; active: boolean }>, actors: Record<string, unknown> = {}) {
+    (globalThis as Record<string, unknown>).game = {
+        user: { id: userId, isGM },
+        users: new Map(users.map(u => [u.id, u])),
+        actors: { get: (id: string) => actors[id] },
+    };
+}
+
+afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
+
+describe("canCurrentUserActFor / isActorLockedForCurrentGM", () => {
+    it("a GM may act when no active player controls the actor", () => {
+        const actor = { id: "a1" };
+        setGame("gm1", true, [{ id: "gm1", isGM: true, active: true }], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(true);
+        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+    });
+
+    it("a GM may NOT act once an active player controls the actor", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        setGame("gm1", true, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: true },
+        ], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(false);
+        expect(isActorLockedForCurrentGM("a1")).toBe(true);
+    });
+
+    it("a GM regains control once the player goes offline", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        setGame("gm1", true, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: false },
+        ], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(true);
+        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+    });
+
+    it("the controlling player may act; is never reported locked (lock is GM-only)", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        setGame("player1", false, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: true },
+        ], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(true);
+        expect(isActorLockedForCurrentGM("a1")).toBe(false);
+    });
+
+    it("an unrelated player may not act", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        setGame("player2", false, [
+            { id: "gm1", isGM: true, active: true },
+            { id: "player1", isGM: false, active: true },
+            { id: "player2", isGM: false, active: true },
+        ], { a1: actor });
+
+        expect(canCurrentUserActFor(actor as never)).toBe(false);
     });
 });

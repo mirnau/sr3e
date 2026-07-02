@@ -138,6 +138,7 @@ describe("handleDefenderChoice", () => {
         (globalThis as Record<string, unknown>).game = {
             actors: { get: (id: string) => id === "def1" ? actor() : undefined },
             user: { id: "gm1", isGM: true },
+            users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
         };
         (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
 
@@ -155,6 +156,7 @@ describe("handleDefenderChoice", () => {
         (globalThis as Record<string, unknown>).game = {
             actors: { get: (id: string) => id === "def1" ? actor() : undefined },
             user: { id: "gm1", isGM: true },
+            users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
         };
         (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
 
@@ -171,6 +173,7 @@ describe("handleDefenderChoice", () => {
         (globalThis as Record<string, unknown>).game = {
             actors: { get: (id: string) => id === "def1" ? actor() : undefined },
             user: { id: "gm1", isGM: true },
+            users: new Map([["gm1", { id: "gm1", isGM: true, active: true }]]),
         };
         (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
 
@@ -182,5 +185,28 @@ describe("handleDefenderChoice", () => {
         expect(openFn.mock.calls[0][0].kind).toBe("spell-resistance");
         expect(openFn.mock.calls[0][0].rollState.dice).toBe(5);
         expect(openFn.mock.calls[0][0].rollState.targetNumber).toBe(6);
+    });
+
+    // A GM viewing the (whispered) defender prompt must not be able to
+    // answer on the actively-controlling player's behalf.
+    it("does nothing when a GM clicks but an active player controls the defender", async () => {
+        const openFn = vi.fn();
+        const { registerComposer } = await import("../procedures/composerService");
+        registerComposer(openFn);
+
+        const ownedDefender = { ...actor(), ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            actors: { get: (id: string) => id === "def1" ? ownedDefender : undefined },
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+        };
+        (globalThis as Record<string, unknown>).ChatMessage = { create: vi.fn().mockResolvedValue(undefined) };
+
+        await handleContestStub(makeStub("dodge"));
+        handleDefenderChoice("c1", "dodge");
+        expect(openFn).not.toHaveBeenCalled();
     });
 });

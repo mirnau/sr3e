@@ -1,4 +1,4 @@
-import { countSuccesses, resolveControllingUser } from "../engine/contestCoordinator";
+import { countSuccesses, canCurrentUserActFor } from "../engine/contestCoordinator";
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
 import { applyDamageBoxesFromBaseline, type HealthBaseline } from "../damageApplication";
 import { resolveResistance, type ResistanceBuild, type ResistanceResult } from "../resistanceEngine";
@@ -46,13 +46,11 @@ export function rerenderResistanceMessage(flag: ResistanceOutcomeFlag): string {
     );
 }
 
+// GM may act only when no active player controls the defender — see
+// canCurrentUserActFor for why this deliberately doesn't special-case isGM.
 export function canActOnResistance(flag: ResistanceOutcomeFlag): boolean {
-    if (typeof game === "undefined" || !game.user) return false;
-    if ((game.user as unknown as { isGM?: boolean }).isGM) return true;
-
     const actor = getKarmaActor(flag.actorId) as never;
-    const controller = actor ? resolveControllingUser(actor) : null;
-    return controller?.id === (game.user as unknown as { id?: string }).id;
+    return canCurrentUserActFor(actor);
 }
 
 // Applied by whichever client actually performs the write (always the GM's —

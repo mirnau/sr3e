@@ -56,8 +56,8 @@ describe("computeDrainOutcome", () => {
 });
 
 describe("canActOnDrain", () => {
-    it("allows a GM regardless of ownership", () => {
-        setGame("gm1", true, null);
+    it("allows a GM when no active player controls the caster", () => {
+        setGame("gm1", true, { id: "a1" });
         expect(canActOnDrain(flag())).toBe(true);
     });
 
@@ -69,6 +69,34 @@ describe("canActOnDrain", () => {
     it("denies an unrelated player", () => {
         setGame("player2", false, { id: "a1", ownership: { player1: 3 } });
         expect(canActOnDrain(flag())).toBe(false);
+    });
+
+    // The actual point of this session's change: a GM must not be able to
+    // act on behalf of a player who is actively at the keyboard.
+    it("denies a GM when an active player controls the caster", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: true }],
+            ]),
+            actors: { get: (id: string) => (id === "a1" ? actor : undefined) },
+        };
+        expect(canActOnDrain(flag())).toBe(false);
+    });
+
+    it("allows a GM when the controlling player is offline", () => {
+        const actor = { id: "a1", ownership: { player1: 3 } };
+        (globalThis as Record<string, unknown>).game = {
+            user: { id: "gm1", isGM: true },
+            users: new Map([
+                ["gm1", { id: "gm1", isGM: true, active: true }],
+                ["player1", { id: "player1", isGM: false, active: false }],
+            ]),
+            actors: { get: (id: string) => (id === "a1" ? actor : undefined) },
+        };
+        expect(canActOnDrain(flag())).toBe(true);
     });
 });
 

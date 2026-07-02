@@ -1,4 +1,4 @@
-import { countSuccesses, resolveControllingUser } from "../combat/engine/contestCoordinator";
+import { countSuccesses, canCurrentUserActFor } from "../combat/engine/contestCoordinator";
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "../combat/orchestration/karmaRerollCore";
 import { applyDamageBoxesFromBaseline, type HealthBaseline } from "../combat/damageApplication";
 import { boxesForLevel, stageStep, type DamageStep, type DamageTrack } from "../combat/damageMath";
@@ -66,13 +66,11 @@ export function rerenderDrainMessage(flag: DrainOutcomeFlag): string {
     );
 }
 
+// GM may act only when no active player controls the caster — see
+// canCurrentUserActFor for why this deliberately doesn't special-case isGM.
 export function canActOnDrain(flag: DrainOutcomeFlag): boolean {
-    if (typeof game === "undefined" || !game.user) return false;
-    if ((game.user as unknown as { isGM?: boolean }).isGM) return true;
-
     const actor = getKarmaActor(flag.actorId) as never;
-    const controller = actor ? resolveControllingUser(actor) : null;
-    return controller?.id === (game.user as unknown as { id?: string }).id;
+    return canCurrentUserActFor(actor);
 }
 
 // Applied by whichever client actually performs the write (always the GM's —

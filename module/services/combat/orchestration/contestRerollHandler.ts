@@ -1,4 +1,4 @@
-import { computeNetSuccesses, resolveControllingUser, signalContestBothDone } from "../engine/contestCoordinator";
+import { computeNetSuccesses, canCurrentUserActFor, signalContestBothDone } from "../engine/contestCoordinator";
 import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
 import { spellDamageStaging, renderSpellDamageStaging } from "../../spells/spellCombat";
 import { renderContestOutcome } from "../../../ui/combat/chat/renderContestOutcome";
@@ -37,14 +37,13 @@ function toRollSnapshot(side: ContestSideData): RollSnapshot {
     };
 }
 
+// Deliberately allows GM action only when resolveControllingUser falls back
+// to the GM (no active player controls this side's actor) — a GM must NOT
+// be able to act on behalf of a player who is actively at the keyboard.
 export function canActOnContestSide(side: ContestSideData): boolean {
     if (side.done) return false;
-    if (typeof game === "undefined" || !game.user) return false;
-    if ((game.user as unknown as { isGM?: boolean }).isGM) return true;
-
     const actor = getKarmaActor(side.actorId) as never;
-    const controller = actor ? resolveControllingUser(actor) : null;
-    return controller?.id === (game.user as unknown as { id?: string }).id;
+    return canCurrentUserActFor(actor);
 }
 
 // The message's FINAL negotiated net successes — computed the same way
