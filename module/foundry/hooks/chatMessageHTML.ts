@@ -6,6 +6,7 @@ import {
 import { handleKarmaPoolReroll, handleKarmaBuySuccess, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
 import { handleContestReroll, handleContestBuy, handleContestDone, type ContestOutcomeFlag, type ContestSide } from "../../services/combat/orchestration/contestRerollHandler";
 import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFlag } from "../../services/spells/drainRerollHandler";
+import { handleResistanceReroll, handleResistanceBuy, handleResistanceDone, type ResistanceOutcomeFlag } from "../../services/combat/orchestration/resistanceRerollHandler";
 import { requestMessageUpdate } from "../../services/combat/orchestration/messageRelay";
 import { withDiePending } from "./diePendingState";
 
@@ -116,6 +117,13 @@ function registerDieClickDelegation(): void {
         if (drainOutcome) {
             const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
             withDiePending(group, () => isBuy ? handleDrainBuy(messageId, drainOutcome) : handleDrainReroll(messageId, drainOutcome));
+            return;
+        }
+
+        const resistanceOutcome = sr3eFlags.resistanceOutcome as ResistanceOutcomeFlag | undefined;
+        if (resistanceOutcome) {
+            const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
+            withDiePending(group, () => isBuy ? handleResistanceBuy(messageId, resistanceOutcome) : handleResistanceReroll(messageId, resistanceOutcome));
         }
     });
 }
@@ -157,6 +165,23 @@ function registerDrainDoneDelegation(): void {
     });
 }
 
+function registerResistanceDoneDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const btn = (event.target as HTMLElement).closest<HTMLElement>("[data-resistance-done]");
+        if (!btn) return;
+        const msgEl = btn.closest<HTMLElement>(".chat-message");
+        const messageId = msgEl?.dataset?.messageId;
+        if (!messageId) return;
+
+        const resistanceOutcome = getLiveMessage(messageId)?.flags?.sr3e?.resistanceOutcome as ResistanceOutcomeFlag | undefined;
+        if (!resistanceOutcome) return;
+        if (!msgEl || !consumeCard(msgEl)) return;
+
+        persistConsumedToMessage(msgEl);
+        void handleResistanceDone(resistanceOutcome);
+    });
+}
+
 export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElement): void {
     if (message.flags?.sr3e?.consumed) {
         disableAllButtons(html);
@@ -171,4 +196,5 @@ export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): v
     registerDieClickDelegation();
     registerDrainDoneDelegation();
     registerContestDoneDelegation();
+    registerResistanceDoneDelegation();
 }

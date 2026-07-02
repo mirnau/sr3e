@@ -3,6 +3,7 @@ import { handleContestStub } from "./defenderFlow";
 import { updateMessageAsGM } from "./messageRelay";
 import { applyContestSideDelta, applyContestDone, type ContestOutcomeFlag, type ContestSide, type ContestSideDelta } from "./contestRerollHandler";
 import { applyDrainDelta, type DrainOutcomeFlag, type DrainDelta } from "../../spells/drainRerollHandler";
+import { applyResistanceDelta, type ResistanceOutcomeFlag, type ResistanceDelta } from "./resistanceRerollHandler";
 import type { ContestStub, RollSnapshot } from "../engine/types";
 
 const FULL_DEFENSE_FLAG = "fullDefenseActive";
@@ -16,7 +17,8 @@ type SocketPayload =
     | { type: "contestSideUpdate"; messageId: string; delta: ContestSideDelta; fallback: ContestOutcomeFlag }
     | { type: "contestDone"; messageId: string; side: ContestSide; fallback: ContestOutcomeFlag }
     | { type: "contestBothDone"; contestId: string; finalFlag: ContestOutcomeFlag }
-    | { type: "drainUpdate"; messageId: string; delta: DrainDelta; fallback: DrainOutcomeFlag };
+    | { type: "drainUpdate"; messageId: string; delta: DrainDelta; fallback: DrainOutcomeFlag }
+    | { type: "resistanceUpdate"; messageId: string; delta: ResistanceDelta; fallback: ResistanceOutcomeFlag };
 
 export function registerSocketHandlers(): void {
     if (typeof game === "undefined" || !game.socket) return;
@@ -40,6 +42,8 @@ export function registerSocketHandlers(): void {
                 resolveBothDone(p.contestId, p.finalFlag);
             } else if (p.type === "drainUpdate") {
                 void applyDrainDelta(p.messageId, p.delta, p.fallback);
+            } else if (p.type === "resistanceUpdate") {
+                void applyResistanceDelta(p.messageId, p.delta, p.fallback);
             }
         });
 }

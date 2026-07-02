@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { executeResistanceRoll, promptResistance } from "./resistanceFlow";
 import type { ResistancePrep } from "../engine/types";
+import type { ResistanceOutcomeFlag } from "./resistanceRerollHandler";
 
 const prep = (tnBase = 4): ResistancePrep => ({
     familyKey: "firearm", weaponId: null, weaponName: "Predator",
@@ -8,6 +9,8 @@ const prep = (tnBase = 4): ResistancePrep => ({
 });
 
 const defender = (body = 4, physValue = 0, stunValue = 0, overflow = 0) => ({
+    id: "def1",
+    name: "Defender",
     system: {
         attributes: { body: { value: body, total: body } },
         health: { physical: { value: physValue }, stun: { value: stunValue }, overflow: { value: overflow } },
@@ -16,49 +19,33 @@ const defender = (body = 4, physValue = 0, stunValue = 0, overflow = 0) => ({
     update: vi.fn().mockResolvedValue(undefined),
 });
 
-function mockRollGlobal(results: number[]) {
-    class MockRoll {
-        terms = [{ results: results.map(r => ({ result: r, active: true })) }];
-        async evaluate() { return this; }
-    }
-    (globalThis as Record<string, unknown>).Roll = MockRoll;
+function rollSnapshot(results: number[], targetNumber = 4) {
+    return {
+        terms: [{ results: results.map(r => ({ result: r, active: true })) }],
+        options: { targetNumber },
+        meta: { flavor: "", procedureKind: "resistance" },
+    };
 }
 
-afterEach(() => { delete (globalThis as Record<string, unknown>).Roll; });
-
-const finalState = { dice: 4, poolDice: 0, karmaDice: 0, targetNumber: 4, modifiers: [] };
-
 describe("executeResistanceRoll", () => {
-    it("applies boxes when body successes < damage level", async () => {
-        mockRollGlobal([1, 2, 3, 4]);
+    afterEach(() => { delete (globalThis as Record<string, unknown>).ChatMessage; });
+
+    // Damage is deliberately NOT applied by this function anymore — it posts
+    // an interactive message and defers to handleResistanceDone (see
+    // resistanceRerollHandler.test.ts) so the defender can reroll/buy first.
+    it("posts an interactive message without touching the defender's health", async () => {
+        const create = vi.fn().mockResolvedValue(undefined);
+        (globalThis as Record<string, unknown>).ChatMessage = { create };
         const d = defender(4, 0);
-        await executeResistanceRoll(prep(6), d, finalState);
-        expect(d.update).toHaveBeenCalled();
-    });
-    it("does not update when damage staged off by body successes", async () => {
-        mockRollGlobal([5, 6, 5, 6, 5, 6]);
-        const d = defender(4, 0);
-        await executeResistanceRoll(prep(4), d, finalState);
+
+        await executeResistanceRoll(prep(6), d, rollSnapshot([1, 2, 3, 4]));
+
         expect(d.update).not.toHaveBeenCalled();
-    });
-    it("stun overflow spills to physical", async () => {
-        mockRollGlobal([1, 1, 1, 1]);
-        const d = defender(4, 0, 9);
-        const stunPrep: ResistancePrep = { ...prep(6), trackKey: "stun", stagedStepBeforeResist: "l" };
-        await executeResistanceRoll(stunPrep, d, finalState);
-        const call = d.update.mock.calls[0]?.[0] as Record<string, number> | undefined;
-        if (call) {
-            expect("system.health.stun.value" in call || "system.health.physical.value" in call).toBe(true);
-        }
-    });
-    it("physical overflow increments overflow counter", async () => {
-        mockRollGlobal([1, 1, 1, 1]);
-        const d = defender(4, 9, 0, 0);
-        await executeResistanceRoll(prep(4), d, finalState);
-        const call = d.update.mock.calls[0]?.[0] as Record<string, number> | undefined;
-        if (call && call["system.health.physical.value"] === 10) {
-            expect(call["system.health.overflow.value"]).toBeGreaterThan(0);
-        }
+        expect(create).toHaveBeenCalledOnce();
+        const flag = (create.mock.calls[0]?.[0] as Record<string, unknown>).flags as { sr3e: { resistanceOutcome: ResistanceOutcomeFlag } };
+        expect(flag.sr3e.resistanceOutcome.actorId).toBe("def1");
+        expect(flag.sr3e.resistanceOutcome.results).toHaveLength(4);
+        expect(flag.sr3e.resistanceOutcome.baseline).toEqual({ stun: 0, physical: 0, overflow: 0 });
     });
 });
 

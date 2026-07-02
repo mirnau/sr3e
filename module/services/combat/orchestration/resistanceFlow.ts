@@ -1,14 +1,11 @@
-import { SR3ERoll } from "./SR3ERoll";
-import { buildResistance, resolveResistance } from "../resistanceEngine";
+import { buildResistance } from "../resistanceEngine";
 import { resolveControllingUser } from "../engine/contestCoordinator";
-import { applyDamageBoxes, getTrackValue } from "../damageApplication";
+import { captureHealthBaseline } from "../damageApplication";
 import { renderResistancePrompt } from "../../../ui/combat/chat/renderResistancePrompt";
-import { renderResistanceOutcome } from "../../../ui/combat/chat/renderResistanceOutcome";
-import type { ResistancePrep } from "../engine/types";
-import type { RollState } from "../diceFormula";
+import { extractDieResults } from "../../../ui/combat/chat/renderRollSummary";
+import { rerenderResistanceMessage, type ResistanceOutcomeFlag } from "./resistanceRerollHandler";
 import type { ResistanceBuild } from "../resistanceEngine";
-
-const TRACK_MAX = 10;
+import type { ResistancePrep, RollSnapshot } from "../engine/types";
 
 type Defender = {
     id?: string;
@@ -18,25 +15,16 @@ type Defender = {
     update?: (data: Record<string, unknown>) => Promise<unknown>;
 };
 
-function bodyRating(defender: Defender): number {
-    const attrs = (defender.system as { attributes?: Record<string, { value?: number; total?: number }> }).attributes ?? {};
-    return attrs.body?.total ?? attrs.body?.value ?? 1;
-}
-
+// Posts the interactive resistance message — no damage is applied here.
+// The defender can reroll/buy successes (Karma Pool, SR3E p.246) before
+// committing via the message's Done button (handleResistanceDone), which
+// applies the FINAL staged damage exactly once.
 export async function executeResistanceRoll(
-    prep: ResistancePrep & { build?: ResistanceBuild },
+    prep: ResistancePrep,
     defender: Defender,
-    finalState: RollState,
+    roll: RollSnapshot,
 ): Promise<void> {
-    const tn = prep.tnBase + prep.tnMods.reduce((s, m) => s + m.value, 0);
-    const dice = Math.max(1, bodyRating(defender));
-
-    const roll = SR3ERoll.build(finalState.dice || dice, tn);
-    await roll.evaluate();
-
-    const bodySuccesses = roll.countSuccesses() ?? 0;
-
-    const build = buildResistance(
+    const build: ResistanceBuild = buildResistance(
         defender as Parameters<typeof buildResistance>[0],
         {
             power: prep.tnBase,
@@ -49,27 +37,24 @@ export async function executeResistanceRoll(
         0,
     );
 
-    const outcome = resolveResistance(build, bodySuccesses);
+    const baseline = captureHealthBaseline(defender as never);
+    const flag: ResistanceOutcomeFlag = {
+        actorId: defender.id ?? "",
+        actorName: defender.name ?? "Defender",
+        prep,
+        build,
+        baseline,
+        options: roll.options,
+        meta: roll.meta,
+        results: extractDieResults(roll.terms),
+        rerollCount: 0,
+    };
 
-    const track = prep.trackKey as "stun" | "physical";
-    const currentBoxes = getTrackValue(defender, track);
-    const overflowBoxes = outcome.applied
-        ? Math.max(0, currentBoxes + outcome.boxes - TRACK_MAX)
-        : 0;
-
-    if (outcome.applied && outcome.boxes > 0) {
-        await applyDamageBoxes(defender, defender.id ?? "", track, outcome.boxes);
-    }
-
-    if (typeof Hooks !== "undefined") {
-        Hooks.callAll("actorSystemRecalculated", defender);
-    }
-
-    const outcomeHtml = renderResistanceOutcome(
-        outcome, prep, defender.name ?? "Defender", bodySuccesses, tn, overflowBoxes,
-    );
     if (typeof ChatMessage !== "undefined") {
-        await (ChatMessage as any).create?.({ content: outcomeHtml });
+        await (ChatMessage as any).create?.({
+            content: rerenderResistanceMessage(flag),
+            flags: { sr3e: { resistanceOutcome: flag } },
+        });
     }
 }
 

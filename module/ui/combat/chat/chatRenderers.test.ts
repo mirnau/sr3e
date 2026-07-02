@@ -144,24 +144,27 @@ describe("renderResistancePrompt", () => {
 
 describe("renderResistanceOutcome", () => {
     const outcome = { applied: true, finalStep: "l" as never, trackKey: "physical" as never, boxes: 1, notes: [] };
+    const roll = (results: Array<{ result: number }> = [{ result: 3 }]) => ({
+        actorName: "Ganger",
+        options: { targetNumber: 4 },
+        meta: { flavor: "Resist", procedureKind: "resistance" },
+        results,
+    });
 
     it("shows successes vs TN", () => {
-        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 2, 4)).toContain("2 successes vs TN 4");
+        expect(renderResistanceOutcome(roll(), outcome, prep(), 2, 4)).toContain("2 successes vs TN 4");
     });
     it("shows staging arrow", () => {
-        expect(renderResistanceOutcome(outcome, prep(4, "m"), "Ganger", 2, 4)).toContain("Moderate → Light");
+        expect(renderResistanceOutcome(roll(), outcome, prep(4, "m"), 2, 4)).toContain("Moderate → Light");
     });
     it("shows takes-no-damage when staged off", () => {
         const o = { ...outcome, applied: false, finalStep: null, boxes: 0 };
-        expect(renderResistanceOutcome(o, prep(), "Ganger", 4, 4)).toContain("takes no damage");
+        expect(renderResistanceOutcome(roll(), o, prep(), 4, 4)).toContain("takes no damage");
     });
     it("shows damage taken with defender name", () => {
-        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 2, 4)).toContain("Ganger takes 1 box");
+        expect(renderResistanceOutcome(roll(), outcome, prep(), 2, 4)).toContain("Ganger will take 1 box");
     });
-    it("shows overflow when non-zero", () => {
-        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 0, 4, 2)).toContain("Overflow: 2 boxes");
-    });
-    it("no overflow line when zero", () => {
-        expect(renderResistanceOutcome(outcome, prep(), "Ganger", 0, 4, 0)).not.toContain("Overflow");
+    it("includes a Done button to apply the damage", () => {
+        expect(renderResistanceOutcome(roll(), outcome, prep(), 2, 4)).toContain("data-resistance-done");
     });
 });

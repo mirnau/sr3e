@@ -1,7 +1,6 @@
 import { executeResistanceRoll } from "./resistanceFlow";
 import { openComposer } from "../procedures/composerService";
-import type { ResistancePrep } from "../engine/types";
-import type { RollState } from "../diceFormula";
+import type { ResistancePrep, RollSnapshot } from "../engine/types";
 import type { ProcedureSetup } from "../procedures/simpleSetups";
 
 type DefenderLike = {
@@ -24,7 +23,11 @@ export function buildResistanceSetup(defender: DefenderLike, prep: ResistancePre
         title: "Resistance Roll",
         rollState: { dice, poolDice: 0, karmaDice: 0, targetNumber, modifiers: [] },
         lockPriority: "simple",
-        selfPublish: true,
+        // The interactive resistance message posted by executeResistanceRoll
+        // IS this roll's chat presence — advancedFlow's own generic
+        // roll-summary message (with its own independent reroll flag) would
+        // duplicate it and could desync from the resistance-specific reroll.
+        selfPublish: false,
         defenseHint: null,
         exportFn: () => ({
             familyKey: "resistance",
@@ -36,8 +39,8 @@ export function buildResistanceSetup(defender: DefenderLike, prep: ResistancePre
             tnMods: prep.tnMods,
             next: { kind: "", ui: {}, args: {} },
         }),
-        commitFn: async (rollState: unknown) => {
-            await executeResistanceRoll(prep, defender, rollState as RollState);
+        commitFn: async (roll: unknown) => {
+            await executeResistanceRoll(prep, defender, roll as RollSnapshot);
         },
     };
 }
