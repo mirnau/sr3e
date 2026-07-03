@@ -200,6 +200,36 @@ describe("contest Done button delegation", () => {
     });
 });
 
+describe("sender shadow color on render", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function renderPlainMessage(): HTMLElement {
+        document.body.innerHTML = `<li class="chat-message" data-message-id="msg1"></li>`;
+        return document.querySelector<HTMLElement>(".chat-message")!;
+    }
+
+    function fireRenderHook(message: Record<string, unknown>): HTMLElement {
+        const el = renderPlainMessage();
+        const on = vi.fn();
+        registerChatMessageHTMLHook({ on });
+        const handler = on.mock.calls[0]?.[1] as (message: unknown, html: HTMLElement) => void;
+        handler(message, el);
+        return el;
+    }
+
+    it("sets --sender-shadow-color from the message author's color", () => {
+        const el = fireRenderHook({ author: { color: "#ff00aa" } });
+        expect(el.style.getPropertyValue("--sender-shadow-color")).toBe("#ff00aa");
+    });
+
+    it("leaves the property unset when the message has no resolvable author", () => {
+        const el = fireRenderHook({});
+        expect(el.style.getPropertyValue("--sender-shadow-color")).toBe("");
+    });
+});
+
 describe("per-viewer visual lockout on render", () => {
     afterEach(() => {
         delete (globalThis as Record<string, unknown>).game;

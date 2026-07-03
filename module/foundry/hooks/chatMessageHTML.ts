@@ -11,10 +11,12 @@ import { requestMessageUpdate } from "../../services/combat/orchestration/messag
 import { getContest, isActorLockedForCurrentUser } from "../../services/combat/engine/contestCoordinator";
 import { handlePurchaseOfferResponse, handleSellerConsentResponse, type PurchaseOfferFlag } from "../../services/economy/purchaseOfferFlow";
 import { withDiePending } from "./diePendingState";
+import { wrapChatMessage } from "./wrapChatMessage";
 
 type ChatMessageLike = {
     flags?: { sr3e?: Record<string, unknown> };
     update?: (data: Record<string, unknown>) => Promise<unknown>;
+    author?: { color?: unknown } | null;
 };
 
 type HookRegistrar = {
@@ -43,6 +45,17 @@ function lockSubtreeForViewer(el: HTMLElement): void {
     el.dataset.sr3eLocked = "true";
     el.title = "Locked — controlled by someone else";
     el.querySelectorAll<HTMLButtonElement>("button").forEach(b => { b.disabled = true; });
+}
+
+// Every client renders this message independently, but all read the same
+// author.color off the message document, so the shadow is consistently that
+// sender's color everywhere rather than only on the sending client.
+function applySenderShadowColor(message: ChatMessageLike, html: HTMLElement): void {
+    const color = message.author?.color;
+    if (!color) return;
+
+    const chatMessageEl = html.closest<HTMLElement>(".chat-message") ?? html;
+    chatMessageEl.style.setProperty("--sender-shadow-color", String(color));
 }
 
 function lockForCurrentViewerIfNeeded(message: ChatMessageLike, html: HTMLElement): void {
@@ -328,11 +341,14 @@ function registerResistanceDoneDelegation(): void {
 }
 
 export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElement): void {
+    wrapChatMessage(html);
+
     if (message.flags?.sr3e?.consumed) {
         disableAllButtons(html);
         html.dataset.sr3eConsumed = "true";
     }
 
+    applySenderShadowColor(message, html);
     lockForCurrentViewerIfNeeded(message, html);
 }
 

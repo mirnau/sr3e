@@ -7,18 +7,62 @@
    --chat-surface-color: rgb(17, 17, 17);
 }
 
+// Foundry's own <li class="chat-message"> is left bare — wrapChatMessage.ts
+// (called from handleChatMessageHTML) moves its rendered content into the
+// nested structure below at render time. This reproduces the same
+// offset-blurred-shadow / outline / textured-surface treatment every sheet
+// card has (ItemSheetComponent.svelte's .sheet-card-shadow/.sheet-card-outline/
+// .sheet-card-displayarea), but as its own chat-specific classes rather than
+// those bare ones — .sheet-card-* assumes a fixed-size (100%/100%) packery
+// grid cell, whereas a chat bubble's height is auto/content-driven.
 body.game .chat-message {
    position: relative;
+   background: transparent;
+   border: 0;
+   border-radius: 0;
+   padding: 0;
+   margin: 0;
+}
+
+body.game .sr3e-chat-message-wrapper {
+   position: relative;
+   width: 100%;
+   padding: 0.5rem;
+}
+
+// Same offset-and-undersized geometry as .sheet-card-shadow (sheetcard.scss)
+// — colored per message via --sender-shadow-color, set in
+// applySenderShadowColor (chatMessageHTML.ts) from the author's assigned
+// Foundry user color, so every client sees the sender consistently glow in
+// that sender's color rather than the sheets' shared rotating gradient.
+// Percentage top/left/width/height on an absolutely positioned child resolves
+// fine here even though the wrapper's own height is auto — the wrapper's
+// height is settled from its in-flow content before this element's
+// percentages are computed against it.
+body.game .sr3e-chat-message-shadow {
+   position: absolute;
+   top: 1.5rem;
+   left: 1.5rem;
+   width: calc(100% - 1.5rem);
+   height: calc(100% - 1.5rem);
+   z-index: -2;
+   background: var(--sender-shadow-color, rgb(0, 255, 234));
+   filter: blur(20px);
+   pointer-events: none;
+   @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem);
+}
+
+body.game .sr3e-chat-message-content {
+   position: relative;
    isolation: isolate;
+   z-index: 1;
    padding: 0.5rem;
    color: var(--chat-text-color);
    background: var(--chat-frame-color);
-   border: 0;
-   border-radius: 0;
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem, 0.25rem);
 }
 
-body.game .chat-message::before {
+body.game .sr3e-chat-message-content::before {
    content: "";
    position: absolute;
    z-index: -1;
