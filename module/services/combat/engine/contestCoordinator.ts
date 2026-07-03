@@ -20,6 +20,16 @@ const activeContests = new Map<string, ContestRecord>();
 const pendingResponses = new Map<string, (data: RollSnapshot) => void>();
 const pendingBothDone = new Map<string, (finalFlag: unknown) => void>();
 
+// A deliver/resolve call can arrive before the corresponding wait* call has
+// registered its listener (e.g. waitForBothDone is only reached after an
+// awaited ChatMessage.create() — plenty of time for the signal to land
+// first). Without caching the value here, that signal is silently dropped
+// and the wait* promise never resolves, leaving executeProcedure's lock
+// held forever for that actor. Confirmed live: a stuck actor was cleared
+// only by a full page refresh, which wipes this in-memory module state.
+const resolvedResponses = new Map<string, RollSnapshot>();
+const resolvedBothDone = new Map<string, unknown>();
+
 const ABORT_SENTINEL = "__aborted" as const;
 
 export function startContest(
@@ -96,6 +106,12 @@ export function registerContestStub(stub: ContestStub): ContestRecord {
 }
 
 export function waitForResponse(contestId: string): Promise<RollSnapshot> {
+    if (resolvedResponses.has(contestId)) {
+        const rollData = resolvedResponses.get(contestId) as RollSnapshot;
+        resolvedResponses.delete(contestId);
+        return Promise.resolve(rollData);
+    }
+
     return new Promise((resolve) => {
         pendingResponses.set(contestId, resolve);
     });
@@ -111,6 +127,8 @@ export function deliverResponse(contestId: string, rollData: RollSnapshot): void
     if (resolve) {
         pendingResponses.delete(contestId);
         resolve(rollData);
+    } else {
+        resolvedResponses.set(contestId, rollData);
     }
 }
 
@@ -136,6 +154,12 @@ export function submitContestResponse(contestId: string, rollData: RollSnapshot)
 // client re-read game.messages, which would race against Foundry's own
 // document-update broadcast finishing.
 export function waitForBothDone(contestId: string): Promise<unknown> {
+    if (resolvedBothDone.has(contestId)) {
+        const finalFlag = resolvedBothDone.get(contestId);
+        resolvedBothDone.delete(contestId);
+        return Promise.resolve(finalFlag);
+    }
+
     return new Promise((resolve) => {
         pendingBothDone.set(contestId, resolve);
     });
@@ -148,6 +172,8 @@ export function resolveBothDone(contestId: string, finalFlag: unknown): void {
     if (resolve) {
         pendingBothDone.delete(contestId);
         resolve(finalFlag);
+    } else {
+        resolvedBothDone.set(contestId, finalFlag);
     }
 }
 
@@ -256,4 +282,6 @@ export function _resetForTest(): void {
     activeContests.clear();
     pendingResponses.clear();
     pendingBothDone.clear();
+    resolvedResponses.clear();
+    resolvedBothDone.clear();
 }

@@ -17,11 +17,20 @@ let roll: SR3ERoll;
 beforeAll(async () => { roll = await SR3ERoll.build(2, 4).evaluate(); });
 
 let chatMessageCreate: ReturnType<typeof vi.fn>;
+let actorsById: Map<string, unknown>;
 beforeEach(() => {
     _resetForTest();
+    actorsById = new Map();
     (globalThis as Record<string, unknown>).game = {
         user: { id: "u1" },
         socket: { emit: vi.fn() },
+        // Without this, defenderFlow's resolveActor(stub.target.actorId) always
+        // fails, so handleContestStub calls expireContest on every contest —
+        // previously a harmless no-op only because the abort signal it delivers
+        // races (and used to lose to) the main flow's own waitForResponse
+        // registration; now that race is fixed to always deliver, so a target
+        // actor that can't be resolved would abort for real.
+        actors: { get: (id: string) => actorsById.get(id) },
     };
     chatMessageCreate = vi.fn().mockResolvedValue({ id: "msg1" });
     (globalThis as Record<string, unknown>).ChatMessage = { create: chatMessageCreate, getSpeaker: vi.fn() };
@@ -49,7 +58,7 @@ const setup = (commitFn = vi.fn().mockResolvedValue(undefined)): ProcedureSetup 
 const actor = () => ({ id: "att1", uuid: "Actor.att1", system: {} });
 
 function makeTarget(id = "def1") {
-    return {
+    const target = {
         id, scene: { id: "s1" },
         actor: {
             id, name: "Defender",
@@ -59,6 +68,8 @@ function makeTarget(id = "def1") {
             update: vi.fn().mockResolvedValue(undefined),
         },
     };
+    actorsById.set(id, target.actor);
+    return target;
 }
 
 // Delivers the defender's roll response (same as before), then reads the

@@ -3,6 +3,7 @@ import {
     waitForResponse, deliverResponse, expireContest,
     countSuccesses, computeNetSuccesses, computeSignedNetSuccesses, submitContestResponse, _resetForTest,
     canCurrentUserActFor, isActorLockedForCurrentUser,
+    waitForBothDone, resolveBothDone, signalContestBothDone,
 } from "./contestCoordinator";
 import type { RollSnapshot } from "./types";
 
@@ -47,6 +48,54 @@ describe("waitForResponse / deliverResponse", () => {
         await p;
         // second deliver does not reject
         expect(() => deliverResponse("c2", roll([5], 4))).not.toThrow();
+    });
+
+    // Regression: deliverResponse can arrive before the corresponding
+    // waitForResponse call registers (e.g. a fast defender response racing
+    // the initiator's own async continuation). Previously the signal was
+    // dropped silently and the later waitForResponse call hung forever,
+    // leaving executeProcedure's per-actor lock stuck permanently.
+    it("resolves immediately when delivered before anyone is waiting", async () => {
+        const r = roll([6], 4);
+        deliverResponse("c-early", r);
+
+        const result = await waitForResponse("c-early");
+        expect(result).toBe(r);
+    });
+});
+
+describe("waitForBothDone / resolveBothDone / signalContestBothDone", () => {
+    afterEach(() => { delete (globalThis as Record<string, unknown>).game; });
+
+    it("resolves with the delivered final flag", async () => {
+        const promise = waitForBothDone("d1");
+        resolveBothDone("d1", { done: true });
+        expect(await promise).toEqual({ done: true });
+    });
+
+    // Same shape of regression as waitForResponse above — this is the path
+    // that was actually confirmed stuck live: waitForBothDone is only
+    // reached after an awaited ChatMessage.create(), leaving a real window
+    // for the "both done" signal to arrive first.
+    it("resolves immediately when resolved before anyone is waiting", async () => {
+        resolveBothDone("d-early", { done: true });
+        const result = await waitForBothDone("d-early");
+        expect(result).toEqual({ done: true });
+    });
+
+    it("signalContestBothDone resolves the local pending promise", async () => {
+        const promise = waitForBothDone("d2");
+        signalContestBothDone("d2", { done: true });
+        expect(await promise).toEqual({ done: true });
+    });
+
+    it("signalContestBothDone relays over the socket for other clients", () => {
+        const emit = vi.fn();
+        (globalThis as Record<string, unknown>).game = { socket: { emit } };
+
+        signalContestBothDone("d3", { done: true });
+
+        expect(emit).toHaveBeenCalledWith("system.sr3e", { type: "contestBothDone", contestId: "d3", finalFlag: { done: true } });
     });
 });
 

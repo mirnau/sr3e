@@ -21,6 +21,20 @@ function computePool(state: RollState): number {
     return state.dice + computePoolDice(state, state.poolDice) + (state.focusDice ?? 0) + state.karmaDice;
 }
 
+// Every call site below fires this and voids/discards the result — without
+// this, a denied roll (full defense, or an actor's prior roll still locked)
+// failed completely silently, which made a stuck lock (see contestCoordinator's
+// resolvedResponses/resolvedBothDone caches) look like total unresponsiveness
+// rather than a denial.
+function warnDenied(reason?: string): void {
+    if (typeof ui === "undefined") return;
+    if (reason === "full-defense") {
+        ui.notifications?.warn("This actor is in full defense and cannot roll.");
+    } else if (reason === "lock-denied") {
+        ui.notifications?.warn("This actor already has a roll in progress.");
+    }
+}
+
 export type ExecuteProcedureOptions = {
     targets?: Array<{ id?: string; scene?: { id?: string }; actor?: { id: string; system: Record<string, unknown>; items?: unknown } }>;
     fullDefenseOverride?: boolean;
@@ -35,12 +49,16 @@ export async function executeProcedure(
     opts: ExecuteProcedureOptions = {},
 ): Promise<{ succeeded: boolean; reason?: string }> {
     if (getFullDefenseFlag(actor) || opts.fullDefenseOverride) {
+        warnDenied("full-defense");
         return { succeeded: false, reason: "full-defense" };
     }
 
     const lockKey = `${actor.id}:${setup.kind}`;
     const lockId = acquireLock(lockKey, setup.lockPriority);
-    if (!lockId) return { succeeded: false, reason: "lock-denied" };
+    if (!lockId) {
+        warnDenied("lock-denied");
+        return { succeeded: false, reason: "lock-denied" };
+    }
 
     try {
         const state = opts.rollState ?? setup.rollState;
