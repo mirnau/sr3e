@@ -82,6 +82,16 @@ body.game .chat-message .dice-tooltip .dice-rolls .roll {
    filter: drop-shadow(0 0 4px rgba(0, 255, 200, 0.35));
 }
 
+// Foundry's default .max/.min styling implies a success/failure verdict
+// (green/red) that has no meaning for our dice — TN success is communicated
+// by .sr3e-die classes, and open rolls have no success concept at all. Beats
+// the rule above on specificity, so it needs an explicit override.
+body.game .chat-message .dice-tooltip .dice-rolls .roll.max,
+body.game .chat-message .dice-tooltip .dice-rolls .roll.min {
+   color: #fff;
+   background: transparent;
+}
+
 body.game .chat-message .sr3e-roll-dice {
    display: flex;
    flex-wrap: wrap;
@@ -139,6 +149,12 @@ body.game .chat-message .sr3e-die.sr3e-botch {
    color: #ff4c4c;
    text-shadow: 0 0 6px rgba(255, 76, 76, 0.5);
    border-color: rgba(255, 76, 76, 0.4);
+}
+
+// Selected for reroll — simple/open rolls only, toggled via right-click;
+// left-click on any die fires the reroll for exactly the marked dice.
+body.game .chat-message .sr3e-die[data-selected] {
+   box-shadow: inset 0 0 6px 1px rgba(255, 221, 0, 0.85), inset 0 0 8px darkslategrey;
 }
 
 // Pending — a reroll/buy request for this roll is in flight; blocks re-clicking

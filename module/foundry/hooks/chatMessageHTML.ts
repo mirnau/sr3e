@@ -3,7 +3,7 @@ import {
     handleResistanceClick,
     type ResistanceCtx,
 } from "../../services/combat/orchestration/resistanceHandler";
-import { handleKarmaPoolReroll, handleKarmaBuySuccess, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
+import { handleKarmaPoolReroll, handleKarmaPoolRerollSelected, handleKarmaBuySuccess, type RerollFlag } from "../../services/combat/orchestration/rerollHandler";
 import { handleContestReroll, handleContestBuy, handleContestDone, type ContestOutcomeFlag, type ContestSide } from "../../services/combat/orchestration/contestRerollHandler";
 import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFlag } from "../../services/spells/drainRerollHandler";
 import { handleResistanceReroll, handleResistanceBuy, handleResistanceDone, type ResistanceOutcomeFlag } from "../../services/combat/orchestration/resistanceRerollHandler";
@@ -141,6 +141,38 @@ function registerResistanceButtonDelegation(): void {
     });
 }
 
+// Simple/open rolls only: right-click toggles a die into the reroll selection
+// (yellow inset, see .sr3e-die[data-selected] in chat.scss). Left-click on any
+// die then fires the reroll for exactly the marked dice — see registerDieClickDelegation.
+//
+// Registered on the CAPTURE phase: Foundry's own chat-message context menu is
+// bound closer to the message element and would otherwise win the bubble-phase
+// race and open before this handler ever runs. Capture always fires first
+// regardless of DOM position, and stopPropagation here (only once a die is
+// confirmed under the cursor) keeps the event from ever reaching Foundry's
+// bubble-phase listener.
+function registerDieSelectionDelegation(): void {
+    document.addEventListener("contextmenu", (event) => {
+        const die = (event.target as HTMLElement).closest<HTMLElement>(".sr3e-die");
+        if (!die) return;
+        const msgEl = die.closest<HTMLElement>(".chat-message");
+        const messageId = msgEl?.dataset?.messageId;
+        if (!messageId) return;
+
+        const message = getLiveMessage(messageId);
+        const sr3eFlags = message?.flags?.sr3e;
+        if (!message || !sr3eFlags || sr3eFlags.consumed) return;
+
+        const reroll = sr3eFlags.reroll as RerollFlag | undefined;
+        if (!reroll || reroll.pipeline !== "simple") return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        if (die.dataset.selected) delete die.dataset.selected;
+        else die.dataset.selected = "true";
+    }, true);
+}
+
 function registerDieClickDelegation(): void {
     document.addEventListener("click", (event) => {
         const die = (event.target as HTMLElement).closest<HTMLElement>(".sr3e-die");
@@ -158,8 +190,21 @@ function registerDieClickDelegation(): void {
         const reroll = sr3eFlags.reroll as RerollFlag | undefined;
         if (reroll) {
             const group = msgEl?.querySelector<HTMLElement>(".sr3e-roll-dice") ?? msgEl;
-            withDiePending(group, () => isBuy ? handleKarmaBuySuccess(message as { update: (d: Record<string, unknown>) => Promise<unknown> }, reroll)
-                : handleKarmaPoolReroll(message as { update: (d: Record<string, unknown>) => Promise<unknown> }, reroll));
+            const updatableMessage = message as { update: (d: Record<string, unknown>) => Promise<unknown> };
+
+            if (isBuy) {
+                withDiePending(group, () => handleKarmaBuySuccess(updatableMessage, reroll));
+                return;
+            }
+
+            if (reroll.pipeline === "simple") {
+                const selectedIndices = Array.from(group?.querySelectorAll<HTMLElement>(".sr3e-die[data-selected]") ?? [])
+                    .map(el => Number(el.dataset.dieIndex));
+                withDiePending(group, () => handleKarmaPoolRerollSelected(updatableMessage, reroll, selectedIndices));
+                return;
+            }
+
+            withDiePending(group, () => handleKarmaPoolReroll(updatableMessage, reroll));
             return;
         }
 
@@ -254,6 +299,7 @@ export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): v
     registrar.on("renderChatMessageHTML", handleChatMessageHTML);
     registerResponderDelegation();
     registerResistanceButtonDelegation();
+    registerDieSelectionDelegation();
     registerDieClickDelegation();
     registerDrainDoneDelegation();
     registerContestDoneDelegation();

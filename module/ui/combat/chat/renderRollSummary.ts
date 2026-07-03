@@ -104,8 +104,10 @@ export function renderSimpleRollSummary(
 ): string {
     const isDisastrous = results.length > 0 && results.every(r => r.result === 1);
 
+    // Always amber, rerolled or not — open rolls have no success/failure
+    // verdict, so no die should ever look "resolved" differently from another.
     const diceHtml = results.length > 0
-        ? results.map((e, i) => dieSpan(e, i, !e.rerolled, false)).join(" ")
+        ? results.map((e, i) => dieSpan(e, i, true, false)).join(" ")
         : emptyDice();
 
     const failureLine = isDisastrous

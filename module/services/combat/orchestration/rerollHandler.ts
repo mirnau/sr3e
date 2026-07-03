@@ -1,4 +1,4 @@
-import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
+import { getKarmaActor, karmaBuySuccess, karmaPoolReroll, karmaPoolRerollSelected, notifyKarmaSpendDeclined, type KarmaActor } from "./karmaRerollCore";
 import { canCurrentUserActFor } from "../engine/contestCoordinator";
 import { serializeByKey } from "../../writeQueue";
 import {
@@ -61,7 +61,6 @@ export async function handleKarmaBuySuccess(
     flag: RerollFlag,
 ): Promise<void> {
     const tn = typeof flag.options.targetNumber === "number" ? flag.options.targetNumber : null;
-    if (tn === null) return;
 
     const actor = getKarmaActor(flag.actorId);
     if (!actor) return;
@@ -73,5 +72,26 @@ export async function handleKarmaBuySuccess(
     await applyKarmaUpdate(actor, flag.actorId, result.karmaUpdate);
 
     const newFlag: RerollFlag = { ...flag, results: result.results };
+    await message.update({ content: rerenderContent(newFlag, result.results), "flags.sr3e.reroll": newFlag });
+}
+
+// Simple/open rolls only — no TN means no systemic "failure" filter, so the
+// player right-clicks dice to mark which ones to reroll.
+export async function handleKarmaPoolRerollSelected(
+    message: UpdatableMessage,
+    flag: RerollFlag,
+    selectedIndices: number[],
+): Promise<void> {
+    const actor = getKarmaActor(flag.actorId);
+    if (!actor) return;
+    if (!canCurrentUserActFor(actor as never)) return;
+
+    const result = await karmaPoolRerollSelected(actor, flag.results, selectedIndices, flag.rerollCount ?? 0);
+    if (!result.ok) { notifyKarmaSpendDeclined(result.reason); return; }
+
+    await applyKarmaUpdate(actor, flag.actorId, result.karmaUpdate);
+
+    const rerollCount = (flag.rerollCount ?? 0) + 1;
+    const newFlag: RerollFlag = { ...flag, results: result.results, rerollCount };
     await message.update({ content: rerenderContent(newFlag, result.results), "flags.sr3e.reroll": newFlag });
 }

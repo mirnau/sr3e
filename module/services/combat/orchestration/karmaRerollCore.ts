@@ -6,7 +6,7 @@ export type KarmaActor = {
     update?: (data: Record<string, unknown>, opts?: Record<string, unknown>) => Promise<unknown>;
 };
 
-export type KarmaSpendDeclineReason = "insufficient-karma" | "no-failures" | "no-natural-success";
+export type KarmaSpendDeclineReason = "insufficient-karma" | "no-failures" | "no-natural-success" | "no-selection";
 
 // karmaUpdate is the field-update payload the caller must apply via
 // actor.update() — returned rather than written here so a caller that also
@@ -53,19 +53,24 @@ export async function karmaPoolReroll(
 }
 
 // Buy 1 additional success by burning 1 Karma Pool point permanently (SR3E p.246).
-// Requires at least 1 natural (un-rerolled, un-bought) success on the roll.
-export async function karmaBuySuccess(actor: KarmaActor, results: DieEntry[], tn: number): Promise<KarmaSpendResult> {
+// Additive only — appends a bonus success, never converts/touches an existing die.
+// Requires at least 1 natural (un-rerolled, un-bought) success on the roll when a
+// TN exists. Open/simple rolls have no TN and thus no systemic success to require —
+// success there is honorary (GM reads the raw total), so the gate is skipped.
+export async function karmaBuySuccess(actor: KarmaActor, results: DieEntry[], tn: number | null): Promise<KarmaSpendResult> {
     const kpBalance = actor.system?.karma?.karmaPool?.value ?? 0;
     if (kpBalance < 1) return { ok: false, reason: "insufficient-karma" };
 
-    const naturalSuccesses = results.filter(r => !r.rerolled && !r.bought && r.result >= tn).length;
-    if (naturalSuccesses < 1) return { ok: false, reason: "no-natural-success" };
+    if (tn !== null) {
+        const naturalSuccesses = results.filter(r => !r.rerolled && !r.bought && r.result >= tn).length;
+        if (naturalSuccesses < 1) return { ok: false, reason: "no-natural-success" };
+    }
 
     const ceiling = actor.system?.karma?.karmaPoolCeiling ?? kpBalance;
 
     return {
         ok: true,
-        results: [...results, { result: tn, bought: true }],
+        results: [...results, { result: tn ?? 0, bought: true }],
         karmaUpdate: {
             "system.karma.karmaPool.value": kpBalance - 1,
             "system.karma.karmaPoolCeiling": Math.max(0, ceiling - 1),
@@ -73,11 +78,41 @@ export async function karmaBuySuccess(actor: KarmaActor, results: DieEntry[], tn
     };
 }
 
+// Re-roll only the caller-selected dice (simple/open rolls have no TN, so there is
+// no systemic "failure" to filter — the player right-clicks dice to mark them).
+export async function karmaPoolRerollSelected(
+    actor: KarmaActor,
+    results: DieEntry[],
+    selectedIndices: number[],
+    rerollCount: number,
+): Promise<KarmaSpendResult> {
+    const cost = rerollCount + 1;
+    const kpBalance = actor.system?.karma?.karmaPool?.value ?? 0;
+    if (kpBalance < cost) return { ok: false, reason: "insufficient-karma" };
+    if (selectedIndices.length === 0) return { ok: false, reason: "no-selection" };
+
+    const roll = await SR3ERoll.buildOpen(selectedIndices.length).evaluate();
+    const dieResults: { total?: number; result?: number; exploded?: boolean }[] =
+        (roll.terms[0] as any)?.results ?? [];
+    await (game as any).dice3d?.showForRoll?.(roll.foundryRoll, (game as any).user, true);
+
+    const selected = new Set(selectedIndices);
+    let i = 0;
+    const newResults = results.map((entry, index) => {
+        if (!selected.has(index) || entry.bought) return entry;
+        const d = dieResults[i++] ?? {};
+        return { result: d.total ?? d.result ?? 1, exploded: d.exploded ?? false, rerolled: true };
+    });
+
+    return { ok: true, results: newResults, karmaUpdate: { "system.karma.karmaPool.value": kpBalance - cost } };
+}
+
 export function notifyKarmaSpendDeclined(reason: KarmaSpendDeclineReason): void {
     const messages: Record<KarmaSpendDeclineReason, string> = {
         "insufficient-karma": "Not enough Karma Pool.",
         "no-failures": "No failed dice to reroll.",
         "no-natural-success": "Need at least one natural success to buy another.",
+        "no-selection": "Right-click a die to select it before rerolling.",
     };
     (globalThis as Record<string, unknown> & { ui?: { notifications?: { warn?: (msg: string) => void } } })
         .ui?.notifications?.warn?.(messages[reason]);
