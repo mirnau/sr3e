@@ -41,6 +41,10 @@ An unlinked token gets its own synthetic actor (`token.delta`) with a genuinely 
 
 `registerDebtInterestHook` in `debtInterest.ts` gates its entire body on `currentUserIsGM()`. `updateWorldTime` fires on every connected client, and the hook iterates every actor's debts and writes to them directly — without the gate, non-GM clients throw permission errors writing to actors they don't own, and a debt visible to both its owner and the GM risks having interest compounded twice in the same month rollover. Do not remove this gate to "let every client keep things in sync" — only the GM's client may perform this bulk write.
 
+### contestedFlow.test.ts's `game.actors` mock is load-bearing, not incidental
+
+The test's `game` mock resolves target actors via a `game.actors.get` backed by an `actorsById` map that `makeTarget()` populates. This exists because `handleContestStub` (defenderFlow.ts) calls `resolveActor(stub.target.actorId)` via `game.actors.get`, and without a real actor to resolve, it calls `expireContest`, which aborts the contest before it ever reaches `ChatMessage.create`. This used to pass anyway only because of the exact missed-wakeup bug ADR-0011 fixes — the premature abort signal arrived before `waitForResponse` had registered its listener and was silently dropped, so the test's own later `deliverResponse` call "won" instead. Do not remove the `game.actors` mock as unnecessary boilerplate; without it, every contest in this test file will abort for real again.
+
 ## ADR Index
 - [0001-sr3eroll-injectable-evaluator](adr/0001-sr3eroll-injectable-evaluator.md) — SUPERSEDED: SR3ERoll injectable evaluator (replaced by ADR-0005)
 - [0002-dice-formula-always-d6x6](adr/0002-dice-formula-always-d6x6.md) — SUPERSEDED: d6x6 formula (replaced by ADR-0006)
@@ -52,3 +56,4 @@ An unlinked token gets its own synthetic actor (`token.delta`) with a genuinely 
 - [0008-gadget-storage-active-effects](adr/0008-gadget-storage-active-effects.md) — Gadgets stored as ActiveEffect docs with flags.sr3e.gadget.*; no embedded item-in-item
 - [0009-sustained-spell-drop-via-native-effect-deletion](adr/0009-sustained-spell-drop-via-native-effect-deletion.md) — Sustained-spell drop rides native ActiveEffect deletion + deleteActiveEffect sync hook instead of dedicated drop UI
 - [0010-cross-client-actor-mutation-relay](adr/0010-cross-client-actor-mutation-relay.md) — Cross-actor economy writes relay through the GM's client; trades require consent from whoever isn't dragging
+- [0011-contest-signal-caching-prevents-stuck-locks](adr/0011-contest-signal-caching-prevents-stuck-locks.md) — waitForResponse/waitForBothDone cache an early signal instead of only resolving a currently-registered listener

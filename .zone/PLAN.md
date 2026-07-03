@@ -31,7 +31,7 @@
 [x] COULD: Magic Level 3 — spellcasting infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 4 — drain chat flow -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
-[~] COULD: Chat / socket challenge–response flows -> .zone/techspecs/TECHSPEC-chat-socket-challenge-response.md
+[x] COULD: Chat / socket challenge–response flows -> .zone/techspecs/TECHSPEC-chat-socket-challenge-response.md
 [ ] COULD: Vehicle economy
 [ ] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md
 
