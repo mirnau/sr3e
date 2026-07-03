@@ -41,6 +41,13 @@ const SPEC_PATH: Record<SkillCategory, string> = {
     language: "languageSkill.specializations",
 };
 
+type SkillCreationSession = {
+    pool: number;
+    value: number;
+    specializations: Array<{ name: string; value: number }>;
+    readwrite?: number;
+};
+
 /**
  * Skill spending service for character creation.
  * Follows singleton pattern established in Phase 1.
@@ -92,7 +99,65 @@ export class SkillSpendingService {
         );
     }
 
+    #getSessionStore(actor: Actor) {
+        return StoreManager.Instance.GetShallowStore<Record<string, SkillCreationSession>>(
+            actor,
+            "skillCreationRegistry",
+            {}
+        );
+    }
+
+    #getSessionKey(skill: Item): string {
+        return skill.id!;
+    }
+
+    #getReadWriteStore(skill: Item) {
+        return StoreManager.Instance.GetRWStore<number>(skill, "languageSkill.readwrite.value");
+    }
+
     // ─── Public API ───────────────────────────────────────────────────────────
+
+    /**
+     * Snapshot a skill editor session. Close/X restores this snapshot; thumbs-up drops it.
+     */
+    startSession(actor: Actor, skill: Item, category: SkillCategory): void {
+        const registry = this.#getSessionStore(actor);
+        const key = this.#getSessionKey(skill);
+        if (get(registry)[key]) return;
+
+        const snapshot: SkillCreationSession = {
+            pool: get(this.#getPoolStore(actor, category)) ?? 0,
+            value: get(this.#getValueStore(skill, category)) ?? 0,
+            specializations: (get(this.#getSpecStore(skill, category)) ?? []).map((spec) => ({ ...spec })),
+        };
+        if (category === "language") snapshot.readwrite = get(this.#getReadWriteStore(skill)) ?? 0;
+        registry.update((sessions) => ({ ...sessions, [key]: snapshot }));
+    }
+
+    commitSession(actor: Actor, skill: Item): void {
+        const registry = this.#getSessionStore(actor);
+        const key = this.#getSessionKey(skill);
+        registry.update((sessions) => {
+            const next = { ...sessions };
+            delete next[key];
+            return next;
+        });
+    }
+
+    cancelSession(actor: Actor, skill: Item, category: SkillCategory): void {
+        const registry = this.#getSessionStore(actor);
+        const key = this.#getSessionKey(skill);
+        const snapshot = get(registry)[key];
+        if (!snapshot) return;
+
+        this.#getPoolStore(actor, category).set(snapshot.pool);
+        this.#getValueStore(skill, category).set(snapshot.value);
+        this.#getSpecStore(skill, category).set(snapshot.specializations.map((spec) => ({ ...spec })));
+        if (category === "language" && snapshot.readwrite !== undefined) {
+            this.#getReadWriteStore(skill).set(snapshot.readwrite);
+        }
+        this.commitSession(actor, skill);
+    }
 
     /**
      * Check if the character can increase a skill.

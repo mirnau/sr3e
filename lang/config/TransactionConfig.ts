@@ -1,6 +1,6 @@
 export const TRANSACTION_KEYS = [
   "transaction", "amount", "type", "recurrent", "creditstick",
-  "interestpermonth", "creditor", "deletedChat",
+  "interestpermonth", "creditor", "deletedChat", "startingcreditstick",
 ] as const;
 
 export const TRANSACTION_TYPE_KEYS = [

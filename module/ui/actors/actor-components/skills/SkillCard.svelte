@@ -114,6 +114,12 @@ const linkedAttrName =
          <div class="skill-main-container">
             <h1 class="skill-value">{$valueStore}</h1>
          </div>
+         {#if category === "language" && readWriteStore}
+            <div class="skill-readwrite-field">
+               <span>R&amp;W</span>
+               <strong>{$readWriteStore}</strong>
+            </div>
+         {/if}
          {#if $specializationsStore.length > 0}
             <div class="specialization-container">
                {#each $specializationsStore as spec}
@@ -141,19 +147,10 @@ const linkedAttrName =
             <h1 class="skill-value">{$valueStore}</h1>
          </div>
 
-         {#if category === "language" && readWriteStore && $readWriteStore > 0}
-            <div class="specialization-container">
-               <div
-                  class="skill-specialization-card button"
-                  role="button"
-                  tabindex="0"
-                  onclick={(e) => rollSkill(e)}
-                  onkeydown={(e) => (e.key === "Enter" || e.key === " ") && rollSkill(e)}
-               >
-                  <div class="specialization-background"></div>
-                  <div class="specialization-name">Read/Write</div>
-                  <h1 class="embedded-value">{$readWriteStore}</h1>
-               </div>
+         {#if category === "language" && readWriteStore}
+            <div class="skill-readwrite-field">
+               <span>R&amp;W</span>
+               <strong>{$readWriteStore}</strong>
             </div>
          {/if}
 

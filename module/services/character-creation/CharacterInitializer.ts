@@ -7,6 +7,7 @@ import { configkeys, flags } from "../../../types/configuration-keys";
 import type SR3EActor from "../../documents/SR3EActor";
 import { CreationPointsService } from "./CreationPointsService";
 import { FLAGS } from "../../constants/flags";
+import { localize } from "../utilities";
 
 // Type definitions for character creation
 
@@ -38,6 +39,14 @@ const SKILL_POINTS: Record<string, number> = {
 	C: 34,
 	D: 30,
 	E: 27,
+};
+
+const RESOURCE_NUYEN: Record<string, number> = {
+	A: 1000000,
+	B: 400000,
+	C: 90000,
+	D: 20000,
+	E: 5000,
 };
 
 /**
@@ -97,7 +106,10 @@ export class CharacterInitializer {
 		const metatypeItem = game.items?.get(selections.metatypeId)!;
 		await actor.createEmbeddedDocuments("Item", [metatypeItem.toObject()]);
 
-		// Step 5: Handle magic awakening for priority A or B
+		// Step 5: Create starting resources as a credit stick
+		await actor.createEmbeddedDocuments("Item", [this.#startingCreditStick(selections.resourcePriority)]);
+
+		// Step 6: Handle magic awakening for priority A or B
 		const magicPriority = this.#getMagicPriorityFromId(selections.magicId);
 		if (magicPriority === "A" || magicPriority === "B") {
 			// Create embedded magic item (if not Unawakened)
@@ -111,7 +123,7 @@ export class CharacterInitializer {
 			await actor.update({ "system.attributes.magic.value": 6 });
 		}
 
-		// Step 6: Set character creation mode flags
+		// Step 7: Set character creation mode flags
 		await actor.setFlag(configkeys.sr3e, FLAGS.ACTOR.IS_CHARACTER_CREATION, true);
 		await actor.setFlag(configkeys.sr3e, FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED, false);
 
@@ -138,5 +150,24 @@ export class CharacterInitializer {
 
 		const priority = (magicItem.system as { awakened?: { priority?: string } })?.awakened?.priority;
 		return priority ?? "E";
+	}
+
+	#startingCreditStick(resourcePriority: string): Record<string, unknown> {
+		return {
+			name: localize(CONFIG.SR3E.TRANSACTION.startingcreditstick),
+			type: "transaction",
+			system: {
+				amount: RESOURCE_NUYEN[resourcePriority] ?? 0,
+				recurrent: false,
+				isCreditStick: true,
+				type: "asset",
+				creditorId: "",
+				interestPerMonth: 0,
+				journalId: "",
+				paidThroughPeriod: "",
+				lastMissedPeriod: "",
+				lastInterestPeriod: "",
+			},
+		};
 	}
 }

@@ -49,6 +49,7 @@
       const state = get(lockModalState);
       if (state.open || state.locking || $attributeLocked) return;
       lockModalState.set({ open: true, locking: false });
+      let confirmedLock = false;
 
       try {
          const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -59,19 +60,22 @@
          });
 
          if (confirmed) {
-            lockModalState.set({ open: true, locking: true });
+            confirmedLock = true;
+            lockModalState.set({ open: false, locking: true });
+            await attributeLocked.update(() => true);
             const finalInt = $intelligenceStore;
             $knowledgePoints = finalInt * 5;
             $languagePoints = Math.floor(finalInt * 1.5);
-            await attributeLocked.update(() => true);
          }
       } finally {
+         if (confirmedLock) return;
          lockModalState.set({ open: false, locking: false });
       }
    }
    $effect(() => {
       const attrPoints = $creationPointsStore;
-      if (attrPoints !== 0 || $attributeLocked) return;
+      const state = get(lockModalState);
+      if (attrPoints !== 0 || $attributeLocked || state.open || state.locking) return;
 
       if (hasOpenSkillEditors()) {
          pendingLockModal = true;

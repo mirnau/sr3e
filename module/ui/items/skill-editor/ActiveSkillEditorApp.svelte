@@ -38,6 +38,7 @@
     const linkedAttribute = (skill.system as Record<string, any>).activeSkill.linkedAttribute as string;
     const attrs = (actor.system as Record<string, any>)?.attributes ?? {};
     const linkedAttrRating = Number(attrs[linkedAttribute]?.value ?? 0) + Number(attrs[linkedAttribute]?.modifier ?? 0);
+    let committed = false;
 
     const remainingKarma = $derived(
         ($goodKarmaStore ?? 0)
@@ -67,12 +68,15 @@
 
     onMount(() => {
         if (get(isKarmaMode)) karmaService.startSkillSession(actor, skill);
+        else if (get(isCreation)) spendingService.startSession(actor, skill, SKILL_CATEGORY);
     });
 
     $effect(() => {
         if (app) {
             app.requestCommit = () => {
                 if (get(isKarmaMode)) karmaService.commitSkillSession(actor, skill.id!);
+                else if (get(isCreation)) spendingService.commitSession(actor, skill);
+                committed = true;
             };
         }
     });
@@ -144,9 +148,12 @@
         if (confirmed) {
             if ($isCreation) {
                 await spendingService.deleteWithRefund(actor, skill, SKILL_CATEGORY, linkedAttrRating);
+                spendingService.commitSession(actor, skill);
+                committed = true;
                 ui.notifications?.info(localize("SR3E.notifications.skillpointsrefund"));
             } else {
                 if (get(isKarmaMode)) karmaService.cancelSkillSession(actor, skill);
+                committed = true;
                 await actor.deleteEmbeddedDocuments("Item", [skill.id!]);
             }
             app?.close();
@@ -154,7 +161,10 @@
     }
 
     onDestroy(() => {
-        karmaService.cancelSkillSession(actor, skill);
+        if (!committed) {
+            if (get(isKarmaMode)) karmaService.cancelSkillSession(actor, skill);
+            else if (get(isCreation)) spendingService.cancelSession(actor, skill, SKILL_CATEGORY);
+        }
         storeManager.Unsubscribe(actor);
         storeManager.Unsubscribe(skill);
         if (app?.requestCommit) {

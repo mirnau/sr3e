@@ -68,6 +68,12 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
         return `${skillLabel}: ${this.#skill.name}`;
     }
 
+    override async close(options?: DeepPartial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
+        this.#hideImmediately();
+        this.#returnFocusToActorSheet();
+        return super.close(options);
+    }
+
     // ─── Rendering lifecycle ──────────────────────────────────────────────────
 
     protected async _renderHTML(): Promise<unknown> {
@@ -164,6 +170,8 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
     // ─── Teardown ─────────────────────────────────────────────────────────────
 
     protected async _tearDown(options: DeepPartial<RenderOptions>): Promise<void> {
+        this.#hideImmediately();
+        this.#returnFocusToActorSheet();
         if (this._commitMO) {
             try { this._commitMO.disconnect(); } catch { /* no-op */ }
             this._commitMO = null;
@@ -173,6 +181,23 @@ export class SkillEditorApp extends foundry.applications.api.ApplicationV2 {
             this.#app = undefined;
         }
         return super._tearDown(options);
+    }
+
+    #hideImmediately(): void {
+        if (!this.element) return;
+        this.element.style.visibility = "hidden";
+        this.element.style.opacity = "0";
+        this.element.style.pointerEvents = "none";
+    }
+
+    #returnFocusToActorSheet(): void {
+        const actorId = this.#actor.id;
+        const actorSheet = Object.values(ui.windows as unknown as Record<string, foundry.applications.api.ApplicationV2>)
+            .find((app: any) => app.document?.id === actorId && app !== this);
+        try {
+            actorSheet?.bringToTop();
+            (actorSheet as any)?.element?.focus?.();
+        } catch { /* no-op */ }
     }
 }
 

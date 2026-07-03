@@ -11,9 +11,7 @@
    const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
    const localization = $derived(CONFIG.SR3E.MOVEMENT);
-   const metatype = $derived(
-      actor?.items.find((i: any) => i.type === "metatype"),
-   );
+   let metatype = $state<Item | null>(null);
 
    storeManager.Subscribe(actor);
 
@@ -39,7 +37,28 @@
       { active: false, values: {} },
    );
 
-   onDestroy(() => storeManager.Unsubscribe(actor));
+   onDestroy(() => {
+      Hooks.off("createItem", createHookId);
+      Hooks.off("updateItem", updateHookId);
+      Hooks.off("deleteItem", deleteHookId);
+      storeManager.Unsubscribe(actor);
+   });
+
+   function rebuildMetatype(): void {
+      metatype = [...((actor as any).items ?? [])].find((item: Item) => item.type === "metatype") ?? null;
+   }
+
+   function onItemChange(item: any): void {
+      if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
+      rebuildMetatype();
+   }
+
+   rebuildMetatype();
+
+   const createHookId = Hooks.on("createItem", onItemChange);
+   const updateHookId = Hooks.on("updateItem", onItemChange);
+   const deleteHookId = Hooks.on("deleteItem", onItemChange);
+
    $effect(() => {
       if (!metatype) return;
 

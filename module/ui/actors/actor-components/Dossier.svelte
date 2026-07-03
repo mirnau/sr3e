@@ -1,7 +1,7 @@
 <script lang="ts">
 import { onDestroy, untrack } from "svelte";
 import { slide } from "svelte/transition";
-import { localize } from "../../../services/utilities";
+import { localize, pickImagePath } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import type SR3EActor from "../../../documents/SR3EActor";
@@ -10,14 +10,34 @@ let { actor: _actor, config = CONFIG.SR3E }: { actor: SR3EActor; config?: any } 
 const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 
-let metatype = $derived(actor?.items.find((i: any) => i.type === "metatype"));
+let metatype = $state<Item | null>(null);
 
 storeManager.Subscribe(actor);
 
 const actorNameStore = storeManager.GetShallowStore<string>(actor, "actorName", actor.name);
 const isDetailsOpenStore = storeManager.GetRWStore<boolean>(actor, "profile.isDetailsOpen");
 
-onDestroy(() => storeManager.Unsubscribe(actor));
+onDestroy(() => {
+   Hooks.off("createItem", createHookId);
+   Hooks.off("updateItem", updateHookId);
+   Hooks.off("deleteItem", deleteHookId);
+   storeManager.Unsubscribe(actor);
+});
+
+function rebuildMetatype(): void {
+   metatype = [...((actor as any).items ?? [])].find((item: Item) => item.type === "metatype") ?? null;
+}
+
+function onItemChange(item: any): void {
+   if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
+   rebuildMetatype();
+}
+
+rebuildMetatype();
+
+const createHookId = Hooks.on("createItem", onItemChange);
+const updateHookId = Hooks.on("updateItem", onItemChange);
+const deleteHookId = Hooks.on("deleteItem", onItemChange);
 
 function toggleDetails() {
    isDetailsOpenStore.update((val) => !val);
@@ -52,14 +72,10 @@ function updateQuote(event: Event) {
    actor?.update({ "system.profile.quote": target.innerText.trim() }, { render: false });
 }
 
-function editImage(): void {
+async function editImage(): Promise<void> {
    if (!actor) return;
-   const fp = new FilePicker({
-      type: "image",
-      current: actor.img,
-      callback: (path: string) => actor.update({ img: path }),
-   });
-   fp.browse();
+   const path = await pickImagePath(actor.img as string);
+   await actor.update({ img: path });
 }
 
 const profile = $derived(config.PROFILE);

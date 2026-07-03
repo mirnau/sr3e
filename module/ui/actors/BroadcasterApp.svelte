@@ -5,6 +5,7 @@
       stopBroadcast,
    } from "../../services/news-service/NewsService.svelte";
    import SheetCard from "../common-components/SheetCard.svelte";
+   import Switch from "../common-components/Switch.svelte";
    import StoreManager from "../../utilities/StoreManager.svelte";
    import type { IStoreManager } from "../../utilities/IStoreManager";
    import { openFilePicker } from "../../services/utilities";
@@ -166,15 +167,8 @@
                   </h1>
                </div>
                <div class="broadcast-toggle">
-                  <label class="broadcast-toggle-label">
-                     <input
-                        type="checkbox"
-                        class="sr3e-checkbox"
-                        id="broadcasting-toggle"
-                        bind:checked={$isBroadcastingStore}
-                     />
-                     Broadcasting
-                  </label>
+                  <Switch bind:checked={$isBroadcastingStore} ariaLabel="Broadcasting" />
+                  <span class="broadcast-toggle-label">Broadcasting</span>
                </div>
             </div>
          </div>
