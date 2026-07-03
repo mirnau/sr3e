@@ -21,13 +21,39 @@ storeManager.Subscribe(actor);
 const intelligence = storeManager.GetSimpleStatROStore(actor, "attributes.intelligence");
 const quickness = storeManager.GetSimpleStatROStore(actor, "attributes.quickness");
 const reaction = storeManager.GetSimpleStatROStore(actor, "attributes.reaction");
+const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
+const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurnedOut");
 
-const isAwakened = $derived(
-   actor.items.some((item: any) => item.type === "magic") &&
-      !actor.system?.attributes?.isBurnedOut
-);
+let magicItem = $state<Item | null>(null);
 
-onDestroy(() => storeManager.Unsubscribe(actor));
+const isAwakened = $derived($magic > 0 && magicItem !== null && !$isBurnedOut);
+
+onDestroy(() => {
+   Hooks.off("createItem", createHookId);
+   Hooks.off("updateItem", updateHookId);
+   Hooks.off("deleteItem", deleteHookId);
+   storeManager.Unsubscribe(actor);
+});
+
+function rebuildMagicItem(): void {
+   magicItem = [...((actor as any).items ?? [])].find((item: Item) => item.type === "magic") ?? null;
+}
+
+function belongsToActor(item: any): boolean {
+   const actorId = (actor as any).id;
+   return item.parent?.id === actorId || item.actor?.id === actorId;
+}
+
+function onItemChange(item: any): void {
+   if (!belongsToActor(item)) return;
+   rebuildMagicItem();
+}
+
+rebuildMagicItem();
+
+const createHookId = Hooks.on("createItem", onItemChange);
+const updateHookId = Hooks.on("updateItem", onItemChange);
+const deleteHookId = Hooks.on("deleteItem", onItemChange);
 
 $effect(() => {
    const intelSum = $intelligence;

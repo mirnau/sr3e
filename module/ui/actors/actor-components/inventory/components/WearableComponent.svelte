@@ -1,4 +1,5 @@
 <script lang="ts">
+import { untrack } from "svelte";
 import { localize } from "../../../../../services/utilities";
 
 const p = $props<{ item: Item }>();

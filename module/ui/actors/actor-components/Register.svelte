@@ -11,12 +11,14 @@ import Inventory from "./inventory/Inventory.svelte";
 import Grimoire from "./Grimoire.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
 import RatsRace from "./rats-race/RatsRace.svelte";
+import { REGISTER_TAB_FLAG, type RegisterTab, isRegisterTab, registerTabForItem } from "./registerTabs";
 
 let { actor: _actor }: { actor: Actor } = $props();
 const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
-let activeTab = $state<"active" | "knowledge" | "language" | "grimoire" | "inventory" | "garage" | "effects" | "ratsrace">("active");
+const activeTabStore = storeManager.GetFlagStore<RegisterTab>(actor, REGISTER_TAB_FLAG, "active");
 const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
+const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurnedOut");
 storeManager.Subscribe(actor);
 onDestroy(() => {
    Hooks.off("createItem", createHookId);
@@ -28,6 +30,7 @@ onDestroy(() => {
 let skillItems = $state<any[]>([]);
 let spellItems = $state<Item[]>([]);
 let transactionItems = $state<Item[]>([]);
+let magicItems = $state<Item[]>([]);
 
 function rebuildRegisterItems() {
    const items = [...((actor as any).items ?? [])];
@@ -38,14 +41,21 @@ function rebuildRegisterItems() {
    transactionItems = items
       .filter((item: Item) => item.type === "transaction")
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   magicItems = items.filter((item: Item) => item.type === "magic");
 }
 rebuildRegisterItems();
 const onItemChange = (item: any) => {
-   if (item.parent?.id !== (actor as any).id) return;
+   if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
    rebuildRegisterItems();
 };
 
-const createHookId = Hooks.on("createItem", onItemChange);
+const onItemCreate = (item: Item) => {
+   onItemChange(item);
+   const tab = registerTabForItem(item);
+   if (tab) $activeTabStore = tab;
+};
+
+const createHookId = Hooks.on("createItem", onItemCreate);
 const updateHookId = Hooks.on("updateItem", onItemChange);
 const deleteHookId = Hooks.on("deleteItem", onItemChange);
 function bySkillType(skillType: string) {
@@ -61,12 +71,13 @@ const knowledgeSkills = $derived(bySkillType("knowledge"));
 const languageSkills = $derived(bySkillType("language"));
 const isAwakened = $derived(
    $magic > 0 &&
-   actor.items.some((item: any) => item.type === "magic") &&
-   !actor.system?.attributes?.isBurnedOut,
+   magicItems.length > 0 &&
+   !$isBurnedOut,
 );
 
 $effect(() => {
-   if (!isAwakened && activeTab === "grimoire") activeTab = "active";
+   if (!isRegisterTab($activeTabStore)) $activeTabStore = "active";
+   if (!isAwakened && $activeTabStore === "grimoire") $activeTabStore = "active";
 });
 </script>
 
@@ -76,71 +87,71 @@ $effect(() => {
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "active"}
-            onclick={() => (activeTab = "active")}
+            class:active={$activeTabStore === "active"}
+            onclick={() => ($activeTabStore = "active")}
          ><span>Active</span></button>
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "knowledge"}
-            onclick={() => (activeTab = "knowledge")}
+            class:active={$activeTabStore === "knowledge"}
+            onclick={() => ($activeTabStore = "knowledge")}
          ><span>Knowledge</span></button>
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "language"}
-            onclick={() => (activeTab = "language")}
+            class:active={$activeTabStore === "language"}
+            onclick={() => ($activeTabStore = "language")}
          ><span>Language</span></button>
          {#if isAwakened}
             <button
                type="button"
                class="skills-register-tab"
-               class:active={activeTab === "grimoire"}
-               onclick={() => (activeTab = "grimoire")}
+               class:active={$activeTabStore === "grimoire"}
+               onclick={() => ($activeTabStore = "grimoire")}
             ><span>Grimoire</span></button>
          {/if}
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "inventory"}
-            onclick={() => (activeTab = "inventory")}
+            class:active={$activeTabStore === "inventory"}
+            onclick={() => ($activeTabStore = "inventory")}
          ><span>{localize(CONFIG.SR3E.INVENTORY.inventory)}</span></button>
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "garage"}
-            onclick={() => (activeTab = "garage")}
+            class:active={$activeTabStore === "garage"}
+            onclick={() => ($activeTabStore = "garage")}
          ><span>{localize(CONFIG.SR3E.INVENTORY.garage)}</span></button>
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "effects"}
-            onclick={() => (activeTab = "effects")}
+            class:active={$activeTabStore === "effects"}
+            onclick={() => ($activeTabStore = "effects")}
          ><span>{localize(CONFIG.SR3E.INVENTORY.effects)}</span></button>
          <button
             type="button"
             class="skills-register-tab"
-            class:active={activeTab === "ratsrace"}
-            onclick={() => (activeTab = "ratsrace")}
+            class:active={$activeTabStore === "ratsrace"}
+            onclick={() => ($activeTabStore = "ratsrace")}
          ><span>Rat's Race</span></button>
       </div>
       <div class="skills-content">
          <div class="skills-content-inner">
-            {#if activeTab === "active"}
+            {#if $activeTabStore === "active"}
                <SkillsActive {actor} skills={activeSkills} />
-            {:else if activeTab === "knowledge"}
+            {:else if $activeTabStore === "knowledge"}
                <SkillsKnowledge {actor} skills={knowledgeSkills} />
-            {:else if activeTab === "language"}
+            {:else if $activeTabStore === "language"}
                <SkillsLanguage {actor} skills={languageSkills} />
-            {:else if activeTab === "grimoire" && isAwakened}
+            {:else if $activeTabStore === "grimoire" && isAwakened}
                <Grimoire {actor} spells={spellItems} />
-            {:else if activeTab === "inventory"}
+            {:else if $activeTabStore === "inventory"}
                <Inventory {actor} />
-            {:else if activeTab === "garage"}
+            {:else if $activeTabStore === "garage"}
                <p>{localize(CONFIG.SR3E.INVENTORY.garage)}</p>
-            {:else if activeTab === "effects"}
+            {:else if $activeTabStore === "effects"}
                <ActiveEffectsViewer document={actor} />
-            {:else if activeTab === "ratsrace"}
+            {:else if $activeTabStore === "ratsrace"}
                <RatsRace {actor} transactions={transactionItems} />
             {/if}
          </div>

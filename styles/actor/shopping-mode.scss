@@ -1,5 +1,7 @@
 // Creation points sidebar positioning
 .points-position {
+	--creation-point-active-color: var(--health-highlight-color-primary);
+
 	position: relative;
 
 	.point-container {
@@ -34,12 +36,12 @@
 // Attribute phase: first item (attribute points) highlighted, others dimmed
 .attribute-point-assignment > .point-container:first-child {
 	box-shadow:
-		inset 0 0 10px 1px #0f0,
-		inset 0 0 30px #0f0;
-	border-color: #0f0;
+		inset 0 0 10px 1px var(--creation-point-active-color),
+		inset 0 0 30px var(--creation-point-active-color);
+	border-color: var(--creation-point-active-color);
 
 	.points-value {
-		color: #0f0;
+		color: var(--creation-point-active-color);
 	}
 }
 
@@ -64,11 +66,11 @@
 
 .skill-point-assignment > .point-container:not(:first-child) {
 	box-shadow:
-		inset 0 0 10px 1px #0f0,
-		inset 0 0 30px #0f0;
-	border-color: #0f0;
+		inset 0 0 10px 1px var(--creation-point-active-color),
+		inset 0 0 30px var(--creation-point-active-color);
+	border-color: var(--creation-point-active-color);
 
 	.points-value {
-		color: #0f0;
+		color: var(--creation-point-active-color);
 	}
 }

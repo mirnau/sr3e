@@ -16,7 +16,7 @@ Migrate character foundations first:
 - Character sheet workflows.
 - Attribute and skill shopping.
 - Karma and advancement.
-- Storyteller-facing karma distribution.
+- Game Master-facing karma distribution.
 
 Build dependent systems after that foundation is stable.
 

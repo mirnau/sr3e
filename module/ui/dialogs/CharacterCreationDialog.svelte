@@ -8,6 +8,7 @@
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
    import LabeledDropdown from "../items/LabeledDropdown.svelte";
+   import { pickImagePath } from "../../services/utilities";
 
    const { actorName: _actorName, onSubmit, onCancel } = $props<{
       actorName: string;
@@ -44,6 +45,13 @@
    const metatypeImage = $derived(metatypeItem?.img || defaultCharacterIcon);
    const metatypeName = $derived(metatypeItem?.name || "");
 
+   let customImage = $state("");
+   const characterImage = $derived(customImage || metatypeImage);
+
+   async function handleImageClick() {
+      customImage = await pickImagePath(characterImage);
+   }
+
    const ageMin = 0;
    const ageMax = $derived((metatypeItem?.system as any)?.agerange?.max ?? 100);
    const lifespan = $derived(ageMax - ageMin);
@@ -75,6 +83,7 @@
       event.preventDefault();
       onSubmit({
          name: characterName,
+         img: characterImage,
          metatypeId: selectedMetatype,
          magicId: selectedMagic,
          attributePriority: selectedAttribute,
@@ -129,6 +138,7 @@
    }
 
    function handleClear() {
+      customImage = "";
       selectedMetatype = "";
       selectedMagic = "";
       selectedAttribute = "";
@@ -145,10 +155,12 @@
       <ItemSheetComponent>
          <div class="image-mask">
             <img
-               src={metatypeImage}
+               src={characterImage}
                role="presentation"
+               data-edit="img"
                title={metatypeName}
                alt={metatypeName}
+               onclick={handleImageClick}
             />
          </div>
          <div class="large-input-wrapper">

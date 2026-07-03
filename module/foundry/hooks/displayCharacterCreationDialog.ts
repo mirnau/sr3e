@@ -104,7 +104,8 @@ async function showCharacterCreationDialog(creationId: string): Promise<void> {
 			const createOptions = { ...options, __sr3eAllowCreation: true };
 
 			// Create the actor
-			const [actor] = await Actor.create([data], createOptions) as SR3EActor[];
+			const createData = result.img ? { ...data, img: result.img } : data;
+			const [actor] = await Actor.create([createData], createOptions) as SR3EActor[];
 
 			if (actor) {
 				// Apply character creation initialization

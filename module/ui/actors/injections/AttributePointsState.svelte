@@ -4,6 +4,12 @@
    import type { IStoreManager } from "../../../utilities/IStoreManager";
    import { FLAGS } from "../../../constants/flags";
    import CreationPointList from "../../common-components/CreationPointList.svelte";
+   import { get } from "svelte/store";
+
+   type LockModalState = {
+      open: boolean;
+      locking: boolean;
+   };
 
    const { actor: _actor } = $props<{ actor: Actor; config?: any }>();
    const actor = untrack(() => _actor);
@@ -18,6 +24,11 @@
       FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED,
       false,
    );
+   const lockModalState = storeManager.GetShallowStore<LockModalState>(
+      actor,
+      "attributeLockModalState",
+      { open: false, locking: false },
+   );
 
    const pointList = $derived([
       { value: $creationPointsStore, text: "Attribute Points" },
@@ -27,7 +38,6 @@
    ]);
 
    let pendingLockModal = $state(false);
-   let lockModalOpen = false;
 
    function hasOpenSkillEditors(): boolean {
       return Object.values(ui.windows as unknown as Record<string, { id?: string }>).some(
@@ -36,8 +46,9 @@
    }
 
    async function showLockModal(): Promise<void> {
-      if (lockModalOpen) return;
-      lockModalOpen = true;
+      const state = get(lockModalState);
+      if (state.open || state.locking || $attributeLocked) return;
+      lockModalState.set({ open: true, locking: false });
 
       try {
          const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -48,13 +59,14 @@
          });
 
          if (confirmed) {
+            lockModalState.set({ open: true, locking: true });
             const finalInt = $intelligenceStore;
             $knowledgePoints = finalInt * 5;
             $languagePoints = Math.floor(finalInt * 1.5);
             await attributeLocked.update(() => true);
          }
       } finally {
-         lockModalOpen = false;
+         lockModalState.set({ open: false, locking: false });
       }
    }
    $effect(() => {

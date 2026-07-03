@@ -96,6 +96,12 @@ export function buildSkillSetup(
         rollState,
         lockPriority: "simple",
         selfPublish: true,
+        // Defaulting only applies when rolling the base skill directly — a
+        // specialization roll is already the most specific rating available
+        // (like an attribute, nothing to fall back further from), so it
+        // never offers Defaulting mode.
+        defaultingAttributeKey: specIndex == null ? (resolved?.linkedAttribute ?? null) : null,
+        defaultingExcludeSkillId: skillId,
         defenseHint: { type: "skill", key: skillId, tnMod: 0, tnLabel: "Skill" },
         exportFn: () => ({
             familyKey: "skill",

@@ -2,6 +2,7 @@ export const hooks = Object.freeze({
   init: "init",
   ready: "ready",
   preCreateActor: "preCreateActor",
+  preCreateItem: "preCreateItem",
   createActor: "createActor",
 } as const);
 
@@ -12,7 +13,9 @@ export const configkeys = Object.freeze({
 export const typekeys = Object.freeze({
   character: "character",
   broadcaster: "broadcaster",
-  storytellerscreen: "storytellerscreen",
+  gamemasterscreen: "gamemasterscreen",
+  legacyStorytellerScreen: "storytellerscreen",
+  mechanical: "mechanical",
   metatype: "metatype",
   skill: "skill",
   weapon: "weapon",

@@ -1,0 +1,23 @@
+import { typekeys } from "../../types/configuration-keys";
+import { registerDocumentTypeIcon, registerDocumentTypeIconRule } from "./documentTypeIcons";
+
+const svg = (fileName: string): string => `systems/sr3e/textures/svgrepo/${fileName}`;
+
+export function registerSr3eDocumentTypeIcons(): void {
+	registerDocumentTypeIcon("Actor", typekeys.gamemasterscreen, svg("map-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.focus, svg("crystal-cluster-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.medical, svg("syringe-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.wearable, svg("jacket-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.gadget, svg("cogs-f-svgrepo-com.svg"));
+	registerDocumentTypeIconRule(
+		"Item",
+		typekeys.gadget,
+		source => source.system?.type === "fetish",
+		svg("snake-totem-svgrepo-com.svg")
+	);
+	registerDocumentTypeIcon("Item", typekeys.ammunition, svg("bullets-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.spell, svg("book-open-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.skill, svg("action-solid-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.transaction, svg("yen-money-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.weapon, svg("rifle-gun-svgrepo-com.svg"));
+}

@@ -22,6 +22,7 @@ import {
 import { INVENTORY_KEYS } from "./config/InventoryConfig";
 import { GADGET_KEYS, GADGET_TYPE_KEYS, EFFECTS_KEYS } from "./config/GadgetConfig";
 import { MEDICAL_KEYS } from "./config/MedicalConfig";
+import { LANDING_TAKEOFF_KEYS, MECHANICAL_CATEGORY_KEYS, MECHANICAL_KEYS, POWER_SOURCE_KEYS, VEHICLE_TYPE_KEYS } from "./config/MechanicalConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -94,6 +95,11 @@ export const sr3e = {
   GADGET_TYPES: createCategory("gadgetTypes", GADGET_TYPE_KEYS),
   EFFECTS: createCategory("effects", EFFECTS_KEYS),
   MEDICAL: createCategory("medical", MEDICAL_KEYS),
+  MECHANICAL: createCategory("mechanical", MECHANICAL_KEYS),
+  VEHICLE_TYPES: createCategory("vehicleTypes", VEHICLE_TYPE_KEYS),
+  MECHANICAL_CATEGORIES: createCategory("mechanicalCategories", MECHANICAL_CATEGORY_KEYS),
+  POWER_SOURCES: createCategory("powerSources", POWER_SOURCE_KEYS),
+  LANDING_TAKEOFF: createCategory("landingTakeoff", LANDING_TAKEOFF_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

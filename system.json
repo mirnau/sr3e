@@ -24,6 +24,7 @@
   "documentTypes": {
     "Actor": {
       "character": {},
+      "gamemasterscreen": {},
       "storytellerscreen": {},
       "broadcaster": {},
       "mechanical": {}

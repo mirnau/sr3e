@@ -1,13 +1,13 @@
 {
   "sr3e": {
     "GMSCREEN": {
-      "storytellerscreen": "Storyteller's Screen"
+      "gamemasterscreen": "Game Master's Screen"
     },
     "actorTypes": {
       "broadcaster": "Broadcaster",
       "character": "Character",
-      "mechanical": "Mechanical",
-      "storytellerscreen": "Storyteller's Screen"
+      "gamemasterscreen": "Game Master's Screen",
+      "mechanical": "Mechanical"
     },
     "ammunition": {
       "ammunition": "Ammunition",
@@ -224,6 +224,12 @@
       "useKarmaPool": "Use Karma Pool",
       "useKarmaPoolConfirm": "Spend (temporary) or Burn (permanent) 1 Karma Pool point?"
     },
+    "landingTakeoff": {
+      "LaunchRecovery": "Launch/Recovery",
+      "Runway": "Runway",
+      "VSTOL": "VSTOL",
+      "VTOL": "VTOL"
+    },
     "legalpermit": {
       "1": "Permit Level 1",
       "2": "Permit Level 2",
@@ -261,6 +267,67 @@
       "aspectedmage": "Aspected Mage",
       "fullmage": "Full Mage"
     },
+    "mechanical": {
+      "accel": "Acceleration",
+      "accelTurbo": "Acceleration (Turbo)",
+      "armor": "Armor",
+      "autonav": "Autonav",
+      "body": "Body",
+      "capacity": "Capacity",
+      "cargo": "Cargo",
+      "category": "Category",
+      "droneOps": "Drone Operations",
+      "eccm": "ECCM",
+      "ecm": "ECM",
+      "electronicWarfare": "Electronic Warfare",
+      "entryPoints": "Entry Points",
+      "externalFixed": "External Fixed",
+      "firmpoints": "Firmpoints",
+      "flux": "Flux",
+      "handling": "Handling",
+      "handlingOffRoad": "Handling (Off-Road)",
+      "handlingRoad": "Handling (Road)",
+      "hardpoints": "Hardpoints",
+      "internalFixed": "Internal Fixed",
+      "landingTakeoff": "Landing/Takeoff",
+      "load": "Load",
+      "mechanical": "Mechanical",
+      "miniTurrets": "Mini Turrets",
+      "mountsTitle": "Weapon Mounts",
+      "performance": "Performance",
+      "pilot": "Pilot",
+      "pintles": "Pintles",
+      "power": "Power Source",
+      "remoteControlInterface": "Remote Control Interface",
+      "riggerAdaptation": "Rigger Adaptation",
+      "seating": "Seating",
+      "sensor": "Sensor",
+      "setupBreakdownMinutes": "Setup/Breakdown (min)",
+      "signature": "Signature",
+      "speed": "Speed",
+      "speedMax": "Max Speed",
+      "speedStall": "Stall Speed",
+      "speedTurbo": "Speed (Turbo)",
+      "turrets": "Turrets",
+      "vehicleType": "Type"
+    },
+    "mechanicalCategories": {
+      "bike": "Bike",
+      "boat": "Boat",
+      "car": "Car",
+      "drone": "Drone",
+      "fixedWing": "Fixed-Wing Aircraft",
+      "hovercraft": "Hovercraft",
+      "lta": "Lighter-than-Air",
+      "military": "Military Vehicle",
+      "rotor": "Rotorcraft",
+      "security": "Security Vehicle",
+      "ship": "Ship",
+      "submarine": "Submarine",
+      "tBird": "TBird",
+      "truck": "Truck",
+      "vectoredThrust": "Vectored Thrust"
+    },
     "medical": {
       "depleted": "Depleted",
       "medical": "Medical Supplies",
@@ -276,6 +343,8 @@
       "weight": "Weight"
     },
     "modal": {
+      "awakencharacter": "Do you want {name} to awaken with {magic}?",
+      "awakencharactertitle": "Awaken Character?",
       "cancel": "Cancel",
       "confirm": "Confirm",
       "decline": "Decline",
@@ -300,6 +369,14 @@
       "concealability": "Conceal",
       "portability": "Portability",
       "weight": "Weight"
+    },
+    "powerSources": {
+      "electric": "Electric",
+      "fusion": "Fusion",
+      "methanol": "Methanol",
+      "other": "Other",
+      "petrochem": "Petrochemical",
+      "sail": "Sail"
     },
     "profile": {
       "age": "Age",
@@ -452,6 +529,11 @@
       "debt": "Debt",
       "expense": "Expense",
       "income": "Income"
+    },
+    "vehicleTypes": {
+      "aviation": "Aviation",
+      "ground": "Ground",
+      "marine": "Marine"
     },
     "weapon": {
       "ammunitionClass": "Ammunition Class",

@@ -1,9 +1,9 @@
-import CommodityModel from "./item-components/Commodity";
-import CustomTokenModel from "./item-components/CustomToken";
+import CommodityModel from "../items/item-components/Commodity";
+import CustomTokenModel from "../items/item-components/CustomToken";
 
 export default class MechanicalModel extends foundry.abstract.TypeDataModel<
   MechanicalSchema,
-  BaseItem
+  BaseActor
 > {
   static defineSchema(): MechanicalSchema {
     return {
@@ -31,8 +31,16 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
         initial: "petrochem",
         choices: ["electric", "petrochem", "methanol", "fusion", "sail", "other"],
       }),
+      vehicleType: new StringField({
+        initial: "ground",
+        choices: ["ground", "marine", "aviation"],
+      }),
       handling: new NumberField({ integer: true, min: 0, initial: 0 }),
+      handlingRoad: new NumberField({ integer: true, min: 0, initial: 0 }),
+      handlingOffRoad: new NumberField({ integer: true, min: 0, initial: 0 }),
       speed: new NumberField({ integer: true, min: 0, initial: 0 }),
+      speedMax: new NumberField({ integer: true, min: 0, initial: 0 }),
+      speedStall: new NumberField({ integer: true, min: 0, initial: 0 }),
       accel: new NumberField({ integer: true, min: 0, initial: 0 }),
       body: new NumberField({ integer: true, min: 0, initial: 0 }),
       armor: new NumberField({ integer: true, min: 0, initial: 0 }),
@@ -40,18 +48,13 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
       autonav: new NumberField({ integer: true, min: 0, initial: 0 }),
       pilot: new NumberField({ integer: true, min: 0, initial: 0 }),
       sensor: new NumberField({ integer: true, min: 0, initial: 0 }),
+      ecm: new NumberField({ integer: true, min: 0, initial: 0 }),
+      eccm: new NumberField({ integer: true, min: 0, initial: 0 }),
+      flux: new NumberField({ integer: true, min: 0, initial: 0 }),
       cargo: new NumberField({ integer: true, min: 0, initial: 0 }),
       load: new NumberField({ integer: true, min: 0, initial: 0 }),
-      speedTurbo: new NumberField({
-        integer: true,
-        min: 0,
-        nullable: true,
-      }),
-      accelTurbo: new NumberField({
-        integer: true,
-        min: 0,
-        nullable: true,
-      }),
+      speedTurbo: new NumberField({ integer: true, min: 0, nullable: true }),
+      accelTurbo: new NumberField({ integer: true, min: 0, nullable: true }),
       seating: new StringField({
         initial: "",
         blank: true,
@@ -107,8 +110,13 @@ type MountsSchema = {
 type MechanicalSchema = {
   category: StringField;
   power: StringField;
+  vehicleType: StringField;
   handling: NumberField;
+  handlingRoad: NumberField;
+  handlingOffRoad: NumberField;
   speed: NumberField;
+  speedMax: NumberField;
+  speedStall: NumberField;
   accel: NumberField;
   body: NumberField;
   armor: NumberField;
@@ -116,6 +124,9 @@ type MechanicalSchema = {
   autonav: NumberField;
   pilot: NumberField;
   sensor: NumberField;
+  ecm: NumberField;
+  eccm: NumberField;
+  flux: NumberField;
   cargo: NumberField;
   load: NumberField;
   speedTurbo: NumberField;

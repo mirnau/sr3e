@@ -1,11 +1,13 @@
 import CharacterModel from "./module/models/actors/CharacterModel";
 import BroadcasterModel from "./module/models/actors/BroadcasterModel";
-import StorytellerScreenModel from "./module/models/actors/StorytellerScreenModel";
+import GameMasterScreenModel from "./module/models/actors/GameMasterScreenModel";
+import MechanicalModel from "./module/models/actors/MechanicalModel";
 import { sr3e } from "./lang/config";
 import { configkeys, hooks, typekeys } from "./types/configuration-keys";
 import CharacterActorSheet from "./module/sheets/actors/CharacterSheet";
 import BroadcasterSheet from "./module/sheets/actors/BroadcasterSheet";
-import StorytellerScreenSheet from "./module/sheets/actors/StorytellerScreenSheet";
+import GameMasterScreenSheet from "./module/sheets/actors/GameMasterScreenSheet";
+import MechanicalSheet from "./module/sheets/actors/MechanicalSheet";
 import SR3EActor from "./module/documents/SR3EActor";
 import SR3EItem from "./module/documents/SR3EItem";
 import SR3ECombat from "./module/documents/SR3ECombat";
@@ -40,6 +42,9 @@ import { registerMedicalTokenDropHook } from "./module/services/medical/applyMed
 import { registerWindowFocusDimHook } from "./module/foundry/hooks/windowFocusDim";
 import { registerSustainedSpellCleanupHook } from "./module/services/spells/sustainedSpells";
 import { registerDebtInterestHook } from "./module/services/economy/debtInterest";
+import { registerDocumentTypeIconHooks } from "./module/foundry/documentTypeIcons";
+import { registerSr3eDocumentTypeIcons } from "./module/foundry/registerSr3eDocumentTypeIcons";
+import { migrateLegacyActorTypes } from "./module/foundry/migrateLegacyActorTypes";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -146,9 +151,21 @@ async function registerHooks(): Promise<void> {
          },
          {
             docClass: Actor,
-            type: typekeys.storytellerscreen,
-            model: StorytellerScreenModel,
-            sheet: StorytellerScreenSheet,
+            type: typekeys.gamemasterscreen,
+            model: GameMasterScreenModel,
+            sheet: GameMasterScreenSheet,
+         },
+         {
+            docClass: Actor,
+            type: typekeys.legacyStorytellerScreen,
+            model: GameMasterScreenModel,
+            sheet: GameMasterScreenSheet,
+         },
+         {
+            docClass: Actor,
+            type: typekeys.mechanical,
+            model: MechanicalModel,
+            sheet: MechanicalSheet,
          },
          {
             docClass: Item,
@@ -224,11 +241,13 @@ async function registerHooks(): Promise<void> {
       CONFIG.Actor.typeLabels = Object.fromEntries(
          Object.entries(CONFIG.SR3E.ACTOR_TYPES).map(([key, token]) => [key, token as string])
       );
+      registerSr3eDocumentTypeIcons();
 
       console.log("SR3E | CONFIG.SR3E initialized, localize() ready");
    });
 
    Hooks.once(hooks.ready, () => {
+      void migrateLegacyActorTypes();
       getNewsService();
       registerSocketHandlers();
       registerCombatTurnHook();
@@ -244,6 +263,7 @@ async function registerHooks(): Promise<void> {
    registerMedicalTokenDropHook();
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
+   registerDocumentTypeIconHooks();
    patchActorCreateDialog();
    console.log("SR3E | preCreateActor hook registered");
 

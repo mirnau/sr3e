@@ -9,12 +9,12 @@ export const CHARACTER_KEYS = [
 ] as const;
 
 export const GMSCREEN_KEYS = [
-  "storytellerscreen",
+  "gamemasterscreen",
 ] as const;
 
 export const ACTOR_TYPE_KEYS = [
   "character",
-  "storytellerscreen",
+  "gamemasterscreen",
   "broadcaster",
   "mechanical",
 ] as const;

@@ -1,12 +1,12 @@
-type StorytellerScreenSchema = {
+type GameMasterScreenSchema = {
   journalEntryUuid: StringField;
 };
 
-export default class StorytellerScreenModel extends foundry.abstract.TypeDataModel<
-  StorytellerScreenSchema,
+export default class GameMasterScreenModel extends foundry.abstract.TypeDataModel<
+  GameMasterScreenSchema,
   BaseActor
 > {
-  static defineSchema(): StorytellerScreenSchema {
+  static defineSchema(): GameMasterScreenSchema {
     return {
       journalEntryUuid: new foundry.data.fields.StringField({
         required: false,

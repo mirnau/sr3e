@@ -53,14 +53,10 @@ let selectedDefaultCandidateId = $state("");
 
 const DEFAULTING_MOD_ID = "defaulting-attribute";
 
-// Shown either when the linked skill has nothing to offer (rating 0, the
-// player needs help finding something to default to) or when the item
-// itself pre-selected a candidate (weapon.system.isDefaulting) — the
-// player still needs to see and be able to override that choice even
-// though the pre-selected skill's own rating can be nonzero.
-const showDefaultingPicker = $derived(
-    isDefaulting && ((setup?.rollState.dice ?? 0) === 0 || !!selectedDefaultCandidateId)
-);
+// Defaulting is always a choice among linked attribute / sibling skill /
+// sibling specialization (SR3E p.84) — shown whenever Defaulting mode is
+// selected, regardless of whether the current skill itself has dice.
+const showDefaultingPicker = $derived(isDefaulting);
 
 const defaultingCandidates = $derived.by<DefaultingCandidate[]>(() => {
     if (!showDefaultingPicker || !setup?.defaultingAttributeKey) return [];
@@ -294,7 +290,7 @@ onDestroy(() => {
                         <button class="composer-btn-close" onclick={onClose} title="Close">✕</button>
                     </div>
                 </div>
-                {#if !setup.openTest}
+                {#if !setup.openTest && setup.defaultingAttributeKey}
                 <select bind:value={isDefaulting} class="roll-composer-type-select">
                     <option value={false}>Regular roll</option>
                     <option value={true}>Defaulting</option>

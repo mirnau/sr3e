@@ -7,6 +7,8 @@ import CharacterCreationManager from "../../ui/actors/injections/CharacterCreati
 import RollComposerComponent from "../../ui/combat/RollComposerComponent.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 import { KarmaSpendingService } from "../../services/karma/KarmaSpendingService";
+import { persistRegisterTab, registerTabForItem } from "../../ui/actors/actor-components/registerTabs";
+import { actorMagicItems, awakenActor, confirmAwakening, isMagicItem } from "../../services/magic/awakenActor";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
@@ -165,12 +167,29 @@ export default class CharacterActorSheet extends SR3EActorBase {
 
     protected async _onDropItem(event: DragEvent, data: Record<string, unknown>): Promise<unknown> {
         const item = await (Item as any).fromDropData(data) as Item | null;
+        const actor = this.document as Actor;
+        if (isMagicItem(item)) {
+            if (actorMagicItems(actor).length > 0) {
+                ui.notifications?.warn(`${actor.name} already has a magic priority item.`);
+                return;
+            }
+            if (!await confirmAwakening(actor, item)) return;
+
+            const created = await actor.createEmbeddedDocuments("Item", [item.toObject()]);
+            await awakenActor(actor);
+            await persistRegisterTab(actor, "grimoire");
+            return created;
+        }
+
         if (item?.type === "skill") {
-            const actor = this.document as Actor;
             if (actor.items.getName(item.name!)) {
                 ui.notifications?.warn(`"${item.name}" is already on this sheet.`);
                 return;
             }
+        }
+        if (item) {
+            const tab = registerTabForItem(item);
+            if (tab) await persistRegisterTab(actor, tab);
         }
         // @ts-expect-error — Foundry v13 _onDropItem signature not fully typed
         return super._onDropItem(event, data);

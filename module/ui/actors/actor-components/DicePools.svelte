@@ -9,6 +9,7 @@ import { buildDicePoolSetup } from "../../../services/combat/procedures/simpleSe
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 import { getComposerState, openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import Foldout from "./Foldout.svelte";
+import { canAstrallyProject, isMagicianMagic } from "../../../services/magic/awakenActor";
 
 const p = $props<{ actor: SR3EActor }>();
 const actor = untrack(() => p.actor);
@@ -46,6 +47,7 @@ const astralValue = storeManager.GetRWStore<number>(actor, "dicePools.astral.val
 const spellValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.spell");
 const spellSpent = storeManager.GetRWStore<number>(actor, "dicePools.spell.spent");
 const spellValue = storeManager.GetRWStore<number>(actor, "dicePools.spell.value");
+const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurnedOut");
 
 const combatAvail = $derived(Math.max(0, $combatValueMod - $combatSpent));
 const controlAvail = $derived(Math.max(0, $controlValueMod - $controlSpent));
@@ -55,6 +57,7 @@ const spellAvail = $derived(Math.max(0, $spellValueMod - $spellSpent));
 
 let hasMatrixInterface = $state(false);
 let hasRiggerInterface = $state(false);
+let magicItem = $state<Item | null>(null);
 let focusPools = $state<{ id: string; name: string; available: number }[]>([]);
 
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, "isShoppingState", false);
@@ -62,9 +65,11 @@ const attributePreview = storeManager.GetShallowStore<any>(actor, "shoppingAttri
 
 const isAwakened = $derived(
     $magic > 0 &&
-    actor.items.some((item: any) => item.type === "magic") &&
-    !actor.system?.attributes?.isBurnedOut,
+    magicItem !== null &&
+    !$isBurnedOut,
 );
+const hasSpellPool = $derived(isAwakened && isMagicianMagic(magicItem));
+const hasAstralPool = $derived(isAwakened && canAstrallyProject(magicItem));
 
 onDestroy(() => {
     Hooks.off("createItem", createHookId);
@@ -81,7 +86,9 @@ function isUsableFocus(item: any): boolean {
 }
 
 function rebuildFocusPools() {
-    focusPools = [...((actor as any).items ?? [])]
+    const items = [...((actor as any).items ?? [])];
+    magicItem = items.find((item: Item) => item.type === "magic") ?? null;
+    focusPools = items
         .filter(isUsableFocus)
         .map((item: any) => {
             const force = Number(item.system?.force ?? 0);
@@ -97,7 +104,7 @@ function rebuildFocusPools() {
 rebuildFocusPools();
 
 const onItemChange = (item: any) => {
-    if (item.parent?.id !== (actor as any).id) return;
+    if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
     rebuildFocusPools();
 };
 
@@ -221,10 +228,12 @@ $effect(() => {
             </StatCard>
         {/if}
 
-        {#if isAwakened}
+        {#if hasAstralPool}
             <StatCard label={localize(localization?.astral)} onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}>
                 <span class={poolClass("astral")}>{astralAvail}</span>
             </StatCard>
+        {/if}
+        {#if hasSpellPool}
             <StatCard label={localize(localization?.spell)} onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}>
                 <span class={poolClass("spell")}>{spellAvail}</span>
             </StatCard>

@@ -1,18 +1,18 @@
 import { mount } from "svelte";
-import StorytellerScreenApp from "../../ui/actors/StorytellerScreenApp.svelte";
+import GameMasterScreenApp from "../../ui/actors/GameMasterScreenApp.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 
-export default class StorytellerScreenSheet extends SR3EActorBase {
+export default class GameMasterScreenSheet extends SR3EActorBase {
 	get title() {
-		this.actor.name = localize(CONFIG.SR3E.GMSCREEN.storytellerscreen);
+		this.actor.name = localize(CONFIG.SR3E.GMSCREEN.gamemasterscreen);
 		return this.actor.name;
 	}
 
 	static get DEFAULT_OPTIONS() {
 		return {
 			...super.DEFAULT_OPTIONS,
-			id: `sr3e-storytellerscreen-sheet-${foundry.utils.randomID()}`,
-			classes: ["sr3e", "sheet", "actor", "storytellerscreen", "ActorSheetV2"],
+			id: `sr3e-gamemasterscreen-sheet-${foundry.utils.randomID()}`,
+			classes: ["sr3e", "sheet", "actor", "gamemasterscreen", "ActorSheetV2"],
 			template: null,
 			position: { width: 900, height: "auto" },
 			window: {
@@ -30,8 +30,7 @@ export default class StorytellerScreenSheet extends SR3EActorBase {
 
 		const form = this.form as HTMLFormElement;
 
-		// Mount storyteller screen app
-		const app = mount(StorytellerScreenApp, {
+		const app = mount(GameMasterScreenApp, {
 			target: windowContent,
 			props: {
 			},
