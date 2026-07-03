@@ -9,6 +9,7 @@ import { handleDrainReroll, handleDrainBuy, handleDrainDone, type DrainOutcomeFl
 import { handleResistanceReroll, handleResistanceBuy, handleResistanceDone, type ResistanceOutcomeFlag } from "../../services/combat/orchestration/resistanceRerollHandler";
 import { requestMessageUpdate } from "../../services/combat/orchestration/messageRelay";
 import { getContest, isActorLockedForCurrentUser } from "../../services/combat/engine/contestCoordinator";
+import { handlePurchaseOfferResponse, handleSellerConsentResponse, type PurchaseOfferFlag } from "../../services/economy/purchaseOfferFlow";
 import { withDiePending } from "./diePendingState";
 
 type ChatMessageLike = {
@@ -86,6 +87,18 @@ function lockForCurrentViewerIfNeeded(message: ChatMessageLike, html: HTMLElemen
     if (opposedContestId) {
         const targetActorId = getContest(opposedContestId)?.target?.id;
         if (isActorLockedForCurrentUser(targetActorId)) lockSubtreeForViewer(html);
+        return;
+    }
+
+    const sellerConsent = flags.sellerConsent as PurchaseOfferFlag | undefined;
+    if (sellerConsent && isActorLockedForCurrentUser(sellerConsent.sellerActorId)) {
+        lockSubtreeForViewer(html);
+        return;
+    }
+
+    const purchaseOffer = flags.purchaseOffer as PurchaseOfferFlag | undefined;
+    if (purchaseOffer && isActorLockedForCurrentUser(purchaseOffer.buyerActorId)) {
+        lockSubtreeForViewer(html);
     }
 }
 
@@ -122,6 +135,34 @@ function registerResponderDelegation(): void {
         const contestId = prompt.dataset.contestId ?? "";
         const key = button.dataset.responder ?? null;
         if (contestId) handleDefenderChoice(contestId, key);
+    });
+}
+
+function registerPurchaseResponseDelegation(): void {
+    document.addEventListener("click", (event) => {
+        const button = (event.target as HTMLElement).closest<HTMLElement>("[data-purchase-response]");
+        if (!button) return;
+        const prompt = button.closest<HTMLElement>("[data-purchase-message]");
+        if (!prompt) return;
+        const messageId = prompt.closest<HTMLElement>(".chat-message")?.dataset?.messageId;
+        if (!messageId) return;
+
+        const flags = getLiveMessage(messageId)?.flags?.sr3e;
+        if (!flags || flags.consumed) return;
+
+        if (!consumeCard(prompt)) return;
+        persistConsumedToMessage(prompt);
+
+        const accepted = button.dataset.purchaseResponse === "accept";
+
+        const sellerConsent = flags.sellerConsent as PurchaseOfferFlag | undefined;
+        if (sellerConsent) {
+            handleSellerConsentResponse(accepted, sellerConsent);
+            return;
+        }
+
+        const purchaseOffer = flags.purchaseOffer as PurchaseOfferFlag | undefined;
+        if (purchaseOffer) void handlePurchaseOfferResponse(accepted, purchaseOffer);
     });
 }
 
@@ -298,6 +339,7 @@ export function handleChatMessageHTML(message: ChatMessageLike, html: HTMLElemen
 export function registerChatMessageHTMLHook(registrar: HookRegistrar = Hooks): void {
     registrar.on("renderChatMessageHTML", handleChatMessageHTML);
     registerResponderDelegation();
+    registerPurchaseResponseDelegation();
     registerResistanceButtonDelegation();
     registerDieSelectionDelegation();
     registerDieClickDelegation();

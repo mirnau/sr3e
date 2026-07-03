@@ -1,0 +1,5 @@
+// Purchase dialog intentionally skips the .sr3e sheet skin so it inherits the
+// same native-Foundry-window look as the weapon reload prompt (foundry-apps.scss).
+.purchase-dialog-warning {
+   color: #ff6b7a;
+}

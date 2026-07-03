@@ -16,5 +16,16 @@ export const MODAL_KEYS = [
   "defaultsubscription",
   "defaultsubscriptiontitle",
   "awakencharacter",
-  "awakencharactertitle"
+  "awakencharactertitle",
+  "goblinizecharacter",
+  "goblinizecharactertitle",
+  "goblinize",
+  "missingmetatype",
+  "requireshumanmetatype",
+  "existingmagic",
+  "recommendedprice",
+  "payupfront",
+  "registerdebt",
+  "grantfree",
+  "insufficientfunds"
 ] as const;

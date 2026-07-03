@@ -136,3 +136,19 @@
       color: #ff6b7a;
    }
 }
+
+.transfer-dialog {
+   display: flex;
+   align-items: center;
+   gap: 0.3rem;
+   justify-content: flex-end;
+
+   input[type="number"] {
+      width: 5rem;
+   }
+}
+
+.transfer-dialog-empty {
+   color: rgba(232, 243, 255, 0.5);
+   font-style: italic;
+}

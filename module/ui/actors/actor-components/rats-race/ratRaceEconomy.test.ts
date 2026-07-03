@@ -33,6 +33,16 @@ describe("ratRaceEconomy", () => {
 
       expect(rows.map(r => r.name).sort()).toEqual(["empty non-stick asset", "loaded stick"]);
    });
+
+   it("carries the debt's originalAmount through for the paid-fraction display", () => {
+      const rows = transactionRows([tx("loan", "debt", 700, { originalAmount: 1000 })]);
+      expect(rows[0]!.originalAmount).toBe(1000);
+   });
+
+   it("falls back originalAmount to the current amount for debts created before the field existed", () => {
+      const rows = transactionRows([tx("legacy loan", "debt", 500)]);
+      expect(rows[0]!.originalAmount).toBe(500);
+   });
 });
 
 function tx(name: string, type: string, amount: number, extra: Record<string, unknown> = {}) {

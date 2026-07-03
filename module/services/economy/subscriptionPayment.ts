@@ -53,6 +53,7 @@ export async function defaultOnSubscription(
         type: "transaction",
         system: {
             amount: transaction.system.amount,
+            originalAmount: transaction.system.amount,
             type: "debt",
             recurrent: false,
             isCreditStick: false,

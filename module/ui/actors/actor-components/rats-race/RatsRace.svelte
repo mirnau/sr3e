@@ -6,8 +6,11 @@
    import { availableCreditSticks, defaultOnSubscription, isSubscriptionDue, paySubscription } from "../../../../services/economy/subscriptionPayment";
    import { payDebt } from "../../../../services/economy/debtPayment";
    import { deleteTransaction } from "../../../../services/economy/transactionDeletion";
+   import { transferBetweenSticks } from "../../../../services/economy/stickTransfer";
    import { economyTotals, formatNuyen, transactionRows } from "./ratRaceEconomy";
    import CreditStickPicker from "./CreditStickPicker.svelte";
+   import TransferDialog from "./TransferDialog.svelte";
+   import DebtPaymentDialog from "./DebtPaymentDialog.svelte";
 
    const p = $props<{ actor: Actor; transactions: Item[] }>();
    const actor = untrack(() => p.actor);
@@ -27,8 +30,10 @@
    const rows = $derived(transactionRows(p.transactions as any[]));
    const totals = $derived(economyTotals(rows));
    const sticks = $derived(availableCreditSticks(p.transactions as any[]) as unknown as Item[]);
+   const allSticks = $derived((p.transactions as Item[]).filter((item) => Boolean((item.system as any).isCreditStick)));
 
    let payingRowId = $state<string | null>(null);
+   let transferringRowId = $state<string | null>(null);
 
    function typeLabel(type: string): string {
       const key = CONFIG.SR3E.TRANSACTION_TYPES[type as keyof typeof CONFIG.SR3E.TRANSACTION_TYPES];
@@ -66,11 +71,11 @@
       if (confirmed) await defaultOnSubscription(actor as any, transaction as any, period);
    }
 
-   async function confirmDebtPayment(rowId: string, stick: Item) {
+   async function confirmDebtPayment(rowId: string, stick: Item, amount: number) {
       const debt = findTransaction(rowId);
       if (!debt) return;
 
-      await payDebt(debt as any, stick as any);
+      await payDebt(debt as any, stick as any, amount);
       payingRowId = null;
    }
 
@@ -86,6 +91,14 @@
 
    function isDebtRow(row: { type: string }): boolean {
       return row.type === "debt";
+   }
+
+   async function confirmTransfer(rowId: string, target: Item, amount: number) {
+      const source = findTransaction(rowId);
+      if (!source) return;
+
+      await transferBetweenSticks(source as any, target as any, amount);
+      transferringRowId = null;
    }
 
    async function handleDelete(rowId: string) {
@@ -144,7 +157,13 @@
                   </button>
                </td>
                <td>{typeLabel(row.type)}</td>
-               <td>{formatNuyen(row.amount)}</td>
+               <td>
+                  {#if isDebtRow(row) && row.originalAmount > row.amount}
+                     {formatNuyen(row.originalAmount - row.amount)} / {formatNuyen(row.originalAmount)} paid
+                  {:else}
+                     {formatNuyen(row.amount)}
+                  {/if}
+               </td>
                <td>{row.interestPerMonth}%</td>
                <td>{row.recurrent ? "Yes" : "No"}</td>
                <td>{row.isCreditStick ? "Yes" : "No"}</td>
@@ -165,13 +184,25 @@
                      {/if}
                   {:else if isDebtRow(row)}
                      {#if payingRowId === row.id}
-                        <CreditStickPicker
+                        <DebtPaymentDialog
+                           debtRemaining={row.amount}
                            {sticks}
-                           onconfirm={(stick) => confirmDebtPayment(row.id, stick)}
+                           onconfirm={(stick, amount) => confirmDebtPayment(row.id, stick, amount)}
                            oncancel={() => (payingRowId = null)}
                         />
                      {:else}
                         <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
+                     {/if}
+                  {:else if row.isCreditStick}
+                     {#if transferringRowId === row.id}
+                        <TransferDialog
+                           source={findTransaction(row.id)}
+                           targets={allSticks.filter((s) => s.id !== row.id)}
+                           onconfirm={(target, amount) => confirmTransfer(row.id, target, amount)}
+                           oncancel={() => (transferringRowId = null)}
+                        />
+                     {:else}
+                        <button type="button" onclick={() => (transferringRowId = row.id)}>Transfer</button>
                      {/if}
                   {/if}
                </td>

@@ -9,6 +9,10 @@ import { SR3EActorBase } from "./SR3EActorBase";
 import { KarmaSpendingService } from "../../services/karma/KarmaSpendingService";
 import { persistRegisterTab, registerTabForItem } from "../../ui/actors/actor-components/registerTabs";
 import { actorMagicItems, awakenActor, confirmAwakening, isMagicItem } from "../../services/magic/awakenActor";
+import { mutateMetatype } from "../../services/metatype/mutateMetatype";
+import { commodityPrice, hasCommodityComponent, hasCommodityProfile } from "../../services/economy/purchase";
+import { initiatePurchase } from "../../services/economy/purchaseOfferFlow";
+import { localize } from "../../services/utilities";
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
@@ -168,9 +172,13 @@ export default class CharacterActorSheet extends SR3EActorBase {
     protected async _onDropItem(event: DragEvent, data: Record<string, unknown>): Promise<unknown> {
         const item = await (Item as any).fromDropData(data) as Item | null;
         const actor = this.document as Actor;
+        if (item?.type === "metatype") {
+            return mutateMetatype(actor, item);
+        }
+
         if (isMagicItem(item)) {
             if (actorMagicItems(actor).length > 0) {
-                ui.notifications?.warn(`${actor.name} already has a magic priority item.`);
+                ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.existingmagic).replace("{name}", actor.name ?? ""));
                 return;
             }
             if (!await confirmAwakening(actor, item)) return;
@@ -187,6 +195,16 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 return;
             }
         }
+
+        const seller = item?.parent instanceof Actor && item.parent.id !== actor.id
+            ? item.parent as Actor
+            : undefined;
+
+        if (hasCommodityProfile(item as any) || (seller && hasCommodityComponent(item as any))) {
+            await initiatePurchase(seller, actor, item as Item, commodityPrice(item as any));
+            return;
+        }
+
         if (item) {
             const tab = registerTabForItem(item);
             if (tab) await persistRegisterTab(actor, tab);

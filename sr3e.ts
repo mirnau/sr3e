@@ -39,6 +39,9 @@ import SR3Edie from "./module/foundry/documents/SR3Edie";
 import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook } from "./module/services/combat/orchestration/socketHandlers";
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
 import { registerMedicalTokenDropHook } from "./module/services/medical/applyMedical";
+import { registerPurchaseTokenDropHook } from "./module/services/economy/purchaseTokenDropHook";
+import { registerSellerMutationRelay } from "./module/services/economy/sellerMutationRelay";
+import { registerDebtRepaymentRelay } from "./module/services/economy/debtRepaymentRelay";
 import { registerWindowFocusDimHook } from "./module/foundry/hooks/windowFocusDim";
 import { registerSustainedSpellCleanupHook } from "./module/services/spells/sustainedSpells";
 import { registerDebtInterestHook } from "./module/services/economy/debtInterest";
@@ -250,6 +253,8 @@ async function registerHooks(): Promise<void> {
       void migrateLegacyActorTypes();
       getNewsService();
       registerSocketHandlers();
+      registerSellerMutationRelay();
+      registerDebtRepaymentRelay();
       registerCombatTurnHook();
       registerPoolRefreshHook();
       registerWindowFocusDimHook();
@@ -261,6 +266,7 @@ async function registerHooks(): Promise<void> {
 
    registerChatMessageHTMLHook();
    registerMedicalTokenDropHook();
+   registerPurchaseTokenDropHook();
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    registerDocumentTypeIconHooks();

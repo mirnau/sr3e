@@ -25,6 +25,7 @@
 [x] MUST: Overflow damage rules (stun→physical conversion, bleeding out, death threshold)
 [x] MUST: First Aid items (trauma patch, medkit — depends on overflow)
 [x] MUST: Economy and transactions (general, not vehicle-specific) -> .zone/techspecs/TECHSPEC-economy-and-transactions.md
+[~] MUST: Purchase on drop (commodity purchase dialog + credit-stick transfer) -> .zone/techspecs/TECHSPEC-purchase-on-drop.md
 [x] COULD: Magic Level 1 — spell/focus item substrate -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 2 — focus activation infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Magic Level 3 — spellcasting infrastructure -> .zone/techspecs/TECHSPEC-magic-system.md

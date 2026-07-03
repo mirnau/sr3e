@@ -4,6 +4,7 @@ export type TransactionRow = {
    id: string;
    name: string;
    amount: number;
+   originalAmount: number;
    type: TransactionKind;
    recurrent: boolean;
    isCreditStick: boolean;
@@ -48,11 +49,16 @@ function toTransactionRow(item: Record<string, any>): TransactionRow {
    const system = item.system ?? {};
    const amount = Number(system.amount ?? 0);
    const type = String(system.type ?? "");
+   // Debts created before this field existed (or edited manually) have no
+   // originalAmount — falling back to the current amount reads as "100%
+   // remaining, nothing paid yet" instead of a nonsensical amount/0 fraction.
+   const originalAmount = Number(system.originalAmount ?? 0) || amount;
 
    return {
       id: String(item.id ?? item.name),
       name: String(item.name ?? ""),
       amount,
+      originalAmount,
       type,
       recurrent: Boolean(system.recurrent),
       isCreditStick: Boolean(system.isCreditStick),
