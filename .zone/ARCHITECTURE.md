@@ -33,6 +33,14 @@ Spells are grimoire entries only; do not also render them as inventory assets. A
 
 An unlinked token gets its own synthetic actor (`token.delta`) with a genuinely separate Items collection, cloned from the canonical actor at token-creation time and then diverging independently. Editing a PC's sheet via an unlinked token (adding/editing spells, attributes, anything) writes only to that per-token copy — `game.actors.get(id)` and every chat-driven flow (rolls, drain, contests) read the canonical actor and never see those edits, and there is no reconciliation back. This produced real symptoms in live testing: duplicate spell items with divergent data (e.g. two copies of the same spell with different drain levels), and a stray +6 drain modifier traced to data that only existed on the token's synthetic actor. Re-linking (remove token, confirm `actorLink: true`, re-add) resets the token to the canonical actor's real data and resolves it, but any edits made while unlinked are lost, not merged. This is not a bug in this codebase to guard against — it's inherent to Foundry's linked/unlinked actor model — but mid-combat sheet editing on a PC token should never be treated as a supported workflow, since Foundry gives no visible warning when a token silently isn't linked.
 
+### sellerMutationRelay's item-existence check before delete is not redundant
+
+`deleteSellerItem` in `sellerMutationRelay.ts` checks `seller.items.get(itemId)` before calling `deleteEmbeddedDocuments`. This looks like it could be trimmed to just the delete call, but it can't: if two GM sessions are connected, both receive the same broadcasted `purchaseSellerDelete` socket payload and both attempt the delete — the second one targets a document the first already removed, which Foundry rejects with an uncaught "does not exist" error instead of a no-op. This existence check is what makes the operation idempotent under that real double-GM-session scenario (confirmed live).
+
+### debtInterest's GM-only gate on updateWorldTime is required, not optional
+
+`registerDebtInterestHook` in `debtInterest.ts` gates its entire body on `currentUserIsGM()`. `updateWorldTime` fires on every connected client, and the hook iterates every actor's debts and writes to them directly — without the gate, non-GM clients throw permission errors writing to actors they don't own, and a debt visible to both its owner and the GM risks having interest compounded twice in the same month rollover. Do not remove this gate to "let every client keep things in sync" — only the GM's client may perform this bulk write.
+
 ## ADR Index
 - [0001-sr3eroll-injectable-evaluator](adr/0001-sr3eroll-injectable-evaluator.md) — SUPERSEDED: SR3ERoll injectable evaluator (replaced by ADR-0005)
 - [0002-dice-formula-always-d6x6](adr/0002-dice-formula-always-d6x6.md) — SUPERSEDED: d6x6 formula (replaced by ADR-0006)
@@ -43,3 +51,4 @@ An unlinked token gets its own synthetic actor (`token.delta`) with a genuinely 
 - [0007-count-successes-null-for-open-rolls](adr/0007-count-successes-null-for-open-rolls.md) — countSuccesses() returns null for open rolls; isGlitch() always false without TN
 - [0008-gadget-storage-active-effects](adr/0008-gadget-storage-active-effects.md) — Gadgets stored as ActiveEffect docs with flags.sr3e.gadget.*; no embedded item-in-item
 - [0009-sustained-spell-drop-via-native-effect-deletion](adr/0009-sustained-spell-drop-via-native-effect-deletion.md) — Sustained-spell drop rides native ActiveEffect deletion + deleteActiveEffect sync hook instead of dedicated drop UI
+- [0010-cross-client-actor-mutation-relay](adr/0010-cross-client-actor-mutation-relay.md) — Cross-actor economy writes relay through the GM's client; trades require consent from whoever isn't dragging

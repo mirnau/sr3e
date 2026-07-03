@@ -23,17 +23,30 @@ function confirm() {
 }
 </script>
 
-<div class="debt-payment-dialog">
-   {#if p.sticks.length === 0}
-      <span class="debt-payment-dialog-empty">No credit sticks available</span>
-   {:else}
-      <select bind:value={selectedId}>
-         {#each p.sticks as stick (stick.id)}
-            <option value={stick.id}>{stick.name} ({formatNuyen((stick.system as any).amount)})</option>
-         {/each}
-      </select>
-      <input type="number" min="0" max={maxAmount} bind:value={amount} />
+{#if p.sticks.length === 0}
+   <p class="hint">No credit sticks available</p>
+   <div class="form-footer">
+      <button type="button" onclick={p.oncancel}>Cancel</button>
+   </div>
+{:else}
+   <div class="form-group">
+      <label>Credit Stick</label>
+      <div class="form-fields">
+         <select bind:value={selectedId}>
+            {#each p.sticks as stick (stick.id)}
+               <option value={stick.id}>{stick.name} ({formatNuyen((stick.system as any).amount)})</option>
+            {/each}
+         </select>
+      </div>
+   </div>
+   <div class="form-group">
+      <label>Amount</label>
+      <div class="form-fields">
+         <input type="number" min="0" max={maxAmount} bind:value={amount} />
+      </div>
+   </div>
+   <div class="form-footer">
       <button type="button" onclick={confirm}>Confirm</button>
-   {/if}
-   <button type="button" onclick={p.oncancel}>Cancel</button>
-</div>
+      <button type="button" onclick={p.oncancel}>Cancel</button>
+   </div>
+{/if}

@@ -8,9 +8,9 @@
    import { deleteTransaction } from "../../../../services/economy/transactionDeletion";
    import { transferBetweenSticks } from "../../../../services/economy/stickTransfer";
    import { economyTotals, formatNuyen, transactionRows } from "./ratRaceEconomy";
+   import { DebtPaymentDialogApp } from "../../../../sheets/actors/DebtPaymentDialogApp";
    import CreditStickPicker from "./CreditStickPicker.svelte";
    import TransferDialog from "./TransferDialog.svelte";
-   import DebtPaymentDialog from "./DebtPaymentDialog.svelte";
 
    const p = $props<{ actor: Actor; transactions: Item[] }>();
    const actor = untrack(() => p.actor);
@@ -76,7 +76,14 @@
       if (!debt) return;
 
       await payDebt(debt as any, stick as any, amount);
-      payingRowId = null;
+   }
+
+   function openDebtPaymentDialog(rowId: string, debtRemaining: number) {
+      new DebtPaymentDialogApp(
+         debtRemaining,
+         sticks,
+         (stick, amount) => confirmDebtPayment(rowId, stick, amount),
+      ).render(true);
    }
 
    const dueRowIds = $derived(new Set(
@@ -183,16 +190,7 @@
                         <button type="button" disabled>Paid</button>
                      {/if}
                   {:else if isDebtRow(row)}
-                     {#if payingRowId === row.id}
-                        <DebtPaymentDialog
-                           debtRemaining={row.amount}
-                           {sticks}
-                           onconfirm={(stick, amount) => confirmDebtPayment(row.id, stick, amount)}
-                           oncancel={() => (payingRowId = null)}
-                        />
-                     {:else}
-                        <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
-                     {/if}
+                     <button type="button" onclick={() => openDebtPaymentDialog(row.id, row.amount)}>Pay</button>
                   {:else if row.isCreditStick}
                      {#if transferringRowId === row.id}
                         <TransferDialog

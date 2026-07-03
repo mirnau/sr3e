@@ -28,10 +28,21 @@ export function applyPendingInterest(
     return { amount: grown, lastInterestPeriod: period };
 }
 
+function currentUserIsGM(): boolean {
+    return !!(typeof game !== "undefined" ? (game.user as unknown as { isGM?: boolean } | undefined)?.isGM : false);
+}
+
 let lastSeenPeriod = "";
 
+// GM-only: this iterates every actor's debts and writes to them directly, and
+// updateWorldTime fires on every connected client. Without gating to a single
+// client, players would hit permission errors writing to actors they don't
+// own, and a debt owned by both an active player and the GM could have its
+// interest compounded twice in the same rollover.
 export function registerDebtInterestHook(): void {
     Hooks.on("updateWorldTime", async () => {
+        if (!currentUserIsGM()) return;
+
         const period = currentPeriod(new Date((game as { time: { worldTime: number } }).time.worldTime));
         if (period === lastSeenPeriod) return;
         lastSeenPeriod = period;
@@ -47,4 +58,8 @@ export function registerDebtInterestHook(): void {
             }
         }
     });
+}
+
+export function _resetForTest(): void {
+    lastSeenPeriod = "";
 }
