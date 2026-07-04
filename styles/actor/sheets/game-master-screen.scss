@@ -151,7 +151,8 @@
 }
 
 // Override sheetcard.scss broad rule (0,3,1) — same specificity, wins by load order
-.sheet-card-outline .karma-manager .karma-input-frame input {
+.sheet-card-outline .karma-manager .karma-input-frame input,
+.sheet-card-outline .pool-manager .karma-input-frame input {
 	border: none;
 	background: transparent;
 	border-radius: 0;
@@ -213,5 +214,59 @@
 			object-fit: cover;
 			display: block;
 		}
+	}
+}
+
+.pool-manager {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+
+	&__toolbar {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		flex-wrap: wrap;
+	}
+
+	&__search {
+		flex: 1;
+		@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+
+		&::before {
+			@include clipped-corners(0.25rem, 0.25rem, 0.5rem, 0.25rem);
+		}
+		min-width: 120px;
+	}
+
+	&__table {
+		width: 100%;
+		border-collapse: collapse;
+
+		th,
+		td {
+			padding: 4px 8px;
+			text-align: left;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+		}
+
+		th {
+			font-weight: 600;
+			background: rgba(0, 0, 0, 0.05);
+		}
+
+		.portrait {
+			width: 3rem;
+			height: 3rem;
+			object-fit: cover;
+			display: block;
+		}
+	}
+
+	&__cell {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		white-space: nowrap;
 	}
 }

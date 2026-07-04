@@ -7,7 +7,6 @@ import InventoryCard from "./inventory/InventoryCard.svelte";
 import LabeledDropdown from "../../items/LabeledDropdown.svelte";
 import { buildVehicleWeaponAttack } from "../../../services/combat/procedures/vehicleWeaponAttack";
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
-import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
 
 const p = $props<{ characterActor: Actor; weapon: Item; jackedIn: boolean; vcrLevel: number }>();
 const characterActor = untrack(() => p.characterActor);
@@ -38,12 +37,7 @@ function onRoll() {
         jackedIn: p.jackedIn,
         vcrLevel: p.vcrLevel,
     });
-    const hasTargets = (game.user?.targets?.size ?? 0) > 0;
-    if (hasTargets) {
-        openComposer(setup, characterActor as never);
-    } else {
-        void executeProcedure(setup, characterActor as never);
-    }
+    openComposer(setup, characterActor as never);
 }
 </script>
 

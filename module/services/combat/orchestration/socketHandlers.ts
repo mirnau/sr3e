@@ -4,6 +4,7 @@ import { updateMessageAsGM } from "./messageRelay";
 import { applyContestSideDelta, applyContestDone, type ContestOutcomeFlag, type ContestSide, type ContestSideDelta } from "./contestRerollHandler";
 import { applyDrainDelta, type DrainOutcomeFlag, type DrainDelta } from "../../spells/drainRerollHandler";
 import { applyResistanceDelta, type ResistanceOutcomeFlag, type ResistanceDelta } from "./resistanceRerollHandler";
+import { resetActorDicePools, type PoolRefreshActor } from "../poolRefresh";
 import type { ContestStub, RollSnapshot } from "../engine/types";
 
 const FULL_DEFENSE_FLAG = "fullDefenseActive";
@@ -52,27 +53,6 @@ function clearFullDefenseFlag(actor: { unsetFlag?: (scope: string, key: string) 
     actor.unsetFlag?.("sr3e", FULL_DEFENSE_FLAG)?.catch(() => {});
 }
 
-type FocusItem = {
-    type: string;
-    system?: { dice?: { spent?: number }; expendable?: boolean };
-    update?: (data: Record<string, unknown>) => Promise<unknown>;
-};
-
-type PoolRefreshActor = {
-    items?: Iterable<FocusItem>;
-    update?: (data: Record<string, unknown>) => Promise<unknown>;
-};
-
-// Non-expendable foci recharge their dice the same way a bonded focus's
-// pool refreshes each Combat Turn — an expendable (single-use) focus is
-// consumed by use instead, so it's deliberately excluded here.
-async function refreshFociDice(actor: PoolRefreshActor): Promise<void> {
-    for (const item of actor.items ?? []) {
-        if (item.type !== "focus" || item.system?.expendable) continue;
-        await item.update?.({ "system.dice.spent": 0 });
-    }
-}
-
 export function registerPoolRefreshHook(): void {
     if (typeof Hooks === "undefined") return;
 
@@ -81,18 +61,7 @@ export function registerPoolRefreshHook(): void {
         const cbt = combat as { combatants?: { contents?: Array<{ actor?: PoolRefreshActor }> } };
         const combatants = cbt.combatants?.contents ?? [];
         for (const combatant of combatants) {
-            const actor = combatant.actor;
-            if (!actor) continue;
-
-            await actor.update?.({
-                "system.dicePools.combat.spent": 0,
-                "system.dicePools.astral.spent": 0,
-                "system.dicePools.hacking.spent": 0,
-                "system.dicePools.control.spent": 0,
-                "system.dicePools.spell.spent": 0,
-            });
-
-            await refreshFociDice(actor);
+            if (combatant.actor) await resetActorDicePools(combatant.actor);
         }
     });
 }
