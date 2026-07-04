@@ -6,6 +6,8 @@ import {
     renderAdvancedRollSummary,
     type DieEntry,
 } from "../../../ui/combat/chat/renderRollSummary";
+import type { VehicleSpeedAdjustment } from "../procedures/simpleSetups";
+import { applySpeedDelta } from "../vehicleSpeedAdjustment";
 
 export type RerollFlag = {
     actorId: string;
@@ -15,7 +17,38 @@ export type RerollFlag = {
     meta: { flavor: string; procedureKind: string };
     results: DieEntry[];
     rerollCount: number;
+    vehicleSpeedAdjustment?: VehicleSpeedAdjustment;
 };
+
+// A karma reroll/bought success happens well after commitFn already
+// applied the vehicle's speed change once, off the original roll. Rather
+// than recomputing from a remembered baseline (which would clobber
+// anything else that touched currentSpeed since), this applies only the
+// *marginal* extra successes — new total minus what was already
+// applied — to whatever currentSpeed the vehicle actually has right now,
+// then returns the updated adjustment (with the new applied count) so the
+// caller can persist it back into the flag for any further reroll/buy.
+async function reapplyVehicleSpeedAdjustment(
+    adjustment: VehicleSpeedAdjustment,
+    results: DieEntry[],
+    tn: number | null,
+): Promise<VehicleSpeedAdjustment> {
+    if (tn === null) return adjustment;
+    const newSuccessCount = results.filter(r => r.bought || r.result >= tn).length;
+    const extraSuccesses = newSuccessCount - adjustment.appliedSuccesses;
+    if (extraSuccesses === 0) return adjustment;
+
+    const vehicle = await fromUuid(adjustment.vehicleUuid) as {
+        system?: { currentSpeed?: { value?: number } };
+        update?: (d: Record<string, unknown>) => Promise<unknown>;
+    } | null;
+    if (!vehicle) return adjustment;
+
+    const liveSpeed = Number(vehicle.system?.currentSpeed?.value ?? 0);
+    const newSpeed = applySpeedDelta(liveSpeed, adjustment.accel, extraSuccesses, adjustment.direction, adjustment.maxSpeed);
+    await vehicle.update?.({ "system.currentSpeed.value": newSpeed });
+    return { ...adjustment, appliedSuccesses: newSuccessCount };
+}
 
 type UpdatableMessage = {
     update: (data: Record<string, unknown>) => Promise<unknown>;
@@ -52,7 +85,10 @@ export async function handleKarmaPoolReroll(
     await applyKarmaUpdate(actor, flag.actorId, result.karmaUpdate);
 
     const rerollCount = (flag.rerollCount ?? 0) + 1;
-    const newFlag: RerollFlag = { ...flag, results: result.results, rerollCount };
+    const vehicleSpeedAdjustment = flag.vehicleSpeedAdjustment
+        ? await reapplyVehicleSpeedAdjustment(flag.vehicleSpeedAdjustment, result.results, tn)
+        : undefined;
+    const newFlag: RerollFlag = { ...flag, results: result.results, rerollCount, vehicleSpeedAdjustment };
     await message.update({ content: rerenderContent(newFlag, result.results), "flags.sr3e.reroll": newFlag });
 }
 
@@ -71,7 +107,10 @@ export async function handleKarmaBuySuccess(
 
     await applyKarmaUpdate(actor, flag.actorId, result.karmaUpdate);
 
-    const newFlag: RerollFlag = { ...flag, results: result.results };
+    const vehicleSpeedAdjustment = flag.vehicleSpeedAdjustment
+        ? await reapplyVehicleSpeedAdjustment(flag.vehicleSpeedAdjustment, result.results, tn)
+        : undefined;
+    const newFlag: RerollFlag = { ...flag, results: result.results, vehicleSpeedAdjustment };
     await message.update({ content: rerenderContent(newFlag, result.results), "flags.sr3e.reroll": newFlag });
 }
 
@@ -92,6 +131,11 @@ export async function handleKarmaPoolRerollSelected(
     await applyKarmaUpdate(actor, flag.actorId, result.karmaUpdate);
 
     const rerollCount = (flag.rerollCount ?? 0) + 1;
-    const newFlag: RerollFlag = { ...flag, results: result.results, rerollCount };
+    let vehicleSpeedAdjustment = flag.vehicleSpeedAdjustment;
+    if (vehicleSpeedAdjustment) {
+        const tn = typeof flag.options.targetNumber === "number" ? flag.options.targetNumber : null;
+        vehicleSpeedAdjustment = await reapplyVehicleSpeedAdjustment(vehicleSpeedAdjustment, result.results, tn);
+    }
+    const newFlag: RerollFlag = { ...flag, results: result.results, rerollCount, vehicleSpeedAdjustment };
     await message.update({ content: rerenderContent(newFlag, result.results), "flags.sr3e.reroll": newFlag });
 }

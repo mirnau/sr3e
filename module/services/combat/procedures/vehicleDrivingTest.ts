@@ -4,12 +4,14 @@ import type { RollSnapshot } from "../engine/types";
 import { highestOpenTestDie } from "../openTestResult";
 import { countTnSuccesses } from "../successCount";
 import { terrainPoints, type TerrainCategory } from "../terrainCategory";
+import { applySpeedDelta, type VehicleSpeedAdjustmentDirection } from "../vehicleSpeedAdjustment";
 
 type ActorWithItems = { items: { get?: (id: string) => { system?: Record<string, unknown> } | undefined } };
 type Vcr = { system?: { level?: number } } | null;
 type VehicleWithSensor = { system?: { sensor?: { value?: number } } };
 type UpdatableVehicle = VehicleWithSensor & { update?: (d: Record<string, unknown>) => Promise<unknown> };
 type VehicleWithPerformance = {
+    uuid?: string;
     system?: { accel?: { value?: number }; currentSpeed?: { value?: number }; maxSpeed?: { value?: number } };
 };
 type UpdatableVehicleWithPerformance = VehicleWithPerformance & { update?: (d: Record<string, unknown>) => Promise<unknown> };
@@ -59,7 +61,7 @@ export function buildVehicleDrivingTestSetup(
     return setup;
 }
 
-export type AccelerateBrakeDirection = "accelerate" | "brake";
+export type AccelerateBrakeDirection = VehicleSpeedAdjustmentDirection;
 
 // SR3 p.142 — Change in Speed = Acceleration Rating x successes. Same
 // Driving Test as buildVehicleDrivingTestSetup; only the commitFn differs,
@@ -68,6 +70,11 @@ export type AccelerateBrakeDirection = "accelerate" | "brake";
 // maxSpeed is set. Successes are counted against the roll's own final TN
 // (post VCR/terrain/comparison modifiers), not the raw Handling TN, so
 // this agrees with what the player actually saw and rolled against.
+// setup.vehicleSpeedAdjustment carries accel/direction/appliedSuccesses
+// onto the posted chat message so a later karma reroll or bought success
+// (which happens after this commitFn already ran once) only needs to
+// apply its own marginal extra successes to whatever currentSpeed the
+// vehicle has *now* — see orchestration/rerollHandler.ts.
 export function buildAccelerateBrakeSetup(
     character: ActorWithItems,
     vehicle: UpdatableVehicleWithPerformance,
@@ -79,17 +86,19 @@ export function buildAccelerateBrakeSetup(
     extraModifiers: Modifier[] = [],
 ): ProcedureSetup {
     const setup = buildVehicleDrivingTestSetup(character, skillId, handlingTN, vcr, title, extraModifiers);
+    const accel = Number(vehicle.system?.accel?.value ?? 0);
+    const maxSpeed = Number(vehicle.system?.maxSpeed?.value ?? 0);
+    if (vehicle.uuid) {
+        setup.vehicleSpeedAdjustment = { vehicleUuid: vehicle.uuid, direction, accel, maxSpeed, appliedSuccesses: 0 };
+    }
     setup.commitFn = async (roll: unknown) => {
         const snapshot = roll as RollSnapshot;
         const finalTN = snapshot.options.targetNumber ?? handlingTN;
         const successes = countTnSuccesses(snapshot.terms ?? [], finalTN);
-        const accel = Number(vehicle.system?.accel?.value ?? 0);
-        const currentSpeed = Number(vehicle.system?.currentSpeed?.value ?? 0);
-        const maxSpeed = Number(vehicle.system?.maxSpeed?.value ?? 0);
-        const delta = successes * accel * (direction === "accelerate" ? 1 : -1);
-        const ceiling = maxSpeed > 0 ? maxSpeed : Infinity;
-        const newSpeed = Math.max(0, Math.min(ceiling, currentSpeed + delta));
+        const liveSpeed = Number(vehicle.system?.currentSpeed?.value ?? 0);
+        const newSpeed = applySpeedDelta(liveSpeed, accel, successes, direction, maxSpeed);
         await vehicle.update?.({ "system.currentSpeed.value": newSpeed });
+        if (setup.vehicleSpeedAdjustment) setup.vehicleSpeedAdjustment.appliedSuccesses = successes;
     };
     return setup;
 }

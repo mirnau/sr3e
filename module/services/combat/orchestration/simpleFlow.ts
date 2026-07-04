@@ -30,6 +30,7 @@ export async function executeSimpleFlow(
         meta: snapshot.meta,
         results,
         rerollCount: 0,
+        vehicleSpeedAdjustment: setup.vehicleSpeedAdjustment,
     } : undefined;
 
     const speaker = typeof ChatMessage !== "undefined"

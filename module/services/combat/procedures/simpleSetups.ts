@@ -1,6 +1,7 @@
 import { resolveLinkedSkill } from "./resolveLinkedSkill";
 import type { DefenseHint, ContestExport, RollState } from "../engine/types";
 import type { Modifier } from "../modifierList";
+import type { VehicleSpeedAdjustmentDirection } from "../vehicleSpeedAdjustment";
 
 export type ProcedureSetup = {
     kind: string;
@@ -40,6 +41,23 @@ export type ProcedureSetup = {
     exportFn: () => ContestExport;
     defenseHint: DefenseHint | null;
     commitFn: (roll: unknown, actor: unknown) => Promise<void>;
+    // Carried onto the posted chat message's RerollFlag so a later karma
+    // reroll/bought success (which happens well after commitFn already
+    // ran once against the original roll) can apply just its marginal
+    // extra successes to the vehicle's speed instead of leaving it stuck
+    // at the pre-Karma-spend value. See buildAccelerateBrakeSetup and
+    // orchestration/rerollHandler.ts's reapplyVehicleSpeedAdjustment.
+    vehicleSpeedAdjustment?: VehicleSpeedAdjustment;
+};
+
+export type VehicleSpeedAdjustment = {
+    vehicleUuid: string;
+    direction: VehicleSpeedAdjustmentDirection;
+    accel: number;
+    // How many successes have already had their speed change applied —
+    // a reroll/bought success only needs to apply (new total - this).
+    appliedSuccesses: number;
+    maxSpeed: number;
 };
 
 export type ForceControl = {
