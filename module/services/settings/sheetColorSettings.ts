@@ -1,6 +1,8 @@
 import SheetColorSettingsApp from "../../foundry/applications/SheetColorSettingsApp";
 import {
     applySheetColor,
+    applyDisableNeonNameBlinking,
+    disableNeonNameBlinkingSetting,
     getSheetColor,
     sheetColorDefinitions,
     sheetColorSettingKeys,
@@ -20,6 +22,17 @@ export function registerSheetColorSettings(): void {
         });
     }
 
+    settings.register(sheetColorSettingKeys.moduleId, sheetColorSettingKeys.disableNeonNameBlinking, {
+        name: "Disable Neon Name Blinking",
+        hint: "Stops the glow and flicker animation on character sheet neon names.",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: false,
+        restricted: true,
+        onChange: (disabled: boolean) => applyDisableNeonNameBlinking(disabled),
+    });
+
     settings.registerMenu(sheetColorSettingKeys.moduleId, "sheetColors", {
         name: "Sheet Colors",
         label: "Configure",
@@ -34,4 +47,5 @@ export function applySheetColorSettings(): void {
     for (const definition of sheetColorDefinitions) {
         applySheetColor(definition, getSheetColor(definition));
     }
+    applyDisableNeonNameBlinking(disableNeonNameBlinkingSetting());
 }

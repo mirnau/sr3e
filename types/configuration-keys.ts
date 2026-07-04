@@ -29,6 +29,7 @@ export const typekeys = Object.freeze({
   gadget: "gadget",
   medical: "medical",
   vehiclecontrolrig: "vehiclecontrolrig",
+  cyberdeck: "cyberdeck",
 } as const);
 
 export const flags = Object.freeze({

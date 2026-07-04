@@ -19,7 +19,18 @@ import GadgetComponent from "./components/GadgetComponent.svelte";
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 const MELEE_MODES = new Set(["blade", "blunt"]);
 
-const p = $props<{ actor: Actor; item: Item; hardpointFull?: boolean; firmpointFull?: boolean }>();
+const p = $props<{
+    actor: Actor;
+    item: Item;
+    hardpointFull?: boolean;
+    firmpointFull?: boolean;
+    hideToggles?: boolean;
+    hideRollButton?: boolean;
+    // A vehicle-mounted weapon can reload from either the vehicle's own
+    // ammo stock or this extra actor's (the seated character's) carried
+    // ammo — both get searched for compatible ammunition.
+    extraAmmoSourceActor?: Actor;
+}>();
 const actor = untrack(() => p.actor);
 const item = untrack(() => p.item);
 const sys = item.system as Record<string, any>;
@@ -99,7 +110,8 @@ function onDragStart(event: DragEvent) {
 }
 
 async function onReloadClick() {
-    await reloadWeapon(actor as any, item as any);
+    const sources = p.extraAmmoSourceActor ? [actor, p.extraAmmoSourceActor] : actor;
+    await reloadWeapon(sources as any, item as any);
 }
 
 async function onTrashClick() {
@@ -168,14 +180,16 @@ function onRollClick() {
         </div>
 
         <div class="asset-card-row">
-            <button
-                type="button"
-                class="sr3e-toolbar-button fa-solid fa-dice"
-                aria-label="Roll"
-                title={rollDisabledReason}
-                disabled={!isRollEnabled}
-                onclick={onRollClick}
-            ></button>
+            {#if !p.hideRollButton}
+                <button
+                    type="button"
+                    class="sr3e-toolbar-button fa-solid fa-dice"
+                    aria-label="Roll"
+                    title={rollDisabledReason}
+                    disabled={!isRollEnabled}
+                    onclick={onRollClick}
+                ></button>
+            {/if}
 
             <button
                 type="button"
@@ -202,27 +216,29 @@ function onRollClick() {
         </div>
     </div>
 
-    <div class="asset-toggles">
-        {#if isVehicle}
-            <FilterToggle
-                checked={$isPrimaryStore}
-                onChange={(e) => togglePrimary(e.target.checked)}
-                letter="H"
-                label={localize(CONFIG.SR3E.MECHANICAL.hardpoint)}
-                disabled={primaryDisabled}
-            />
-            <FilterToggle
-                checked={$isSecondaryStore}
-                onChange={(e) => toggleSecondary(e.target.checked)}
-                letter="F"
-                label={localize(CONFIG.SR3E.MECHANICAL.firmpoint)}
-                disabled={secondaryDisabled}
-            />
-        {:else}
-            <FilterToggle bind:checked={$isPrimaryStore} svgName="star-svgrepo-com.svg" />
-            {#if item.type !== "spell"}
-                <FilterToggle bind:checked={$isSecondaryStore} svgName="backpack-svgrepo-com.svg" />
+    {#if !p.hideToggles}
+        <div class="asset-toggles">
+            {#if isVehicle}
+                <FilterToggle
+                    checked={$isPrimaryStore}
+                    onChange={(e) => togglePrimary(e.target.checked)}
+                    letter="H"
+                    label={localize(CONFIG.SR3E.MECHANICAL.hardpoint)}
+                    disabled={primaryDisabled}
+                />
+                <FilterToggle
+                    checked={$isSecondaryStore}
+                    onChange={(e) => toggleSecondary(e.target.checked)}
+                    letter="F"
+                    label={localize(CONFIG.SR3E.MECHANICAL.firmpoint)}
+                    disabled={secondaryDisabled}
+                />
+            {:else}
+                <FilterToggle bind:checked={$isPrimaryStore} svgName="star-svgrepo-com.svg" />
+                {#if item.type !== "spell"}
+                    <FilterToggle bind:checked={$isSecondaryStore} svgName="backpack-svgrepo-com.svg" />
+                {/if}
             {/if}
-        {/if}
-    </div>
+        </div>
+    {/if}
 </div>

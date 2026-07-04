@@ -1,7 +1,9 @@
 <script lang="ts">
-import { onMount, untrack } from "svelte";
+import { onDestroy, onMount, untrack } from "svelte";
 import { localize } from "../../../services/utilities";
-import WeaponComponent from "./inventory/components/WeaponComponent.svelte";
+import type { IStoreManager } from "../../../utilities/IStoreManager";
+import { StoreManager } from "../../../utilities/StoreManager.svelte";
+import InventoryCard from "./inventory/InventoryCard.svelte";
 import LabeledDropdown from "../../items/LabeledDropdown.svelte";
 import { buildVehicleWeaponAttack } from "../../../services/combat/procedures/vehicleWeaponAttack";
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
@@ -10,22 +12,29 @@ import { executeProcedure } from "../../../services/combat/orchestration/execute
 const p = $props<{ characterActor: Actor; weapon: Item; jackedIn: boolean; vcrLevel: number }>();
 const characterActor = untrack(() => p.characterActor);
 const weapon = untrack(() => p.weapon);
+const vehicle = untrack(() => (weapon as any).parent);
+const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
+
+storeManager.Subscribe(weapon);
+onDestroy(() => storeManager.Unsubscribe(weapon));
 
 const activeSkills = $derived(
     [...((characterActor as any).items ?? [])].filter((item: any) => item.type === "skill" && item.system?.skillType === "active")
 );
 const activeSkillOptions = $derived(activeSkills.map((skill: any) => ({ value: skill.id, label: skill.name })));
 
-let selectedSkillId = $state<string>("");
-let hasAmmo = $state(true);
+// Flag-backed on the weapon (not local $state) so the choice survives
+// closing/reopening the sheet — stored per-weapon since different mounted
+// weapons plausibly need different skills (e.g. Gunnery vs an exotic mount).
+const selectedSkillIdStore = storeManager.GetFlagStore<string>(weapon, "garageFiringSkillId", "");
 
 onMount(() => {
-    if (activeSkills.length > 0) selectedSkillId = activeSkills[0].id;
+    if (!$selectedSkillIdStore && activeSkills.length > 0) selectedSkillIdStore.set(activeSkills[0].id);
 });
 
 function onRoll() {
-    if (!selectedSkillId) return;
-    const setup = buildVehicleWeaponAttack(characterActor as never, weapon as never, selectedSkillId, {
+    if (!$selectedSkillIdStore) return;
+    const setup = buildVehicleWeaponAttack(characterActor as never, weapon as never, $selectedSkillIdStore, {
         jackedIn: p.jackedIn,
         vcrLevel: p.vcrLevel,
     });
@@ -39,18 +48,36 @@ function onRoll() {
 </script>
 
 <div class="garage-weapon-card">
-    <h4 class="no-margin uppercase">{(weapon as any).name}</h4>
-    <WeaponComponent item={weapon} bind:hasAmmo />
+    <!-- Vehicle-owned weapon: reload offers ammo from both the vehicle's
+         own stock (actor={vehicle}) and the seated character's carried
+         ammo (extraAmmoSourceActor). H/F toggles are hidden — mount status
+         is set from the vehicle's own sheet, not re-toggleable from here.
+         The built-in roll button is hidden too: it resolves the firing
+         skill via the weapon's linkedSkillId against whichever actor is
+         passed in, which can never work against a vehicle (no skill
+         items) — the ad-hoc dropdown below covers firing instead. -->
+    <InventoryCard
+        actor={vehicle}
+        item={weapon}
+        hideToggles
+        hideRollButton
+        extraAmmoSourceActor={characterActor}
+    />
     {#if activeSkills.length > 0}
         <div class="garage-vehicle-roll">
             <LabeledDropdown
                 key="firingSkill"
                 label={localize(CONFIG.SR3E.SKILL.skill)}
-                value={selectedSkillId}
+                value={$selectedSkillIdStore}
                 options={activeSkillOptions}
-                onUpdate={(v) => (selectedSkillId = v)}
+                onUpdate={(v) => selectedSkillIdStore.set(v)}
             />
-            <button type="button" disabled={!hasAmmo} onclick={onRoll}>{localize(CONFIG.SR3E.WEAPON.weapon)}</button>
+            <button
+                type="button"
+                class="sr3e-toolbar-button fa-solid fa-dice"
+                aria-label="Roll"
+                onclick={onRoll}
+            ></button>
         </div>
     {/if}
 </div>

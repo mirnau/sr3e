@@ -24,6 +24,7 @@ import { GADGET_KEYS, GADGET_TYPE_KEYS, EFFECTS_KEYS } from "./config/GadgetConf
 import { MEDICAL_KEYS } from "./config/MedicalConfig";
 import { LANDING_TAKEOFF_KEYS, MECHANICAL_CATEGORY_KEYS, MECHANICAL_KEYS, POWER_SOURCE_KEYS, VEHICLE_TYPE_KEYS } from "./config/MechanicalConfig";
 import { VEHICLE_CONTROL_RIG_KEYS } from "./config/VehicleControlRigConfig";
+import { CYBERDECK_KEYS } from "./config/CyberdeckConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -102,6 +103,7 @@ export const sr3e = {
   POWER_SOURCES: createCategory("powerSources", POWER_SOURCE_KEYS),
   LANDING_TAKEOFF: createCategory("landingTakeoff", LANDING_TAKEOFF_KEYS),
   VEHICLE_CONTROL_RIG: createCategory("vehicleControlRig", VEHICLE_CONTROL_RIG_KEYS),
+  CYBERDECK: createCategory("cyberdeck", CYBERDECK_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

@@ -15,7 +15,7 @@ type WeaponSystem = {
 };
 
 type Item = { id: string; name?: string; type: string; system: Record<string, unknown>; getFlag?: (scope: string, key: string) => unknown };
-type Actor = { items: { get: (id: string) => Item | undefined; contents?: Item[] } };
+type Actor = { type?: string; items: { get: (id: string) => Item | undefined; contents?: Item[] } };
 
 export function getAttachedAmmo(actor: Actor, weapon: { system: Record<string, unknown> }): Item | null {
     const ws = weapon.system as WeaponSystem;
@@ -26,26 +26,38 @@ export function getAttachedAmmo(actor: Actor, weapon: { system: Record<string, u
     return (as.rounds ?? 0) > 0 ? ammo : null;
 }
 
+// A vehicle's cargo has no "equipped" concept — everything mounted or
+// carried is available — so the isEquipped gate (meant for a character's
+// personal gear) only applies to non-vehicle actors. Lets a vehicle-mounted
+// weapon draw ammo from either the vehicle's own stock or the shooting
+// character's carried ammo.
 export function findCompatibleAmmo(actor: Actor, weapon: { system: Record<string, unknown> }): Item[] {
     const ws = weapon.system as WeaponSystem;
     const items: Item[] = actor.items.contents ?? [...(actor.items as unknown as Iterable<Item>)];
+    const requireEquipped = actor.type !== "mechanical";
     return items.filter(i => {
         if (i.type !== "ammunition") return false;
         const as = i.system as AmmoSystem;
-        const isEquipped = !!i.getFlag?.("sr3e", "isEquipped");
+        const equippedOk = !requireEquipped || !!i.getFlag?.("sr3e", "isEquipped");
         const mechOk = !ws.reloadMechanism || !as.reloadMechanism || as.reloadMechanism === ws.reloadMechanism;
-        return as.ammunitionClass === ws.ammunitionClass && mechOk && isEquipped && (as.rounds ?? 0) > 0;
+        return as.ammunitionClass === ws.ammunitionClass && mechOk && equippedOk && (as.rounds ?? 0) > 0;
     });
 }
 
+function asList<T>(value: T | T[]): T[] {
+    return Array.isArray(value) ? value : [value];
+}
+
 export async function consume(
-    actor: Actor & { update?: (data: Record<string, unknown>) => Promise<unknown> },
+    actors: (Actor & { update?: (data: Record<string, unknown>) => Promise<unknown> }) | (Actor & { update?: (data: Record<string, unknown>) => Promise<unknown> })[],
     weapon: { system: Record<string, unknown>; update?: (data: Record<string, unknown>) => Promise<unknown> },
     n: number,
 ): Promise<void> {
     const ws = weapon.system as WeaponSystem;
     if (!ws.ammoId) return;
-    const ammo = actor.items.get(ws.ammoId);
+    const actorList = asList(actors);
+    const owner = actorList.find(a => a.items.get(ws.ammoId!));
+    const ammo = owner?.items.get(ws.ammoId);
     if (!ammo) {
         await weapon.update?.({ "system.ammoId": "" });
         return;
@@ -60,10 +72,10 @@ export async function consume(
 }
 
 export async function reloadWeapon(
-    actor: Actor,
+    actors: Actor | Actor[],
     weapon: { name?: string; system: Record<string, unknown>; update?: (data: Record<string, unknown>) => Promise<unknown> },
 ): Promise<void> {
-    const candidates = findCompatibleAmmo(actor, weapon);
+    const candidates = asList(actors).flatMap(a => findCompatibleAmmo(a, weapon));
     const options = candidates.map(c => {
         const as = c.system as AmmoSystem;
         return `<option value="${c.id}">${c.name} — ${as.rounds ?? 0}/${as.maxCapacity ?? 0} rounds</option>`;

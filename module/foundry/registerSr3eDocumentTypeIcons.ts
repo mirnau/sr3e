@@ -29,4 +29,5 @@ export function registerSr3eDocumentTypeIcons(): void {
 	registerDocumentTypeIcon("Item", typekeys.transaction, svg("yen-money-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.weapon, svg("rifle-gun-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.vehiclecontrolrig, svg("plugin-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.cyberdeck, svg("computer-chip-svgrepo-com.svg"));
 }

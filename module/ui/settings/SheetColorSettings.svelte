@@ -23,9 +23,7 @@ async function reset(definition: SheetColorDefinition) {
     colors = { ...colors, [definition.key]: definition.defaultColor };
 }
 
-function colorFromEvent(event: Event, fallback: string): string {
-    return String((event.currentTarget as ColorPickerElement).value ?? fallback);
-}
+function colorFromEvent(event: Event, fallback: string): string { return String((event.currentTarget as ColorPickerElement).value ?? fallback); }
 </script>
 
 <fieldset>

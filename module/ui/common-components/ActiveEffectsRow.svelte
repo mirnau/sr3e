@@ -2,6 +2,7 @@
 import { localize } from "../../services/utilities";
 import Switch from "./Switch.svelte";
 import type { ActiveEffectViewModel } from "./activeEffectViewModel";
+import { durationTypeFrom, durationValueFrom } from "./activeEffectDurationUpdate";
 
 const p = $props<{
     effectData: ActiveEffectViewModel;
@@ -18,11 +19,9 @@ async function onToggleEnabled(e: Event) {
 }
 
 function formatDuration(duration: Record<string, unknown>): string {
-    const units = duration?.units as string | undefined;
-    if (!units) return localize(CONFIG.SR3E.EFFECTS.permanent);
-    const value = (duration[units] as number) ?? (duration.value as number) ?? 0;
-    if (units === "seconds" && value === 0) return localize(CONFIG.SR3E.EFFECTS.permanent);
-    return `${value} ${units}`;
+    const units = durationTypeFrom(duration);
+    if (!units || units === "none") return localize(CONFIG.SR3E.EFFECTS.permanent);
+    return `${durationValueFrom(duration, units)} ${units}`;
 }
 </script>
 

@@ -20,11 +20,9 @@ type VehicleWeapon = {
 
 export type VehicleWeaponRigging = { jackedIn: boolean; vcrLevel: number };
 
-// Firing skill and TN come from the seated character; ammo lookup and
-// consumption target the weapon's actual owner (the vehicle) — the weapon
-// lives in the vehicle's inventory, not the character's, so mutating the
-// character's items here would silently no-op (or worse, clear ammoId, see
-// ammoService.consume's not-found branch).
+// Firing skill and TN come from the seated character; ammo can live on
+// either the vehicle (its own stock) or the shooting character (their own
+// carried ammo) — both are searched, vehicle first.
 export function buildVehicleWeaponAttack(
     character: ActorWithItems,
     weapon: VehicleWeapon,
@@ -32,13 +30,14 @@ export function buildVehicleWeaponAttack(
     rigging: VehicleWeaponRigging = { jackedIn: false, vcrLevel: 0 },
 ): ProcedureSetup {
     const vehicle = weapon.parent ?? character;
+    const ammoActors = [vehicle, character];
     const ws = weapon.system as WeaponSystem;
     const resolved = resolveLinkedSkill(character, chosenSkillId);
     const dice = resolved?.dice ?? 0;
     const baseTN = 4;
     const mods: Modifier[] = [];
 
-    const ammoAvailable = resolveAmmoCount(vehicle, weapon);
+    const ammoAvailable = resolveAmmoCount(ammoActors, weapon);
     const declaredRounds = 1;
     const recoilMod = recoilModifier(vehicle.id, weapon, declaredRounds);
     if (recoilMod) mods.push(recoilMod);
@@ -98,7 +97,7 @@ export function buildVehicleWeaponAttack(
                 powerDelta: 0,
                 levelDelta: 0,
                 notes: [],
-            });
+            }, ammoActors as never);
         },
     };
 }
@@ -111,11 +110,14 @@ function gridMeasure(a: { x: number; y: number }, b: { x: number; y: number }): 
     return { distance: (pixels / size) * distPerSquare };
 }
 
-function resolveAmmoCount(vehicle: ActorWithItems, weapon: VehicleWeapon): number | null {
+function resolveAmmoCount(actors: ActorWithItems[], weapon: VehicleWeapon): number | null {
     const ws = weapon.system as WeaponSystem;
     if (!ws.ammoId) return null;
-    const ammo = vehicle.items.get?.(ws.ammoId);
-    return (ammo?.system as { rounds?: number } | undefined)?.rounds ?? null;
+    for (const actor of actors) {
+        const ammo = actor.items.get?.(ws.ammoId);
+        if (ammo) return (ammo.system as { rounds?: number } | undefined)?.rounds ?? null;
+    }
+    return null;
 }
 
 function resolveAttackerToken(): { x?: number; y?: number } | null {

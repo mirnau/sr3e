@@ -1,5 +1,7 @@
 const MODULE_ID = "sr3e";
 const NEON_NAME_COLOR = "neonNameColor";
+const DISABLE_NEON_NAME_BLINKING = "disableNeonNameBlinking";
+const DISABLE_NEON_NAME_BLINKING_CLASS = "sr3e-disable-neon-name-blinking";
 
 export const DEFAULT_NEON_NAME_COLOR = "#ff2090";
 export const NEON_NAME_COLOR_VAR = "--neon-name-color";
@@ -102,9 +104,22 @@ export function applySheetColor(definition: SheetColorDefinition, color: string)
     document.documentElement.style.setProperty(definition.cssVar, normalizeHexColorWithDefault(color, definition.defaultColor));
 }
 
+export function disableNeonNameBlinkingSetting(): boolean {
+    return Boolean((game.settings as any).get(MODULE_ID, DISABLE_NEON_NAME_BLINKING));
+}
+
+export async function setDisableNeonNameBlinking(disabled: boolean): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, DISABLE_NEON_NAME_BLINKING, Boolean(disabled));
+}
+
+export function applyDisableNeonNameBlinking(disabled: boolean): void {
+    document.documentElement.classList.toggle(DISABLE_NEON_NAME_BLINKING_CLASS, Boolean(disabled));
+}
+
 export const sheetColorSettingKeys = {
     moduleId: MODULE_ID,
     neonNameColor: NEON_NAME_COLOR,
+    disableNeonNameBlinking: DISABLE_NEON_NAME_BLINKING,
 } as const;
 
 function normalizeHexColorWithDefault(value: unknown, defaultColor: string): string {

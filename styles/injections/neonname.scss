@@ -35,6 +35,16 @@
     }
   }
 
+  :root.sr3e-disable-neon-name-blinking & {
+    .neon-name-position .neon-name {
+      .neon-name-text,
+      .malfunc {
+        animation: none;
+        opacity: 1;
+      }
+    }
+  }
+
   @keyframes glow {
     from { opacity: 0.8; }
     to { opacity: 1; }

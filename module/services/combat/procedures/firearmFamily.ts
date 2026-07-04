@@ -117,8 +117,12 @@ export async function onFirearmAttackResolved(
     actor: Parameters<typeof getAttachedAmmo>[0] & ActorId & { update?: (d: Record<string, unknown>) => Promise<unknown> },
     weapon: Parameters<typeof getAttachedAmmo>[1] & { update?: (d: Record<string, unknown>) => Promise<unknown> },
     plan: FirearmPlan,
+    // Vehicle-mounted weapons can draw ammo from either the vehicle or the
+    // shooting character — defaults to just the acting actor for the
+    // personal-weapon path, where ammo always lives on the same actor.
+    ammoActors: Parameters<typeof getAttachedAmmo>[0][] = [actor],
 ): Promise<void> {
-    await consume(actor, weapon, plan.roundsFired);
+    await consume(ammoActors, weapon, plan.roundsFired);
     if (inCombat()) {
         bumpPhaseShots(actor.id, plan.roundsFired);
     } else {

@@ -9,10 +9,12 @@ import VehicleConditionMonitor from "./VehicleConditionMonitor.svelte";
 import LabeledBoolean from "../../items/LabeledBoolean.svelte";
 import LabeledDropdown from "../../items/LabeledDropdown.svelte";
 import GarageWeaponCard from "./GarageWeaponCard.svelte";
+import GarageRiggerActionsCard from "./GarageRiggerActionsCard.svelte";
 import { INVENTORY_PRIMARY_FLAG, INVENTORY_SECONDARY_FLAG } from "./inventory/inventoryMode";
-import { buildSkillSetup } from "../../../services/combat/procedures/simpleSetups";
+import { buildVehicleDrivingTestSetup } from "../../../services/combat/procedures/vehicleDrivingTest";
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import { executeProcedure } from "../../../services/combat/orchestration/executeProcedure";
+import { syncRiggerBonusEffect } from "../../../services/effects/riggerBonusEffect";
 
 type GarageEntry = { uuid: string; seated: boolean; vcrId: string; jackedIn: boolean };
 
@@ -30,7 +32,16 @@ storeManager.Subscribe(characterActor);
 onDestroy(() => storeManager.Unsubscribe(characterActor));
 
 let vehicle = $state<any>(null);
-let selectedSkillId = $state<string>("");
+// Flag-backed (not local $state) so the choice survives closing/reopening
+// the sheet and unseating/reseating, not just component remounts.
+const selectedSkillIdStore = storeManager.GetFlagStore<string>(characterActor, "garageDrivingSkillId", "");
+// Foundry document mutations (e.g. flagging a weapon isHardpoint on the
+// vehicle's own sheet) aren't observed by Svelte's reactivity on their
+// own — vehicle.items is a live Foundry collection, not a $state-tracked
+// one. Bumping this on createItem/updateItem/deleteItem forces
+// mountedWeapons to recompute instead of staying frozen at whatever the
+// vehicle's items looked like the moment this sheet mounted.
+let vehicleItemsVersion = $state(0);
 
 const activeSkills = $derived(
     [...((characterActor as any).items ?? [])].filter((item: any) => item.type === "skill" && item.system?.skillType === "active")
@@ -40,12 +51,13 @@ const ownedVcrItems = $derived(
 );
 const activeSkillOptions = $derived(activeSkills.map((skill: any) => ({ value: skill.id, label: skill.name })));
 const vcrOptions = $derived(ownedVcrItems.map((vcr: any) => ({ value: vcr.id, label: vcr.name })));
-const mountedWeapons = $derived(
-    [...(vehicle?.items ?? [])].filter(
+const mountedWeapons = $derived.by(() => {
+    void vehicleItemsVersion;
+    return [...(vehicle?.items ?? [])].filter(
         (item: any) => item.type === "weapon" &&
             (item.flags?.sr3e?.[INVENTORY_PRIMARY_FLAG.vehicle] || item.flags?.sr3e?.[INVENTORY_SECONDARY_FLAG.vehicle])
-    )
-);
+    );
+});
 const vehicleType = $derived(vehicle?.system?.vehicleType ?? "ground");
 const handlingTN = $derived(
     vehicleType === "ground"
@@ -53,9 +65,24 @@ const handlingTN = $derived(
         : (vehicle?.system?.handling?.value ?? 4)
 );
 
+function onVehicleItemChange(item: any) {
+    if (item.parent?.id !== vehicle?.id) return;
+    vehicleItemsVersion += 1;
+}
+
+const createHookId = Hooks.on("createItem", onVehicleItemChange);
+const updateHookId = Hooks.on("updateItem", onVehicleItemChange);
+const deleteHookId = Hooks.on("deleteItem", onVehicleItemChange);
+
+onDestroy(() => {
+    Hooks.off("createItem", createHookId);
+    Hooks.off("updateItem", updateHookId);
+    Hooks.off("deleteItem", deleteHookId);
+});
+
 onMount(async () => {
     vehicle = await fromUuid(vehicleUuid) as any;
-    if (activeSkills.length > 0) selectedSkillId = activeSkills[0].id;
+    if (!$selectedSkillIdStore && activeSkills.length > 0) selectedSkillIdStore.set(activeSkills[0].id);
     if (!p.entry.vcrId && ownedVcrItems.length > 0) {
         const highestLevel = [...ownedVcrItems].sort((a, b) => (b.system?.level ?? 0) - (a.system?.level ?? 0))[0];
         p.onUpdate({ vcrId: highestLevel.id });
@@ -82,16 +109,16 @@ function selectedVcr() {
     return ownedVcrItems.find((vcr: any) => vcr.id === p.entry.vcrId) ?? null;
 }
 
+$effect(() => {
+    const jackedIn = p.entry.jackedIn;
+    const vcrLevel = jackedIn ? Number(selectedVcr()?.system?.level ?? 0) : 0;
+    void syncRiggerBonusEffect(characterActor as never, jackedIn, vcrLevel);
+});
+
 function onDrivingRoll() {
-    if (!vehicle || !selectedSkillId) return;
+    if (!vehicle || !$selectedSkillIdStore) return;
     const vcr = p.entry.jackedIn ? selectedVcr() : null;
-    const tn = vcr ? Math.max(2, handlingTN - Number(vcr.system?.level ?? 0)) : handlingTN;
-    const setup = buildSkillSetup(characterActor as any, selectedSkillId, null, vehicle.name, tn);
-    if (vcr) {
-        const skillItem = (characterActor as any).items?.get(selectedSkillId);
-        const skillRating = Number(skillItem?.system?.activeSkill?.value ?? 0);
-        setup.poolAvailableOverrides = { control: skillRating };
-    }
+    const setup = buildVehicleDrivingTestSetup(characterActor as never, $selectedSkillIdStore, handlingTN, vcr as never, vehicle.name);
     const hasTargets = (game.user?.targets?.size ?? 0) > 0;
     if (hasTargets) {
         openComposer(setup, characterActor as never);
@@ -148,33 +175,41 @@ function onDrivingRoll() {
                 </SheetCard>
             {/if}
 
-            {#if activeSkills.length > 0 || mountedWeapons.length > 0}
+            {#if activeSkills.length > 0 && !p.entry.jackedIn}
                 <SheetCard itemClass="garage-packery-grid-item">
                     <h4 class="no-margin uppercase">{localize(CONFIG.SR3E.INVENTORY.garageactions)}</h4>
-                    {#if activeSkills.length > 0}
-                        <div class="garage-vehicle-roll">
-                            <LabeledDropdown
-                                key="drivingSkill"
-                                label={localize(CONFIG.SR3E.SKILL.skill)}
-                                value={selectedSkillId}
-                                options={activeSkillOptions}
-                                onUpdate={(v) => (selectedSkillId = v)}
-                            />
-                            <button type="button" onclick={onDrivingRoll}>{localize(CONFIG.SR3E.INVENTORY.garagedrivingroll)}</button>
-                        </div>
-                    {/if}
-                    {#if mountedWeapons.length > 0}
-                        <div class="garage-vehicle-weapons">
-                            {#each mountedWeapons as weapon (weapon.id)}
-                                <GarageWeaponCard
-                                    {characterActor}
-                                    {weapon}
-                                    jackedIn={p.entry.jackedIn}
-                                    vcrLevel={Number(selectedVcr()?.system?.level ?? 0)}
-                                />
-                            {/each}
-                        </div>
-                    {/if}
+                    <div class="garage-vehicle-roll">
+                        <LabeledDropdown
+                            key="drivingSkill"
+                            label={localize(CONFIG.SR3E.SKILL.skill)}
+                            value={$selectedSkillIdStore}
+                            options={activeSkillOptions}
+                            onUpdate={(v) => selectedSkillIdStore.set(v)}
+                        />
+                        <button type="button" onclick={onDrivingRoll}>{localize(CONFIG.SR3E.INVENTORY.garagedrivingroll)}</button>
+                    </div>
+                </SheetCard>
+            {/if}
+
+            {#each mountedWeapons as weapon (weapon.id)}
+                <SheetCard itemClass="garage-packery-grid-item">
+                    <GarageWeaponCard
+                        {characterActor}
+                        {weapon}
+                        jackedIn={p.entry.jackedIn}
+                        vcrLevel={Number(selectedVcr()?.system?.level ?? 0)}
+                    />
+                </SheetCard>
+            {/each}
+
+            {#if p.entry.jackedIn}
+                <SheetCard itemClass="garage-packery-grid-item">
+                    <GarageRiggerActionsCard
+                        {characterActor}
+                        {vehicle}
+                        vcr={selectedVcr()}
+                        {handlingTN}
+                    />
                 </SheetCard>
             {/if}
         </PackeryGrid>

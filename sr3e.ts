@@ -35,6 +35,8 @@ import MedicalModel from "./module/models/items/MedicalModel";
 import MedicalSheet from "./module/sheets/items/MedicalSheet";
 import VehicleControlRigModel from "./module/models/items/VehicleControlRigModel";
 import VehicleControlRigSheet from "./module/sheets/items/VehicleControlRigSheet";
+import CyberdeckModel from "./module/models/items/CyberdeckModel";
+import CyberdeckSheet from "./module/sheets/items/CyberdeckSheet";
 import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -53,6 +55,7 @@ import { registerVehicleControlRigEssenceHook } from "./module/foundry/vehicleCo
 import { migrateLegacyActorTypes } from "./module/foundry/migrateLegacyActorTypes";
 import { applySheetColorSettings, registerSheetColorSettings } from "./module/services/settings/sheetColorSettings";
 import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
+import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/settings/remSizeSettings";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -142,6 +145,7 @@ async function registerHooks(): Promise<void> {
 
       SR3Edie.Register();
       registerSheetColorSettings();
+      registerRemSizeSettings();
       registerDicePoolVisibilitySettings();
 
       // Dynamic imports AFTER configure() has run
@@ -249,6 +253,12 @@ async function registerHooks(): Promise<void> {
             model: VehicleControlRigModel,
             sheet: VehicleControlRigSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.cyberdeck,
+            model: CyberdeckModel,
+            sheet: CyberdeckSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -264,6 +274,7 @@ async function registerHooks(): Promise<void> {
 
    Hooks.once(hooks.ready, () => {
       applySheetColorSettings();
+      applyRemSizeSetting();
       void migrateLegacyActorTypes();
       getNewsService();
       registerSocketHandlers();
