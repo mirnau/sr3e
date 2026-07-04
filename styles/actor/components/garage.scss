@@ -140,6 +140,22 @@
    margin-top: 0.5rem;
 }
 
+// SR3 p.132/142 Safe Braking Limit — decelerating past 4x Acceleration in
+// one turn forces a Crash Test. Persists (no timeout) until the button is
+// actually pressed, since that's the acknowledgement that the test happened.
+@keyframes garage-crash-test-pulse {
+   0%, 100% {
+      box-shadow: inset 0 0 6px 2px red;
+   }
+   50% {
+      box-shadow: inset 0 0 14px 5px red;
+   }
+}
+
+.garage-crash-test-warning {
+   animation: garage-crash-test-pulse 1s ease-in-out infinite;
+}
+
 // Matches .asset-card-row's toolbar rhythm — reads as a continuation of
 // the recycled InventoryCard above it rather than an unrelated row. The
 // dropdown grows to fill the row (its stat-field-card shrink-wraps by
@@ -155,5 +171,90 @@
    .stat-field-card {
       flex: 1;
       min-width: 0;
+   }
+}
+
+// =========================================================
+// Speedometer — horseshoe gauge showing currentSpeed against maxSpeed,
+// with a marker for speedRating and the Maneuver Score readout.
+// =========================================================
+
+.garage-speedometer {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   padding: 0.25rem;
+
+   &__maneuver-score {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--highlight-color-primary);
+      text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+   }
+
+   &__gauge {
+      width: 100%;
+      max-width: 220px;
+      overflow: visible;
+   }
+
+   &__track {
+      stroke: var(--background-color);
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 4px var(--highlight-color-primary));
+   }
+
+   &__fill {
+      stroke: var(--highlight-color-primary);
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 6px var(--highlight-color-primary));
+      transition: d 0.3s ease;
+   }
+
+   &__tick {
+      stroke: var(--background-color);
+      stroke-width: 1.5;
+      opacity: 0.6;
+   }
+
+   &__tick--major {
+      stroke: var(--highlight-color-primary);
+      stroke-width: 2;
+      opacity: 1;
+   }
+
+   &__tick-label {
+      font-size: 14px;
+      fill: var(--text-color, #e8f3ff);
+      dominant-baseline: middle;
+   }
+
+   &__rating-marker {
+      fill: #ff6b7a;
+      filter: drop-shadow(0 0 4px #ff6b7a);
+   }
+
+   &__readout {
+      margin-top: -1.5rem;
+      text-align: center;
+      font-family: "VT323", "VT323-Local", monospace;
+   }
+
+   &__current {
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--h1-color, #fff);
+      text-shadow: var(--h1-bloom, 0 0 8px rgba(0, 255, 200, 0.6));
+   }
+
+   &__max {
+      font-size: 1rem;
+      opacity: 0.6;
+      margin-left: 0.25rem;
    }
 }

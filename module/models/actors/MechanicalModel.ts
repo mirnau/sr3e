@@ -101,6 +101,12 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
         miniTurrets: new EmbeddedDataField(SimpleStat),
       }),
       condition: new EmbeddedDataField(SimpleStat),
+      // Written automatically when a rigger rolls Maneuver Score (Driver
+      // Points, per the Rule of Six exploding-die chain) — see
+      // buildManeuverScoreSetup. Vehicle/Terrain/Speed Points aren't
+      // computed yet, so this is Driver Points alone for now, not the
+      // full SR3 formula.
+      maneuverScore: new NumberField({ integer: true, initial: 0 }),
       commodity: new EmbeddedDataField(CommodityModel),
       customToken: new EmbeddedDataField(CustomTokenModel),
       journalId: new StringField({
@@ -153,6 +159,7 @@ type MechanicalSchema = {
   remoteControlInterface: BooleanField;
   mounts: SchemaField<MountsSchema>;
   condition: EmbeddedDataField<typeof SimpleStat>;
+  maneuverScore: NumberField;
   commodity: EmbeddedDataField<typeof CommodityModel>;
   customToken: EmbeddedDataField<typeof CustomTokenModel>;
   journalId: StringField;

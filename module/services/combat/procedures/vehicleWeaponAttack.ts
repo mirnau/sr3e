@@ -28,6 +28,7 @@ export function buildVehicleWeaponAttack(
     weapon: VehicleWeapon,
     chosenSkillId: string,
     rigging: VehicleWeaponRigging = { jackedIn: false, vcrLevel: 0 },
+    extraModifiers: Modifier[] = [],
 ): ProcedureSetup {
     const vehicle = weapon.parent ?? character;
     const ammoActors = [vehicle, character];
@@ -55,6 +56,7 @@ export function buildVehicleWeaponAttack(
     // — the composer renders each modifier by name, keeping the VCR's
     // effect legible instead of presenting an already-reduced TN.
     if (rigging.jackedIn) mods.push({ id: "vcr-tn-reduction", name: "VCR Rating", value: -rigging.vcrLevel });
+    mods.push(...extraModifiers);
 
     const rollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: tn, modifiers: mods };
     const skillName = resolved?.skill.name ?? "Gunnery";

@@ -2,8 +2,10 @@ export const INVENTORY_KEYS = [
   "inventory", "garage", "effects", "favourites", "equipped",
   "garageempty", "garagewrongtype", "garagedrivingroll", "garageseated",
   "garagejackedin", "garageactions", "garageriggeractions",
-  "garagevehicleskill", "garagegunneryskill", "garagemaneuverscore",
-  "garageaccelerating", "garagepositioning", "garageramming",
+  "garagevehicleskill", "garagegunneryskill", "garagemaneuverscore", "garagemaneuver",
+  "garageaccelerate", "garagebrake", "garagepositioning", "garageramming",
   "garagehiding", "garagecrashtest", "garagesensortest",
-  "garagesensorenhancedgunnery", "garagenoriggeradaptation", "totalweight",
+  "garagesensorenhancedgunnery", "garagenoriggeradaptation", "garageopposingmaneuverscore",
+  "garageterrain", "garageterrainopen", "garageterrainnormal", "garageterrainrestricted", "garageterraintight",
+  "totalweight",
 ] as const;

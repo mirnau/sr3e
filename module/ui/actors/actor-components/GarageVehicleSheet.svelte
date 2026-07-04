@@ -10,6 +10,7 @@ import LabeledBoolean from "../../items/LabeledBoolean.svelte";
 import LabeledDropdown from "../../items/LabeledDropdown.svelte";
 import GarageWeaponCard from "./GarageWeaponCard.svelte";
 import GarageRiggerActionsCard from "./GarageRiggerActionsCard.svelte";
+import GarageSpeedometer from "./GarageSpeedometer.svelte";
 import { INVENTORY_PRIMARY_FLAG, INVENTORY_SECONDARY_FLAG } from "./inventory/inventoryMode";
 import { buildVehicleDrivingTestSetup } from "../../../services/combat/procedures/vehicleDrivingTest";
 import { openComposer } from "../../../services/combat/procedures/composerService.svelte";
@@ -42,6 +43,11 @@ const selectedSkillIdStore = storeManager.GetFlagStore<string>(characterActor, "
 // mountedWeapons to recompute instead of staying frozen at whatever the
 // vehicle's items looked like the moment this sheet mounted.
 let vehicleItemsVersion = $state(0);
+// Same problem, one level up: vehicle.system.* mutations (a GM editing the
+// vehicle's own sheet, or the Maneuver Score roll's commitFn writing
+// maneuverScore back) don't reassign `vehicle` itself, so nothing reading
+// vehicle.system.* through a $derived would otherwise know to recompute.
+let vehicleVersion = $state(0);
 
 const activeSkills = $derived(
     [...((characterActor as any).items ?? [])].filter((item: any) => item.type === "skill" && item.system?.skillType === "active")
@@ -71,20 +77,54 @@ const handlingTN = $derived(
         ? (vehicle?.system?.handlingRoad?.value || vehicle?.system?.handling?.value || 4)
         : (vehicle?.system?.handling?.value || 4)
 );
+const currentSpeed = $derived.by(() => { void vehicleVersion; return vehicle?.system?.currentSpeed?.value ?? 0; });
+const maxSpeedValue = $derived.by(() => { void vehicleVersion; return vehicle?.system?.maxSpeed?.value || 0; });
+const speedRatingValue = $derived.by(() => { void vehicleVersion; return vehicle?.system?.speedRating?.value ?? 0; });
+const maneuverScoreValue = $derived.by(() => { void vehicleVersion; return vehicle?.system?.maneuverScore ?? 0; });
+const accelValue = $derived.by(() => { void vehicleVersion; return vehicle?.system?.accel?.value ?? 0; });
+
+// SR3 p.132/142 Safe Braking Limit: decelerating more than 4x Acceleration
+// in one turn forces an immediate Crash Test. Not $state — it only needs
+// to gate the comparison inside the effect below, not trigger renders
+// itself (making it $state would re-trigger this same effect on every
+// write, since it'd become a tracked read too).
+let previousSpeedForBraking: number | null = null;
+let exceedsBrakingLimit = $state(false);
+
+$effect(() => {
+    const speed = currentSpeed;
+    if (previousSpeedForBraking !== null) {
+        const decel = previousSpeedForBraking - speed;
+        const limit = 4 * accelValue;
+        if (limit > 0 && decel > limit) exceedsBrakingLimit = true;
+    }
+    previousSpeedForBraking = speed;
+});
+
+function acknowledgeBrakingWarning() {
+    exceedsBrakingLimit = false;
+}
 
 function onVehicleItemChange(item: any) {
     if (item.parent?.id !== vehicle?.id) return;
     vehicleItemsVersion += 1;
 }
 
+function onVehicleDocChange(doc: any) {
+    if (doc.id !== vehicle?.id) return;
+    vehicleVersion += 1;
+}
+
 const createHookId = Hooks.on("createItem", onVehicleItemChange);
 const updateHookId = Hooks.on("updateItem", onVehicleItemChange);
 const deleteHookId = Hooks.on("deleteItem", onVehicleItemChange);
+const updateActorHookId = Hooks.on("updateActor", onVehicleDocChange);
 
 onDestroy(() => {
     Hooks.off("createItem", createHookId);
     Hooks.off("updateItem", updateHookId);
     Hooks.off("deleteItem", deleteHookId);
+    Hooks.off("updateActor", updateActorHookId);
 });
 
 onMount(async () => {
@@ -162,11 +202,34 @@ function onDrivingRoll() {
                 <h4 class="no-margin uppercase">{localize(CONFIG.SR3E.MECHANICAL.performance)}</h4>
                 <div class="stat-grid two-column">
                     <span>{localize(CONFIG.SR3E.MECHANICAL.handling)}: {handlingTN}</span>
-                    <span>{localize(CONFIG.SR3E.MECHANICAL.currentSpeed)}: {vehicle.system.currentSpeed?.value ?? 0}</span>
+                    <span>{localize(CONFIG.SR3E.MECHANICAL.currentSpeed)}: {currentSpeed}</span>
                     <span>{localize(CONFIG.SR3E.MECHANICAL.body)}: {vehicle.system.body?.value ?? 0}</span>
                     <span>{localize(CONFIG.SR3E.MECHANICAL.armor)}: {vehicle.system.armor?.value ?? 0}</span>
                 </div>
             </SheetCard>
+
+            <SheetCard itemClass="garage-packery-grid-item">
+                <GarageSpeedometer
+                    {currentSpeed}
+                    maxSpeed={maxSpeedValue}
+                    speedRating={speedRatingValue}
+                    maneuverScore={maneuverScoreValue}
+                />
+            </SheetCard>
+
+            {#if p.entry.jackedIn}
+                <SheetCard itemClass="garage-packery-grid-item">
+                    <GarageRiggerActionsCard
+                        {characterActor}
+                        {vehicle}
+                        vcr={selectedVcr()}
+                        {handlingTN}
+                        maneuverScore={maneuverScoreValue}
+                        {exceedsBrakingLimit}
+                        onCrashTestAcknowledge={acknowledgeBrakingWarning}
+                    />
+                </SheetCard>
+            {/if}
 
             <SheetCard itemClass="garage-packery-grid-item">
                 <VehicleConditionMonitor
@@ -220,20 +283,10 @@ function onDrivingRoll() {
                         {weapon}
                         jackedIn={p.entry.jackedIn}
                         vcrLevel={Number(selectedVcr()?.system?.level ?? 0)}
+                        maneuverScore={maneuverScoreValue}
                     />
                 </SheetCard>
             {/each}
-
-            {#if p.entry.jackedIn}
-                <SheetCard itemClass="garage-packery-grid-item">
-                    <GarageRiggerActionsCard
-                        {characterActor}
-                        {vehicle}
-                        vcr={selectedVcr()}
-                        {handlingTN}
-                    />
-                </SheetCard>
-            {/if}
         </PackeryGrid>
     </div>
 {/if}

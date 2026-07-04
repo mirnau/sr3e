@@ -20,8 +20,8 @@ const isAviation = $derived(p.system.vehicleType === "aviation");
         {/if}
         <LabeledNumberInput key="speedRating" label={localize(CONFIG.SR3E.MECHANICAL.speedRating)} value={p.system.speedRating?.value ?? 0} onUpdate={(v) => p.update("system.speedRating.value", v)} />
         <LabeledNumberInput key="currentSpeed" label={localize(CONFIG.SR3E.MECHANICAL.currentSpeed)} value={p.system.currentSpeed?.value ?? 0} onUpdate={(v) => p.update("system.currentSpeed.value", v)} />
+        <LabeledNumberInput key="maxSpeed" label={localize(CONFIG.SR3E.MECHANICAL.maxSpeed)} value={p.system.maxSpeed?.value ?? p.system.speedRating?.value ?? 0} onUpdate={(v) => p.update("system.maxSpeed.value", v)} />
         {#if isAviation}
-            <LabeledNumberInput key="maxSpeed" label={localize(CONFIG.SR3E.MECHANICAL.maxSpeed)} value={p.system.maxSpeed?.value ?? p.system.speedRating?.value ?? 0} onUpdate={(v) => p.update("system.maxSpeed.value", v)} />
             <LabeledNumberInput key="speedStall" label={localize(CONFIG.SR3E.MECHANICAL.speedStall)} value={p.system.speedStall?.value ?? 0} onUpdate={(v) => p.update("system.speedStall.value", v)} />
         {/if}
         <LabeledNumberInput key="accel" label={localize(CONFIG.SR3E.MECHANICAL.accel)} value={p.system.accel?.value ?? 0} onUpdate={(v) => p.update("system.accel.value", v)} />
