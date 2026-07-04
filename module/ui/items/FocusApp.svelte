@@ -97,6 +97,7 @@ onDestroy(() => {
     <ItemSheetComponent>
         <LabeledBoolean {item} key="bonded" label={localize(CONFIG.SR3E.FOCUS.bonded)} value={Boolean(system.bonded)} path="system" />
         <LabeledBoolean {item} key="active" label={localize(CONFIG.SR3E.FOCUS.active)} value={Boolean(system.active)} path="system" />
+        <LabeledBoolean {item} key="expendable" label={localize(CONFIG.SR3E.FOCUS.expendable)} value={Boolean(system.expendable)} path="system" />
     </ItemSheetComponent>
 
     <ItemSheetComponent>

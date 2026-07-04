@@ -1,6 +1,12 @@
 # Ideas
 > Captured during work. No commitment. Review with zone:review.
 
+## Inventory weight display on character sheet
+
+Compute total weight of the character's inventory (summed from carried items — likely `load`/weight fields on weapon/ammunition/wearable/gadget items, mirroring the `Load` capacity concept used for vehicles). Display the computed total to the right of the filters on the right side of the character sheet's inventory panel.
+
+Needs: a weight field on relevant item data models (may not exist yet — verify), a derived-value read via StoreManager rather than direct `actor.system` access, and a decision on whether an over-capacity indicator (vs. Strength-based carry limits, if SR3E has them) is in scope or just a raw display.
+
 ## [done] Uncapped roll as system setting
 
 Single-click sheet rolls (skill/spec) currently use uncapped `d6x` (infinite chain). This could be a system-level setting:

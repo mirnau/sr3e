@@ -18,7 +18,7 @@ export const SPELL_KEYS = [
 
 export const FOCUS_KEYS = [
   "focus", "type", "force", "bonded", "active", "spell",
-  "category", "spiritType", "reach", "spentDice",
+  "category", "spiritType", "reach", "spentDice", "expendable",
 ] as const;
 
 export const ARCHETYPE_KEYS = ["adept", "magician"] as const;

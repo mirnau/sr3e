@@ -49,6 +49,13 @@ export default class FocusModel extends foundry.abstract.TypeDataModel<FocusSche
           integer: true,
         }),
       }),
+      // An expendable focus (e.g. a single-use fetish-style talisman) is
+      // consumed by use rather than recharging each Combat Turn like a
+      // normal bonded focus — registerPoolRefreshHook skips these.
+      expendable: new BooleanField({
+        required: true,
+        initial: false,
+      }),
       portability: new EmbeddedDataField(PortabilityModel),
       commodity: new EmbeddedDataField(CommodityModel),
     };
@@ -71,6 +78,7 @@ type FocusSchema = {
   dice: SchemaField<{
     spent: NumberField;
   }>;
+  expendable: BooleanField;
   portability: EmbeddedDataField<typeof PortabilityModel>;
   commodity: EmbeddedDataField<typeof CommodityModel>;
 };

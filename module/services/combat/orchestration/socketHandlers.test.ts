@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { registerSocketHandlers, registerCombatTurnHook } from "./socketHandlers";
+import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook } from "./socketHandlers";
 import { _resetForTest, waitForResponse } from "../engine/contestCoordinator";
 
 beforeEach(() => {
@@ -93,5 +93,75 @@ describe("registerCombatTurnHook", () => {
 
         hook({}, { combatantId: "c1" });
         expect(unsetFlag).toHaveBeenCalledWith("sr3e", "fullDefenseActive");
+    });
+});
+
+describe("registerPoolRefreshHook", () => {
+    function combatantWith(actor: Record<string, unknown>) {
+        return { actor };
+    }
+
+    function getRegisteredHook(): (combat: unknown, changed: Record<string, unknown>) => Promise<void> {
+        const hooksOn = ((globalThis as Record<string, unknown>).Hooks as { on: ReturnType<typeof vi.fn> }).on;
+        registerPoolRefreshHook();
+        return hooksOn.mock.calls[0][1] as (combat: unknown, changed: Record<string, unknown>) => Promise<void>;
+    }
+
+    it("does nothing when the change isn't a round advance", async () => {
+        const update = vi.fn();
+        const hook = getRegisteredHook();
+
+        await hook({ combatants: { contents: [combatantWith({ update })] } }, { turn: 1 });
+
+        expect(update).not.toHaveBeenCalled();
+    });
+
+    it("resets dice pool spent counters (Karma Pool is GM-manual only, not touched here)", async () => {
+        const update = vi.fn().mockResolvedValue(undefined);
+        const actor = { system: {}, update, items: [] };
+        const hook = getRegisteredHook();
+
+        await hook({ combatants: { contents: [combatantWith(actor)] } }, { round: 2 });
+
+        expect(update).toHaveBeenCalledWith({
+            "system.dicePools.combat.spent": 0,
+            "system.dicePools.astral.spent": 0,
+            "system.dicePools.hacking.spent": 0,
+            "system.dicePools.control.spent": 0,
+            "system.dicePools.spell.spent": 0,
+        });
+    });
+
+    it("resets a bonded focus's spent dice", async () => {
+        const focusUpdate = vi.fn().mockResolvedValue(undefined);
+        const focus = { type: "focus", system: { dice: { spent: 3 } }, update: focusUpdate };
+        const actor = { system: {}, update: vi.fn().mockResolvedValue(undefined), items: [focus] };
+        const hook = getRegisteredHook();
+
+        await hook({ combatants: { contents: [combatantWith(actor)] } }, { round: 2 });
+
+        expect(focusUpdate).toHaveBeenCalledWith({ "system.dice.spent": 0 });
+    });
+
+    it("does not reset an expendable focus's spent dice", async () => {
+        const focusUpdate = vi.fn().mockResolvedValue(undefined);
+        const focus = { type: "focus", system: { dice: { spent: 2 }, expendable: true }, update: focusUpdate };
+        const actor = { system: {}, update: vi.fn().mockResolvedValue(undefined), items: [focus] };
+        const hook = getRegisteredHook();
+
+        await hook({ combatants: { contents: [combatantWith(actor)] } }, { round: 2 });
+
+        expect(focusUpdate).not.toHaveBeenCalled();
+    });
+
+    it("ignores non-focus items", async () => {
+        const itemUpdate = vi.fn().mockResolvedValue(undefined);
+        const weapon = { type: "weapon", system: {}, update: itemUpdate };
+        const actor = { system: {}, update: vi.fn().mockResolvedValue(undefined), items: [weapon] };
+        const hook = getRegisteredHook();
+
+        await hook({ combatants: { contents: [combatantWith(actor)] } }, { round: 2 });
+
+        expect(itemUpdate).not.toHaveBeenCalled();
     });
 });
