@@ -153,11 +153,14 @@ export function open(newSetup: ProcedureSetup): void {
         label: option.label,
         available: option.available,
     }));
+    composerState.poolAvailableOverrides = newSetup.poolAvailableOverrides ?? null;
 
     if (newSetup.initialPoolKey) {
         const pool = (actor.system as any)?.dicePools?.[newSetup.initialPoolKey];
+        const rawAvailable = Math.max(0, (pool?.value ?? 0) - (pool?.spent ?? 0));
+        const cap = composerState.poolAvailableOverrides?.[newSetup.initialPoolKey];
         composerState.selectedPoolKey = newSetup.initialPoolKey;
-        composerState.poolAvailable = Math.max(0, (pool?.value ?? 0) - (pool?.spent ?? 0));
+        composerState.poolAvailable = cap != null ? Math.min(rawAvailable, cap) : rawAvailable;
     } else {
         composerState.selectedPoolKey = null;
         composerState.poolAvailable = 0;
@@ -184,6 +187,7 @@ function onClose(): void {
     composerState.isOpen = false;
     composerState.selectedPoolKey = null;
     composerState.selectedFocusKey = null;
+    composerState.poolAvailableOverrides = null;
     setup = null;
 }
 

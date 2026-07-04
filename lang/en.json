@@ -193,8 +193,11 @@
       "equipped": "Equipped",
       "favourites": "Favourites",
       "garage": "Garage",
+      "garageactions": "Actions",
       "garagedrivingroll": "Drive",
       "garageempty": "Drag a vehicle actor here to add it to the garage.",
+      "garagejackedin": "Jacked In",
+      "garageseated": "Seated",
       "garagewrongtype": "Only Mechanical actors can be added to the garage.",
       "inventory": "Inventory",
       "totalweight": "Total Weight"

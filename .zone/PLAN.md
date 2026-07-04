@@ -33,5 +33,6 @@
 [x] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Chat / socket challenge–response flows -> .zone/techspecs/TECHSPEC-chat-socket-challenge-response.md
 [~] COULD: Vehicle → .zone/techspecs/TECHSPEC-vehicle.md
+[~] COULD: Vehicle rigger — seated/jacked-in garage flow → .zone/techspecs/TECHSPEC-vehicle-rigger.md
 [ ] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md
 

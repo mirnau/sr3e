@@ -59,11 +59,11 @@ This TECHSPEC scopes the remaining work: retrofit the sheet layout, add gadget-m
 
 ### WON'T (this feature)
 
-- Mounts wired to actual weapon items / drag-drop weapon-to-mount / Body-derived capacity enforcement.
-- Rigger control pool computation, `TechInterfaceModel.rigger.subscribers` linkage to a Mechanical actor, jack-in/possession UI.
+- ~~Mounts wired to actual weapon items / drag-drop weapon-to-mount / Body-derived capacity enforcement.~~ Superseded — mount flag wiring (`isHardpoint`/`isFirmpoint` on vehicle-owned weapons) shipped as part of the inventory system, independent of this techspec.
+- ~~Rigger control pool computation, `TechInterfaceModel.rigger.subscribers` linkage to a Mechanical actor, jack-in/possession UI.~~ Superseded — see `.zone/techspecs/TECHSPEC-vehicle-rigger.md` (seated/jacked-in flow, VCR item selection, Driving Test + Gunnery TN reduction, capped Control Pool).
 - Automated enforcement of condition-monitor consequences (speed reduction, driver initiative penalty, forced rigger resistance rolls).
-- Maneuver Score derived calculation (Vehicle + Terrain + Speed + Driver points).
-- Multi-driver / passenger / rigger-drives-instead branching on the Garage card.
+- Maneuver Score derived calculation (Vehicle + Terrain + Speed + Driver points) — still deferred, now tracked as a WON'T in `TECHSPEC-vehicle-rigger.md` pending its own future phase.
+- Multi-driver / passenger / rigger-drives-instead branching on the Garage card — resolved in `TECHSPEC-vehicle-rigger.md` (seated is per-character-per-entry, multiple characters may be seated in the same vehicle from their own garages).
 
 ---
 

@@ -5,6 +5,7 @@ import KarmaModel from "./actor-components/Karma";
 import HealthModel from "./actor-components/Health";
 import DicePoolsModel from "./actor-components/DicePools";
 import MovementModel from "./actor-components/Movement";
+import GarageEntryModel from "./actor-components/GarageEntry";
 
 type CharacterSchema = {
   attributes: EmbeddedDataField<typeof AttributesModel>;
@@ -15,13 +16,27 @@ type CharacterSchema = {
   karma: EmbeddedDataField<typeof KarmaModel>;
   health: EmbeddedDataField<typeof HealthModel>;
   journalEntryUuid: StringField;
-  garage: ArrayField<StringField>;
+  garage: ArrayField<EmbeddedDataField<typeof GarageEntryModel>>;
 };
 
 export default class CharacterModel extends foundry.abstract.TypeDataModel<
   CharacterSchema,
   BaseActor
 > {
+  // garage used to be a bare array of vehicle-actor UUID strings; it's now
+  // an array of {uuid, seated, vcrId, jackedIn} entries. Without this,
+  // pre-existing string entries fail EmbeddedDataField casting and the
+  // whole array silently resets to [] on load — see the "drop does nothing"
+  // bug in the vehicle-rigger feature.
+  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
+    if (Array.isArray(source.garage)) {
+      source.garage = source.garage.map((entry) =>
+        typeof entry === "string" ? { uuid: entry, seated: false, vcrId: "", jackedIn: false } : entry
+      );
+    }
+    return super.migrateData(source);
+  }
+
   static defineSchema(): CharacterSchema {
     return {
       attributes: new EmbeddedDataField(AttributesModel),
@@ -35,7 +50,7 @@ export default class CharacterModel extends foundry.abstract.TypeDataModel<
         required: false,
         initial: "",
       }),
-      garage: new ArrayField(new StringField({ nullable: false }), {
+      garage: new ArrayField(new EmbeddedDataField(GarageEntryModel), {
         initial: [],
       }),
     };

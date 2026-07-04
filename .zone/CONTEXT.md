@@ -1,8 +1,8 @@
 ## Active Feature
-COULD: Vehicle (Mechanical) -> .zone/techspecs/TECHSPEC-vehicle.md
+COULD: Vehicle rigger — seated/jacked-in garage flow -> .zone/techspecs/TECHSPEC-vehicle-rigger.md
 
 ## Current Issue
-#210 Mechanical stats -> gadget-moddable (SimpleStat conversion + mechanical GADGET_TARGET)
+Grilled and scoped; not yet broken into issues (mat-to-issues pending)
 
 ## Blockers
 none

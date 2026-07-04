@@ -34,9 +34,9 @@
    z-index: -2;
    background: linear-gradient(
       -45deg,
-      rgb(0, 255, 234) 30%,
-      rgb(255, 34, 156) 50%,
-      rgb(0, 255, 234) 70%
+      var(--sheet-shadow-start-color, rgb(0, 255, 234)) 30%,
+      var(--sheet-shadow-middle-color, rgb(255, 34, 156)) 50%,
+      var(--sheet-shadow-end-color, rgb(0, 255, 234)) 70%
    );
    background-size: 400% 400%;
    animation: rotating-gradient 60s ease infinite;
@@ -104,19 +104,28 @@
    width: var(--packery-card-gutter);
 }
 
-.packery-grid-item {
+// Shared sizing recipe for any PackeryGrid's item class — extend this
+// rather than duplicating it when a nested grid needs its own item class
+// (see SheetCard's itemClass prop) to stay isolated from an outer grid's
+// querySelectorAll(itemSelector), which otherwise also matches nested
+// grid items since class selectors ignore container boundaries.
+%packery-grid-item-base {
    width: 100%;
    max-width: none;
    min-width: var(--packery-min-card-width);
    grid-column: span 1;
+
+   &.span-2 {
+      grid-column: span 2;
+      min-width: calc(var(--packery-min-card-width) * 2 + var(--packery-card-gutter));
+   }
+
+   &.span-3 {
+      grid-column: span 3;
+      min-width: calc(var(--packery-min-card-width) * 3 + var(--packery-card-gutter) * 2);
+   }
 }
 
-.packery-grid-item.span-2 {
-   grid-column: span 2;
-   min-width: calc(var(--packery-min-card-width) * 2 + var(--packery-card-gutter));
-}
-
-.packery-grid-item.span-3 {
-   grid-column: span 3;
-   min-width: calc(var(--packery-min-card-width) * 3 + var(--packery-card-gutter) * 2);
+.packery-grid-item {
+   @extend %packery-grid-item-base;
 }

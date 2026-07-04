@@ -13,6 +13,7 @@ class ComposerStateImpl {
     selectedFocusKey = $state<string | null>(null);
     focusAvailable = $state(0);
     focusOptions = $state<{ key: string; label: string; available: number }[]>([]);
+    poolAvailableOverrides = $state<Record<string, number> | null>(null);
 }
 
 export type ComposerState = ComposerStateImpl;

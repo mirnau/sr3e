@@ -1,0 +1,107 @@
+@use "../../mixins.scss" as *;
+@use "../../sheetcard.scss" as *;
+
+// =========================================================
+// Garage tab — vehicle grid (two cards per row) and dropzone
+// =========================================================
+
+.garage-dropzone {
+   transition: box-shadow 0.2s ease;
+
+   &.drag-hover {
+      box-shadow: inset 0 0 0 2px var(--accent-color-primary, var(--highlight-color-primary));
+   }
+}
+
+// Fixed two-column division — deliberately not Packery masonry (which
+// auto-flows column count from available width): a vehicle card always
+// takes exactly one of two columns, never wraps to a third.
+.asset-masonry-grid.garage-masonry-grid {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 0.25rem;
+
+   .asset-card-container {
+      display: block;
+      width: 100%;
+      min-width: 0;
+
+      .asset-card {
+         width: 100%;
+      }
+   }
+}
+
+// =========================================================
+// Expanded (seated) vehicle sheet — its packery cards borrow
+// SheetCard purely for the packery-grid-item/span mechanics, but are
+// reskinned here to match the flat teal/dark/glow recipe used by
+// .asset-card (Inventory) and .skill-card (Skills) instead of
+// SheetCard's default rainbow-gradient + metal-texture chrome, so the
+// garage reads as one visual family with the rest of the sheet.
+// =========================================================
+
+.garage-vehicle-sheet {
+   // Own item class + gridPrefix ("garage") so this nested PackeryGrid
+   // never shares a selector with the character sheet's own top-level
+   // PackeryGrid — sharing "packery-grid-item" caused the outer grid's
+   // querySelectorAll to also pick up these nested cards, corrupting both
+   // layouts (reported as Health being pushed far down the sheet whenever
+   // the garage's expanded view was mounted).
+   .garage-grid-sizer,
+   .garage-gutter-sizer {
+      display: none;
+   }
+
+   .garage-gutter-sizer {
+      width: 0;
+   }
+
+   .garage-packery-grid-item {
+      @extend %packery-grid-item-base;
+   }
+
+   // Match the Skills grid's spacing recipe: zero packery gutter, with the
+   // visible gap coming entirely from each card's own padding (0.125rem on
+   // each side of two adjacent cards = 0.25rem combined) — mirrors
+   // .skill-card-container exactly. SheetCard's default 0.5rem padding
+   // was inflating the visual gap well past 0.25rem; this brings it in line.
+   .sheet-card-component {
+      padding: 0.125rem;
+   }
+
+   .sheet-card-shadow {
+      display: none;
+   }
+
+   .sheet-card-outline {
+      background: var(--highlight-color-primary);
+      @include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+   }
+
+   .sheet-card-displayarea {
+      background: var(--background-color);
+      box-shadow: inset 0 0 20px var(--highlight-color-primary);
+      @include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+
+      &::before {
+         display: none;
+      }
+   }
+}
+
+.garage-vehicle-header {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.25rem;
+
+   .garage-vehicle-name {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      text-transform: uppercase;
+      cursor: pointer;
+   }
+}

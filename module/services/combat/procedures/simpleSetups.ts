@@ -12,6 +12,11 @@ export type ProcedureSetup = {
     openTest?: boolean;
     initialPoolKey?: string;
     poolOptions?: PoolOption[];
+    // Caps a pool's offered dice below its raw actor stat for this specific
+    // roll (e.g. Control Pool capped at the acting skill's rating while
+    // jacked into a vehicle) — keyed by dicePools key, consumed by the
+    // composer's pool-selection flow instead of the raw available value.
+    poolAvailableOverrides?: Record<string, number>;
     forceControl?: ForceControl;
     damageLevelControl?: DamageLevelControl;
     // The linked skill's attribute key, for the composer to compute

@@ -10,6 +10,9 @@ import { executeProcedure } from "../../../services/combat/orchestration/execute
 import { getComposerState, openComposer } from "../../../services/combat/procedures/composerService.svelte";
 import Foldout from "./Foldout.svelte";
 import { canAstrallyProject, isMagicianMagic } from "../../../services/magic/awakenActor";
+import { showAllDicePoolsStore } from "../../../services/settings/dicePoolVisibilitySettings";
+
+type GarageEntry = { uuid: string; seated: boolean; vcrId: string; jackedIn: boolean };
 
 const p = $props<{ actor: SR3EActor }>();
 const actor = untrack(() => p.actor);
@@ -45,10 +48,15 @@ const spellSpent = storeManager.GetRWStore<number>(actor, "dicePools.spell.spent
 const spellValue = storeManager.GetRWStore<number>(actor, "dicePools.spell.value");
 const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurnedOut");
 
+const hackingValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.hacking");
+const hackingSpent = storeManager.GetRWStore<number>(actor, "dicePools.hacking.spent");
+
 const combatAvail = $derived(Math.max(0, $combatValueMod - $combatSpent));
 const controlAvail = $derived(Math.max(0, $controlValueMod - $controlSpent));
 const astralAvail = $derived(Math.max(0, $astralValueMod - $astralSpent));
 const spellAvail = $derived(Math.max(0, $spellValueMod - $spellSpent));
+const hackingAvail = $derived(Math.max(0, $hackingValueMod - $hackingSpent));
+const alwaysShowMainPools = $derived($showAllDicePoolsStore);
 
 let hasRiggerInterface = $state(false);
 let magicItem = $state<Item | null>(null);
@@ -111,8 +119,9 @@ function selectPool(key: string, available: number): void {
         composerState.selectedPoolKey = null;
         composerState.poolAvailable = 0;
     } else {
+        const cap = composerState.poolAvailableOverrides?.[key];
         composerState.selectedPoolKey = key;
-        composerState.poolAvailable = available;
+        composerState.poolAvailable = cap != null ? Math.min(available, cap) : available;
     }
 }
 
@@ -177,12 +186,11 @@ $effect(() => {
     spellValue.set(Math.floor((int + mag + wil) / 3));
 });
 
+const garageStore = storeManager.GetROStore<GarageEntry[]>(actor, "garage");
+
 $effect(() => {
-    const rcDeck = actor.items.find(
-        (it: any) =>
-            it?.type === "vehiclecontrolrig" &&
-            it.getFlag?.("sr3e", "isEquipped"),
-    );
+    const riggingEntry = $garageStore.find((entry) => entry.seated && entry.jackedIn) ?? null;
+    const rcDeck = riggingEntry ? (actor as any).items?.get(riggingEntry.vcrId) : null;
     hasRiggerInterface = !!rcDeck;
     controlValue.set(
         rcDeck ? $reaction + Number(rcDeck.system?.level ?? 0) * 2 : 0,
@@ -196,20 +204,26 @@ $effect(() => {
             <span class={poolClass("combat")}>{combatAvail}</span>
         </StatCard>
 
-        {#if hasRiggerInterface}
+        {#if alwaysShowMainPools || hasRiggerInterface}
             <StatCard label={localize(localization?.control)} onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}>
                 <span class={poolClass("control")}>{controlAvail}</span>
             </StatCard>
         {/if}
 
-        {#if hasAstralPool}
+        {#if alwaysShowMainPools || hasAstralPool}
             <StatCard label={localize(localization?.astral)} onclick={(e) => onPoolCardClick(e, "astral", localize(localization?.astral), astralAvail)}>
                 <span class={poolClass("astral")}>{astralAvail}</span>
             </StatCard>
         {/if}
-        {#if hasSpellPool}
+        {#if alwaysShowMainPools || hasSpellPool}
             <StatCard label={localize(localization?.spell)} onclick={(e) => onPoolCardClick(e, "spell", localize(localization?.spell), spellAvail)}>
                 <span class={poolClass("spell")}>{spellAvail}</span>
+            </StatCard>
+        {/if}
+
+        {#if alwaysShowMainPools}
+            <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
+                <span class={poolClass("hacking")}>{hackingAvail}</span>
             </StatCard>
         {/if}
 
