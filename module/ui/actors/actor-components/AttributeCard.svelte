@@ -25,6 +25,7 @@ const actor = untrack(() => _actor);
 const attributeKey = untrack(() => _attributeKey);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
 const attributeValueStore = storeManager.GetRWStore<number>(actor, `attributes.${attributeKey}.value`);
+const attributeTotalStore = storeManager.GetSimpleStatROStore(actor, `attributes.${attributeKey}`);
 const isCharacterCreation = storeManager.GetFlagStore(actor, FLAGS.ACTOR.IS_CHARACTER_CREATION, false);
 const attributeLocked = storeManager.GetFlagStore(actor, FLAGS.ACTOR.ATTRIBUTE_ASSIGNMENT_LOCKED, false);
 const isShoppingState = storeManager.GetFlagStore<boolean>(actor, FLAGS.ACTOR.IS_SHOPPING_STATE, false);
@@ -44,7 +45,7 @@ const isKarmaMode = $derived($isShoppingState && !$isCharacterCreation);
 const displayValue = $derived(
     isKarmaMode && $attrKarmaSession?.active
         ? ($attrKarmaSession.attrSnapshot[attributeKey] ?? $attributeValueStore) + ($attrKarmaSession.stagedDeltas?.[attributeKey] ?? 0)
-        : $attributeValueStore
+        : $attributeTotalStore
 );
 const showChevrons = $derived(
    !isDerivedAttribute && (

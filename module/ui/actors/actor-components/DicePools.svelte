@@ -36,10 +36,6 @@ const controlValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.cont
 const controlSpent = storeManager.GetRWStore<number>(actor, "dicePools.control.spent");
 const controlValue = storeManager.GetRWStore<number>(actor, "dicePools.control.value");
 
-const hackingValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.hacking");
-const hackingSpent = storeManager.GetRWStore<number>(actor, "dicePools.hacking.spent");
-const hackingValue = storeManager.GetRWStore<number>(actor, "dicePools.hacking.value");
-
 const astralValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.astral");
 const astralSpent = storeManager.GetRWStore<number>(actor, "dicePools.astral.spent");
 const astralValue = storeManager.GetRWStore<number>(actor, "dicePools.astral.value");
@@ -51,11 +47,9 @@ const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurned
 
 const combatAvail = $derived(Math.max(0, $combatValueMod - $combatSpent));
 const controlAvail = $derived(Math.max(0, $controlValueMod - $controlSpent));
-const hackingAvail = $derived(Math.max(0, $hackingValueMod - $hackingSpent));
 const astralAvail = $derived(Math.max(0, $astralValueMod - $astralSpent));
 const spellAvail = $derived(Math.max(0, $spellValueMod - $spellSpent));
 
-let hasMatrixInterface = $state(false);
 let hasRiggerInterface = $state(false);
 let magicItem = $state<Item | null>(null);
 let focusPools = $state<{ id: string; name: string; available: number }[]>([]);
@@ -184,28 +178,14 @@ $effect(() => {
 });
 
 $effect(() => {
-    const deck = actor.items.find(
-        (it: any) =>
-            it?.type === "techinterface" &&
-            (it.system?.subtype === "cyberdeck" || it.system?.subtype === "cyberterminal") &&
-            it.getFlag?.("sr3e", "isEquipped"),
-    );
-    hasMatrixInterface = !!deck;
-    hackingValue.set(
-        deck ? Math.floor(($intelligence + Number(deck.system?.matrix?.mpcp ?? 0)) / 3) : 0,
-    );
-});
-
-$effect(() => {
     const rcDeck = actor.items.find(
         (it: any) =>
-            it?.type === "techinterface" &&
-            it.system?.subtype === "rcdeck" &&
+            it?.type === "vehiclecontrolrig" &&
             it.getFlag?.("sr3e", "isEquipped"),
     );
     hasRiggerInterface = !!rcDeck;
     controlValue.set(
-        rcDeck ? $reaction + Number(actor.getFlag?.("sr3e", "vcrRating") ?? 0) * 2 : 0,
+        rcDeck ? $reaction + Number(rcDeck.system?.level ?? 0) * 2 : 0,
     );
 });
 </script>
@@ -219,12 +199,6 @@ $effect(() => {
         {#if hasRiggerInterface}
             <StatCard label={localize(localization?.control)} onclick={(e) => onPoolCardClick(e, "control", localize(localization?.control), controlAvail)}>
                 <span class={poolClass("control")}>{controlAvail}</span>
-            </StatCard>
-        {/if}
-
-        {#if hasMatrixInterface}
-            <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
-                <span class={poolClass("hacking")}>{hackingAvail}</span>
             </StatCard>
         {/if}
 

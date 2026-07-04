@@ -120,6 +120,15 @@ export class StoreManager implements IStoreManager {
     });
     hooks.push({ event: updateEvent, id: updateHookId });
 
+    for (const effectEvent of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
+      const effectHookId = Hooks.on(effectEvent, (effect: any) => {
+        const freshDoc = this.#affectedDocumentFromEffect(document, effect);
+        if (!freshDoc) return;
+        this.#handleDocumentUpdate(document, {}, freshDoc);
+      });
+      hooks.push({ event: effectEvent, id: effectHookId });
+    }
+
     // Hook for custom recalculation events (for actors)
     if (docType === "Actor") {
       const recalcEvent = "actorSystemRecalculated";
@@ -131,6 +140,22 @@ export class StoreManager implements IStoreManager {
     }
 
     this.#hookDisposers.set(docId, hooks);
+  }
+
+  #affectedDocumentFromEffect(document: FoundryDocument, effect: any): FoundryDocument | null {
+    const parent = effect?.parent;
+    if (!parent) return null;
+
+    if (parent.id === document.id && parent.documentName === document.documentName) {
+      return parent;
+    }
+
+    const owningDocument = parent.parent;
+    if (owningDocument?.id === document.id && owningDocument.documentName === document.documentName) {
+      return owningDocument;
+    }
+
+    return null;
   }
 
   /**
@@ -159,7 +184,9 @@ export class StoreManager implements IStoreManager {
       const path = key.substring(docId.length + 1);
       const value = this.#getValueAtPath(freshDoc, path);
       if (value !== undefined) {
+        this.#mutedPaths.add(key);
         store.set(this.#cloneIfNeeded(value));
+        this.#mutedPaths.delete(key);
       }
     }
 
@@ -286,6 +313,8 @@ export class StoreManager implements IStoreManager {
 
     // Subscribe to store changes and sync to document
     store.subscribe((value) => {
+      if (this.#mutedPaths.has(key)) return;
+
       const currentValue = this.#getValueAtPath(document, fullPath);
 
       // Skip if value hasn't changed

@@ -82,5 +82,11 @@ $effect(() => {
             label={localize(localization?.magic)}
          />
       {/if}
+
+      <AttributeCard
+         {actor}
+         attributeKey="essence"
+         label={localize(localization?.essence)}
+      />
    </div>
 </Foldout>

@@ -18,7 +18,7 @@ const inventoryItemTypes = new Set([
 	"weapon",
 	"wearable",
 	"gadget",
-	"techinterface",
+	"vehiclecontrolrig",
 	"medical",
 	"focus",
 ]);

@@ -126,6 +126,9 @@
       "attributeKey": "Attribute",
       "changeMode": "Mode",
       "changesHeader": "Changes",
+      "deleteConfirm": "Confirm delete \"{name}\"? The GM will be informed that you deleted this active effect.",
+      "deleteTitle": "Delete",
+      "deletedChat": "{userName} deleted the active effect \"{effectName}\" from {actorName} ({sourceName}).",
       "disabled": "Disabled",
       "durationType": "Duration",
       "effectscomposer": "Effect Composer",
@@ -204,8 +207,8 @@
       "metatype": "Metatype",
       "skill": "Skill",
       "spell": "Spell",
-      "techinterface": "Tech Interface",
       "transaction": "Transaction",
+      "vehiclecontrolrig": "Vehicle Control Rig",
       "weapon": "Weapon",
       "wearable": "Wearable"
     },
@@ -559,6 +562,11 @@
       "debt": "Debt",
       "expense": "Expense",
       "income": "Income"
+    },
+    "vehicleControlRig": {
+      "essenceCost": "Essence Cost",
+      "level": "Level",
+      "vehiclecontrolrig": "Vehicle Control Rig"
     },
     "vehicleTypes": {
       "aviation": "Aviation",

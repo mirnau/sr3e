@@ -1,4 +1,5 @@
 import SimpleStat from "./SimpleStat";
+import EssenceStat from "./EssenceStat";
 
 export default class AttributesModel extends foundry.abstract.DataModel<
   AttributesSchema
@@ -13,7 +14,7 @@ export default class AttributesModel extends foundry.abstract.DataModel<
       willpower: new EmbeddedDataField(SimpleStat),
       reaction: new EmbeddedDataField(SimpleStat),
       magic: new EmbeddedDataField(SimpleStat),
-      essence: new EmbeddedDataField(SimpleStat),
+      essence: new EmbeddedDataField(EssenceStat),
       initiative: new EmbeddedDataField(SimpleStat),
       isBurnedOut: new BooleanField({ initial: false }),
     };
@@ -29,7 +30,7 @@ type AttributesSchema = {
   willpower: EmbeddedDataField<typeof SimpleStat>;
   reaction: EmbeddedDataField<typeof SimpleStat>;
   magic: EmbeddedDataField<typeof SimpleStat>;
-  essence: EmbeddedDataField<typeof SimpleStat>;
+  essence: EmbeddedDataField<typeof EssenceStat>;
   initiative: EmbeddedDataField<typeof SimpleStat>;
   isBurnedOut: BooleanField;
 };

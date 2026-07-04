@@ -15,8 +15,9 @@ import {
     durationUpdateForCommit,
     durationValueFrom,
 } from "./activeEffectDurationUpdate";
+import { activeEffectChangeData, normalizeActiveEffectChange } from "../../services/effects/activeEffectChanges";
+import type { ActiveEffectChangeDraft } from "../../services/effects/activeEffectChanges";
 
-type Change = { key: string; type: string; value: string; priority: number };
 type Option = { value: string; label: string };
 const p = $props<{ document: Item | Actor; activeEffect: ActiveEffect }>();
 const doc = untrack(() => p.document);
@@ -30,7 +31,7 @@ let target = $state((effect.flags?.sr3e?.target as string) ?? "self");
 let enabled = $state(!effect.disabled);
 let durationUnits = $state(initialDurationType);
 let durationValue = $state(durationValueFrom(rawDuration, initialDurationType));
-let changes = $state<Change[]>(normalizeChanges(effect.toObject?.().changes ?? effect.changes ?? []));
+let changes = $state<ActiveEffectChangeDraft[]>(normalizeChanges(effect.toObject?.().changes ?? effect.changes ?? []));
 let propertyOptions = $state<GadgetPropertyOption[]>([]);
 
 const targetOptions: Option[] = [
@@ -50,18 +51,8 @@ function enumeratePaths() {
     propertyOptions = activeEffectPropertyOptions({ document: doc, activeEffect: effect, target });
 }
 
-function normalizeChanges(rawChanges: Record<string, unknown>[]): Change[] {
-    return rawChanges.map((change) => ({
-        key: String(change.key ?? ""),
-        type: normalizeChangeType(change.type),
-        value: String(change.value ?? ""),
-        priority: Number(change.priority ?? 0),
-    }));
-}
-
-function normalizeChangeType(type: unknown): string {
-    if (type === "add" || type === "subtract" || type === "override") return type;
-    return "add";
+function normalizeChanges(rawChanges: Record<string, unknown>[]): ActiveEffectChangeDraft[] {
+    return rawChanges.map(normalizeActiveEffectChange);
 }
 
 async function commit() {
@@ -69,7 +60,7 @@ async function commit() {
         name,
         disabled: !enabled,
         transfer: target === "character",
-        changes: [...changes],
+        changes: changes.map(activeEffectChangeData),
         flags: { ...effect.flags, sr3e: { ...effect.flags?.sr3e, target } },
         ...durationUpdateForCommit(durationUnits, durationValue),
     }, { render: false });

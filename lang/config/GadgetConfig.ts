@@ -4,5 +4,5 @@ export const EFFECTS_KEYS = [
   "name", "durationType", "enabled", "disabled", "actions",
   "effectscomposer", "effectview", "changesHeader", "addChange", "attributeKey",
   "changeMode", "value", "priority", "target", "permanent",
-  "selectProperty", "noMatch",
+  "selectProperty", "noMatch", "deleteTitle", "deleteConfirm", "deletedChat",
 ] as const;

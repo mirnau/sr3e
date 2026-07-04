@@ -31,7 +31,7 @@ function actorDocument(uuid: string, id: string) {
         uuid,
         id,
         documentName: "Actor",
-        system: { health: { stun: { value: 0 } } },
+        system: { attributes: { essence: { value: 6, mod: 0 } }, health: { stun: { value: 0 } } },
         update: vi.fn().mockResolvedValue(undefined),
     };
 }
@@ -121,5 +121,23 @@ describe("StoreManager — hook matching survives token-scoped UUIDs", () => {
         expect(get(stunStore)).toBe(0);
 
         storeManager.Unsubscribe(subject);
+    });
+
+    it("refreshes SimpleStat totals when an ActiveEffect changes on the actor", () => {
+        const Hooks = mockHooks();
+        const actor = actorDocument("Actor.a1", "a1");
+        const storeManager = StoreManager.Instance;
+        storeManager.Subscribe(actor);
+
+        const essence = storeManager.GetSimpleStatROStore(actor, "attributes.essence");
+        expect(get(essence)).toBe(6);
+
+        actor.system.attributes.essence.mod = -2;
+        Hooks.callAll("createActiveEffect", { parent: actor });
+
+        expect(get(essence)).toBe(4);
+        expect(actor.update).not.toHaveBeenCalled();
+
+        storeManager.Unsubscribe(actor);
     });
 });

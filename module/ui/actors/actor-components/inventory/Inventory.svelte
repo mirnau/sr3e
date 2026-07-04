@@ -70,7 +70,7 @@
       isMagicStore.set(isMagic);
    });
 
-   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "medical", "focus"];
+   const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "vehiclecontrolrig", "medical", "focus"];
 
    const capacity = $derived(isVehicle ? $loadStore : $strengthStore * 5);
    const totalWeight = $derived(
@@ -109,7 +109,7 @@
             (isWeapon && item.type === "weapon") ||
             (isWorn && item.type === "wearable") ||
             (isGadget && item.type === "gadget") ||
-            (isTech && item.type === "techinterface") ||
+            (isTech && item.type === "vehiclecontrolrig") ||
             (isMagic && item.type === "focus");
 
          const hasTypeFilter = isAmmunition || isWeapon || isWorn || isGadget || isTech || isMagic;
@@ -172,8 +172,8 @@
       <FilterToggle bind:checked={isGadget} label={localize(CONFIG.SR3E.ITEM_TYPES.gadget)} svgName="cogs-f-svgrepo-com.svg" />
       <FilterToggle
          bind:checked={isTech}
-         label={localize(CONFIG.SR3E.ITEM_TYPES.techinterface)}
-         svgName="router-svgrepo-com.svg"
+         label={localize(CONFIG.SR3E.ITEM_TYPES.vehiclecontrolrig)}
+         svgName="controller-1-svgrepo-com.svg"
       />
       <FilterToggle bind:checked={isMagic} label={localize(CONFIG.SR3E.ITEM_TYPES.magic)} svgName="crystal-cluster-svgrepo-com.svg" />
    {/if}

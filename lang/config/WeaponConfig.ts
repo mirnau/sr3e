@@ -36,5 +36,5 @@ export const LEGAL_PRIORITY_KEYS = ["1", "2", "3", "4", "X"] as const;
 
 export const ITEM_TYPE_KEYS = [
   "metatype", "magic", "weapon", "ammunition", "skill", "transaction",
-  "wearable", "techinterface", "spell", "focus", "gadget", "medical",
+  "wearable", "vehiclecontrolrig", "spell", "focus", "gadget", "medical",
 ] as const;

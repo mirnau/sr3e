@@ -37,11 +37,11 @@
       "skill": {},
       "transaction": {},
       "wearable": {},
-      "techinterface": {},
       "spell": {},
       "focus": {},
       "gadget": {},
-      "medical": {}
+      "medical": {},
+      "vehiclecontrolrig": {}
     }
   },
   "styles": [

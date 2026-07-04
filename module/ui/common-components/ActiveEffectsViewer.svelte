@@ -4,6 +4,7 @@ import { localize } from "../../services/utilities";
 import ActiveEffectsRow from "./ActiveEffectsRow.svelte";
 import ActiveEffectsEditor from "../../foundry/applications/ActiveEffectsEditor";
 import { activeEffectViewModel, type ActiveEffectViewModel } from "./activeEffectViewModel";
+import { deleteActiveEffect } from "../../services/effects/activeEffectDeletion";
 
 type AEDoc = Item | Actor;
 
@@ -23,7 +24,7 @@ function refresh() {
         transferredEffects = (doc as any).items.contents.flatMap((item: any) =>
             item.effects.contents
                 .filter((e: any) => !e.flags?.sr3e?.gadget)
-                .map((ae: ActiveEffect) => activeEffectViewModel(ae, item, false))
+                .map((ae: ActiveEffect) => activeEffectViewModel(ae, item, true))
         );
     }
 }
@@ -67,7 +68,15 @@ function editEffect(effectData: ActiveEffectViewModel) {
 }
 
 async function deleteEffect(effectData: ActiveEffectViewModel) {
-    await (effectData.sourceDocument as any).deleteEmbeddedDocuments("ActiveEffect", [effectData.activeEffect.id], { render: false });
+    const confirmed = await foundry.applications.api.DialogV2.confirm({
+        window: { title: localize(CONFIG.SR3E.EFFECTS.deleteTitle) },
+        content: game.i18n.format(CONFIG.SR3E.EFFECTS.deleteConfirm, { name: effectData.name }),
+        yes: { label: localize(CONFIG.SR3E.MODAL.confirm), default: true },
+        no: { label: localize(CONFIG.SR3E.MODAL.decline) },
+        modal: true,
+        rejectClose: true,
+    });
+    if (confirmed) await deleteActiveEffect(effectData.sourceDocument, effectData.activeEffect);
 }
 
 function canDelete(effectData: ActiveEffectViewModel): boolean {

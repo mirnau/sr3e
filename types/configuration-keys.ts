@@ -4,6 +4,7 @@ export const hooks = Object.freeze({
   preCreateActor: "preCreateActor",
   preCreateItem: "preCreateItem",
   createActor: "createActor",
+  createItem: "createItem",
 } as const);
 
 export const configkeys = Object.freeze({
@@ -27,6 +28,7 @@ export const typekeys = Object.freeze({
   focus: "focus",
   gadget: "gadget",
   medical: "medical",
+  vehiclecontrolrig: "vehiclecontrolrig",
 } as const);
 
 export const flags = Object.freeze({

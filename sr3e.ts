@@ -33,6 +33,8 @@ import GadgetModel from "./module/models/items/GadgetModel";
 import GadgetItemSheet from "./module/sheets/items/GadgetItemSheet";
 import MedicalModel from "./module/models/items/MedicalModel";
 import MedicalSheet from "./module/sheets/items/MedicalSheet";
+import VehicleControlRigModel from "./module/models/items/VehicleControlRigModel";
+import VehicleControlRigSheet from "./module/sheets/items/VehicleControlRigSheet";
 import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -47,6 +49,7 @@ import { registerSustainedSpellCleanupHook } from "./module/services/spells/sust
 import { registerDebtInterestHook } from "./module/services/economy/debtInterest";
 import { registerDocumentTypeIconHooks } from "./module/foundry/documentTypeIcons";
 import { registerSr3eDocumentTypeIcons } from "./module/foundry/registerSr3eDocumentTypeIcons";
+import { registerVehicleControlRigEssenceHook } from "./module/foundry/vehicleControlRigEssence";
 import { migrateLegacyActorTypes } from "./module/foundry/migrateLegacyActorTypes";
 
 
@@ -236,6 +239,12 @@ async function registerHooks(): Promise<void> {
             model: MedicalModel,
             sheet: MedicalSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.vehiclecontrolrig,
+            model: VehicleControlRigModel,
+            sheet: VehicleControlRigSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -270,6 +279,7 @@ async function registerHooks(): Promise<void> {
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    registerDocumentTypeIconHooks();
+   registerVehicleControlRigEssenceHook();
    patchActorCreateDialog();
    console.log("SR3E | preCreateActor hook registered");
 
