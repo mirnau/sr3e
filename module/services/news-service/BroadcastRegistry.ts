@@ -12,7 +12,8 @@ export class BroadcastRegistry {
 	readonly allFeeds: Writable<Record<string, NewsMessage[]>> = writable({});
 
 	#feedBuffer: NewsMessage[] = [];
-	#currentIndices = new Map<string, number>();
+	#headlineBags = new Map<string, number[]>();
+	#lastHeadlines = new Map<string, string>();
 	#lastBroadcasterIndex = -1;
 
 	constructor(private readonly maxVisible = NewsConfig.MAX_VISIBLE) {}
@@ -27,11 +28,11 @@ export class BroadcastRegistry {
 		const broadcasters = get(this.activeBroadcasters);
 		if (!headlines || headlines.length === 0) {
 			broadcasters.delete(actorName);
-			this.#currentIndices.delete(actorName);
+			this.#headlineBags.delete(actorName);
+			this.#lastHeadlines.delete(actorName);
 		} else {
 			broadcasters.set(actorName, headlines);
-			const currentIndex = this.#currentIndices.get(actorName) || 0;
-			this.#currentIndices.set(actorName, currentIndex % headlines.length);
+			this.#syncBag(actorName, headlines);
 		}
 		this.activeBroadcasters.set(new Map(broadcasters));
 		this.#updateFeedBuffer();
@@ -40,7 +41,8 @@ export class BroadcastRegistry {
 	stopBroadcaster(actorName: string): void {
 		const broadcasters = get(this.activeBroadcasters);
 		broadcasters.delete(actorName);
-		this.#currentIndices.delete(actorName);
+		this.#headlineBags.delete(actorName);
+		this.#lastHeadlines.delete(actorName);
 		this.activeBroadcasters.set(new Map(broadcasters));
 		this.#updateFeedBuffer();
 	}
@@ -87,13 +89,48 @@ export class BroadcastRegistry {
 			const broadcasterName: string = broadcasterNames[index] as string;
 			const headlines = broadcasters.get(broadcasterName);
 			if (!headlines || headlines.length === 0) continue;
-			const currentIndex = this.#currentIndices.get(broadcasterName) || 0;
-			const headline: string = headlines[currentIndex] as string;
-			this.#currentIndices.set(broadcasterName, (currentIndex + 1) % headlines.length);
+			const headline = this.#drawHeadline(broadcasterName, headlines);
 			this.#lastBroadcasterIndex = index;
 			return { sender: broadcasterName, headline };
 		}
 		return null;
+	}
+
+	#drawHeadline(actorName: string, headlines: string[]): string {
+		let bag = this.#headlineBags.get(actorName) ?? [];
+		if (bag.length === 0) {
+			bag = this.#newBag(actorName, headlines);
+		}
+
+		const headlineIndex = bag.shift() ?? 0;
+		this.#headlineBags.set(actorName, bag);
+		const headline = headlines[headlineIndex] ?? headlines[0] ?? "";
+		this.#lastHeadlines.set(actorName, headline);
+		return headline;
+	}
+
+	#syncBag(actorName: string, headlines: string[]): void {
+		const valid = new Set(headlines.map((_, index) => index));
+		const bag = (this.#headlineBags.get(actorName) ?? []).filter((index) => valid.has(index));
+		this.#headlineBags.set(actorName, bag);
+	}
+
+	#newBag(actorName: string, headlines: string[]): number[] {
+		const bag = this.#shuffle(headlines.map((_, index) => index));
+		const lastHeadline = this.#lastHeadlines.get(actorName);
+		if (bag.length > 1 && lastHeadline && headlines[bag[0]!] === lastHeadline) {
+			bag.push(bag.shift()!);
+		}
+		return bag;
+	}
+
+	#shuffle(indices: number[]): number[] {
+		const shuffled = [...indices];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+		}
+		return shuffled;
 	}
 
 	#updateFeedBuffer(): void {

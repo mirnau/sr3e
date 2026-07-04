@@ -51,6 +51,8 @@ import { registerDocumentTypeIconHooks } from "./module/foundry/documentTypeIcon
 import { registerSr3eDocumentTypeIcons } from "./module/foundry/registerSr3eDocumentTypeIcons";
 import { registerVehicleControlRigEssenceHook } from "./module/foundry/vehicleControlRigEssence";
 import { migrateLegacyActorTypes } from "./module/foundry/migrateLegacyActorTypes";
+import { applySheetColorSettings, registerSheetColorSettings } from "./module/services/settings/sheetColorSettings";
+import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -139,6 +141,8 @@ async function registerHooks(): Promise<void> {
       };
 
       SR3Edie.Register();
+      registerSheetColorSettings();
+      registerDicePoolVisibilitySettings();
 
       // Dynamic imports AFTER configure() has run
 
@@ -259,6 +263,7 @@ async function registerHooks(): Promise<void> {
    });
 
    Hooks.once(hooks.ready, () => {
+      applySheetColorSettings();
       void migrateLegacyActorTypes();
       getNewsService();
       registerSocketHandlers();

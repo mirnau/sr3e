@@ -15,13 +15,13 @@
       .neon-name-text {
         font-family: 'Neonderthaw', serif !important;
         font-size: 5rem;
-        color: var(--accent-color);
+        color: var(--neon-name-color, var(--accent-color));
         text-shadow: 0 0 10px blueviolet, 0 0 20px #ff0033, 0 0 40px blue;
         animation: glow 1.5s infinite alternate;
       }
 
       .malfunc {
-        color: var(--accent-color);
+        color: var(--neon-name-color, var(--accent-color));
         text-shadow: 0 0 10px blueviolet, 0 0 20px #ff0033, 0 0 40px blue;
         animation: flicker 3.5s infinite alternate;
       }

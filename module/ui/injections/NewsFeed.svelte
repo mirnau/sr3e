@@ -23,7 +23,7 @@
    const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
    const service = getNewsService();
 
-   let isOn = $state(false);
+   let isOn = $state(true);
    let ticker: HTMLDivElement | undefined;
    let inner: HTMLDivElement | undefined;
 
@@ -103,7 +103,7 @@
       // eliminating the blank-ticker gap that onfinish (macrotask) produces
       thisAnim.finished.then(() => {
          if (anim !== thisAnim) return;
-         const next = pendingFrame ?? activeFrame;
+         const next = pendingFrame;
          pendingFrame = null;
          if (next) runPass(next);
       }).catch(() => {});
@@ -158,8 +158,8 @@
       const restartIfFinished = () => {
          if (!isOn) return;
          if (!anim || anim.playState === "finished" || anim.playState === "idle") {
-            if (activeFrame || activePool.length) {
-               const next = pendingFrame ?? activeFrame ?? { pool: activePool };
+            if (pendingFrame) {
+               const next = pendingFrame;
                pendingFrame = null;
                runPass(next);
             }

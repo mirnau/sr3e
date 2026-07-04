@@ -8,6 +8,15 @@ type PackeryConfig = Omit<PackeryOptions, "columnWidth" | "gutter"> & {
    itemSelector?: string;
 };
 
+// Sizes below this delta (px) are treated as "unchanged" — guards against
+// ResizeObserver feedback loops where applyWidths()/pckry.layout() themselves
+// trigger the very observers that scheduled them, oscillating forever
+// instead of settling. Most visible when a PackeryGrid is nested inside
+// another (e.g. the Garage tab's expanded sheet inside the character
+// sheet's own grid), since each layout pass's height change bubbles up
+// through the ancestor's own ResizeObserver too.
+const SETTLE_EPSILON_PX = 1;
+
 export function setupPackery({
    container,
    itemSelector,
@@ -61,7 +70,11 @@ export function setupPackery({
          }
          const spanPX = oneColPX * span + gutterPx * (span - 1);
          const spanPct = (spanPX / containerPX) * 100;
-         el.style.width = `min(${spanPct}%, 100%)`;
+         const nextWidth = `min(${spanPct}%, 100%)`;
+         // Assigning an unchanged value still fires ResizeObserver in some
+         // engines (the box is recomputed even if the resolved value is
+         // identical) — skip the write entirely when it wouldn't change.
+         if (el.style.width !== nextWidth) el.style.width = nextWidth;
       });
 
       onLayoutStateChange(getLayoutState(columnCount));
@@ -78,8 +91,13 @@ export function setupPackery({
 
    const pckry = new PackeryClass(container, options);
 
+   let lastFormWidth: number | null = null;
+
    const scheduleLayout = () => {
       requestAnimationFrame(() => {
+         const currentWidth = form.offsetWidth;
+         if (lastFormWidth !== null && Math.abs(currentWidth - lastFormWidth) < SETTLE_EPSILON_PX) return;
+         lastFormWidth = currentWidth;
          applyWidths();
          pckry.reloadItems();
          pckry.layout();
@@ -89,14 +107,34 @@ export function setupPackery({
    const resizeObserver = new ResizeObserver(scheduleLayout);
    resizeObserver.observe(form);
 
+   // Per-item resize reactions only re-layout when an item's own box
+   // actually changed size since we last saw it — otherwise a layout pass
+   // that merely reasserts the same width (see applyWidths above) would
+   // re-trigger itself indefinitely through this same observer.
+   const itemSizes = new WeakMap<Element, { width: number; height: number }>();
+
+   const onItemResize = (entries: ResizeObserverEntry[]) => {
+      let changed = false;
+      for (const entry of entries) {
+         const box = entry.borderBoxSize?.[0];
+         const width = box ? box.inlineSize : entry.contentRect.width;
+         const height = box ? box.blockSize : entry.contentRect.height;
+         const prev = itemSizes.get(entry.target);
+         if (!prev || Math.abs(prev.width - width) >= SETTLE_EPSILON_PX || Math.abs(prev.height - height) >= SETTLE_EPSILON_PX) {
+            itemSizes.set(entry.target, { width, height });
+            changed = true;
+         }
+      }
+      if (!changed) return;
+      requestAnimationFrame(() => {
+         pckry.reloadItems();
+         pckry.layout();
+      });
+   };
+
    const itemObservers: ResizeObserver[] = [];
    container.querySelectorAll<HTMLElement>(itemSelector).forEach((item) => {
-      const obs = new ResizeObserver(() => {
-         requestAnimationFrame(() => {
-            pckry.reloadItems();
-            pckry.layout();
-         });
-      });
+      const obs = new ResizeObserver(onItemResize);
       obs.observe(item);
       itemObservers.push(obs);
    });
@@ -108,7 +146,7 @@ export function setupPackery({
          if (mutation.type === "childList") {
             mutation.addedNodes.forEach((node) => {
                if (node.nodeType === Node.ELEMENT_NODE && node instanceof HTMLElement && node.matches(itemSelector)) {
-                  const obs = new ResizeObserver(scheduleLayout);
+                  const obs = new ResizeObserver(onItemResize);
                   obs.observe(node);
                   itemObservers.push(obs);
                   shouldRelayout = true;
