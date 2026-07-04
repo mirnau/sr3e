@@ -1,4 +1,5 @@
 import { buildSkillSetup, type ProcedureSetup } from "./simpleSetups";
+import type { Modifier } from "../modifierList";
 
 type ActorWithItems = { items: { get?: (id: string) => { system?: Record<string, unknown> } | undefined } };
 type Vcr = { system?: { level?: number } } | null;
@@ -11,6 +12,16 @@ function vcrLevel(vcr: Vcr): number {
 function skillRating(actor: ActorWithItems, skillId: string): number {
     const skill = actor.items.get?.(skillId);
     return Number((skill?.system as { activeSkill?: { value?: number } } | undefined)?.activeSkill?.value ?? 0);
+}
+
+// A visible TN modifier rather than baking the reduction directly into
+// targetNumber — the composer already renders each modifier by name, so
+// this keeps the VCR's effect legible instead of just presenting an
+// already-reduced number with no indication of where it came from.
+// computeFinalTN applies the floor of 2 downstream; no need to clamp here.
+function vcrTnModifier(vcr: Vcr): Modifier[] {
+    const level = vcrLevel(vcr);
+    return vcr ? [{ id: "vcr-tn-reduction", name: "VCR Rating", value: -level }] : [];
 }
 
 // Accelerating/Braking, Positioning, Ramming, and Crash Test are all the
@@ -26,9 +37,8 @@ export function buildVehicleDrivingTestSetup(
     vcr: Vcr,
     title: string,
 ): ProcedureSetup {
-    const level = vcrLevel(vcr);
-    const tn = vcr ? Math.max(2, handlingTN - level) : handlingTN;
-    const setup = buildSkillSetup(character as never, skillId, null, title, tn);
+    const setup = buildSkillSetup(character as never, skillId, null, title, handlingTN);
+    setup.rollState = { ...setup.rollState, modifiers: [...setup.rollState.modifiers, ...vcrTnModifier(vcr)] };
     if (vcr) {
         setup.poolAvailableOverrides = { control: skillRating(character, skillId) };
     }
@@ -91,9 +101,12 @@ export function buildSensorEnhancedGunnerySetup(
 ): ProcedureSetup {
     const baseRating = skillRating(character, skillId);
     const sensorBonus = Math.floor(Number(vehicle.system?.sensor?.value ?? 0) / 2);
-    const tn = Math.max(2, 4 - vcrLevel(vcr));
-    const setup = buildSkillSetup(character as never, skillId, null, title, tn);
-    setup.rollState = { ...setup.rollState, dice: setup.rollState.dice + sensorBonus };
+    const setup = buildSkillSetup(character as never, skillId, null, title, 4);
+    setup.rollState = {
+        ...setup.rollState,
+        dice: setup.rollState.dice + sensorBonus,
+        modifiers: [...setup.rollState.modifiers, ...vcrTnModifier(vcr)],
+    };
     setup.poolAvailableOverrides = { control: baseRating };
     return setup;
 }

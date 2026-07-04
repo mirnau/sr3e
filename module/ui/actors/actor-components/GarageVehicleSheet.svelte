@@ -59,10 +59,13 @@ const mountedWeapons = $derived.by(() => {
     );
 });
 const vehicleType = $derived(vehicle?.system?.vehicleType ?? "ground");
+// A Handling stat of exactly 0 means "unset on this vehicle" (SimpleStat's
+// schema default), not a real TN of 0 — || (not ??) falls back to the
+// neutral default TN of 4 in that case, same as an unconfigured Handling.
 const handlingTN = $derived(
     vehicleType === "ground"
-        ? (vehicle?.system?.handlingRoad?.value ?? vehicle?.system?.handling?.value ?? 4)
-        : (vehicle?.system?.handling?.value ?? 4)
+        ? (vehicle?.system?.handlingRoad?.value || vehicle?.system?.handling?.value || 4)
+        : (vehicle?.system?.handling?.value || 4)
 );
 
 function onVehicleItemChange(item: any) {

@@ -129,7 +129,9 @@ $effect(() => { if (!showDefaultingPicker && selectedDefaultCandidateId) selecte
 
 export function open(newSetup: ProcedureSetup): void {
     setup = newSetup;
-    targetNumber = newSetup.rollState.targetNumber;
+    // Never display a base TN under 2, regardless of what the setup
+    // supplied — mirrors the decrement button's own floor below.
+    targetNumber = Math.max(2, newSetup.rollState.targetNumber);
     const woundPenalty = Number((actor.system as any)?.health?.penalty?.value ?? 0);
     baseModifiers = [
         ...(newSetup.rollState.modifiers ?? []),

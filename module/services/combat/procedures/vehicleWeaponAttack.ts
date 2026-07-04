@@ -51,7 +51,10 @@ export function buildVehicleWeaponAttack(
         if (rMod) mods.push(rMod);
         if (resolution.baseTN !== null) tn = resolution.baseTN;
     }
-    if (rigging.jackedIn) tn = Math.max(2, tn - rigging.vcrLevel);
+    // A visible modifier rather than baking the reduction into targetNumber
+    // — the composer renders each modifier by name, keeping the VCR's
+    // effect legible instead of presenting an already-reduced TN.
+    if (rigging.jackedIn) mods.push({ id: "vcr-tn-reduction", name: "VCR Rating", value: -rigging.vcrLevel });
 
     const rollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: tn, modifiers: mods };
     const skillName = resolved?.skill.name ?? "Gunnery";
