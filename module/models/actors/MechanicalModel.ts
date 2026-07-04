@@ -1,5 +1,6 @@
 import CommodityModel from "../items/item-components/Commodity";
 import CustomTokenModel from "../items/item-components/CustomToken";
+import SimpleStat from "./actor-components/SimpleStat";
 
 export default class MechanicalModel extends foundry.abstract.TypeDataModel<
   MechanicalSchema,
@@ -35,26 +36,26 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
         initial: "ground",
         choices: ["ground", "marine", "aviation"],
       }),
-      handling: new NumberField({ integer: true, min: 0, initial: 0 }),
-      handlingRoad: new NumberField({ integer: true, min: 0, initial: 0 }),
-      handlingOffRoad: new NumberField({ integer: true, min: 0, initial: 0 }),
-      speed: new NumberField({ integer: true, min: 0, initial: 0 }),
-      speedMax: new NumberField({ integer: true, min: 0, initial: 0 }),
-      speedStall: new NumberField({ integer: true, min: 0, initial: 0 }),
-      accel: new NumberField({ integer: true, min: 0, initial: 0 }),
-      body: new NumberField({ integer: true, min: 0, initial: 0 }),
-      armor: new NumberField({ integer: true, min: 0, initial: 0 }),
-      signature: new NumberField({ integer: true, min: 0, initial: 0 }),
-      autonav: new NumberField({ integer: true, min: 0, initial: 0 }),
-      pilot: new NumberField({ integer: true, min: 0, initial: 0 }),
-      sensor: new NumberField({ integer: true, min: 0, initial: 0 }),
-      ecm: new NumberField({ integer: true, min: 0, initial: 0 }),
-      eccm: new NumberField({ integer: true, min: 0, initial: 0 }),
-      flux: new NumberField({ integer: true, min: 0, initial: 0 }),
-      cargo: new NumberField({ integer: true, min: 0, initial: 0 }),
-      load: new NumberField({ integer: true, min: 0, initial: 0 }),
-      speedTurbo: new NumberField({ integer: true, min: 0, nullable: true }),
-      accelTurbo: new NumberField({ integer: true, min: 0, nullable: true }),
+      handling: new EmbeddedDataField(SimpleStat),
+      handlingRoad: new EmbeddedDataField(SimpleStat),
+      handlingOffRoad: new EmbeddedDataField(SimpleStat),
+      speed: new EmbeddedDataField(SimpleStat),
+      speedMax: new EmbeddedDataField(SimpleStat),
+      speedStall: new EmbeddedDataField(SimpleStat),
+      accel: new EmbeddedDataField(SimpleStat),
+      body: new EmbeddedDataField(SimpleStat),
+      armor: new EmbeddedDataField(SimpleStat),
+      signature: new EmbeddedDataField(SimpleStat),
+      autonav: new EmbeddedDataField(SimpleStat),
+      pilot: new EmbeddedDataField(SimpleStat),
+      sensor: new EmbeddedDataField(SimpleStat),
+      ecm: new EmbeddedDataField(SimpleStat),
+      eccm: new EmbeddedDataField(SimpleStat),
+      flux: new EmbeddedDataField(SimpleStat),
+      cargo: new EmbeddedDataField(SimpleStat),
+      load: new EmbeddedDataField(SimpleStat),
+      speedTurbo: new EmbeddedDataField(SimpleStat),
+      accelTurbo: new EmbeddedDataField(SimpleStat),
       seating: new StringField({
         initial: "",
         blank: true,
@@ -76,61 +77,54 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
       riggerAdaptation: new BooleanField({ initial: false }),
       remoteControlInterface: new BooleanField({ initial: false }),
       mounts: new SchemaField({
-        firmpoints: new NumberField({ integer: true, min: 0, initial: 0 }),
-        hardpoints: new NumberField({ integer: true, min: 0, initial: 0 }),
-        turrets: new NumberField({ integer: true, min: 0, initial: 0 }),
-        externalFixed: new NumberField({
-          integer: true,
-          min: 0,
-          initial: 0,
-        }),
-        internalFixed: new NumberField({
-          integer: true,
-          min: 0,
-          initial: 0,
-        }),
-        pintles: new NumberField({ integer: true, min: 0, initial: 0 }),
-        miniTurrets: new NumberField({ integer: true, min: 0, initial: 0 }),
+        firmpoints: new EmbeddedDataField(SimpleStat),
+        hardpoints: new EmbeddedDataField(SimpleStat),
+        turrets: new EmbeddedDataField(SimpleStat),
+        externalFixed: new EmbeddedDataField(SimpleStat),
+        internalFixed: new EmbeddedDataField(SimpleStat),
+        pintles: new EmbeddedDataField(SimpleStat),
+        miniTurrets: new EmbeddedDataField(SimpleStat),
       }),
+      condition: new EmbeddedDataField(SimpleStat),
       commodity: new EmbeddedDataField(CommodityModel),
       customToken: new EmbeddedDataField(CustomTokenModel),
     };
   }
 }
 type MountsSchema = {
-  firmpoints: NumberField;
-  hardpoints: NumberField;
-  turrets: NumberField;
-  externalFixed: NumberField;
-  internalFixed: NumberField;
-  pintles: NumberField;
-  miniTurrets: NumberField;
+  firmpoints: EmbeddedDataField<typeof SimpleStat>;
+  hardpoints: EmbeddedDataField<typeof SimpleStat>;
+  turrets: EmbeddedDataField<typeof SimpleStat>;
+  externalFixed: EmbeddedDataField<typeof SimpleStat>;
+  internalFixed: EmbeddedDataField<typeof SimpleStat>;
+  pintles: EmbeddedDataField<typeof SimpleStat>;
+  miniTurrets: EmbeddedDataField<typeof SimpleStat>;
 };
 
 type MechanicalSchema = {
   category: StringField;
   power: StringField;
   vehicleType: StringField;
-  handling: NumberField;
-  handlingRoad: NumberField;
-  handlingOffRoad: NumberField;
-  speed: NumberField;
-  speedMax: NumberField;
-  speedStall: NumberField;
-  accel: NumberField;
-  body: NumberField;
-  armor: NumberField;
-  signature: NumberField;
-  autonav: NumberField;
-  pilot: NumberField;
-  sensor: NumberField;
-  ecm: NumberField;
-  eccm: NumberField;
-  flux: NumberField;
-  cargo: NumberField;
-  load: NumberField;
-  speedTurbo: NumberField;
-  accelTurbo: NumberField;
+  handling: EmbeddedDataField<typeof SimpleStat>;
+  handlingRoad: EmbeddedDataField<typeof SimpleStat>;
+  handlingOffRoad: EmbeddedDataField<typeof SimpleStat>;
+  speed: EmbeddedDataField<typeof SimpleStat>;
+  speedMax: EmbeddedDataField<typeof SimpleStat>;
+  speedStall: EmbeddedDataField<typeof SimpleStat>;
+  accel: EmbeddedDataField<typeof SimpleStat>;
+  body: EmbeddedDataField<typeof SimpleStat>;
+  armor: EmbeddedDataField<typeof SimpleStat>;
+  signature: EmbeddedDataField<typeof SimpleStat>;
+  autonav: EmbeddedDataField<typeof SimpleStat>;
+  pilot: EmbeddedDataField<typeof SimpleStat>;
+  sensor: EmbeddedDataField<typeof SimpleStat>;
+  ecm: EmbeddedDataField<typeof SimpleStat>;
+  eccm: EmbeddedDataField<typeof SimpleStat>;
+  flux: EmbeddedDataField<typeof SimpleStat>;
+  cargo: EmbeddedDataField<typeof SimpleStat>;
+  load: EmbeddedDataField<typeof SimpleStat>;
+  speedTurbo: EmbeddedDataField<typeof SimpleStat>;
+  accelTurbo: EmbeddedDataField<typeof SimpleStat>;
   seating: StringField;
   entryPoints: StringField;
   setupBreakdownMinutes: NumberField;
@@ -138,6 +132,7 @@ type MechanicalSchema = {
   riggerAdaptation: BooleanField;
   remoteControlInterface: BooleanField;
   mounts: SchemaField<MountsSchema>;
+  condition: EmbeddedDataField<typeof SimpleStat>;
   commodity: EmbeddedDataField<typeof CommodityModel>;
   customToken: EmbeddedDataField<typeof CustomTokenModel>;
 };

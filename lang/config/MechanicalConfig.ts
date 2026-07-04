@@ -9,6 +9,8 @@ export const MECHANICAL_KEYS = [
   "capacity", "droneOps", "mountsTitle", "firmpoints",
   "hardpoints", "turrets", "externalFixed", "internalFixed",
   "pintles", "miniTurrets",
+  "condition", "conditionLight", "conditionModerate", "conditionSerious", "conditionDestroyed",
+  "conditionLightRules", "conditionModerateRules", "conditionSeriousRules", "conditionDestroyedRules",
 ] as const;
 
 export const VEHICLE_TYPE_KEYS = [

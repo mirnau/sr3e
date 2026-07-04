@@ -6,6 +6,7 @@
 @use "./common-components/journal-viewer.scss";
 @use "./common-components/active-effects-viewer.scss";
 @use "./actor/components/health.scss";
+@use "./actor/components/vehicle-condition-monitor.scss";
 @use "./actor/components/skills.scss";
 @use "./actor/components/rats-race.scss";
 @use "./actor/components/roll-composer.scss";
@@ -13,7 +14,8 @@
 @use "./injections/neonname.scss";
 @use "./injections/newsfeed.scss";
 
-form.application.sheet.sr3e.character {
+form.application.sheet.sr3e.character,
+form.application.sheet.sr3e.mechanical {
    background: none;
    overflow: visible;
    max-height: 0rem;

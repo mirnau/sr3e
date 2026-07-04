@@ -8,6 +8,7 @@ import SkillsActive from "./skills/SkillsActive.svelte";
 import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
 import Inventory from "./inventory/Inventory.svelte";
+import Garage from "./Garage.svelte";
 import Grimoire from "./Grimoire.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
 import RatsRace from "./rats-race/RatsRace.svelte";
@@ -148,7 +149,7 @@ $effect(() => {
             {:else if $activeTabStore === "inventory"}
                <Inventory {actor} />
             {:else if $activeTabStore === "garage"}
-               <p>{localize(CONFIG.SR3E.INVENTORY.garage)}</p>
+               <Garage {actor} />
             {:else if $activeTabStore === "effects"}
                <ActiveEffectsViewer document={actor} />
             {:else if $activeTabStore === "ratsrace"}

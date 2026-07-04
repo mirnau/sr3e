@@ -69,6 +69,7 @@ export function buildSkillSetup(
     skillId: string,
     specIndex?: number | null,
     title?: string,
+    targetNumber?: number,
 ): ProcedureSetup {
     const linkedSkillId = specIndex != null ? `${skillId}::${specIndex}` : skillId;
     const resolved = resolveLinkedSkill(actor, linkedSkillId);
@@ -79,7 +80,9 @@ export function buildSkillSetup(
     // rating, since the two sides would then be rolling against different
     // TNs entirely; this is also used for plain (non-challenge) skill
     // clicks, which have no separate code path to special-case.
-    const tn = 4;
+    // Callers driving a test against an external target (e.g. a vehicle's
+    // Handling) may override this via targetNumber.
+    const tn = targetNumber ?? 4;
 
     const mods: Modifier[] = [];
     if (specIndex != null && resolved && !resolved.specHasOwnValue) {

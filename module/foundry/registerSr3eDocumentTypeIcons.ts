@@ -6,6 +6,13 @@ const svg = (fileName: string): string => `systems/sr3e/textures/svgrepo/${fileN
 export function registerSr3eDocumentTypeIcons(): void {
 	registerDocumentTypeIcon("Actor", typekeys.gamemasterscreen, svg("map-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Actor", typekeys.broadcaster, svg("media-signal-tower-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Actor", typekeys.mechanical, svg("vehicle-speedometer-svgrepo-com.svg"));
+	registerDocumentTypeIconRule(
+		"Actor",
+		typekeys.mechanical,
+		source => source.system?.category === "drone",
+		svg("mechanical-arm-svgrepo-com.svg")
+	);
 	registerDocumentTypeIcon("Item", typekeys.focus, svg("crystal-cluster-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.medical, svg("syringe-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.wearable, svg("jacket-svgrepo-com.svg"));

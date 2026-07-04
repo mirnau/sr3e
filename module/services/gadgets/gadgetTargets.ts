@@ -42,6 +42,11 @@ const GADGET_TARGETS: Record<string, GadgetTargetDefinition> = {
         label: () => localize(CONFIG.SR3E.ITEM_TYPES.medical),
         properties: medicalProperties,
     },
+    mechanical: {
+        itemType: "mechanical",
+        label: () => localize(CONFIG.SR3E.ACTOR_TYPES.mechanical),
+        properties: mechanicalProperties,
+    },
 };
 
 export function gadgetTargetOptions(): { value: string; label: string }[] {
@@ -139,6 +144,38 @@ function medicalProperties(): GadgetPropertyOption[] {
         stat("system.dicePools.hacking.mod", localize(CONFIG.SR3E.DICE_POOLS.hacking)),
         stat("system.dicePools.control.mod", localize(CONFIG.SR3E.DICE_POOLS.control)),
         stat("system.dicePools.spell.mod",   localize(CONFIG.SR3E.DICE_POOLS.spell)),
+    ];
+}
+
+function mechanicalProperties(): GadgetPropertyOption[] {
+    return [
+        stat("system.handling.mod", localize(CONFIG.SR3E.MECHANICAL.handling)),
+        stat("system.handlingRoad.mod", localize(CONFIG.SR3E.MECHANICAL.handlingRoad)),
+        stat("system.handlingOffRoad.mod", localize(CONFIG.SR3E.MECHANICAL.handlingOffRoad)),
+        stat("system.speed.mod", localize(CONFIG.SR3E.MECHANICAL.speed)),
+        stat("system.speedMax.mod", localize(CONFIG.SR3E.MECHANICAL.speedMax)),
+        stat("system.speedStall.mod", localize(CONFIG.SR3E.MECHANICAL.speedStall)),
+        stat("system.accel.mod", localize(CONFIG.SR3E.MECHANICAL.accel)),
+        stat("system.body.mod", localize(CONFIG.SR3E.MECHANICAL.body)),
+        stat("system.armor.mod", localize(CONFIG.SR3E.MECHANICAL.armor)),
+        stat("system.signature.mod", localize(CONFIG.SR3E.MECHANICAL.signature)),
+        stat("system.autonav.mod", localize(CONFIG.SR3E.MECHANICAL.autonav)),
+        stat("system.pilot.mod", localize(CONFIG.SR3E.MECHANICAL.pilot)),
+        stat("system.sensor.mod", localize(CONFIG.SR3E.MECHANICAL.sensor)),
+        stat("system.ecm.mod", localize(CONFIG.SR3E.MECHANICAL.ecm)),
+        stat("system.eccm.mod", localize(CONFIG.SR3E.MECHANICAL.eccm)),
+        stat("system.flux.mod", localize(CONFIG.SR3E.MECHANICAL.flux)),
+        stat("system.cargo.mod", localize(CONFIG.SR3E.MECHANICAL.cargo)),
+        stat("system.load.mod", localize(CONFIG.SR3E.MECHANICAL.load)),
+        stat("system.speedTurbo.mod", localize(CONFIG.SR3E.MECHANICAL.speedTurbo)),
+        stat("system.accelTurbo.mod", localize(CONFIG.SR3E.MECHANICAL.accelTurbo)),
+        stat("system.mounts.firmpoints.mod", localize(CONFIG.SR3E.MECHANICAL.firmpoints)),
+        stat("system.mounts.hardpoints.mod", localize(CONFIG.SR3E.MECHANICAL.hardpoints)),
+        stat("system.mounts.turrets.mod", localize(CONFIG.SR3E.MECHANICAL.turrets)),
+        stat("system.mounts.externalFixed.mod", localize(CONFIG.SR3E.MECHANICAL.externalFixed)),
+        stat("system.mounts.internalFixed.mod", localize(CONFIG.SR3E.MECHANICAL.internalFixed)),
+        stat("system.mounts.pintles.mod", localize(CONFIG.SR3E.MECHANICAL.pintles)),
+        stat("system.mounts.miniTurrets.mod", localize(CONFIG.SR3E.MECHANICAL.miniTurrets)),
     ];
 }
 

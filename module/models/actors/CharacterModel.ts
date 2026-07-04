@@ -15,6 +15,7 @@ type CharacterSchema = {
   karma: EmbeddedDataField<typeof KarmaModel>;
   health: EmbeddedDataField<typeof HealthModel>;
   journalEntryUuid: StringField;
+  garage: ArrayField<StringField>;
 };
 
 export default class CharacterModel extends foundry.abstract.TypeDataModel<
@@ -33,6 +34,9 @@ export default class CharacterModel extends foundry.abstract.TypeDataModel<
       journalEntryUuid: new StringField({
         required: false,
         initial: "",
+      }),
+      garage: new ArrayField(new StringField({ nullable: false }), {
+        initial: [],
       }),
     };
   }

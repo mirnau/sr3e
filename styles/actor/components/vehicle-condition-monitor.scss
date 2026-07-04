@@ -1,0 +1,52 @@
+@use "../../mixins.scss" as *;
+
+.vehicle-condition-monitor {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.condition-boxes {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+
+	input[type="checkbox"].checkbox {
+		display: inline-block;
+		appearance: none;
+		-webkit-appearance: none;
+		-moz-appearance: none;
+		background-color: var(--health-highlight-color-primary);
+		width: 20px;
+		height: 20px;
+		min-width: 20px;
+		max-width: 20px;
+		min-height: 20px;
+		max-height: 20px;
+		margin: 0;
+		padding: 0;
+		cursor: pointer;
+		position: relative;
+		box-sizing: border-box;
+		@include clipped-corners(0.25rem, 0.25rem, 0.25rem, 0.25rem);
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			width: calc(100% - 4px);
+			height: calc(100% - 4px);
+			background: var(--health-background-color);
+			@include clipped-corners(0.15rem, 0.15rem, 0.15rem, 0.15rem);
+		}
+
+		&:checked::before {
+			box-shadow: inset 0 0 0.5rem var(--health-highlight-color-primary);
+		}
+	}
+}
+
+.condition-stage {
+	color: var(--health-highlight-color-primary);
+}

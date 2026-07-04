@@ -19,6 +19,14 @@ export function boxesForLevel(step: DamageStep): number {
     }
 }
 
+export function stageForBoxes(boxes: number): DamageStep | null {
+    if (boxes >= boxesForLevel("d")) return "d";
+    if (boxes >= boxesForLevel("s")) return "s";
+    if (boxes >= boxesForLevel("m")) return "m";
+    if (boxes >= boxesForLevel("l")) return "l";
+    return null;
+}
+
 export function splitDamageType(t: string): { step: DamageStep; track: DamageTrack } {
     const track: DamageTrack = t.includes("stun") ? "stun" : "physical";
     const raw = t.replace("stun", "").trim() as DamageStep;
