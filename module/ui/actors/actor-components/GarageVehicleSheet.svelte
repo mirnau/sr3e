@@ -58,6 +58,10 @@ const mountedWeapons = $derived.by(() => {
             (item.flags?.sr3e?.[INVENTORY_PRIMARY_FLAG.vehicle] || item.flags?.sr3e?.[INVENTORY_SECONDARY_FLAG.vehicle])
     );
 });
+// Jacking in requires the vehicle itself to be rigger-adapted, not just
+// the character owning a VCR — set on the vehicle's own sheet
+// (MechanicalIdentity.svelte), previously never checked here.
+const isRiggerAdapted = $derived(!!vehicle?.system?.riggerAdaptation);
 const vehicleType = $derived(vehicle?.system?.vehicleType ?? "ground");
 // A Handling stat of exactly 0 means "unset on this vehicle" (SimpleStat's
 // schema default), not a real TN of 0 — || (not ??) falls back to the
@@ -118,6 +122,17 @@ $effect(() => {
     void syncRiggerBonusEffect(characterActor as never, jackedIn, vcrLevel);
 });
 
+// Defensive: if the vehicle's Rigger Adaptation gets switched off (or this
+// entry predates the gate below existing) while jacked in, force jack-out
+// rather than leaving a rigger benefiting from a vehicle that can't
+// actually support it — warn so the player knows why, not just silently.
+$effect(() => {
+    if (vehicle && p.entry.jackedIn && !isRiggerAdapted) {
+        p.onUpdate({ jackedIn: false });
+        ui.notifications?.warn(localize(CONFIG.SR3E.INVENTORY.garagenoriggeradaptation));
+    }
+});
+
 function onDrivingRoll() {
     if (!vehicle || !$selectedSkillIdStore) return;
     const vcr = p.entry.jackedIn ? selectedVcr() : null;
@@ -147,7 +162,7 @@ function onDrivingRoll() {
                 <h4 class="no-margin uppercase">{localize(CONFIG.SR3E.MECHANICAL.performance)}</h4>
                 <div class="stat-grid two-column">
                     <span>{localize(CONFIG.SR3E.MECHANICAL.handling)}: {handlingTN}</span>
-                    <span>{localize(CONFIG.SR3E.MECHANICAL.speed)}: {vehicle.system.speed?.value ?? 0}</span>
+                    <span>{localize(CONFIG.SR3E.MECHANICAL.currentSpeed)}: {vehicle.system.currentSpeed?.value ?? 0}</span>
                     <span>{localize(CONFIG.SR3E.MECHANICAL.body)}: {vehicle.system.body?.value ?? 0}</span>
                     <span>{localize(CONFIG.SR3E.MECHANICAL.armor)}: {vehicle.system.armor?.value ?? 0}</span>
                 </div>
@@ -160,7 +175,7 @@ function onDrivingRoll() {
                 />
             </SheetCard>
 
-            {#if ownedVcrItems.length > 0}
+            {#if ownedVcrItems.length > 0 && isRiggerAdapted}
                 <SheetCard itemClass="garage-packery-grid-item">
                     <LabeledDropdown
                         key="vcrId"
@@ -175,6 +190,10 @@ function onDrivingRoll() {
                         value={p.entry.jackedIn}
                         onUpdate={onJackedInChange}
                     />
+                </SheetCard>
+            {:else if ownedVcrItems.length > 0 && !isRiggerAdapted}
+                <SheetCard itemClass="garage-packery-grid-item">
+                    <p class="no-margin">{localize(CONFIG.SR3E.INVENTORY.garagenoriggeradaptation)}</p>
                 </SheetCard>
             {/if}
 

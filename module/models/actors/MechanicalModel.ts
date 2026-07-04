@@ -6,6 +6,20 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
   MechanicalSchema,
   BaseActor
 > {
+  // speed was split into three concepts: currentSpeed (live speed during a
+  // chase, e.g. for Maneuver Score's Speed Points), speedRating (the rated
+  // safe top speed — SR3's stat-block "Speed"), and maxSpeed (renamed from
+  // speedMax, the absolute technical ceiling above the safe rating).
+  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
+    if (source.speed !== undefined && source.currentSpeed === undefined) {
+      source.currentSpeed = source.speed;
+    }
+    if (source.speedMax !== undefined && source.maxSpeed === undefined) {
+      source.maxSpeed = source.speedMax;
+    }
+    return super.migrateData(source);
+  }
+
   static defineSchema(): MechanicalSchema {
     return {
       category: new StringField({
@@ -39,8 +53,9 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
       handling: new EmbeddedDataField(SimpleStat),
       handlingRoad: new EmbeddedDataField(SimpleStat),
       handlingOffRoad: new EmbeddedDataField(SimpleStat),
-      speed: new EmbeddedDataField(SimpleStat),
-      speedMax: new EmbeddedDataField(SimpleStat),
+      currentSpeed: new EmbeddedDataField(SimpleStat),
+      speedRating: new EmbeddedDataField(SimpleStat),
+      maxSpeed: new EmbeddedDataField(SimpleStat),
       speedStall: new EmbeddedDataField(SimpleStat),
       accel: new EmbeddedDataField(SimpleStat),
       body: new EmbeddedDataField(SimpleStat),
@@ -112,8 +127,9 @@ type MechanicalSchema = {
   handling: EmbeddedDataField<typeof SimpleStat>;
   handlingRoad: EmbeddedDataField<typeof SimpleStat>;
   handlingOffRoad: EmbeddedDataField<typeof SimpleStat>;
-  speed: EmbeddedDataField<typeof SimpleStat>;
-  speedMax: EmbeddedDataField<typeof SimpleStat>;
+  currentSpeed: EmbeddedDataField<typeof SimpleStat>;
+  speedRating: EmbeddedDataField<typeof SimpleStat>;
+  maxSpeed: EmbeddedDataField<typeof SimpleStat>;
   speedStall: EmbeddedDataField<typeof SimpleStat>;
   accel: EmbeddedDataField<typeof SimpleStat>;
   body: EmbeddedDataField<typeof SimpleStat>;

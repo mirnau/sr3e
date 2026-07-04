@@ -5,5 +5,5 @@ export const INVENTORY_KEYS = [
   "garagevehicleskill", "garagegunneryskill", "garagemaneuverscore",
   "garageaccelerating", "garagepositioning", "garageramming",
   "garagehiding", "garagecrashtest", "garagesensortest",
-  "garagesensorenhancedgunnery", "totalweight",
+  "garagesensorenhancedgunnery", "garagenoriggeradaptation", "totalweight",
 ] as const;

@@ -1,6 +1,6 @@
 export const MECHANICAL_KEYS = [
   "mechanical", "category", "power", "vehicleType", "handling",
-  "handlingRoad", "handlingOffRoad", "speed", "speedMax", "speedStall", "accel",
+  "handlingRoad", "handlingOffRoad", "currentSpeed", "speedRating", "maxSpeed", "speedStall", "accel",
   "body", "armor", "signature", "autonav", "pilot", "sensor",
   "electronicWarfare", "ecm", "eccm", "flux",
   "cargo", "load", "speedTurbo", "accelTurbo", "seating",
