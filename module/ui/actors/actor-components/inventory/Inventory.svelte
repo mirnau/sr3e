@@ -5,9 +5,12 @@
    import { localize } from "../../../../services/utilities";
    import FilterToggle from "./FilterToggle.svelte";
    import InventoryCard from "./InventoryCard.svelte";
+   import { inventoryModeFor, isWeightExempt, mountUsage, INVENTORY_PRIMARY_FLAG, INVENTORY_SECONDARY_FLAG } from "./inventoryMode";
 
    const p = $props<{ actor: Actor }>();
    const actor = untrack(() => p.actor);
+   const mode = inventoryModeFor(actor);
+   const isVehicle = mode === "vehicle";
 
    let gridContainer: HTMLElement;
    let allItems = $state<any[]>([]);
@@ -22,8 +25,13 @@
       storeManager.Unsubscribe(actor);
    });
 
-   const isFavoriteStore   = storeManager.GetFlagStore<boolean>(actor, "isFavorite",   false);
-   const isEquippedStore   = storeManager.GetFlagStore<boolean>(actor, "isEquipped",   false);
+   const strengthStore = storeManager.GetSimpleStatROStore(actor, "attributes.strength");
+   const loadStore = storeManager.GetSimpleStatROStore(actor, "load");
+   const hardpointCapacityStore = storeManager.GetSimpleStatROStore(actor, "mounts.hardpoints");
+   const firmpointCapacityStore = storeManager.GetSimpleStatROStore(actor, "mounts.firmpoints");
+
+   const isPrimaryStore    = storeManager.GetFlagStore<boolean>(actor, INVENTORY_PRIMARY_FLAG[mode],   false);
+   const isSecondaryStore  = storeManager.GetFlagStore<boolean>(actor, INVENTORY_SECONDARY_FLAG[mode], false);
    const isAmmunitionStore = storeManager.GetFlagStore<boolean>(actor, "isAmmunition", false);
    const isWeaponStore     = storeManager.GetFlagStore<boolean>(actor, "isWeapon",     false);
    const isWornStore       = storeManager.GetFlagStore<boolean>(actor, "isWorn",       false);
@@ -31,8 +39,8 @@
    const isTechStore       = storeManager.GetFlagStore<boolean>(actor, "isTech",       false);
    const isMagicStore      = storeManager.GetFlagStore<boolean>(actor, "isMagic",      false);
 
-   let isFavorite   = $state($isFavoriteStore);
-   let isEquipped   = $state($isEquippedStore);
+   let isPrimary    = $state($isPrimaryStore);
+   let isSecondary  = $state($isSecondaryStore);
    let isAmmunition = $state($isAmmunitionStore);
    let isWeapon     = $state($isWeaponStore);
    let isWorn       = $state($isWornStore);
@@ -41,8 +49,8 @@
    let isMagic      = $state($isMagicStore);
 
    $effect(() => {
-      isFavorite   = $isFavoriteStore;
-      isEquipped   = $isEquippedStore;
+      isPrimary    = $isPrimaryStore;
+      isSecondary  = $isSecondaryStore;
       isAmmunition = $isAmmunitionStore;
       isWeapon     = $isWeaponStore;
       isWorn       = $isWornStore;
@@ -52,8 +60,8 @@
    });
 
    $effect(() => {
-      isFavoriteStore.set(isFavorite);
-      isEquippedStore.set(isEquipped);
+      isPrimaryStore.set(isPrimary);
+      isSecondaryStore.set(isSecondary);
       isAmmunitionStore.set(isAmmunition);
       isWeaponStore.set(isWeapon);
       isWornStore.set(isWorn);
@@ -63,6 +71,19 @@
    });
 
    const INVENTORY_TYPES = ["ammunition", "weapon", "wearable", "gadget", "techinterface", "medical", "focus"];
+
+   const capacity = $derived(isVehicle ? $loadStore : $strengthStore * 5);
+   const totalWeight = $derived(
+      Math.round(allItems.reduce((sum, item) => {
+         if (isWeightExempt(mode, item)) return sum;
+         return sum + (item.system?.portability?.weight ?? 0);
+      }, 0) * 100) / 100
+   );
+   const isOverencumbered = $derived(totalWeight > capacity);
+
+   const usage = $derived(mountUsage(mode, allItems));
+   const hardpointFull = $derived(isVehicle && usage.hardpointCount >= $hardpointCapacityStore);
+   const firmpointFull = $derived(isVehicle && usage.firmpointCount >= $firmpointCapacityStore);
 
    function rebuildAllItems() {
       allItems = [...((actor as any).items ?? [])].filter((i: any) => INVENTORY_TYPES.includes(i.type));
@@ -95,10 +116,10 @@
          const passesTypeFilter = hasTypeFilter ? typeMatches : true;
 
          const itemFlags = item.flags?.sr3e || {};
-         const passesFavoriteFilter = isFavorite ? itemFlags.isFavorite : true;
-         const passesEquippedFilter = isEquipped ? itemFlags.isEquipped : true;
+         const passesPrimaryFilter = isPrimary ? itemFlags[INVENTORY_PRIMARY_FLAG[mode]] : true;
+         const passesSecondaryFilter = isSecondary ? itemFlags[INVENTORY_SECONDARY_FLAG[mode]] : true;
 
-         return passesTypeFilter && passesFavoriteFilter && passesEquippedFilter;
+         return passesTypeFilter && passesPrimaryFilter && passesSecondaryFilter;
       });
    });
 
@@ -115,34 +136,58 @@
 
 <div class="asset-category-container static-full-width">
    <div class="asset-masonry-background-layer"></div>
-   <FilterToggle
-      bind:checked={isFavorite}
-      label={localize(CONFIG.SR3E.INVENTORY.favourites)}
-      svgName="star-svgrepo-com.svg"
-   />
-   <FilterToggle
-      bind:checked={isEquipped}
-      label={localize(CONFIG.SR3E.INVENTORY.equipped)}
-      svgName="backpack-svgrepo-com.svg"
-   />
-   <FilterToggle
-      bind:checked={isAmmunition}
-      label={localize(CONFIG.SR3E.AMMUNITION.ammunition)}
-      svgName="bullets-svgrepo-com.svg"
-   />
-   <FilterToggle bind:checked={isWeapon} label={localize(CONFIG.SR3E.WEAPON.weapon)} svgName="rifle-gun-svgrepo-com.svg" />
-   <FilterToggle
-      bind:checked={isWorn}
-      label={localize(CONFIG.SR3E.WEARABLE.wearable)}
-      svgName="coat-with-pockets-svgrepo-com.svg"
-   />
-   <FilterToggle bind:checked={isGadget} label={localize(CONFIG.SR3E.ITEM_TYPES.gadget)} svgName="cogs-f-svgrepo-com.svg" />
-   <FilterToggle
-      bind:checked={isTech}
-      label={localize(CONFIG.SR3E.ITEM_TYPES.techinterface)}
-      svgName="router-svgrepo-com.svg"
-   />
-   <FilterToggle bind:checked={isMagic} label={localize(CONFIG.SR3E.ITEM_TYPES.magic)} svgName="crystal-cluster-svgrepo-com.svg" />
+   {#if isVehicle}
+      <FilterToggle
+         bind:checked={isPrimary}
+         label={localize(CONFIG.SR3E.MECHANICAL.hardpoint)}
+         letter="H"
+      />
+      <FilterToggle
+         bind:checked={isSecondary}
+         label={localize(CONFIG.SR3E.MECHANICAL.firmpoint)}
+         letter="F"
+      />
+   {:else}
+      <FilterToggle
+         bind:checked={isPrimary}
+         label={localize(CONFIG.SR3E.INVENTORY.favourites)}
+         svgName="star-svgrepo-com.svg"
+      />
+      <FilterToggle
+         bind:checked={isSecondary}
+         label={localize(CONFIG.SR3E.INVENTORY.equipped)}
+         svgName="backpack-svgrepo-com.svg"
+      />
+      <FilterToggle
+         bind:checked={isAmmunition}
+         label={localize(CONFIG.SR3E.AMMUNITION.ammunition)}
+         svgName="bullets-svgrepo-com.svg"
+      />
+      <FilterToggle bind:checked={isWeapon} label={localize(CONFIG.SR3E.WEAPON.weapon)} svgName="rifle-gun-svgrepo-com.svg" />
+      <FilterToggle
+         bind:checked={isWorn}
+         label={localize(CONFIG.SR3E.WEARABLE.wearable)}
+         svgName="coat-with-pockets-svgrepo-com.svg"
+      />
+      <FilterToggle bind:checked={isGadget} label={localize(CONFIG.SR3E.ITEM_TYPES.gadget)} svgName="cogs-f-svgrepo-com.svg" />
+      <FilterToggle
+         bind:checked={isTech}
+         label={localize(CONFIG.SR3E.ITEM_TYPES.techinterface)}
+         svgName="router-svgrepo-com.svg"
+      />
+      <FilterToggle bind:checked={isMagic} label={localize(CONFIG.SR3E.ITEM_TYPES.magic)} svgName="crystal-cluster-svgrepo-com.svg" />
+   {/if}
+   <div class="inventory-total-weight">
+      <span class:overencumbered={isOverencumbered}>
+         {localize(CONFIG.SR3E.INVENTORY.totalweight)}:
+         {#if isVehicle}
+            {totalWeight} / {capacity}
+         {:else}
+            {totalWeight}
+         {/if}
+         {localize(CONFIG.SR3E.PORTABILITY.weightunit)}
+      </span>
+   </div>
 </div>
 
 <div class="asset-category-container static-full-width">
@@ -153,7 +198,7 @@
 
       {#each filteredItems as item (item.id)}
          <div class="asset-card-container">
-            <InventoryCard {actor} {item} />
+            <InventoryCard {actor} {item} {hardpointFull} {firmpointFull} />
          </div>
       {/each}
    </div>

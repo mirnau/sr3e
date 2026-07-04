@@ -88,6 +88,10 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
       condition: new EmbeddedDataField(SimpleStat),
       commodity: new EmbeddedDataField(CommodityModel),
       customToken: new EmbeddedDataField(CustomTokenModel),
+      journalId: new StringField({
+        required: true,
+        initial: "",
+      }),
     };
   }
 }
@@ -135,4 +139,5 @@ type MechanicalSchema = {
   condition: EmbeddedDataField<typeof SimpleStat>;
   commodity: EmbeddedDataField<typeof CommodityModel>;
   customToken: EmbeddedDataField<typeof CustomTokenModel>;
+  journalId: StringField;
 };

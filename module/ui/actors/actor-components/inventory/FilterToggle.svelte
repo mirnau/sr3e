@@ -3,12 +3,14 @@ let {
     checked = $bindable(false),
     label = "",
     svgName = "",
+    letter = "",
     disabled = false,
     onChange = null as ((e: { target: { checked: boolean } }) => void) | null,
 }: {
     checked?: boolean;
     label?: string;
     svgName?: string;
+    letter?: string;
     disabled?: boolean;
     onChange?: ((e: { target: { checked: boolean } }) => void) | null;
 } = $props();
@@ -41,17 +43,23 @@ function handleKeyDown(e: KeyboardEvent) {
 
 <div
     class="toggle-card button"
+    class:disabled
     role="checkbox"
     aria-checked={checked}
+    aria-disabled={disabled}
     aria-label={label || "Toggle"}
-    tabindex="0"
+    tabindex={disabled ? -1 : 0}
     onclick={handleToggle}
     onkeydown={handleKeyDown}
 >
     <div class="stat-card-background"></div>
-    <span class="svg-wrapper" data-active={checked}>
-        {@html icon}
-    </span>
+    {#if letter}
+        <span class="svg-wrapper letter-icon" data-active={checked}>{letter}</span>
+    {:else}
+        <span class="svg-wrapper" data-active={checked}>
+            {@html icon}
+        </span>
+    {/if}
     {#if label}
         <h6 class="no-margin uppercase">{label}</h6>
     {/if}

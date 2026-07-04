@@ -1,6 +1,7 @@
 <script lang="ts">
 import { localize } from "../../../services/utilities";
 import { vehicleConditionStage, vehicleConditionStageLabelKey, vehicleConditionRulesKey } from "../../../services/combat/vehicleConditionMonitor";
+import Foldout from "./Foldout.svelte";
 
 const p = $props<{ boxesFilled: number; onUpdate: (value: number) => void }>();
 
@@ -15,23 +16,24 @@ function toggle(index: number, checked: boolean): void {
 }
 </script>
 
-<div class="vehicle-condition-monitor">
-    <h3 class="no-margin">{localize(localization?.condition)}</h3>
-    <div class="condition-boxes">
-        {#each boxes as checked, i}
-            <input
-                class="checkbox"
-                type="checkbox"
-                id={`vehicleConditionBox${i + 1}`}
-                {checked}
-                onchange={(e) => toggle(i, (e.target as HTMLInputElement).checked)}
-            />
-        {/each}
-    </div>
-    {#if stage}
-        <div class="condition-stage">
-            <h4 class="no-margin">{stageLabel}</h4>
-            <p class="no-margin">{stageRules}</p>
+<Foldout label={localize(localization?.condition)}>
+    <div class="vehicle-condition-monitor">
+        <div class="condition-boxes">
+            {#each boxes as checked, i}
+                <input
+                    class="checkbox"
+                    type="checkbox"
+                    id={`vehicleConditionBox${i + 1}`}
+                    {checked}
+                    onchange={(e) => toggle(i, (e.target as HTMLInputElement).checked)}
+                />
+            {/each}
         </div>
-    {/if}
-</div>
+        {#if stage}
+            <div class="condition-stage">
+                <h4 class="no-margin">{stageLabel}</h4>
+                <p class="no-margin">{stageRules}</p>
+            </div>
+        {/if}
+    </div>
+</Foldout>

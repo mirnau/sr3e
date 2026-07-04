@@ -7,6 +7,7 @@ import { buildWeaponAttack } from "../../../../services/combat/procedures/weapon
 import { buildSpellcastingSetup, canStartSpellcasting } from "../../../../services/combat/procedures/spellcastingSetup";
 import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import FilterToggle from "./FilterToggle.svelte";
+import { inventoryModeFor, INVENTORY_PRIMARY_FLAG, INVENTORY_SECONDARY_FLAG } from "./inventoryMode";
 import WeaponComponent from "./components/WeaponComponent.svelte";
 import AmmunitionComponent from "./components/AmmunitionComponent.svelte";
 import WearableComponent from "./components/WearableComponent.svelte";
@@ -18,7 +19,7 @@ import GadgetComponent from "./components/GadgetComponent.svelte";
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 const MELEE_MODES = new Set(["blade", "blunt"]);
 
-const p = $props<{ actor: Actor; item: Item }>();
+const p = $props<{ actor: Actor; item: Item; hardpointFull?: boolean; firmpointFull?: boolean }>();
 const actor = untrack(() => p.actor);
 const item = untrack(() => p.item);
 const sys = item.system as Record<string, any>;
@@ -32,8 +33,25 @@ onDestroy(() => {
     }
 });
 
-const isFavoriteStore = storeManager.GetFlagStore<boolean>(item, "isFavorite", false);
-const isEquippedStore = storeManager.GetFlagStore<boolean>(item, "isEquipped", false);
+const mode = inventoryModeFor(actor);
+const isVehicle = mode === "vehicle";
+const primaryFlag = INVENTORY_PRIMARY_FLAG[mode];
+const secondaryFlag = INVENTORY_SECONDARY_FLAG[mode];
+const isPrimaryStore = storeManager.GetFlagStore<boolean>(item, primaryFlag, false);
+const isSecondaryStore = storeManager.GetFlagStore<boolean>(item, secondaryFlag, false);
+
+const primaryDisabled = $derived(isVehicle && !$isPrimaryStore && Boolean(p.hardpointFull));
+const secondaryDisabled = $derived(isVehicle && !$isSecondaryStore && Boolean(p.firmpointFull));
+
+function togglePrimary(checked: boolean) {
+    isPrimaryStore.set(checked);
+    if (checked && isVehicle) isSecondaryStore.set(false);
+}
+
+function toggleSecondary(checked: boolean) {
+    isSecondaryStore.set(checked);
+    if (checked && isVehicle) isPrimaryStore.set(false);
+}
 const linkedSkillIdStore = storeManager.GetRWStore<string>(item, "linkedSkillId");
 const nameStore = storeManager.GetRWStore<string>(item, "name", true);
 
@@ -185,9 +203,26 @@ function onRollClick() {
     </div>
 
     <div class="asset-toggles">
-        <FilterToggle bind:checked={$isFavoriteStore} svgName="star-svgrepo-com.svg" />
-        {#if item.type !== "spell"}
-            <FilterToggle bind:checked={$isEquippedStore} svgName="backpack-svgrepo-com.svg" />
+        {#if isVehicle}
+            <FilterToggle
+                checked={$isPrimaryStore}
+                onChange={(e) => togglePrimary(e.target.checked)}
+                letter="H"
+                label={localize(CONFIG.SR3E.MECHANICAL.hardpoint)}
+                disabled={primaryDisabled}
+            />
+            <FilterToggle
+                checked={$isSecondaryStore}
+                onChange={(e) => toggleSecondary(e.target.checked)}
+                letter="F"
+                label={localize(CONFIG.SR3E.MECHANICAL.firmpoint)}
+                disabled={secondaryDisabled}
+            />
+        {:else}
+            <FilterToggle bind:checked={$isPrimaryStore} svgName="star-svgrepo-com.svg" />
+            {#if item.type !== "spell"}
+                <FilterToggle bind:checked={$isSecondaryStore} svgName="backpack-svgrepo-com.svg" />
+            {/if}
         {/if}
     </div>
 </div>

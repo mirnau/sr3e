@@ -11,6 +11,8 @@ import MechanicalPerformance from "./mechanical/MechanicalPerformance.svelte";
 import MechanicalCapacity from "./mechanical/MechanicalCapacity.svelte";
 import MechanicalMounts from "./mechanical/MechanicalMounts.svelte";
 import MechanicalCommodity from "./mechanical/MechanicalCommodity.svelte";
+import Foldout from "./actor-components/Foldout.svelte";
+import MechanicalRegister from "./mechanical/MechanicalRegister.svelte";
 
 const p = $props<{ actor: Actor }>();
 const actor = untrack(() => p.actor);
@@ -54,23 +56,28 @@ function update(path: string, value: string | number | boolean) {
     </SheetCard>
 
     <SheetCard>
-        <h3>{localize(CONFIG.SR3E.MECHANICAL.electronicWarfare)}</h3>
-        <div class="stat-grid two-column">
-            <LabeledNumberInput key="ecm" label={localize(CONFIG.SR3E.MECHANICAL.ecm)} value={system.ecm?.value ?? 0} onUpdate={(v) => update("system.ecm.value", v)} />
-            <LabeledNumberInput key="eccm" label={localize(CONFIG.SR3E.MECHANICAL.eccm)} value={system.eccm?.value ?? 0} onUpdate={(v) => update("system.eccm.value", v)} />
-            <LabeledNumberInput key="flux" label={localize(CONFIG.SR3E.MECHANICAL.flux)} value={system.flux?.value ?? 0} onUpdate={(v) => update("system.flux.value", v)} />
-        </div>
+        <Foldout label={localize(CONFIG.SR3E.MECHANICAL.electronicWarfare)}>
+            <div class="stat-grid two-column">
+                <LabeledNumberInput key="ecm" label={localize(CONFIG.SR3E.MECHANICAL.ecm)} value={system.ecm?.value ?? 0} onUpdate={(v) => update("system.ecm.value", v)} />
+                <LabeledNumberInput key="eccm" label={localize(CONFIG.SR3E.MECHANICAL.eccm)} value={system.eccm?.value ?? 0} onUpdate={(v) => update("system.eccm.value", v)} />
+                <LabeledNumberInput key="flux" label={localize(CONFIG.SR3E.MECHANICAL.flux)} value={system.flux?.value ?? 0} onUpdate={(v) => update("system.flux.value", v)} />
+            </div>
+        </Foldout>
     </SheetCard>
 
     <SheetCard>
         <MechanicalCapacity {system} {update} />
     </SheetCard>
 
-    <SheetCard span={2}>
+    <SheetCard>
         <MechanicalMounts mounts={system.mounts} {update} />
     </SheetCard>
 
-    <SheetCard span={2}>
+    <SheetCard>
         <MechanicalCommodity commodity={system.commodity} {update} />
+    </SheetCard>
+
+    <SheetCard span="dynamic">
+        <MechanicalRegister {actor} />
     </SheetCard>
 </PackeryGrid>

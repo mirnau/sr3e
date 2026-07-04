@@ -192,7 +192,8 @@
       "garagedrivingroll": "Drive",
       "garageempty": "Drag a vehicle actor here to add it to the garage.",
       "garagewrongtype": "Only Mechanical actors can be added to the garage.",
-      "inventory": "Inventory"
+      "inventory": "Inventory",
+      "totalweight": "Total Weight"
     },
     "itemTypes": {
       "ammunition": "Ammunition",
@@ -294,13 +295,16 @@
       "electronicWarfare": "Electronic Warfare",
       "entryPoints": "Entry Points",
       "externalFixed": "External Fixed",
+      "firmpoint": "Firmpoint",
       "firmpoints": "Firmpoints",
       "flux": "Flux",
       "handling": "Handling",
       "handlingOffRoad": "Handling (Off-Road)",
       "handlingRoad": "Handling (Road)",
+      "hardpoint": "Hardpoint",
       "hardpoints": "Hardpoints",
       "internalFixed": "Internal Fixed",
+      "journal": "Journal",
       "landingTakeoff": "Landing/Takeoff",
       "load": "Load",
       "mechanical": "Mechanical",
@@ -321,6 +325,7 @@
       "speedStall": "Stall Speed",
       "speedTurbo": "Speed (Turbo)",
       "turrets": "Turrets",
+      "upgrades": "Vehicle Upgrades",
       "vehicleType": "Type"
     },
     "mechanicalCategories": {
@@ -391,7 +396,8 @@
     "portability": {
       "concealability": "Conceal",
       "portability": "Portability",
-      "weight": "Weight"
+      "weight": "Weight",
+      "weightunit": "kg"
     },
     "powerSources": {
       "electric": "Electric",

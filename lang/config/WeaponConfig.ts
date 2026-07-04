@@ -11,7 +11,7 @@ export const COMMODITY_KEYS = [
 ] as const;
 
 export const PORTABILITY_KEYS = [
-  "portability", "concealability", "weight",
+  "portability", "concealability", "weight", "weightunit",
 ] as const;
 
 export const WEAPON_MODE_KEYS = [

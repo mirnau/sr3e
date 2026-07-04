@@ -49,6 +49,16 @@
       &:hover  { transform: scale(1.1); }
       &:active { transform: scale(0.93); }
    }
+
+   &.disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+
+      &.button:hover,
+      &.button:active {
+         transform: none;
+      }
+   }
 }
 
 // =========================================================
@@ -74,6 +84,14 @@
       filter: drop-shadow(0 0 1px var(--highlight-color-primary))
               drop-shadow(0 0 2px var(--highlight-color-primary));
       transition: filter 0.2s ease;
+   }
+
+   &.letter-icon {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: black;
+      text-shadow: 0 0 1px var(--highlight-color-primary), 0 0 2px var(--highlight-color-primary);
+      transition: text-shadow 0.2s ease;
    }
 }
 
@@ -142,6 +160,16 @@
    }
 
    .asset-masonry-background-layer { display: none; }
+
+   .inventory-total-weight {
+      margin-left: auto;
+      font-size: 0.85rem;
+      white-space: nowrap;
+
+      .overencumbered {
+         color: #ff6b7a;
+      }
+   }
 
    .asset-container-header {
       width: 100%;
