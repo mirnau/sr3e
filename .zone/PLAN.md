@@ -33,6 +33,8 @@
 [x] COULD: Magic Level 5 — sustaining and advanced magic hooks -> .zone/techspecs/TECHSPEC-magic-system.md
 [x] COULD: Chat / socket challenge–response flows -> .zone/techspecs/TECHSPEC-chat-socket-challenge-response.md
 [~] COULD: Vehicle → .zone/techspecs/TECHSPEC-vehicle.md
-[~] COULD: Vehicle rigger — seated/jacked-in garage flow → .zone/techspecs/TECHSPEC-vehicle-rigger.md
-[ ] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md
+[x] COULD: Vehicle rigger — seated/jacked-in garage flow → .zone/techspecs/TECHSPEC-vehicle-rigger.md
+[wontfix] COULD: Uncapped roll as system setting → .zone/techspecs/TECHSPEC-uncapped-roll-system-setting.md
+[x] MUST: Cyberdeck + Hacker Pool (jacked-in, VCR-parallel; Matrix deferred) → .zone/techspecs/TECHSPEC-cyberdeck-hacker-pool.md
+[ ] SHOULD: Strip data-migration code (alpha, no players, no back-compat obligation yet) → .zone/techspecs/TECHSPEC-strip-migration-code.md
 

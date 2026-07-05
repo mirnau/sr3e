@@ -211,3 +211,42 @@ export function buildDicePoolSetup(
         commitFn: async () => {},
     };
 }
+
+type CyberdeckItemLike = {
+    system: { persona?: Record<string, number> };
+};
+
+// Persona stats (Bod/Evasion/Sensor/Masking) live on the jacked-in cyberdeck
+// item, not the actor — unlike buildAttributeSetup, dice come from the
+// deck's own schema. Uses a real, adjustable Target Number (not the open-
+// roll shape buildDicePoolSetup uses) since Matrix Programs apply as TN
+// modifiers — RollComposerComponent hides the whole TN/TN-Modifiers section
+// whenever openTest is set, which would make those modifiers unreachable.
+export function buildCyberdeckStatSetup(
+    deckItem: CyberdeckItemLike,
+    statKey: string,
+    title: string,
+): ProcedureSetup {
+    const dice = Number(deckItem.system?.persona?.[statKey] ?? 0);
+    const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: 4, modifiers: [] };
+
+    return {
+        kind: "attribute",
+        title,
+        rollState,
+        lockPriority: "simple",
+        selfPublish: true,
+        defenseHint: null,
+        exportFn: () => ({
+            familyKey: "cyberdeck",
+            weaponId: null,
+            weaponName: "",
+            plan: null,
+            damage: null,
+            tnBase: 4,
+            tnMods: [],
+            next: { kind: "none", ui: {}, args: {} },
+        }),
+        commitFn: async () => {},
+    };
+}

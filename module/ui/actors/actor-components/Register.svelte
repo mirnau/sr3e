@@ -9,6 +9,7 @@ import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
 import SkillsLanguage from "./skills/SkillsLanguage.svelte";
 import Inventory from "./inventory/Inventory.svelte";
 import Garage from "./Garage.svelte";
+import Matrix from "./Matrix.svelte";
 import Grimoire from "./Grimoire.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
 import RatsRace from "./rats-race/RatsRace.svelte";
@@ -32,6 +33,8 @@ let skillItems = $state<any[]>([]);
 let spellItems = $state<Item[]>([]);
 let transactionItems = $state<Item[]>([]);
 let magicItems = $state<Item[]>([]);
+let cyberdeckItems = $state<Item[]>([]);
+let matrixProgramItems = $state<Item[]>([]);
 
 function rebuildRegisterItems() {
    const items = [...((actor as any).items ?? [])];
@@ -43,6 +46,10 @@ function rebuildRegisterItems() {
       .filter((item: Item) => item.type === "transaction")
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
    magicItems = items.filter((item: Item) => item.type === "magic");
+   cyberdeckItems = items.filter((item: Item) => item.type === "cyberdeck");
+   matrixProgramItems = items
+      .filter((item: Item) => item.type === "matrixprogram")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
 }
 rebuildRegisterItems();
 const onItemChange = (item: any) => {
@@ -75,10 +82,13 @@ const isAwakened = $derived(
    magicItems.length > 0 &&
    !$isBurnedOut,
 );
+const hasCyberdeck = $derived(cyberdeckItems.length > 0);
+const hasMatrixTab = $derived(hasCyberdeck || matrixProgramItems.length > 0);
 
 $effect(() => {
    if (!isRegisterTab($activeTabStore)) $activeTabStore = "active";
    if (!isAwakened && $activeTabStore === "grimoire") $activeTabStore = "active";
+   if (!hasMatrixTab && $activeTabStore === "matrix") $activeTabStore = "active";
 });
 </script>
 
@@ -123,6 +133,14 @@ $effect(() => {
             class:active={$activeTabStore === "garage"}
             onclick={() => ($activeTabStore = "garage")}
          ><span>{localize(CONFIG.SR3E.INVENTORY.garage)}</span></button>
+         {#if hasMatrixTab}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={$activeTabStore === "matrix"}
+               onclick={() => ($activeTabStore = "matrix")}
+            ><span>{localize(CONFIG.SR3E.INVENTORY.matrix)}</span></button>
+         {/if}
          <button
             type="button"
             class="skills-register-tab"
@@ -150,6 +168,8 @@ $effect(() => {
                <Inventory {actor} />
             {:else if $activeTabStore === "garage"}
                <Garage {actor} />
+            {:else if $activeTabStore === "matrix" && hasMatrixTab}
+               <Matrix {actor} cyberdecks={cyberdeckItems} programs={matrixProgramItems} />
             {:else if $activeTabStore === "effects"}
                <ActiveEffectsViewer document={actor} />
             {:else if $activeTabStore === "ratsrace"}

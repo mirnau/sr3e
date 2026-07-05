@@ -1,8 +1,8 @@
 ## Active Feature
-COULD: Vehicle rigger — seated/jacked-in garage flow -> .zone/techspecs/TECHSPEC-vehicle-rigger.md
+none
 
 ## Current Issue
-Grilled and scoped; not yet broken into issues (mat-to-issues pending)
+none
 
 ## Blockers
 none

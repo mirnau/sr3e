@@ -1,5 +1,6 @@
 <script lang="ts">
 import SR3EItem from "../../documents/SR3EItem";
+import FieldLabel from "../common-components/FieldLabel.svelte";
 
 const p = $props<{
     item?: SR3EItem;
@@ -57,7 +58,7 @@ function onKeydown(e: KeyboardEvent) {
 <div class="stat-card stat-field-card labeled-field-card labeled-currency-input" class:inactive={p.disabled}>
     <div class="stat-card-background"></div>
     <div class="title-container">
-        <h4 class="no-margin uppercase">{p.label}</h4>
+        <FieldLabel label={p.label} />
     </div>
     <div class="select-wrapper currency-wrapper">
         <div class="select-background"></div>

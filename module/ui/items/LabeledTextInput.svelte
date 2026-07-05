@@ -1,5 +1,6 @@
 <script lang="ts">
 import SR3EItem from "../../documents/SR3EItem";
+import FieldLabel from "../common-components/FieldLabel.svelte";
 
 let {
     item,
@@ -44,7 +45,7 @@ function onChange(e: Event) {
 <div class="stat-card stat-field-card labeled-field-card labeled-text-input" class:inactive={disabled}>
     <div class="stat-card-background"></div>
     <div class="title-container">
-        <h4 class="no-margin uppercase">{label}</h4>
+        <FieldLabel {label} />
     </div>
     <div class="select-wrapper">
         <div class="select-background"></div>

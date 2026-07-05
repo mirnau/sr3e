@@ -13,6 +13,8 @@ export const MODAL_KEYS = [
   "deleteskilltitle",
   "deletetransaction",
   "deletetransactiontitle",
+  "deletecyberdecktitle",
+  "deletematrixprogramtitle",
   "defaultsubscription",
   "defaultsubscriptiontitle",
   "awakencharacter",

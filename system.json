@@ -25,7 +25,6 @@
     "Actor": {
       "character": {},
       "gamemasterscreen": {},
-      "storytellerscreen": {},
       "broadcaster": {},
       "mechanical": {}
     },
@@ -41,7 +40,9 @@
       "focus": {},
       "gadget": {},
       "medical": {},
-      "vehiclecontrolrig": {}
+      "vehiclecontrolrig": {},
+      "cyberdeck": {},
+      "matrixprogram": {}
     }
   },
   "styles": [

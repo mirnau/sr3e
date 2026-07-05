@@ -43,6 +43,11 @@ export default class ActiveEffectsEditor extends foundry.applications.api.Applic
 
     protected async _renderHTML(): Promise<unknown> { return ""; }
 
+    override async close(options?: DeepPartial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
+        this.#hideImmediately();
+        return super.close(options);
+    }
+
     protected _replaceHTML(_result: unknown, windowContent: HTMLElement): void {
         if (this.#app) { unmount(this.#app); this.#app = undefined; }
         this.#app = mount(ActiveEffectsEditorApp, {
@@ -52,7 +57,15 @@ export default class ActiveEffectsEditor extends foundry.applications.api.Applic
     }
 
     protected async _tearDown(options: DeepPartial<RenderOptions>): Promise<void> {
+        this.#hideImmediately();
         if (this.#app) { await unmount(this.#app); this.#app = undefined; }
         return super._tearDown(options);
+    }
+
+    #hideImmediately(): void {
+        if (!this.element) return;
+        this.element.style.visibility = "hidden";
+        this.element.style.opacity = "0";
+        this.element.style.pointerEvents = "none";
     }
 }

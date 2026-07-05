@@ -37,6 +37,8 @@ import VehicleControlRigModel from "./module/models/items/VehicleControlRigModel
 import VehicleControlRigSheet from "./module/sheets/items/VehicleControlRigSheet";
 import CyberdeckModel from "./module/models/items/CyberdeckModel";
 import CyberdeckSheet from "./module/sheets/items/CyberdeckSheet";
+import MatrixProgramModel from "./module/models/items/MatrixProgramModel";
+import MatrixProgramSheet from "./module/sheets/items/MatrixProgramSheet";
 import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -52,7 +54,7 @@ import { registerDebtInterestHook } from "./module/services/economy/debtInterest
 import { registerDocumentTypeIconHooks } from "./module/foundry/documentTypeIcons";
 import { registerSr3eDocumentTypeIcons } from "./module/foundry/registerSr3eDocumentTypeIcons";
 import { registerVehicleControlRigEssenceHook } from "./module/foundry/vehicleControlRigEssence";
-import { migrateLegacyActorTypes } from "./module/foundry/migrateLegacyActorTypes";
+import { registerCyberdeckEssenceHook } from "./module/foundry/cyberdeckEssence";
 import { applySheetColorSettings, registerSheetColorSettings } from "./module/services/settings/sheetColorSettings";
 import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
 import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/settings/remSizeSettings";
@@ -171,12 +173,6 @@ async function registerHooks(): Promise<void> {
          },
          {
             docClass: Actor,
-            type: typekeys.legacyStorytellerScreen,
-            model: GameMasterScreenModel,
-            sheet: GameMasterScreenSheet,
-         },
-         {
-            docClass: Actor,
             type: typekeys.mechanical,
             model: MechanicalModel,
             sheet: MechanicalSheet,
@@ -259,6 +255,12 @@ async function registerHooks(): Promise<void> {
             model: CyberdeckModel,
             sheet: CyberdeckSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.matrixprogram,
+            model: MatrixProgramModel,
+            sheet: MatrixProgramSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -275,7 +277,6 @@ async function registerHooks(): Promise<void> {
    Hooks.once(hooks.ready, () => {
       applySheetColorSettings();
       applyRemSizeSetting();
-      void migrateLegacyActorTypes();
       getNewsService();
       registerSocketHandlers();
       registerSellerMutationRelay();
@@ -296,6 +297,7 @@ async function registerHooks(): Promise<void> {
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    registerDocumentTypeIconHooks();
    registerVehicleControlRigEssenceHook();
+   registerCyberdeckEssenceHook();
    patchActorCreateDialog();
    console.log("SR3E | preCreateActor hook registered");
 

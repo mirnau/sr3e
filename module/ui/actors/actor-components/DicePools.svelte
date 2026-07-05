@@ -50,6 +50,7 @@ const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurned
 
 const hackingValueMod = storeManager.GetSimpleStatROStore(actor, "dicePools.hacking");
 const hackingSpent = storeManager.GetRWStore<number>(actor, "dicePools.hacking.spent");
+const hackingValue = storeManager.GetRWStore<number>(actor, "dicePools.hacking.value");
 
 const combatAvail = $derived(Math.max(0, $combatValueMod - $combatSpent));
 const controlAvail = $derived(Math.max(0, $controlValueMod - $controlSpent));
@@ -59,6 +60,7 @@ const hackingAvail = $derived(Math.max(0, $hackingValueMod - $hackingSpent));
 const alwaysShowMainPools = $derived($showAllDicePoolsStore);
 
 let hasRiggerInterface = $state(false);
+let hasHackerInterface = $state(false);
 let magicItem = $state<Item | null>(null);
 let focusPools = $state<{ id: string; name: string; available: number }[]>([]);
 
@@ -105,9 +107,19 @@ function rebuildFocusPools() {
 
 rebuildFocusPools();
 
+function rebuildHackerInterface() {
+    const items = [...((actor as any).items ?? [])];
+    const jackedDeck = items.find((item: any) => item.type === "cyberdeck" && item.system?.jackedIn) ?? null;
+    hasHackerInterface = !!jackedDeck;
+    hackingValue.set(jackedDeck ? Number(jackedDeck.system?.derived?.hackingPool ?? 0) : 0);
+}
+
+rebuildHackerInterface();
+
 const onItemChange = (item: any) => {
     if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
     rebuildFocusPools();
+    rebuildHackerInterface();
 };
 
 const createHookId = Hooks.on("createItem", onItemChange);
@@ -221,7 +233,7 @@ $effect(() => {
             </StatCard>
         {/if}
 
-        {#if alwaysShowMainPools}
+        {#if alwaysShowMainPools || hasHackerInterface}
             <StatCard label={localize(localization?.hacking)} onclick={(e) => onPoolCardClick(e, "hacking", localize(localization?.hacking), hackingAvail)}>
                 <span class={poolClass("hacking")}>{hackingAvail}</span>
             </StatCard>

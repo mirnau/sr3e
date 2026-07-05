@@ -1,5 +1,6 @@
 <script lang="ts">
 import SR3EItem from "../../documents/SR3EItem";
+import FieldLabel from "../common-components/FieldLabel.svelte";
 
 let {
     item,
@@ -9,6 +10,7 @@ let {
     path,
     onUpdate,
     disabled = false,
+    step = "1",
 }: {
     item?: SR3EItem;
     key: string;
@@ -17,6 +19,7 @@ let {
     path?: string;
     onUpdate?: (val: number) => void;
     disabled?: boolean;
+    step?: string;
 } = $props();
 
 function onChange(e: Event) {
@@ -32,10 +35,10 @@ function onChange(e: Event) {
 <div class="stat-card stat-field-card labeled-field-card" class:inactive={disabled}>
     <div class="stat-card-background"></div>
     <div class="title-container">
-        <h4 class="no-margin uppercase">{label}</h4>
+        <FieldLabel {label} />
     </div>
     <div class="select-wrapper narrow">
         <div class="select-background"></div>
-        <input type="number" value={value ?? 0} onchange={onChange} {disabled} />
+        <input type="number" {step} value={value ?? 0} onchange={onChange} {disabled} />
     </div>
 </div>

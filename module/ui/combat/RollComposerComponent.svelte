@@ -86,6 +86,7 @@ const defaultingMod = $derived.by<Modifier | null>(() => {
 const modifiers = $derived<Modifier[]>([
     ...baseModifiers,
     ...(defaultingMod ? [defaultingMod] : []),
+    ...composerState.programModifiers,
 ]);
 
 const modifiersTotal = $derived(sumMods(modifiers));
@@ -148,6 +149,7 @@ export function open(newSetup: ProcedureSetup): void {
     isDefaulting = newSetup.itemDefaultsOnRoll ?? false;
     selectedDefaultCandidateId = newSetup.defaultingPreselectedSkillId ?? "";
     composerState.isOpen = true;
+    composerState.programModifiers = [];
     composerState.selectedFocusKey = null;
     composerState.focusAvailable = 0;
     composerState.focusOptions = (newSetup.poolOptions ?? []).map(option => ({
@@ -183,6 +185,7 @@ function onReset(): void {
     composerState.poolAvailable = 0;
     composerState.selectedFocusKey = null;
     composerState.focusAvailable = 0;
+    composerState.programModifiers = [];
 }
 
 function onClose(): void {
@@ -190,6 +193,7 @@ function onClose(): void {
     composerState.selectedPoolKey = null;
     composerState.selectedFocusKey = null;
     composerState.poolAvailableOverrides = null;
+    composerState.programModifiers = [];
     setup = null;
 }
 
@@ -217,6 +221,7 @@ async function onConfirm(): Promise<void> {
     composerState.isOpen = false;
     composerState.selectedPoolKey = null;
     composerState.selectedFocusKey = null;
+    composerState.programModifiers = [];
     setup = null;
 
     const updates: Record<string, unknown> = {};
@@ -400,7 +405,7 @@ onDestroy(() => {
                     <span>Add</span>
                 </button>
                 {#each modifiers as mod (mod.id ?? mod.name)}
-                    {@const isAuto = mod.id === DEFAULTING_MOD_ID}
+                    {@const isAuto = mod.id === DEFAULTING_MOD_ID || mod.id?.startsWith("program-")}
                     <div class="mod-row">
                         <input class="mod-name" bind:value={mod.name} readonly={isAuto} disabled={isAuto} />
                         <div class="composer-counter composer-counter--compact">

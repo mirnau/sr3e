@@ -1,7 +1,7 @@
 # Ideas
 > Captured during work. No commitment. Review with zone:review.
 
-## Inventory weight display on character sheet
+## [done] Inventory weight display on character sheet
 
 Compute total weight of the character's inventory (summed from carried items — likely `load`/weight fields on weapon/ammunition/wearable/gadget items, mirroring the `Load` capacity concept used for vehicles). Display the computed total to the right of the filters on the right side of the character sheet's inventory panel.
 

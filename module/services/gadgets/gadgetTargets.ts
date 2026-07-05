@@ -47,6 +47,11 @@ const GADGET_TARGETS: Record<string, GadgetTargetDefinition> = {
         label: () => localize(CONFIG.SR3E.ACTOR_TYPES.mechanical),
         properties: mechanicalProperties,
     },
+    patch: {
+        itemType: "matrixprogram",
+        label: () => localize(CONFIG.SR3E.GADGET_TYPES.patch),
+        properties: matrixProgramProperties,
+    },
 };
 
 export function gadgetTargetOptions(): { value: string; label: string }[] {
@@ -177,6 +182,18 @@ function mechanicalProperties(): GadgetPropertyOption[] {
         stat("system.mounts.internalFixed.mod", localize(CONFIG.SR3E.MECHANICAL.internalFixed)),
         stat("system.mounts.pintles.mod", localize(CONFIG.SR3E.MECHANICAL.pintles)),
         stat("system.mounts.miniTurrets.mod", localize(CONFIG.SR3E.MECHANICAL.miniTurrets)),
+    ];
+}
+
+// Patch gadgets are deliberately minimal — a Matrix Program is just
+// {name, tnModifier}, so the only stat-mod surfaced here is its own TN
+// modifier. Beyond that, patches lean on the generic ActiveEffects editor
+// (any property, any target) for whatever homebrew behavior a table wants
+// to bolt onto a program, rather than a curated properties list like
+// weapon/wearable gadgets.
+function matrixProgramProperties(): GadgetPropertyOption[] {
+    return [
+        stat("system.tnModifier.mod", localize(CONFIG.SR3E.MATRIX_PROGRAM.tnModifier)),
     ];
 }
 

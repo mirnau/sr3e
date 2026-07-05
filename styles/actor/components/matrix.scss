@@ -1,0 +1,115 @@
+@use "../../mixins.scss" as *;
+@use "../../sheetcard.scss" as *;
+
+// =========================================================
+// Matrix tab — cyberdeck grid/sheet switch and Matrix Program cards
+// =========================================================
+
+.matrix-program-list {
+   display: grid;
+   gap: 0.35rem;
+}
+
+// The .pool-active/.pool-pick-me classes elsewhere in the project only get
+// visible styling via `.attribute-card-outline:has(...)` (roll-composer.scss),
+// which assumes the StatCard/attribute-card DOM structure — this button
+// isn't wrapped in that, so those classes are otherwise inert here. Style
+// the button directly instead.
+.matrix-program-mod {
+   flex: 0 0 auto;
+   white-space: nowrap;
+   transition: box-shadow 0.15s ease, background 0.15s ease;
+
+   &.pool-pick-me {
+      cursor: pointer;
+      animation: pool-pick-me 1.4s ease-in-out infinite;
+   }
+
+   &.pool-active {
+      background: var(--highlight-color-primary);
+      box-shadow: 0 0 8px rgba(0, 255, 200, 0.6);
+   }
+}
+
+// Smaller than the default 7.5rem asset-card thumbnail/8rem card height
+// (inventory.scss) — a Matrix Program is just a name + TN modifier, not
+// worth a full-size icon. Compact the card down to its content height and
+// bottom-align the row so the now-small image sits bottom-left instead of
+// stranded at the top of an otherwise-empty tall card.
+.matrix-program-card {
+   height: auto;
+   align-items: flex-end;
+
+   .image-mask {
+      width: 3rem;
+      height: 3rem;
+   }
+}
+
+// =========================================================
+// Expanded (jacked-in) cyberdeck sheet — same Packery-grid-of-SheetCards
+// recipe as the Garage tab's expanded vehicle sheet (garage.scss), reskinned
+// to the same flat teal/dark/glow family as .asset-card/.skill-card so the
+// Matrix tab reads as one visual family with the rest of the character sheet.
+// =========================================================
+
+.matrix-cyberdeck-sheet {
+   .matrix-grid-sizer,
+   .matrix-gutter-sizer {
+      display: none;
+   }
+
+   .matrix-gutter-sizer {
+      width: 0;
+   }
+
+   .matrix-packery-grid-item {
+      @extend %packery-grid-item-base;
+   }
+
+   .sheet-card-component {
+      padding: 0.125rem;
+   }
+
+   .sheet-card-shadow {
+      display: none;
+   }
+
+   .sheet-card-outline {
+      background: var(--highlight-color-primary);
+      @include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+   }
+
+   .sheet-card-displayarea {
+      background: var(--background-color);
+      box-shadow: inset 0 0 20px var(--highlight-color-primary);
+      @include clipped-corners(0.427rem, 0.427rem, 0.854rem, 0.427rem);
+
+      &::before {
+         display: none;
+      }
+   }
+}
+
+.matrix-sheet-header {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   justify-content: space-between;
+   gap: 0.25rem;
+
+   .matrix-sheet-name {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      text-transform: uppercase;
+      cursor: pointer;
+   }
+}
+
+.matrix-roll-buttons {
+   display: flex;
+   flex-direction: row;
+   gap: 0.5rem;
+   flex-wrap: wrap;
+}

@@ -27,7 +27,7 @@ function updateLevel(value: string) {
 }
 </script>
 
-<ItemSheetWrapper csslayout="triple">
+<ItemSheetWrapper csslayout="double">
     <ItemSheetComponent>
         <Image entity={item} />
         <div class="large-input-wrapper">

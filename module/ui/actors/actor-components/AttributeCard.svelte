@@ -12,6 +12,7 @@ import { claimPendingResponse } from "../../../services/combat/engine/responseIn
 import { submitContestResponse } from "../../../services/combat/engine/contestCoordinator";
 import type { RollSnapshot } from "../../../services/combat/engine/types";
 import type { ProcedureSetup } from "../../../services/combat/procedures/simpleSetups";
+import FieldLabel from "../../common-components/FieldLabel.svelte";
 
 interface Props {
    actor: SR3EActor;
@@ -121,7 +122,7 @@ function decreaseAttribute(): void {
       onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onRollClick(new MouseEvent('click'))}
    >
       <div class="attribute-card-displayarea"></div>
-      <h4 class="attribute-label">{label}</h4>
+      <FieldLabel {label} className="attribute-label" />
       <div class="attribute-value-row">
          {#if showChevrons}
             <button

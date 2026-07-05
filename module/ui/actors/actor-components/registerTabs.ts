@@ -7,6 +7,7 @@ export const registerTabs = [
 	"grimoire",
 	"inventory",
 	"garage",
+	"matrix",
 	"effects",
 	"ratsrace",
 ] as const;
@@ -31,6 +32,7 @@ export function registerTabForItem(item: Item): RegisterTab | null {
 	if (item.type === "skill") return skillTab(item);
 	if (item.type === "spell") return "grimoire";
 	if (item.type === "transaction") return "ratsrace";
+	if (item.type === "cyberdeck" || item.type === "matrixprogram") return "matrix";
 	if (inventoryItemTypes.has(item.type)) return "inventory";
 	return null;
 }

@@ -103,35 +103,23 @@
       "languagePoints": "Language Points"
     },
     "cyberdeck": {
-      "active": "Active",
-      "activeMemory": "ActiveMemory",
-      "activeUsed": "ActiveUsed",
-      "addUtility": "AddUtility",
+      "activeMemory": "Active Memory",
       "bod": "Bod",
       "cyberdeck": "Cyberdeck",
-      "defensive": "Defensive",
-      "deleteUtility": "DeleteUtility",
-      "derived": "Derived",
-      "detectionFactor": "DetectionFactor",
+      "detectionFactor": "Detection Factor",
+      "essenceCost": "Essence Cost",
       "evasion": "Evasion",
-      "hackingPool": "HackingPool",
       "hardening": "Hardening",
-      "ioSpeed": "IoSpeed",
+      "ioSpeed": "I/O Speed",
       "masking": "Masking",
-      "matrixInitiative": "MatrixInitiative",
       "memory": "Memory",
-      "mpcp": "Mpcp",
-      "offensive": "Offensive",
-      "operational": "Operational",
+      "mpcp": "MPCP",
       "persona": "Persona",
-      "personaSum": "PersonaSum",
-      "responseIncrease": "ResponseIncrease",
+      "personaSum": "Persona Sum",
+      "responseIncrease": "Response Increase",
       "sensor": "Sensor",
-      "special": "Special",
-      "storageMemory": "StorageMemory",
-      "storageUsed": "StorageUsed",
-      "utilities": "Utilities",
-      "utilityName": "UtilityName"
+      "sleazeRating": "Sleaze Rating",
+      "storageMemory": "Storage Memory"
     },
     "damageType": {
       "d": "Deadly",
@@ -201,6 +189,7 @@
     },
     "gadgetTypes": {
       "fetish": "Fetish",
+      "patch": "Patch",
       "weapon": "Weapon",
       "wearable": "Wearable"
     },
@@ -251,6 +240,9 @@
       "garagevehicleskill": "Vehicle Skill",
       "garagewrongtype": "Only Mechanical actors can be added to the garage.",
       "inventory": "Inventory",
+      "matrix": "Matrix",
+      "matrixempty": "No cyberdeck owned. Add one to your inventory to jack in.",
+      "matrixopensheet": "Open Deck Sheet",
       "totalweight": "Total Weight"
     },
     "itemTypes": {
@@ -259,6 +251,7 @@
       "focus": "Focus",
       "gadget": "Gadget",
       "magic": "Magic",
+      "matrixprogram": "Matrix Program",
       "medical": "Medical",
       "metatype": "Metatype",
       "skill": "Skill",
@@ -329,6 +322,10 @@
     "magicianTypes": {
       "aspectedmage": "Aspected Mage",
       "fullmage": "Full Mage"
+    },
+    "matrixProgram": {
+      "matrixprogram": "Matrix Program",
+      "tnModifier": "T.N. Modifier"
     },
     "mechanical": {
       "accel": "Acceleration",
@@ -427,6 +424,8 @@
       "decline": "Decline",
       "defaultsubscription": "You are about to default on this payment. It will become a debt.",
       "defaultsubscriptiontitle": "Default on Payment?",
+      "deletecyberdecktitle": "Delete Cyberdeck?",
+      "deletematrixprogramtitle": "Delete Matrix Program?",
       "deleteskill": "Do you want to delete this skill? Spent karma points are not refunded!",
       "deleteskilltitle": "Delete Skill?",
       "deletetransaction": "You are about to delete this. Your GM will be informed.",
@@ -635,6 +634,7 @@
       "damage": "Damage",
       "damageType": "Damage Type",
       "isDefaulting": "Defaulting On Roll",
+      "isSmartlinked": "Smartlink",
       "linkedskill": "Linked Skill",
       "mode": "Mode",
       "range": "Range",

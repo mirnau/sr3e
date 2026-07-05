@@ -1,5 +1,12 @@
 @use "../mixins.scss" as *;
 
+// Generic over-limit indicator (e.g. Persona Sum exceeding MPCP x 3 on the
+// Cyberdeck sheet) — shared across any item sheet that needs to flag a
+// derived value has gone out of bounds.
+.warning {
+	color: var(--danger-color, #ff4b6e);
+}
+
 // Fake shadow mixin
 @mixin fake-shadow($color) {
 	position: absolute;

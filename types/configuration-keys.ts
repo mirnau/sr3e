@@ -15,7 +15,6 @@ export const typekeys = Object.freeze({
   character: "character",
   broadcaster: "broadcaster",
   gamemasterscreen: "gamemasterscreen",
-  legacyStorytellerScreen: "storytellerscreen",
   mechanical: "mechanical",
   metatype: "metatype",
   skill: "skill",
@@ -30,6 +29,7 @@ export const typekeys = Object.freeze({
   medical: "medical",
   vehiclecontrolrig: "vehiclecontrolrig",
   cyberdeck: "cyberdeck",
+  matrixprogram: "matrixprogram",
 } as const);
 
 export const flags = Object.freeze({

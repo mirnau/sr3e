@@ -4,6 +4,7 @@
  * Used for dice pools, movement, health stats, and similar displays.
  */
 import type { Snippet } from "svelte";
+import FieldLabel from "../../common-components/FieldLabel.svelte";
 
 interface Props {
    label: string;
@@ -25,7 +26,7 @@ let { label, children, onclick }: Props = $props();
          onkeydown={onclick ? (e) => (e.key === 'Enter' || e.key === ' ') && onclick(new MouseEvent('click')) : undefined}
       >
          <div class="attribute-card-displayarea"></div>
-         <h4 class="attribute-label">{label}</h4>
+         <FieldLabel {label} className="attribute-label" />
          <div class="attribute-value-row">
             {#if children}
                {@render children()}

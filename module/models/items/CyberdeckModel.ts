@@ -1,6 +1,5 @@
 import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
-import CyberdeckUtilityModel from "./item-components/CyberdeckUtility";
 
 type CyberdeckSchema = {
   mpcp: NumberField;
@@ -10,6 +9,8 @@ type CyberdeckSchema = {
     masking: NumberField;
     sensor: NumberField;
   }>;
+  sleazeRating: NumberField;
+  essenceCost: NumberField;
   stats: SchemaField<{
     hardening: NumberField;
     ioSpeed: NumberField;
@@ -23,10 +24,10 @@ type CyberdeckSchema = {
     detectionFactor: NumberField;
     hackingPool: NumberField;
   }>;
-  utilities: ArrayField<EmbeddedDataField<typeof CyberdeckUtilityModel>>;
   journalId: StringField;
   portability: EmbeddedDataField<typeof PortabilityModel>;
   commodity: EmbeddedDataField<typeof CommodityModel>;
+  jackedIn: BooleanField;
 };
 
 export default class CyberdeckModel extends foundry.abstract.TypeDataModel<CyberdeckSchema, BaseItem> {
@@ -39,6 +40,8 @@ export default class CyberdeckModel extends foundry.abstract.TypeDataModel<Cyber
         masking: ratingField(0),
         sensor: ratingField(0),
       }),
+      sleazeRating: ratingField(0),
+      essenceCost: new NumberField({ required: true, initial: 0 }),
       stats: new SchemaField({
         hardening: ratingField(0),
         ioSpeed: positiveInteger(0),
@@ -52,10 +55,10 @@ export default class CyberdeckModel extends foundry.abstract.TypeDataModel<Cyber
         detectionFactor: positiveInteger(0),
         hackingPool: positiveInteger(0),
       }),
-      utilities: new ArrayField(new EmbeddedDataField(CyberdeckUtilityModel), { initial: [] }),
       journalId: new StringField({ required: true, initial: "" }),
       portability: new EmbeddedDataField(PortabilityModel),
       commodity: new EmbeddedDataField(CommodityModel),
+      jackedIn: new BooleanField({ required: true, initial: false }),
     };
   }
 }

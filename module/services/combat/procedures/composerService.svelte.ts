@@ -1,4 +1,5 @@
 import type { ProcedureSetup } from "./simpleSetups";
+import type { Modifier } from "../engine/types";
 
 export const COMPOSER_KEY = "sr3e:composer";
 
@@ -14,6 +15,11 @@ class ComposerStateImpl {
     focusAvailable = $state(0);
     focusOptions = $state<{ key: string; label: string; available: number }[]>([]);
     poolAvailableOverrides = $state<Record<string, number> | null>(null);
+    // Toggled on/off from outside the composer (e.g. Matrix Program cards in
+    // Matrix.svelte) while it's open — merged into RollComposerComponent's
+    // TN Modifiers list, since there's no ActiveEffect/gadget path that can
+    // reach a TN modifier for these.
+    programModifiers = $state<Modifier[]>([]);
 }
 
 export type ComposerState = ComposerStateImpl;
@@ -27,6 +33,14 @@ export function getComposerState(actorId: string): ComposerStateImpl {
 
 export function clearComposerState(actorId: string): void {
     stateMap.delete(actorId);
+}
+
+export function toggleComposerProgramModifier(actorId: string, modifier: Modifier): void {
+    const state = getComposerState(actorId);
+    const exists = state.programModifiers.some(m => m.id === modifier.id);
+    state.programModifiers = exists
+        ? state.programModifiers.filter(m => m.id !== modifier.id)
+        : [...state.programModifiers, modifier];
 }
 
 // Per-actor open-fn registry — lets service code (defenderFlow, resistanceHandler)

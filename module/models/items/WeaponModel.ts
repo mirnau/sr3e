@@ -19,6 +19,7 @@ type WeaponSchema = {
   journalId: StringField;
   ammoId: StringField;
   isDefaulting: BooleanField;
+  isSmartlinked: BooleanField;
   rangeBand: EmbeddedDataField<typeof RangeBandModel>;
   roll: EmbeddedDataField<typeof RollDataModel>;
   portability: EmbeddedDataField<typeof PortabilityModel>;
@@ -76,6 +77,10 @@ export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSc
         initial: "",
       }),
       isDefaulting: new BooleanField({
+        required: true,
+        initial: false,
+      }),
+      isSmartlinked: new BooleanField({
         required: true,
         initial: false,
       }),

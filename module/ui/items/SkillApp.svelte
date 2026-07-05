@@ -4,8 +4,8 @@
    import Image from "../common-components/Image.svelte";
    import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
    import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-   import StatCard from "../common-components/StatCard.svelte";
    import JournalViewer from "../common-components/JournalViewer.svelte";
+   import LabeledDropdown from "./LabeledDropdown.svelte";
 
    let { item: _item }: { item: Item } = $props();
    const item = untrack(() => _item);
@@ -20,6 +20,20 @@
 
    const attributeKeys = ["body", "quickness", "strength", "charisma", "intelligence", "willpower", "reaction"];
    const dicePoolKeys = ["astral", "combat", "hacking", "control", "spell"];
+   const iconRoot = "systems/sr3e/textures/svgrepo";
+   const defaultSkillIcons = new Set([
+      "icons/svg/item-bag.svg",
+      `${iconRoot}/action-solid-svgrepo-com.svg`,
+      `${iconRoot}/lightbulb-power-svgrepo-com.svg`,
+      `${iconRoot}/language-svgrepo-com.svg`,
+   ]);
+
+   const skillIcons = {
+      active: `${iconRoot}/action-solid-svgrepo-com.svg`,
+      knowledge: `${iconRoot}/lightbulb-power-svgrepo-com.svg`,
+      language: `${iconRoot}/language-svgrepo-com.svg`,
+   };
+   const sheetLayout = $derived(skillType === "active" ? "double" : "single");
 
    const typeOptions = [
       { value: "active",    label: localize(CONFIG.SR3E.SKILL?.active) },
@@ -39,11 +53,13 @@
 
    function updateSkillType(type: "active" | "knowledge" | "language") {
       skillType = type;
-      item.update({ "system.skillType": type });
+      const updates: Record<string, string> = { "system.skillType": type };
+      if (!item.img || defaultSkillIcons.has(item.img)) updates.img = skillIcons[type];
+      item.update(updates);
    }
 </script>
 
-<ItemSheetWrapper csslayout="single">
+<ItemSheetWrapper csslayout={sheetLayout}>
    <ItemSheetComponent>
       <Image entity={item} />
       <div class="large-input-wrapper">
@@ -57,39 +73,40 @@
          />
       </div>
 
-      <div class="stat-grid single-column">
-         <StatCard
-            {item}
-            key="skillType"
-            label={localize(CONFIG.SR3E.SKILL?.skill)}
-            value={skillType}
-            type="select"
-            options={typeOptions}
-            onUpdate={(val) => updateSkillType(val as "active" | "knowledge" | "language")}
-         />
-         {#if skillType === "active"}
-            <StatCard
+      <LabeledDropdown
+         {item}
+         key="skillType"
+         label={localize(CONFIG.SR3E.SKILL?.skill)}
+         value={skillType}
+         path="system"
+         options={typeOptions}
+         onUpdate={(val) => updateSkillType(val as "active" | "knowledge" | "language")}
+      />
+   </ItemSheetComponent>
+
+   {#if skillType === "active"}
+      <ItemSheetComponent>
+         <h3>{localize(CONFIG.SR3E.SKILL?.active)}</h3>
+         <div class="stat-grid single-column">
+            <LabeledDropdown
                {item}
                key="linkedAttribute"
                label={localize(CONFIG.SR3E.SKILL?.linkedAttribute)}
                value={system.activeSkill.linkedAttribute}
                path="system.activeSkill"
-               type="select"
                options={attributeOptions}
-               placeholder={localize(CONFIG.SR3E.SKILL?.linkedAttribute)}
             />
-            <StatCard
+            <LabeledDropdown
                {item}
                key="associatedDicePool"
                label={localize(CONFIG.SR3E.DICE_POOLS?.dicePools)}
                value={system.activeSkill.associatedDicePool}
                path="system.activeSkill"
-               type="select"
                options={dicePoolOptions}
             />
-         {/if}
-      </div>
-   </ItemSheetComponent>
+         </div>
+      </ItemSheetComponent>
+   {/if}
 
    <JournalViewer document={item} config={CONFIG.SR3E} />
 </ItemSheetWrapper>

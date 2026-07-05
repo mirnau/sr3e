@@ -74,10 +74,11 @@ function onTargetChange(val: string) {
 
 function updateChange(index: number, field: string, value: unknown) {
     changes = changes.map((c, i) => i === index ? { ...c, [field]: value } : c);
+    void commit();
 }
 
-function addChange() { changes = [...changes, { key: "", type: "add", value: "", priority: 0 }]; }
-function deleteChange(index: number) { changes = changes.filter((_, i) => i !== index); }
+function addChange() { changes = [...changes, { key: "", type: "add", value: "", priority: 0 }]; void commit(); }
+function deleteChange(index: number) { changes = changes.filter((_, i) => i !== index); void commit(); }
 </script>
 
 <div class="effects-editor">

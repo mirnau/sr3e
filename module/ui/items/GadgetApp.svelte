@@ -10,19 +10,33 @@ import Portability from "../common-components/Portability.svelte";
 import ActiveEffectsViewer from "../common-components/ActiveEffectsViewer.svelte";
 import JournalViewer from "../common-components/JournalViewer.svelte";
 import { gadgetTargetOptions, normalizeGadgetTargetItemType } from "../../services/gadgets/gadgetTargets";
+import { gadgetTargetIcon, isDefaultGadgetIcon } from "../../services/gadgets/gadgetIcons";
 
 const p = $props<{ item: Item }>();
 const item = untrack(() => p.item);
 const system = item.system as Record<string, any>;
 
 let name = $state(item.name as string);
+let imageSrc = $state(item.img ?? "");
 const typeOptions = gadgetTargetOptions();
-const gadgetType = normalizeGadgetTargetItemType(system.type);
+let gadgetType = $state(normalizeGadgetTargetItemType(system.type));
+
+function updateGadgetType(type: string): void {
+    const normalized = normalizeGadgetTargetItemType(type);
+    gadgetType = normalized;
+
+    const updates: Record<string, string> = { "system.type": normalized };
+    if (isDefaultGadgetIcon(item.img)) {
+        updates.img = gadgetTargetIcon(normalized);
+        imageSrc = updates.img;
+    }
+    item.update(updates);
+}
 </script>
 
 <ItemSheetWrapper csslayout="triple">
     <ItemSheetComponent>
-        <Image entity={item} />
+        <Image entity={item} src={imageSrc} />
         <div class="large-input-wrapper">
             <div class="large-input-background"></div>
             <input
@@ -34,7 +48,15 @@ const gadgetType = normalizeGadgetTargetItemType(system.type);
             />
         </div>
         <div class="stat-grid single-column">
-            <LabeledDropdown {item} key="type" label={localize(CONFIG.SR3E.GADGET.type)} value={gadgetType} path="system" options={typeOptions} />
+            <LabeledDropdown
+                {item}
+                key="type"
+                label={localize(CONFIG.SR3E.GADGET.type)}
+                value={gadgetType}
+                path="system"
+                options={typeOptions}
+                onUpdate={updateGadgetType}
+            />
         </div>
     </ItemSheetComponent>
 

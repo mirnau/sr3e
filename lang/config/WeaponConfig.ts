@@ -2,7 +2,7 @@ export const WEAPON_KEYS = [
   "weapon", "weaponStats", "damage", "damageType", "mode", "ammunitionClass",
   "range", "recoilCompensation", "reloadMechanism",
   "rangeband", "rangebandshort", "rangebandmedium", "rangebandlong", "rangebandextreme",
-  "linkedskill", "isDefaulting",
+  "linkedskill", "isDefaulting", "isSmartlinked",
 ] as const;
 
 export const COMMODITY_KEYS = [
@@ -37,5 +37,5 @@ export const LEGAL_PRIORITY_KEYS = ["1", "2", "3", "4", "X"] as const;
 export const ITEM_TYPE_KEYS = [
   "metatype", "magic", "weapon", "ammunition", "skill", "transaction",
   "wearable", "vehiclecontrolrig", "spell", "focus", "gadget", "medical",
-  "cyberdeck",
+  "cyberdeck", "matrixprogram",
 ] as const;

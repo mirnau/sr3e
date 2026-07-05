@@ -87,6 +87,14 @@ onDestroy(() => {
             />
         </div>
 
+        <LabeledBoolean
+            {item}
+            key="isSmartlinked"
+            label={localize(CONFIG.SR3E.WEAPON.isSmartlinked)}
+            value={system.isSmartlinked ?? false}
+            path="system"
+        />
+
         {#if (item as any).parent}
             <LabeledDropdown
                 {item}
