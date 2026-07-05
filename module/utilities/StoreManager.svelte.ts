@@ -121,10 +121,19 @@ export class StoreManager implements IStoreManager {
     hooks.push({ event: updateEvent, id: updateHookId });
 
     for (const effectEvent of ["createActiveEffect", "updateActiveEffect", "deleteActiveEffect"]) {
+      // Deferred to a microtask: this hook fires *before* Foundry bubbles the
+      // change up to the owning actor's _onUpdateDescendantDocuments, which is
+      // what actually calls actor.reset()/prepareDerivedData(). Reading
+      // freshDoc synchronously here would see pre-recalculation values (e.g. a
+      // transfer effect's contribution to system.attributes.essence.mod).
+      // That bubble-and-reset happens later in the same synchronous flow, so
+      // queueMicrotask is enough to land after it without a visible delay.
       const effectHookId = Hooks.on(effectEvent, (effect: any) => {
-        const freshDoc = this.#affectedDocumentFromEffect(document, effect);
-        if (!freshDoc) return;
-        this.#handleDocumentUpdate(document, {}, freshDoc);
+        queueMicrotask(() => {
+          const freshDoc = this.#affectedDocumentFromEffect(document, effect);
+          if (!freshDoc) return;
+          this.#handleDocumentUpdate(document, {}, freshDoc);
+        });
       });
       hooks.push({ event: effectEvent, id: effectHookId });
     }

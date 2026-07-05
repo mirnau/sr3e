@@ -123,7 +123,7 @@ describe("StoreManager — hook matching survives token-scoped UUIDs", () => {
         storeManager.Unsubscribe(subject);
     });
 
-    it("refreshes SimpleStat totals when an ActiveEffect changes on the actor", () => {
+    it("refreshes SimpleStat totals when an ActiveEffect changes on the actor", async () => {
         const Hooks = mockHooks();
         const actor = actorDocument("Actor.a1", "a1");
         const storeManager = StoreManager.Instance;
@@ -134,6 +134,12 @@ describe("StoreManager — hook matching survives token-scoped UUIDs", () => {
 
         actor.system.attributes.essence.mod = -2;
         Hooks.callAll("createActiveEffect", { parent: actor });
+
+        // The read-back is deferred a microtask past the hook — Foundry
+        // itself doesn't recalculate derived data (actor.reset()) until
+        // after this hook fires, so StoreManager waits one tick to avoid
+        // reading pre-recalculation values.
+        await Promise.resolve();
 
         expect(get(essence)).toBe(4);
         expect(actor.update).not.toHaveBeenCalled();

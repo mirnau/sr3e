@@ -43,10 +43,15 @@ const isDerivedAttribute = $derived(
 );
 const canRoll = attributeKey !== "essence" && attributeKey !== "magic" && attributeKey !== "initiative";
 const isKarmaMode = $derived($isShoppingState && !$isCharacterCreation);
-const displayValue = $derived(
+const rawDisplayValue = $derived(
     isKarmaMode && $attrKarmaSession?.active
         ? ($attrKarmaSession.attrSnapshot[attributeKey] ?? $attributeValueStore) + ($attrKarmaSession.stagedDeltas?.[attributeKey] ?? 0)
         : $attributeTotalStore
+);
+// Essence is the one attribute expressed to a decimal place (see EssenceStat)
+// — summing its .value and .mod as floats can land on e.g. 5.699999999999999.
+const displayValue = $derived(
+    attributeKey === "essence" ? rawDisplayValue.toFixed(1) : rawDisplayValue
 );
 const showChevrons = $derived(
    !isDerivedAttribute && (

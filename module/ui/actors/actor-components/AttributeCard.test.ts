@@ -37,6 +37,6 @@ describe("AttributeCard", () => {
             },
         });
 
-        expect(screen.getByText("4")).toBeTruthy();
+        expect(screen.getByText("4.0")).toBeTruthy();
     });
 });
