@@ -8,6 +8,6 @@
     transition: filter 0.5s ease-out;
 
     &.sr3e-window-unfocused {
-        filter: saturate(0.2) blur(4px);
+        filter: saturate(0.2) blur(var(--sr3e-window-focus-blur, 2px));
     }
 }

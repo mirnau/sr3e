@@ -58,6 +58,7 @@ import { registerCyberdeckEssenceHook } from "./module/foundry/cyberdeckEssence"
 import { applySheetColorSettings, registerSheetColorSettings } from "./module/services/settings/sheetColorSettings";
 import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
 import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/settings/remSizeSettings";
+import { applyWindowFocusBlurSetting, registerWindowFocusBlurSettings } from "./module/services/settings/windowFocusBlurSettings";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -149,6 +150,7 @@ async function registerHooks(): Promise<void> {
       registerSheetColorSettings();
       registerRemSizeSettings();
       registerDicePoolVisibilitySettings();
+      registerWindowFocusBlurSettings();
 
       // Dynamic imports AFTER configure() has run
 
@@ -277,6 +279,7 @@ async function registerHooks(): Promise<void> {
    Hooks.once(hooks.ready, () => {
       applySheetColorSettings();
       applyRemSizeSetting();
+      applyWindowFocusBlurSetting();
       getNewsService();
       registerSocketHandlers();
       registerSellerMutationRelay();
