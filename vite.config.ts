@@ -33,6 +33,7 @@ export default defineConfig({
     minify: "esbuild",
     outDir: "build",
     emptyOutDir: false,
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       input: {
         bundle: path.resolve(projectRoot, "sr3e.ts"),
