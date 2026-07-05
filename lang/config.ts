@@ -17,7 +17,7 @@ import {
   SPELL_MANIPULATION_SUBTYPE_KEYS,
   SPELL_DURATION_KEYS, SPELL_RANGE_KEYS, SPELL_TARGETING_KEYS,
   SPELL_THRESHOLD_MODE_KEYS, SPELL_DRAIN_LEVEL_KEYS, FOCUS_TYPE_KEYS,
-  SPELL_EFFECT_ALGORITHM_KEYS, SPELL_EFFECT_SCOPE_KEYS,
+  SPELL_EFFECT_ALGORITHM_KEYS, SPELL_EFFECT_SCOPE_KEYS, ADEPT_POWER_KEYS,
 } from "./config/MagicConfig";
 import { INVENTORY_KEYS } from "./config/InventoryConfig";
 import { GADGET_KEYS, GADGET_TYPE_KEYS, EFFECTS_KEYS } from "./config/GadgetConfig";
@@ -84,6 +84,7 @@ export const sr3e = {
   TRADITIONS: createCategory("traditions", TRADITION_KEYS),
   SPELL_TYPES: createCategory("spellTypes", SPELL_TYPE_KEYS),
   SPELL_CATEGORIES: createCategory("spellCategories", SPELL_CATEGORY_KEYS),
+  ADEPT_POWER: createCategory("adeptPower", ADEPT_POWER_KEYS),
   SPELL_MANIPULATION_SUBTYPES: createCategory("spellManipulationSubtypes", SPELL_MANIPULATION_SUBTYPE_KEYS),
   SPELL_DURATIONS: createCategory("spellDurations", SPELL_DURATION_KEYS),
   SPELL_RANGES: createCategory("spellRanges", SPELL_RANGE_KEYS),

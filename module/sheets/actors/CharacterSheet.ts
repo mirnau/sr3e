@@ -12,6 +12,7 @@ import { actorMagicItems, awakenActor, confirmAwakening, isMagicItem } from "../
 import { mutateMetatype } from "../../services/metatype/mutateMetatype";
 import { commodityPrice, hasCommodityComponent, hasCommodityProfile } from "../../services/economy/purchase";
 import { initiatePurchase } from "../../services/economy/purchaseOfferFlow";
+import { getAdeptMagicItem, spendPowerPoints } from "../../services/magic/adeptPowerPoints";
 import { localize } from "../../services/utilities";
 
 export default class CharacterActorSheet extends SR3EActorBase {
@@ -187,6 +188,27 @@ export default class CharacterActorSheet extends SR3EActorBase {
             await awakenActor(actor);
             await persistRegisterTab(actor, "grimoire");
             return created;
+        }
+
+        if (item?.type === "spell" && getAdeptMagicItem(actor as any)) {
+            ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.adeptscannotlearnspells));
+            return;
+        }
+
+        if (item?.type === "adeptpower") {
+            if (!getAdeptMagicItem(actor as any)) {
+                ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.notanadept));
+                return;
+            }
+            const cost = Number((item.system as any)?.powerPointCost ?? 0);
+            const spent = await spendPowerPoints(actor as any, cost);
+            if (!spent) {
+                ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.insufficientpowerpoints));
+                return;
+            }
+            await persistRegisterTab(actor, "grimoire");
+            // @ts-expect-error — Foundry v13 _onDropItem signature not fully typed
+            return super._onDropItem(event, data);
         }
 
         if (item?.type === "skill") {

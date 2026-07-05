@@ -36,6 +36,7 @@ export function registerSr3eDocumentTypeIcons(): void {
 	registerDocumentTypeIcon("Item", typekeys.vehiclecontrolrig, svg("plugin-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.cyberdeck, svg("computer-chip-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.matrixprogram, svg("matrix-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.adeptpower, svg("rune-svgrepo-com.svg"));
 	registerDocumentTypeIconRule(
 		"Item",
 		typekeys.skill,

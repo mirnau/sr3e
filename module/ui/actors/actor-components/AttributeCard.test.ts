@@ -17,7 +17,10 @@ function actor() {
         id: "a1",
         documentName: "Actor",
         system: {
-            attributes: { essence: { value: 6, mod: -2 } },
+            attributes: {
+                essence: { value: 6, mod: -2 },
+                magic: { value: 6 },
+            },
             creation: { attributePoints: 0 },
         },
         getFlag: vi.fn(),
@@ -38,5 +41,17 @@ describe("AttributeCard", () => {
         });
 
         expect(screen.getByText("4.0")).toBeTruthy();
+    });
+
+    it("treats Magic as a rollable attribute", () => {
+        render(AttributeCard, {
+            props: {
+                actor: actor() as never,
+                attributeKey: "magic",
+                label: "Magic",
+            },
+        });
+
+        expect(screen.getByRole("button", { name: /magic/i })).toBeTruthy();
     });
 });

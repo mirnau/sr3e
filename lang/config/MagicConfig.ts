@@ -43,3 +43,10 @@ export const SPELL_EFFECT_ALGORITHM_KEYS = [
   "barrierStep", "levitateSpeed", "magicFingers", "detectionRange", "permanentTimeDivisor",
 ] as const;
 export const SPELL_EFFECT_SCOPE_KEYS = ["caster", "target"] as const;
+
+export const ADEPT_POWER_KEYS = [
+  "adeptpower", "isActive", "hasDrain", "powerPointCost", "rating",
+  "tnModifiers", "addRow", "removeRow",
+  "targetKind", "targetId", "modifier", "skill", "attribute", "passive",
+  "buyPowerPoints", "spendPowerPoints", "powerPointsAvailable",
+] as const;

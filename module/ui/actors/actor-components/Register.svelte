@@ -31,6 +31,7 @@ onDestroy(() => {
 
 let skillItems = $state<any[]>([]);
 let spellItems = $state<Item[]>([]);
+let adeptPowerItems = $state<Item[]>([]);
 let transactionItems = $state<Item[]>([]);
 let magicItems = $state<Item[]>([]);
 let cyberdeckItems = $state<Item[]>([]);
@@ -41,6 +42,9 @@ function rebuildRegisterItems() {
    skillItems = items.filter((item: Record<string, unknown>) => item.type === "skill");
    spellItems = items
       .filter((item: Item) => item.type === "spell")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   adeptPowerItems = items
+      .filter((item: Item) => item.type === "adeptpower")
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
    transactionItems = items
       .filter((item: Item) => item.type === "transaction")
@@ -163,7 +167,7 @@ $effect(() => {
             {:else if $activeTabStore === "language"}
                <SkillsLanguage {actor} skills={languageSkills} />
             {:else if $activeTabStore === "grimoire" && isAwakened}
-               <Grimoire {actor} spells={spellItems} />
+               <Grimoire {actor} items={[...spellItems, ...adeptPowerItems]} />
             {:else if $activeTabStore === "inventory"}
                <Inventory {actor} />
             {:else if $activeTabStore === "garage"}

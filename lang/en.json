@@ -9,6 +9,25 @@
       "gamemasterscreen": "Game Master's Screen",
       "mechanical": "Mechanical"
     },
+    "adeptPower": {
+      "addRow": "Add Row",
+      "adeptpower": "Adept Power",
+      "attribute": "Attribute",
+      "buyPowerPoints": "Buy Power Points",
+      "hasDrain": "Has Drain",
+      "isActive": "Active",
+      "modifier": "TN Modifier",
+      "passive": "Passive",
+      "powerPointCost": "Power Point Cost",
+      "powerPointsAvailable": "Power Points",
+      "rating": "Rating",
+      "removeRow": "Remove",
+      "skill": "Skill",
+      "spendPowerPoints": "Spend Power Points",
+      "targetId": "Target",
+      "targetKind": "Target Kind",
+      "tnModifiers": "TN Modifiers"
+    },
     "ammunition": {
       "ammunition": "Ammunition",
       "class": "Weapon Class",
@@ -246,6 +265,7 @@
       "totalweight": "Total Weight"
     },
     "itemTypes": {
+      "adeptpower": "Adept Power",
       "ammunition": "Ammunition",
       "cyberdeck": "Cyberdeck",
       "focus": "Focus",
@@ -417,6 +437,7 @@
       "weight": "Weight"
     },
     "modal": {
+      "adeptscannotlearnspells": "Adepts cannot learn spells.",
       "awakencharacter": "Do you want {name} to awaken with {magic}?",
       "awakencharactertitle": "Awaken Character?",
       "cancel": "Cancel",
@@ -436,7 +457,9 @@
       "goblinizecharactertitle": "Goblinize Character?",
       "grantfree": "Grant Free",
       "insufficientfunds": "This credit stick doesn't have enough nuyen to cover this purchase.",
+      "insufficientpowerpoints": "Not enough Power Points to purchase this power.",
       "missingmetatype": "{name} has no metatype to replace.",
+      "notanadept": "Only an Adept can learn adept powers.",
       "payupfront": "Pay Upfront",
       "recommendedprice": "Recommended Price",
       "registerdebt": "Register Debt",

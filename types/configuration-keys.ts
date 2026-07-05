@@ -30,6 +30,7 @@ export const typekeys = Object.freeze({
   vehiclecontrolrig: "vehiclecontrolrig",
   cyberdeck: "cyberdeck",
   matrixprogram: "matrixprogram",
+  adeptpower: "adeptpower",
 } as const);
 
 export const flags = Object.freeze({

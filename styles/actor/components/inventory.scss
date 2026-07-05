@@ -126,6 +126,22 @@
          text-shadow: 0 0 6px var(--accent-color-tertiary);
       }
    }
+
+   .grimoire-power-points {
+      flex: 1 1 auto;
+      text-align: center;
+      white-space: nowrap;
+      color: var(--accent-color-tertiary);
+   }
+
+   .grimoire-buy-power-points {
+      color: var(--accent-color-tertiary);
+      text-shadow: 0 0 6px var(--accent-color-tertiary);
+
+      & + .grimoire-buy-power-points {
+         margin-left: 0.25rem;
+      }
+   }
 }
 
 .asset-category-container {

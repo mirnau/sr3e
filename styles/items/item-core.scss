@@ -252,5 +252,9 @@ form.application.sheet.staticlayout {
         .sr3e-waterfall--triple .item-sheet-component.span-two {
             grid-column: span 2;
         }
+
+        .sr3e-waterfall--triple .item-sheet-component.span-all {
+            grid-column: span 3;
+        }
     }
 }

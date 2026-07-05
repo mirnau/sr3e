@@ -2,7 +2,6 @@ import CommodityModel from "./item-components/Commodity";
 import PortabilityModel from "./item-components/Portability";
 import RangeBandModel from "./item-components/RangeBand";
 import RollDataModel from "./item-components/RollData";
-import { modifiableNumber } from "../common/modifiableNumber";
 import ModifiableNumberModel from "./item-components/ModifiableNumber";
 
 type WeaponSchema = {
@@ -27,13 +26,6 @@ type WeaponSchema = {
 };
 
 export default class WeaponModel extends foundry.abstract.TypeDataModel<WeaponSchema, BaseItem> {
-  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
-    source.damage = modifiableNumber(source.damage);
-    source.range = modifiableNumber(source.range);
-    source.recoilComp = modifiableNumber(source.recoilComp);
-    return (foundry.abstract.TypeDataModel as any).migrateData.call(this, source);
-  }
-
   static defineSchema(): WeaponSchema {
     return {
       mode: new StringField({

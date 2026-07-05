@@ -23,20 +23,6 @@ export default class CharacterModel extends foundry.abstract.TypeDataModel<
   CharacterSchema,
   BaseActor
 > {
-  // garage used to be a bare array of vehicle-actor UUID strings; it's now
-  // an array of {uuid, seated, vcrId, jackedIn} entries. Without this,
-  // pre-existing string entries fail EmbeddedDataField casting and the
-  // whole array silently resets to [] on load — see the "drop does nothing"
-  // bug in the vehicle-rigger feature.
-  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
-    if (Array.isArray(source.garage)) {
-      source.garage = source.garage.map((entry) =>
-        typeof entry === "string" ? { uuid: entry, seated: false, vcrId: "", jackedIn: false } : entry
-      );
-    }
-    return super.migrateData(source);
-  }
-
   static defineSchema(): CharacterSchema {
     return {
       attributes: new EmbeddedDataField(AttributesModel),

@@ -41,7 +41,7 @@ const isDerivedAttribute = $derived(
    attributeKey === "magic" ||
    attributeKey === "initiative"
 );
-const canRoll = attributeKey !== "essence" && attributeKey !== "magic" && attributeKey !== "initiative";
+const canRoll = attributeKey !== "essence" && attributeKey !== "initiative";
 const isKarmaMode = $derived($isShoppingState && !$isCharacterCreation);
 const rawDisplayValue = $derived(
     isKarmaMode && $attrKarmaSession?.active

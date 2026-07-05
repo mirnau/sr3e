@@ -29,5 +29,8 @@ export const MODAL_KEYS = [
   "payupfront",
   "registerdebt",
   "grantfree",
-  "insufficientfunds"
+  "insufficientfunds",
+  "notanadept",
+  "insufficientpowerpoints",
+  "adeptscannotlearnspells"
 ] as const;

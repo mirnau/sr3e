@@ -6,20 +6,6 @@ export default class MechanicalModel extends foundry.abstract.TypeDataModel<
   MechanicalSchema,
   BaseActor
 > {
-  // speed was split into three concepts: currentSpeed (live speed during a
-  // chase, e.g. for Maneuver Score's Speed Points), speedRating (the rated
-  // safe top speed — SR3's stat-block "Speed"), and maxSpeed (renamed from
-  // speedMax, the absolute technical ceiling above the safe rating).
-  static migrateData(source: Record<string, unknown>): Record<string, unknown> {
-    if (source.speed !== undefined && source.currentSpeed === undefined) {
-      source.currentSpeed = source.speed;
-    }
-    if (source.speedMax !== undefined && source.maxSpeed === undefined) {
-      source.maxSpeed = source.speedMax;
-    }
-    return super.migrateData(source);
-  }
-
   static defineSchema(): MechanicalSchema {
     return {
       category: new StringField({

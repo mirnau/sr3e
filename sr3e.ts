@@ -39,6 +39,8 @@ import CyberdeckModel from "./module/models/items/CyberdeckModel";
 import CyberdeckSheet from "./module/sheets/items/CyberdeckSheet";
 import MatrixProgramModel from "./module/models/items/MatrixProgramModel";
 import MatrixProgramSheet from "./module/sheets/items/MatrixProgramSheet";
+import AdeptPowerModel from "./module/models/items/AdeptPowerModel";
+import AdeptPowerSheet from "./module/sheets/items/AdeptPowerSheet";
 import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -262,6 +264,12 @@ async function registerHooks(): Promise<void> {
             type: typekeys.matrixprogram,
             model: MatrixProgramModel,
             sheet: MatrixProgramSheet,
+         },
+         {
+            docClass: Item,
+            type: typekeys.adeptpower,
+            model: AdeptPowerModel,
+            sheet: AdeptPowerSheet,
          },
       ] satisfies SR3EDocumentRegistration[]);
 

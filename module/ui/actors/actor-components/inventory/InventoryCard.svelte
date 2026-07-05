@@ -5,6 +5,7 @@ import { localize } from "../../../../services/utilities";
 import { reloadWeapon } from "../../../../services/combat/procedures/ammoService";
 import { buildWeaponAttack } from "../../../../services/combat/procedures/weaponAttack";
 import { buildSpellcastingSetup, canStartSpellcasting } from "../../../../services/combat/procedures/spellcastingSetup";
+import { buildAttributeSetup } from "../../../../services/combat/procedures/simpleSetups";
 import { openComposer } from "../../../../services/combat/procedures/composerService.svelte";
 import FilterToggle from "./FilterToggle.svelte";
 import { inventoryModeFor, INVENTORY_PRIMARY_FLAG, INVENTORY_SECONDARY_FLAG } from "./inventoryMode";
@@ -15,6 +16,7 @@ import MedicalComponent from "./components/MedicalComponent.svelte";
 import SpellComponent from "./components/SpellComponent.svelte";
 import FocusComponent from "./components/FocusComponent.svelte";
 import GadgetComponent from "./components/GadgetComponent.svelte";
+import AdeptPowerComponent from "./components/AdeptPowerComponent.svelte";
 
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 const MELEE_MODES = new Set(["blade", "blunt"]);
@@ -69,13 +71,16 @@ const nameStore = storeManager.GetRWStore<string>(item, "name", true);
 const isFirearm = $derived(item.type === "weapon" && FIREARM_MODES.has(sys.mode ?? ""));
 const isSpell = $derived(item.type === "spell");
 const canCastSpell = $derived(item.type === "spell" && canStartSpellcasting(item as never));
+const isPassiveAdeptPower = $derived(item.type === "adeptpower" && !sys.isActive);
+const isActiveAdeptPower = $derived(item.type === "adeptpower" && Boolean(sys.isActive));
 
 let targetCount = $state(typeof game !== "undefined" ? ((game.user as any)?.targets?.size ?? 0) : 0);
 let hasAmmo = $state(true);
 
 const isRollEnabled = $derived(
     (item.type === "weapon" && targetCount === 1 && !!$linkedSkillIdStore && hasAmmo) ||
-    canCastSpell
+    canCastSpell ||
+    isActiveAdeptPower
 );
 const rollDisabledReason = $derived(
     item.type === "weapon" && !$linkedSkillIdStore ? "No skill selected" :
@@ -131,8 +136,16 @@ function onRollClick() {
         openComposer(buildSpellcastingSetup(actor as never, item as never), actor);
         return;
     }
+    if (isActiveAdeptPower) {
+        openComposer(buildAttributeSetup(actor as never, "magic", $nameStore), actor);
+        return;
+    }
     const setup = buildWeaponAttack(actor as never, item as never);
     openComposer(setup, actor);
+}
+
+function onDrainClick() {
+    openComposer(buildAttributeSetup(actor as never, "willpower", `${$nameStore} — ${localize(CONFIG.SR3E.SPELL.drain)}`), actor);
 }
 </script>
 
@@ -175,12 +188,14 @@ function onRollClick() {
                     <FocusComponent {item} />
                 {:else if item.type === "gadget"}
                     <GadgetComponent {item} />
+                {:else if item.type === "adeptpower"}
+                    <AdeptPowerComponent {item} />
                 {/if}
             </div>
         </div>
 
         <div class="asset-card-row">
-            {#if !p.hideRollButton}
+            {#if !p.hideRollButton && !isPassiveAdeptPower}
                 <button
                     type="button"
                     class="sr3e-toolbar-button fa-solid fa-dice"
@@ -188,6 +203,16 @@ function onRollClick() {
                     title={rollDisabledReason}
                     disabled={!isRollEnabled}
                     onclick={onRollClick}
+                ></button>
+            {/if}
+
+            {#if isActiveAdeptPower && Boolean(sys.hasDrain)}
+                <button
+                    type="button"
+                    class="sr3e-toolbar-button fa-solid fa-tornado"
+                    aria-label={localize(CONFIG.SR3E.SPELL.drain)}
+                    title={localize(CONFIG.SR3E.SPELL.drain)}
+                    onclick={onDrainClick}
                 ></button>
             {/if}
 
@@ -235,7 +260,7 @@ function onRollClick() {
                 />
             {:else}
                 <FilterToggle bind:checked={$isPrimaryStore} svgName="star-svgrepo-com.svg" />
-                {#if item.type !== "spell"}
+                {#if item.type !== "spell" && item.type !== "adeptpower"}
                     <FilterToggle bind:checked={$isSecondaryStore} svgName="backpack-svgrepo-com.svg" />
                 {/if}
             {/if}

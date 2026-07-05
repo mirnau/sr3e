@@ -68,6 +68,24 @@ describe("buildSkillSetup", () => {
         const s = buildSkillSetup(actor([skill("s1", 4)]), "s1");
         expect(s.defenseHint).toEqual({ type: "skill", key: "s1", tnMod: 0, tnLabel: "Skill" });
     });
+
+    it("merges a matching adept-power TN modifier for an adept character", () => {
+        const magic = { type: "magic", system: { awakened: { archetype: "adept" } } };
+        const power = { type: "adeptpower", name: "Killing Hands", system: { tnModifiers: [{ targetKind: "skill", targetId: "s1", modifier: -2 }] } };
+        const a = actor([skill("s1", 4)]);
+        a.items.contents = [...a.items.contents, magic, power] as never;
+        const s = buildSkillSetup(a, "s1");
+        expect(s.rollState.modifiers).toEqual([expect.objectContaining({ name: "Killing Hands", value: -2 })]);
+    });
+
+    it("ignores adept-power TN modifiers for a non-adept character", () => {
+        const magic = { type: "magic", system: { awakened: { archetype: "magician" } } };
+        const power = { type: "adeptpower", name: "Killing Hands", system: { tnModifiers: [{ targetKind: "skill", targetId: "s1", modifier: -2 }] } };
+        const a = actor([skill("s1", 4)]);
+        a.items.contents = [...a.items.contents, magic, power] as never;
+        const s = buildSkillSetup(a, "s1");
+        expect(s.rollState.modifiers).toHaveLength(0);
+    });
 });
 
 describe("buildAttributeSetup", () => {
@@ -94,5 +112,14 @@ describe("buildAttributeSetup", () => {
         const s = buildAttributeSetup(actor([]), "strength");
         expect(s.defenseHint).toEqual({ type: "attribute", key: "strength", tnMod: 0, tnLabel: "strength" });
         expect(s.exportFn().next).toEqual({ kind: "attribute-response", ui: { label: "Respond" }, args: { attributeKey: "strength" } });
+    });
+
+    it("merges a matching adept-power TN modifier for an adept character", () => {
+        const magic = { type: "magic", system: { awakened: { archetype: "adept" } } };
+        const power = { type: "adeptpower", name: "Attribute Boost", system: { tnModifiers: [{ targetKind: "attribute", targetId: "strength", modifier: -1 }] } };
+        const a = actor([], { strength: { value: 3, total: 5 } });
+        a.items.contents = [...a.items.contents, magic, power] as never;
+        const s = buildAttributeSetup(a, "strength");
+        expect(s.rollState.modifiers).toEqual([expect.objectContaining({ name: "Attribute Boost", value: -1 })]);
     });
 });
