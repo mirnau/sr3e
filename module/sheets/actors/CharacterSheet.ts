@@ -13,7 +13,11 @@ import { mutateMetatype } from "../../services/metatype/mutateMetatype";
 import { commodityPrice, hasCommodityComponent, hasCommodityProfile } from "../../services/economy/purchase";
 import { initiatePurchase } from "../../services/economy/purchaseOfferFlow";
 import { getAdeptMagicItem, spendPowerPoints } from "../../services/magic/adeptPowerPoints";
+import { wouldBeLethal } from "../../services/magic/essenceGate";
+import { typekeys } from "../../../types/configuration-keys";
 import { localize } from "../../services/utilities";
+
+const ESSENCE_COST_TYPES = new Set<string>([typekeys.cyberdeck, typekeys.vehiclecontrolrig, typekeys.augmentation]);
 
 export default class CharacterActorSheet extends SR3EActorBase {
     #app?: SvelteApp;
@@ -188,6 +192,14 @@ export default class CharacterActorSheet extends SR3EActorBase {
             await awakenActor(actor);
             await persistRegisterTab(actor, "grimoire");
             return created;
+        }
+
+        if (item && ESSENCE_COST_TYPES.has(item.type)) {
+            const essenceCost = Number((item.system as any)?.essenceCost ?? 0);
+            if (wouldBeLethal(actor as any, essenceCost)) {
+                ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.essencewouldbelethal));
+                return;
+            }
         }
 
         if (item?.type === "spell" && getAdeptMagicItem(actor as any)) {

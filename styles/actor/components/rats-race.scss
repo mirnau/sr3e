@@ -83,6 +83,20 @@
       text-transform: uppercase;
    }
 
+   // Interest/Recurrent header labels are longer than the short values they
+   // hold ("8%", "Yes"/"No") — letting the header text wrap instead of
+   // forcing nowrap-driven column width frees that space for the actions
+   // column's Pay/Default buttons.
+   th:nth-child(4),
+   th:nth-child(5) {
+      white-space: normal;
+      max-width: 4rem;
+   }
+
+   th:nth-child(8) {
+      min-width: 7rem;
+   }
+
    tbody tr {
       cursor: default;
 
@@ -106,11 +120,25 @@
    text-align: center !important;
 }
 
+// A flex wrapper div INSIDE the actions <td>, never on the <td> itself —
+// display:flex on a table cell blockifies it, which drops it out of the
+// row's shared table-cell height algorithm. That left this one cell's own
+// (shorter) box sized to its own content, so its border-bottom rendered
+// above the row's actual bottom edge instead of flush with sibling cells.
 .rats-race-actions {
-   text-align: right;
+   display: flex;
+   align-items: center;
+   justify-content: flex-end;
+   gap: 0.3rem;
+   width: 100%;
+   height: 100%;
 
-   button + button {
-      margin-left: 0.3rem;
+   button {
+      flex: 1 1 0;
+   }
+
+   .rats-race-delete-icon {
+      flex: 0 0 auto;
    }
 }
 
@@ -119,6 +147,7 @@
    align-items: center;
    gap: 0.3rem;
    justify-content: flex-end;
+   flex: 1 1 0;
 }
 
 .credit-stick-picker-empty {
@@ -142,6 +171,7 @@
    align-items: center;
    gap: 0.3rem;
    justify-content: flex-end;
+   flex: 1 1 0;
 
    input[type="number"] {
       width: 5rem;

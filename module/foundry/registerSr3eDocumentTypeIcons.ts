@@ -1,4 +1,5 @@
 import { typekeys } from "../../types/configuration-keys";
+import { AUGMENTATION_CATEGORY_ICONS } from "../services/augmentations/augmentationIcons";
 import { GADGET_TARGET_ICONS } from "../services/gadgets/gadgetIcons";
 import { registerDocumentTypeIcon, registerDocumentTypeIconRule } from "./documentTypeIcons";
 
@@ -37,6 +38,19 @@ export function registerSr3eDocumentTypeIcons(): void {
 	registerDocumentTypeIcon("Item", typekeys.cyberdeck, svg("computer-chip-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.matrixprogram, svg("matrix-svgrepo-com.svg"));
 	registerDocumentTypeIcon("Item", typekeys.adeptpower, svg("rune-svgrepo-com.svg"));
+	registerDocumentTypeIcon("Item", typekeys.augmentation, svg("biohazard-svgrepo-com.svg"));
+	registerDocumentTypeIconRule(
+		"Item",
+		typekeys.augmentation,
+		source => source.system?.category === "cyberware",
+		AUGMENTATION_CATEGORY_ICONS.cyberware
+	);
+	registerDocumentTypeIconRule(
+		"Item",
+		typekeys.augmentation,
+		source => source.system?.category === "bioware",
+		AUGMENTATION_CATEGORY_ICONS.bioware
+	);
 	registerDocumentTypeIconRule(
 		"Item",
 		typekeys.skill,

@@ -4,4 +4,5 @@ export const MEDICAL_KEYS = [
   "depleted",
   "reusable",
   "medicalDepletedChat",
+  "rating",
 ] as const;

@@ -2,7 +2,7 @@ import { resolveLinkedSkill } from "./resolveLinkedSkill";
 import type { DefenseHint, ContestExport, RollState } from "../engine/types";
 import type { Modifier } from "../modifierList";
 import type { VehicleSpeedAdjustmentDirection } from "../vehicleSpeedAdjustment";
-import { adeptPowerTnModifiers } from "../adeptPowerModifiers";
+import { tnModifiers as scanTnModifiers } from "../tnModifiers";
 
 export type ProcedureSetup = {
     kind: string;
@@ -112,7 +112,7 @@ export function buildSkillSetup(
     if (specIndex != null && resolved && !resolved.specHasOwnValue) {
         mods.push({ name: "defaulting-spec", value: 2, poolCap: Math.floor(dice / 2) });
     }
-    mods.push(...adeptPowerTnModifiers(actor, "skill", skillId));
+    mods.push(...scanTnModifiers(actor, "skill", skillId));
 
     const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: tn, modifiers: mods };
 
@@ -158,7 +158,7 @@ export function buildAttributeSetup(
     const attr = attrs[attributeKey];
     const dice = attr?.total ?? attr?.value ?? 0;
 
-    const mods = adeptPowerTnModifiers(actor, "attribute", attributeKey);
+    const mods = scanTnModifiers(actor, "attribute", attributeKey);
     const rollState: RollState = { dice, poolDice: 0, karmaDice: 0, targetNumber: 4, modifiers: mods };
 
     const attrTitle = title ?? attributeKey;

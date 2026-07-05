@@ -93,11 +93,29 @@ export function setupPackery({
 
    let lastFormWidth: number | null = null;
 
+   // Only for the form ResizeObserver below — guards against relayout
+   // feedback loops where applyWidths()/layout() themselves trigger the very
+   // resize observer that scheduled them (see SETTLE_EPSILON_PX). A newly
+   // added item never changes the form's own width, so this guard must never
+   // gate the "an item was added" path (relayout(), below) — doing so once
+   // left new items stuck in normal block flow (full-width) since Packery
+   // never got told about them via reloadItems()/layout().
    const scheduleLayout = () => {
       requestAnimationFrame(() => {
          const currentWidth = form.offsetWidth;
          if (lastFormWidth !== null && Math.abs(currentWidth - lastFormWidth) < SETTLE_EPSILON_PX) return;
          lastFormWidth = currentWidth;
+         applyWidths();
+         pckry.reloadItems();
+         pckry.layout();
+      });
+   };
+
+   // Unconditional relayout — used whenever the item set itself changes
+   // (new item added/removed), where a layout pass is always needed
+   // regardless of whether the container's own width happened to change.
+   const relayout = () => {
+      requestAnimationFrame(() => {
          applyWidths();
          pckry.reloadItems();
          pckry.layout();
@@ -156,7 +174,7 @@ export function setupPackery({
       }
 
       if (shouldRelayout) {
-         scheduleLayout();
+         relayout();
       }
    });
 

@@ -41,6 +41,8 @@ import MatrixProgramModel from "./module/models/items/MatrixProgramModel";
 import MatrixProgramSheet from "./module/sheets/items/MatrixProgramSheet";
 import AdeptPowerModel from "./module/models/items/AdeptPowerModel";
 import AdeptPowerSheet from "./module/sheets/items/AdeptPowerSheet";
+import AugmentationModel from "./module/models/items/AugmentationModel";
+import AugmentationSheet from "./module/sheets/items/AugmentationSheet";
 import { preCreateCharacterActor, patchActorCreateDialog } from "./module/foundry/hooks/displayCharacterCreationDialog";
 import SkillModel from "./module/models/items/SkillModel";
 import SR3Edie from "./module/foundry/documents/SR3Edie";
@@ -48,6 +50,7 @@ import { registerSocketHandlers, registerCombatTurnHook, registerPoolRefreshHook
 import { registerChatMessageHTMLHook } from "./module/foundry/hooks/chatMessageHTML";
 import { registerMedicalTokenDropHook } from "./module/services/medical/applyMedical";
 import { registerPurchaseTokenDropHook } from "./module/services/economy/purchaseTokenDropHook";
+import { registerPermanentEffectTokenIconFilter } from "./module/foundry/hooks/tokenEffectIcons";
 import { registerSellerMutationRelay } from "./module/services/economy/sellerMutationRelay";
 import { registerDebtRepaymentRelay } from "./module/services/economy/debtRepaymentRelay";
 import { registerWindowFocusDimHook } from "./module/foundry/hooks/windowFocusDim";
@@ -57,6 +60,7 @@ import { registerDocumentTypeIconHooks } from "./module/foundry/documentTypeIcon
 import { registerSr3eDocumentTypeIcons } from "./module/foundry/registerSr3eDocumentTypeIcons";
 import { registerVehicleControlRigEssenceHook } from "./module/foundry/vehicleControlRigEssence";
 import { registerCyberdeckEssenceHook } from "./module/foundry/cyberdeckEssence";
+import { registerAugmentationEssenceHook } from "./module/foundry/augmentationEssence";
 import { applySheetColorSettings, registerSheetColorSettings } from "./module/services/settings/sheetColorSettings";
 import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
 import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/settings/remSizeSettings";
@@ -271,6 +275,12 @@ async function registerHooks(): Promise<void> {
             model: AdeptPowerModel,
             sheet: AdeptPowerSheet,
          },
+         {
+            docClass: Item,
+            type: typekeys.augmentation,
+            model: AugmentationModel,
+            sheet: AugmentationSheet,
+         },
       ] satisfies SR3EDocumentRegistration[]);
 
       CONFIG.Item.typeLabels = Object.fromEntries(
@@ -304,11 +314,13 @@ async function registerHooks(): Promise<void> {
    registerChatMessageHTMLHook();
    registerMedicalTokenDropHook();
    registerPurchaseTokenDropHook();
+   registerPermanentEffectTokenIconFilter();
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    registerDocumentTypeIconHooks();
    registerVehicleControlRigEssenceHook();
    registerCyberdeckEssenceHook();
+   registerAugmentationEssenceHook();
    patchActorCreateDialog();
    console.log("SR3E | preCreateActor hook registered");
 

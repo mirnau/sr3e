@@ -5,6 +5,7 @@ import Image from "../common-components/Image.svelte";
 import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
 import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
 import LabeledBoolean from "./LabeledBoolean.svelte";
+import LabeledNumberInput from "./LabeledNumberInput.svelte";
 import Commodity from "../common-components/Commodity.svelte";
 import Portability from "../common-components/Portability.svelte";
 import ActiveEffectsViewer from "../common-components/ActiveEffectsViewer.svelte";
@@ -61,6 +62,13 @@ onMount(() => {
             />
         </div>
         <div class="stat-grid single-column">
+            <LabeledNumberInput
+                {item}
+                key="rating"
+                label={localize(CONFIG.SR3E.MEDICAL.rating)}
+                value={sys.rating ?? 1}
+                path="system"
+            />
             <LabeledBoolean
                 {item}
                 key="isReusable"

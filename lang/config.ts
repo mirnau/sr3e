@@ -26,6 +26,7 @@ import { LANDING_TAKEOFF_KEYS, MECHANICAL_CATEGORY_KEYS, MECHANICAL_KEYS, POWER_
 import { VEHICLE_CONTROL_RIG_KEYS } from "./config/VehicleControlRigConfig";
 import { CYBERDECK_KEYS } from "./config/CyberdeckConfig";
 import { MATRIX_PROGRAM_KEYS } from "./config/MatrixProgramConfig";
+import { AUGMENTATION_KEYS, AUGMENTATION_CATEGORY_KEYS } from "./config/AugmentationConfig";
 
 const SYSTEM_NAMESPACE = "sr3e";
 
@@ -107,6 +108,8 @@ export const sr3e = {
   VEHICLE_CONTROL_RIG: createCategory("vehicleControlRig", VEHICLE_CONTROL_RIG_KEYS),
   CYBERDECK: createCategory("cyberdeck", CYBERDECK_KEYS),
   MATRIX_PROGRAM: createCategory("matrixProgram", MATRIX_PROGRAM_KEYS),
+  AUGMENTATION: createCategory("augmentation", AUGMENTATION_KEYS),
+  AUGMENTATION_CATEGORIES: createCategory("augmentationCategories", AUGMENTATION_CATEGORY_KEYS),
 } as const;
 
 export type localizations = typeof sr3e;

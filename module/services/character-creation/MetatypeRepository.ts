@@ -48,7 +48,7 @@ export interface MovementData {
 export interface MetatypeItemData {
 	name: string;
 	type: "metatype";
-	img: string;
+	img?: string;
 	system: {
 		agerange: AgeRange;
 		physical: PhysicalData;
@@ -118,7 +118,6 @@ export class MetatypeRepository {
 		return {
 			name: "Human",
 			type: "metatype",
-			img: "systems/sr3e/textures/ai/humans.webp",
 			system: {
 				agerange: { min: 0, average: 30, max: 100 },
 				physical: {

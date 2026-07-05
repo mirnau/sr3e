@@ -38,5 +38,5 @@
 [x] MUST: Cyberdeck + Hacker Pool (jacked-in, VCR-parallel; Matrix deferred) → .zone/techspecs/TECHSPEC-cyberdeck-hacker-pool.md
 [x] SHOULD: Strip data-migration code (alpha, no players, no back-compat obligation yet) → .zone/techspecs/TECHSPEC-strip-migration-code.md
 [x] MUST: Adept powers — Power Points, active/passive powers, TN modifiers, Grimoire integration → .zone/techspecs/TECHSPEC-adept-powers.md
-[ ] MUST: Cyberware, bioware — shared Augmentation backend, Augmentations tab → .zone/techspecs/TECHSPEC-augmentation-cyberware-bioware.md
+[x] MUST: Cyberware, bioware — shared Augmentation backend, Augmentations tab → .zone/techspecs/TECHSPEC-augmentation-cyberware-bioware.md
 

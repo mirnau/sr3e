@@ -35,8 +35,8 @@ let changes = $state<ActiveEffectChangeDraft[]>(normalizeChanges(effect.toObject
 let propertyOptions = $state<GadgetPropertyOption[]>([]);
 
 const targetOptions: Option[] = [
-    { value: "self", label: "self" },
-    { value: "character", label: "character" },
+    { value: "self", label: localize(CONFIG.SR3E.EFFECTS.self) },
+    { value: "character", label: localize(CONFIG.SR3E.EFFECTS.character) },
 ];
 
 const durationTypeOptions = $derived<Option[]>([

@@ -11,6 +11,7 @@ import Inventory from "./inventory/Inventory.svelte";
 import Garage from "./Garage.svelte";
 import Matrix from "./Matrix.svelte";
 import Grimoire from "./Grimoire.svelte";
+import Augmentations from "./Augmentations.svelte";
 import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
 import RatsRace from "./rats-race/RatsRace.svelte";
 import { REGISTER_TAB_FLAG, type RegisterTab, isRegisterTab, registerTabForItem } from "./registerTabs";
@@ -32,6 +33,7 @@ onDestroy(() => {
 let skillItems = $state<any[]>([]);
 let spellItems = $state<Item[]>([]);
 let adeptPowerItems = $state<Item[]>([]);
+let augmentationItems = $state<Item[]>([]);
 let transactionItems = $state<Item[]>([]);
 let magicItems = $state<Item[]>([]);
 let cyberdeckItems = $state<Item[]>([]);
@@ -45,6 +47,9 @@ function rebuildRegisterItems() {
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
    adeptPowerItems = items
       .filter((item: Item) => item.type === "adeptpower")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   augmentationItems = items
+      .filter((item: Item) => item.type === "augmentation")
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
    transactionItems = items
       .filter((item: Item) => item.type === "transaction")
@@ -88,11 +93,13 @@ const isAwakened = $derived(
 );
 const hasCyberdeck = $derived(cyberdeckItems.length > 0);
 const hasMatrixTab = $derived(hasCyberdeck || matrixProgramItems.length > 0);
+const hasAugmentationsTab = $derived(augmentationItems.length > 0);
 
 $effect(() => {
    if (!isRegisterTab($activeTabStore)) $activeTabStore = "active";
    if (!isAwakened && $activeTabStore === "grimoire") $activeTabStore = "active";
    if (!hasMatrixTab && $activeTabStore === "matrix") $activeTabStore = "active";
+   if (!hasAugmentationsTab && $activeTabStore === "augmentations") $activeTabStore = "active";
 });
 </script>
 
@@ -145,6 +152,14 @@ $effect(() => {
                onclick={() => ($activeTabStore = "matrix")}
             ><span>{localize(CONFIG.SR3E.INVENTORY.matrix)}</span></button>
          {/if}
+         {#if hasAugmentationsTab}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={$activeTabStore === "augmentations"}
+               onclick={() => ($activeTabStore = "augmentations")}
+            ><span>{localize(CONFIG.SR3E.INVENTORY.augmentations)}</span></button>
+         {/if}
          <button
             type="button"
             class="skills-register-tab"
@@ -174,6 +189,8 @@ $effect(() => {
                <Garage {actor} />
             {:else if $activeTabStore === "matrix" && hasMatrixTab}
                <Matrix {actor} cyberdecks={cyberdeckItems} programs={matrixProgramItems} />
+            {:else if $activeTabStore === "augmentations" && hasAugmentationsTab}
+               <Augmentations {actor} items={augmentationItems} />
             {:else if $activeTabStore === "effects"}
                <ActiveEffectsViewer document={actor} />
             {:else if $activeTabStore === "ratsrace"}

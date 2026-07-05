@@ -152,7 +152,6 @@
             <th>{localize(CONFIG.SR3E.TRANSACTION.creditstick)}</th>
             <th>Net</th>
             <th></th>
-            <th></th>
          </tr>
       </thead>
       <tbody>
@@ -175,48 +174,48 @@
                <td>{row.recurrent ? "Yes" : "No"}</td>
                <td>{row.isCreditStick ? "Yes" : "No"}</td>
                <td class:negative={row.signedAmount < 0}>{formatNuyen(row.signedAmount)}</td>
-               <td class="rats-race-actions">
-                  {#if isSubscriptionRow(row)}
-                     {#if payingRowId === row.id}
-                        <CreditStickPicker
-                           {sticks}
-                           onconfirm={(stick) => confirmSubscriptionPayment(row.id, stick)}
-                           oncancel={() => (payingRowId = null)}
-                        />
-                     {:else if dueRowIds.has(row.id)}
-                        <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
-                        <button type="button" onclick={() => handleDefault(row.id)}>Default</button>
-                     {:else}
-                        <button type="button" disabled>Paid</button>
+               <td>
+                  <div class="rats-race-actions">
+                     {#if isSubscriptionRow(row)}
+                        {#if payingRowId === row.id}
+                           <CreditStickPicker
+                              {sticks}
+                              onconfirm={(stick) => confirmSubscriptionPayment(row.id, stick)}
+                              oncancel={() => (payingRowId = null)}
+                           />
+                        {:else if dueRowIds.has(row.id)}
+                           <button type="button" onclick={() => (payingRowId = row.id)}>Pay</button>
+                           <button type="button" onclick={() => handleDefault(row.id)}>Default</button>
+                        {:else}
+                           <button type="button" disabled>Paid</button>
+                        {/if}
+                     {:else if isDebtRow(row)}
+                        <button type="button" onclick={() => openDebtPaymentDialog(row.id, row.amount)}>Pay</button>
+                     {:else if row.isCreditStick}
+                        {#if transferringRowId === row.id}
+                           <TransferDialog
+                              source={findTransaction(row.id)}
+                              targets={allSticks.filter((s) => s.id !== row.id)}
+                              onconfirm={(target, amount) => confirmTransfer(row.id, target, amount)}
+                              oncancel={() => (transferringRowId = null)}
+                           />
+                        {:else}
+                           <button type="button" onclick={() => (transferringRowId = row.id)}>Transfer</button>
+                        {/if}
                      {/if}
-                  {:else if isDebtRow(row)}
-                     <button type="button" onclick={() => openDebtPaymentDialog(row.id, row.amount)}>Pay</button>
-                  {:else if row.isCreditStick}
-                     {#if transferringRowId === row.id}
-                        <TransferDialog
-                           source={findTransaction(row.id)}
-                           targets={allSticks.filter((s) => s.id !== row.id)}
-                           onconfirm={(target, amount) => confirmTransfer(row.id, target, amount)}
-                           oncancel={() => (transferringRowId = null)}
-                        />
-                     {:else}
-                        <button type="button" onclick={() => (transferringRowId = row.id)}>Transfer</button>
-                     {/if}
-                  {/if}
-               </td>
-               <td class="rats-race-actions">
-                  <span
-                     class="rats-race-delete-icon"
-                     role="button"
-                     tabindex="0"
-                     onclick={() => handleDelete(row.id)}
-                     onkeydown={(e) => (e.key === "Enter" || e.key === " ") && handleDelete(row.id)}
-                  >✕</span>
+                     <span
+                        class="rats-race-delete-icon"
+                        role="button"
+                        tabindex="0"
+                        onclick={() => handleDelete(row.id)}
+                        onkeydown={(e) => (e.key === "Enter" || e.key === " ") && handleDelete(row.id)}
+                     >✕</span>
+                  </div>
                </td>
             </tr>
          {:else}
             <tr>
-               <td colspan="9" class="rats-race-empty">No transactions</td>
+               <td colspan="8" class="rats-race-empty">No transactions</td>
             </tr>
          {/each}
       </tbody>

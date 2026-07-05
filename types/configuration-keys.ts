@@ -31,6 +31,7 @@ export const typekeys = Object.freeze({
   cyberdeck: "cyberdeck",
   matrixprogram: "matrixprogram",
   adeptpower: "adeptpower",
+  augmentation: "augmentation",
 } as const);
 
 export const flags = Object.freeze({

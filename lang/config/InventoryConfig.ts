@@ -9,4 +9,5 @@ export const INVENTORY_KEYS = [
   "garageterrain", "garageterrainopen", "garageterrainnormal", "garageterrainrestricted", "garageterraintight",
   "totalweight",
   "matrix", "matrixempty", "matrixopensheet",
+  "augmentations",
 ] as const;

@@ -52,6 +52,11 @@ const GADGET_TARGETS: Record<string, GadgetTargetDefinition> = {
         label: () => localize(CONFIG.SR3E.GADGET_TYPES.patch),
         properties: matrixProgramProperties,
     },
+    augmentation: {
+        itemType: "augmentation",
+        label: () => localize(CONFIG.SR3E.ITEM_TYPES.augmentation),
+        properties: augmentationProperties,
+    },
 };
 
 export function gadgetTargetOptions(): { value: string; label: string }[] {
@@ -194,6 +199,13 @@ function mechanicalProperties(): GadgetPropertyOption[] {
 function matrixProgramProperties(): GadgetPropertyOption[] {
     return [
         stat("system.tnModifier.mod", localize(CONFIG.SR3E.MATRIX_PROGRAM.tnModifier)),
+    ];
+}
+
+function augmentationProperties(): GadgetPropertyOption[] {
+    return [
+        override("system.category", localize(CONFIG.SR3E.AUGMENTATION.category)),
+        stat("system.essenceCost", localize(CONFIG.SR3E.AUGMENTATION.essenceCost)),
     ];
 }
 

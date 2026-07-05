@@ -17,6 +17,7 @@ import SpellComponent from "./components/SpellComponent.svelte";
 import FocusComponent from "./components/FocusComponent.svelte";
 import GadgetComponent from "./components/GadgetComponent.svelte";
 import AdeptPowerComponent from "./components/AdeptPowerComponent.svelte";
+import AugmentationComponent from "./components/AugmentationComponent.svelte";
 
 const FIREARM_MODES = new Set(["manual", "semiauto", "burst", "fullauto", "energy"]);
 const MELEE_MODES = new Set(["blade", "blunt"]);
@@ -190,6 +191,8 @@ function onDrainClick() {
                     <GadgetComponent {item} />
                 {:else if item.type === "adeptpower"}
                     <AdeptPowerComponent {item} />
+                {:else if item.type === "augmentation"}
+                    <AugmentationComponent {item} />
                 {/if}
             </div>
         </div>
