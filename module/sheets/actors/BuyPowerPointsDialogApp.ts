@@ -1,10 +1,10 @@
-import { mount, unmount } from "svelte";
+import { mount } from "svelte";
 import BuyPowerPointsDialog from "../../ui/dialogs/BuyPowerPointsDialog.svelte";
+import { SvelteDialogApp } from "../../foundry/applications/SvelteDialogApp";
 
-export class BuyPowerPointsDialogApp extends foundry.applications.api.ApplicationV2 {
+export class BuyPowerPointsDialogApp extends SvelteDialogApp {
     #goodKarma: number;
     #onConfirm: (quantity: number) => void;
-    #svelteApp: any; // Svelte mount returns any - acceptable for Svelte integration
 
     constructor(goodKarma: number, onConfirm: (quantity: number) => void) {
         super();
@@ -25,17 +25,9 @@ export class BuyPowerPointsDialogApp extends foundry.applications.api.Applicatio
         },
     };
 
-    override async _renderHTML(_context: unknown, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        return "";
-    }
-
-    override _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-        }
-
-        this.#svelteApp = mount(BuyPowerPointsDialog, {
-            target: windowContent,
+    protected mountSvelteApp(target: HTMLElement) {
+        return mount(BuyPowerPointsDialog, {
+            target,
             props: {
                 goodKarma: this.#goodKarma,
                 onconfirm: (quantity: number) => {
@@ -45,14 +37,5 @@ export class BuyPowerPointsDialogApp extends foundry.applications.api.Applicatio
                 oncancel: () => this.close(),
             },
         });
-    }
-
-    override async close(options = {}): Promise<this> {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-            this.#svelteApp = null;
-        }
-
-        return super.close(options);
     }
 }

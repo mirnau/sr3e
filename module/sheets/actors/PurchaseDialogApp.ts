@@ -1,11 +1,11 @@
-import { mount, unmount } from "svelte";
+import { mount } from "svelte";
 import PurchaseDialog from "../../ui/dialogs/PurchaseDialog.svelte";
+import { SvelteDialogApp } from "../../foundry/applications/SvelteDialogApp";
 
-export class PurchaseDialogApp extends foundry.applications.api.ApplicationV2 {
+export class PurchaseDialogApp extends SvelteDialogApp {
     #buyer: Actor;
     #item: Item;
     #seller?: Actor;
-    #svelteApp: any; // Svelte mount returns any - acceptable for Svelte integration
 
     constructor(buyer: Actor, item: Item, seller?: Actor) {
         super();
@@ -27,17 +27,9 @@ export class PurchaseDialogApp extends foundry.applications.api.ApplicationV2 {
         },
     };
 
-    override async _renderHTML(_context: unknown, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        return "";
-    }
-
-    override _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-        }
-
-        this.#svelteApp = mount(PurchaseDialog, {
-            target: windowContent,
+    protected mountSvelteApp(target: HTMLElement) {
+        return mount(PurchaseDialog, {
+            target,
             props: {
                 buyer: this.#buyer,
                 item: this.#item,
@@ -45,14 +37,5 @@ export class PurchaseDialogApp extends foundry.applications.api.ApplicationV2 {
                 onClose: () => this.close(),
             },
         });
-    }
-
-    override async close(options = {}): Promise<this> {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-            this.#svelteApp = null;
-        }
-
-        return super.close(options);
     }
 }

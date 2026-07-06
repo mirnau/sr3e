@@ -1,11 +1,11 @@
-import { mount, unmount } from "svelte";
+import { mount } from "svelte";
 import DebtPaymentDialog from "../../ui/actors/actor-components/rats-race/DebtPaymentDialog.svelte";
+import { SvelteDialogApp } from "../../foundry/applications/SvelteDialogApp";
 
-export class DebtPaymentDialogApp extends foundry.applications.api.ApplicationV2 {
+export class DebtPaymentDialogApp extends SvelteDialogApp {
     #debtRemaining: number;
     #sticks: Item[];
     #onConfirm: (stick: Item, amount: number) => void;
-    #svelteApp: any; // Svelte mount returns any - acceptable for Svelte integration
 
     constructor(debtRemaining: number, sticks: Item[], onConfirm: (stick: Item, amount: number) => void) {
         super();
@@ -30,17 +30,9 @@ export class DebtPaymentDialogApp extends foundry.applications.api.ApplicationV2
         },
     };
 
-    override async _renderHTML(_context: unknown, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        return "";
-    }
-
-    override _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-        }
-
-        this.#svelteApp = mount(DebtPaymentDialog, {
-            target: windowContent,
+    protected mountSvelteApp(target: HTMLElement) {
+        return mount(DebtPaymentDialog, {
+            target,
             props: {
                 debtRemaining: this.#debtRemaining,
                 sticks: this.#sticks,
@@ -51,14 +43,5 @@ export class DebtPaymentDialogApp extends foundry.applications.api.ApplicationV2
                 oncancel: () => this.close(),
             },
         });
-    }
-
-    override async close(options = {}): Promise<this> {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-            this.#svelteApp = null;
-        }
-
-        return super.close(options);
     }
 }

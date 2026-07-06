@@ -5,7 +5,7 @@ import { NewsMessage } from "./NewsMessage";
  */
 export const NewsConfig = {
 	AVG_CHAR_PX: 12,
-	SCROLL_SPEED: 100,
+	SCROLL_SPEED: 120,
 	DEFAULT_MS: 10000,
 	CONTROLLER_TIMEOUT: 15000,
 	HEARTBEAT_INTERVAL: 5000,

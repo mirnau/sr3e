@@ -61,13 +61,18 @@ function rebuildRegisterItems() {
       .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
 }
 rebuildRegisterItems();
+function belongsToActor(item: any): boolean {
+   return item.parent?.id === (actor as any).id || item.actor?.id === (actor as any).id;
+}
+
 const onItemChange = (item: any) => {
-   if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
+   if (!belongsToActor(item)) return;
    rebuildRegisterItems();
 };
 
 const onItemCreate = (item: Item) => {
    onItemChange(item);
+   if (!belongsToActor(item)) return;
    const tab = registerTabForItem(item);
    if (tab) $activeTabStore = tab;
 };
