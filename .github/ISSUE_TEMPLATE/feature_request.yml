@@ -1,0 +1,73 @@
+name: SR3E Suggest an Improvement
+description: Propose a new feature, a change to existing behavior, or a quality-of-life improvement.
+title: "[SR3E Improvement]: "
+labels: [enhancement, needs-triage]
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem or gap?
+      description: What's missing, awkward, or annoying today? What made you want this changed?
+      placeholder: There's no way to see how much Karma I've spent this session without opening the actor's flags manually...
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired
+    attributes:
+      label: Desired behavior
+      description: What would you like to happen instead? Be as concrete as you can — describe it as if explaining to someone using the sheet for the first time.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: rule_related
+    attributes:
+      label: Is this about a specific SR3E rule?
+      description: Are you asking for a rule or mechanic from the SR3E books that isn't implemented yet (or is implemented but not automated), or is this a general UI/workflow improvement not tied to a specific rule?
+      options:
+        - Implement or automate a specific SR3E rule that's missing
+        - Improve something already implemented (not a new rule)
+        - General UI / quality-of-life improvement, not tied to a specific rule
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule_reference
+    attributes:
+      label: Rule reference (if applicable)
+      description: Which rule, and where is it from? Book/page if you have it, or a description of the mechanic if you don't. Leave blank if this isn't tied to a specific rule.
+      placeholder: "SR3E Rigger 3 p.42, vehicle rigging jump-in/jump-out — currently there's no way to model control passing between rigger and driver"
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where should this live?
+      description: Pick the closest area of the system. If more than one applies, mention the others in the description.
+      options:
+        - Character sheet
+        - NPC / other actor sheet
+        - Item sheet or item editor
+        - A dialog (purchase, debt, power points, etc.)
+        - Combat tracker / combat rolls
+        - Chat message / roll card
+        - Character creation
+        - Compendium / item browser
+        - Settings
+        - Not sure / other / new area
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you use today, or other approaches you thought of and why they fall short. Leave blank if none.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, rulebook references, or anything else that helps clarify the request.

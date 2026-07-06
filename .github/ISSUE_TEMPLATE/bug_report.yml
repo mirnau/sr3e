@@ -1,0 +1,100 @@
+name: SR3E Bug Report
+description: Something in the SR3E system is broken or behaving incorrectly.
+title: "[SR3E Bug]: "
+labels: [bug, needs-triage]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear, short description of the bug. What did you do, and what went wrong?
+      placeholder: When I dropped a weapon onto the inventory tab, the character sheet stopped updating...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps, starting from a known state, that reliably trigger the bug.
+      placeholder: |
+        1. Open a character sheet
+        2. Drag a weapon item from the sidebar onto the Inventory tab
+        3. Observe that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: What actually happened? Include exact error text, wrong values, or visual glitches.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: rule_related
+    attributes:
+      label: Is this a rules problem or a software problem?
+      description: Is the system misapplying a specific SR3E rule (wrong dice pool, wrong modifier, wrong formula), or is this a general software bug (crash, data not saving, UI glitch) unrelated to any specific rule?
+      options:
+        - A specific SR3E rule is implemented incorrectly
+        - General software bug, not tied to a specific rule
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule_reference
+    attributes:
+      label: Rule reference (if applicable)
+      description: Which rule, and where is it from? E.g. book/page, or a short description of the rule if you don't have the citation handy. Leave blank if this isn't a rules issue.
+      placeholder: "SR3E core rulebook p.110, Recoil Compensation — recoil should reduce the pool by 1 per point over the first, not per point total"
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where did this happen?
+      description: Pick the closest area of the system. If more than one applies, mention the others in the description.
+      options:
+        - Character sheet
+        - NPC / other actor sheet
+        - Item sheet or item editor
+        - A dialog (purchase, debt, power points, etc.)
+        - Combat tracker / combat rolls
+        - Chat message / roll card
+        - Character creation
+        - Compendium / item browser
+        - Settings
+        - Not sure / other
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors (if any)
+      description: Open the browser dev tools console (F12) and paste any red error text here. This is often the single most useful piece of information for tracking down the bug.
+      render: shell
+
+  - type: input
+    id: versions
+    attributes:
+      label: Foundry and system version
+      description: Found under Game Settings > Configuration, or in the Add-on Modules / System list.
+      placeholder: "Foundry v12.331, SR3E v0.x.x"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, screen recordings, or anything else that might help.
