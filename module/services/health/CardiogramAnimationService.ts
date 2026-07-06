@@ -65,7 +65,6 @@ export class CardiogramAnimationService {
 	private static readonly SCROLL_PX_PER_SEC = 60;
 	private static readonly PHASE_RAD_PER_SEC = 0.04 * 60;
 	private static readonly AMP_SMOOTHING_PER_FRAME_AT_60FPS = 0.05;
-	private static readonly MAX_DT_SEC = 0.1;
 	// Fraction of `amp` the R-spike actually reaches (see _getHeartY) — used so
 	// the accent color maxes out exactly at the true peak instead of at 80% of amp.
 	private static readonly R_WAVE_PEAK_FRACTION = 0.8;
@@ -169,9 +168,7 @@ export class CardiogramAnimationService {
 	private _animate = (timestamp: number): void => {
 		if (!this._isAnimating) return;
 
-		const dt = this._lastTimestamp === null
-			? 0
-			: Math.min((timestamp - this._lastTimestamp) / 1000, CardiogramAnimationService.MAX_DT_SEC);
+		const dt = this._lastTimestamp === null ? 0 : (timestamp - this._lastTimestamp) / 1000;
 		this._lastTimestamp = timestamp;
 
 		this._drawEcg(dt, timestamp / 1000);
