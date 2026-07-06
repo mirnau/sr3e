@@ -277,8 +277,11 @@ function removeModById(id: string): void {
 
 onMount(() => registerComposerForActor(actorId, open));
 onDestroy(() => {
-    unregisterComposerForActor(actorId);
-    clearComposerState(actorId);
+    // Only the instance that still owns the registration may clear the shared
+    // per-actor state — a superseded instance clearing it would split state
+    // between the surviving composer and DicePools/MatrixProgramCard, which
+    // re-fetch a fresh object from the map.
+    if (unregisterComposerForActor(actorId, open)) clearComposerState(actorId);
     if (hasActorProp) storeManager.Unsubscribe(actor);
 });
 </script>

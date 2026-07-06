@@ -1,5 +1,5 @@
 type EffectDuration = {
-    type?: string;
+    units?: string;
     seconds?: number | null;
     rounds?: number | null;
     turns?: number | null;
@@ -8,13 +8,20 @@ type EffectDuration = {
 type TokenEffectLike = {
     duration?: EffectDuration;
     statuses?: Set<string> | string[] | null;
+    toObject?: () => { duration?: EffectDuration };
 };
 
 const WRAPPED_FLAG = "__sr3ePermanentEffectIconFilter";
 
 export function isPermanentNonStatusEffect(effect: TokenEffectLike): boolean {
     if (hasStatuses(effect.statuses)) return false;
-    return !hasFiniteDuration(effect.duration);
+    // Reads the raw persisted duration (toObject) rather than the live
+    // ActiveEffectDuration getter — the latter trips Foundry's own
+    // ActiveEffectDuration#type -> #units compatibility-warning logger on
+    // every access for unmigrated effect data, spamming the console on
+    // every token draw even though we never touch #type ourselves.
+    const duration = effect.toObject?.().duration ?? effect.duration;
+    return !hasFiniteDuration(duration);
 }
 
 export function tokenIconEffects<T extends TokenEffectLike>(effects: Iterable<T>): T[] {
@@ -22,7 +29,8 @@ export function tokenIconEffects<T extends TokenEffectLike>(effects: Iterable<T>
 }
 
 export function registerPermanentEffectTokenIconFilter(): void {
-    const tokenPrototype = (globalThis as any).Token?.prototype;
+    const tokenClass = (globalThis as any).foundry?.canvas?.placeables?.Token ?? (globalThis as any).Token;
+    const tokenPrototype = tokenClass?.prototype;
     if (!tokenPrototype?._drawEffects || tokenPrototype[WRAPPED_FLAG]) return;
 
     const originalDrawEffects = tokenPrototype._drawEffects;
@@ -39,7 +47,7 @@ function hasStatuses(statuses: TokenEffectLike["statuses"]): boolean {
 
 function hasFiniteDuration(duration?: EffectDuration): boolean {
     if (!duration) return false;
-    if (duration.type && duration.type !== "none") return true;
+    if (duration.units && duration.units !== "none") return true;
     return [duration.seconds, duration.rounds, duration.turns].some(value => Number(value) > 0);
 }
 

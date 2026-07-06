@@ -60,8 +60,17 @@ export function registerComposerForActor(actorId: string, openFn: (setup: Proced
     }
 }
 
-export function unregisterComposerForActor(actorId: string): void {
+// Identity-guarded: two composer instances can coexist for one actorId
+// (unlinked token sheet + sidebar sheet share the actor id, and close/reopen
+// can overlap mount/destroy). A destroyed instance may only remove the entry
+// if it is still the registered one — otherwise it would clobber the live
+// instance's registration and every subsequent openComposer call for that
+// actor would silently land in deferredSetups. Returns whether this instance
+// owned the registration, so the caller knows if shared state is now orphaned.
+export function unregisterComposerForActor(actorId: string, openFn: (setup: ProcedureSetup) => void): boolean {
+    if (registry.get(actorId) !== openFn) return false;
     registry.delete(actorId);
+    return true;
 }
 
 export function registerComposer(openFn: (setup: ProcedureSetup) => void): void {
@@ -80,6 +89,9 @@ export function openComposer(setup: ProcedureSetup, actor: unknown): void {
     } else if (fallbackOpenFn) {
         fallbackOpenFn(setup);
     } else {
+        // Legitimate for a not-yet-mounted sheet (defender flow), but must
+        // never be invisible — a swallowed setup here is a dead Roll click.
+        console.warn(`sr3e | No composer registered for actor ${id} — deferring setup until its sheet mounts.`);
         deferredSetups.set(id, setup);
     }
 }
