@@ -100,6 +100,7 @@
           display: flex;
           align-items: center;
           white-space: nowrap;
+          contain: layout style paint;
           backdrop-filter: blur(8px);
           margin: 0 4px;
           mask-image: linear-gradient(to right,

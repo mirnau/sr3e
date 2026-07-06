@@ -1,6 +1,7 @@
 <script lang="ts">
    import { getNewsService, currentDisplayFrame } from "../../services/news-service/NewsService.svelte";
    import { NewsConfig } from "../../services/news-service/NewsConfig";
+   import { installTickerDiagnostics } from "./tickerDiagnostics";
    import { onMount } from "svelte";
 
    interface NewsMessage {
@@ -16,8 +17,6 @@
 
    interface RenderFrame {
       pool: string[];
-      timestamp?: number;
-      duration?: number;
    }
 
    const SCROLL_SPEED = NewsConfig.SCROLL_SPEED;
@@ -84,11 +83,17 @@
       buildContent(pool);
       activePool = pool;
       activeFrame = frame;
+      // Measured width at constant SCROLL_SPEED — never the controller's estimate.
+      // Integer px-per-frame steps; fractional speeds crawl across the device-pixel grid.
       const contentW = inner.scrollWidth;
-      const measuredDuration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
-      const duration = frame.duration && frame.duration > 0 ? frame.duration : measuredDuration;
-      const elapsed = frame.timestamp ? Math.max(0, Date.now() - frame.timestamp) : 0;
-      const phaseOffset = duration > 0 ? elapsed % duration : 0;
+      const duration = ((tickerW + contentW) / SCROLL_SPEED) * 1000;
+
+      (globalThis as any).sr3eTickerDebug?.logPass({
+         poolSize: pool.length,
+         contentW,
+         tickerW,
+         durationMs: duration,
+      });
 
       const thisAnim = (anim = inner.animate(
          [
@@ -97,13 +102,13 @@
          ],
          { duration, easing: "linear", fill: "forwards" },
       ));
-      thisAnim.currentTime = phaseOffset;
 
       // .finished resolves as a microtask — fires before the next rendered frame,
-      // eliminating the blank-ticker gap that onfinish (macrotask) produces
+      // eliminating the blank-ticker gap that onfinish (macrotask) produces.
+      // No pending frame yet -> loop the current pool until the controller ships one.
       thisAnim.finished.then(() => {
          if (anim !== thisAnim) return;
-         const next = pendingFrame;
+         const next = pendingFrame ?? activeFrame;
          pendingFrame = null;
          if (next) runPass(next);
       }).catch(() => {});
@@ -114,7 +119,7 @@
       const pool = frame.buffer.map((m) =>
          m?.sender && m?.headline ? `${m.sender}: "${m.headline}"` : String(m),
       );
-      const renderFrame = { pool, timestamp: frame.timestamp, duration: frame.duration };
+      const renderFrame = { pool };
       if (!isOn) {
          pendingFrame = renderFrame;
          return;
@@ -147,6 +152,7 @@
    });
 
    onMount(() => {
+      const removeDiagnostics = installTickerDiagnostics(() => anim, () => inner);
       if (ticker) service.reportTickerWidth(ticker.clientWidth);
 
       const resizeObserver = new ResizeObserver(() => {
@@ -196,6 +202,7 @@
       document.addEventListener("visibilitychange", onVisibilityChange);
 
       return () => {
+         removeDiagnostics();
          anim?.cancel();
          if (retryRafId !== null) { cancelAnimationFrame(retryRafId); retryRafId = null; }
          if (blurTimer) clearTimeout(blurTimer);
