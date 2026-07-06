@@ -37,12 +37,19 @@ jobs:
         id: flags
         run: |
           V="${{ steps.v.outputs.version }}"
+          # GitHub refuses to mark a prerelease as "latest" ("Drafts and prereleases
+          # cannot be set as latest"), which would leave the rolling manifest link
+          # 404ing for the whole alpha/beta phase — worse than losing the native
+          # "Pre-release" badge, since it breaks Foundry's update-check flow for
+          # anyone who installed via the latest link. Always publish as a full
+          # release and make_latest=true; instability is called out in the body
+          # text instead of the GitHub UI badge.
+          echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          echo "make_latest=true" >> "$GITHUB_OUTPUT"
           if echo "$V" | grep -Eq -- "-(alpha|beta)\\."; then
-            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
-            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+            echo "unstable=true" >> "$GITHUB_OUTPUT"
           else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+            echo "unstable=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install deps & build
@@ -57,20 +64,19 @@ jobs:
           ZIP="sr3e-${VERSION}.zip"
 
           MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
+          MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
           # Pinned manifest for this exact version
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
 
-          # "Latest" channel manifest — only meaningful once GitHub can actually mark this
-          # release as latest, which it refuses to do for prereleases. Skip it for
-          # alpha/beta builds instead of publishing a link that 404s.
-          if [ "${{ steps.flags.outputs.prerelease }}" = "false" ]; then
-            MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
-            jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
-               '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
-          fi
+          # "Latest" channel manifest (always points to latest release asset).
+          # Every release is published as make_latest=true (see "Decide prerelease
+          # + latest") specifically so this stays resolvable through alpha/beta too —
+          # otherwise anyone installed via this URL never gets an update notification.
+          jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
+             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
 
       - name: Package (players only)
         run: |
@@ -88,22 +94,27 @@ jobs:
           [ -d licenses ]  && cp -r licenses "$ROOT/"
           [ -f README.md ] && cp README.md "$ROOT/"
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
-          # Upload "latest" manifest as a separate asset — only exists for non-prerelease builds.
-          [ -f system.latest.json ] && cp system.latest.json system.json || rm -f system.json
+          # upload "latest" manifest as a separate asset
+          cp system.latest.json system.json
 
       - name: Compose release body
         id: body
         run: |
           V="${{ steps.v.outputs.version }}"
           {
-            if [ "${{ steps.flags.outputs.prerelease }}" = "false" ]; then
-              echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
+            if [ "${{ steps.flags.outputs.unstable }}" = "true" ]; then
+              echo "**⚠ Pre-release build — not marked as such in GitHub's UI so the"
+              echo "install/update manifest link below keeps working; see notes below.**"
+              echo
             fi
+            echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
             echo "Pinned manifest: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${V}/system.json"
             echo
             if echo "$V" | grep -q -- "-alpha\\."; then
               echo "This is an alpha build. No migration scripts are in effect, any work done in the current"
               echo "system may break without warning or future fixes."
+            elif echo "$V" | grep -q -- "-beta\\."; then
+              echo "This is a beta build. Expect rough edges; please report anything broken."
             fi
           } > RELEASE_BODY.md
 
@@ -119,7 +130,6 @@ jobs:
             system.pinned.json
           prerelease: ${{ steps.flags.outputs.prerelease }}
           make_latest: ${{ steps.flags.outputs.make_latest }}
-          # system.json is absent for prerelease builds (no "latest" manifest to ship) — don't fail on it.
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
