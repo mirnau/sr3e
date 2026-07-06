@@ -26,7 +26,7 @@ Parts of this project — code, documentation, and tooling — have been develop
 
 ## Contributing
 
-Contributions, bug reports, and feature requests are all welcome. If you'd like to report a bug or suggest an improvement, please use the issue templates on GitHub — they help route your report to the right place. If you'd like to contribute code or documentation, see [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and check the [documentation site](https://mirnau.github.io/sr3e/) for the current state of the project.
+Contributions, bug reports, and feature requests are all welcome. If you'd like to report a bug or suggest an improvement, please use the issue templates on GitHub — they help route your report to the right place. If you'd like to contribute code or documentation you are welcome to tag along this sr3e adventure.
 
 ## What is Shadowrun Third Edition
 
