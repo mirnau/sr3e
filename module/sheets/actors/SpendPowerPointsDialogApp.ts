@@ -1,10 +1,10 @@
-import { mount, unmount } from "svelte";
+import { mount } from "svelte";
 import SpendPowerPointsDialog from "../../ui/dialogs/SpendPowerPointsDialog.svelte";
+import { SvelteDialogApp } from "../../foundry/applications/SvelteDialogApp";
 
-export class SpendPowerPointsDialogApp extends foundry.applications.api.ApplicationV2 {
+export class SpendPowerPointsDialogApp extends SvelteDialogApp {
     #powerPointsAvailable: number;
     #onConfirm: (quantity: number) => void;
-    #svelteApp: any; // Svelte mount returns any - acceptable for Svelte integration
 
     constructor(powerPointsAvailable: number, onConfirm: (quantity: number) => void) {
         super();
@@ -25,17 +25,9 @@ export class SpendPowerPointsDialogApp extends foundry.applications.api.Applicat
         },
     };
 
-    override async _renderHTML(_context: unknown, _options: DeepPartial<RenderOptions>): Promise<unknown> {
-        return "";
-    }
-
-    override _replaceHTML(_result: unknown, windowContent: HTMLElement, _options: DeepPartial<RenderOptions>): void {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-        }
-
-        this.#svelteApp = mount(SpendPowerPointsDialog, {
-            target: windowContent,
+    protected mountSvelteApp(target: HTMLElement) {
+        return mount(SpendPowerPointsDialog, {
+            target,
             props: {
                 powerPointsAvailable: this.#powerPointsAvailable,
                 onconfirm: (quantity: number) => {
@@ -45,14 +37,5 @@ export class SpendPowerPointsDialogApp extends foundry.applications.api.Applicat
                 oncancel: () => this.close(),
             },
         });
-    }
-
-    override async close(options = {}): Promise<this> {
-        if (this.#svelteApp) {
-            unmount(this.#svelteApp);
-            this.#svelteApp = null;
-        }
-
-        return super.close(options);
     }
 }

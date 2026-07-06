@@ -26,6 +26,8 @@ $skill-card-outer-bottom-right-clip: 0.45rem;
 .skills-register-tab {
 	position: relative;
 	flex: 1;
+	min-width: 0;
+	box-sizing: border-box;
 	padding: 0.25rem 0.4rem 0.35rem;
 	background: rgb(174, 224, 224);
 	border: none;
