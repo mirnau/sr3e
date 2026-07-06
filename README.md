@@ -1,22 +1,32 @@
-# NOTE: Second Iteration
-
-This is an ongoing second iteration of the implementation of sr3e. It is a hobby project, and it is *not* a functional and complete system ready to play.
-If that is what you are after and you are in a rush, you are welcome to join and help me complete it. I work on this project when I have time, and
-it is a large scope.
-
-# Changes from the first iteration
-
--  Svelte has been added to manage complex databinding scenarios, thus a Svelte installation is necessary to run and build the project
--  Vite watch runs automatically from the VS Code workspace task on startup to avoid missed rebuilds
--  DataModels are used instead of a template.json
-
 # sr3e
 
-sr3e is a Shadowrun Third Edition Homebrew game system. In Foundry Virtual Tabletop (VTT), a game system is essentially a modular software package that defines the rules, mechanics, and data structures for a specific tabletop role-playing game (TTRPG).
+<!-- Overview video goes here -->
 
-# Documentation
+sr3e is a Shadowrun Third Edition Homebrew game system for Foundry Virtual Tabletop (VTT). In Foundry, a game system is a modular software package that defines the rules, mechanics, and data structures for a specific tabletop role-playing game (TTRPG).
 
-[Documentation](https://mirnau.github.io/sr3e/) has been added and underway. To save on time, it leans heavy on AI generation, which of course means, there might be mistakes present. Documetation is also open for contribution. All you need to start colaborating can be found [here](https://mirnau.github.io/sr3e/)
+## Beta release
+
+This is the first beta release of sr3e — the system is now playable end to end. It is still a hobby project developed in spare time, so expect rough edges, missing rules, and the occasional bug. If you run into one, please [report it](#contributing) — that's exactly what a beta is for.
+
+## Architecture overview
+
+The system follows a four-layer model: **Svelte UI → Service Layer → IStoreManager → Foundry VTT**. Actor and item sheets are built with Svelte 5 components that never touch Foundry documents directly — they read and write through a game-wide `IStoreManager` singleton, which is the only layer that talks to Foundry's actor/item/effect APIs. Rules and business logic live in a service layer beneath the UI, keeping components focused on presentation and services free of framework concerns. DataModels (rather than a legacy `template.json`) define the actor and item schemas.
+
+## Localization
+
+Translation strings are not hand-maintained in `lang/*.json`. Each config module under `lang/config/` declares the set of keys a category needs in TypeScript; a Vite plugin (`vite-plugins/i18n-scaffold.ts`) scans those declarations on every build and scaffolds the locale JSON files automatically — adding new keys with a placeholder value, pruning keys that no longer exist, and leaving existing translations untouched. This keeps every locale file in sync with the code without anyone having to remember to update them by hand. Translating the system is just a matter of editing the values in the relevant `lang/<locale>.json` file.
+
+## Icon credit
+
+Icons used throughout the system are sourced from [SVG Repo](https://www.svgrepo.com/), an open-source icon repository. Thank you to the artists whose freely licensed work makes this project more presentable — see `textures/svgrepo/` for the icons in use.
+
+## AI-assisted development
+
+Parts of this project — code, documentation, and tooling — have been developed with the assistance of AI. This is disclosed in the interest of transparency.
+
+## Contributing
+
+Contributions, bug reports, and feature requests are all welcome. If you'd like to report a bug or suggest an improvement, please use the issue templates on GitHub — they help route your report to the right place. If you'd like to contribute code or documentation, see [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and check the [documentation site](https://mirnau.github.io/sr3e/) for the current state of the project.
 
 ## What is Shadowrun Third Edition
 
@@ -24,46 +34,21 @@ Shadowrun 3rd Edition is a cyberpunk-fantasy tabletop role-playing game set in a
 
 ## What is Foundry VTT?
 
-This system targets Foundry VTT, and can not be built or run without the Foundry VTT software and licence. A VTT (Virtual Tabletop) is a digital platform designed to simulate a tabletop gaming experience online. It allows players to collaborate in role-playing games (RPGs) like Dungeons & Dragons, Pathfinder, or Shadowrun, even if they’re geographically separated.
+This system targets Foundry VTT, and can not be built or run without the Foundry VTT software and licence. A VTT (Virtual Tabletop) is a digital platform designed to simulate a tabletop gaming experience online. It allows players to collaborate in role-playing games (RPGs) like Dungeons & Dragons, Pathfinder, or Shadowrun, even if they're geographically separated.
 
 Foundry Virtual Tabletop is a web-based application built primarily with JavaScript, utilizing HTML and CSS for its user interface. It operates on a Node.js server, leveraging Electron to provide a desktop application experience. For data storage, Foundry employs LevelDB, a fast key-value store, to manage game data and assets efficiently.
-
-## Project goals
-
--  Full scale rule automation
-
-   -  Dice pool calculations
-   -  Karma point purchasing system
-   -  Character creation point system
-   -  Health system
-   -  Economy and Resource Management
-
--  Responsive design
-   -  Take advantage of the web based techonolgies to fully express mood and game immersion
-   -  Rich animations through integration with rive.app (if possible)
-   -  Clear and intuitive layout
 
 ## Requirements
 
 -  Software
    -  A licenced copy of Foundry Virtual Table Top
 
-## Road Map
--  Currenty working on
-   -  Development of responsive layout
-   -  Development of data structures
--  Future Development
-   -  Visual themes (light-mode, dark-mode et.c.)
-   -  Systems
-   -  Game Logic
-   -  Play Testing
-
 ## Disclaimer
 
 This project is a fan-made initiative created out of love for the Shadowrun 3rd Edition tabletop RPG. It is developed for personal enjoyment and the enjoyment of other fans.
 
 -  This is an unofficial, non-commercial fan project, and it is not affiliated with or endorsed by the IP owners.
--  This project is designed to complement the original source material. The official rulebooks are required to fully understand and run the game. You may buy your copies here: [Shadowrun at DriveThroughRPG](https://www.drivethrurpg.com/en/product/1893/shadowrun-third-edition).
+-  This project is designed to complement the original source material. The official rulebooks are required to fully understand and run the game. You may buy your copies here: [Shadowrun at DriveThroughRPG](https://www.drivethrurpg.com/en/product/1893/shadowrun-third-edition) or somwhere else where sold.
 -  Shadowrun and all associated intellectual property are owned by their respective copyright holders.
 -  The project may be removed from GitHub at any time if requested by the rights holders or for any other reason.
 
