@@ -1,6 +1,0 @@
-{
-    "scripts": {
-        "watch": "npm run watch --prefix ..",
-        "build": "npm run build --prefix .."
-    }
-}

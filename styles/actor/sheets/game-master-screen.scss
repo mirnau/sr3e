@@ -6,6 +6,17 @@
 	padding: 0;
 	gap: 8px;
 
+	// Tabs inherit the global button scale-on-hover/active animation —
+	// these should only animate color, so cancel the transform.
+	.skills-register-tab {
+		transition: color 0.15s ease;
+
+		&:hover:not(:disabled),
+		&:active:not(:disabled) {
+			transform: none;
+		}
+	}
+
 	&__panel {
 		width: 100%;
 		box-sizing: border-box;
