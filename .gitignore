@@ -1,11 +1,15 @@
 # Folders
 build/
 node_modules/
+.zone/
+.rules/
+.vscode/
+.claude/
 
 # Files
 AGENTS.md
+CONTEXT.md
 DangerousClaude.bat
 
 # Graphify
 graphify-out/
-./rules
