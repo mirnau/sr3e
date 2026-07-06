@@ -32,8 +32,8 @@ export class ElectroCardiogramService {
 		this.ecgCanvas = ecgCanvas;
 		this.ecgPointCanvas = ecgPointCanvas;
 
-		this.ctxLine = ecgCanvas.getContext("2d", { willReadFrequently: true })!;
-		this.ctxPoint = ecgPointCanvas.getContext("2d", { willReadFrequently: true })!;
+		this.ctxLine = ecgCanvas.getContext("2d")!;
+		this.ctxPoint = ecgPointCanvas.getContext("2d")!;
 
 		// Get colors from CSS variables or use defaults
 		const computedStyle = getComputedStyle(document.documentElement);

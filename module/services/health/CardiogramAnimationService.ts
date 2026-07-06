@@ -59,12 +59,19 @@ export class CardiogramAnimationService {
 
 	private _isAnimating: boolean = false;
 	private _animFrame: number | null = null;
+	private _lastTimestamp: number | null = null;
+	private _samples: { t: number; heartY: number }[] = [];
+
+	private static readonly SCROLL_PX_PER_SEC = 60;
+	private static readonly PHASE_RAD_PER_SEC = 0.04 * 60;
+	private static readonly AMP_SMOOTHING_PER_FRAME_AT_60FPS = 0.05;
+	private static readonly MAX_DT_SEC = 0.1;
+	// Fraction of `amp` the R-spike actually reaches (see _getHeartY) — used so
+	// the accent color maxes out exactly at the true peak instead of at 80% of amp.
+	private static readonly R_WAVE_PEAK_FRACTION = 0.8;
 
 	private bottomColor: string;
 	private topColor: string;
-
-	private prevY: number | undefined;
-	private prevHeartY: number | undefined;
 
 	constructor(
 		lineCanvas: HTMLCanvasElement,
@@ -79,8 +86,10 @@ export class CardiogramAnimationService {
 			topColor = "#0000FF"
 		} = options;
 
-		this.lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true })!;
-		this.pointCtx = pointCanvas.getContext("2d", { willReadFrequently: true })!;
+		// No willReadFrequently hint: we no longer read pixels back, so the
+		// canvas stays eligible for GPU-accelerated rendering.
+		this.lineCtx = lineCanvas.getContext("2d")!;
+		this.pointCtx = pointCanvas.getContext("2d")!;
 
 		this.width = lineCanvas.width;
 		this.height = lineCanvas.height;
@@ -101,11 +110,13 @@ export class CardiogramAnimationService {
 	start(): void {
 		if (this._isAnimating) return;
 		this._isAnimating = true;
-		this._animate();
+		this._lastTimestamp = null;
+		this._animFrame = requestAnimationFrame(this._animate);
 	}
 
 	stop(): void {
 		this._isAnimating = false;
+		this._lastTimestamp = null;
 		if (this._animFrame !== null) {
 			cancelAnimationFrame(this._animFrame);
 			this._animFrame = null;
@@ -150,79 +161,128 @@ export class CardiogramAnimationService {
 	updateDimensions(width: number, height: number): void {
 		this.width = Math.floor(width);
 		this.height = Math.floor(height);
-		// Reset previous values to avoid stale data
-		this.prevY = undefined;
-		this.prevHeartY = undefined;
+		// Old samples were positioned for the previous canvas size — discard and let
+		// the trace rebuild rather than have it jump or stretch.
+		this._samples = [];
 	}
 
-	private _animate = (): void => {
+	private _animate = (timestamp: number): void => {
 		if (!this._isAnimating) return;
-		this._drawEcg();
+
+		const dt = this._lastTimestamp === null
+			? 0
+			: Math.min((timestamp - this._lastTimestamp) / 1000, CardiogramAnimationService.MAX_DT_SEC);
+		this._lastTimestamp = timestamp;
+
+		this._drawEcg(dt, timestamp / 1000);
 		this._animFrame = requestAnimationFrame(this._animate);
 	};
 
-	private _drawEcg(): void {
+	/**
+	 * Redraws the whole visible trace from a rolling buffer of {time, value}
+	 * samples every frame instead of scrolling pixel data. Avoids
+	 * getImageData/putImageData (a synchronous GPU readback — one of the most
+	 * expensive things you can do on a canvas, and it forces software
+	 * rendering for the whole context) in favor of a single smoothed path
+	 * and one stroke() call.
+	 */
+	private _drawEcg(dt: number, nowSec: number): void {
 		if (this.width <= 0 || this.height <= 0) return;
 
 		const effectiveTargetAmp = this.isFlatlined ? 0 : this.targetAmp;
-		this.amp += (effectiveTargetAmp - this.amp) * 0.05;
+		// Reproduces the original per-frame-at-60fps smoothing factor at any frame rate.
+		const ampSmoothing = 1 - Math.pow(1 - CardiogramAnimationService.AMP_SMOOTHING_PER_FRAME_AT_60FPS, dt * 60);
+		this.amp += (effectiveTargetAmp - this.amp) * ampSmoothing;
 
 		const offsetX = 10;
 		const offsetY = 10;
 		const radius = 4;
-		const x = this.width - offsetX - radius;
-
-		// Scroll the line canvas left by 1px
-		const imageData = this.lineCtx.getImageData(1, 0, this.width - 1, this.height);
-		this.lineCtx.clearRect(0, 0, this.width, this.height);
-		this.lineCtx.putImageData(imageData, 0, 0);
+		const headX = this.width - offsetX - radius;
+		const centerY = this.height / 2 + offsetY;
 
 		const heartY = this._getHeartY(this.phase);
-		const centerY = this.height / 2 + offsetY;
-		const y = centerY - heartY;
+		this._samples.push({ t: nowSec, heartY });
 
-		if (this.prevY === undefined) {
-			this.prevY = y;
-			this.prevHeartY = heartY;
+		// Drop samples that have scrolled fully off the left edge.
+		const toX = (t: number): number => headX - (nowSec - t) * CardiogramAnimationService.SCROLL_PX_PER_SEC;
+		while (this._samples.length > 2 && toX(this._samples[1]!.t) < -radius) {
+			this._samples.shift();
 		}
 
-		// Gradient stroke based on wave height
-		const prevHeartY = this.prevHeartY!;
-		const safeAmp = Math.max(this.amp, 0.0001);
-		const t1 = Math.min(1, Math.abs(prevHeartY) / safeAmp);
-		const t2 = Math.min(1, Math.abs(heartY) / safeAmp);
+		this.lineCtx.clearRect(0, 0, this.width, this.height);
 
-		const gradient = this.lineCtx.createLinearGradient(x - 1, this.prevY, x, y);
-		gradient.addColorStop(0, lerpColor(this.bottomColor, this.topColor, t1));
-		gradient.addColorStop(1, lerpColor(this.bottomColor, this.topColor, t2));
+		if (this._samples.length >= 2) {
+			const points = this._samples.map((s) => ({
+				x: toX(s.t),
+				y: centerY - s.heartY,
+				colorT: this._peakColorT(s.heartY),
+			}));
 
-		this.lineCtx.beginPath();
-		this.lineCtx.moveTo(x - 1, this.prevY);
-		this.lineCtx.lineTo(x, y);
-		this.lineCtx.strokeStyle = gradient;
-		this.lineCtx.lineWidth = this.lineWidth;
-		this.lineCtx.stroke();
+			this.lineCtx.strokeStyle = this._buildTraceGradient(points);
+			this.lineCtx.lineWidth = this.lineWidth;
+			this.lineCtx.lineJoin = "round";
+			this.lineCtx.lineCap = "round";
 
-		// Solid pixel for continuity
-		this.lineCtx.fillStyle = lerpColor(this.bottomColor, this.topColor, t2);
-		this.lineCtx.fillRect(x, y, 1, 1);
+			// Smooth the polyline into a continuous quadratic-bezier path: each
+			// segment curves through a sample toward the midpoint of the next one.
+			this.lineCtx.beginPath();
+			this.lineCtx.moveTo(points[0]!.x, points[0]!.y);
+			for (let i = 1; i < points.length - 1; i++) {
+				const cur = points[i]!;
+				const next = points[i + 1]!;
+				this.lineCtx.quadraticCurveTo(cur.x, cur.y, (cur.x + next.x) / 2, (cur.y + next.y) / 2);
+			}
+			const last = points[points.length - 1]!;
+			this.lineCtx.lineTo(last.x, last.y);
+			this.lineCtx.stroke();
+		}
 
 		// Draw needle/point on top canvas
+		const headY = centerY - heartY;
+		const headColor = lerpColor(this.bottomColor, this.topColor, this._peakColorT(heartY));
 		this.pointCtx.clearRect(0, 0, this.width, this.height);
 		this.pointCtx.beginPath();
-		this.pointCtx.arc(x, y, radius, 0, 2 * Math.PI);
-		this.pointCtx.fillStyle = this.topColor;
+		this.pointCtx.arc(headX, headY, radius, 0, 2 * Math.PI);
+		this.pointCtx.fillStyle = headColor;
 		this.pointCtx.shadowBlur = 5;
-		this.pointCtx.shadowColor = this.topColor;
+		this.pointCtx.shadowColor = headColor;
 		this.pointCtx.fill();
 		this.pointCtx.shadowBlur = 0;
 
-		// Update previous state
-		this.prevY = y;
-		this.prevHeartY = heartY;
-
 		// Advance waveform phase
-		this.phase += 0.04 * this.freq;
+		this.phase += CardiogramAnimationService.PHASE_RAD_PER_SEC * this.freq * dt;
+	}
+
+	/**
+	 * Maps a waveform height to how strongly the accent (top) color should show:
+	 * a smooth gradient proportional to height, scaled against the R-spike's
+	 * actual peak (see R_WAVE_PEAK_FRACTION) rather than raw amp so the true
+	 * apex reaches full accent color instead of topping out at 80%.
+	 */
+	private _peakColorT(heartY: number): number {
+		const safeAmp = Math.max(this.amp, 0.0001);
+		const peakRelative = Math.abs(heartY) / (safeAmp * CardiogramAnimationService.R_WAVE_PEAK_FRACTION);
+		return Math.min(1, peakRelative);
+	}
+
+	/**
+	 * Builds the trace gradient from every sample rather than a subsampled
+	 * handful — subsampling by index into a sliding window means "stop #12"
+	 * refers to a different real sample each frame as the buffer scrolls,
+	 * desyncing the color from the geometry it's supposed to track.
+	 */
+	private _buildTraceGradient(points: { x: number; colorT: number }[]): CanvasGradient {
+		const x0 = points[0]!.x;
+		const x1 = points[points.length - 1]!.x;
+		const gradient = this.lineCtx.createLinearGradient(x0, 0, x1, 0);
+		const span = Math.max(x1 - x0, 1);
+
+		for (const p of points) {
+			const offset = Math.min(1, Math.max(0, (p.x - x0) / span));
+			gradient.addColorStop(offset, lerpColor(this.bottomColor, this.topColor, p.colorT));
+		}
+
+		return gradient;
 	}
 
 	/**
@@ -248,7 +308,7 @@ export class CardiogramAnimationService {
 		// R spike (large positive - main heartbeat)
 		else if (cycle < 0.2) {
 			const alpha = (cycle - 0.15) / 0.05;
-			y = 0.8 * Math.sin(alpha * Math.PI) * this.amp;
+			y = CardiogramAnimationService.R_WAVE_PEAK_FRACTION * Math.sin(alpha * Math.PI) * this.amp;
 		}
 		// S dip (small negative after R)
 		else if (cycle < 0.25) {
