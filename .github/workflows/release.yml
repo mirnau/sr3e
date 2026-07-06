@@ -33,6 +33,18 @@ jobs:
         run: |
           echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Decide prerelease + latest
+        id: flags
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          if echo "$V" | grep -Eq -- "-(alpha|beta)\\."; then
+            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
+            echo "make_latest=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "make_latest=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install deps & build
         run: |
           npm ci
@@ -45,16 +57,20 @@ jobs:
           ZIP="sr3e-${VERSION}.zip"
 
           MANIFEST_PINNED="${REPO}/releases/download/v${VERSION}/system.json"
-          MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
           DOWNLOAD_URL="${REPO}/releases/download/v${VERSION}/${ZIP}"
 
           # Pinned manifest for this exact version
           jq --arg ver "$VERSION" --arg manifest "$MANIFEST_PINNED" --arg download "$DOWNLOAD_URL" \
              '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.pinned.json
 
-          # "Latest" channel manifest (always points to latest release asset)
-          jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
-             '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
+          # "Latest" channel manifest — only meaningful once GitHub can actually mark this
+          # release as latest, which it refuses to do for prereleases. Skip it for
+          # alpha/beta builds instead of publishing a link that 404s.
+          if [ "${{ steps.flags.outputs.prerelease }}" = "false" ]; then
+            MANIFEST_LATEST="${REPO}/releases/latest/download/system.json"
+            jq --arg ver "$VERSION" --arg manifest "$MANIFEST_LATEST" --arg download "$DOWNLOAD_URL" \
+               '.version=$ver | .manifest=$manifest | .download=$download' system.json > system.latest.json
+          fi
 
       - name: Package (players only)
         run: |
@@ -72,15 +88,17 @@ jobs:
           [ -d licenses ]  && cp -r licenses "$ROOT/"
           [ -f README.md ] && cp README.md "$ROOT/"
           (cd package && zip -r "../sr3e-${VERSION}.zip" "sr3e")
-          # upload "latest" manifest as a separate asset
-          cp system.latest.json system.json
+          # Upload "latest" manifest as a separate asset — only exists for non-prerelease builds.
+          [ -f system.latest.json ] && cp system.latest.json system.json || rm -f system.json
 
       - name: Compose release body
         id: body
         run: |
           V="${{ steps.v.outputs.version }}"
           {
-            echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
+            if [ "${{ steps.flags.outputs.prerelease }}" = "false" ]; then
+              echo "Install/Update manifest (latest): https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/system.json"
+            fi
             echo "Pinned manifest: https://github.com/${GITHUB_REPOSITORY}/releases/download/v${V}/system.json"
             echo
             if echo "$V" | grep -q -- "-alpha\\."; then
@@ -88,18 +106,6 @@ jobs:
               echo "system may break without warning or future fixes."
             fi
           } > RELEASE_BODY.md
-
-      - name: Decide prerelease + latest
-        id: flags
-        run: |
-          V="${{ steps.v.outputs.version }}"
-          if echo "$V" | grep -Eq -- "-(alpha|beta)\\."; then
-            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
-            echo "make_latest=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-            echo "make_latest=true" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -113,7 +119,7 @@ jobs:
             system.pinned.json
           prerelease: ${{ steps.flags.outputs.prerelease }}
           make_latest: ${{ steps.flags.outputs.make_latest }}
-          # set to true after first success run if you like
+          # system.json is absent for prerelease builds (no "latest" manifest to ship) — don't fail on it.
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
