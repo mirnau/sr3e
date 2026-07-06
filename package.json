@@ -17,7 +17,7 @@
       "release": "standard-version && git push --follow-tags origin main"
    },
    "devDependencies": {
-      "@league-of-foundry-developers/foundry-vtt-types": "^13.340.1",
+      "@league-of-foundry-developers/foundry-vtt-types": "^12.331.5",
       "@sveltejs/vite-plugin-svelte": "^7.1.2",
       "@testing-library/svelte": "^5.2.8",
       "@testing-library/user-event": "^14.6.1",
