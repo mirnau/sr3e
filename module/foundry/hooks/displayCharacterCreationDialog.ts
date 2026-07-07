@@ -19,17 +19,33 @@ interface PendingCreation {
 const pendingCreations = new Map<string, PendingCreation>();
 
 /**
+ * Reference to the native "Create Actor" DialogV2 instance while it's open, so
+ * preCreateCharacterActor can force it closed the moment it intercepts creation.
+ */
+let nativeCreateDialog: { close: (options?: object) => Promise<unknown> } | null = null;
+let awaitingNativeCreateDialog = false;
+
+/**
  * Foundry's native "Create Actor" dialog awaits Actor.create() and then calls
- * `document.sheet.render()` on the result. Our preCreateActor hook blocks that
- * creation (returns false) so it can show CharacterCreationApp first, which
- * leaves `document` undefined and makes Foundry's own dialog throw. The actor
- * is still created correctly afterward through showCharacterCreationDialog, so
- * this is a known, harmless crash in Foundry's callback that we only need to swallow.
+ * `document.sheet.render()` on the result inside its own button callback, which
+ * runs in a try/catch that skips the dialog's own close() call when it throws.
+ * Our preCreateActor hook blocks creation (returns false) so it can show
+ * CharacterCreationApp first, which leaves `document` undefined, makes Foundry's
+ * callback throw, and leaves the native dialog stuck open. We close it ourselves
+ * (see closeNativeCreateDialog) and swallow the resulting error here, since the
+ * actor is still created correctly afterward through showCharacterCreationDialog.
  */
 export function patchActorCreateDialog(): void {
 	const originalCreateDialog = Actor.createDialog;
 
+	Hooks.on("renderDialogV2", (app: unknown) => {
+		if (awaitingNativeCreateDialog) {
+			nativeCreateDialog = app as { close: (options?: object) => Promise<unknown> };
+		}
+	});
+
 	Actor.createDialog = async function (this: unknown, ...args: unknown[]) {
+		awaitingNativeCreateDialog = true;
 		try {
 			return await (originalCreateDialog as (...a: unknown[]) => Promise<unknown>).apply(this, args);
 		} catch (error) {
@@ -37,8 +53,20 @@ export function patchActorCreateDialog(): void {
 				return null;
 			}
 			throw error;
+		} finally {
+			awaitingNativeCreateDialog = false;
+			nativeCreateDialog = null;
 		}
 	} as typeof Actor.createDialog;
+}
+
+/**
+ * Force-closes the native "Create Actor" dialog if it's currently open. Called
+ * as soon as we intercept character creation so the dialog doesn't linger
+ * behind CharacterCreationApp.
+ */
+function closeNativeCreateDialog(): void {
+	nativeCreateDialog?.close({ force: true })?.catch(() => {});
 }
 
 /**
@@ -68,6 +96,10 @@ export function preCreateCharacterActor(
 
 	// Prevent the actor from being created
 	console.log("SR3E | Intercepting character creation - showing dialog first");
+
+	// Close Foundry's native "Create Actor" dialog now, rather than leaving it
+	// stuck open behind CharacterCreationApp
+	closeNativeCreateDialog();
 
 	// Store the creation data and show dialog
 	const creationId = `creation-${Date.now()}-${Math.random()}`;

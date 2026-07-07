@@ -138,7 +138,7 @@
     async function deleteSkill(): Promise<void> {
         const confirmed = await foundry.applications.api.DialogV2.confirm({
             window: { title: localize(CONFIG.SR3E.MODAL.deleteskilltitle) },
-            content: localize(CONFIG.SR3E.MODAL.deleteskill),
+            content: localize($isCreation ? CONFIG.SR3E.MODAL.deleteskillcreation : CONFIG.SR3E.MODAL.deleteskill),
             yes: { label: localize(CONFIG.SR3E.MODAL.confirm), default: true },
             no: { label: localize(CONFIG.SR3E.MODAL.decline) },
             modal: true,
