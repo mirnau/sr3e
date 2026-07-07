@@ -241,6 +241,7 @@
       "buyingintro": "Once a roll's dice appear in the chat message, you can spend Karma Pool on them:",
       "buyingreroll": "<span class=\"guide-action\">Click</span> any die to reroll. On target-number rolls this rerolls every currently-failed die at once. On simple/open rolls (no target number) <span class=\"guide-action\">right-click</span> the dice you want to reroll first to mark them, then click any die to reroll just the marked ones. Cost is 1 Karma the first time, 2 the second, and so on for the same test.",
       "buyingtitle": "Buying Successes & Rerolls",
+      "firstlogintip": "<strong>Tip:</strong> Press <strong>F1</strong> to open the Guide for SR3E — dice rolls, buying successes, dice pools, and other system features.",
       "gadgetdescription": "A <strong>Gadget</strong> isn't used on its own — it's a modifier you attach to another item by dragging the Gadget onto that item's sheet (a weapon mod, armor plating, a spell fetish, a matrix program patch, vehicle add-on, and so on). Once attached it applies its bonuses as an Active Effect, with a switch on the host item to enable or disable it, and a button to detach it again.",
       "gadgettitle": "Gadgets",
       "itemadeptpower": "<strong>Adept Power</strong> — a Physical Adept's power, paid for with Power Points.",

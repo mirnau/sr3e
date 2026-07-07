@@ -1,4 +1,5 @@
 export const GUIDE_KEYS = [
+  "firstlogintip",
   "rollingtitle",
   "rollingsimple",
   "rollingadvanced",

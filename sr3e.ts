@@ -68,6 +68,7 @@ import { applyWindowFocusBlurSetting, registerWindowFocusBlurSettings } from "./
 import { registerHealthAnimationSettings } from "./module/services/settings/healthAnimationSettings";
 import { registerPerformanceSettingsMenu } from "./module/services/settings/performanceSettings";
 import { registerGuideKeybinding } from "./module/foundry/hooks/registerGuideKeybinding";
+import { showFirstLoginGuideTip } from "./module/foundry/hooks/firstLoginGuideTip";
 import { registerInitiativePlaceholderIconHook } from "./module/foundry/hooks/initiativePlaceholderIcon";
 
 
@@ -314,6 +315,7 @@ async function registerHooks(): Promise<void> {
       registerWindowFocusDimHook();
       registerSustainedSpellCleanupHook();
       registerDebtInterestHook();
+      void showFirstLoginGuideTip();
 
       console.log("SR3E | Ready");
    });
