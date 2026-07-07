@@ -1,6 +1,6 @@
 # sr3e
-
 <!-- Overview video goes here -->
+[![Watch the video](https://img.youtube.com/vi/qKfM4xvRxYo/maxresdefault.jpg)](https://youtu.be/qKfM4xvRxYo)
 
 sr3e is a Shadowrun Third Edition Homebrew game system for Foundry Virtual Tabletop (VTT). In Foundry, a game system is a modular software package that defines the rules, mechanics, and data structures for a specific tabletop role-playing game (TTRPG).
 
