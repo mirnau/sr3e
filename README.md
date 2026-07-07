@@ -26,7 +26,7 @@ The texture for the character sheet is from https://ambientcg.com/
 
 ## AI-assisted development
 
-Parts of this project — code, documentation, and tooling — have been developed with the assistance of AI. This is disclosed in the interest of transparency. First iteration was made mostly by old fashion hand coding, including the visual design. Second iteration has been more AI-heavy.
+Parts of this project — code, documentation, and tooling — have been developed with the assistance of AI. This is disclosed in the interest of transparency. First iteration was made mostly by old fashion hand coding, including the visual design. Second iteration has been more AI-heavy. If you want to program you are welcome to use AI, but be sure to verify its output, and align it to the projects over all structure.
 
 ## Contributing
 
