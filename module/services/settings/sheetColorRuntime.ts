@@ -2,6 +2,8 @@ const MODULE_ID = "sr3e";
 const NEON_NAME_COLOR = "neonNameColor";
 const DISABLE_NEON_NAME_BLINKING = "disableNeonNameBlinking";
 const DISABLE_NEON_NAME_BLINKING_CLASS = "sr3e-disable-neon-name-blinking";
+const DISABLE_FAKE_SHADOWS = "disableFakeShadows";
+const DISABLE_FAKE_SHADOWS_CLASS = "sr3e-disable-fake-shadows";
 
 export const DEFAULT_NEON_NAME_COLOR = "#ff2090";
 export const NEON_NAME_COLOR_VAR = "--neon-name-color";
@@ -116,10 +118,23 @@ export function applyDisableNeonNameBlinking(disabled: boolean): void {
     document.documentElement.classList.toggle(DISABLE_NEON_NAME_BLINKING_CLASS, Boolean(disabled));
 }
 
+export function disableFakeShadowsSetting(): boolean {
+    return Boolean((game.settings as any).get(MODULE_ID, DISABLE_FAKE_SHADOWS));
+}
+
+export async function setDisableFakeShadows(disabled: boolean): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, DISABLE_FAKE_SHADOWS, Boolean(disabled));
+}
+
+export function applyDisableFakeShadows(disabled: boolean): void {
+    document.documentElement.classList.toggle(DISABLE_FAKE_SHADOWS_CLASS, Boolean(disabled));
+}
+
 export const sheetColorSettingKeys = {
     moduleId: MODULE_ID,
     neonNameColor: NEON_NAME_COLOR,
     disableNeonNameBlinking: DISABLE_NEON_NAME_BLINKING,
+    disableFakeShadows: DISABLE_FAKE_SHADOWS,
 } as const;
 
 function normalizeHexColorWithDefault(value: unknown, defaultColor: string): string {

@@ -41,6 +41,14 @@ export function getWindowFocusBlur(): number {
     return normalizeWindowFocusBlur((game.settings as any).get(MODULE_ID, WINDOW_FOCUS_BLUR));
 }
 
+export async function setWindowFocusBlur(value: unknown): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, WINDOW_FOCUS_BLUR, normalizeWindowFocusBlur(value));
+}
+
+export async function resetWindowFocusBlur(): Promise<void> {
+    await setWindowFocusBlur(DEFAULT_WINDOW_FOCUS_BLUR_PX);
+}
+
 export function normalizeWindowFocusShrinkPercent(value: unknown): number {
     const percent = Math.round(Number(value));
     if (!Number.isFinite(percent)) return DEFAULT_WINDOW_FOCUS_SHRINK_PERCENT;
@@ -57,16 +65,32 @@ export function windowFocusShrinkSetting(): boolean {
     return Boolean((game.settings as any).get(MODULE_ID, WINDOW_FOCUS_SHRINK));
 }
 
+export async function setWindowFocusShrink(enabled: boolean): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, WINDOW_FOCUS_SHRINK, Boolean(enabled));
+}
+
 export function getWindowFocusShrinkPercent(): number {
     return normalizeWindowFocusShrinkPercent((game.settings as any).get(MODULE_ID, WINDOW_FOCUS_SHRINK_PERCENT));
+}
+
+export async function setWindowFocusShrinkPercent(value: unknown): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, WINDOW_FOCUS_SHRINK_PERCENT, normalizeWindowFocusShrinkPercent(value));
 }
 
 export function windowFocusOpacitySetting(): boolean {
     return Boolean((game.settings as any).get(MODULE_ID, WINDOW_FOCUS_OPACITY));
 }
 
+export async function setWindowFocusOpacity(enabled: boolean): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, WINDOW_FOCUS_OPACITY, Boolean(enabled));
+}
+
 export function getWindowFocusOpacityPercent(): number {
     return normalizeWindowFocusOpacityPercent((game.settings as any).get(MODULE_ID, WINDOW_FOCUS_OPACITY_PERCENT));
+}
+
+export async function setWindowFocusOpacityPercent(value: unknown): Promise<void> {
+    await (game.settings as any).set(MODULE_ID, WINDOW_FOCUS_OPACITY_PERCENT, normalizeWindowFocusOpacityPercent(value));
 }
 
 export function applyWindowFocusBlur(value: unknown): void {

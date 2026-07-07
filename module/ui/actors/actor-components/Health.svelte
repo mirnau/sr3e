@@ -4,6 +4,8 @@ import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
 import { ElectroCardiogramService } from "../../../services/health/ElectroCardiogramService";
+import { calculateHealthPenalty } from "../../../services/health/healthPenalty";
+import { disableEcgStore } from "../../../services/settings/healthAnimationRuntime";
 import { KarmaPoolBurnService } from "../../../services/karma/KarmaPoolBurnService";
 import type SR3EActor from "../../../documents/SR3EActor";
 import StatCard from "./StatCard.svelte";
@@ -34,6 +36,11 @@ const severityLabels = ["light", "medium", "serious", "deadly"];
 const severityIndices = [0, 2, 5, 9];
 
 $effect(() => {
+   if ($disableEcgStore) {
+      ecgService?.destroy();
+      ecgService = null;
+      return;
+   }
    if (ecgCanvas && ecgPointCanvas && ecgContainer && !ecgService) {
       ecgService = new ElectroCardiogramService(
          ecgCanvas,
@@ -58,8 +65,9 @@ $effect(() => {
    }
 });
 $effect(() => {
-   if (!ecgService) return;
-   const calculatedPenalty = ecgService.calculatePenalty($stun, $physical);
+   const calculatedPenalty = ecgService
+      ? ecgService.calculatePenalty($stun, $physical)
+      : calculateHealthPenalty($stun, $physical);
    penalty.set(calculatedPenalty);
 });
 onDestroy(() => {
@@ -98,7 +106,8 @@ function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
 }
 </script>
 
-<div bind:this={ecgContainer} class="ecg-container">
+{#if !$disableEcgStore}
+   <div bind:this={ecgContainer} class="ecg-container">
       <div class="ecg-viewport">
          <canvas bind:this={ecgCanvas} id="ecg-canvas" class="ecg-animation"></canvas>
          <canvas bind:this={ecgPointCanvas} id="ecg-point-canvas"></canvas>
@@ -106,6 +115,7 @@ function handleButtonKeypress(e: KeyboardEvent, fn: () => void) {
          <div class="right-gradient"></div>
       </div>
    </div>
+{/if}
 
    <div class="condition-monitor">
       <div class="condition-meter">

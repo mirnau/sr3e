@@ -64,6 +64,10 @@
 	animation: attribute-gradient 45s ease infinite;
 	filter: blur(8px);
 	@include clipped-corners(0.4rem, 0.4rem, 0.6rem, 0.4rem);
+
+	:root.sr3e-disable-fake-shadows & {
+		display: none;
+	}
 }
 
 .attribute-card-outline {

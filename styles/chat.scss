@@ -50,6 +50,10 @@ body.game .sr3e-chat-message-shadow {
    filter: blur(20px);
    pointer-events: none;
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem);
+
+   :root.sr3e-disable-fake-shadows & {
+      display: none;
+   }
 }
 
 body.game .sr3e-chat-message-content {

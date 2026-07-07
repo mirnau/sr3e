@@ -14,11 +14,10 @@ export function registerDicePoolVisibilitySettings(): void {
     (game.settings as any).register(MODULE_ID, SHOW_ALL_DICE_POOLS, {
         name: "Show All Dice Pools",
         hint: "Always show Combat, Control, Astral, Spell, and Hacking dice pools on character sheets.",
-        scope: "world",
+        scope: "client",
         config: true,
         type: Boolean,
         default: false,
-        restricted: true,
         onChange: (value: boolean) => showAllDicePoolsStore.set(Boolean(value)),
     });
 

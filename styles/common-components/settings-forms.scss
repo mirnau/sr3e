@@ -1,0 +1,7 @@
+// Shared grid layout for range-slider settings forms (e.g. WindowFocusBlurSettings.svelte)
+.sr3e-window-focus-fields {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 3.5rem auto;
+	align-items: center;
+	gap: 0.5rem;
+}

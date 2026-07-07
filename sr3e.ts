@@ -65,6 +65,8 @@ import { applySheetColorSettings, registerSheetColorSettings } from "./module/se
 import { registerDicePoolVisibilitySettings } from "./module/services/settings/dicePoolVisibilitySettings";
 import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/settings/remSizeSettings";
 import { applyWindowFocusBlurSetting, registerWindowFocusBlurSettings } from "./module/services/settings/windowFocusBlurSettings";
+import { registerHealthAnimationSettings } from "./module/services/settings/healthAnimationSettings";
+import { registerPerformanceSettingsMenu } from "./module/services/settings/performanceSettings";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -157,6 +159,8 @@ async function registerHooks(): Promise<void> {
       registerRemSizeSettings();
       registerDicePoolVisibilitySettings();
       registerWindowFocusBlurSettings();
+      registerHealthAnimationSettings();
+      registerPerformanceSettingsMenu();
 
       // Dynamic imports AFTER configure() has run
 

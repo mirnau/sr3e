@@ -4,6 +4,7 @@
  */
 
 import { CardiogramAnimationService, type EcgAnimatorOptions } from "./CardiogramAnimationService";
+import { calculateHealthPenalty } from "./healthPenalty";
 
 export interface ElectroCardiogramServiceOptions {
 	highlightColor?: string;
@@ -135,7 +136,7 @@ export class ElectroCardiogramService {
 	 */
 	calculatePenalty(stun: number, physical: number): number {
 		this.setEcgForDamage(stun, physical);
-		return this.severityLevel(Math.max(stun, physical));
+		return calculateHealthPenalty(stun, physical);
 	}
 
 	/**
@@ -154,22 +155,6 @@ export class ElectroCardiogramService {
 		// Boxes 0–9: smooth per-box escalation
 		const t = degree / 10;
 		this.setPace(1.5 + t * 8.5, 20 + t * 20);
-	}
-
-	/**
-	 * Map a single-track damage degree to a SR3e penalty level.
-	 * - 0:   No penalty
-	 * - 1–2: Light   (-1)
-	 * - 3–5: Moderate (-2)
-	 * - 6–8: Serious  (-3)
-	 * - 9+:  Deadly   (incapacitated)
-	 */
-	private severityLevel(degree: number): number {
-		if (degree === 0) return 0;
-		if (degree < 3) return 1;
-		if (degree < 6) return 2;
-		if (degree < 9) return 3;
-		return 4;
 	}
 
 	/**

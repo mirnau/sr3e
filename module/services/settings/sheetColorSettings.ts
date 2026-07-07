@@ -2,7 +2,9 @@ import SheetColorSettingsApp from "../../foundry/applications/SheetColorSettings
 import {
     applySheetColor,
     applyDisableNeonNameBlinking,
+    applyDisableFakeShadows,
     disableNeonNameBlinkingSetting,
+    disableFakeShadowsSetting,
     getSheetColor,
     sheetColorDefinitions,
     sheetColorSettingKeys,
@@ -14,7 +16,7 @@ export function registerSheetColorSettings(): void {
         settings.register(sheetColorSettingKeys.moduleId, definition.setting, {
             name: definition.label,
             hint: definition.hint,
-            scope: "world",
+            scope: "client",
             config: false,
             type: String,
             default: definition.defaultColor,
@@ -25,12 +27,21 @@ export function registerSheetColorSettings(): void {
     settings.register(sheetColorSettingKeys.moduleId, sheetColorSettingKeys.disableNeonNameBlinking, {
         name: "Disable Neon Name Blinking",
         hint: "Stops the glow and flicker animation on character sheet neon names.",
-        scope: "world",
+        scope: "client",
         config: true,
         type: Boolean,
         default: false,
-        restricted: true,
         onChange: (disabled: boolean) => applyDisableNeonNameBlinking(disabled),
+    });
+
+    settings.register(sheetColorSettingKeys.moduleId, sheetColorSettingKeys.disableFakeShadows, {
+        name: "Disable Sheet Glow Shadows",
+        hint: "Stops the blurred rotating glow layer behind sheet cards and chat messages. Improves performance on low-spec devices.",
+        scope: "client",
+        config: false,
+        type: Boolean,
+        default: false,
+        onChange: (disabled: boolean) => applyDisableFakeShadows(disabled),
     });
 
     settings.registerMenu(sheetColorSettingKeys.moduleId, "sheetColors", {
@@ -39,7 +50,6 @@ export function registerSheetColorSettings(): void {
         hint: "Adjust selected SR3E sheet colors without changing layout or typography.",
         icon: "fas fa-palette",
         type: SheetColorSettingsApp,
-        restricted: true,
     });
 }
 
@@ -48,4 +58,5 @@ export function applySheetColorSettings(): void {
         applySheetColor(definition, getSheetColor(definition));
     }
     applyDisableNeonNameBlinking(disableNeonNameBlinkingSetting());
+    applyDisableFakeShadows(disableFakeShadowsSetting());
 }

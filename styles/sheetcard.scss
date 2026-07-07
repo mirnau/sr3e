@@ -42,6 +42,10 @@
    animation: rotating-gradient 60s ease infinite;
    filter: blur(20px);
    @include clipped-corners(0.75rem, 0.75rem, 1.25rem, 0.75rem);
+
+   :root.sr3e-disable-fake-shadows & {
+      display: none;
+   }
 }
 
 .sheet-card-outline {
