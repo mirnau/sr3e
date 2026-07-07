@@ -67,6 +67,8 @@ import { applyRemSizeSetting, registerRemSizeSettings } from "./module/services/
 import { applyWindowFocusBlurSetting, registerWindowFocusBlurSettings } from "./module/services/settings/windowFocusBlurSettings";
 import { registerHealthAnimationSettings } from "./module/services/settings/healthAnimationSettings";
 import { registerPerformanceSettingsMenu } from "./module/services/settings/performanceSettings";
+import { registerGuideKeybinding } from "./module/foundry/hooks/registerGuideKeybinding";
+import { registerInitiativePlaceholderIconHook } from "./module/foundry/hooks/initiativePlaceholderIcon";
 
 
 // Configure global aliases FIRST, before any model imports happen
@@ -161,6 +163,7 @@ async function registerHooks(): Promise<void> {
       registerWindowFocusBlurSettings();
       registerHealthAnimationSettings();
       registerPerformanceSettingsMenu();
+      registerGuideKeybinding();
 
       // Dynamic imports AFTER configure() has run
 
@@ -319,6 +322,7 @@ async function registerHooks(): Promise<void> {
    registerMedicalTokenDropHook();
    registerPurchaseTokenDropHook();
    registerPermanentEffectTokenIconFilter();
+   registerInitiativePlaceholderIconHook();
 
    Hooks.on(hooks.preCreateActor, preCreateCharacterActor);
    registerDocumentTypeIconHooks();

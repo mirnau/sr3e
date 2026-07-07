@@ -3,11 +3,11 @@ import PackeryGrid from "../common-components/PackeryGrid.svelte";
 import SheetCard from "../common-components/SheetCard.svelte";
 import Attributes from "./actor-components/Attributes.svelte";
 import DicePools from "./actor-components/DicePools.svelte";
-import Dossier from "./actor-components/Dossier.svelte";
+import Profile from "./actor-components/Profile.svelte";
 import Health from "./actor-components/Health.svelte";
 import Karma from "./actor-components/Karma.svelte";
 import Movement from "./actor-components/Movement.svelte";
-import Register from "./actor-components/Register.svelte";
+import Dossier from "./actor-components/Dossier.svelte";
 import type SR3EActor from "../../documents/SR3EActor";
 
 const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
@@ -15,7 +15,7 @@ const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
 
 <PackeryGrid>
     <SheetCard>
-        <Dossier {actor} />
+        <Profile {actor} />
     </SheetCard>
     <SheetCard>
         <Attributes {actor} />
@@ -30,7 +30,7 @@ const { actor } = $props<{ actor: SR3EActor; form?: HTMLFormElement }>();
         <Karma {actor} />
     </SheetCard>
     <SheetCard span="dynamic">
-        <Register {actor} />
+        <Dossier {actor} />
     </SheetCard>
     <SheetCard span={2}>
         <Health {actor} />

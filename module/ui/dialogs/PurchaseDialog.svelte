@@ -3,7 +3,7 @@ import { untrack } from "svelte";
 import { localize } from "../../services/utilities";
 import { availableCreditSticks } from "../../services/economy/subscriptionPayment";
 import { commodityPrice, completePurchase, type PurchaseMode } from "../../services/economy/purchase";
-import { persistRegisterTab, registerTabForItem } from "../actors/actor-components/registerTabs";
+import { persistDossierTab, dossierTabForItem } from "../actors/actor-components/dossierTabs";
 import CreditStickPicker from "../actors/actor-components/rats-race/CreditStickPicker.svelte";
 import FuzzyFinder from "../common-components/FuzzyFinder.svelte";
 
@@ -40,9 +40,9 @@ $effect(() => {
    creditorOptions = options.map((a: any) => ({ value: a.id, label: a.name }));
 });
 
-async function registerInventoryTab() {
-   const tab = registerTabForItem(item);
-   if (tab) await persistRegisterTab(buyer, tab);
+async function switchToDossierTab() {
+   const tab = dossierTabForItem(item);
+   if (tab) await persistDossierTab(buyer, tab);
 }
 
 async function payWithStick(stick: Item) {
@@ -51,19 +51,19 @@ async function payWithStick(stick: Item) {
       insufficientFunds = true;
       return;
    }
-   await registerInventoryTab();
+   await switchToDossierTab();
    p.onClose();
 }
 
 async function confirmDebt() {
    await completePurchase(buyer as any, item as any, "debt", { price, creditorId, interestPerMonth }, seller as any);
-   await registerInventoryTab();
+   await switchToDossierTab();
    p.onClose();
 }
 
 async function confirmFree() {
    await completePurchase(buyer as any, item as any, "free", { price: 0 }, seller as any);
-   await registerInventoryTab();
+   await switchToDossierTab();
    p.onClose();
 }
 </script>

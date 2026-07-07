@@ -1,6 +1,6 @@
-export const REGISTER_TAB_FLAG = "registerTab";
+export const DOSSIER_TAB_FLAG = "dossierTab";
 
-export const registerTabs = [
+export const dossierTabs = [
 	"active",
 	"knowledge",
 	"language",
@@ -13,7 +13,7 @@ export const registerTabs = [
 	"ratsrace",
 ] as const;
 
-export type RegisterTab = (typeof registerTabs)[number];
+export type DossierTab = (typeof dossierTabs)[number];
 
 const inventoryItemTypes = new Set([
 	"ammunition",
@@ -25,11 +25,11 @@ const inventoryItemTypes = new Set([
 	"focus",
 ]);
 
-export function isRegisterTab(tab: unknown): tab is RegisterTab {
-	return typeof tab === "string" && registerTabs.includes(tab as RegisterTab);
+export function isDossierTab(tab: unknown): tab is DossierTab {
+	return typeof tab === "string" && dossierTabs.includes(tab as DossierTab);
 }
 
-export function registerTabForItem(item: Item): RegisterTab | null {
+export function dossierTabForItem(item: Item): DossierTab | null {
 	if (item.type === "skill") return skillTab(item);
 	if (item.type === "spell" || item.type === "adeptpower") return "grimoire";
 	if (item.type === "transaction") return "ratsrace";
@@ -39,11 +39,11 @@ export function registerTabForItem(item: Item): RegisterTab | null {
 	return null;
 }
 
-export async function persistRegisterTab(actor: Actor, tab: RegisterTab): Promise<void> {
-	await actor.update({ [`flags.sr3e.${REGISTER_TAB_FLAG}`]: tab }, { render: false });
+export async function persistDossierTab(actor: Actor, tab: DossierTab): Promise<void> {
+	await actor.update({ [`flags.sr3e.${DOSSIER_TAB_FLAG}`]: tab }, { render: false });
 }
 
-function skillTab(item: Item): RegisterTab {
+function skillTab(item: Item): DossierTab {
 	const skillType = String((item.system as Record<string, unknown>)?.skillType ?? "active");
 	if (skillType === "knowledge" || skillType === "language") return skillType;
 	return "active";

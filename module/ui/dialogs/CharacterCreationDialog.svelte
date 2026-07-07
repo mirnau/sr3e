@@ -41,7 +41,7 @@
    const metatypeItem = $derived(
       game.items?.get(selectedMetatype) as Item | undefined,
    );
-   const defaultCharacterIcon = "icons/svg/mystery-man.svg";
+   const defaultCharacterIcon = "systems/sr3e/textures/svgrepo/person-circle-svgrepo-com.svg";
    const metatypeImage = $derived(metatypeItem?.img || defaultCharacterIcon);
    const metatypeName = $derived(metatypeItem?.name || "");
 

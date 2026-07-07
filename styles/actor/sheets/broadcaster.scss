@@ -214,26 +214,26 @@
 	margin: 0;
 }
 
-.dossier {
+.profile {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 	margin-top: 0;
 }
 
-.dossier-img-btn {
+.profile-img-btn {
 	display: block;
 	position: relative;
 	border: none;
 	cursor: pointer;
 	width: 100%;
 
-	&:hover .dossier-img {
+	&:hover .profile-img {
 		filter: brightness(1.15) drop-shadow(0 0 6px var(--highlight-color-primary));
 	}
 }
 
-.dossier-img {
+.profile-img {
 	display: block;
 	width: 100%;
 	margin: 0;
@@ -262,13 +262,13 @@
 	}
 }
 
-// Dossier — name input; sits above .input-frame::before
+// Profile — name input; sits above .input-frame::before
 #actor-name {
 	font-size: 1.2rem;
 	text-align: center;
 }
 
-// Dossier — flavor stat rows (age / height / weight)
+// Profile — flavor stat rows (age / height / weight)
 .flavor-edit-block {
 	display: flex;
 	flex-direction: column;

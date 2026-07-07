@@ -144,7 +144,7 @@
    <div class="broadcaster-layout">
       <SheetCard span={1}>
          <div class="broadcaster-info">
-            <div class="broadcaster-image dossier-img-btn" role="button" tabindex="0" title="Click to change image"
+            <div class="broadcaster-image profile-img-btn" role="button" tabindex="0" title="Click to change image"
                onclick={() => openFilePicker(actor)}
                onkeydown={(e) => e.key === "Enter" && openFilePicker(actor)}
             >

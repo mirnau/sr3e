@@ -187,7 +187,7 @@ img {
 }
 
 .image-mask,
-.dossier-img-btn,
+.profile-img-btn,
 .broadcaster-image {
    background: var(--highlight-color-primary);
    padding: 1px;
@@ -208,7 +208,7 @@ img {
    }
 }
 
-.dossier-img-btn {
+.profile-img-btn {
    @include clipped-corners(0.5rem, 0.5rem, 0.9rem, 0.5rem);
 
    img {

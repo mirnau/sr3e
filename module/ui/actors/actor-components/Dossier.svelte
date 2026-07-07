@@ -1,22 +1,28 @@
 <script lang="ts">
 import { onDestroy, untrack } from "svelte";
-import { slide } from "svelte/transition";
-import { localize, pickImagePath } from "../../../services/utilities";
+import { localize } from "../../../services/utilities";
 import type { IStoreManager } from "../../../utilities/IStoreManager";
 import { StoreManager } from "../../../utilities/StoreManager.svelte";
-import type SR3EActor from "../../../documents/SR3EActor";
+import Foldout from "./Foldout.svelte";
+import SkillsActive from "./skills/SkillsActive.svelte";
+import SkillsKnowledge from "./skills/SkillsKnowledge.svelte";
+import SkillsLanguage from "./skills/SkillsLanguage.svelte";
+import Inventory from "./inventory/Inventory.svelte";
+import Garage from "./Garage.svelte";
+import Matrix from "./Matrix.svelte";
+import Grimoire from "./Grimoire.svelte";
+import Augmentations from "./Augmentations.svelte";
+import ActiveEffectsViewer from "../../common-components/ActiveEffectsViewer.svelte";
+import RatsRace from "./rats-race/RatsRace.svelte";
+import { DOSSIER_TAB_FLAG, type DossierTab, isDossierTab, dossierTabForItem } from "./dossierTabs";
 
-let { actor: _actor, config = CONFIG.SR3E }: { actor: SR3EActor; config?: any } = $props();
+let { actor: _actor }: { actor: Actor } = $props();
 const actor = untrack(() => _actor);
 const storeManager: IStoreManager = StoreManager.Instance as IStoreManager;
-
-let metatype = $state<Item | null>(null);
-
+const activeTabStore = storeManager.GetFlagStore<DossierTab>(actor, DOSSIER_TAB_FLAG, "active");
+const magic = storeManager.GetSimpleStatROStore(actor, "attributes.magic");
+const isBurnedOut = storeManager.GetRWStore<boolean>(actor, "attributes.isBurnedOut");
 storeManager.Subscribe(actor);
-
-const actorNameStore = storeManager.GetShallowStore<string>(actor, "actorName", actor.name);
-const isDetailsOpenStore = storeManager.GetRWStore<boolean>(actor, "profile.isDetailsOpen");
-
 onDestroy(() => {
    Hooks.off("createItem", createHookId);
    Hooks.off("updateItem", updateHookId);
@@ -24,158 +30,178 @@ onDestroy(() => {
    storeManager.Unsubscribe(actor);
 });
 
-function rebuildMetatype(): void {
-   metatype = [...((actor as any).items ?? [])].find((item: Item) => item.type === "metatype") ?? null;
+let skillItems = $state<any[]>([]);
+let spellItems = $state<Item[]>([]);
+let adeptPowerItems = $state<Item[]>([]);
+let augmentationItems = $state<Item[]>([]);
+let transactionItems = $state<Item[]>([]);
+let magicItems = $state<Item[]>([]);
+let cyberdeckItems = $state<Item[]>([]);
+let matrixProgramItems = $state<Item[]>([]);
+
+function rebuildDossierItems() {
+   const items = [...((actor as any).items ?? [])];
+   skillItems = items.filter((item: Record<string, unknown>) => item.type === "skill");
+   spellItems = items
+      .filter((item: Item) => item.type === "spell")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   adeptPowerItems = items
+      .filter((item: Item) => item.type === "adeptpower")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   augmentationItems = items
+      .filter((item: Item) => item.type === "augmentation")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   transactionItems = items
+      .filter((item: Item) => item.type === "transaction")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+   magicItems = items.filter((item: Item) => item.type === "magic");
+   cyberdeckItems = items.filter((item: Item) => item.type === "cyberdeck");
+   matrixProgramItems = items
+      .filter((item: Item) => item.type === "matrixprogram")
+      .sort((a: Item, b: Item) => (a.name ?? "").localeCompare(b.name ?? ""));
+}
+rebuildDossierItems();
+function belongsToActor(item: any): boolean {
+   return item.parent?.id === (actor as any).id || item.actor?.id === (actor as any).id;
 }
 
-function onItemChange(item: any): void {
-   if (item.parent?.id !== (actor as any).id && item.actor?.id !== (actor as any).id) return;
-   rebuildMetatype();
-}
+const onItemChange = (item: any) => {
+   if (!belongsToActor(item)) return;
+   rebuildDossierItems();
+};
 
-rebuildMetatype();
+const onItemCreate = (item: Item) => {
+   onItemChange(item);
+   if (!belongsToActor(item)) return;
+   const tab = dossierTabForItem(item);
+   if (tab) $activeTabStore = tab;
+};
 
-const createHookId = Hooks.on("createItem", onItemChange);
+const createHookId = Hooks.on("createItem", onItemCreate);
 const updateHookId = Hooks.on("updateItem", onItemChange);
 const deleteHookId = Hooks.on("deleteItem", onItemChange);
-
-function toggleDetails() {
-   isDetailsOpenStore.update((val) => !val);
+function bySkillType(skillType: string) {
+   return skillItems
+      .filter((item: Record<string, unknown>) => (item.system as Record<string, unknown>)?.skillType === skillType)
+      .sort((a: Record<string, unknown>, b: Record<string, unknown>) =>
+         (a.name as string).localeCompare(b.name as string)
+      );
 }
 
-function handleActorNameChange(event: Event) {
-   const target = event.target as HTMLInputElement;
-   actorNameStore.set(target.value);
-}
+const activeSkills = $derived(bySkillType("active"));
+const knowledgeSkills = $derived(bySkillType("knowledge"));
+const languageSkills = $derived(bySkillType("language"));
+const isAwakened = $derived(
+   $magic > 0 &&
+   magicItems.length > 0 &&
+   !$isBurnedOut,
+);
+const hasCyberdeck = $derived(cyberdeckItems.length > 0);
+const hasMatrixTab = $derived(hasCyberdeck || matrixProgramItems.length > 0);
+const hasAugmentationsTab = $derived(augmentationItems.length > 0);
 
-function cubicInOut(t: number): number {
-   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) * 0.5;
-}
-
-function updateAge(event: Event) {
-   const target = event.target as HTMLElement;
-   actor?.update({ "system.profile.age": Number(target.innerText.trim()) }, { render: false });
-}
-
-function updateHeight(event: Event) {
-   const target = event.target as HTMLElement;
-   actor?.update({ "system.profile.height": Number(target.innerText.trim()) }, { render: false });
-}
-
-function updateWeight(event: Event) {
-   const target = event.target as HTMLElement;
-   actor?.update({ "system.profile.weight": Number(target.innerText.trim()) }, { render: false });
-}
-
-function updateQuote(event: Event) {
-   const target = event.target as HTMLElement;
-   actor?.update({ "system.profile.quote": target.innerText.trim() }, { render: false });
-}
-
-async function editImage(): Promise<void> {
-   if (!actor) return;
-   const path = await pickImagePath(actor.img as string);
-   await actor.update({ img: path });
-}
-
-const profile = $derived(config.PROFILE);
+$effect(() => {
+   if (!isDossierTab($activeTabStore)) $activeTabStore = "active";
+   if (!isAwakened && $activeTabStore === "grimoire") $activeTabStore = "active";
+   if (!hasMatrixTab && $activeTabStore === "matrix") $activeTabStore = "active";
+   if (!hasAugmentationsTab && $activeTabStore === "augmentations") $activeTabStore = "active";
+});
 </script>
 
-<div class="dossier">
-   <div class="dossier-img-btn" onclick={editImage} title="Click to change image" role="button" tabindex="0"
-      onkeydown={(e) => e.key === "Enter" && editImage()}>
-      <img
-         src={$isDetailsOpenStore ? (metatype?.img || actor.img) : actor.img}
-         alt={$isDetailsOpenStore ? (metatype?.name || actor.name) : actor.name}
-         class="dossier-img"
-      />
+<Foldout label="Dossier">
+   <div class="skills-component">
+      <div class="skills-register">
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "active"}
+            onclick={() => ($activeTabStore = "active")}
+         ><span>Active</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "knowledge"}
+            onclick={() => ($activeTabStore = "knowledge")}
+         ><span>Knowledge</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "language"}
+            onclick={() => ($activeTabStore = "language")}
+         ><span>Language</span></button>
+         {#if isAwakened}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={$activeTabStore === "grimoire"}
+               onclick={() => ($activeTabStore = "grimoire")}
+            ><span>Grimoire</span></button>
+         {/if}
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "inventory"}
+            onclick={() => ($activeTabStore = "inventory")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.inventory)}</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "garage"}
+            onclick={() => ($activeTabStore = "garage")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.garage)}</span></button>
+         {#if hasMatrixTab}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={$activeTabStore === "matrix"}
+               onclick={() => ($activeTabStore = "matrix")}
+            ><span>{localize(CONFIG.SR3E.INVENTORY.matrix)}</span></button>
+         {/if}
+         {#if hasAugmentationsTab}
+            <button
+               type="button"
+               class="skills-register-tab"
+               class:active={$activeTabStore === "augmentations"}
+               onclick={() => ($activeTabStore = "augmentations")}
+            ><span>{localize(CONFIG.SR3E.INVENTORY.augmentations)}</span></button>
+         {/if}
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "effects"}
+            onclick={() => ($activeTabStore = "effects")}
+         ><span>{localize(CONFIG.SR3E.INVENTORY.effects)}</span></button>
+         <button
+            type="button"
+            class="skills-register-tab"
+            class:active={$activeTabStore === "ratsrace"}
+            onclick={() => ($activeTabStore = "ratsrace")}
+         ><span>Rat's Race</span></button>
+      </div>
+      <div class="skills-content">
+         <div class="skills-content-inner">
+            {#if $activeTabStore === "active"}
+               <SkillsActive {actor} skills={activeSkills} />
+            {:else if $activeTabStore === "knowledge"}
+               <SkillsKnowledge {actor} skills={knowledgeSkills} />
+            {:else if $activeTabStore === "language"}
+               <SkillsLanguage {actor} skills={languageSkills} />
+            {:else if $activeTabStore === "grimoire" && isAwakened}
+               <Grimoire {actor} items={[...spellItems, ...adeptPowerItems]} />
+            {:else if $activeTabStore === "inventory"}
+               <Inventory {actor} />
+            {:else if $activeTabStore === "garage"}
+               <Garage {actor} />
+            {:else if $activeTabStore === "matrix" && hasMatrixTab}
+               <Matrix {actor} cyberdecks={cyberdeckItems} programs={matrixProgramItems} />
+            {:else if $activeTabStore === "augmentations" && hasAugmentationsTab}
+               <Augmentations {actor} items={augmentationItems} />
+            {:else if $activeTabStore === "effects"}
+               <ActiveEffectsViewer document={actor} />
+            {:else if $activeTabStore === "ratsrace"}
+               <RatsRace {actor} transactions={transactionItems} />
+            {/if}
+         </div>
+      </div>
    </div>
-
-   <div
-      class="details-foldout"
-      role="button"
-      tabindex="0"
-      onclick={toggleDetails}
-      onkeydown={(e) => ["Enter", " "].includes(e.key) && (e.preventDefault(), toggleDetails())}
-   >
-      <span><i class="fa-solid fa-magnifying-glass"></i></span>
-      {localize(profile.isDetailsOpen)}
-   </div>
-
-   {#if $isDetailsOpenStore}
-      <div in:slide={{ duration: 100, easing: cubicInOut }} out:slide={{ duration: 50, easing: cubicInOut }}>
-         <div class="input-frame">
-            <input
-               type="text"
-               id="actor-name"
-               name="name"
-               value={$actorNameStore}
-               oninput={handleActorNameChange}
-               onblur={handleActorNameChange}
-               onkeypress={(e) => e.key === "Enter" && handleActorNameChange(e)}
-            />
-         </div>
-      </div>
-
-      <div class="flavor-edit-block">
-         <div class="editable-row">
-            <div class="label-line-wrap">
-               <div class="label">{localize(profile.age)}</div>
-               <div class="dotted-line"></div>
-            </div>
-            <div class="value-unit">
-               <div class="editable-field" contenteditable="true" onblur={updateAge}>
-                  {actor.system?.profile?.age || 0}
-               </div>
-               <span class="unit">yrs</span>
-            </div>
-         </div>
-
-         <div class="editable-row">
-            <div class="label-line-wrap">
-               <div class="label">{localize(profile.height)}</div>
-               <div class="dotted-line"></div>
-            </div>
-            <div class="value-unit">
-               <div class="editable-field" contenteditable="true" onblur={updateHeight}>
-                  {actor.system?.profile?.height || 0}
-               </div>
-               <span class="unit">cm</span>
-            </div>
-         </div>
-
-         <div class="editable-row">
-            <div class="label-line-wrap">
-               <div class="label">{localize(profile.weight)}</div>
-               <div class="dotted-line"></div>
-            </div>
-            <div class="value-unit">
-               <div class="editable-field" contenteditable="true" onblur={updateWeight}>
-                  {actor.system?.profile?.weight || 0}
-               </div>
-               <span class="unit">kg</span>
-            </div>
-         </div>
-      </div>
-
-      <div class="flavor-edit-block last-flavor-edit-block">
-         <h4>{localize(profile.quote)}</h4>
-         <div class="input-frame">
-            <div
-               class="editable-field quote"
-               role="presentation"
-               contenteditable="true"
-               onblur={updateQuote}
-               onkeypress={(e) => {
-                  if (e.key === "Enter") {
-                     e.preventDefault();
-                     e.currentTarget.blur();
-                  }
-               }}
-            >
-               {actor.system?.profile?.quote || ""}
-            </div>
-         </div>
-      </div>
-   {/if}
-</div>
+</Foldout>

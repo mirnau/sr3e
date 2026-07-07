@@ -144,6 +144,37 @@
    }
 }
 
+// Cyberware/bioware — shares the Grimoire card layout but uses the Health
+// box's blue rather than the Grimoire's purple, since augmentations aren't magic.
+.augmentations-component {
+   --highlight-color-primary: var(--health-highlight-color-primary);
+   --text-color: var(--health-text-color);
+
+   .augmentations-category::before,
+   .augmentation-card-container .asset-background-layer,
+   .toggle-card .stat-card-background {
+      background: var(--health-background-color);
+   }
+
+   .augmentation-card-container {
+      .asset-card h3,
+      .asset-card h4 {
+         color: var(--health-highlight-color-primary);
+         text-shadow: 0 0 6px var(--health-highlight-color-primary);
+      }
+
+      .image-mask {
+         background: var(--health-highlight-color-primary);
+         filter: drop-shadow(0 0 2px var(--health-highlight-color-primary));
+      }
+
+      .sr3e-toolbar-button {
+         color: var(--health-highlight-color-primary);
+         text-shadow: 0 0 6px var(--health-highlight-color-primary);
+      }
+   }
+}
+
 .asset-category-container {
    display: flex;
    flex-direction: row;

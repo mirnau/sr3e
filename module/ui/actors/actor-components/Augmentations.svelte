@@ -43,8 +43,8 @@ $effect(() => {
 });
 </script>
 
-<div class="grimoire-component">
-   <div class="asset-category-container static-full-width grimoire-category">
+<div class="augmentations-component">
+   <div class="asset-category-container static-full-width augmentations-category">
       <div class="asset-masonry-background-layer"></div>
       <FilterToggle
          bind:checked={isFavorite}
@@ -53,14 +53,14 @@ $effect(() => {
       />
    </div>
 
-   <div class="asset-category-container static-full-width grimoire-category">
+   <div class="asset-category-container static-full-width augmentations-category">
       <div class="asset-masonry-background-layer"></div>
       <div bind:this={gridContainer} class="asset-masonry-grid">
          <div class="asset-grid-sizer"></div>
          <div class="asset-gutter-sizer"></div>
 
          {#each filteredItems as item (item.id)}
-            <div class="asset-card-container grimoire-spell-card-container">
+            <div class="asset-card-container augmentation-card-container">
                <InventoryCard {actor} {item} />
             </div>
          {/each}

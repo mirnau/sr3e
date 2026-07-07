@@ -7,7 +7,7 @@ import CharacterCreationManager from "../../ui/actors/injections/CharacterCreati
 import RollComposerComponent from "../../ui/combat/RollComposerComponent.svelte";
 import { SR3EActorBase } from "./SR3EActorBase";
 import { KarmaSpendingService } from "../../services/karma/KarmaSpendingService";
-import { persistRegisterTab, registerTabForItem } from "../../ui/actors/actor-components/registerTabs";
+import { persistDossierTab, dossierTabForItem } from "../../ui/actors/actor-components/dossierTabs";
 import { actorMagicItems, awakenActor, confirmAwakening, isMagicItem } from "../../services/magic/awakenActor";
 import { mutateMetatype } from "../../services/metatype/mutateMetatype";
 import { commodityPrice, hasCommodityComponent, hasCommodityProfile } from "../../services/economy/purchase";
@@ -190,7 +190,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
 
             const created = await actor.createEmbeddedDocuments("Item", [item.toObject()]);
             await awakenActor(actor);
-            await persistRegisterTab(actor, "grimoire");
+            await persistDossierTab(actor, "grimoire");
             return created;
         }
 
@@ -218,7 +218,7 @@ export default class CharacterActorSheet extends SR3EActorBase {
                 ui.notifications?.warn(localize(CONFIG.SR3E.MODAL.insufficientpowerpoints));
                 return;
             }
-            await persistRegisterTab(actor, "grimoire");
+            await persistDossierTab(actor, "grimoire");
             // @ts-expect-error — Foundry v13 _onDropItem signature not fully typed
             return super._onDropItem(event, data);
         }
@@ -240,8 +240,8 @@ export default class CharacterActorSheet extends SR3EActorBase {
         }
 
         if (item) {
-            const tab = registerTabForItem(item);
-            if (tab) await persistRegisterTab(actor, tab);
+            const tab = dossierTabForItem(item);
+            if (tab) await persistDossierTab(actor, tab);
         }
         // @ts-expect-error — Foundry v13 _onDropItem signature not fully typed
         return super._onDropItem(event, data);
