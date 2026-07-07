@@ -8,6 +8,10 @@ sr3e is a Shadowrun Third Edition Homebrew game system for Foundry Virtual Table
 
 This is the first beta release of sr3e — the system is now playable end to end. It is still a hobby project developed in spare time, so expect rough edges, missing rules, and the occasional bug. If you run into one, please [report it](#contributing) — that's exactly what a beta is for.
 
+## How to install
+Provide this link in Foundry VTTs system dialog:
+https://github.com/devdrawdiy/sr3e/releases/latest/download/system.json
+
 ## Architecture overview
 
 The system follows a four-layer model: **Svelte UI → Service Layer → IStoreManager → Foundry VTT**. Actor and item sheets are built with Svelte 5 components that never touch Foundry documents directly — they read and write through a game-wide `IStoreManager` singleton, which is the only layer that talks to Foundry's actor/item/effect APIs. Rules and business logic live in a service layer beneath the UI, keeping components focused on presentation and services free of framework concerns. DataModels (rather than a legacy `template.json`) define the actor and item schemas.
