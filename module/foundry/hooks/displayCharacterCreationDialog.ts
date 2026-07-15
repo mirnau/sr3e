@@ -26,14 +26,16 @@ let nativeCreateDialog: { close: (options?: object) => Promise<unknown> } | null
 let awaitingNativeCreateDialog = false;
 
 /**
- * Foundry's native "Create Actor" dialog awaits Actor.create() and then calls
- * `document.sheet.render()` on the result inside its own button callback, which
- * runs in a try/catch that skips the dialog's own close() call when it throws.
- * Our preCreateActor hook blocks creation (returns false) so it can show
- * CharacterCreationApp first, which leaves `document` undefined, makes Foundry's
- * callback throw, and leaves the native dialog stuck open. We close it ourselves
- * (see closeNativeCreateDialog) and swallow the resulting error here, since the
- * actor is still created correctly afterward through showCharacterCreationDialog.
+ * Foundry's native "Create Actor" dialog's own "ok" button callback awaits
+ * Actor.create() and then calls `document.sheet.render()` on the result. Our
+ * preCreateActor hook blocks creation (returns false) so it can show
+ * CharacterCreationApp first, which leaves `document` undefined and makes
+ * Foundry's callback throw a TypeError. That callback runs inside
+ * DialogV2._onSubmit, a bare async click handler nobody awaits, so the throw
+ * becomes an unhandled promise rejection rather than something we could catch
+ * by wrapping Actor.createDialog itself. We patch DialogV2._onSubmit directly
+ * so the exception is caught where it's actually thrown; the actor is still
+ * created correctly afterward through showCharacterCreationDialog.
  */
 export function patchActorCreateDialog(): void {
 	const originalCreateDialog = Actor.createDialog;
@@ -48,16 +50,36 @@ export function patchActorCreateDialog(): void {
 		awaitingNativeCreateDialog = true;
 		try {
 			return await (originalCreateDialog as (...a: unknown[]) => Promise<unknown>).apply(this, args);
-		} catch (error) {
-			if (error instanceof TypeError && /sheet/.test(error.message)) {
-				return null;
-			}
-			throw error;
 		} finally {
 			awaitingNativeCreateDialog = false;
 			nativeCreateDialog = null;
 		}
 	} as typeof Actor.createDialog;
+
+	patchDialogV2SubmitForMissingSheet();
+}
+
+/**
+ * Wraps DialogV2.prototype._onSubmit so the TypeError thrown by Foundry's
+ * native "Create Actor" button callback (when our preCreateActor hook blocks
+ * creation and leaves `document` undefined) is swallowed at its actual source
+ * instead of leaking as an unhandled promise rejection. Any other error is
+ * rethrown unchanged.
+ */
+function patchDialogV2SubmitForMissingSheet(): void {
+	const DialogV2 = (foundry as any).applications.api.DialogV2;
+	const originalOnSubmit = DialogV2.prototype._onSubmit;
+
+	DialogV2.prototype._onSubmit = async function (this: unknown, ...args: unknown[]) {
+		try {
+			return await originalOnSubmit.apply(this, args);
+		} catch (error) {
+			if (error instanceof TypeError && /sheet/.test(error.message)) {
+				return null;
+			}
+			throw error;
+		}
+	};
 }
 
 /**
