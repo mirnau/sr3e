@@ -6,19 +6,19 @@ sr3e is a Shadowrun Third Edition Homebrew game system for Foundry Virtual Table
 
 ## Beta release
 
-This is the first beta release of sr3e — the system is now playable end to end. It is still a hobby project developed in spare time, so expect rough edges, missing rules, and the occasional bug. If you run into one, please [report it](#contributing) — that's exactly what a beta is for.
+This is the first beta release of sr3e - the system is now playable end to end. It is still a hobby project developed in spare time, so expect rough edges, missing rules, and the occasional bug. If you run into one, please [report it](#contributing), that's exactly what a beta is for.
 
 ## Architecture overview
 
-The system follows a four-layer model: **Svelte UI → Service Layer → IStoreManager → Foundry VTT**. Actor and item sheets are built with Svelte 5 components that never touch Foundry documents directly — they read and write through a game-wide `IStoreManager` singleton, which is the only layer that talks to Foundry's actor/item/effect APIs. Rules and business logic live in a service layer beneath the UI, keeping components focused on presentation and services free of framework concerns. DataModels (rather than a legacy `template.json`) define the actor and item schemas.
+The system follows a four-layer model: **Svelte UI -> Service Layer -> IStoreManager -> Foundry VTT**. Actor and item sheets are built with Svelte 5 components that never touch Foundry documents directly, they read and write through a game-wide `IStoreManager` singleton, which is the only layer that talks to Foundry's actor/item/effect APIs. Rules and business logic live in a service layer beneath the UI, keeping components focused on presentation and services free of framework concerns. DataModels (rather than a legacy `template.json`) define the actor and item schemas.
 
 ## Localization
 
-Translation strings are not hand-maintained in `lang/*.json`. Each config module under `lang/config/` declares the set of keys a category needs in TypeScript; a Vite plugin (`vite-plugins/i18n-scaffold.ts`) scans those declarations on every build and scaffolds the locale JSON files automatically — adding new keys with a placeholder value, pruning keys that no longer exist, and leaving existing translations untouched. This keeps every locale file in sync with the code without anyone having to remember to update them by hand. Translating the system is just a matter of editing the values in the relevant `lang/<locale>.json` file.
+Translation strings are not hand-maintained in `lang/*.json`. Each config module under `lang/config/` declares the set of keys a category needs in TypeScript; a Vite plugin (`vite-plugins/i18n-scaffold.ts`) scans those declarations on every build and scaffolds the locale JSON files automatically, adding new keys with a placeholder value, pruning keys that no longer exist, and leaving existing translations untouched. This keeps every locale file in sync with the code without anyone having to remember to update them by hand. Translating the system is just a matter of editing the values in the relevant `lang/<locale>.json` file.
 
 ## Icon credit
 
-Icons used throughout the system are sourced from [SVG Repo](https://www.svgrepo.com/), an open-source icon repository. Thank you to the artists whose freely licensed work makes this project more presentable — see `textures/svgrepo/` for the icons in use.
+Icons used throughout the system are sourced from [SVG Repo](https://www.svgrepo.com/), an open-source icon repository. Thank you to the artists whose freely licensed work makes this project more presentable, see `textures/svgrepo/` for the icons in use.
 
 ## Texture credit
 
@@ -26,11 +26,11 @@ The texture for the character sheet is from https://ambientcg.com/
 
 ## AI-assisted development
 
-Parts of this project — code, documentation, and tooling — have been developed with the assistance of AI. This is disclosed in the interest of transparency. First iteration was made mostly by old fashion hand coding, including the visual design. Second iteration has been more AI-heavy. If you want to program you are welcome to use AI, but be sure to verify its output, and align it to the projects over all structure.
+Parts of this project (code, documentation, and tooling) have been developed with the assistance of AI. This is disclosed in the interest of transparency. First iteration was made mostly by old fashion hand coding, including the visual design. Second iteration has been more AI-heavy. If you want to program you are welcome to use AI, but be sure to verify its output, and align it to the projects over all structure.
 
 ## Contributing
 
-Contributions, bug reports, and feature requests are all welcome. If you'd like to report a bug or suggest an improvement, please use the issue templates on GitHub — they help route your report to the right place. If you'd like to contribute code or documentation you are welcome to tag along this sr3e adventure.
+Contributions, bug reports, and feature requests are all welcome. If you'd like to report a bug or suggest an improvement, please use the issue templates on GitHub, they help route your report to the right place. If you'd like to contribute code or documentation you are welcome to tag along this sr3e adventure.
 
 ## What is Shadowrun Third Edition
 
