@@ -13,4 +13,6 @@ export const SKILL_KEYS = [
   "onlyonespecializationatcreation",
   "linkedAttribute",
   "specialize",
+  "sorcery",
+  "conjuring",
   ] as const;

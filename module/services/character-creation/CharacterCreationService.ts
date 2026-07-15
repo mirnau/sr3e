@@ -8,6 +8,8 @@ import { MetatypeRepository, type MetatypeOption } from "./MetatypeRepository";
 import { MagicRepository, type MagicOption } from "./MagicRepository";
 import { PriorityValidator, type SelectedPriorities, type ValidationResult } from "./PriorityValidator";
 import { CharacterInitializer, type CharacterCreationSelections } from "./CharacterInitializer";
+import { SkillRepository } from "./SkillRepository";
+import { localize } from "../utilities";
 import type SR3EActor from "../../documents/SR3EActor";
 
 /**
@@ -38,6 +40,7 @@ export class CharacterCreationService {
 
 	#metatypeRepo: MetatypeRepository;
 	#magicRepo: MagicRepository;
+	#skillRepo: SkillRepository;
 	#validator: PriorityValidator;
 	#initializer: CharacterInitializer;
 
@@ -46,6 +49,7 @@ export class CharacterCreationService {
 	private constructor() {
 		this.#metatypeRepo = MetatypeRepository.Instance();
 		this.#magicRepo = MagicRepository.Instance();
+		this.#skillRepo = SkillRepository.Instance();
 		this.#validator = PriorityValidator.Instance();
 		this.#initializer = CharacterInitializer.Instance();
 	}
@@ -108,6 +112,46 @@ export class CharacterCreationService {
 			const magicData = this.#magicRepo.getDefaultMagic();
 			await Item.create(magicData);
 		}
+
+		// Ensure Sorcery/Conjuring skill items exist — magician archetypes are entitled
+		// to them, so the world must always have them available to draw on.
+		await this.#ensureMagicSkillsExist();
+	}
+
+	/**
+	 * Ensures the Sorcery and Conjuring skill catalog items exist in the world,
+	 * creating and localizing whichever is missing.
+	 */
+	async #ensureMagicSkillsExist(): Promise<void> {
+		const activeSkills = this.#skillRepo.getSkillsByCategory("active");
+		const sorceryName = localize(CONFIG.SR3E.SKILL.sorcery);
+		const conjuringName = localize(CONFIG.SR3E.SKILL.conjuring);
+
+		if (!activeSkills.some((s) => s.name === sorceryName)) {
+			console.log("SR3E | No Sorcery skill found, creating default");
+			await Item.create(this.#buildMagicSkillData(sorceryName, "willpower"));
+		}
+
+		if (!activeSkills.some((s) => s.name === conjuringName)) {
+			console.log("SR3E | No Conjuring skill found, creating default");
+			await Item.create(this.#buildMagicSkillData(conjuringName, "charisma"));
+		}
+	}
+
+	#buildMagicSkillData(name: string, linkedAttribute: string): Record<string, unknown> {
+		return {
+			name,
+			type: "skill",
+			system: {
+				skillType: "active",
+				activeSkill: {
+					value: 0,
+					linkedAttribute,
+					associatedDicePool: "",
+					specializations: [],
+				},
+			},
+		};
 	}
 
 	/**

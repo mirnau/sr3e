@@ -1,7 +1,28 @@
 @use "../mixins.scss" as *;
 
+// Same "float outside the resize box" hack the character sheet uses (see character.scss's
+// form.application.sheet.sr3e.character rule): the window stays resizable, but its own box
+// doesn't clip content — cards can render past the nominal resize bounds for a nicer look.
+form.application.sheet.sr3e.charactercreation {
+  background: none;
+  overflow: visible;
+  max-height: 0rem;
+
+  section.window-content {
+    overflow: visible;
+
+    .packery-packery-grid {
+      overflow: visible;
+    }
+  }
+}
+
 // Character creation dialog — shares the sea-green stat-field-card / large-input-wrapper
 // language established by WeaponApp (see items/item-sheet.scss) rather than inventing its own.
+// Card layout uses the same PackeryGrid + SheetCard combo as the character sheet's own
+// top-level grid (CharacterSheetApp.svelte) — no dialog-specific packery CSS needed, the
+// shared .packery-grid-item / .packery-grid-sizer / .packery-gutter-sizer rules in
+// sheetcard.scss already cover it.
 .charactercreation {
   display: flex;
   flex-direction: column;
@@ -106,6 +127,17 @@
     }
   }
 
+  // Rolled skill rating — same blue as the stat-field-card header (.title-container h4),
+  // just applied to the number rather than the label.
+  .skill-random-value {
+    flex-shrink: 0;
+    margin: 0 0.5rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--highlight-color-primary);
+    text-shadow: 0 0 6px rgba(0, 255, 200, 0.4);
+  }
+
   // Button panel — relies on the global button skin (skinning/core.scss); only lays out the grid.
   .character-creation-buttonpanel {
     display: grid;
@@ -116,6 +148,17 @@
     button.submit {
       grid-column: 1 / -1;
     }
+
+    // Draws attention to a Randomize button that just became available (e.g. skill
+    // randomizers unlocking once attributes have been rolled).
+    button.highlighted:not(:disabled) {
+      animation: pulse-glow-highlight 1.5s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse-glow-highlight {
+    0%, 100% { box-shadow: 0 0 4px var(--highlight-color-primary); }
+    50%       { box-shadow: 0 0 12px var(--highlight-color-primary); }
   }
 
   @media (max-width: 768px) {

@@ -35,15 +35,15 @@ export class CharacterCreationApp extends foundry.applications.api.ApplicationV2
 
 	static override DEFAULT_OPTIONS = {
 		id: "sr3e-character-creation",
-		classes: ["sr3e", "sheet", "staticlayout", "charactercreation"],
+		classes: ["sr3e", "sheet", "charactercreation"],
 		tag: "form",
 		window: {
 			title: "Character Creation",
-			resizable: false,
+			resizable: true,
 		},
 		position: {
-			width: "auto",
-			height: "auto",
+			width: 900,
+			height: 800,
 		},
 	};
 
