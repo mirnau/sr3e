@@ -97,6 +97,24 @@ jobs:
           # upload "latest" manifest as a separate asset
           cp system.latest.json system.json
 
+      - name: Extract changelog section for this version
+        id: changelog
+        run: |
+          V="${{ steps.v.outputs.version }}"
+          # CHANGELOG.md (standard-version) delimits each release with a "### " header
+          # ending in a (YYYY-MM-DD) date — either "### [x.y.z](compare-link) (date)" or,
+          # for the very first ever release with no prior tag to diff against,
+          # "### x.y.z (date)". Capture everything between this version's header and
+          # the next one (stopping at the next header line, not printing headers).
+          awk -v bracket="[$V]" -v bare="### $V (" '
+            /^### .*\([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]\)[[:space:]]*$/ {
+              if (capturing) exit
+              if (index($0, bracket) > 0 || index($0, bare) == 1) { capturing = 1 }
+              next
+            }
+            capturing { print }
+          ' CHANGELOG.md > CHANGELOG_SECTION.md
+
       - name: Compose release body
         id: body
         run: |
@@ -115,6 +133,11 @@ jobs:
               echo "system may break without warning or future fixes."
             elif echo "$V" | grep -q -- "-beta\\."; then
               echo "This is a beta build. Expect rough edges; please report anything broken."
+            fi
+            if [ -s CHANGELOG_SECTION.md ]; then
+              echo
+              echo "## What's Changed"
+              cat CHANGELOG_SECTION.md
             fi
           } > RELEASE_BODY.md
 
