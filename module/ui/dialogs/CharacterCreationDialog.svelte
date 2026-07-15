@@ -5,10 +5,15 @@
       PRIORITY_TABLES,
    } from "../../../types/character-creation";
    import { untrack } from "svelte";
-   import ItemSheetWrapper from "../common-components/ItemSheetWrapper.svelte";
-   import ItemSheetComponent from "../common-components/ItemSheetComponent.svelte";
+   import SheetCard from "../common-components/SheetCard.svelte";
+   import PackeryGrid from "../common-components/PackeryGrid.svelte";
    import LabeledDropdown from "../items/LabeledDropdown.svelte";
+   import LabeledBoolean from "../items/LabeledBoolean.svelte";
    import { pickImagePath } from "../../services/utilities";
+   import AttributeRandomizerComponent from "./AttributeRandomizerComponent.svelte";
+   import type { AttributeValues } from "../../services/character-creation/AttributeRandomizerService";
+   import SkillCategoryChecklist from "./SkillCategoryChecklist.svelte";
+   import type { SkillSelection } from "../../services/character-creation/SkillRandomizerService";
 
    const { actorName: _actorName, onSubmit, onCancel } = $props<{
       actorName: string;
@@ -28,6 +33,18 @@
    let selectedAttribute = $state("");
    let selectedSkill = $state("");
    let selectedResource = $state("");
+   let extendedRandomization = $state(false);
+   let burnUnusedPoints = $state(false);
+   let generatedAttributes = $state<AttributeValues | null>(null);
+   let activeSkillSelections = $state<SkillSelection[]>([]);
+   let knowledgeSkillSelections = $state<SkillSelection[]>([]);
+   let languageSkillSelections = $state<SkillSelection[]>([]);
+   let skillsResetKey = $state(0);
+   const skillSelections = $derived([
+      ...activeSkillSelections,
+      ...knowledgeSkillSelections,
+      ...languageSkillSelections,
+   ]);
    const metatypeOptions = creationService.getMetatypes();
    const magicOptions = creationService.getMagics();
    const canCreate = $derived(
@@ -79,6 +96,12 @@
       if (selectedResource) arr.push(selectedResource);
       usedPriorities = arr;
    });
+
+   $effect(() => {
+      selectedMetatype;
+      selectedAttribute;
+      generatedAttributes = null;
+   });
    function handleSubmit(event: Event) {
       event.preventDefault();
       onSubmit({
@@ -92,6 +115,9 @@
          age: characterAge,
          height: characterHeight,
          weight: characterWeight,
+         generatedAttributes: generatedAttributes ?? undefined,
+         skillSelections: skillSelections.length > 0 ? skillSelections : undefined,
+         burnUnusedPoints: extendedRandomization && burnUnusedPoints ? true : undefined,
       });
    }
 
@@ -147,12 +173,33 @@
       characterAge = 25;
       characterHeight = 175;
       characterWeight = 75;
+      clearSkillSelections();
+      generatedAttributes = null;
+      burnUnusedPoints = false;
+   }
+
+   // Skills are randomized against final attribute values, so clearing attributes
+   // invalidates any skill roll — cascade the clear and hide the skill sections again.
+   function clearSkillSelections() {
+      activeSkillSelections = [];
+      knowledgeSkillSelections = [];
+      languageSkillSelections = [];
+      skillsResetKey++;
+   }
+
+   function handleExtendedRandomizationChange(enabled: boolean) {
+      extendedRandomization = enabled;
+      if (!enabled) {
+         clearSkillSelections();
+         generatedAttributes = null;
+         burnUnusedPoints = false;
+      }
    }
 </script>
 
 <form onsubmit={handleSubmit}>
-   <ItemSheetWrapper csslayout="double">
-      <ItemSheetComponent>
+   <PackeryGrid>
+      <SheetCard>
          <div class="image-mask">
             <img
                src={characterImage}
@@ -172,8 +219,8 @@
                placeholder="Enter character name"
             />
          </div>
-      </ItemSheetComponent>
-      <ItemSheetComponent>
+      </SheetCard>
+      <SheetCard>
          <div class="stat-grid single-column">
             <div class="stat-card stat-field-card labeled-slider">
                <div class="stat-card-background"></div>
@@ -226,8 +273,11 @@
                </div>
             </div>
          </div>
-      </ItemSheetComponent>
-      <ItemSheetComponent>
+      </SheetCard>
+      <SheetCard>
+         <div class="title-container">
+            <h4 class="no-margin uppercase">Priority</h4>
+         </div>
          <div class="stat-grid single-column">
             <LabeledDropdown
                key="metatype"
@@ -327,20 +377,90 @@
                   </select>
                </div>
             </div>
+
+            <LabeledBoolean
+               key="extendedRandomization"
+               label="Extended Randomization"
+               value={extendedRandomization}
+               onUpdate={handleExtendedRandomizationChange}
+            />
+
+            {#if extendedRandomization}
+               <LabeledBoolean
+                  key="burnUnusedPoints"
+                  label="Burn Unused Points"
+                  value={burnUnusedPoints}
+                  onUpdate={(val) => (burnUnusedPoints = val)}
+               />
+            {/if}
+
+            <div class="character-creation-buttonpanel">
+               <button type="button" onclick={handleRandomize}>
+                  <i class="fas fa-dice"></i>
+                  Randomize
+               </button>
+
+               <button type="button" onclick={handleClear}>
+                  <i class="fas fa-eraser"></i>
+                  Clear
+               </button>
+            </div>
          </div>
-      </ItemSheetComponent>
-      <ItemSheetComponent>
+      </SheetCard>
+      {#if extendedRandomization}
+         <SheetCard>
+            <div class="title-container">
+               <h4 class="no-margin uppercase">Attributes</h4>
+            </div>
+            <AttributeRandomizerComponent
+               metatypeId={selectedMetatype}
+               attributePriority={selectedAttribute}
+               bind:generatedAttributes
+               onRandomize={clearSkillSelections}
+               onClear={clearSkillSelections}
+            />
+         </SheetCard>
+         {#if generatedAttributes}
+            <SheetCard>
+               {#key skillsResetKey}
+                  <SkillCategoryChecklist
+                     category="active"
+                     label="Active"
+                     magicId={selectedMagic}
+                     skillPriority={selectedSkill}
+                     {generatedAttributes}
+                     bind:skillSelections={activeSkillSelections}
+                  />
+               {/key}
+            </SheetCard>
+            <SheetCard>
+               {#key skillsResetKey}
+                  <SkillCategoryChecklist
+                     category="knowledge"
+                     label="Knowledge"
+                     magicId={selectedMagic}
+                     skillPriority={selectedSkill}
+                     {generatedAttributes}
+                     bind:skillSelections={knowledgeSkillSelections}
+                  />
+               {/key}
+            </SheetCard>
+            <SheetCard>
+               {#key skillsResetKey}
+                  <SkillCategoryChecklist
+                     category="language"
+                     label="Language"
+                     magicId={selectedMagic}
+                     skillPriority={selectedSkill}
+                     {generatedAttributes}
+                     bind:skillSelections={languageSkillSelections}
+                  />
+               {/key}
+            </SheetCard>
+         {/if}
+      {/if}
+      <SheetCard>
          <div class="character-creation-buttonpanel">
-            <button type="button" onclick={handleRandomize}>
-               <i class="fas fa-dice"></i>
-               Randomize
-            </button>
-
-            <button type="button" onclick={handleClear}>
-               <i class="fas fa-eraser"></i>
-               Clear
-            </button>
-
             <button type="button" onclick={onCancel}>
                <i class="fas fa-times"></i>
                Cancel
@@ -351,6 +471,6 @@
                Create Character
             </button>
          </div>
-      </ItemSheetComponent>
-   </ItemSheetWrapper>
+      </SheetCard>
+   </PackeryGrid>
 </form>

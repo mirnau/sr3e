@@ -587,6 +587,7 @@
     "skill": {
       "active": "Active",
       "addlingo": "Add Lingo",
+      "conjuring": "Conjuring",
       "knowledge": "Knowledge",
       "language": "Language",
       "lingos": "Lingos",
@@ -595,6 +596,7 @@
       "onlyonespecializationatcreation": "You can only have one specialization during character creation.",
       "readwrite": "Read/Write",
       "skill": "Skill",
+      "sorcery": "Sorcery",
       "specialization": "Specialization",
       "specializations": "Specializations",
       "specialize": "Specialize",
