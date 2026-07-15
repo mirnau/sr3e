@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3-beta.4](https://github.com/devdrawdiy/sr3e/compare/v0.0.3-beta.3...v0.0.3-beta.4) (2026-07-15)
+
+
+### Features
+
+* add attribute and skill randomizers to character creation ([d74c80d](https://github.com/devdrawdiy/sr3e/commit/d74c80d04db65f9fc74d647307e2806b2f714cff))
+
 ### [0.0.3-beta.3](https://github.com/devdrawdiy/sr3e/compare/v0.0.3-beta.2...v0.0.3-beta.3) (2026-07-07)
 
 ### [0.0.3-beta.2](https://github.com/devdrawdiy/sr3e/compare/v0.0.3-beta.1...v0.0.3-beta.2) (2026-07-06)
