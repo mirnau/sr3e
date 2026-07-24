@@ -4,7 +4,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-   title: "SR3E Homebrew Documentation",
+   title: "SR3E Unofficial Documentation",
    tagline: "-Project documentation",
    favicon: "img/favicon.ico",
 
@@ -75,7 +75,7 @@ const config: Config = {
       // Replace with your project's social card
       image: "img/docusaurus-social-card.jpg",
       navbar: {
-         title: "SR3E Homebrew Documentation",
+         title: "SR3E Unofficial Documentation",
          logo: {
             alt: "My Site Logo",
             src: "img/logo.svg",
@@ -140,7 +140,7 @@ const config: Config = {
                ],
             },
          ],
-         // copyright: `Last update ${new Date().getFullYear()} SR3E Homebrew. Built with Docusaurus.`,
+         // copyright: `Last update ${new Date().getFullYear()} SR3E Unofficial. Built with Docusaurus.`,
       },
       prism: {
          theme: prismThemes.github,

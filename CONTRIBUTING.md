@@ -1,6 +1,6 @@
 # Contributing to SR3E
 
-Unofficial Shadowrun 3rd Edition Homebrew system for Foundry VTT v13 (V2).
+Unofficial Shadowrun 3rd Edition system for Foundry VTT v13 (V2).
 
 > **Legal** Contributors must own SR3E. Specs cite page numbers only (e.g., “SR3 p. 115”). No reproduction of rules text or tables.
 
