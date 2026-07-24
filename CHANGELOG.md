@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.3-beta.5](https://github.com/devdrawdiy/sr3e/compare/v0.0.3-beta.4...v0.0.3-beta.5) (2026-07-24)
+
+
+### Features
+
+* include CHANGELOG.md section in GitHub release notes ([3e365a2](https://github.com/devdrawdiy/sr3e/commit/3e365a209ba54a5edd7779bb06b6c84f8eb73aa4))
+
+
+### Bug Fixes
+
+* catch native create-actor dialog error at its actual throw site ([d1dd630](https://github.com/devdrawdiy/sr3e/commit/d1dd6307d79c7bceabe28dd37e8b2faebfa19d88))
+
 ### [0.0.3-beta.4](https://github.com/devdrawdiy/sr3e/compare/v0.0.3-beta.3...v0.0.3-beta.4) (2026-07-15)
 
 
